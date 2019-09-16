@@ -21,17 +21,13 @@
       <#assign itemsList=status.actualValue />
       <p>
       <#if itemsList?size gt 0>
-        Your ${noun_verb_passive} with feedback for <@fmt.p number=itemsList?size singular="student" plural="students" shownumber=true />
+        Your ${noun_verb_passive} with feedback for <@fmt.p number=itemsList?size singular="student" plural="students" shownumber=true />.
         <#if hasErrors>
-          <div class="alert alert-danger">
-            There are some problems, which are shown below.
-            You need to correct these problems with the .zip file and try again.
-          </div>
+          There are some problems, which are shown below.
+          You need to correct these problems with the .zip file and try again.
         </#if>
       <#else>
-        <div class="alert alert-danger">
-          Your ${noun_verb_passive} but there are no files that look like feedback items.
-        </div>
+        Your ${noun_verb_passive} but there are no files that look like feedback items.
       </#if>
       </p>
     </@spring.bind>
@@ -40,7 +36,7 @@
       <div class="alert alert-danger"><@f.errors path="" cssClass="error"/></div>
     <#else>
       <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
-        <div class="unrecognised-files alert alert-block">
+        <div class="unrecognised-files alert alert-info">
           <div>The following files are not recognised and will be ignored:</div>
           <ul class="file-list">
             <#list addMarkerFeedbackCommand.unrecognisedFiles as unrecognisedFile>
@@ -69,7 +65,7 @@
         </div>
       </#if>
       <#if addMarkerFeedbackCommand.invalidFiles?size gt 0>
-        <div class="invalid-files alert alert-block alert-danger">
+        <div class="invalid-files alert alert-danger">
           <div>Some files have problematic names. Fix them, then try uploading again.</div>
           <ul class="file-list">
             <#list addMarkerFeedbackCommand.invalidFiles as invalidFile>
@@ -83,7 +79,7 @@
         </div>
       </#if>
       <#if addMarkerFeedbackCommand.invalidStudents?size gt 0>
-        <div class="invalid-students alert">
+        <div class="invalid-students alert alert-info">
           <div>Some of the feedback you uploaded is for students that are not allocated to you for marking. These files will be ignored.</div>
           <ul class="file-list">
             <#list addMarkerFeedbackCommand.invalidStudents as invalidStudent>
@@ -95,7 +91,7 @@
         </div>
       </#if>
       <#if addMarkerFeedbackCommand.markedStudents?size gt 0>
-        <div class="invalid-students alert">
+        <div class="invalid-students alert alert-info">
           <div>Some of the feedback that you uploaded is for students that you have finished marking. These files will be ignored.</div>
           <ul class="file-list">
             <#list addMarkerFeedbackCommand.markedStudents as markedStudent>
@@ -155,7 +151,7 @@
       </@spring.bind>
     </#if>
     <div class="submit-buttons form-actions">
-      <#if hasErrors || itemList?size == 0>
+      <#if hasErrors || addMarkerFeedbackCommand.items?size == 0>
         <input class="btn btn-primary" type="submit" value="Confirm" disabled="disabled">
       <#else>
         <input type="hidden" name="confirm" value="true">
