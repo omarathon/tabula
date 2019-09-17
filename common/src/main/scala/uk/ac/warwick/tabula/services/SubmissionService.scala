@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
@@ -144,7 +145,7 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
       .seq.headOption
   }
 
-  def saveOrUpdate(report: OriginalityReport): Unit = session.saveOrUpdate(report)
+  def saveOrUpdate(report: OriginalityReport): Unit = transactional() { session.saveOrUpdate(report) }
 
   def refresh(report: OriginalityReport): Unit = session.refresh(report)
 }

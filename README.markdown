@@ -194,10 +194,10 @@ Logback config. An alternative would be to package this up with the WARs, but th
 
 Properties passed into the app. You can get one of these off of tabula-test and then personalise it.
 
-#### Encryption keys
+#### Security keys
 
-Don't just use the encryption keys from tabula-test or any other instance, generate new ones for your local instance
-by running `./gradlew generateEncryptionKey` and using that for `objectstore.encryptionKey` and `tabula.database.encryptionKey`.
+Don't just use the keys from tabula-test or any other instance, generate new ones for your local instance
+by running `./gradlew generateEncryptionKey` and using that for `objectstore.encryptionKey`, `turnitin.tca.signingSecret` and `tabula.database.encryptionKey`.
 
 ### `lib/tabula-sso-config.xml`
 
