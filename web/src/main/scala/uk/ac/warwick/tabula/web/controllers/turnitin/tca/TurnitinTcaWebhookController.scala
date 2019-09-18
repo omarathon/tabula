@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 @Profile(Array("turnitinTca"))
 @Controller
 @RequestMapping(Array("/turnitin/tca/webhooks"))
-class TurnitinTCAWebhookController extends BaseController with Logging with AutowiringTurnitinTcaServiceComponent  {
+class TurnitinTcaWebhookController extends BaseController with Logging with AutowiringTurnitinTcaServiceComponent  {
 
   @RequestMapping(method = Array(POST), value = Array("/submission-complete"))
   def submissionComplete(@RequestBody json: TcaSubmission): Mav = {

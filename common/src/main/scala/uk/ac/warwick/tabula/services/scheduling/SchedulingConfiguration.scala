@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.util.Properties
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.quartz._
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
 import org.springframework.beans.factory.{FactoryBean, InitializingBean}
@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.ScheduledJob
 import uk.ac.warwick.tabula.services.scheduling.jobs._
+import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
 import uk.ac.warwick.util.web.Uri
@@ -94,7 +96,8 @@ object SchedulingConfiguration {
   val unscheduledJobs: Seq[UnscheduledJob[_]] = Seq(
     SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob](),
     SimpleUnscheduledJob[ImportAssignmentsAllYearsJob](),
-    SimpleUnscheduledJob[ImportSmallGroupEventLocationsJob]()
+    SimpleUnscheduledJob[ImportSmallGroupEventLocationsJob](),
+    SimpleUnscheduledJob[TurnitinTcaRegisterWebhooksJob]()
   )
 
   /**
@@ -255,6 +258,19 @@ class SchedulingMaintenanceModeObserver extends InitializingBean {
       if (enabled) scheduler.standby()
       else scheduler.start()
     }
+  }
+}
+
+@Component
+@Profile(Array("scheduling"))
+class SchedulingTurnitinTcaRegisterWebhooks extends InitializingBean with Logging {
+
+  @Autowired var scheduler: Scheduler = _
+
+  override def afterPropertiesSet(): Unit = {
+    // TODO - it would be better if we only ran this once but I can't figure out a way of nominating a single scheduler node.
+    // This will be run once per scheduler node but the Job has DisallowConcurrentExecution so that shouldn't cause any issues
+    scheduler.scheduleNow[TurnitinTcaRegisterWebhooksJob]()
   }
 }
 

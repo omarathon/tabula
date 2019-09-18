@@ -26,6 +26,8 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
+  def listWebhooks: Future[Seq[TcaWebhook]]
+  def registerWebhook(webhook: TcaWebhook): Future[Unit]
 }
 
 abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Logging {
@@ -35,6 +37,8 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     with TurnitinTcaConfigurationComponent =>
 
   @Value("${build.time}") var buildTime: String = _
+
+  private implicit val webhookWrites: Writes[TcaWebhook] = TcaWebhook.writes(tcaConfiguration.signingSecret)
 
   private def tcaRequest(value: RequestBuilder): RequestBuilder = value.addHeader("X-Turnitin-Integration-Name", tcaConfiguration.integrationName)
     .addHeader("X-Turnitin-Integration-Version", buildTime)
@@ -86,7 +90,6 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
           .build()
 
         val handler: ResponseHandler[Unit] = ApacheHttpClientUtils.handler {
-
           case response if response.getStatusLine.getStatusCode == HttpStatus.SC_ACCEPTED =>
             EntityUtils.consumeQuietly(response.getEntity)
             logger.info(s"Similarity Report requested for ${tca.id}")
@@ -100,15 +103,55 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
         }
 
         Try(httpClient.execute(req, handler)).fold(
-          t => {
-            logger.error(s"Error requesting the generation of a similarity report for TCA ID - ${tca.id}, submission ${submission.id}, student ${submission.studentIdentifier}", t)
-          },
-          {
-            identity
-          }
+          t => logger.error(s"Error requesting the generation of a similarity report for TCA ID - ${tca.id}, submission ${submission.id}, student ${submission.studentIdentifier}", t),
+          identity
         )
       }
     }).getOrElse(Future.unit)
+  }
+
+  override def listWebhooks: Future[Seq[TcaWebhook]] = Future {
+    val req = tcaRequest(RequestBuilder.get(s"${tcaConfiguration.baseUri}/webhooks")).build()
+
+    val handler: ResponseHandler[Seq[TcaWebhook]] = ApacheHttpClientUtils.jsonResponseHandler { json =>
+      json.validate[Seq[TcaWebhook]](Reads.seq(TcaWebhook.reads)).fold(
+        invalid => {
+          logger.error(s"Error fetching webhooks - $invalid")
+          Seq()
+        },
+        identity
+      )
+    }
+
+    Try(httpClient.execute(req, handler)).fold(
+      t => {
+        logger.error(s"Error fetching webhooks", t)
+        Seq()
+      },
+      identity
+    )
+  }
+
+  def registerWebhook(webhook: TcaWebhook): Future[Unit] = Future {
+    logger.info(s"Registering ${webhook.description} webhook")
+    val requestBody: JsValue = Json.toJson(webhook)
+
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/webhooks"))
+      .addHeader("Content-Type", s"application/json")
+      .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
+      .build()
+
+    val handler: ResponseHandler[Unit] = ApacheHttpClientUtils.handler {
+
+      case response if response.getStatusLine.getStatusCode == HttpStatus.SC_CREATED =>
+        EntityUtils.consumeQuietly(response.getEntity)
+        logger.info(s"${webhook.description} webhook registered")
+
+      case response =>
+        logger.error(s"Unexpected response when registering webhook ${webhook.description}: $response")
+    }
+
+    Try(httpClient.execute(req, handler)).fold(t => logger.error(s"Error when registering webhook ${webhook.description}", t), identity)
   }
 }
 
