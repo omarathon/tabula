@@ -224,10 +224,11 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
     val currentAllocationMap = allocationMap // just calculate current allocationMap once rather than invoking method a few times
     validateConcurrentStages(currentAllocationMap, errors)
     validateSequentialStageMarkers(currentAllocationMap, errors)
-    validateChangedAllocations(currentAllocationMap, errors)
+    validateChangedMarkerAllocations(currentAllocationMap, errors)
+    validateUnallocatedMarkerAllocations(currentAllocationMap, errors)
   }
 
-  def validateChangedAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
+  def validateChangedMarkerAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
     val changedMarkerAllocationsWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = for {
       (stage, allocations) <- allocationMap
       (newMarker, students) <- allocations
@@ -250,7 +251,9 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
 
           errors.reject("markingWorkflow.markers.finalised", args, "")
       }
+  }
 
+  def validateUnallocatedMarkerAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
 
     val unAllocatedMarkerWithFinalisedFeedback: immutable.Iterable[(MarkingWorkflowStage, Marker, Student)] = {
 
