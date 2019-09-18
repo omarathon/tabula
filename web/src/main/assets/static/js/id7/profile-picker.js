@@ -16,11 +16,13 @@ export default class ProfilePicker extends Picker {
   }
 
   textFor(item) {
+    console.log(item);
     if (item.inuse) return item.name;
     return `${item.name} (inactive)`;
   }
 
   valueFor(item) {
+    console.log(item);
     return {
       title: item.name,
       description: `${item.userId} ${item.description}`,
