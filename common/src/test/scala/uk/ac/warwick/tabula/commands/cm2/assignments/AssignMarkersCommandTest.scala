@@ -27,7 +27,6 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
     val userlookupService = Fixtures.userLookupService(marker1, marker2, moderator, student1, student2, student3, student4, student5, student6)
     val a1 = Fixtures.assignment("a1")
     a1.id = "a1"
-    //    a1.cm2Assignment = true
 
     val alloc: Map[MarkingWorkflowStage, Allocations] = Map(
       ModerationMarker -> Map(marker1 -> Set(student1, student2, student3), marker2 -> Set(student4, student5, student6)),
@@ -53,7 +52,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
   }
 
   @Test
-  def testValidateChangedAllocationsValid(): Unit = new Fixture {
+  def testValidateChangedMarkerAllocationsValid(): Unit = new Fixture {
     private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
 
       val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
