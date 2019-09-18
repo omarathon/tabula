@@ -14,8 +14,11 @@ import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable
+
 
 object AssignMarkersCommand {
 
@@ -29,6 +32,9 @@ object AssignMarkersCommand {
       with AutowiringUserLookupComponent
       with AutowiringCM2MarkingWorkflowServiceComponent
       with AutowiringFeedbackServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
+
+
 }
 
 object AssignMarkersBySpreadsheetCommand {
@@ -46,6 +52,7 @@ object AssignMarkersBySpreadsheetCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
       with AutowiringMarkerAllocationExtractorComponent
       with AutowiringFeedbackServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
 
   val AcceptedFileExtensions = Seq(".xlsx")
 }
@@ -60,7 +67,8 @@ object AssignMarkersBySmallGroupsCommand {
       with AssignMarkersDescription
       with AutowiringUserLookupComponent
       with AutowiringCM2MarkingWorkflowServiceComponent
-      with AutowiringFeedbackServiceComponent {
+      with AutowiringFeedbackServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent {
       def groupMarkerAllocations: Seq[GroupMarkerAllocation] = groupMarkerAllocationSequence
     }
 }
@@ -207,15 +215,19 @@ trait AssignMarkersSequentialStageValidationState {
   var allocationWarnings: Seq[String] = Nil
 }
 
-trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages with ValidateSequentialStages {
-  self: AssignMarkersState =>
+trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages with ValidateSequentialStages with FetchMarkerAllocations {
+  self: AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent =>
+
+  implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
+
   def validate(errors: Errors): Unit = {
-    validateConcurrentStages(allocationMap, errors)
-    validateSequentialStageMarkers(allocationMap, errors)
-    validateChangedAllocations(errors)
+    val currentAllocationMap = allocationMap // just calculate current allocationMap once rather than invoking method a few times
+    validateConcurrentStages(currentAllocationMap, errors)
+    validateSequentialStageMarkers(currentAllocationMap, errors)
+    validateChangedAllocations(currentAllocationMap, errors)
   }
 
-  def validateChangedAllocations(errors: Errors): Unit = {
+  def validateChangedAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
     val changedMarkerAllocationsWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = for {
       (stage, allocations) <- allocationMap
       (newMarker, students) <- allocations
@@ -228,6 +240,7 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
       (stage, currentMarker, student)
     }
 
+    // check if student  with finalised feedback has been moved to another marker for a particular workflow stage
     changedMarkerAllocationsWithFinalisedFeedback
       .groupBy { case (stage, marker, _) => (stage, marker) }
       .mapValues(_.map({ case (_, _, student) => student }))
@@ -235,6 +248,44 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
         case ((stage, marker), students) =>
           val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))
 
+          errors.reject("markingWorkflow.markers.finalised", args, "")
+      }
+
+
+    val unAllocatedMarkerWithFinalisedFeedback: immutable.Iterable[(MarkingWorkflowStage, Marker, Student)] = {
+
+      def isMarkerUnallocated(student: Student, allocations: Map[Marker, Set[Student]]): Boolean = !(allocations.values.flatten.toSet.contains(student))
+
+      def workflowStageAllocations(stageAllocationName: String): Map[MarkingWorkflowStage, Allocations] = {
+        val stageAllocations = allocationMap.filter(_._1.allocationName == stageAllocationName)
+        if (stageAllocations.isEmpty) {
+          Map(MarkingWorkflowStage.fromAllocationName(stageAllocationName, assignment.cm2MarkingWorkflow.workflowType).get -> Map.empty[Marker, Set[Student]])
+        } else stageAllocations
+      }
+
+      def isMarkerFeed(student: Student, stage: MarkingWorkflowStage): Boolean = {
+        assignment.findFeedback(student.getUserId).toSeq.flatMap(_.allMarkerFeedback)
+          .filter(_.stage == stage).exists(_.finalised)
+      }
+
+      for {
+        (stageAllocationName, priorAllocations) <- fetchAllocations(assignment).allocations
+        (workflowStage, newAllocations) <- workflowStageAllocations(stageAllocationName)
+        (oldMarker, students) <- priorAllocations
+        student <- students
+        if isMarkerFeed(student, workflowStage) && isMarkerUnallocated(student, newAllocations)
+      } yield {
+        (workflowStage, oldMarker, student)
+      }
+    }
+
+    // check if student  with finalised feedback has been unallocated marker
+    unAllocatedMarkerWithFinalisedFeedback
+      .groupBy { case (stage, marker, _) => (stage, marker) }
+      .mapValues(_.map({ case (_, _, student) => student }))
+      .foreach {
+        case ((stage, marker), students) =>
+          val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))
           errors.reject("markingWorkflow.markers.finalised", args, "")
       }
   }

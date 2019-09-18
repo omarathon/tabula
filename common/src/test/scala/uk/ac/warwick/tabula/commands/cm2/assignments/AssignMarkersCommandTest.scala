@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFe
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator}
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService._
-import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent, CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent, FeedbackService, UserLookupComponent}
 
 import scala.collection.JavaConverters._
 
@@ -53,7 +53,11 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 
   @Test
   def testValidateChangedAllocationsValid(): Unit = new Fixture {
-    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
+
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has written some non-final feedback for student1
       val assignment: Assignment = {
         val feedback = new AssignmentFeedback
@@ -99,7 +103,10 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 
   @Test
   def testValidateChangedAllocationsInvalid(): Unit = new Fixture {
-    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent  with AssessmentMembershipServiceComponent {
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has finalised some feedback for student1
       val assignment: Assignment = {
         val feedback = new AssignmentFeedback
