@@ -64,13 +64,13 @@ class MeetingRecord extends AbstractMeetingRecord {
   // for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
   def isAttendanceApproved: Boolean = ((creator != null && relationships.map(_.agent).contains(creator.universityId)) || isApproved) && !missed
 
-  def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
+  def isPendingApproval: Boolean = approvals.asScala.exists(_.pending)
 
-  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)
+  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.pending)
 
   def pendingApprovalBy(user: CurrentUser): Boolean =
     approvals.asScala.exists(approval =>
-      approval.state == Pending &&
+      approval.pending &&
         user.universityId != creator.universityId &&
         (pendingApprovals.exists(_.approver.universityId == user.apparentUser.getWarwickId) ||
           securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
@@ -78,9 +78,9 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def pendingApprovers: List[Member] = pendingApprovals.map(_.approver).toList
 
-  def isRejected: Boolean = approvals.asScala.exists(approval => approval.state == Rejected)
+  def isRejected: Boolean = approvals.asScala.exists(_.rejected)
 
-  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
+  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.rejected)
 
   def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 
@@ -94,9 +94,11 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
-  def approvedDate: Option[DateTime] = approvals.asScala.filter(_.approved).map(_.lastUpdatedDate).sorted.headOption
+  def approvedDate: Option[DateTime] = if (isPendingApproval) None else mostRecentApproval.map(_.lastUpdatedDate)
 
-  def approvedBy: Option[Member] = approvals.asScala.filter(_.approved).flatMap(a => Option(a.approvedBy)).headOption
+  def approvedBy: Option[Member] = if (isPendingApproval) None else mostRecentApproval.flatMap(a => Option(a.approvedBy))
+
+  def mostRecentApproval: Option[MeetingRecordApproval] = approvals.asScala.filter(_.approved).sortBy(_.lastUpdatedDate).lastOption
 
   def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
     case Nil => "nobody"
