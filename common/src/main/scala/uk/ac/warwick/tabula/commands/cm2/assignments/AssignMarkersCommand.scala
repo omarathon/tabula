@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable
 
 
 object AssignMarkersCommand {
@@ -33,8 +32,6 @@ object AssignMarkersCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
       with AutowiringFeedbackServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
-
-
 }
 
 object AssignMarkersBySpreadsheetCommand {
@@ -255,7 +252,7 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
 
   def validateUnallocatedMarkerAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
 
-    val unAllocatedMarkerWithFinalisedFeedback: immutable.Iterable[(MarkingWorkflowStage, Marker, Student)] = {
+    val unallocatedMarkerWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = {
 
       def isMarkerUnallocated(student: Student, allocations: Map[Marker, Set[Student]]): Boolean = !(allocations.values.flatten.toSet.contains(student))
 
@@ -266,7 +263,7 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
         } else stageAllocations
       }
 
-      def isMarkerFeed(student: Student, stage: MarkingWorkflowStage): Boolean = {
+      def isMarkerFeedbackFinalised(student: Student, stage: MarkingWorkflowStage): Boolean = {
         assignment.findFeedback(student.getUserId).toSeq.flatMap(_.allMarkerFeedback)
           .filter(_.stage == stage).exists(_.finalised)
       }
@@ -276,14 +273,14 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
         (workflowStage, newAllocations) <- workflowStageAllocations(stageAllocationName)
         (oldMarker, students) <- priorAllocations
         student <- students
-        if isMarkerFeed(student, workflowStage) && isMarkerUnallocated(student, newAllocations)
+        if isMarkerFeedbackFinalised(student, workflowStage) && isMarkerUnallocated(student, newAllocations)
       } yield {
         (workflowStage, oldMarker, student)
       }
     }
 
     // check if student  with finalised feedback has been unallocated marker
-    unAllocatedMarkerWithFinalisedFeedback
+    unallocatedMarkerWithFinalisedFeedback
       .groupBy { case (stage, marker, _) => (stage, marker) }
       .mapValues(_.map({ case (_, _, student) => student }))
       .foreach {
