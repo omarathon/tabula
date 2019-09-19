@@ -35,6 +35,8 @@ trait SubmissionService {
 trait OriginalityReportService {
   def getOriginalityReportByFileId(fileId: String): Option[OriginalityReport]
 
+  def getOriginalityReportByTcaSubmissionId(submissionId: String): Option[OriginalityReport]
+
   def deleteOriginalityReport(attachment: FileAttachment): Unit
 
   def saveOriginalityReport(attachment: FileAttachment): Unit
@@ -142,6 +144,12 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
     session.newCriteria[OriginalityReport]
       .createAlias("attachment", "attachment")
       .add(is("attachment.id", fileId))
+      .seq.headOption
+  }
+
+  def getOriginalityReportByTcaSubmissionId(submissionId: String): Option[OriginalityReport] = {
+    session.newCriteria[OriginalityReport]
+      .add(is("tcaSubmission", submissionId))
       .seq.headOption
   }
 

@@ -5,10 +5,12 @@ import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.util.EntityUtils
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services.{ApacheHttpClientComponent, AutowiringApacheHttpClientComponent, AutowiringOriginalityReportServiceComponent, AutowiringSubmissionServiceComponent, OriginalityReportServiceComponent, SubmissionServiceComponent}
 
@@ -26,6 +28,7 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
+  def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def listWebhooks: Future[Seq[TcaWebhook]]
   def registerWebhook(webhook: TcaWebhook): Future[Unit]
 }
@@ -45,9 +48,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     .addHeader("Authorization", s"Bearer ${tcaConfiguration.integrationKey}")
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {
-    // TODO - I don't think the custom metadata that is returned to webhooks is sent with manual requests to "Get Submission Info" so we can't rely on getting a file attachment ID
-    // instead save the tca submission ID in an originality report when we first request and then lookup the report here and walk back up to the assignment that way
-    val originalityReport = tcaSubmission.metadata.flatMap(m =>  originalityReportService.getOriginalityReportByFileId(m.fileAttachmentId))
+    val originalityReport = originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
 
     // persist metadata
     originalityReport.foreach(or => {
@@ -132,7 +133,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     )
   }
 
-  def registerWebhook(webhook: TcaWebhook): Future[Unit] = Future {
+  override def registerWebhook(webhook: TcaWebhook): Future[Unit] = Future {
     logger.info(s"Registering ${webhook.description} webhook")
     val requestBody: JsValue = Json.toJson(webhook)
 
@@ -152,6 +153,20 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     }
 
     Try(httpClient.execute(req, handler)).fold(t => logger.error(s"Error when registering webhook ${webhook.description}", t), identity)
+  }
+
+  override def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport] = {
+    val originalityReport = originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSimilarityReport.submissionId)
+
+    // persist metadata
+    originalityReport.foreach(or => {
+      or.matchPercentage = tcaSimilarityReport.overallMatch
+      or.similarityRequestedOn = new DateTime(tcaSimilarityReport.requested.toInstant.toEpochMilli)
+      or.similarityLastGenerated = new DateTime(tcaSimilarityReport.generated.toInstant.toEpochMilli)
+      originalityReportService.saveOrUpdate(or)
+    })
+
+    originalityReport
   }
 }
 
