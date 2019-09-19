@@ -24,5 +24,5 @@ class TurnitinTcaSendSubmissionController extends CourseworkController with Logg
   def submissionComplete(@ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
     command.apply()
     Mav.empty()
-    }
+  }
 }

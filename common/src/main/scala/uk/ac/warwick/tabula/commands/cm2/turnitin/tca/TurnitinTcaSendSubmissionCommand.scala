@@ -14,11 +14,11 @@ object TurnitinTcaSendSubmissionCommand {
 
   def apply(attachment: FileAttachment, user: User) =
     new TurnitinTcaSendSubmissionCommandInternal(attachment, user)
-  with ComposableCommand[Future[Option[TcaSubmission]]]
-  with TurnitinTcaSendSubmissionCommandPermissions
-  with TurnitinTcaSendSubmissionState
-  with TurnitinTcaSendSubmissionDescription
-  with AutowiringTurnitinTcaServiceComponent
+    with ComposableCommand[Future[Option[TcaSubmission]]]
+    with TurnitinTcaSendSubmissionCommandPermissions
+    with TurnitinTcaSendSubmissionState
+    with TurnitinTcaSendSubmissionDescription
+    with AutowiringTurnitinTcaServiceComponent
 }
 
 class TurnitinTcaSendSubmissionCommandInternal(val attachment: FileAttachment, val user: User)
