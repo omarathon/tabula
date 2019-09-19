@@ -13,6 +13,8 @@
   <p>
     The Turnitin service reported an error: ${message}
   </p>
+<#else>
+    ${problem}
 </#if>
 
 <p>You can close this browser tab and return to the coursework application.</p>
