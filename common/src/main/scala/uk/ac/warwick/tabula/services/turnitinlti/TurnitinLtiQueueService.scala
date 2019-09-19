@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
@@ -102,16 +101,6 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
       originalityReportService.saveOrUpdate(report)
       report
     })
-
-    if (features.urkundSubmissions) {
-      reports.filter(report =>
-        UrkundService.validFileType(report.attachment)
-          && UrkundService.validFileSize(report.attachment)
-      ).foreach(report => {
-        report.nextSubmitAttempt = DateTime.now
-        originalityReportService.saveOrUpdate(report)
-      })
-    }
 
     reports
   }

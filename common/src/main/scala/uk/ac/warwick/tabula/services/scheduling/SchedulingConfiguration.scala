@@ -136,8 +136,7 @@ object SchedulingConfiguration {
 
     SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 1.minute),
 
-    SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds),
-    SimpleTriggerJob[ProcessUrkundQueueJob](repeatInterval = 10.seconds)
+    SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds)
 
     // Migration now complete, don't need this any more
     // SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)

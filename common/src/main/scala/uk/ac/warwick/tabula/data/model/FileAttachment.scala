@@ -176,10 +176,6 @@ class FileAttachment extends GeneratedId {
     originalityReport != null && originalityReport.reportReceived
   }
 
-  def urkundResponseReceived: Boolean = {
-    originalityReport != null && originalityReport.reportUrl != null
-  }
-
   def generateToken(): FileAttachmentToken = {
     val token = new FileAttachmentToken
     token.fileAttachmentId = this.id
