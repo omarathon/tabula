@@ -10,13 +10,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.OriginalityReport
+import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport, Submission}
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
-import uk.ac.warwick.tabula.services.{ApacheHttpClientComponent, AutowiringApacheHttpClientComponent, AutowiringOriginalityReportServiceComponent, AutowiringSubmissionServiceComponent, OriginalityReportServiceComponent, SubmissionServiceComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Future
 import scala.util.Try
-import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 
 
 case class TurnitinTcaConfiguration(
@@ -27,6 +28,7 @@ case class TurnitinTcaConfiguration(
 )
 
 trait TurnitinTcaService {
+  def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def listWebhooks: Future[Seq[TcaWebhook]]
@@ -46,6 +48,66 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
   private def tcaRequest(value: RequestBuilder): RequestBuilder = value.addHeader("X-Turnitin-Integration-Name", tcaConfiguration.integrationName)
     .addHeader("X-Turnitin-Integration-Version", buildTime)
     .addHeader("Authorization", s"Bearer ${tcaConfiguration.integrationKey}")
+
+  // TODO check whether we will be bulk-approving the EULA on behalf of staff/students
+  private def bulkEulaAcceptance: JsObject = Json.obj (
+    "accepted_timestamp" -> "2019-09-01T00:00:00Z",
+    "language" -> "en-US",
+    "version"-> "v1beta"
+  )
+
+  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]] = {
+
+    Future {
+      val tabulaSubmission: Submission = fileAttachment.submissionValue.submission
+      val requestBody: JsObject = Json.obj(
+        "owner" -> tabulaSubmission.studentIdentifier,
+        "title" -> fileAttachment.name,
+        "eula" -> bulkEulaAcceptance
+      )
+
+      val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions"))
+        .addHeader("Content-Type", s"application/json")
+        .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
+        .build()
+
+      val handler: ResponseHandler[Option[TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
+
+        json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).fold(
+          invalid => {
+            logger.error(s"Error creating submission : $invalid")
+            logger.error(s"Response was: $json")
+            null
+          },
+          tcaSubmission => {
+            fileAttachment.originalityReport match {
+              case existingOriginalityReport if existingOriginalityReport != null =>
+                logger.error(s"Not creating an originality report as one already exists for file: ${fileAttachment.id}")
+                None
+              case _ =>
+                logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
+                val report = new OriginalityReport
+                report.attachment = fileAttachment
+                fileAttachment.originalityReport = report
+                report.lastSubmittedToTurnitin = new DateTime(0)
+                report.tcaSubmissionStatus = tcaSubmission.status
+                report.tcaSubmission = tcaSubmission.id
+                originalityReportService.saveOrUpdate(report)
+                Some(tcaSubmission)
+            }
+          }
+        )
+      }
+
+      Try(httpClient.execute(req, handler)).fold(
+        t => {
+          logger.error(s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}", t)
+          None
+        },
+          identity
+      )
+    }
+  }
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {
     val originalityReport = originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
