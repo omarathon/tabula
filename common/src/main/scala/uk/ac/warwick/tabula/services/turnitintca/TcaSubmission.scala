@@ -120,5 +120,4 @@ object TcaSubmission {
     (__ \ "error_code").readNullable[TcaErrorCode](TcaErrorCode.reads) and
     (__ \ "metadata" \ "custom").readNullable[CustomMetadata](CustomMetadata.readCustomMetadata)
   )(TcaSubmission.apply _)
-
 }

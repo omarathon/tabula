@@ -4,7 +4,7 @@ import javax.persistence.{Column, _}
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.turnitintca.{TcaErrorCode, TcaErrorCodeUserType, TcaSubmissionStatus}
+import uk.ac.warwick.tabula.services.turnitintca.{TcaErrorCode, TcaSubmissionStatus}
 
 @Entity
 @Proxy
@@ -82,8 +82,7 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   // TCA fields
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
-  var tcaSubmission: Option[String] = None
+  var tcaSubmission: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatusUserType")
   var tcaSubmissionStatus: TcaSubmissionStatus = _
@@ -99,5 +98,12 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var characterCount: Option[Int] = None
+
+  var similarityRequestedOn: DateTime = _
+
+  var similarityLastGenerated: DateTime = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var matchPercentage: Option[Int] = None
 
 }
