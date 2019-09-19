@@ -6,7 +6,7 @@ import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, NotRequired}
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
@@ -42,6 +42,10 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
   def approved: Boolean = state == Approved
 
   def required: Boolean = state != NotRequired
+
+  def pending: Boolean = state == Pending
+
+  def rejected: Boolean = state == Rejected
 }
 
 sealed abstract class MeetingApprovalState(val code: String, val description: String) {

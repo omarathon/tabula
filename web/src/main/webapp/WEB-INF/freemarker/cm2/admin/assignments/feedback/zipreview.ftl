@@ -50,7 +50,7 @@
         </div>
       </#if>
       <#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
-        <div class="invalid-files alert-block alert-info">
+        <div class="invalid-files alert alert-info">
           <div>Some files, based on their names, appear to relate to another module. Please check these before confirming.</div>
           <ul class="file-list">
             <#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
@@ -65,7 +65,7 @@
       </#if>
 
       <#if addFeedbackCommand.invalidFiles?size gt 0>
-        <div class="alert alert-block alert-info">
+        <div class="alert alert alert-info">
           <div>Some files have problematic names. Fix them, then try uploading again.</div>
           <ul class="file-list">
             <#list addFeedbackCommand.invalidFiles as invalidFile>
@@ -140,7 +140,7 @@
     </#if>
 
     <div class="submit-buttons form-actions">
-      <#if hasErrors>
+      <#if hasErrors || addFeedbackCommand.items?size == 0>
         <input class="btn btn-primary" type="submit" value="Confirm" disabled="disabled">
       <#else>
         <input type="hidden" name="confirm" value="true">

@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.selenium.WebBrowser
+import org.scalatest.selenium.WebBrowser.cssSelector
 import org.scalatest.time.SpanSugar._
 import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.WebsignonMethods._
@@ -71,9 +72,12 @@ trait WebsignonMethods extends Matchers with Eventually {
               }
               click on cssSelector("div.sign-out a")
               eventually {
-                (className("sso-link").findElement.isDefined && className("sso-link").findElement.get.attribute("class").exists(_.contains("sign-in"))) should be (true)
+                // The page contains two sso-link class elements so pick up the right one. The header div only contains sign-in class
+                val cssSel = cssSelector(".id7-page-header a.sso-link")
+                cssSel.findElement.isDefined && cssSel.findElement.get.attribute("class").exists(_.contains("sign-in")) should be (true)
+                click on cssSel
               }
-              click on className("sso-link")
+
               login(url)
             }
           } else {

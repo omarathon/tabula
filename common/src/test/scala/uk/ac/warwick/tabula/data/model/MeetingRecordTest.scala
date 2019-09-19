@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.{DateTime, DateTimeConstants}
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, Pending}
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
 import scala.collection.JavaConverters._
@@ -159,6 +160,63 @@ class MeetingRecordTest extends PersistenceTestBase {
     meeting.participants should contain allOf(student, agent)
     meeting.allParticipantNames should be("Staff Member and Student Member")
     meeting.allAgentNames should be("Staff Member")
+  }
+
+  @Test def approvalDetails(): Unit = {
+    val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+    val student = Fixtures.student(universityId = "1000001", userId = "student")
+    student.firstName = "Student"
+    student.lastName = "Member"
+
+    val firstAgent = Fixtures.staff(universityId = "1000002", userId = "first")
+    firstAgent.firstName = "First"
+    firstAgent.lastName = "Agent"
+
+    val finalAgent = Fixtures.staff(universityId = "1000003", userId = "final")
+    finalAgent.firstName = "Final"
+    finalAgent.lastName = "Agent"
+
+    val firstRelationship = StudentRelationship(firstAgent, relationshipType, student, DateTime.now)
+    val finalRelationship = StudentRelationship(finalAgent, relationshipType, student, DateTime.now)
+
+    val meeting = new MeetingRecord(student, Seq(firstRelationship, finalRelationship))
+
+    val firstApproval = new MeetingRecordApproval
+    firstApproval.meetingRecord = meeting
+    firstApproval.approver = firstAgent
+    firstApproval.state = Approved
+    firstApproval.approvedBy = firstAgent
+    firstApproval.lastUpdatedDate = DateTime.now().minusMinutes(1)
+    meeting.approvals.add(firstApproval)
+
+    val finalApproval = new MeetingRecordApproval
+    finalApproval.meetingRecord = meeting
+    firstApproval.approver = finalAgent
+    finalApproval.state = Pending
+    finalApproval.lastUpdatedDate = DateTime.now()
+    finalApproval.approver = finalAgent
+    meeting.approvals.add(finalApproval)
+
+    // Not approved when an approval is Pending
+
+    meeting.isPendingApproval should be(true)
+    meeting.isApproved should be(false)
+    meeting.approvedBy should be(None)
+    meeting.approvedDate should be(None)
+
+    finalApproval.state = Approved
+    finalApproval.approvedBy = finalAgent
+
+    // Approved when all approvals are Approved or NotRequired
+
+    meeting.isPendingApproval should be(false)
+    meeting.isApproved should be(true)
+
+    // Approved by the final approver on the date of the final approval
+
+    meeting.approvedBy should contain(finalAgent)
+    meeting.approvedDate should contain(finalApproval.lastUpdatedDate)
   }
 
   /** Zero-pad integer to a 7 digit string */

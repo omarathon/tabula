@@ -51,6 +51,7 @@ abstract class Features {
   @Value("${features.collectMarks:true}") var collectMarks: Boolean = defaults.collectMarks
   @Value("${features.turnitin:true}") var turnitin: Boolean = defaults.turnitin
   @Value("${features.turnitinSubmissions:true}") var turnitinSubmissions: Boolean = defaults.turnitinSubmissions
+  @Value("${features.turnitinTca:false}") var turnitinTca: Boolean = defaults.turnitinTca
   @Value("${features.assignmentMembership:true}") var assignmentMembership: Boolean = defaults.assignmentMembership
   @Value("${features.extensions:true}") var extensions: Boolean = defaults.extensions
   @Value("${features.feedbackTemplates:true}") var feedbackTemplates: Boolean = defaults.feedbackTemplates
@@ -192,6 +193,7 @@ class FeaturesMessage {
   @BeanProperty var collectMarks = true
   @BeanProperty var turnitin = true
   @BeanProperty var turnitinSubmissions = true
+  @BeanProperty var turnitinTca = false
   @BeanProperty var assignmentMembership = true
   @BeanProperty var extensions = true
   @BeanProperty var feedbackTemplates = true

@@ -216,6 +216,8 @@
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeConverter"/>
+    <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatusConverter"/>
+    <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaErrorCodeConverter"/>
   </util:list>
 
   <bean id="typeConverter"
@@ -268,6 +270,7 @@
       <mvc:exclude-mapping path="*.ftl"/>
       <mvc:exclude-mapping path="*.flth"/>
       <mvc:exclude-mapping path="/error/*"/>
+      <mvc:exclude-mapping path="/error"/>
       <mvc:exclude-mapping path="/test/*"/>
       <mvc:exclude-mapping path="/service/*"/>
       <mvc:exclude-mapping path="/v1/**"/>
@@ -440,6 +443,10 @@
       <filter ref="staticContentHeadersFilter"/>
       <url-pattern>/static/*</url-pattern>
     </mapping>
+    <mapping name="turnitinTcaSignature">
+      <filter ref="turnitinTcaSignatureFilter"/>
+      <url-pattern>/turnitin/tca/webhooks/*</url-pattern>
+    </mapping>
   </filter-stack>
 
   <import resource="filters-context.xml"/>
@@ -453,6 +460,8 @@
         p:group="${permissions.admin.group}"
         p:groupService-ref="groupService"/>
   <!-- FIXME groupservice wont be switched out for a maintenance version -->
+
+  <bean id="turnitinTcaSignatureFilter" class="uk.ac.warwick.tabula.web.filters.TurnitinTcaSignatureFilter" />
 
   <bean id="userLookup" class="uk.ac.warwick.tabula.services.SwappableUserLookupService">
     <constructor-arg ref="realUserLookup"/>

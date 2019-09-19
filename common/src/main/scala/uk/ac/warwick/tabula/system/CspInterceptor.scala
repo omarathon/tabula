@@ -31,7 +31,9 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // photos.warwick is for the account popover; actual photos are proxied so 'self' is fine
       // data: is for Modernizr doing webp checks
       // ssl.google-analytics.com for GA
-      "img-src" -> Some("'self' data: https://photos.warwick.ac.uk https://ssl.google-analytics.com"),
+      "img-src" -> Some("'self' data: https://photos.warwick.ac.uk https://ssl.google-analytics.com https://warwick.ac.uk"),
+
+      "media-src" -> Some("'self' https://warwick.ac.uk"),
 
       // The unsafe-inline directive here is IGNORED in favour of nonces in modern browsers
       // ssl.google-analytics.com for GA
@@ -68,6 +70,10 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
   def enforcingRules(nonce: String): ListMap[String, Option[String]] =
     ListMap(
       "default-src" -> Some("* data:"),
+
+      "img-src" -> Some("'self' data: https://photos.warwick.ac.uk https://ssl.google-analytics.com https://warwick.ac.uk"),
+
+      "media-src" -> Some("'self' https://warwick.ac.uk"),
 
       // Allow pretty much everything for now
       // ssl.google-analytics.com for GA
