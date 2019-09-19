@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -42,7 +41,6 @@ object AssignMarkersBySpreadsheetCommand {
       with AssignMarkersBySpreadsheetState
       with AssignMarkersBySpreadsheetBindListener
       with AssignMarkersValidation
-      with ValidateConcurrentStages
       with AssignMarkersPermissions
       with AssignMarkersDescription
       with AutowiringUserLookupComponent
@@ -89,7 +87,7 @@ abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends 
 trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 
   this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with MarkerAllocationExtractorComponent
-    with AssignMarkersBySpreadsheetState with ValidateConcurrentStages with ValidateSequentialStages =>
+    with AssignMarkersBySpreadsheetState with ValidateConcurrentStages with ValidateSequentialStages with ValidateMarkerChanges=>
 
   override def onBind(result: BindingResult): Unit = transactional() {
 
@@ -143,6 +141,8 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
           }
           validateConcurrentStages(_allocationMap, result)
           validateSequentialStageMarkers(_allocationMap, result)
+          validateChangedMarkerAllocations(_allocationMap, result)
+          validateUnallocatedMarkerAllocations(_allocationMap, result)
         }
       }
     }
@@ -206,24 +206,8 @@ trait ValidateSequentialStages {
   }
 }
 
-trait AssignMarkersSequentialStageValidationState {
-  var allowSameMarkerForSequentialStages: Boolean = false
-
-  var allocationWarnings: Seq[String] = Nil
-}
-
-trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages with ValidateSequentialStages with FetchMarkerAllocations {
-  self: AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent =>
-
-  implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
-
-  def validate(errors: Errors): Unit = {
-    val currentAllocationMap = allocationMap // just calculate current allocationMap once rather than invoking method a few times
-    validateConcurrentStages(currentAllocationMap, errors)
-    validateSequentialStageMarkers(currentAllocationMap, errors)
-    validateChangedMarkerAllocations(currentAllocationMap, errors)
-    validateUnallocatedMarkerAllocations(currentAllocationMap, errors)
-  }
+trait ValidateMarkerChanges extends FetchMarkerAllocations {
+  self: SelfValidating with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent=>
 
   def validateChangedMarkerAllocations(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
     val changedMarkerAllocationsWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = for {
@@ -288,6 +272,25 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
           val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))
           errors.reject("markingWorkflow.markers.finalised", args, "")
       }
+  }
+
+}
+
+trait AssignMarkersSequentialStageValidationState {
+  var allowSameMarkerForSequentialStages: Boolean = false
+
+  var allocationWarnings: Seq[String] = Nil
+}
+
+trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages with ValidateSequentialStages with ValidateMarkerChanges {
+  self: AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent =>
+
+  def validate(errors: Errors): Unit = {
+    val currentAllocationMap = allocationMap // just calculate current allocationMap once rather than invoking method a few times
+    validateConcurrentStages(currentAllocationMap, errors)
+    validateSequentialStageMarkers(currentAllocationMap, errors)
+    validateChangedMarkerAllocations(currentAllocationMap, errors)
+    validateUnallocatedMarkerAllocations(currentAllocationMap, errors)
   }
 }
 
