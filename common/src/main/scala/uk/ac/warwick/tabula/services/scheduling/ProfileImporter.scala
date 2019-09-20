@@ -229,7 +229,7 @@ class SandboxProfileImporter extends ProfileImporter {
         "spr_code" -> "%s/1".format(member.universityId),
         "route_code" -> route.code.toUpperCase,
         "department_code" -> member.departmentCode.toUpperCase,
-        "award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
+        "award_code" -> route.awardCode,
         "spr_status_code" -> "C",
         "scj_status_code" -> "C",
         "level_code" -> thisYearOfStudy.toString,
