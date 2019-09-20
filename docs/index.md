@@ -1,0 +1,22 @@
+Tabula developer documentation
+==============================
+
+- [Code style](code-style.md)
+- [🎂 Cake](cake.md)
+- [Controllers and autowiring](controllers.md)
+- [Commands](commands.md)
+  - [Applying](commands.md#applying)
+  - [Binding data from the request](commands.md#binding-data-from-the-request)
+  - [Running code on bind (pre-validation)](commands.md#running-code-on-bind-pre-validation)
+  - [Validating data](commands.md#validating-data)
+  - [Audit logging (Describable)](commands.md#audit-logging-describable)
+  - [Notifications](commands.md#notifications)
+    - [Sending notifications when a command runs](commands.md#sending-notifications-when-a-command-runs)
+    - [Scheduling notifications for the future](commands.md#scheduling-notifications-for-the-future)
+    - [Completing notifications](commands.md#completing-notifications)
+  - [Triggers](commands.md#triggers)
+- [Permissions](permissions.md)
+- [Views](views.md)
+  - [Style guide 🗎](style-guide.pdf)
+- [Database schema changes](schema-migrations.md)
+- [Dependency upgrades](dependency-upgrades.md)
