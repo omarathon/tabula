@@ -53,8 +53,9 @@ If you're adding new scripts, and can't use an external JS file, please do inclu
 Security headers
 ----------------
 
-We set most of the other security headers you'd expect to see (XCTO, STS, RP, XFO, XXP - in blocking mode, FP etc). User uploads are
-served `Content-Disposition: attachment`.
+We set most of the other security headers you'd expect to see (X-Content-Type-Options, HSTS, Referrer-Policy, X-Frame-Options, X-XSS-Protection - in blocking mode, Feature-Policy, Expect-CT etc).
+
+User uploads are served `Content-Disposition: attachment`.
 
 Virus scanning
 --------------
