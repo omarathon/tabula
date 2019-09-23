@@ -99,7 +99,6 @@ case class TcaSubmission(
   characterCount: Option[Int],
   contentType: Option[String],
   errorCode: Option[TcaErrorCode],
-  metadata: Option[CustomMetadata]
 )
 
 object TcaSubmission {
@@ -117,7 +116,6 @@ object TcaSubmission {
     (__ \ "word_count").readNullable[Int] and
     (__ \ "character_count").readNullable[Int] and
     (__ \ "content_type").readNullable[String] and
-    (__ \ "error_code").readNullable[TcaErrorCode](TcaErrorCode.reads) and
-    (__ \ "metadata" \ "custom").readNullable[CustomMetadata](CustomMetadata.readCustomMetadata)
-  )(TcaSubmission.apply _)
+    (__ \ "error_code").readNullable[TcaErrorCode](TcaErrorCode.reads) )(TcaSubmission.apply _)
+
 }
