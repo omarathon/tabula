@@ -20,3 +20,4 @@ Tabula developer documentation
   - [Style guide 🗎](style-guide.pdf)
 - [Database schema changes](schema-migrations.md)
 - [Dependency upgrades](dependency-upgrades.md)
+- [Security](security.md)
