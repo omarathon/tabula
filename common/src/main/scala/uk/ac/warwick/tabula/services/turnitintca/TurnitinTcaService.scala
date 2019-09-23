@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
@@ -18,6 +20,8 @@ import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Future
 import scala.util.Try
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
+import uk.ac.warwick.util.web.Uri
 
 
 case class TurnitinTcaConfiguration(
@@ -31,6 +35,7 @@ trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
+  def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Option[Uri]]
   def listWebhooks: Future[Seq[TcaWebhook]]
   def registerWebhook(webhook: TcaWebhook): Future[Unit]
 }
@@ -241,6 +246,39 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     })
 
     originalityReport
+  }
+
+  override def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Option[Uri]] = Future {
+    val requestBody: JsObject = Json.obj(
+      "viewer_user_id" -> user.apparentId,
+      "locale" -> "en",
+      "viewer_default_permission_set" -> "INSTRUCTOR"
+    )
+
+    val req = tcaRequest(RequestBuilder.put(s"${tcaConfiguration.baseUri}/submissions/${originalityReport.tcaSubmission}/viewer-url"))
+      .addHeader("Content-Type", s"application/json")
+      .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
+      .build()
+
+    val uriRead: Reads[Uri] = (__ \ "viewer_url").read[String].map(Uri.parse)
+
+    val handler: ResponseHandler[Option[Uri]] = ApacheHttpClientUtils.jsonResponseHandler { json =>
+      json.validate[Uri](uriRead).fold(
+        invalid => {
+          logger.error(s"Error fetching report url - $invalid")
+          None
+        },
+        uri => Some(uri)
+      )
+    }
+
+    Try(httpClient.execute(req, handler)).fold(
+      t => {
+        logger.error(s"Error requesting originality report for file ${originalityReport.attachment}", t)
+        None
+      },
+      identity
+    )
   }
 }
 
