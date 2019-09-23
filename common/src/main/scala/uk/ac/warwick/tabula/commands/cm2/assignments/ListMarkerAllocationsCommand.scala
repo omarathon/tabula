@@ -27,7 +27,7 @@ trait FetchMarkerAllocations {
   self: UserLookupComponent with CM2MarkingWorkflowServiceComponent
     with AssessmentMembershipServiceComponent =>
 
-  implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
+  import ListMarkerAllocationsCommand.userOrdering
 
   def fetchAllocations(assignment: Assignment, selectedAllocations: Map[MarkingWorkflowStage, Allocations] = Map.empty): MarkerAllocations = {
 
@@ -95,6 +95,8 @@ object ListMarkerAllocationsCommand {
 
   type Student = User
   type Marker = User
+
+  implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
 
   def apply(assignment: Assignment, allocations: Map[MarkingWorkflowStage, Allocations] = Map.empty) = new ListMarkerAllocationsCommandInternal(assignment, allocations)
     with ComposableCommand[MarkerAllocations]
