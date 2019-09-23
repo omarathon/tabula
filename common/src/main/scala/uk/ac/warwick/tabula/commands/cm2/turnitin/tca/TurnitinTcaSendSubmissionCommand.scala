@@ -7,14 +7,15 @@ import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceCo
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object TurnitinTcaSendSubmissionCommand {
-  type CommandType = Appliable[Future[Option[TcaSubmission]]]
+  type CommandType = Appliable[Option[TcaSubmission]]
 
   def apply(attachment: FileAttachment, user: User) =
     new TurnitinTcaSendSubmissionCommandInternal(attachment, user)
-    with ComposableCommand[Future[Option[TcaSubmission]]]
+    with ComposableCommand[Option[TcaSubmission]]
     with TurnitinTcaSendSubmissionCommandPermissions
     with TurnitinTcaSendSubmissionState
     with TurnitinTcaSendSubmissionDescription
@@ -22,10 +23,10 @@ object TurnitinTcaSendSubmissionCommand {
 }
 
 class TurnitinTcaSendSubmissionCommandInternal(val attachment: FileAttachment, val user: User)
-extends CommandInternal[Future[Option[TcaSubmission]]] {
+extends CommandInternal[Option[TcaSubmission]] {
   self: TurnitinTcaServiceComponent =>
-  override def applyInternal(): Future[Option[TcaSubmission]] = {
-    turnitinTcaService.createSubmission(attachment, user)
+  override def applyInternal(): Option[TcaSubmission] = {
+    Await.result(turnitinTcaService.createSubmission(attachment, user), Duration.Inf)
   }
 }
 
@@ -34,12 +35,24 @@ trait TurnitinTcaSendSubmissionState {
   def user: User
 }
 
-trait TurnitinTcaSendSubmissionDescription extends Describable[Future[Option[TcaSubmission]]] {
+trait TurnitinTcaSendSubmissionDescription extends Describable[Option[TcaSubmission]] {
   self: TurnitinTcaSendSubmissionState =>
   override lazy val eventName = "TurnitinTCASendSubmission"
 
   override def describe(d: Description): Unit = {
     d.fileAttachments(Seq(attachment))
+  }
+
+  override def describeResult(d: Description, result: Option[TcaSubmission]): Unit = {
+    d.property("tcaSubmissionCreated" -> result.isDefined)
+    result match {
+      case Some(tcaSubmission:TcaSubmission) =>
+        d.properties(
+          "tcaSubmissionId" -> tcaSubmission.id,
+          "tcaStatus" -> tcaSubmission.status,
+          "tcaCreatedTime" -> tcaSubmission.created)
+      case None =>
+    }
   }
 }
 

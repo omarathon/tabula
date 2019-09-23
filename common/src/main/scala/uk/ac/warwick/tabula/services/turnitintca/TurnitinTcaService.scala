@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
@@ -60,10 +60,22 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
     Future {
       val tabulaSubmission: Submission = fileAttachment.submissionValue.submission
+      val assignment: Assignment = tabulaSubmission.assignment
+      val module: Module = assignment.module
       val requestBody: JsObject = Json.obj(
         "owner" -> tabulaSubmission.studentIdentifier,
         "title" -> fileAttachment.name,
-        "eula" -> bulkEulaAcceptance
+        "eula" -> bulkEulaAcceptance,
+        "metadata" -> Json.obj(
+          "group" -> Json.obj (
+            "id" -> assignment.id,
+            "name" -> assignment.name
+          ),
+          "group_context" -> Json.obj(
+            "id" -> module.id,
+            "name"-> module.name
+          )
+        )
       )
 
       val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions"))

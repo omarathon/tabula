@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.tabula.web.views.JSONView
 
 @Profile(Array("turnitinTca"))
 @Controller
@@ -22,7 +23,8 @@ class TurnitinTcaSendSubmissionController extends CourseworkController with Logg
 
   @RequestMapping(method = Array(POST))
   def submissionComplete(@ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
-    command.apply()
-    Mav.empty()
+    Mav(new JSONView(Map(
+      "succeeded" -> command.apply().isDefined
+    ))).noLayout()
   }
 }
