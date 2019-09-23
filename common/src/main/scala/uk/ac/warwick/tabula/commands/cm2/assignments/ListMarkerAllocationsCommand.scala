@@ -27,6 +27,8 @@ trait FetchMarkerAllocations {
   self: UserLookupComponent with CM2MarkingWorkflowServiceComponent
     with AssessmentMembershipServiceComponent =>
 
+  import ListMarkerAllocationsCommand.userOrdering
+
   def fetchAllocations(assignment: Assignment, selectedAllocations: Map[MarkingWorkflowStage, Allocations] = Map.empty): MarkerAllocations = {
 
     // If seat number is empty we use the uni ID instead. This will be larger than a real seat number and unique
