@@ -1,9 +1,13 @@
 package uk.ac.warwick.tabula.services.turnitintca
 
+import java.io.File
+
+import com.google.common.io.Files
 import org.apache.http.HttpStatus
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.entity.{ContentType, StringEntity}
+import org.apache.http.client.entity.EntityBuilder
 import org.apache.http.util.EntityUtils
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
@@ -11,17 +15,15 @@ import org.springframework.stereotype.Service
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.OriginalityReport
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module, OriginalityReport, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
 import scala.util.Try
-import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
-import uk.ac.warwick.util.web.Uri
 
 
 case class TurnitinTcaConfiguration(
@@ -33,6 +35,7 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]]
+  def uploadSubmissionFile(fileAttachment: FileAttachment): Future[Unit]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Option[Uri]]
@@ -61,69 +64,92 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     "version"-> "v1beta"
   )
 
-  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]] = {
-
-    Future {
-      val tabulaSubmission: Submission = fileAttachment.submissionValue.submission
-      val assignment: Assignment = tabulaSubmission.assignment
-      val module: Module = assignment.module
-      val requestBody: JsObject = Json.obj(
-        "owner" -> tabulaSubmission.studentIdentifier,
-        "title" -> fileAttachment.name,
-        "eula" -> bulkEulaAcceptance,
-        "metadata" -> Json.obj(
-          "group" -> Json.obj (
-            "id" -> assignment.id,
-            "name" -> assignment.name
-          ),
-          "group_context" -> Json.obj(
-            "id" -> module.id,
-            "name"-> module.name
-          )
+  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]] = Future {
+    val tabulaSubmission: Submission = fileAttachment.submissionValue.submission
+    val assignment: Assignment = tabulaSubmission.assignment
+    val module: Module = assignment.module
+    val requestBody: JsObject = Json.obj(
+      "owner" -> tabulaSubmission.studentIdentifier,
+      "title" -> fileAttachment.name,
+      "eula" -> bulkEulaAcceptance,
+      "metadata" -> Json.obj(
+        "group" -> Json.obj (
+          "id" -> assignment.id,
+          "name" -> assignment.name
+        ),
+        "group_context" -> Json.obj(
+          "id" -> module.id,
+          "name"-> module.name
         )
       )
+    )
 
-      val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions"))
-        .addHeader("Content-Type", s"application/json")
-        .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
-        .build()
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions"))
+      .addHeader("Content-Type", s"application/json")
+      .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
+      .build()
 
-      val handler: ResponseHandler[Option[TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
+    val handler: ResponseHandler[Option[TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
 
-        json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).fold(
-          invalid => {
-            logger.error(s"Error creating submission : $invalid")
-            logger.error(s"Response was: $json")
-            null
-          },
-          tcaSubmission => {
-            fileAttachment.originalityReport match {
-              case existingOriginalityReport if existingOriginalityReport != null =>
-                logger.error(s"Not creating an originality report as one already exists for file: ${fileAttachment.id}")
-                None
-              case _ =>
-                logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
-                val report = new OriginalityReport
-                report.attachment = fileAttachment
-                fileAttachment.originalityReport = report
-                report.lastSubmittedToTurnitin = new DateTime(0)
-                report.tcaSubmissionStatus = tcaSubmission.status
-                report.tcaSubmission = tcaSubmission.id
-                originalityReportService.saveOrUpdate(report)
-                Some(tcaSubmission)
-            }
-          }
-        )
-      }
-
-      Try(httpClient.execute(req, handler)).fold(
-        t => {
-          logger.error(s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}", t)
-          None
+      json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).fold(
+        invalid => {
+          logger.error(s"Error creating submission : $invalid")
+          logger.error(s"Response was: $json")
+          null
         },
-          identity
+        tcaSubmission => {
+          fileAttachment.originalityReport match {
+            case existingOriginalityReport if existingOriginalityReport != null =>
+              logger.error(s"Not creating an originality report as one already exists for file: ${fileAttachment.id}")
+              None
+            case _ =>
+              logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
+              val report = new OriginalityReport
+              report.attachment = fileAttachment
+              fileAttachment.originalityReport = report
+              report.lastSubmittedToTurnitin = new DateTime(0)
+              report.tcaSubmissionStatus = tcaSubmission.status
+              report.tcaSubmission = tcaSubmission.id
+              originalityReportService.saveOrUpdate(report)
+              Some(tcaSubmission)
+          }
+        }
       )
     }
+
+    Try(httpClient.execute(req, handler)).fold(
+      t => {
+        logger.error(s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}", t)
+        None
+      },
+        identity
+    )
+  }
+
+  override def uploadSubmissionFile(fileAttachment: FileAttachment): Future[Unit] = Future {
+    val tcaSubmissionId = fileAttachment.originalityReport.tcaSubmission
+
+
+    val tempFile = File.createTempFile(fileAttachment.id, null)
+    fileAttachment.asByteSource.copyTo(Files.asByteSink(tempFile))
+
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions/$tcaSubmissionId/original"))
+      .addHeader("Content-Type", s"binary/octet-stream")
+      .addHeader("Content-Disposition", "inline;filename=\"" + fileAttachment.name + "\"")
+      .setEntity(EntityBuilder.create().setFile(tempFile).build())
+      .build()
+
+    val handler: ResponseHandler[Unit] = ApacheHttpClientUtils.handler {
+
+      case response if response.getStatusLine.getStatusCode == HttpStatus.SC_ACCEPTED =>
+        EntityUtils.consumeQuietly(response.getEntity)
+        logger.info(s"successfully uploaded file to TCA submission: $tcaSubmissionId")
+
+      case response =>
+        logger.error(s"Unexpected response when attempting to upload a file to TCA submission $tcaSubmissionId: $response")
+    }
+
+    Try(httpClient.execute(req, handler)).fold(t => logger.error(s"Error when attempting to upload a file to TCA submission $tcaSubmissionId", t), identity)
   }
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {

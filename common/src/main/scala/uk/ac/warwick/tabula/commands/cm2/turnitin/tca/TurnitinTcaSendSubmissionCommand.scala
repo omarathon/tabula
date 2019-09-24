@@ -61,6 +61,6 @@ trait TurnitinTcaSendSubmissionCommandPermissions extends RequiresPermissionsChe
 
   override def permissionsCheck(p: PermissionsChecking) {
     mandatory(attachment)
-    p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, attachment.submissionValue.submission)
+    p.PermissionCheck(Permissions.Submission.CheckForPlagiarism, attachment.submissionValue.submission)
   }
 }
