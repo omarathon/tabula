@@ -55,6 +55,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
   def levelCodeRestriction: Option[ScalaRestriction]
 
+  def studyLevelCodeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+    "studentCourseYearDetails.studyLevel", studyLevelCodes.asScala,
+    getAliasPaths("studentCourseYearDetails"): _*
+  )
+
   def registeredModulesRestriction(year: AcademicYear): Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
     Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
     Seq(modules.asScala, Seq(year)),
@@ -102,6 +107,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       attendanceRestriction,
       yearOfStudyRestriction,
       levelCodeRestriction,
+      studyLevelCodeRestriction,
       sprStatusRestriction,
       registeredModulesRestriction(year),
       tier4Restriction,
