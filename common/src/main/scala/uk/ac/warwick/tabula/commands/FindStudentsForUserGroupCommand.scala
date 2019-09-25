@@ -88,9 +88,11 @@ class FindStudentsForUserGroupCommandInternal(val department: Department, val ac
     } else {
       doFind = true
 
-      staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
-        profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
+      staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInTouchedDepartmentsOrModules") {
+        profileService.findAllUniversityIdsByRestrictionsInTouchedDepartmentsOrModules(
           department = department,
+          modules.asScala.toSet,
+          academicYear,
           restrictions = buildRestrictions(academicYear),
           orders = buildOrders()
         ).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)

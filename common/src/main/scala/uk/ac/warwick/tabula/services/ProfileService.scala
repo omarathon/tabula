@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import java.util.UUID
 
+import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -9,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.data.ScalaRestriction.inIfNotEmptyMultipleProperties
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
@@ -87,6 +89,8 @@ trait ProfileService {
   def findAllUserIdsByRestrictions(restrictions: Seq[ScalaRestriction]): Seq[String]
 
   def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+
+  def findAllUniversityIdsByRestrictionsInTouchedDepartmentsOrModules(department: Department, modules: Set[Module], year: AcademicYear, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 
   def findAllUserIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 
@@ -427,10 +431,35 @@ abstract class AbstractProfileService extends ProfileService with Logging {
     memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
   }
 
+  def findAllUniversityIdsByRestrictionsInTouchedDepartmentsOrModules(
+    department: Department,
+    modules: Set[Module],
+    year: AcademicYear,
+    restrictions: Seq[ScalaRestriction],
+    orders: Seq[ScalaOrder] = Seq()
+  ): Seq[String] = transactional(readOnly = true) {
+
+    val deptRestrictions = affiliatedDepartmentsRestriction(department, restrictions) ++
+      department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
+
+    val moduleRestrictions = inIfNotEmptyMultipleProperties(
+      Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
+      Seq(modules.toSeq, Seq(year)),
+      FiltersStudents.AliasPaths("moduleRegistration"): _*
+    ).toSeq ++ restrictions
+
+    val allRestrictions = ScalaRestriction.custom(
+      disjunction(conjunction(deptRestrictions.map(_.underlying): _*), conjunction(moduleRestrictions.map(_.underlying): _*)),
+      deptRestrictions.flatMap(_.aliases.toSeq) ++ moduleRestrictions.flatMap(_.aliases.toSeq) : _*
+    ).toSeq
+
+    memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+  }
+
 
   override def findAllUserIdsByRestrictionsInAffiliatedDepartments(
     department: Department,
-    restrictions: Seq[ScalaRestriction],
+    restrictions: Seq[ScalaRestriction]
   ): Seq[String] = {
     val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions) ++
       department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
