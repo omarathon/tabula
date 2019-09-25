@@ -86,6 +86,7 @@
                 Delete
               </a>
             <#else>
+              <a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
               <a class="btn btn-default" href="<@routes.cm2.reusableWorkflowAddToCurrentYear department academicYear workflow/>">Add
                 to ${currentYear.toString}</a>
             </#if>

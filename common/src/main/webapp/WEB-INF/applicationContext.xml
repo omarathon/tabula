@@ -270,6 +270,7 @@
       <mvc:exclude-mapping path="*.ftl"/>
       <mvc:exclude-mapping path="*.flth"/>
       <mvc:exclude-mapping path="/error/*"/>
+      <mvc:exclude-mapping path="/error"/>
       <mvc:exclude-mapping path="/test/*"/>
       <mvc:exclude-mapping path="/service/*"/>
       <mvc:exclude-mapping path="/v1/**"/>

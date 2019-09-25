@@ -168,7 +168,9 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
   }
 
   def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = {
-    Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+    Option(applicantByUniversityIdQuery.executeByNamedParam(
+      Map("universityIds" -> universityId).asJava).asScala.toList.map{ case (membershipMember, _) => membershipMember}
+    ).flatMap(head)
   }
 
   def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
@@ -229,7 +231,7 @@ class SandboxProfileImporter extends ProfileImporter {
         "spr_code" -> "%s/1".format(member.universityId),
         "route_code" -> route.code.toUpperCase,
         "department_code" -> member.departmentCode.toUpperCase,
-        "award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
+        "award_code" -> route.awardCode,
         "spr_status_code" -> "C",
         "scj_status_code" -> "C",
         "level_code" -> thisYearOfStudy.toString,

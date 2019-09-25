@@ -150,14 +150,9 @@ object ModuleImporter {
     """
 		select substr(mod.mod_code,0,5) as code, max(mod.mod_name) as name, max(mod.mod_snam) as short_name, max(mod.sch_code) as scheme_code, max(mod.mot_code) as status
 		  from ins_mod mod
-		    left outer join cam_top top on mod.mod_code = top.mod_code
 		  where
 		    mod.mod_code like '_____-%' and
-		    (
-		      (top.dpt_code is not null and top.top_perc = 100 and top.dpt_code = :department_code) or
-		      (top.sub_code is not null and top.top_perc <> 100 and substr(top.sub_code, 0, length(mod.dpt_code)) = :department_code) or
-		      (top.dpt_code is null and mod.dpt_code = :department_code)
-		    ) and
+		    mod.dpt_code = :department_code and
 		    mod.mod_iuse = 'Y'
 		  group by substr(mod.mod_code,0,5)
 		"""

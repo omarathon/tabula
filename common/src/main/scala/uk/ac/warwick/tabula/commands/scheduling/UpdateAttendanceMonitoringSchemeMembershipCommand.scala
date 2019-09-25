@@ -119,6 +119,7 @@ trait UpdateAttendanceMonitoringSchemeMembershipCommandState extends FiltersStud
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
   var yearsOfStudy: JList[JInteger] = JArrayList()
   var levelCodes: JList[String] = JArrayList()
+  var studyLevelCodes: JList[String] = JArrayList()
   var sprStatuses: JList[SitsStatus] = JArrayList()
   var modules: JList[Module] = JArrayList()
   var hallsOfResidence: JList[String] = JArrayList()

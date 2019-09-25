@@ -100,6 +100,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
   var yearsOfStudy: JList[JInteger] = JArrayList()
   var levelCodes: JList[String] = JArrayList()
+  var studyLevelCodes: JList[String] = JArrayList()
   var sprStatuses: JList[SitsStatus] = JArrayList()
 
   // For filtering the submission itself

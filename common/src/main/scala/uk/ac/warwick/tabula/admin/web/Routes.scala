@@ -15,6 +15,14 @@ object Routes {
 
   import RoutesUtils._
 
+  object turnitin {
+    private val context = "/turnitin/tca"
+    object webhooks {
+      def submissionComplete: String = context + "/webhooks/submission-complete"
+      def similarityComplete: String = context + "/webhooks/similarity"
+    }
+  }
+
   private val context = "/admin"
 
   def home: String = context + "/"
