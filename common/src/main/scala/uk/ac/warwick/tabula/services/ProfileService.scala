@@ -448,10 +448,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
       FiltersStudents.AliasPaths("moduleRegistration"): _*
     ).toSeq ++ restrictions
 
-    val allRestrictions = ScalaRestriction.custom(
-      disjunction(conjunction(deptRestrictions.map(_.underlying): _*), conjunction(moduleRestrictions.map(_.underlying): _*)),
-      deptRestrictions.flatMap(_.aliases.toSeq) ++ moduleRestrictions.flatMap(_.aliases.toSeq) : _*
-    ).toSeq
+    val allRestrictions = if(modules.nonEmpty) {
+      ScalaRestriction.custom(
+        disjunction(conjunction(deptRestrictions.map(_.underlying): _*), conjunction(moduleRestrictions.map(_.underlying): _*)),
+        deptRestrictions.flatMap(_.aliases.toSeq) ++ moduleRestrictions.flatMap(_.aliases.toSeq) : _*
+      ).toSeq
+    } else {
+      deptRestrictions
+    }
 
     memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
   }
