@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
-import org.springframework.validation.{BeanPropertyBindingResult, MapBindingResult}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import org.springframework.validation.BeanPropertyBindingResult
 import uk.ac.warwick.tabula.commands.{DescriptionImpl, ValidatorHelpers}
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFeedback}
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator, SelectedModerationMarker, SelectedModerationModerator}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, ModerationSampler, SelectedModeratedWorkflow}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService._
-import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
@@ -36,6 +35,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 
     marker1.setFullName("Marker One")
     student1.setFullName("Student One")
+    student2.setFullName("Student Two")
   }
 
   @Test
@@ -52,8 +52,12 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
   }
 
   @Test
-  def testValidateChangedAllocationsValid(): Unit = new Fixture {
-    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState {
+  def testValidateChangedMarkerAllocationsValid(): Unit = new Fixture {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
+
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has written some non-final feedback for student1
       val assignment: Assignment = {
         val feedback = new AssignmentFeedback
@@ -92,14 +96,17 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
     }
 
     private val bindingResult = new BeanPropertyBindingResult(validation, "assignMarkers")
-    validation.validateChangedAllocations(bindingResult)
+    validation.validateChangedMarkerAllocations(validation.allocationMap, bindingResult)
 
     bindingResult.hasErrors shouldBe false
   }
 
   @Test
-  def testValidateChangedAllocationsInvalid(): Unit = new Fixture {
-    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState {
+  def testValidateChangedMarkerAllocationsInvalid(): Unit = new Fixture {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has finalised some feedback for student1
       val assignment: Assignment = {
         val feedback = new AssignmentFeedback
@@ -138,13 +145,150 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
     }
 
     private val bindingResult = new BeanPropertyBindingResult(validation, "assignMarkers")
-    validation.validateChangedAllocations(bindingResult)
+    validation.validateChangedMarkerAllocations(validation.allocationMap, bindingResult)
 
     private val maybeError = bindingResult.getAllErrors.asScala.find(_.getCode == "markingWorkflow.markers.finalised")
     maybeError should not be empty
 
     private val error = maybeError.get
     error.getArguments shouldBe Array("marker", "Marker One", "Student One")
+  }
+
+
+  @Test
+  def testValidateUnallocatedMarkerAllocationsValid(): Unit = new Fixture {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
+
+      // Set up an assignment where marker1 has written some non-final feedback for student1
+      val assignment: Assignment = {
+        a1.assessmentMembershipService = assessmentMembershipService
+        val feedback = new AssignmentFeedback
+        feedback.usercode = student1.getUserId
+        val mf = new MarkerFeedback
+        mf.userLookup = userlookupService
+        mf.stage = ModerationMarker
+        mf.marker = marker1
+        mf.mark = Some(80)
+        mf.comments = "Good job"
+        mf.uploadedDate = DateTime.now
+        mf.updatedOn = DateTime.now
+        feedback.outstandingStages.add(ModerationMarker)
+        mf.feedback = feedback
+        feedback.markerFeedback.add(mf)
+        a1.feedbacks.add(feedback)
+        a1.feedbackService = smartMock[FeedbackService]
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+
+        mf should not be 'finalised
+        val department = new Department
+        val module = new Module("IN101", department)
+        a1.module = module
+        a1
+      }
+
+      assessmentMembershipService.determineMembershipUsersWithOrder(assignment) returns Seq((student1, None), (student2, None))
+      assessmentMembershipService.determineMembershipUsers(assignment) returns Seq(student1, student2)
+
+      cm2MarkingWorkflowService.getMarkerAllocations(assignment, SelectedModerationMarker) returns Map(marker1 -> Set(student1), marker2 -> Set(student2))
+      cm2MarkingWorkflowService.getMarkerAllocations(assignment, SelectedModerationModerator) returns Map(moderator -> Set(student1, student1))
+
+
+      val workflow = SelectedModeratedWorkflow("test", assignment.module.adminDepartment, ModerationSampler.Marker, Seq(marker1, marker2), Seq(moderator))
+      val mockUserLookup: UserLookupService = Fixtures.userLookupService(Seq(moderator, marker1, marker2) ++ Seq(student1, student2): _*)
+      workflow.stageMarkers.asScala.foreach(_.markers.asInstanceOf[UserGroup].userLookup = mockUserLookup)
+      assignment.cm2MarkingWorkflow = workflow
+
+
+      // Now try and unallocate student1 from marker1 - this should be valid
+      val allocationMap: Map[MarkingWorkflowStage, Allocations] =
+        Map(
+          ModerationMarker -> Map(
+            marker1 -> Set.empty,
+            marker2 -> Set(student2)
+          ),
+          ModerationModerator -> Map(
+            moderator -> Set(student1, student2)
+          )
+        )
+    }
+
+    private val bindingResult = new BeanPropertyBindingResult(validation, "assignMarkers")
+    validation.validateUnallocatedMarkerAllocations(validation.allocationMap, bindingResult)
+    bindingResult.hasErrors shouldBe false
+  }
+
+
+  @Test
+  def testValidateUnallocatedMarkerAllocationsInvalid(): Unit = new Fixture {
+    private val validation = new AssignMarkersValidation with ValidateConcurrentStages with AssignMarkersState with UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent {
+      val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
+
+      // Set up an assignment where marker1 has finalised some feedback for student2
+      val assignment: Assignment = {
+        a1.assessmentMembershipService = assessmentMembershipService
+
+        val feedback = new AssignmentFeedback
+        feedback.usercode = student2.getUserId
+        val mf = new MarkerFeedback
+        mf.userLookup = userlookupService
+        mf.stage = ModerationMarker
+        mf.marker = marker1
+        mf.mark = Some(80)
+        mf.comments = "Good job"
+        mf.uploadedDate = DateTime.now
+        mf.updatedOn = DateTime.now
+        feedback.outstandingStages.add(ModerationModerator)
+        mf.feedback = feedback
+        feedback.markerFeedback.add(mf)
+        a1.feedbacks.add(feedback)
+        a1.feedbackService = smartMock[FeedbackService]
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+
+        mf shouldBe 'finalised
+
+        val department = new Department
+        val module = new Module("IN101", department)
+        a1.module = module
+        a1
+      }
+      assessmentMembershipService.determineMembershipUsersWithOrder(assignment) returns Seq((student1, None), (student2, None))
+      assessmentMembershipService.determineMembershipUsers(assignment) returns Seq(student1, student2)
+
+      cm2MarkingWorkflowService.getMarkerAllocations(assignment, SelectedModerationMarker) returns Map(marker1 -> Set(student2), marker2 -> Set(student1))
+      cm2MarkingWorkflowService.getMarkerAllocations(assignment, SelectedModerationModerator) returns Map(moderator -> Set(student1, student1))
+
+
+      val workflow = SelectedModeratedWorkflow("test", assignment.module.adminDepartment, ModerationSampler.Marker, Seq(marker1, marker2), Seq(moderator))
+      val mockUserLookup: UserLookupService = Fixtures.userLookupService(Seq(moderator, marker1, marker2) ++ Seq(student1, student2): _*)
+      workflow.stageMarkers.asScala.foreach(_.markers.asInstanceOf[UserGroup].userLookup = mockUserLookup)
+      assignment.cm2MarkingWorkflow = workflow
+
+      // Now try and unallocate student2 from marker1 - this shouldn't be valid
+      val allocationMap: Map[MarkingWorkflowStage, Allocations] =
+        Map(
+          ModerationMarker -> Map(
+            marker1 -> Set.empty,
+            marker2 -> Set(student1)
+          ),
+          ModerationModerator -> Map(
+            moderator -> Set(student1, student2)
+          )
+        )
+    }
+
+    private val bindingResult = new BeanPropertyBindingResult(validation, "assignMarkers")
+    validation.validateUnallocatedMarkerAllocations(validation.allocationMap, bindingResult)
+
+    private val maybeError = bindingResult.getAllErrors.asScala.find(_.getCode == "markingWorkflow.markers.finalised")
+    maybeError should not be empty
+
+    private val error = maybeError.get
+    error.getArguments shouldBe Array("marker", "Marker One", "Student Two")
   }
 
 }

@@ -29,6 +29,8 @@ trait FiltersStudentsBase {
 
   def levelCodes: JList[String]
 
+  def studyLevelCodes: JList[String]
+
   def sprStatuses: JList[SitsStatus]
 
   def modules: JList[Module]
@@ -59,6 +61,7 @@ trait FiltersStudentsBase {
     modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
     yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
     levelCodes.asScala.foreach(p => result.addQueryParameter("levelCodes", p))
+    studyLevelCodes.asScala.foreach(p => result.addQueryParameter("studyLevelCodes", p))
     sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
     modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
     hallsOfResidence.asScala.foreach(p => result.addQueryParameter("hallsOfResidence", p))

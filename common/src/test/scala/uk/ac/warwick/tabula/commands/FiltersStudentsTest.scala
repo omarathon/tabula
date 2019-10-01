@@ -55,6 +55,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val profileService: ProfileService = thisProfileService
         val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
         val levelCodes: JavaImports.JList[String] = JArrayList()
+        val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         val modules: JavaImports.JList[Module] = JArrayList()
         val routes: JavaImports.JList[Route] = JArrayList()
         val courses: JavaImports.JList[Course] = JArrayList()
@@ -89,6 +90,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val routes: JavaImports.JList[Route] = JArrayList(route1, route2)
         val courses: JavaImports.JList[Course] = JArrayList()
         val levelCodes: JavaImports.JList[String] = JArrayList()
+        val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
       }
 
@@ -128,6 +130,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val routes: JavaImports.JList[Route] = JArrayList()
         val courses: JavaImports.JList[Course] = JArrayList()
         val levelCodes: JavaImports.JList[String] = JArrayList()
+        val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
       }
 

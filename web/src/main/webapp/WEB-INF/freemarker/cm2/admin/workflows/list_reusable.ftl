@@ -86,6 +86,7 @@
                 Delete
               </a>
             <#else>
+              <a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
               <a class="btn btn-default" href="<@routes.cm2.reusableWorkflowAddToCurrentYear department academicYear workflow/>">Add
                 to ${currentYear.toString}</a>
             </#if>
@@ -99,4 +100,3 @@
     <p><#if !isCurrentYear><a href="<@routes.coursework.markingworkflowlist department />">Edit legacy workflows created before August 2017 here</a>.</#if></p>
   </#if>
 </#escape>
-git

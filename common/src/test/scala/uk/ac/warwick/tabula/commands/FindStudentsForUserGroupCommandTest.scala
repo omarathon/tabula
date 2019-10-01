@@ -38,8 +38,8 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
         this.code = "a100"
       })
 
-      command.profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-        any[Department], any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]
+      command.profileService.findAllUniversityIdsByRestrictionsInTouchedDepartmentsOrModules(
+        any[Department], any[Set[Module]], any[AcademicYear], any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]
       ) returns Seq(student1.universityId, student2.universityId)
 
       command.userLookup.registerUserObjects(
