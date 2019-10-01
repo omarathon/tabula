@@ -24,9 +24,9 @@ import scala.collection.JavaConverters._
 @Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 
-  def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String, passFail: Boolean = false) {
+  def this(scjCode: String, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String, passFail: Boolean = false) {
     this()
-    this.studentCourseDetails = studentCourseDetails
+    this._scjCode = scjCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
@@ -48,10 +48,13 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "scjCode", referencedColumnName = "scjCode")
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  @JoinColumn(name = "scjCode", insertable = false, updatable = false)
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var studentCourseDetails: StudentCourseDetails = _
+
+  @Column(name = "scjCode")
+  var _scjCode: String = _
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _
@@ -113,7 +116,7 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
     upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
   }
 
-  override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
+  override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: Stream[PermissionsTarget] = Stream(Option(studentCourseDetails), Option(module)).flatten

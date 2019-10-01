@@ -21,6 +21,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
   var profileService: ProfileService = Wire[ProfileService]
   var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
   var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   val sceSequenceNumber: _root_.uk.ac.warwick.tabula.JavaImports.JInteger = row.sceSequenceNumber
 
@@ -67,9 +68,11 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
     "blockOccurrence"
   )
 
+  private lazy val enrolmentDepartment = row.enrolmentDepartmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+
   private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
     copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
-      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, toDepartment(row.enrolmentDepartmentCode)) |
+      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, enrolmentDepartment) |
       copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
       copyObjectProperty("route", row.sceRouteCode, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
       copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |

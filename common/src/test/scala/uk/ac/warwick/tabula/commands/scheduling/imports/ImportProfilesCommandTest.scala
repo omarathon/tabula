@@ -47,8 +47,9 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
     session.flush()
 
     // register the student on the module
-    val existingMr = new ModuleRegistration(scd, existingMod, new JBigDecimal(30), AcademicYear(2013), "A")
+    val existingMr = new ModuleRegistration(scd.scjCode, existingMod, new JBigDecimal(30), AcademicYear(2013), "A")
     session.saveOrUpdate(existingMr)
+    existingMr.studentCourseDetails = scd
     scd.addModuleRegistration(existingMr)
     session.saveOrUpdate(scd)
     session.flush()
@@ -102,11 +103,13 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
       scd.moduleRegistrations.contains(existingMr) should be(true)
       session.flush()
 
-      val newMr = new ModuleRegistration(scd, newMod, new JBigDecimal(30), AcademicYear(2013), "A")
+      val newMr = new ModuleRegistration(scd.scjCode, newMod, new JBigDecimal(30), AcademicYear(2013), "A")
       session.saveOrUpdate(newMr)
       session.flush()
       scd.addModuleRegistration(newMr)
       session.flush()
+      // manually set the studentCourseDetails for the test
+      newMr.studentCourseDetails = scd
 
       // now check that if the new MR does not match the old, the old will be deleted:
       command.deleteOldModuleRegistrations(Seq("abcde"), Seq(newMr))
