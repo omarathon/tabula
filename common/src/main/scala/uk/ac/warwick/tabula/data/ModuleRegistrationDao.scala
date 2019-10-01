@@ -36,6 +36,8 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration]
+
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
   def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
@@ -80,11 +82,16 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] = {
     session.newCriteria[ModuleRegistration]
-      .createAlias("studentCourseDetails", "studentCourseDetails")
       .add(is("module", module))
       .add(is("academicYear", academicYear))
-      .setFetchMode("studentCourseDetails", FetchMode.JOIN)
-      .addOrder(asc("studentCourseDetails.scjCode"))
+      .addOrder(asc("_scjCode"))
+      .seq
+  }
+
+  def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration] = {
+    session.newCriteria[ModuleRegistration]
+      .add(is("academicYear", academicYear))
+      .addOrder(asc("_scjCode"))
       .seq
   }
 

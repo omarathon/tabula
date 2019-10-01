@@ -23,7 +23,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     session.saveOrUpdate(mod)
     session.flush()
 
-    val mr = new ModuleRegistration(scd, mod, new JBigDecimal(30), AcademicYear(2013), "A")
+    val mr = new ModuleRegistration(scd.scjCode, mod, new JBigDecimal(30), AcademicYear(2013), "A")
     session.saveOrUpdate(mr)
     session.flush()
 
@@ -52,7 +52,6 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 
       // apply the command
       val command = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow1), Set(mod))
-      command.moduleAndDepartmentService = madService
       command.moduleRegistrationDao = mrDao
 
       val newModRegs: Seq[ModuleRegistration] = command.applyInternal()
@@ -65,7 +64,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
       newModRegs.head.cats should be(cats)
       newModRegs.head.occurrence should be(occurrence)
       newModRegs.head.selectionStatus.description should be("Core")
-      newModRegs.head.studentCourseDetails should be(scd)
+      newModRegs.head._scjCode should be(scd.scjCode)
       newModRegs.head.lastUpdatedDate.getDayOfMonth should be(LocalDate.now.getDayOfMonth)
       newModRegs.head.passFail should be (true)
 
@@ -77,7 +76,6 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 
       // now re-import the same mod reg - the lastupdateddate shouldn't change
       val command2 = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow1), Set(mod))
-      command2.moduleAndDepartmentService = madService
       command2.moduleRegistrationDao = mrDao
 
 
@@ -86,7 +84,6 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 
       // try just changing the selection status:
       val command3 = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow2), Set(mod))
-      command3.moduleAndDepartmentService = madService
       command3.moduleRegistrationDao = mrDao
 
       val newModRegs3: Seq[ModuleRegistration] = command3.applyInternal()

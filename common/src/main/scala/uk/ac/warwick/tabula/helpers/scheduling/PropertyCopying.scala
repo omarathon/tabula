@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.JavaImports._
 
 trait PropertyCopying extends Logging {
   var sitsStatusImporter: SitsStatusImporter = Wire[SitsStatusImporter]
-  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   /* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
   def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, destinationBean: BeanWrapper): Boolean = {
@@ -90,14 +89,6 @@ trait PropertyCopying extends Logging {
       None
     } else {
       sitsStatusImporter.getSitsStatusForCode(code)
-    }
-  }
-
-  def toDepartment(departmentCode: String): Option[Department] = {
-    if (departmentCode == null || departmentCode == "") {
-      None
-    } else {
-      moduleAndDepartmentService.getDepartmentByCode(departmentCode)
     }
   }
 

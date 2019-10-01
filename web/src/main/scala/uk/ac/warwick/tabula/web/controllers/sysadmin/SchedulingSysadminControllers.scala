@@ -245,6 +245,20 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 }
 
 @Controller
+@RequestMapping(Array("/sysadmin/import-module-registrations"))
+class ImportModuleRegistrationsController extends BaseSysadminController {
+
+  var scheduler: Scheduler = Wire[Scheduler]
+
+  @RequestMapping(method = Array(POST))
+  def importModuleRegistrations(@RequestParam academicYear: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[BulkImportModuleRegistrationsJob]("academicYear" -> academicYear)
+    ))
+  }
+}
+
+@Controller
 @RequestMapping(Array("/sysadmin/import-profiles/{universityId}"))
 class ImportSingleProfileController extends BaseSysadminController {
 

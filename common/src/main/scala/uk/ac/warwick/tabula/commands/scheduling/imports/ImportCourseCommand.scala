@@ -11,7 +11,10 @@ import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.CourseInfo
+
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportCourseCommand(info: CourseInfo)
   extends Command[(Course, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
@@ -20,6 +23,7 @@ class ImportCourseCommand(info: CourseInfo)
   PermissionCheck(Permissions.ImportSystemData)
 
   var courseDao: CourseDao = Wire.auto[CourseDao]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   var code: String = info.code
   var shortName: String = info.shortName
@@ -41,10 +45,11 @@ class ImportCourseCommand(info: CourseInfo)
 
     val commandBean = new BeanWrapperImpl(this)
     val courseBean = new BeanWrapperImpl(course)
+    lazy val department = info.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
 
     val hasChanged = copyBasicProperties(properties, commandBean, courseBean) |
       (if (course.department.isEmpty) {
-        copyObjectProperty("department", info.departmentCode, courseBean, toDepartment(info.departmentCode))
+        copyObjectProperty("department", info.departmentCode, courseBean, department)
       } else {
         false
       })
