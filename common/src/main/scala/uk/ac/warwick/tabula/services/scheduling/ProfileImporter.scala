@@ -149,9 +149,11 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
       }
 
     val fimUniversityIds = fimMembers.map(_.member.universityId)
+    val fimUserIds = fimMembers.map(_.member.usercode)
     val tabulaActiveMembers = transactional(readOnly = true) {
       memberDao.getActiveMembersByDepartment(department)
         .filterNot(m => fimUniversityIds.contains(m.universityId))
+        .filterNot(m => fimUserIds.contains(m.userId))
         .map(MembershipInformation.apply)
     }
 
