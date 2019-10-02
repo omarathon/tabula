@@ -42,13 +42,26 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     val assignment5: Assignment = Fixtures.assignment("assignment 5")
     assignment5.assessmentMembershipService = assignmentMembershipService
 
+    val resitAssignment1: Assignment = Fixtures.assignment("resit assignment 1")
+    resitAssignment1.resitAssessment = true
+    resitAssignment1.assessmentMembershipService = assignmentMembershipService
+    val resitAssignment2: Assignment = Fixtures.assignment("resit assignment 2")
+    resitAssignment2.resitAssessment = true
+    resitAssignment2.assessmentMembershipService = assignmentMembershipService
+
     module1.assignments.add(assignment1)
     module1.assignments.add(assignment2)
+    module1.assignments.add(resitAssignment1)
+    module1.assignments.add(resitAssignment2)
+
     module2.assignments.add(assignment3)
     module2.assignments.add(assignment4)
     module2.assignments.add(assignment5)
+
     assignment1.module = module1
     assignment2.module = module1
+    resitAssignment1.module = module1
+    resitAssignment2.module = module1
     assignment3.module = module2
     assignment4.module = module2
     assignment5.module = module2
@@ -176,6 +189,113 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
       }
     }
   }
+
+  @Test def enrolledResitAssignmentsWithResitMemeber(): Unit = {
+    transactional { _ =>
+      new Fixture {
+
+        // assessment component enrolment for resitAssignment 1
+        val resitAssignment1AC = new AssessmentComponent
+        resitAssignment1AC.moduleCode = "in101-20"
+        resitAssignment1AC.assessmentGroup = "A1"
+        resitAssignment1AC.sequence = "A03"
+        resitAssignment1AC.module = module1
+        resitAssignment1AC.assessmentType = AssessmentType.Assignment
+        resitAssignment1AC.name = "Resit Essay"
+        resitAssignment1AC.inUse = true
+
+        val resitAssessmentGroup1 = new AssessmentGroup
+        resitAssessmentGroup1.membershipService = assignmentMembershipService
+        resitAssessmentGroup1.assessmentComponent = resitAssignment1AC
+        resitAssessmentGroup1.occurrence = "A"
+        resitAssessmentGroup1.assignment = resitAssignment1
+
+        // upstream group with some student marked as resit
+        val upstreamGroup5WithResitStudent = new UpstreamAssessmentGroup
+        upstreamGroup5WithResitStudent.moduleCode = "in101-20"
+        upstreamGroup5WithResitStudent.occurrence = "A"
+        upstreamGroup5WithResitStudent.assessmentGroup = "A1"
+        upstreamGroup5WithResitStudent.sequence = "A03"
+        upstreamGroup5WithResitStudent.academicYear = AcademicYear(2010)
+        val uagMember1 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "0672089")
+        uagMember1.resitExpected = Some(true)
+        val uagMember2 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "1000005")
+        uagMember2.resitExpected = Some(false)
+
+        upstreamGroup5WithResitStudent.members = JArrayList(
+          uagMember1, uagMember2
+        )
+
+        resitAssignment1.assessmentGroups.add(resitAssessmentGroup1)
+        resitAssignment1.academicYear = AcademicYear(2010)
+        session.save(resitAssignment1AC)
+        session.save(upstreamGroup5WithResitStudent)
+        session.flush()
+        session.save(assignment2AC)
+        session.save(upstreamGroup2)
+        session.flush()
+        session.save(assignment3AC)
+        session.save(upstreamGroup3)
+        session.flush()
+        session.save(dept)
+        session.flush()
+
+        assignmentMembershipService.getEnrolledAssignments(user, None).toSet should be(Set(assignment1, assignment2, assignment3, resitAssignment1))
+      }
+    }
+  }
+
+
+  @Test def enrolledResitAssignmentsWithNonResitMember(): Unit = {
+    transactional { _ =>
+      new Fixture {
+        // assessment component enrolment for resitAssignment 2
+        val resitAssignment2AC = new AssessmentComponent
+        resitAssignment2AC.moduleCode = "in101-20"
+        resitAssignment2AC.assessmentGroup = "A1"
+        resitAssignment2AC.sequence = "A04"
+        resitAssignment2AC.module = module1
+        resitAssignment2AC.assessmentType = AssessmentType.Assignment
+        resitAssignment2AC.name = "Resit Essay-01"
+        resitAssignment2AC.inUse = true
+
+        val resitAssessmentGroup2 = new AssessmentGroup
+        resitAssessmentGroup2.membershipService = assignmentMembershipService
+        resitAssessmentGroup2.assessmentComponent = resitAssignment2AC
+        resitAssessmentGroup2.occurrence = "A"
+        resitAssessmentGroup2.assignment = resitAssignment1
+
+        //includes a student that doesn't have resit assignment
+        val upstreamGroup6WithoutResit = new UpstreamAssessmentGroup
+        upstreamGroup6WithoutResit.moduleCode = "in101-20"
+        upstreamGroup6WithoutResit.occurrence = "A"
+        upstreamGroup6WithoutResit.assessmentGroup = "A1"
+        upstreamGroup6WithoutResit.sequence = "A04"
+        upstreamGroup6WithoutResit.academicYear = AcademicYear(2010)
+        val uagMember11 = new UpstreamAssessmentGroupMember(upstreamGroup6WithoutResit, "0672089")
+        uagMember11.resitExpected = Some(false)
+
+        upstreamGroup6WithoutResit.members = JArrayList(uagMember11)
+
+        resitAssignment2.assessmentGroups.add(resitAssessmentGroup2)
+        resitAssignment2.academicYear = AcademicYear(2010)
+        session.save(resitAssignment2AC)
+        session.save(upstreamGroup6WithoutResit)
+        session.flush()
+        session.save(assignment2AC)
+        session.save(upstreamGroup2)
+        session.flush()
+        session.save(assignment3AC)
+        session.save(upstreamGroup3)
+        session.flush()
+        session.save(dept)
+        session.flush()
+
+        assignmentMembershipService.getEnrolledAssignments(user, None).toSet should be(Set(assignment1, assignment2, assignment3))
+      }
+    }
+  }
+
 
   /** TAB-1824 if uniid appears twice in upstream group users, SQL sadness can result. */
   @Test def duplicateImportedUser() {
