@@ -138,6 +138,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           scd.student.universityId = :universityId and
           scd.statusOnCourse.code not like 'P%' and
           ${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
+          ((a.resitAssessment = true and a.resitAssessment = uagms.resitExpected) or  a.resitAssessment = false) and
           a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
         .setString("universityId", user.getWarwickId)
 
