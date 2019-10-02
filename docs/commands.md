@@ -6,6 +6,36 @@ and performs an action to give a result. These work best when constructed using 
 combining several components together, so this documentation will exclusively use that method, based off
 `ComposableCommand`.
 
+When using the cake pattern, declare types up-front on the companion object as they're often shared
+with the controller, e.g.
+
+```scala
+object MyCommand {
+  type ResultType = Bag[Money]
+  
+  // Declare the various opt-in behaviour of the Command up-front to ensure that a mix-in isn't missed
+  type CommandType =
+    Appliable[ResultType]
+      with MyCommandState
+      with MyCommandRequest                               // Binds data from the request
+      with PopulateOnForm                                 // Populates defaults when the form is first rendered
+      with SelfValidating                                 // Validates data
+      with BindListener                                   // Runs pre-binding behaviour
+      with Notifies[ResultType, Department]               // Runs notifications based on the result for the department
+      with SchedulesNotifications[ResultType, Department] // Schedules notifications based on the result for the department
+      with CompletesNotifications[Department]             // Completes notifications on the department
+      with GeneratesTriggers[Department]                  // Generates triggers for the department
+      
+  val RequiredPermission: Permission = Permissions.Department.Finance
+      
+  // Pass in any required state here
+  def apply(department: Department): CommandType =
+    new MyCommandInternal(department)
+      with ComposableCommand[ResultType]
+      with ... // must fit CommandType 
+}
+```
+
 Table of Contents
 -----------------
 
@@ -50,40 +80,265 @@ The flow of `Command.apply()` is as follows:
 Binding data from the request
 -----------------------------
 
+Any Controller `@ModelAttribute` is eligible for binding data from the request when it's passed in
+if it's then included as a method parameter to the method that accepts the request. This handles
+primitive types fine and *Java* collections such as a `java.util.List` or an `Array`.
+
+Typically you'd declare the binding parameters as part of a mixed in trait that you then pass into
+your command, e.g.:
+
+```scala
+object MyCommand {
+  def apply() =
+    new MyCommandInternal()
+      with ComposableCommand[Result]
+      with MyCommandRequest
+      with ... 
+}
+
+abstract class MyCommandInternal() extends CommandInternal[Result] {
+  self: MyCommandRequest =>
+
+  override def applyInternal(): Result = ...  
+}
+
+trait MyCommandRequest {
+  var checkbox: Boolean = _
+  var textbox: String = _
+  var date: LocalDate = _
+}
+```
+
 Populating defaults in the request data
 ---------------------------------------
+
+There are two ways to set defaults in the request data. For simple defaults that will be overridden
+when request data is passed, it can just be set in the trait - for example, you might want to make
+sure a checkbox is checked by default or that the date defaults to the current date:
+
+```scala
+trait MyCommandRequest {
+  var checkbox: Boolean = true
+  var textbox: String = "Some default value"
+  var date: LocalDate = LocalDate.now()
+}
+```
+
+For expensive operations, there's a commonly used pattern to use a `PopulateOnForm` trait which
+is designed to only be called when the form is first rendered, so it doesn't have to be re-calculated
+every time. **Note** there is no magic here, the Controller is responsible for calling `.populate()`
+at the appropriate time. For example:
+
+```scala
+trait MyCommandRequest {
+  var expensiveValue: Int = _
+}
+
+trait MyCommandPopulate extends PopulateOnForm {
+  self: MyCommandRequest =>
+  
+  override def populate(): Unit = new scala.util.Random.nextInt() // such extravagence
+}
+
+@Controller
+@RequestMapping(Array("/admin/int"))
+class MyController extends BaseController {
+
+  @ModelAttribute("myCommand")
+  def myCommand(): MyCommand.CommandType =
+    MyCommand()
+
+  @RequestMapping
+  def form(@ModelAttribute("myCommand") command: MyCommand.CommandType): String = {
+    // We'd make sure to only call this on initial requests, and not on any POSTs
+    command.populate()
+    "admin/int"
+  }
+  
+  ...
+    
+}
+```
 
 Running code on bind (pre-validation)
 -------------------------------------
 
-- Mixin `BindListener` on your command instead of calling `onBind` from a controller
+You can run pre-validation code on bind by mixing in the `BindListener` trait. This is particularly
+useful for if you're working with uploaded files, which require `.onBind()` themselves to be called.
+You **don't** need to call this yourself from the controller.
+
+```scala
+trait MyCommandRequest {
+  var file: UploadedFile = new UploadedFile
+}
+
+trait MyCommandBinding extends BindListener {
+  self: MyCommandRequest =>
+  
+  override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
+    file.onBind(result)
+    result.popNestedPath()
+  }
+}
+```
 
 Validating data
 ---------------
 
+In short:
+
 - Always add the `@Valid` annotation to the controller method argument.
-
 - Use validation annotations on your commands for simple things if you want.
-
 - For custom code, make the command extend `SelfValidating` and in the controller body do `validatesSelf[DeleteFeedbackCommand]`
+
+Fuller example (this shows some validation being done twice, you wouldn't use both annotations AND then check it in SelfValidating):
+
+```scala
+trait MyCommandRequest {
+  @AssertTrue
+  var checkbox: Boolean = _
+  
+  @SafeHtml
+  @Length(max = 4000)
+  var textbox: String = _
+  
+  @NotNull
+  @Future
+  var date: LocalDate = _
+}
+
+trait MyCommandValidation extends SelfValidating {
+  self: MyCommandRequest =>
+
+  override def validate(errors: Errors): Unit = {
+    // The second argument here looks up the message from common/src/main/resources/messages.properties 
+    if (!checkbox) 
+      errors.rejectValue("checkbox", "errors.checkbox.notChecked")
+      
+    // Passing arguments allows them to be used in the message, e.g. {0} will be replaced with 4000 here
+    if (textbox.length > 4000)
+      errors.rejectValue("textbox", "errors.textbox.tooLong", Array(4000), "Too many letterwords")
+      
+    if (date != null && date.isBeforeNow()) 
+      errors.rejectValue("date", "errors.date.tooEarly") 
+  }
+}
+```
 
 Audit logging (Describable)
 ---------------------------
 
+As part of the Command contract, it must extend `Describable` or `Unaudited` explicitly. Commands
+would typically only be `Unaudited` if they perform no action, e.g. a search. The best way to do
+this is to mix-in a `Describable` trait based off any state that the command has, optionally adding
+request information and also optionally implementing `describeResult` to augment that with additional
+information with the result of the operation.
+
+Example:
+
+```scala
+trait MyCommandDescription extends Describable[ResultType] {
+  self: MyCommandState with MyCommandRequest =>
+
+  // Set the event name explicitly to avoid it being inferred from a compound type
+  override lazy val eventName: String = "MyAction"
+  
+  // Avoid using .property() and .properties() wherever possible to avoid namespace collisions
+  // describe() is evaluated after binding, but before anything is applied and is used for the 'before' event
+  override def describe(d: Description): Unit =
+    d.department(department)
+     .property("date" -> date.toString("yyyy-MM-dd"))
+  
+  // describeResult() is optional data added to the 'after' event once the command has been applied
+  override def describeResult(d: Description, result: ResultType): Unit =
+    d.property("moneyRobbed", result.size)
+}
+```
+
 Read-only commands
 ------------------
+
+By default a Command is writeable which means that when Tabula is in read-only mode, it will prevent
+`apply()` being called (because it's expecting to throw an exception). If a Command doesn't perform
+any database writes it can mix in the `ReadOnly` trait, this also has performance benefits (i.e.
+it runs with a read-only database transaction rather than a writeable one which tracks changes).
 
 Notifications
 -------------
 
+If your command should notify users that the operation has happened, you can mix in the `Notifies`
+or `SchedulesNotifications` traits to either generate them immediately or in the future. If the
+notifications have an action to be completed and your command completes that action, you can also
+mix in `CompletesNotifications` to declare which notifications should be marked as completed (these
+are displayed differently in the activity stream).
+
 ### Sending notifications when a command runs
+
+These notifications are generated immediately and are then processed through the notification listeners
+(e.g. to send emails, be sent to My Warwick, etc.)
+
+```scala
+trait MyCommandNotifications extends Notifies[ResultType, Department] {
+  self: MyCommandState => // Assuming we've got currentUser from here with the person performing the action
+  
+  override def emit(result: ResultType): Seq[Notification[ResultType, Department]] =
+    Seq(
+      Notification.init(new MyActionStudentsNotification, currentUser, department),
+      Notification.init(new MyActionTutorsNotification, currentUser, department)
+    )
+}
+```
 
 ### Scheduling notifications for the future
 
+These notifications are scheduled for a point in the future. The target for the `ScheduledNotification`s
+is important here (in this example, `Department`) because every time this is run, any _existing_
+`ScheduledNotification`s for the same target are removed (to avoid them stacking).
+
+```scala
+trait MyCommandScheduledNotifications extends SchedulesNotifications[ResultType, Department] {
+  // Transform the result of the Command to a Seq of all the targets that this will schedule notifications for
+  override def transformResult(result: ResultType): Seq[Department] = result.flatMap(_.department)
+
+  // In this example, 12 scheduled notifications are generated as a "Reminder", based on the current
+  // date for 12 weeks  
+  override def scheduledNotifications(department: Department): Seq[ScheduledNotification[Department]] =
+    (1 to 12)
+      .map(week => DateTime.now.plusDays(week * 7))
+      .map(when => new ScheduledNotification[Department]("MyActionReminder", department, when))
+}
+```
+
 ### Completing notifications
+
+```scala
+trait MyCommandNotificationCompletion extends CompletesNotifications[ResultType] {
+  self: NotificationHandling =>
+  
+  // Rather than adding a self-type of MyCommandState as we do above, we just declare the contract
+  // explicitly that we must have the currentUser defined
+  def currentUser: User
+
+  override def notificationsToComplete(result: ResultType): CompletesNotificationsResult = {
+    if (result.nonEmpty) {
+      CompletesNotificationsResult(
+        notificationService.findActionRequiredNotificationsByEntityAndType[MyActionStudentsNotification](department) ++
+        notificationService.findActionRequiredNotificationsByEntityAndType[MyActionTutorsNotification](department),
+        currentUser
+      )
+    } else {
+      EmptyCompletesNotificationsResult
+    }
+  }
+}
+```
 
 Triggers
 --------
+
+A Trigger is any operation that can be scheduled to run in the future based on the result of a
+Command's execution.
 
 Benchmarking execution time
 ---------------------------
