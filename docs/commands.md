@@ -36,10 +36,17 @@ object MyCommand {
 }
 ```
 
+The contract of `ComposableCommand` specifies that, as a minimum, a Command **MUST**:
+
+* Have an `applyInternal()` method returning the result of the Command
+* [Perform permissions checking](#permissions-checking) or be marked as `PubliclyVisiblePermissions`
+* [Describe the operation for audit logging](#audit-logging-describable) or be marked as `Unaudited`
+
 Table of Contents
 -----------------
 
 - [Applying](#applying)
+- [Permissions checking](#permissions-checking)
 - [Binding data from the request](#binding-data-from-the-request)
 - [Populating defaults in the request data](#populating-defaults-in-the-request-data)
 - [Running code on bind (pre-validation)](#running-code-on-bind-pre-validation)
@@ -76,6 +83,28 @@ The flow of `Command.apply()` is as follows:
 8. Save any [triggers that the command generates](#triggers)
 9. Record an `after` [event](#audit-logging-describable) unless the Command is `Unaudited`
 10. Return the result to the caller (typically a Controller or another Command)
+
+Permissions checking
+--------------------
+
+Permissions checking is performed at bind-time, so the Command must be available as a
+`@ModelAttribute` and included in the method signature of the handler method on the
+controller.
+
+Declare the required permissions by mixing in the `RequiresPermissionsChecking` trait. It's
+often handy to also include `PermissionsCheckingMethods` which provides `mandatory()` (for example),
+though it's the responsibility of the Controller to ensure that `mandatory()` and `mustBeLinked()`
+have been called as appropriate on any state that's passed to the command.
+
+```scala
+trait MyCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  self: MyCommandState =>
+
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(RequiredPermission, mandatory(department))
+  }
+}
+```
 
 Binding data from the request
 -----------------------------
@@ -338,7 +367,42 @@ Triggers
 --------
 
 A Trigger is any operation that can be scheduled to run in the future based on the result of a
-Command's execution.
+Command's execution. For example, any Command that modifies an Assignment's deadline would generate
+an `AssignmentClosedTrigger` for the deadline date-time, to do things like release submissions to markers
+or send them off to Turnitin. The target for the `Trigger`s is important here (in the example below, `Department`)
+because every time this is run, any _existing_ `Trigger`s for the same target are removed (to avoid them stacking).
+
+```scala
+trait MyCommandTriggers extends GeneratesTriggers[ResultType] {
+  self: MyCommandState with MyCommandRequest =>  
+
+  override def generateTriggers(result: ResultType): Seq[Trigger[_ >: Null <: ToEntityReference, _]] =
+    Seq(DatePassedTrigger(date.withTimeAtStartOfDay(), department))
+}
+```
 
 Benchmarking execution time
 ---------------------------
+
+As Commands are quite commonly where the most intensive database or CPU-driven work takes place, it's a good
+place to place benchmarking to diagnose performance at a later date. Every Command is benchmarked in its own
+right and if it exceeds a benchmark (`Command.MillisToSlowlog`) is automatically logged. You can break this
+down further by mixing in `TaskBenchmarking` and wrapping individual tasks with `benchmarkTask()`. e.g.
+
+```scala
+abstract class MyCommandInternal() extends CommandInternal[ResultType] with TaskBenchmarking {
+  override def applyInternal(): ResultType = {
+    val expensive1 = benchmarkTask("Calculate expensive1") {
+      ...
+    }
+
+    val expensive2 = benchmarkTask("Calculate expensive2") {
+      ...
+    }
+
+    ...
+  }
+}
+```
+
+These calls can be nested and will be broken down as such in the logging.
