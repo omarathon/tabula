@@ -47,3 +47,9 @@ There are some optimisations here; for example, some `RoleProvider`s are `Scopel
 evaluated once as their results don't change based on the scope that's passed in. The most important `RoleProvider`s
 are the `DatabaseBackedRoleProvider`, which return `GrantedRole`s, and `UserTypeAndDepartmentRoleProvider` which returns
 `StaffRole` if you're a member of staff, for example.
+
+Permissions helper
+------------------
+
+A "Permissions helper" tool is provided at the top of the Sysadmin screen which shows a breakdown of why a user is
+(or isn't) allowed to perform an action. 

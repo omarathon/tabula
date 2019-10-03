@@ -10,7 +10,6 @@ These happen at command binding time.
 
 It is not sufficient to manually call `apply()` on the command object.
 
-
 CSRF
 ----
 
@@ -26,7 +25,7 @@ hidden input field.
 
 If necessary, there is a macro which can be used to manually insert the hidden input field:
 
-```freemarker
+```ftl
 <@csrf_macros.csrfHiddenInputField />
 ```
 
@@ -44,7 +43,7 @@ If you modify a template which still uses the legacy `.ftl` extension, please co
 Finally, we are working towards a strict `Content-Security-Policy`. We already have a nonce-based strict policy in reporting mode,
 you'll see templates include the `nonce` like so:
 
-```freemarker
+```ftl
 <script type="text/javascript" nonce="${nonce()}">
 ```
 
