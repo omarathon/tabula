@@ -301,7 +301,9 @@ object ModuleRegistrationImporter {
         and smo.mod_code = smr.mod_code
         and smo.mav_occur = smr.mav_occur
 
-       where smo.ayr_code = :academicYear"""
+       where
+       (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
+       and smo.ayr_code = :academicYear"""
 
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     new ModuleRegistrationRow(
