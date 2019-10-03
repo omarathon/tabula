@@ -10,7 +10,9 @@ import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.services.scheduling.{AwardImporter, CourseImporter}
-import uk.ac.warwick.tabula.services.{AwardService, CourseAndRouteService, RelationshipService}
+import uk.ac.warwick.tabula.services.{AwardService, CourseAndRouteService, ModuleAndDepartmentService, RelationshipService}
+
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
   extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -23,6 +25,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   var awardService: AwardService = Wire[AwardService]
   var courseImporter: CourseImporter = Wire[CourseImporter]
   var awardImporter: AwardImporter = Wire[AwardImporter]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   val courseRow: SitsStudentRow = rows.head
 
@@ -112,9 +115,11 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
     "reasonForTransferCode"
   )
 
+  private lazy val courseDepartment = courseRow.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+
   private def copyStudentCourseProperties(rowBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
     copyBasicProperties(basicStudentCourseProperties, rowBean, studentCourseDetailsBean) |
-      copyObjectProperty("department", courseRow.departmentCode, studentCourseDetailsBean, toDepartment(courseRow.departmentCode)) |
+      copyObjectProperty("department", courseRow.departmentCode, studentCourseDetailsBean, courseDepartment) |
       copyObjectProperty("currentRoute", courseRow.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(courseRow.routeCode)) |
       copyObjectProperty("course", courseRow.courseCode, studentCourseDetailsBean, courseImporter.getCourseByCodeCached(courseRow.courseCode)) |
       copyObjectProperty("award", courseRow.awardCode, studentCourseDetailsBean, awardImporter.getAwardByCodeCached(courseRow.awardCode)) |

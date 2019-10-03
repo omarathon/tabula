@@ -97,7 +97,8 @@ object SchedulingConfiguration {
     SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob](),
     SimpleUnscheduledJob[ImportAssignmentsAllYearsJob](),
     SimpleUnscheduledJob[ImportSmallGroupEventLocationsJob](),
-    SimpleUnscheduledJob[TurnitinTcaRegisterWebhooksJob]()
+    SimpleUnscheduledJob[TurnitinTcaRegisterWebhooksJob](),
+    SimpleUnscheduledJob[BulkImportModuleRegistrationsJob]()
   )
 
   /**

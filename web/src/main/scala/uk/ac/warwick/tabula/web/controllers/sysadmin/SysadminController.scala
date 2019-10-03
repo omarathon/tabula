@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.web.controllers.sysadmin
 
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.commands.sysadmin.GodModeCommand
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.validators.WithinYears
@@ -42,13 +42,15 @@ class SysadminController extends BaseSysadminController
   with AutowiringMaintenanceModeServiceComponent
   with AutowiringEmergencyMessageServiceComponent {
 
+  @Value("${tabula.yearZero}") var yearZero: Int = 2000
   @ModelAttribute("blankForm") def blankForm = new BlankForm
 
   @RequestMapping
-  def home: Mav = Mav("sysadmin/home")
-    .addObjects(
+  def home: Mav = Mav("sysadmin/home",
       "maintenanceModeEnabled" -> maintenanceModeService.enabled,
-      "emergencyMessageEnabled" -> emergencyMessageService.enabled
+      "emergencyMessageEnabled" -> emergencyMessageService.enabled,
+      "academicYears" -> AcademicYear(yearZero).to(AcademicYear.now().next),
+      "currentAcademicYear" -> AcademicYear.now()
     )
 }
 

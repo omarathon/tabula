@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.{PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.services.scheduling.{MembershipInformation, MembershipMember}
 import uk.ac.warwick.userlookup.User
 
@@ -31,6 +31,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
   var memberDao: MemberDao = Wire[MemberDao]
   var userLookup: UserLookupService = Wire[UserLookupService]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   // A couple of intermediate properties that will be transformed later
   var homeDepartmentCode: String = _
@@ -116,10 +117,12 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
     }
   }
 
+  private lazy val department = homeDepartmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+
   // We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
   protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
     copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-      copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
+      copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, department) |
       setTimetableHashIfMissing(memberBean)
 
 }

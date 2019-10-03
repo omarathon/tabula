@@ -4,6 +4,7 @@ import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
+import org.springframework.beans.{BeanWrapper, PropertyAccessorFactory}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -14,9 +15,10 @@ import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleRegistrationsCommand
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.{Module, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleResult, ModuleSelectionStatus, StudentCourseDetails}
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
@@ -24,6 +26,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.{HashMap, Iterable}
+import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 /**
@@ -230,6 +233,78 @@ object ModuleRegistrationImporter {
 
 				where stu.stu_code = :universityId"""
 
+  def UnconfirmedModuleRegistrationsForAcademicYear =
+    s"""
+      select
+      scj_code,
+      sms.mod_code,
+      sms.sms_mcrd as credit,
+      sms.sms_agrp as assess_group,
+      sms.ses_code,
+      sms.ayr_code,
+      sms.sms_occl as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_sms sms
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = sms.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = sms.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on sms.spr_code = smr.spr_code
+        and sms.ayr_code = smr.ayr_code
+        and sms.mod_code = smr.mod_code
+        and sms.sms_occl = smr.mav_occur
+
+       where sms.ayr_code = :academicYear"""
+
+  def ConfirmedModuleRegistrationsForAcademicYear =
+    s"""
+      select
+      scj_code,
+      smo.mod_code,
+      smo.smo_mcrd as credit,
+      smo.smo_agrp as assess_group,
+      smo.ses_code,
+      smo.ayr_code,
+      smo.mav_occur as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_smo smo
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = smo.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = smo.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on smo.spr_code = smr.spr_code
+        and smo.ayr_code = smr.ayr_code
+        and smo.mod_code = smr.mod_code
+        and smo.mav_occur = smr.mav_occur
+
+       where
+       (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
+       and smo.ayr_code = :academicYear"""
+
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     new ModuleRegistrationRow(
       resultSet.getString("scj_code"),
@@ -244,7 +319,7 @@ object ModuleRegistrationImporter {
       Option(resultSet.getBigDecimal("smr_agrm")),
       resultSet.getString("smr_agrg"),
       resultSet.getString("smr_mksc"),
-      resultSet.getString("smr_rslt"),
+      resultSet.getString("smr_rslt")
     )
   }
 
@@ -264,6 +339,55 @@ object ModuleRegistrationImporter {
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
   }
 
+  class ModuleRegistrationsByAcademicYearQuery(ds: DataSource)
+    extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
+    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+  }
+
+}
+
+trait CopyModuleRegistrationProperties {
+  self: PropertyCopying with Logging =>
+
+  def copyProperties(modRegRow: ModuleRegistrationRow, moduleRegistration: ModuleRegistration): Boolean = {
+    val rowBean = PropertyAccessorFactory.forBeanPropertyAccess(modRegRow)
+    val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
+
+    copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
+      copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+      copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
+      copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+      copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
+  }
+
+  private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
+    val oldValue = destinationBean.getPropertyValue(property)
+    val newValue = fn(code)
+
+    logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
+
+    // null == null in Scala so this is safe for unset values
+    if (oldValue != newValue) {
+      logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
+
+      destinationBean.setPropertyValue(property, newValue)
+      true
+    }
+    else false
+  }
+
+  private def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean =
+    copyCustomProperty("selectionStatus", destinationBean, selectionStatusCode, ModuleSelectionStatus.fromCode)
+
+  private def copyModuleResult(destinationBean: BeanWrapper, moduleResultCode: String): Boolean =
+    copyCustomProperty("moduleResult", destinationBean, moduleResultCode, ModuleResult.fromCode)
+
+  private val properties = Set(
+    "assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"
+  )
 }
 
 // Full class rather than case class so it can be BeanWrapped (these need to be vars)
@@ -280,7 +404,7 @@ class ModuleRegistrationRow(
   var agreedMark: Option[JBigDecimal],
   var agreedGrade: String,
   var passFail: Boolean,
-  var moduleResult: String,
+  var moduleResult: String
 ) {
 
   def this(
@@ -300,6 +424,8 @@ class ModuleRegistrationRow(
   ) {
     this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult)
   }
+
+  def moduleCode: Option[String] = Module.stripCats(sitsModuleCode).map(_.toLowerCase)
 
   override def toString: String =
     new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -332,6 +458,26 @@ class ModuleRegistrationRow(
       .append(agreedGrade)
       .append(passFail)
       .build()
+
+  private def scaled(bg: JBigDecimal): JBigDecimal =
+    JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
+
+  def matches(that: ModuleRegistration) : Boolean = {
+    scjCode == that._scjCode &&
+    Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
+    AcademicYear.parse(academicYear) == that.academicYear &&
+    scaled(cats) == scaled(that.cats) &&
+    occurrence == that.occurrence
+  }
+
+  def toModuleRegistration(module: Module): ModuleRegistration = new ModuleRegistration(
+    scjCode,
+    module,
+    cats,
+    AcademicYear.parse(academicYear),
+    occurrence,
+    passFail
+  )
 
   override def equals(other: Any): Boolean = other match {
     case that: ModuleRegistrationRow =>

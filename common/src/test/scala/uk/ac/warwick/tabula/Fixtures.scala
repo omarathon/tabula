@@ -365,7 +365,8 @@ object Fixtures extends Mockito {
     agreedMark: BigDecimal = BigDecimal(0),
     status: ModuleSelectionStatus = ModuleSelectionStatus.Core
   ): ModuleRegistration = {
-    val mr = new ModuleRegistration(scd, mod, cats, year, occurrence)
+    val scjCode = Option(scd).map(_.scjCode).orNull
+    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence)
     mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
     mr.selectionStatus = status
     mr

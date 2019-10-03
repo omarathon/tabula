@@ -6,13 +6,11 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
 import uk.ac.warwick.tabula.data.model.{Course, Department, Route, SitsStatus}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
 
 trait PropertyCopying extends Logging {
   var sitsStatusImporter: SitsStatusImporter = Wire[SitsStatusImporter]
-  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
   /* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
   def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, destinationBean: BeanWrapper): Boolean = {
@@ -90,14 +88,6 @@ trait PropertyCopying extends Logging {
       None
     } else {
       sitsStatusImporter.getSitsStatusForCode(code)
-    }
-  }
-
-  def toDepartment(departmentCode: String): Option[Department] = {
-    if (departmentCode == null || departmentCode == "") {
-      None
-    } else {
-      moduleAndDepartmentService.getDepartmentByCode(departmentCode)
     }
   }
 
