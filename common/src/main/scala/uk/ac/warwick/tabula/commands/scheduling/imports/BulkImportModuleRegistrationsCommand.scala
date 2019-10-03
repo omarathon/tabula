@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceCompone
 
 import scala.collection.immutable.HashMap
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 object BulkImportModuleRegistrationsCommand {
 
@@ -74,7 +75,11 @@ class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYea
 
             r.deleted = false
             r.lastUpdatedDate = DateTime.now
-            moduleRegistrationService.saveOrUpdate(r)
+            try {
+              moduleRegistrationService.saveOrUpdate(r)
+            } catch {
+              case t: Throwable => logger.error(s"Unable to save module registration $r", t)
+            }
           }
         case None => logger.warn(s"No module exists in Tabula for $row - Not importing")
       }
@@ -88,7 +93,11 @@ class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYea
         logger.debug(s"Marking $mr as deleted")
         mr.markDeleted()
         mr.lastUpdatedDate = DateTime.now
-        moduleRegistrationService.saveOrUpdate(mr)
+        try {
+          moduleRegistrationService.saveOrUpdate(mr)
+        } catch {
+          case t: Throwable => logger.error(s"Unable to delete module registration $mr", t)
+        }
       })
     }
 
