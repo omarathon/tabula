@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
 import uk.ac.warwick.tabula.data.model.{Course, Department, Route, SitsStatus}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
 

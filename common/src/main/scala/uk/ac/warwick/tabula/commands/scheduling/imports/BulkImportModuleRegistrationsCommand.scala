@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import BulkImportModuleRegistrationsCommand._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.ModuleRegistrationsByAcademicYearQuery
@@ -14,16 +13,15 @@ import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceCompone
 
 import scala.collection.immutable.HashMap
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 object BulkImportModuleRegistrationsCommand {
 
   type Result = Unit
-  type Command = Appliable[Result] with BulkImportModuleRegistrationsState with BulkImportModuleRegistrationsState with SelfValidating
+  type Command = Appliable[Result] with BulkImportModuleRegistrationsState with SelfValidating
 
   def apply(academicYear: AcademicYear) = new BulkImportModuleRegistrationsCommandInternal(academicYear)
     with ComposableCommand[Result]
-    with BulkImportModuleRegistrationsPermissions
+    with ImportSystemDataPermissions
     with CopyModuleRegistrationProperties
     with PropertyCopying
     with AutowiringSitsDataSourceComponent
@@ -38,7 +36,7 @@ class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYea
   self: SitsDataSourceComponent with ModuleRegistrationServiceComponent with ModuleAndDepartmentServiceComponent with CopyModuleRegistrationProperties
     with Logging =>
 
-  def applyInternal(): Result = benchmarkTask(s"Importing module registrations for $academicYear"){
+  def applyInternal(): Result = transactional() { benchmarkTask(s"Importing module registrations for $academicYear"){
     val params = HashMap(("academicYear", academicYear)).asJava
     val rows = benchmarkTask(s"Fetching registrations from SITS") {
       new ModuleRegistrationsByAcademicYearQuery(sitsDataSource).executeByNamedParam(params).asScala.distinct
@@ -75,11 +73,7 @@ class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYea
 
             r.deleted = false
             r.lastUpdatedDate = DateTime.now
-            try {
-              moduleRegistrationService.saveOrUpdate(r)
-            } catch {
-              case t: Throwable => logger.error(s"Unable to save module registration $r", t)
-            }
+            moduleRegistrationService.saveOrUpdate(r)
           }
         case None => logger.warn(s"No module exists in Tabula for $row - Not importing")
       }
@@ -93,25 +87,12 @@ class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYea
         logger.debug(s"Marking $mr as deleted")
         mr.markDeleted()
         mr.lastUpdatedDate = DateTime.now
-        try {
-          moduleRegistrationService.saveOrUpdate(mr)
-        } catch {
-          case t: Throwable => logger.error(s"Unable to delete module registration $mr", t)
-        }
+        moduleRegistrationService.saveOrUpdate(mr)
       })
     }
 
-  }
+  }}
 }
-
-trait BulkImportModuleRegistrationsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: BulkImportModuleRegistrationsState =>
-
-  def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.ImportSystemData)
-  }
-}
-
 
 trait BulkImportModuleRegistrationsState {
  val academicYear: AcademicYear

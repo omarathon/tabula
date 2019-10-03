@@ -108,16 +108,9 @@
       <@f.form method="post" action="${url('/sysadmin/import-module-registrations')}" modelAttribute="blankForm">
         <div class="input-group">
           <select name="academicYear" class="form-control">
-            <option>Year</option>
-            <option value="2011">11/12</option>
-            <option value="2012">12/13</option>
-            <option value="2013">13/14</option>
-            <option value="2014">14/15</option>
-            <option value="2015">15/16</option>
-            <option value="2016">16/17</option>
-            <option value="2017">17/18</option>
-            <option value="2018">18/19</option>
-            <option value="2019">19/20</option>
+            <#list academicYears as ay>
+              <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+            </#list>
           </select>
           <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Module Registrations" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
         </div>
@@ -129,16 +122,9 @@
       Check for missing event locations
     <div class="input-group">
       <select name="academicYear" class="form-control">
-        <option>Academic year</option>
-        <option value="2011">11/12</option>
-        <option value="2012">12/13</option>
-        <option value="2013">13/14</option>
-        <option value="2014">14/15</option>
-        <option value="2015">15/16</option>
-        <option value="2016">16/17</option>
-        <option value="2017">17/18</option>
-        <option value="2018">18/19</option>
-        <option value="2019">19/20</option>
+        <#list academicYears as ay>
+          <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+        </#list>
       </select>
       <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Re-check"
                                            data-toggle="confirm-submit" data-message="Really? Could take a while." /></span>
