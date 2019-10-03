@@ -513,7 +513,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
   override def findUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
     memberDao.findAllUsercodesByRestrictions(Seq(
-      ScalaRestriction.is("homeDepartment", department.rootDepartment).get
+      ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+      ScalaRestriction.inIfNotEmpty("userType", Seq(MemberUserType.Staff, MemberUserType.Student, MemberUserType.Emeritus)).get
     ))
   }
 
