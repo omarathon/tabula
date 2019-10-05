@@ -1,6 +1,8 @@
 Tabula developer documentation
 ==============================
 
+Tabula is written in Scala, using the Spring MVC framework and Freemarker templating language.
+
 - [Code style](code-style.md)
 - [🎂 Cake](cake.md)
 - [Controllers and autowiring](controllers.md)
