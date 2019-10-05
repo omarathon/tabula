@@ -18,3 +18,5 @@ Note the *two* underscores after the version number, this is important. Don't ch
 any migrations after they've been committed to the repo, because Flyway will refuse to
 start if the migration file doesn't exactly match the checksum that it has in the
 `flyway_schema_history` table in the database.
+
+These schema migrations go in `common/src/main/resources/db/migration`.
