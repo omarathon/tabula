@@ -101,6 +101,8 @@ trait MyCommandPermissions extends RequiresPermissionsChecking with PermissionsC
   self: MyCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
+    // RequiredPermission would typically be a val declared on the Command's companion object
+    // to be explicit, e.g. val RequiredPermission = Permissions.Department.Finance
     p.PermissionCheck(RequiredPermission, mandatory(department))
   }
 }
@@ -109,9 +111,9 @@ trait MyCommandPermissions extends RequiresPermissionsChecking with PermissionsC
 Binding data from the request
 -----------------------------
 
-Any Controller `@ModelAttribute` is eligible for binding data from the request when it's passed in
-if it's then included as a method parameter to the method that accepts the request. This handles
-primitive types fine and *Java* collections such as a `java.util.List` or an `Array`.
+Any parameter in a request-mapped Controller method that is annotated with `@ModelAttribute` is 
+eligible for binding data from the request. This handles primitive types fine and *Java* collections 
+such as a `java.util.List` or an `Array`.
 
 Typically you'd declare the binding parameters as part of a mixed in trait that you then pass into
 your command, e.g.:
