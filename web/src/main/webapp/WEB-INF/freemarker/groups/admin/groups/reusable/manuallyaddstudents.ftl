@@ -7,15 +7,7 @@
     <@csrf_macros.csrfHiddenInputField />
     <@f.hidden path="findCommand.linkToSits" />
     <@f.hidden path="findCommand.doFind" />
-    <@f.hidden path="findCommand.courseTypes" />
-    <@f.hidden path="findCommand.routes" />
-    <@f.hidden path="findCommand.courses" />
-    <@f.hidden path="findCommand.modesOfAttendance" />
-    <@f.hidden path="findCommand.yearsOfStudy" />
-    <@f.hidden path="findCommand.levelCodes" />
-    <@f.hidden path="findCommand.sprStatuses" />
-    <@f.hidden path="findCommand.modules" />
-    <@f.hidden path="findCommand.hallsOfResidence" />
+    <@f.hidden path="findCommand.filterQueryString" />
 
     <#list findCommand.staticStudentIds as id>
       <input type="hidden" name="staticStudentIds" value="${id}" />

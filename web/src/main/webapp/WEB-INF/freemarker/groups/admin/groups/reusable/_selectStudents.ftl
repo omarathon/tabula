@@ -154,10 +154,12 @@
             </@filter>
 
             <#assign placeholder = "All statuses" />
-            <#assign currentfilter><@current_filter_value "findCommand.sprStatuses" placeholder; sprStatus>${sprStatus.shortName?capitalize}</@current_filter_value></#assign>
+            <#assign currentfilter><#if !filterQueryString?has_content>Current Student<#else><@current_filter_value "findCommand.sprStatuses" placeholder; sprStatus>${sprStatus.shortName?capitalize}</@current_filter_value></#if></#assign>
             <@filter "findCommand.sprStatuses" placeholder currentfilter findCommand.allSprStatuses; sprStatus>
+              <#-- If there is no filter query then the default should be all current students -->
+              <#assign applyDefault=(!filterQueryString?has_content && sprStatus.code == "C") />
               <input type="checkbox" name="${status.expression}" value="${sprStatus.code}"
-                     data-short-value="${sprStatus.shortName?capitalize}" ${contains_by_code(findCommand.sprStatuses, sprStatus)?string('checked','')}>
+                     data-short-value="${sprStatus.shortName?capitalize}" ${(applyDefault || contains_by_code(findCommand.sprStatuses, sprStatus))?string('checked','')}>
               ${sprStatus.fullName}
             </@filter>
 
