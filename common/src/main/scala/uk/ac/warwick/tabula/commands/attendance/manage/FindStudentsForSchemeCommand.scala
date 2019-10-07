@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.{SchemeMembershipExcludeType, SchemeMembershipIncludeType, SchemeMembershipItem, SchemeMembershipStaticType}
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
@@ -94,16 +95,12 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
     includedStudentIds = scheme.members.includedUserIds.toSeq.asJava
     excludedStudentIds = scheme.members.excludedUserIds.toSeq.asJava
     filterQueryString = scheme.memberQuery
-    linkToSits = scheme.memberQuery != null && scheme.memberQuery.nonEmpty || scheme.members.members.isEmpty
+    linkToSits = scheme.memberQuery.hasText || scheme.members.members.isEmpty
     // Should only be true when editing
     if (linkToSits && scheme.members.members.nonEmpty) {
       doFind = true
     }
-    // Default to current students
-    if (filterQueryString == null || filterQueryString.length == 0)
-      allSprStatuses.find(_.code == "C").map(sprStatuses.add)
-    else
-      deserializeFilter(filterQueryString)
+    if(filterQueryString.hasText) deserializeFilter(filterQueryString)
   }
 
 }
@@ -115,11 +112,7 @@ trait UpdatesFindStudentsForSchemeCommand {
   def update(editSchemeMembershipCommandResult: EditSchemeMembershipCommandResult): Any = {
     includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
     excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
-    // Default to current students
-    if (filterQueryString == null || filterQueryString.length == 0)
-      allSprStatuses.find(_.code == "C").map(sprStatuses.add)
-    else
-      deserializeFilter(filterQueryString)
+    if(filterQueryString.hasText) deserializeFilter(filterQueryString)
   }
 
 }

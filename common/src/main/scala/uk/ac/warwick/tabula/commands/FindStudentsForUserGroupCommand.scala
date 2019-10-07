@@ -133,18 +133,14 @@ trait PopulateFindStudentsForUserGroupCommand extends PopulateOnForm {
     includedStudentIds = adapter.includedUserIds.toSeq.asJava
     excludedStudentIds = adapter.excludedUserIds.toSeq.asJava
     filterQueryString = Option(adapter.memberQuery).getOrElse("")
-    linkToSits = adapter.users.isEmpty || (adapter.memberQuery != null && adapter.memberQuery.nonEmpty)
+    linkToSits = adapter.users.isEmpty || adapter.memberQuery.hasText
 
     // Should only be true when editing
     if (linkToSits && adapter.users.nonEmpty) {
       doFind = true
     }
 
-    // Default to current students
-    if (!filterQueryString.hasText)
-      allSprStatuses.find(_.code == "C").map(sprStatuses.add)
-    else
-      deserializeFilter(filterQueryString)
+    if(filterQueryString.hasText) deserializeFilter(filterQueryString)
   }
 
 }
@@ -157,11 +153,7 @@ trait UpdatesFindStudentsForUserGroupCommand {
     includedStudentIds = result.includedStudentIds
     excludedStudentIds = result.excludedStudentIds
 
-    // Default to current students
-    if (!filterQueryString.hasText)
-      allSprStatuses.find(_.code == "C").map(sprStatuses.add)
-    else
-      deserializeFilter(filterQueryString)
+    if(filterQueryString.hasText) deserializeFilter(filterQueryString)
   }
 
 }
