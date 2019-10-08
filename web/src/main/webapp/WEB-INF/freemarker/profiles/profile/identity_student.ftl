@@ -147,6 +147,9 @@
               <#if scd.sprCode??>
                 <strong>Programme route code:</strong> ${scd.sprCode}<br />
               </#if>
+              <#if scd.statusOnRoute??>
+                <strong>Status on route:</strong> <@fmt.status_on_route scd /><br />
+              </#if>
               <#if scd.scjCode??>
                 <strong>Course join code:</strong> ${scd.scjCode}<br />
               </#if>
