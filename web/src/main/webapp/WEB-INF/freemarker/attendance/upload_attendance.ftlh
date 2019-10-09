@@ -14,13 +14,21 @@
 
         <@modal.body enabled=ajax>
 
-            <@spring.bind path="command.*">
-                <#if status.error>
-                  <div class="alert alert-danger">
-                      <@f.errors path="command.*" cssClass="error" />
-                  </div>
-                </#if>
-            </@spring.bind>
+          <#if errors.hasErrors()>
+            <div class="alert alert-danger">
+              <#-- show global errors (problems with extracting the spreadsheet) -->
+              <@f.errors cssClass="error" />
+              <#list command.checkpointMap?keys as student>
+                  <#list mapGet(command.checkpointMap, student)?keys as point>
+                      <@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
+                        <#if status.error>
+                          ${student.universityId} &mdash; <@f.errors path="checkpointMap[${student.universityId}][${point.id}]" cssClass="error" />
+                        </#if>
+                      </@spring.bind>
+                  </#list>
+              </#list>
+            </div>
+          </#if>
 
           <p>
             Each row in the uploaded file should have 2 values: University ID and the attendance.
@@ -28,13 +36,13 @@
           </p>
           <ul>
             <li>attended</li>
-            <li>authorised</li>
             <li>unauthorised</li>
             <li>not-recorded</li>
           </ul>
-            <@bs3form.labelled_form_group "" "File">
-              <input type="file" name="file.upload" />
-            </@bs3form.labelled_form_group>
+          It is not possible to record authorised absences using the CSV upload.
+          <@bs3form.labelled_form_group "" "File">
+            <input type="file" name="file.upload" />
+          </@bs3form.labelled_form_group>
         </@modal.body>
 
         <@modal.footer enabled=ajax>
