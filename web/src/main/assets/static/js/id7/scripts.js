@@ -919,8 +919,6 @@ $(() => {
         if ($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')) {
           ev.preventDefault();
           ev.stopImmediatePropagation();
-        } else {
-          $form.trigger('reset');
         }
       });
 
