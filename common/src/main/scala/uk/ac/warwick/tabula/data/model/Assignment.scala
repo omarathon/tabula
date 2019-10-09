@@ -643,7 +643,12 @@ class Assignment
   def requestedOrApprovedExtensions: Map[String, Extension] =
     allExtensions.mapValues { extensions =>
       if (extensions.size == 1) extensions.head
-      else extensions.find(_.awaitingReview).getOrElse(extensions.maxBy(_.requestedOn))
+      else extensions.find(_.awaitingReview).getOrElse {
+        if (extensions.exists(_.requestedOn != null))
+          extensions.filter(_.requestedOn != null).maxBy(_.requestedOn)
+        else
+          extensions.head
+      }
     }
 
   /**
