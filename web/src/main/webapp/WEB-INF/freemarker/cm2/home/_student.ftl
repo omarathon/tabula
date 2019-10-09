@@ -16,9 +16,9 @@
 
     <@components.student_assignment_list
       id="student-noaction"
-      title="Submitted"
+      title="Awaiting feedback"
       assignments=studentInformation.noActionRequiredAssignments
-      empty_message="You have no submitted assignments awaiting feedback in Tabula."
+      empty_message="You have no assignments awaiting feedback in Tabula."
       expand_by_default=(!studentInformation.actionRequiredAssignments?has_content)
     />
 
