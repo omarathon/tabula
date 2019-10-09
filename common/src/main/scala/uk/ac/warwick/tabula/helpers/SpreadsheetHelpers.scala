@@ -149,8 +149,8 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
       val anchor = factory.createClientAnchor()
 
       // By default the comment drawing starts at the end of the cell, is 4 cells wide and 4 rows high
-      anchor.setCol1(cell.getColumnIndex + 1)
-      anchor.setCol2(cell.getColumnIndex + 5)
+      anchor.setCol1(cell.getColumnIndex)
+      anchor.setCol2(cell.getColumnIndex + 4)
       anchor.setRow1(cell.getRowIndex)
       anchor.setRow2(cell.getRowIndex + 4)
 
