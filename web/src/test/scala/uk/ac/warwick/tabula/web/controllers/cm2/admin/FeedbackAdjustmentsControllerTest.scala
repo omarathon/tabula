@@ -90,8 +90,10 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def pgPenalty() {
+  @Test def pgPenaltyPre2019() {
     new PGStudentFixture {
+      pgStudent.mostSignificantCourse.sprStartAcademicYear = AcademicYear.starting(2012)
+
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
       submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
@@ -101,6 +103,22 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
       mav.toModel("marksSubtracted") should be(Some(6))
       mav.toModel("proposedAdjustment") should be(Some(44))
       mav.toModel("latePenalty") should be(3)
+    }
+  }
+
+  @Test def pgPenaltyPost2019() {
+    new PGStudentFixture {
+      pgStudent.mostSignificantCourse.sprStartAcademicYear = AcademicYear.starting(2019)
+
+      assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+      submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
+
+      val mav: Mav = controller.showForm(command, assignment, thisStudent)
+      mav.viewName should be("cm2/admin/assignments/feedback/adjustments")
+      mav.toModel("daysLate") should be(Some(2))
+      mav.toModel("marksSubtracted") should be(Some(10))
+      mav.toModel("proposedAdjustment") should be(Some(40))
+      mav.toModel("latePenalty") should be(5)
     }
   }
 
@@ -114,7 +132,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
       mav.toModel("daysLate") should be(Some(0))
       mav.toModel("marksSubtracted") should be(Some(0))
       mav.toModel("proposedAdjustment") should be(None)
-      mav.toModel("latePenalty") should be(3)
+      mav.toModel("latePenalty") should be(5)
     }
   }
 
