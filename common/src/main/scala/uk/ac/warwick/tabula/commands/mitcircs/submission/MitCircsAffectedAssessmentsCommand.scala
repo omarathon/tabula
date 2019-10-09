@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
+import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -26,6 +27,8 @@ object UpstreamAffectedAssessment {
     "name" -> o.name,
   )
 
+  private def maybeType(a: AssessmentComponent): String = Option(a.assessmentType).getOrElse(AssessmentType.Other).code
+
   implicit val writesAssessmentComponent: Writes[AssessmentComponent] = o => Json.obj(
     "cats" -> o.cats,
     "assessmentGroup" -> o.assessmentGroup,
@@ -33,7 +36,7 @@ object UpstreamAffectedAssessment {
     "sequence" -> o.sequence,
     "name" -> o.name,
     "inUse" -> o.inUse,
-    "assessmentType" -> o.assessmentType.code,
+    "assessmentType" -> maybeType(o),
     "marksCode" -> o.marksCode,
     "weighting" -> Int.unbox(o.weighting),
   )

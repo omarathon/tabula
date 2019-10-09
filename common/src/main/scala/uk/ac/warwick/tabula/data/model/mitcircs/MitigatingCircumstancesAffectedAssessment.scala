@@ -108,7 +108,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     "sequence" -> sequence,
     "academicYear" -> academicYear.toString,
     "name" -> name,
-    "assessmentType" -> assessmentType.code,
+    "assessmentType" -> Option(assessmentType).map(_.code).orNull,
     "deadline" -> deadline,
     "mitigatingCircumstancesSubmission" -> mitigatingCircumstancesSubmission.id,
   )

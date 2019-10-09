@@ -52,7 +52,7 @@
           <a target="_blank" href="https://warwick.ac.uk/mitigatingcircumstances">university policy for mitigating circumstances</a>.
           Mitigating circumstances do not result in changes to marks; they may result in you being able to take a failed assessment again
           as a first attempt, or to have an extension for a deadline, or to have a late penalty removed. Mitigation may also be considered when
-          deciding final year degree classifications in borderlines cases, but it does not automatically result in a higher degree classification.
+          deciding final year degree classifications in borderline cases, but it does not automatically result in a higher degree classification.
         </p>
       </div>
     </header>

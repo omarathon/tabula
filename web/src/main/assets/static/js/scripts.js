@@ -794,10 +794,8 @@ const {jQuery, WPopupBox} = window;
           if ($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')) {
             e.preventDefault();
             e.stopImmediatePropagation();
-          } else {
-            $form.trigger('reset');
           }
-        })
+        });
 
         //Prevent modal closing from clicking on parent page or from cancel and cross buttons (use dirty check event above).
         $m.find('[data-dismiss="modal"]').off('click.dismiss.modal');
