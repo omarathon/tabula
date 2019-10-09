@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.StatusAdapter
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleExamGridColumn, ModuleReportsColumn}
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 import scala.collection.mutable
@@ -48,6 +49,8 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
     val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
+
+    val commentHelper = new SpreadsheetHelpers.CommentHelper(sheet)
 
     ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
 
@@ -89,14 +92,14 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
             val (header, valueRows) = entityRows(entity)
             val entityCell = header.createCell(currentColumnIndex)
-            chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+            chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
             if (mergedCells) {
               val lastRow = if (showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
               mergedRegions += new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex)
             } else {
               valueRows.values.foreach(row => {
                 val entityCell = row.createCell(currentColumnIndex)
-                chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+                chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
               })
             }
           }
@@ -153,14 +156,14 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
                   if (showComponentMarks) {
                     val overallCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-                    marks(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
+                    marks(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap, commentHelper)
                     val assignmentCell = valueRows(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
-                    ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
+                    ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap, commentHelper)
                     val examsCell = valueRows(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
-                    ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
+                    ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap, commentHelper)
                   } else {
                     val entityCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-                    marks(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
+                    marks(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap, commentHelper)
                   }
 
                 // blank cell(s)
@@ -202,7 +205,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             header.createCell(currentColumnIndex)
             val overallCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
             if (perYearColumnValues.get(reportColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
-              perYearColumnValues(reportColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
+              perYearColumnValues(reportColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap, commentHelper)
             }
           })
           // and finally ..
@@ -254,14 +257,14 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           val (header, valueRows) = entityRows(entity)
           if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
             val entityCell = header.createCell(currentColumnIndex)
-            chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
+            chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
             if (mergedCells) {
               val lastRow = if (showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
               mergedRegions += new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex)
             } else {
               valueRows.values.foreach(row => {
                 val entityCell = row.createCell(currentColumnIndex)
-                chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
+                chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
               })
             }
           }

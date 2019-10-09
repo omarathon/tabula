@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.exams.grids.columns
 
 import org.apache.poi.ss.usermodel.{Cell, CellStyle}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridExportStyles, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 sealed abstract class ExamGridColumnValueType(val label: String, val description: String)
@@ -41,7 +42,7 @@ sealed trait ExamGridColumnValue {
 
   def toHTML: String
 
-  def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit
+  def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit
 
   def isEmpty: Boolean
 }
@@ -94,7 +95,7 @@ class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = fals
     if (isActual) "<span class=\"exam-grid-actual-mark\">%s</span>".format(getValueStringForRender)
     else getValueStringForRender
 
-  override final def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     cell.setCellValue(getValueForRender.doubleValue)
     applyCellStyle(cell, cellStyleMap)
   }
@@ -119,7 +120,7 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
     if (isActual) "<span class=\"exam-grid-actual-mark\">%s</span>".format(value)
     else value
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     cell.setCellValue(value)
     applyCellStyle(cell, cellStyleMap)
   }
@@ -133,6 +134,13 @@ case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, messag
       s"""<span class="tabula-tooltip" tabindex="0" data-title="$message">$value</span>"""
     else
       s"""<span>$value</span>"""
+
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+    super.populateCell(cell, cellStyleMap, commentHelper)
+
+    if (message.hasText)
+      cell.setCellComment(commentHelper.createComment(cell, message))
+  }
 }
 
 trait ExamGridColumnValueFailed {
@@ -210,6 +218,13 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
   override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
     cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
   }
+
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+    super.populateCell(cell, cellStyleMap, commentHelper)
+
+    if (message.hasText)
+      cell.setCellComment(commentHelper.createComment(cell, message))
+  }
 }
 
 case class ExamGridColumnValueStringWithHtml(value: String, html: String) extends ExamGridColumnValueString(value) {
@@ -219,5 +234,5 @@ case class ExamGridColumnValueStringWithHtml(value: String, html: String) extend
 case class ExamGridColumnValueStringHtmlOnly(value: String) extends ExamGridColumnValueString(value) {
   override def toHTML: String = super.toHTML
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {}
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {}
 }
