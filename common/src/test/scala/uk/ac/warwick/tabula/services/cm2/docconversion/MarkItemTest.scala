@@ -26,25 +26,12 @@ class MarkItemTest extends TestBase with Mockito {
   }
 
   @Test
-  def userFromMemberCache(): Unit = {
+  def userFromBackend(): Unit = {
     val item = markItem()
     item.id = "1234567"
 
     val user = Fixtures.user(universityId = "1234567")
     item.userLookup.getUserByWarwickUniId("1234567") returns user
-
-    item.user(assignment) should be(Some(user))
-  }
-
-  @Test
-  def userFromBackend(): Unit = {
-    val item = markItem()
-    item.id = "1234567"
-
-    item.userLookup.getUserByWarwickUniId("1234567") returns new AnonymousUser
-
-    val user = Fixtures.user(universityId = "1234567")
-    item.userLookup.getUserByWarwickUniId("1234567", true) returns user
 
     item.user(assignment) should be(Some(user))
   }

@@ -109,14 +109,6 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
 
 }
 
-class SwappableUserLookupService(d: UserLookupService) extends UserLookupServiceAdapter(d)
-
-abstract class UserLookupServiceAdapter(var delegateUserLookupService: UserLookupService)
-  extends UserLookupAdapter(delegateUserLookupService) with UserLookupService {
-
-  override def getGroupService: LenientGroupService = delegateUserLookupService.getGroupService
-}
-
 class LenientGroupService(delegate: GroupService) extends GroupService with Logging {
   private def tryOrElse[A](r: => A, default: => A): A =
     Try(r) match {
