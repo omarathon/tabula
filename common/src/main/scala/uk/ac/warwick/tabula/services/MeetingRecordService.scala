@@ -35,6 +35,8 @@ trait MeetingRecordService {
 
   def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord]
 
+  def countAll(rel: StudentRelationship): Int
+
   def countPendingApprovals(universityId: String): Int
 
   def get(id: String): Option[AbstractMeetingRecord]
@@ -82,6 +84,9 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
   def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord] = {
     (meetingRecordDao.list(rel) ++ meetingRecordDao.listScheduled(rel)).sorted
   }
+
+  def countAll(rel: StudentRelationship): Int =
+    meetingRecordDao.count(rel) + meetingRecordDao.countScheduled(rel)
 
   def countPendingApprovals(universityId: String): Int = meetingRecordDao.countPendingApprovals(universityId)
 

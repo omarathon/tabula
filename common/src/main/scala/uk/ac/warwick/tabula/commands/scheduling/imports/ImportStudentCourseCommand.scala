@@ -30,7 +30,6 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   val courseRow: SitsStudentRow = rows.head
 
   override def applyInternal(): StudentCourseDetails = {
-
     logger.debug("Importing student course details for " + courseRow.scjCode)
 
     val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(courseRow.scjCode)

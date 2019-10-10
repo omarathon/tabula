@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Order, Projections, Restrictions}
-import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -24,7 +23,11 @@ trait MeetingRecordDao {
 
   def list(rel: StudentRelationship): Seq[MeetingRecord]
 
+  def count(rel: StudentRelationship): Int
+
   def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord]
+
+  def countScheduled(rel: StudentRelationship): Int
 
   def countPendingApprovals(universityId: String): Int
 
@@ -91,7 +94,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
     (meetings1 ++ meetings2).sortBy(m => (m.meetingDate, m.lastUpdatedDate))(Ordering[(DateTime, DateTime)].reverse)
   }
 
-  def list(rel: StudentRelationship): Seq[MeetingRecord] = {
+  private def criteriaForRelationship(rel: StudentRelationship): ScalaCriteria[MeetingRecord] =
     session.newCriteria[MeetingRecord]
       .createAlias("_relationships", "relationships")
       .add(Restrictions.or(
@@ -99,12 +102,18 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
         Restrictions.eq("relationships.id", rel.id)
       ))
       .add(is("deleted", false))
+
+  def list(rel: StudentRelationship): Seq[MeetingRecord] =
+    criteriaForRelationship(rel)
       .addOrder(Order.desc("meetingDate"))
       .addOrder(Order.desc("lastUpdatedDate"))
       .seq
-  }
 
-  def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord] = {
+  def count(rel: StudentRelationship): Int =
+    criteriaForRelationship(rel)
+      .count.intValue()
+
+  private def criteriaScheduledForRelationship(rel: StudentRelationship): ScalaCriteria[ScheduledMeetingRecord] =
     session.newCriteria[ScheduledMeetingRecord]
       .createAlias("_relationships", "relationships")
       .add(Restrictions.or(
@@ -112,10 +121,16 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
         Restrictions.eq("relationships.id", rel.id)
       ))
       .add(is("deleted", false))
+
+  def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord] =
+    criteriaScheduledForRelationship(rel)
       .addOrder(Order.desc("meetingDate"))
       .addOrder(Order.desc("lastUpdatedDate"))
       .seq
-  }
+
+  def countScheduled(rel: StudentRelationship): Int =
+    criteriaScheduledForRelationship(rel)
+      .count.intValue()
 
   def listBetweenDates(student: StudentMember, startInclusive: DateTime, endExclusive: DateTime): Seq[MeetingRecord] = {
     val relationships = relationshipDao.getAllPastAndPresentRelationships(student)

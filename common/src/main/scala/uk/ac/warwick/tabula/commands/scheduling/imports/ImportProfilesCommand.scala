@@ -252,21 +252,28 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     logger.info("Updating relationships")
 
     toStudentMembers(rowCommands).foreach { student =>
-      val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
-      val expireCommandErrors = new BindException(expireCommand, "expireCommand")
-      expireCommand.validate(expireCommandErrors)
-      if (!expireCommandErrors.hasErrors) {
-        logger.info(s"Expiring old relationships for ${student.universityId}")
-        expireCommand.apply()
-      } else {
-        logger.info(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
-      }
-      val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
-      val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
-      migrateCommand.validate(migrateCommandErrors)
-      if (!migrateCommandErrors.hasErrors) {
-        logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
-        migrateCommand.apply()
+      benchmarkTask(s"Rationalise relationships for ${student.universityId}") {
+        val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
+        val expireCommandErrors = new BindException(expireCommand, "expireCommand")
+        expireCommand.validate(expireCommandErrors)
+        if (!expireCommandErrors.hasErrors) {
+          logger.info(s"Expiring old relationships for ${student.universityId}")
+          expireCommand.apply()
+        } else {
+          logger.debug(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
+        }
+
+        benchmarkTask("Migrating meeting records from old relationships") {
+          val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
+          val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
+          migrateCommand.validate(migrateCommandErrors)
+          if (!migrateCommandErrors.hasErrors) {
+            logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
+            migrateCommand.apply()
+          } else {
+            logger.debug(s"Skipping meeting record migration for ${student.universityId} - ${migrateCommandErrors.getMessage}")
+          }
+        }
       }
     }
 
