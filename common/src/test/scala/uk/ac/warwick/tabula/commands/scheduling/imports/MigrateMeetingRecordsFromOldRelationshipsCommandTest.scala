@@ -40,6 +40,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
     testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
     val relationshipOnEndedCourseMeeting = new MeetingRecord
     relationshipOnEndedCourseMeeting.relationships = Seq(relationshipOnEndedCourse)
+    testObject.meetingRecordService.countAll(relationshipOnEndedCourse) returns 1
     testObject.meetingRecordService.listAll(relationshipOnEndedCourse) returns Seq(relationshipOnEndedCourseMeeting)
   }
 
@@ -52,6 +53,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
   @Test
   def validateNoMeetingRecords(): Unit = withFakeTime(DateTime.now) {
     new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
+      testObject.meetingRecordService.countAll(relationshipOnEndedCourse) returns 0
       testObject.meetingRecordService.listAll(relationshipOnEndedCourse) returns Seq()
       validator.validate(errors)
       errors.hasErrors should be (true)
