@@ -192,13 +192,13 @@ class FeedbackItem extends AutowiringUserLookupComponent {
   var isValid = true
   var isModified = false
 
-  def user(assignment: Assignment): Option[User] = id.maybeText.map(userLookup.getUserByWarwickUniId).filter(u => u.isFoundUser && !u.isLoginDisabled)
-    .orElse(id.maybeText.map(userLookup.getUserByWarwickUniIdUncached(_, skipMemberLookup = true)).filter(u => u.isFoundUser && !u.isLoginDisabled))
-    .orElse(id.maybeText.map(userLookup.getUserByUserId).filter(u => u.isFoundUser && !u.isLoginDisabled))
-    .orElse({
-      val anonId = id.maybeText.flatMap { asStr => Try(asStr.toInt).toOption }
-      anonId.flatMap(id => assignment.allFeedback.find(_.anonymousId.contains(id)).map(f => userLookup.getUserByUserId(f.usercode)))
-    })
+  def user(assignment: Assignment): Option[User] =
+    id.maybeText.map(userLookup.getUserByWarwickUniId).filter(u => u.isFoundUser && !u.isLoginDisabled)
+      .orElse(id.maybeText.map(userLookup.getUserByUserId).filter(u => u.isFoundUser && !u.isLoginDisabled))
+      .orElse({
+        val anonId = id.maybeText.flatMap { asStr => Try(asStr.toInt).toOption }
+        anonId.flatMap(id => assignment.allFeedback.find(_.anonymousId.contains(id)).map(f => userLookup.getUserByUserId(f.usercode)))
+      })
 
   def currentFeedback(assignment: Assignment): Option[Feedback] = for {
     u <- user(assignment)

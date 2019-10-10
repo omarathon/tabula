@@ -86,15 +86,14 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           else benchmarkTask("Fetch user details") {
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
+            val usersByWarwickIds =
+              userLookup.getUsersByWarwickUniIds(membershipInfos.map(_.member.universityId))
+                .collect { case (universityId, FoundUser(u)) => universityId -> u }
+
             membershipInfos.map { m =>
               val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-              val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
-                case FoundUser(u) => u
-                case _ => userLookup.getUserByUserId(usercode)
-              }
-
-              m.member.universityId -> user
+              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, userLookup.getUserByUserId(usercode))
             }.toMap
           }
 
@@ -284,7 +283,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def refresh(universityId: String, userId: Option[String]): Option[Member] = {
     transactional() {
-      val user = userLookup.getUserByWarwickUniIdUncached(universityId, skipMemberLookup = true) match {
+      val user = userLookup.getUserByWarwickUniId(universityId) match {
         case FoundUser(u) => u
         case _ => userId.map(userLookup.getUserByUserId).getOrElse(new AnonymousUser)
       }
