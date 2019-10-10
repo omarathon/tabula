@@ -89,7 +89,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
             membershipInfos.map { m =>
               val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-              val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
+              val user = userLookup.getUserByWarwickUniId(warwickId) match {
                 case FoundUser(u) => u
                 case _ => userLookup.getUserByUserId(usercode)
               }
@@ -284,7 +284,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def refresh(universityId: String, userId: Option[String]): Option[Member] = {
     transactional() {
-      val user = userLookup.getUserByWarwickUniIdUncached(universityId, skipMemberLookup = true) match {
+      val user = userLookup.getUserByWarwickUniId(universityId) match {
         case FoundUser(u) => u
         case _ => userId.map(userLookup.getUserByUserId).getOrElse(new AnonymousUser)
       }

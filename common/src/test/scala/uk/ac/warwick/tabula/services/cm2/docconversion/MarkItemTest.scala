@@ -44,7 +44,7 @@ class MarkItemTest extends TestBase with Mockito {
     item.userLookup.getUserByWarwickUniId("1234567") returns new AnonymousUser
 
     val user = Fixtures.user(universityId = "1234567")
-    item.userLookup.getUserByWarwickUniIdUncached("1234567", skipMemberLookup = true) returns user
+    item.userLookup.getUserByWarwickUniId("1234567", true) returns user
 
     item.user(assignment) should be(Some(user))
   }
@@ -55,7 +55,7 @@ class MarkItemTest extends TestBase with Mockito {
     item.id = "u1234567"
 
     item.userLookup.getUserByWarwickUniId("u1234567") returns new AnonymousUser
-    item.userLookup.getUserByWarwickUniIdUncached("u1234567", skipMemberLookup = true) returns new AnonymousUser
+    item.userLookup.getUserByWarwickUniId("u1234567", true) returns new AnonymousUser
 
     val user = Fixtures.user(userId = "u1234567")
     item.userLookup.getUserByUserId("u1234567") returns user
@@ -69,7 +69,7 @@ class MarkItemTest extends TestBase with Mockito {
     item.id = "999"
 
     item.userLookup.getUserByWarwickUniId("999") returns new AnonymousUser
-    item.userLookup.getUserByWarwickUniIdUncached("999", skipMemberLookup = true) returns new AnonymousUser
+    item.userLookup.getUserByWarwickUniId("999", true) returns new AnonymousUser
     item.userLookup.getUserByUserId("999") returns new AnonymousUser
 
     val feedback = Fixtures.assignmentFeedback(userId = "u1234567")
@@ -88,7 +88,7 @@ class MarkItemTest extends TestBase with Mockito {
     item.id = "u1234567"
 
     item.userLookup.getUserByWarwickUniId("u1234567") returns new AnonymousUser
-    item.userLookup.getUserByWarwickUniIdUncached("u1234567", skipMemberLookup = true) returns new AnonymousUser
+    item.userLookup.getUserByWarwickUniId("u1234567", true) returns new AnonymousUser
     item.userLookup.getUserByUserId("u1234567") returns new AnonymousUser
 
     item.user(assignment) should be('empty)

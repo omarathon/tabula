@@ -30,7 +30,7 @@ dependencies {
   compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-virusscan:${warwickUtilsVersion}"
 
-  compile 'uk.ac.warwick.sso:sso-client:2.74'
+  compile 'uk.ac.warwick.sso:sso-client:2.76'
 
   compile 'org.apache.httpcomponents:httpclient:4.5.9'
   compile 'org.apache.httpcomponents:httpcore:4.4.11'

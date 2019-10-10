@@ -10,7 +10,7 @@ trait LenientUserLookup extends Mockito {
   @Autowired var userLookup: SwappableUserLookupService = _
 
   @Before def setup {
-    userLookup.delegate = lenientUserLookup
+    userLookup.delegateUserLookupService = lenientUserLookup
   }
 
   def lenientUserLookup: UserLookupService = {
