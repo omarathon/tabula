@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 import scala.util.Try
 
-object SitsStudentRow extends TaskBenchmarking {
-  def apply(rs: ResultSet): SitsStudentRow = benchmarkTask("Map one row") { new SitsStudentRow(rs) }
+object SitsStudentRow {
+  def apply(rs: ResultSet): SitsStudentRow = new SitsStudentRow(rs)
 }
 
 /**
