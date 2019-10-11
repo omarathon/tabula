@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.ResultSet
-import javax.sql.DataSource
 
-import org.joda.time.DateTime
+import javax.sql.DataSource
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAcademicInformationCommand, ImportCourseCommand}
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.Transactions._
@@ -42,9 +40,8 @@ trait CourseImporter extends Logging {
       logger.debug("refreshing SITS course map")
 
       (for {
-        courseCode <- courseDao.getAllCourseCodes
-        course <- courseDao.getByCode(courseCode)
-      } yield courseCode -> course).toMap
+        course <- courseDao.getAll
+      } yield course.code -> course).toMap
 
     }
   }

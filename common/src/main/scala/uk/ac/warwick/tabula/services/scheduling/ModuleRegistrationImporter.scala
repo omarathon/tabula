@@ -367,8 +367,6 @@ trait CopyModuleRegistrationProperties {
     val oldValue = destinationBean.getPropertyValue(property)
     val newValue = fn(code)
 
-    logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
-
     // null == null in Scala so this is safe for unset values
     if (oldValue != newValue) {
       logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")

@@ -132,7 +132,7 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
           case _ => (SPR, None)
         }
 
-        val tutorMember = tutorId.flatMap(memberDao.getByUniversityIdStaleOrFresh)
+        val tutorMember = tutorId.flatMap(memberDao.getByUniversityIdStaleOrFresh(_))
 
         PersonalTutorCheck(
           sitsIsSource = sitsIsSource,

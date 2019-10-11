@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.ModuleDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
@@ -42,8 +42,10 @@ class ModuleAndDepartmentService extends Logging {
     moduleDao.allModules
   }
 
-  def getDepartmentByCode(code: String): Option[Department] = transactional(readOnly = true) {
-    departmentDao.getByCode(code)
+  def getDepartmentByCode(code: String): Option[Department] = RequestLevelCache.cachedBy("ModuleAndDepartmentService.getDepartmentByCode", code) {
+    transactional(readOnly = true) {
+      departmentDao.getByCode(code)
+    }
   }
 
   def getDepartmentById(code: String): Option[Department] = transactional(readOnly = true) {

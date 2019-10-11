@@ -49,7 +49,7 @@ class ImportCourseCommand(info: CourseInfo)
 
     val hasChanged = copyBasicProperties(properties, commandBean, courseBean) |
       (if (course.department.isEmpty) {
-        copyObjectProperty("department", info.departmentCode, courseBean, department)
+        copyObjectProperty("department", info.departmentCode.toLowerCase, courseBean, department)
       } else {
         false
       })

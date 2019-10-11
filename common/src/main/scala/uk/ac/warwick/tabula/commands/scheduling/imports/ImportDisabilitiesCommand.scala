@@ -29,7 +29,7 @@ class ImportDisabilitiesCommand(info: DisabilityInfo)
 
     logger.debug("Importing disability " + code + " into " + disabilityExisting)
 
-    val isTransient = !disabilityExisting.isDefined
+    val isTransient = disabilityExisting.isEmpty
 
     val disability = disabilityExisting.getOrElse(new Disability)
 

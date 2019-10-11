@@ -21,7 +21,11 @@ object Stopwatches {
   implicit def ToEnhancedStopwatch(s: util.core.StopWatch) = new EnhancedStopwatch(s)
 
   object StopWatch {
-    def apply() = new util.core.StopWatch()
+    def apply() = {
+      val sw = new util.core.StopWatch()
+      sw.setDisplayThresholdInMs(200) // Don't let me merge this change
+      sw
+    }
   }
 
 }

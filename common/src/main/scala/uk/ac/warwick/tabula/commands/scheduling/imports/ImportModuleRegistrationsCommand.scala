@@ -39,7 +39,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
       val hasChanged = copyProperties(modRegRow, moduleRegistration)
 
       if (isTransient || hasChanged || moduleRegistration.deleted) {
-        logger.debug("Saving changes for " + moduleRegistration)
+        logger.debug(s"Saving changes for $moduleRegistration because ${if (isTransient) "it's a new object" else if (hasChanged) "it's changed" else "it's been un-deleted"}")
 
         moduleRegistration.deleted = false
         moduleRegistration.lastUpdatedDate = DateTime.now
