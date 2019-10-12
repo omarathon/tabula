@@ -122,7 +122,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
   // We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
   protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
     copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-      copyObjectProperty("homeDepartment", homeDepartmentCode.toLowerCase, memberBean, department) |
+      copyObjectProperty("homeDepartment", homeDepartmentCode.safeLowercase, memberBean, department) |
       setTimetableHashIfMissing(memberBean)
 
 }

@@ -278,7 +278,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
   @Test def testMarkAsSeenInSits() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       // first set up the studentCourseYearDetails as above
       var studentCourseDetails = new StudentCourseDetails
@@ -306,7 +306,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   @Test
   def testImportStudentRowCommandWorksWithNew() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -394,7 +394,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   @Test
   def testImportStudentRowCommandWorksWithNulls() {
     new EnvironmentWithNulls {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -440,7 +440,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   def worksWithExistingMember() {
     new Environment {
       val existing = new StudentMember("0672089")
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -464,8 +464,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       val existing = new StudentMember("0672089")
       val existingStaffMember = new StaffMember("0070790")
 
-      memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+      memberDao.getByUniversityIdStaleOrFresh("0070790", eagerLoad = true) returns Some(existingStaffMember)
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
       val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
@@ -502,8 +502,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
         // if personalTutorSource is "SITS", there *should* an update
         department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
 
-        memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
-        memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+        memberDao.getByUniversityIdStaleOrFresh("0070790", eagerLoad = true) returns Some(existingStaffMember)
+        memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
         importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
@@ -523,7 +523,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
   @Test def testDisabilityHandling() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       var student: StudentMember = rowCommand.applyInternal().asInstanceOf[StudentMember]
       student.disability should be(Some(disabilityQ))
@@ -546,7 +546,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       val row3 = SitsStudentRow(getResultSet("0770884/2", 3))
       val row4 = SitsStudentRow(getResultSet("0770884/2", 2))
 
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       val thisRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(row1, row2, row3, row4), None, importCommandFactory) with ComponentMixins
       thisRowCommand.memberDao = memberDao

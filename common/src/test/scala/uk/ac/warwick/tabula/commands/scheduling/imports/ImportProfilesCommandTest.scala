@@ -14,7 +14,7 @@ import scala.language.implicitConversions
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 
   trait Environment {
-    val year = AcademicYear(2013)
+    val year: AcademicYear = AcademicYear.now()
 
     // set up a department
     val dept: Department = Fixtures.department("EN", "English")

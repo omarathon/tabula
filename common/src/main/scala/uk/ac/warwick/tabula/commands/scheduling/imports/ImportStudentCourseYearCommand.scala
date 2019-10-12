@@ -72,9 +72,9 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 
   private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
     copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
-      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode.toLowerCase, studentCourseYearBean, enrolmentDepartment) |
+      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode.safeLowercase, studentCourseYearBean, enrolmentDepartment) |
       copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
-      copyObjectProperty("route", row.sceRouteCode.toLowerCase, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
+      copyObjectProperty("route", row.sceRouteCode.safeLowercase, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
       copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
       copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
       copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |
