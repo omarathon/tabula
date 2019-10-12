@@ -464,7 +464,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       val existing = new StudentMember("0672089")
       val existingStaffMember = new StaffMember("0070790")
 
-      memberDao.getByUniversityIdStaleOrFresh("0070790", eagerLoad = true) returns Some(existingStaffMember)
+      memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
       val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
@@ -502,17 +502,15 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
         // if personalTutorSource is "SITS", there *should* an update
         department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
 
-        memberDao.getByUniversityIdStaleOrFresh("0070790", eagerLoad = true) returns Some(existingStaffMember)
+        memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
         memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
         importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
-        val member: Option[StudentMember] = rowCommand.applyInternal() match {
-          case stu: StudentMember => Some(stu)
-          case _ => None
+        val studentMember: StudentMember = rowCommand.applyInternal() match {
+          case stu: StudentMember => stu
+          case _ => fail("No student returned from command")
         }
-
-        val studentMember: StudentMember = member.get
 
         studentMember.mostSignificantCourseDetails should not be null
 
