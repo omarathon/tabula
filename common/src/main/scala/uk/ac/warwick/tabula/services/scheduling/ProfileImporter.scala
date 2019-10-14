@@ -33,7 +33,7 @@ import scala.concurrent.duration.Duration
 import scala.util.Try
 
 object MembershipInformation {
-  def apply(member: Member): MembershipInformation = new MembershipInformation(MembershipMember(member), None)
+  def apply(member: Member): MembershipInformation = MembershipInformation(MembershipMember(member), None)
 }
 case class MembershipInformation(member: MembershipMember, sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
@@ -141,20 +141,18 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
   }
 
   def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
-    val fimMembers = if (department.code == applicantDepartmentCode) {
-      // Magic student recruitment department - get membership information directly from SITS for applicants
-      val members = applicantQuery.execute().asScala
-      val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }
+    val fimMembers =
+      if (department.code == applicantDepartmentCode) {
+        // Magic student recruitment department - get membership information directly from SITS for applicants
+        val members = applicantQuery.execute().asScala
+        val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }.toSet
 
-      // Filter out people in UOW_CURRENT_MEMBERS to avoid double import
-      val universityIdsInMembership =
-        universityIds.grouped(SQLServerMaxParameterCount).flatMap { ids =>
-          membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
-        }
+        // Filter out people in UOW_CURRENT_MEMBERS to avoid double import
+        val universityIdsInMembership = getUniversityIdsPresentInMembership(universityIds)
 
-      members
-        .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
-        .map { case (m, a) => MembershipInformation(m, Some(a)) }
+        members
+          .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
+          .map { case (m, a) => MembershipInformation(m, Some(a)) }
       } else {
         membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
           MembershipInformation(member)
@@ -740,7 +738,7 @@ object ProfileImporter extends Logging {
 }
 
 object MembershipMember {
-  def apply(m: Member): MembershipMember= new MembershipMember(
+  def apply(m: Member): MembershipMember = MembershipMember(
     universityId = m.universityId,
     departmentCode = m.homeDepartment.code,
     email = m.email,
