@@ -135,7 +135,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 
   // Setting for MonitoringPointType.Meeting
   def meetingRelationships: Seq[StudentRelationshipType] = getStringSeqSetting(Settings.MeetingRelationships, Seq())
-    .map(relationshipService.getStudentRelationshipTypeById(_).orNull)
+    .flatMap(relationshipService.getStudentRelationshipTypeById(_))
 
   def meetingRelationships_=(relationships: Seq[StudentRelationshipType]): Unit =
     settings += (Settings.MeetingRelationships -> relationships.map(_.id))
@@ -172,7 +172,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
   }
 
   def smallGroupEventModules: Seq[Module] = getStringSeqSetting(Settings.SmallGroupEventModules, Seq())
-    .map(moduleAndDepartmentService.getModuleById(_).orNull)
+    .flatMap(moduleAndDepartmentService.getModuleById(_))
 
   def smallGroupEventModules_=(modules: Seq[Module]): Unit =
     settings += (Settings.SmallGroupEventModules -> modules.map(_.id))
@@ -226,7 +226,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
   }
 
   def assignmentSubmissionModules: Seq[Module] = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq())
-    .map(moduleAndDepartmentService.getModuleById(_).orNull)
+    .flatMap(moduleAndDepartmentService.getModuleById(_))
 
   def assignmentSubmissionModules_=(modules: Seq[Module]): Unit =
     settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
@@ -236,7 +236,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
     assignmentSubmissionModules = modules.asScala.toSeq
 
   def assignmentSubmissionAssignments: Seq[Assignment] = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq())
-    .map(assignmentService.getAssignmentById(_).orNull)
+    .flatMap(assignmentService.getAssignmentById(_))
 
   def assignmentSubmissionAssignments_=(assignments: Seq[Assignment]): Unit =
     settings += (Settings.AssignmentSubmissionAssignments -> assignments.flatMap(a => Option(a).map(_.id)))
