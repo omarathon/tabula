@@ -70,7 +70,7 @@
             </#if>
             <#if user.sysadmin>
               <span tabindex="0" class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
-              <strong>Last import:</strong> <@fmt.date date=member.lastImportDate />
+              <#if member.lastImportDate??><strong>Last import:</strong> <@fmt.date date=member.lastImportDate /></#if>
               <@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="" style="display: inline;">
                 <input type="hidden" name="members" value="${member.universityId}">
                 <input class="btn btn-danger btn-xs" type="submit" value="Re-import now">
