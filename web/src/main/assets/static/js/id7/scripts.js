@@ -873,7 +873,7 @@ exports.tableSortMatching = (tableArray) => {
 
   if (tableArray.length < 2) return;
 
-  $.each(tableArray, (i) => {
+  $.each(tableArray, function bindSortableTableScrolling(i) {
     const otherTables = tableArray.slice();
     otherTables.splice(i, 1);
     this.on('sortEnd', (e) => {

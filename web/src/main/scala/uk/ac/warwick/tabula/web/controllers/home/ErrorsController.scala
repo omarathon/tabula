@@ -50,7 +50,7 @@ class ErrorsController extends BaseController with Logging {
         err.pageUrl.maybeText.map("page_url" -> _),
         err.stack.maybeText.map("stack_trace" -> _),
         request.getRemoteAddr.maybeText.map("source_ip" -> _),
-        request.getHeader("User-Agent").maybeText.map("request_headers" -> ("user-agent", _)),
+        request.getHeader("User-Agent").maybeText.map(ua => "request_headers" -> JMap("user-agent"-> ua)),
         if (user.apparentUser.isFoundUser) Option("username" -> user.apparentId) else None
       ).flatten.toMap
 
