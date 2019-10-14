@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 import scala.collection.JavaConverters._
@@ -57,9 +58,11 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
         null,
         properties.get("yearOfStudy"),
         properties.get("sprCode"),
-        tier4Requirements = properties.get("tier4Requirements").toBoolean
+        tier4Requirements = properties.get("tier4Requirements").toBoolean,
+        properties.get("email"),
+        Option(properties.get("tutorEmail"))
       )
-    }.toSeq.sortBy(s => (s.lastName, s.firstName))
+    }.sortBy(s => (s.lastName, s.firstName))
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
     val processedPoints = points.asScala.map { properties =>
       PointData(
@@ -69,7 +72,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
         new LocalDate(properties.get("endDate").toLong),
         new DateTime(properties.get("endDate").toLong).plusDays(1).isBeforeNow
       )
-    }.toSeq.sortBy(p => (p.startDate, p.endDate))
+    }.sortBy(p => (p.startDate, p.endDate))
     val processedAttendance = attendance.asScala.flatMap { case (universityId, pointMap) =>
       processedStudents.find(_.universityId == universityId).map(studentData =>
         studentData -> pointMap.asScala.flatMap { case (id, stateString) =>

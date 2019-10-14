@@ -18,8 +18,8 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
   val students: Seq[AttendanceMonitoringStudentData] = processorResult.students
   val events: Seq[EventData] = processorResult.events
 
-  val headers: Seq[String] = Seq("First name", "Last name", "University ID", "Route", "Year of study", "SPR code") ++
-    events.map(e => s"${e.moduleCode} ${e.setName} ${e.format} ${e.groupName} ${e.dayString} Week ${e.week}") ++
+  val studentInfoHeaders: Seq[String] = Seq("First name", "Last name", "University ID", "Route", "Year of study", "SPR code", "Email address", "Tutor email address")
+  val headers: Seq[String] = studentInfoHeaders ++ events.map(e => s"${e.moduleCode} ${e.setName} ${e.format} ${e.groupName} ${e.dayString} Week ${e.week}") ++
     Seq("Not recorded", "Not recorded - Late", "Missed (unauthorised)", "Missed (authorised)", "Attended")
 
   val unrecordedIndex: Int = headers.size - 5
@@ -44,6 +44,10 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
         studentData.yearOfStudy
       case 5 =>
         studentData.sprCode
+      case 6 =>
+        studentData.email
+      case 7 =>
+        studentData.tutorEmail.getOrElse("")
       case index if index == unrecordedIndex =>
         attendance.get(studentData).map(eventMap =>
           eventMap.map { case (event, state) => state }.count(_ == NotRecorded).toString
@@ -65,7 +69,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
           eventMap.map { case (event, state) => state }.count(_ == Attended).toString
         ).getOrElse("0")
       case _ =>
-        val thisEvent = events(eventIndex - 6)
+        val thisEvent = events(eventIndex - studentInfoHeaders.size)
         attendance.get(studentData).flatMap(_.get(thisEvent).map {
           case state if state == NotRecorded =>
             if (thisEvent.isLate)
@@ -143,7 +147,10 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
           universityid={studentData.universityId}
           route={studentData.routeCode}
           year={studentData.yearOfStudy}
-          spr={studentData.sprCode}/>
+          spr={studentData.sprCode}
+          emailAddress={studentData.email}
+          tutorEmail={studentData.tutorEmail.getOrElse("")}
+          />
       )}
       </students>
       <events>

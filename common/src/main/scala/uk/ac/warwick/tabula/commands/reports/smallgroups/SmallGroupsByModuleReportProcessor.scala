@@ -53,16 +53,18 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
         null,
         properties.get("yearOfStudy"),
         properties.get("sprCode"),
-        tier4Requirements = properties.get("tier4Requirements").toBoolean
+        tier4Requirements = properties.get("tier4Requirements").toBoolean,
+        properties.get("email"),
+        Option(properties.get("tutorEmail"))
       )
-    }.toSeq.sortBy(s => (s.lastName, s.firstName))
+    }.sortBy(s => (s.lastName, s.firstName))
     val processedModules = modules.asScala.map { properties =>
       ModuleData(
         properties.get("id"),
         properties.get("code"),
         properties.get("name")
       )
-    }.toSeq.sortBy(_.code)
+    }.sortBy(_.code)
     val processedCounts = counts.asScala.flatMap { case (universityId, moduleMap) =>
       processedStudents.find(_.universityId == universityId).map(studentData =>
         studentData -> moduleMap.asScala.flatMap { case (id, countString) =>
