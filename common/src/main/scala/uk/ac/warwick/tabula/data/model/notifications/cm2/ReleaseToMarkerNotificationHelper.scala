@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
-import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Student
 import uk.ac.warwick.userlookup.User
@@ -37,21 +38,26 @@ class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User,
     }
   }
 
+  lazy val submissions: Seq[Submission] =
+    if (assignment.cm2Assignment)
+      assignment.cm2MarkerSubmissions(recipient).distinct
+    else
+      assignment.getMarkersSubmissions(recipient).distinct
+
   lazy val submissionsCount: Int =
     if (assignment.cm2Assignment)
-      assignment.cm2MarkerSubmissions(recipient).count(_.submitted)
+      submissions.count(_.submitted)
     else
-      assignment.getMarkersSubmissions(recipient).distinct.size
+      submissions.size
 
-  lazy val extensionsCount: Int = assignment.approvedExtensions.values.flatMap(_.universityId).toSet.size
+  lazy val approvedExtensions: Map[String, Extension] =
+    assignment.approvedExtensions
+      .filter { case (_, e) => studentsAllocatedToThisMarker.exists(e.isForUser) }
 
-  lazy val submissionsWithExtensionCount: Int = {
-    val submissions: Seq[Submission] = if (assignment.cm2Assignment)
-      assignment.cm2MarkerSubmissions(recipient).distinct
-    else assignment.getMarkersSubmissions(recipient).distinct
+  lazy val extensionsCount: Int = approvedExtensions.size
 
-    submissions.filter { submission =>
-      assignment.approvedExtensions.values.flatMap(_.universityId).toSet.contains(submission._universityId)
-    }.count(_.submitted)
-  }
+  lazy val submissionsWithExtensionCount: Int =
+    submissions
+      .filter { s => approvedExtensions.contains(s.usercode) }
+      .count(_.submitted)
 }
