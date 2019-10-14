@@ -26,8 +26,10 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
       format(anotherDay) should be("12:13&#8194;Sat 10ᵗʰ March 2012")
 
       format(date = anotherDay, includeAt = false) should be("12:13&#8194;Sat 10ᵗʰ March 2012")
+      format(date = anotherDay.withTime(12, 0, 35, 123), includeAt = false) should be("12 noon&#8194;Sat 10ᵗʰ March 2012")
 
       format(date = anotherDay, includeSeconds = true, includeTimezone = true) should be("12:13:14 (GMT)&#8194;Sat 10ᵗʰ March 2012")
+      format(date = anotherDay.withTime(12, 0, 0, 241), includeSeconds = true, includeTimezone = true) should be("12 noon (GMT)&#8194;Sat 10ᵗʰ March 2012")
 
       format(date = yesterday) should be("13:36&#8194;Yesterday")
       format(date = tomorrow, includeSeconds = true, capitalise = false) should be("13:36:00&#8194;tomorrow")
