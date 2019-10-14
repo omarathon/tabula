@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalTime}
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.JavaImports.{JList, _}
@@ -97,10 +97,18 @@ trait AbstractScheduledMeetingRecordNotifies[T, B] extends Notifies[T, B] {
 }
 
 trait AbstractScheduledMeetingRecordNotificationProcess {
+  val OnTheDayReminderTime: LocalTime = new LocalTime(8, 0) // 8am
+
   def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
+    val onTheDayReminderDateTime =
+      if (meetingRecord.meetingDate.toLocalTime.isAfter(OnTheDayReminderTime))
+        meetingRecord.meetingDate.minusHours(1)
+      else
+        meetingRecord.meetingDate.withTime(OnTheDayReminderTime)
+
     Seq(
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
+      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, onTheDayReminderDateTime),
+      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, onTheDayReminderDateTime),
       new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate),
       new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate.plusDays(5))
     )
