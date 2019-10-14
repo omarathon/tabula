@@ -1,13 +1,17 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportCommandFactorySetup
 import uk.ac.warwick.tabula.data.model.{Gender, MemberUserType}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-class SandboxProfileImporterTest extends TestBase with ImportCommandFactorySetup {
+import scala.concurrent.Future
+
+class SandboxProfileImporterTest extends TestBase with Mockito with ImportCommandFactorySetup {
 
   val importer = new SandboxProfileImporter
+  importer.reasonableAdjustmentsImporter = smartMock[ReasonableAdjustmentsImporter]
+  importer.reasonableAdjustmentsImporter.getReasonableAdjustments(any[String]) returns Future.successful(None)
 
   @Test def itWorks() = withFakeTime(new DateTime(2013, DateTimeConstants.JULY, 4, 11, 27, 54, 0)) {
     val department = Fixtures.department("hom", "History of Music")

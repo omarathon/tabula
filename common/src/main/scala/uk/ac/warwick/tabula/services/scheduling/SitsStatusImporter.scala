@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.ResultSet
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
@@ -34,8 +34,8 @@ trait SitsStatusImporter extends Logging {
     transactional(readOnly = true) {
       logger.debug("refreshing SITS status map")
 
-      (for (statusCode <- sitsStatusDao.getAllStatusCodes; status <- sitsStatusDao.getByCode(statusCode)) yield {
-        (statusCode, status)
+      (for (status <- sitsStatusDao.getAll) yield {
+        status.code -> status
       }).toMap
     }
   }

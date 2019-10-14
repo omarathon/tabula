@@ -29,7 +29,7 @@ class ImportSitsStatusCommand(info: SitsStatusInfo) extends Command[(SitsStatus,
 
     logger.debug("Importing SITS status " + code + " into " + sitsStatusExisting)
 
-    val isTransient = !sitsStatusExisting.isDefined
+    val isTransient = sitsStatusExisting.isEmpty
 
     val sitsStatus = sitsStatusExisting match {
       case Some(sitsStatus: SitsStatus) => sitsStatus

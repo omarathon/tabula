@@ -4,7 +4,7 @@ import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
-import uk.ac.warwick.tabula.data.model.{Course, Department, Route, SitsStatus}
+import uk.ac.warwick.tabula.data.model.{Award, Course, Department, Route, SitsStatus}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
@@ -46,11 +46,13 @@ trait PropertyCopying extends Logging {
       case None =>
         if (oldValue == null) false // null before and still null - no change
         else {
+          logger.debug(s"Detected property change for $property: $oldValue -> null; setting value")
           memberBean.setPropertyValue(property, null) // change from non-null to null
           true
         }
       case Some(obj) =>
         if (oldValue == null) { // changed from null to non-null
+          logger.debug(s"Detected property change for $property: $oldValue -> $obj; setting value")
           memberBean.setPropertyValue(property, obj)
           true
         }
@@ -60,12 +62,16 @@ trait PropertyCopying extends Logging {
             case course: Course => course.code
             case dept: Department => dept.code
             case sitsStatus: SitsStatus => sitsStatus.code
-            case _ => null
+            case award: Award => award.code
+            case _ =>
+              logger.warn(s"Couldn't find a code for ${oldValue.getClass.getSimpleName}, this will always be seen as changed!")
+              null
           }
-          if (oldCode == code.toLowerCase) { // same non-null value
+
+          if (oldCode == code) { // same non-null value
             false
-          }
-          else { // different non-null value
+          } else { // different non-null value
+            logger.debug(s"Detected property change for $property: $oldValue -> $obj ($oldCode -> $code); setting value")
             memberBean.setPropertyValue(property, obj)
             true
           }
@@ -78,6 +84,7 @@ trait PropertyCopying extends Logging {
     if (bean.getPropertyValue(propertyName) == null)
       false
     else {
+      logger.debug("Marking as seen in SITS")
       bean.setPropertyValue(propertyName, null)
       true
     }

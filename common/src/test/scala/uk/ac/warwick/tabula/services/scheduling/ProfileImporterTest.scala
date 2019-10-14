@@ -63,7 +63,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
           teachingStaff = JBoolean(Some(true))
         ))
 
-        val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
+        val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), None, importCommandFactory)
         member.firstName should be(name)
       }
     }
@@ -85,7 +85,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
           teachingStaff = JBoolean(Some(true))
         ))
 
-        val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
+        val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), None, importCommandFactory)
         member.lastName should be(name)
       }
     }

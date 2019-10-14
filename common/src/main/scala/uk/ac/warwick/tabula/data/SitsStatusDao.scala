@@ -19,6 +19,8 @@ trait SitsStatusDao {
 
   def getAllStatusCodes: Seq[String]
 
+  def getAll: Seq[SitsStatus]
+
   def getFullName(code: String): Option[String]
 }
 
@@ -32,6 +34,9 @@ class SitsStatusDaoImpl extends SitsStatusDao with Daoisms {
 
   def getAllStatusCodes: Seq[String] =
     session.newQuery[String]("select distinct code from SitsStatus").seq
+
+  def getAll: Seq[SitsStatus] =
+    session.newCriteria[SitsStatus].seq
 
   def getFullName(code: String): Option[String] =
     session.newQuery[String]("select fullName from SitsStatus where code = :code").setString("code", code).uniqueResult

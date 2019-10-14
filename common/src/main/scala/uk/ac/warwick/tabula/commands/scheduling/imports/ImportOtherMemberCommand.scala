@@ -45,7 +45,7 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
       }
 
       if (isTransient || hasChanged) {
-        logger.debug("Saving changes for " + member)
+        logger.debug(s"Saving changes for $member because ${if (isTransient) "it's a new object" else "it's changed"}")
 
         member.lastUpdatedDate = DateTime.now
         memberDao.saveOrUpdate(member)

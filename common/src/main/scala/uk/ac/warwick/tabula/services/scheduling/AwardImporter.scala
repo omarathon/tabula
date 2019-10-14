@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.ResultSet
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAwardCommand, ImportAcademicInformationCommand}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAcademicInformationCommand, ImportAwardCommand}
 import uk.ac.warwick.tabula.data.AwardDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Award
@@ -30,9 +30,8 @@ trait AwardImporter extends Logging {
       logger.debug("refreshing SITS award map")
 
       (for {
-        awardCode <- awardDao.getAllAwardCodes
-        award <- awardDao.getByCode(awardCode)
-      } yield (awardCode -> award)).toMap
+        award <- awardDao.getAll
+      } yield award.code -> award).toMap
 
     }
   }

@@ -3,28 +3,26 @@ package uk.ac.warwick.tabula.helpers.scheduling
 import java.sql.ResultSet
 
 import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
 import uk.ac.warwick.tabula.data.model.{BasicStudentCourseProperties, BasicStudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
 
 import scala.util.Try
-import uk.ac.warwick.tabula.JavaImports._
-
-trait HasResultSet {
-  def resultSet: ResultSet
-}
 
 object SitsStudentRow {
-  def apply(rs: ResultSet) = new SitsStudentRow(rs)
+  def apply(rs: ResultSet): SitsStudentRow = new SitsStudentRow(rs)
 }
 
 /**
   * Contains the data from the result set for the SITS query.
   */
-class SitsStudentRow(val resultSet: ResultSet)
-  extends SitsStudentRowCourseDetails
-    with SitsStudentRowYearDetails
-    with HasResultSet {
+class SitsStudentRow(resultSet: ResultSet)
+  extends BasicStudentCourseProperties
+    with BasicStudentCourseYearProperties
+    with Logging
+    with TaskBenchmarking {
 
   implicit val rs: Option[ResultSet] = Option(resultSet)
 
@@ -47,14 +45,11 @@ class SitsStudentRow(val resultSet: ResultSet)
   }
   val nationality: Option[String] = optString("nationality")
   val secondNationality: Option[String] = optString("second_nationality")
+  val tier4VisaRequirement: Option[Boolean] = optIntAsBoolean("tier4_visa_requirement")
   val mobileNumber: Option[String] = optString("mobile_number")
-}
 
-// this trait holds data from the result set which will be used by ImportStudentCourseCommand to create
-// StudentCourseDetails.  The data needs to be extracted in this command while the result set is accessible.
-trait SitsStudentRowCourseDetails
-  extends BasicStudentCourseProperties {
-  self: HasResultSet =>
+  // data from the result set which will be used by ImportStudentCourseCommand to create
+  // StudentCourseDetails.  The data needs to be extracted in this command while the result set is accessible.
 
   var routeCode: String = resultSet.getString("route_code")
   var courseCode: String = resultSet.getString("course_code")
@@ -89,12 +84,9 @@ trait SitsStudentRowCourseDetails
   this.courseYearLength = JInteger(Try(resultSet.getString("course_year_length").toInt).toOption)
   this.levelCode = resultSet.getString("level_code")
   this.reasonForTransferCode = resultSet.getString("scj_transfer_reason_code")
-}
 
-// this trait holds data from the result set which will be used by ImportStudentCourseYearCommand to create
-// StudentCourseYearDetails.  The data needs to be extracted in this command while the result set is accessible.
-trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties with Logging {
-  self: HasResultSet =>
+  // data from the result set which will be used by ImportStudentCourseYearCommand to create
+  // StudentCourseYearDetails.  The data needs to be extracted in this command while the result set is accessible.
 
   var enrolmentDepartmentCode: String = resultSet.getString("enrolment_department_code")
   var enrolmentStatusCode: String = resultSet.getString("enrolment_status_code")

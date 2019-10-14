@@ -4,7 +4,9 @@ import java.time.format.DateTimeFormatter
 import java.time.{OffsetDateTime, ZoneId}
 
 import org.apache.http.client.ResponseHandler
+import org.apache.http.client.entity.EntityBuilder
 import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.entity.ContentType
 import org.springframework.stereotype.Service
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -38,6 +40,9 @@ object ReasonableAdjustmentsImporter {
     (__ \ "lastUpdated").readNullable[OffsetDateTime](readsOffsetDateTime)
   )(ReasonableAdjustments.apply _)
 
+  val readsMultipleReasonableAdjustmentsResponse: Reads[Seq[ReasonableAdjustments]] =
+    (__ \ "clients").read[Seq[ReasonableAdjustments]](Reads.seq(readsReasonableAdjustments))
+
   case class WellbeingCaseManagementConfiguration(
     baseUri: String,
     usercode: String,
@@ -46,6 +51,7 @@ object ReasonableAdjustmentsImporter {
 
 trait ReasonableAdjustmentsImporter {
   def getReasonableAdjustments(universityId: String): Future[Option[ReasonableAdjustments]]
+  def getReasonableAdjustments(universityIds: Seq[String]): Future[Map[String, Option[ReasonableAdjustments]]]
 }
 
 trait ReasonableAdjustmentsImporterService extends ReasonableAdjustmentsImporter with Logging {
@@ -74,6 +80,42 @@ trait ReasonableAdjustmentsImporterService extends ReasonableAdjustmentsImporter
         t => {
           logger.error(s"Error fetching reasonable adjustments for $universityId", t)
           None
+        },
+        identity
+      )
+    }
+
+  override def getReasonableAdjustments(universityIds: Seq[String]): Future[Map[String, Option[ReasonableAdjustments]]] =
+    Future {
+      val req = RequestBuilder.post(s"${configuration.baseUri}/reasonable-adjustments")
+        .setEntity(
+          EntityBuilder.create()
+            .setText(Json.stringify(Json.obj(
+              "clients" -> universityIds
+            )))
+            .setContentType(ContentType.APPLICATION_JSON)
+            .build()
+        )
+        .build()
+      TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, configuration.usercode, req)
+
+      val handler: ResponseHandler[Map[String, Option[ReasonableAdjustments]]] =
+        ApacheHttpClientUtils.jsonResponseHandler { json =>
+          json.validate[Seq[ReasonableAdjustments]](readsMultipleReasonableAdjustmentsResponse).fold(
+            invalid => {
+              logger.error(s"Error fetching reasonable adjustments for $universityIds: $invalid")
+              Map.empty
+            },
+            reasonableAdjustments => reasonableAdjustments.map { adjustment =>
+              adjustment.universityID -> Option(adjustment).filter(_.reasonableAdjustments.nonEmpty)
+            }.toMap
+          )
+        }
+
+      Try(httpClient.execute(req, handler)).fold(
+        t => {
+          logger.error(s"Error fetching reasonable adjustments for $universityIds", t)
+          Map.empty
         },
         identity
       )

@@ -94,9 +94,11 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
     routeDao.getById(id)
   }
 
-  def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap {
-    rcode => transactional(readOnly = true) {
-      routeDao.getByCode(rcode.toLowerCase)
+  def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap { rcode =>
+    RequestLevelCache.cachedBy("CourseAndRouteService.getRouteByCode", code) {
+      transactional(readOnly = true) {
+        routeDao.getByCode(rcode.toLowerCase)
+      }
     }
   }
 

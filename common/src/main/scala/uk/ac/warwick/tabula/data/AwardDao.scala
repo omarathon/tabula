@@ -21,6 +21,8 @@ trait AwardDao {
 
   def getAllAwardCodes: Seq[String]
 
+  def getAll: Seq[Award]
+
 }
 
 @Repository
@@ -33,5 +35,7 @@ class AwardDaoImpl extends AwardDao with Daoisms {
 
   def getAllAwardCodes: Seq[String] =
     session.newQuery[String]("select distinct code from Award").seq
+
+  def getAll: Seq[Award] = session.newCriteria[Award].seq
 
 }

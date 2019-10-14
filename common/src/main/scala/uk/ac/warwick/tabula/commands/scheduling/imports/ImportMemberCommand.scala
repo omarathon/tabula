@@ -122,7 +122,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
   // We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
   protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
     copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-      copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, department) |
+      copyObjectProperty("homeDepartment", homeDepartmentCode.safeLowercase, memberBean, department) |
       setTimetableHashIfMissing(memberBean)
 
 }
@@ -145,6 +145,12 @@ object ImportMemberHelpers {
       if (hasColumn(rs, columnName)) Option(rs.getDate(columnName)).map {
         new LocalDate(_)
       }
+      else None
+    }
+
+  def optIntAsBoolean(columnName: String)(implicit rs: Option[ResultSet]): Option[Boolean] =
+    rs.flatMap { rs =>
+      if (hasColumn(rs, columnName)) Option(rs.getInt(columnName)).exists(_ != 0)
       else None
     }
 

@@ -35,7 +35,7 @@ trait MemberDao {
 
   def getByUniversityIds(universityIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 
-  def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
+  def getByUniversityIdStaleOrFresh(universityId: String, eagerLoad: Boolean = false): Option[Member]
 
   def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 
@@ -93,6 +93,8 @@ trait MemberDao {
 
   def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 
+  def stampLastImportDate(universityIds: Seq[String], lastImportDate: DateTime): Unit
+
   def getDisability(code: String): Option[Disability]
 
   def getMemberByTimetableHash(timetableHash: String): Option[Member]
@@ -145,6 +147,25 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
     }
   }
 
+  private def executeMemberCriteria(criteria: ScalaCriteria[Member], eagerLoad: Boolean): Seq[Member] =
+    if (eagerLoad) {
+      criteria
+        .setFetchMode("studentCourseDetails", FetchMode.JOIN)
+        .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+        .setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+        .setFetchMode("homeDepartment", FetchMode.JOIN)
+        .setFetchMode("homeDepartment.children", FetchMode.JOIN)
+        .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
+        .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
+        .distinct.seq.map { m =>
+        // This is the worst hack of all time
+        m.permissionsParents.force
+        m
+      }
+    } else {
+      criteria.seq
+    }
+
   def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] =
     getByUniversityIds(Seq(universityId), disableFilter, eagerLoad).headOption
 
@@ -154,27 +175,11 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
       if (disableFilter)
         session.disableFilter(Member.StudentsOnlyFilter)
 
-      val criteria =
+      executeMemberCriteria(
         session.newCriteria[Member]
-          .add(safeIn("universityId", universityIds.map(_.safeTrim)))
-
-      if (eagerLoad) {
-        criteria
-          .setFetchMode("studentCourseDetails", FetchMode.JOIN)
-          .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
-          .setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
-          .setFetchMode("homeDepartment", FetchMode.JOIN)
-          .setFetchMode("homeDepartment.children", FetchMode.JOIN)
-          .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
-          .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
-          .distinct.seq.map { m =>
-          // This is the worst hack of all time
-          m.permissionsParents.force
-          m
-        }
-      } else {
-        criteria.seq
-      }
+          .add(safeIn("universityId", universityIds.map(_.safeTrim))),
+        eagerLoad
+      )
     } finally {
       if (disableFilter && filterEnabled)
         session.enableFilter(Member.StudentsOnlyFilter)
@@ -189,12 +194,12 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
     s
   }
 
-  def getByUniversityIdStaleOrFresh(universityId: String): Option[Member] = {
-    val member = sessionWithoutFreshFilters.newCriteria[Member]
-      .add(is("universityId", universityId.safeTrim))
-      .uniqueResult
-    member
-  }
+  def getByUniversityIdStaleOrFresh(universityId: String, eagerLoad: Boolean = false): Option[Member] =
+    executeMemberCriteria(
+      sessionWithoutFreshFilters.newCriteria[Member]
+        .add(is("universityId", universityId.safeTrim)),
+      eagerLoad
+    ).headOption
 
   def getFreshStudentUniversityIds: Seq[String] =
     session.newCriteria[StudentMember]
@@ -258,25 +263,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
             .add(like("inUseFlag", "Inactive - Starts %"))
           )
 
-
-        if (eagerLoad) {
-          criteria
-            .setFetchMode("studentCourseDetails", FetchMode.JOIN)
-            .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
-            .setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
-            .setFetchMode("homeDepartment", FetchMode.JOIN)
-            .setFetchMode("homeDepartment.children", FetchMode.JOIN)
-            .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
-            .setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
-            .distinct
-            .seq.map { m =>
-            // This is the worst hack of all time
-            m.permissionsParents.force
-            m
-          }
-        } else {
-          criteria.seq
-        }
+        executeMemberCriteria(criteria, eagerLoad)
       } finally {
         if (disableFilter && filterEnabled)
           session.enableFilter(Member.StudentsOnlyFilter)
@@ -529,6 +516,14 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
         .executeUpdate()
     }
   }
+
+  def stampLastImportDate(universityIds: Seq[String], lastImportDate: DateTime): Unit =
+    universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids =>
+      sessionWithoutFreshFilters.newUpdateQuery("update Member set lastImportDate = :lastImportDate where universityId in (:universityIds)")
+        .setParameter("lastImportDate", lastImportDate)
+        .setParameterList("universityIds", ids)
+        .executeUpdate()
+    }
 
   def getDisability(code: String): Option[Disability] = {
     session.newCriteria[Disability]

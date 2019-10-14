@@ -10,36 +10,36 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports._
-import uk.ac.warwick.tabula.commands.{Command, Unaudited}
-import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, Daoisms}
+import uk.ac.warwick.tabula.commands.{Command, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, Daoisms}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileService}
-import uk.ac.warwick.tabula.{AcademicYear, Features}
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.Try
 
 object MembershipInformation {
-  def apply(member: Member): MembershipInformation = new MembershipInformation(MembershipMember(member), None)
+  def apply(member: Member): MembershipInformation = MembershipInformation(MembershipMember(member), None)
 }
 case class MembershipInformation(member: MembershipMember, sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
 trait ProfileImporter {
 
   import ProfileImporter._
-
-  var features: Features = Wire[Features]
 
   def getMemberDetails(
     memberInfo: Seq[MembershipInformation],
@@ -62,7 +62,7 @@ trait ProfileImporter {
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware with AutowiringMemberDaoComponent {
+class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware with AutowiringMemberDaoComponent with AutowiringReasonableAdjustmentsImporterComponent with TaskBenchmarking {
 
   import ProfileImporter._
 
@@ -79,14 +79,15 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
   lazy val applicantByUniversityIdQuery = new ApplicantByUniversityIdQuery(sits)
 
-  def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
-
-  def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
+  lazy val studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
   override def sitsStudentRows(universityIds: Seq[String]): Seq[SitsStudentRow] =
-    multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> universityIds.asJava).asJava).asScala
+    // Due to the way our query works, it's faster to do this as multiple queries rather than individually
+    universityIds.sorted.flatMap { universityId =>
+      studentInformationQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala
+    }
 
-  def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
+  lazy val membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
 
   def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = {
     universityIds.toSeq.grouped(SQLServerMaxParameterCount).flatMap(ids =>
@@ -94,54 +95,64 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
     ).toSet
   }
 
-  def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
-  : Seq[ImportMemberCommand] = {
-    // TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
-
-    memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
+  def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] = {
+    memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) => benchmarkTask(s"Get member info for $userType") {
       userType match {
         case Staff | Emeritus => members.map { info =>
           val ssoUser = users(info.member.universityId)
           new ImportStaffMemberCommand(info, ssoUser)
         }
-        case Student => members.map { info =>
-          val universityId = info.member.universityId
-          val ssoUser = users(universityId)
 
-          val sitsRows = studentInformationQuery.executeByNamedParam(
-            Map("universityId" -> universityId).asJava
-          ).asScala
-          ImportStudentRowCommand(
-            info,
-            ssoUser,
-            sitsRows,
-            importCommandFactory
-          )
-        }.seq
+        case Student =>
+          val universityIds = members.map(_.member.universityId).distinct
+
+          val allStudentSitsRows = benchmarkTask(s"Get student rows for ${members.map(_.member.universityId).size} university IDs") {
+            sitsStudentRows(universityIds)
+              .groupBy(_.universityId.get)
+          }
+
+          val allStudentsReasonableAdjustments = benchmarkTask(s"Get reasonable adjustments for ${members.map(_.member.universityId).size} university IDs") {
+            Await.result(reasonableAdjustmentsImporter.getReasonableAdjustments(universityIds), Duration.Inf)
+          }
+
+          members.map { info =>
+            val universityId = info.member.universityId
+            val ssoUser = users(universityId)
+
+            val sitsRows = allStudentSitsRows.getOrElse(universityId, Seq.empty)
+
+            ImportStudentRowCommand(
+              info,
+              ssoUser,
+              sitsRows,
+              allStudentsReasonableAdjustments.get(universityId).flatten,
+              importCommandFactory
+            )
+          }.seq
+
         case Applicant | Other => members.map { info =>
           val ssoUser = users(info.member.universityId)
           new ImportOtherMemberCommand(info, ssoUser)
         }
-        case _ => Seq()
+
+        case _ => Seq.empty
       }
-    }.toSeq
+    }}.toSeq
   }
 
   def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
-    val fimMembers = if (department.code == applicantDepartmentCode) {
-      // Magic student recruitment department - get membership information directly from SITS for applicants
-      val members = applicantQuery.execute().asScala
-      val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }
+    val fimMembers =
+      if (department.code == applicantDepartmentCode) {
+        // Magic student recruitment department - get membership information directly from SITS for applicants
+        val members = applicantQuery.execute().asScala
+        val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }.toSet
 
-      // Filter out people in UOW_CURRENT_MEMBERS to avoid double import
-      val universityIdsInMembership =
-        universityIds.grouped(SQLServerMaxParameterCount).flatMap { ids =>
-          membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
-        }
+        // Filter out people in UOW_CURRENT_MEMBERS to avoid double import
+        val universityIdsInMembership = getUniversityIdsPresentInMembership(universityIds)
 
-      members
-        .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
-        .map { case (m, a) => MembershipInformation(m, Some(a)) }
+        members
+          .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
+          .map { case (m, a) => MembershipInformation(m, Some(a)) }
       } else {
         membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
           MembershipInformation(member)
@@ -188,9 +199,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 @Profile(Array("sandbox"))
 @Service
-class SandboxProfileImporter extends ProfileImporter {
-  var profileService: ProfileService = Wire[ProfileService]
-
+class SandboxProfileImporter extends ProfileImporter with AutowiringProfileServiceComponent with AutowiringReasonableAdjustmentsImporterComponent {
   def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
     memberInfo map { info =>
       info.member.userType match {
@@ -228,6 +237,7 @@ class SandboxProfileImporter extends ProfileImporter {
         "mobile_number" -> (if (member.universityId.toLong % 3 == 0) null else s"0700${member.universityId}"),
         "nationality" -> (if (member.universityId.toLong % 3 == 0) "Kittitian/Nevisian" else "British (ex. Channel Islands & Isle of Man)"),
         "second_nationality" -> (if (member.universityId.toLong % 3 == 0) "Syrian" else null),
+        "tier4_visa_requirement" -> (if (member.universityId.toLong % 3 == 0) 1 else 0),
         "course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
         "course_year_length" -> "3",
         "spr_code" -> "%s/1".format(member.universityId),
@@ -278,7 +288,7 @@ class SandboxProfileImporter extends ProfileImporter {
     })
   }
 
-  def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringReasonableAdjustmentsImporterComponent with Unaudited = {
+  def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with Unaudited = {
     val member = mac.member
     val ssoUser = new User(member.usercode)
     ssoUser.setFoundUser(true)
@@ -297,6 +307,7 @@ class SandboxProfileImporter extends ProfileImporter {
       mac,
       ssoUser,
       rows,
+      Await.result(reasonableAdjustmentsImporter.getReasonableAdjustments(member.universityId), Duration.Inf),
       importCommandFactory
     )
   }
@@ -448,8 +459,6 @@ object ProfileImporter extends Logging {
 
   import ImportMemberHelpers._
 
-  var features: Features = Wire[Features]
-
   type UniversityId = String
 
   val applicantDepartmentCode: String = "sl"
@@ -475,6 +484,13 @@ object ProfileImporter extends Logging {
 
 			nat.nat_name as nationality,
 			nat2.nat_name as second_nationality,
+      case
+        when
+          (nat.nat_edid is not null and nat.nat_edid = 0) or
+          (nat2.nat_edid is not null and nat2.nat_edid = 0)
+        then 0
+        else 1
+      end as tier4_visa_requirement,
 
 			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
@@ -535,14 +551,11 @@ object ProfileImporter extends Logging {
 			left join $sitsSchema.srs_cbo cbo -- Course Block Occurrence
 				on sce.SCE_CRSC = cbo.CBO_CRSC and sce.SCE_BLOK = cbo.CBO_BLOK and sce.SCE_OCCL = cbo.CBO_OCCL and sce.SCE_AYRC = cbo.CBO_AYRC
 
-			join $sitsSchema.srs_mst mst -- Master Student
-				on stu.stu_code = mst.mst_adid
-				and mst.mst_code =
-					(
-						select max(mst2.mst_code)
-							from $sitsSchema.srs_mst mst2
-							where mst.mst_adid = mst2.mst_adid
-					)
+			join $sitsSchema.men_mre mre -- Master Related Entity
+        on stu.stu_code = mre.mre_code and mre.mre_mrcc = 'STU'
+
+      join $sitsSchema.srs_mst mst -- Master Student
+        on mst.mst_code = mre.mre_mstc
 
 			left outer join $sitsSchema.srs_crs crs -- Course
 				on sce.sce_crsc = crs.crs_code
@@ -570,30 +583,10 @@ object ProfileImporter extends Logging {
 			order by stu.stu_code
 		"""
 
-  def GetMultipleStudentsInformation: UniversityId = GetStudentInformation +
-    f"""
-			where stu.stu_code in (:universityIds)
-			order by stu.stu_code
-		"""
-
   class StudentInformationQuery(ds: DataSource)
     extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation) {
 
-    var features: Features = Wire.auto[Features]
-
     declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-
-    compile()
-
-    override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
-  }
-
-  class MultipleStudentInformationQuery(ds: DataSource)
-    extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation) {
-
-    var features: Features = Wire.auto[Features]
-
-    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 
     compile()
 
@@ -745,7 +738,7 @@ object ProfileImporter extends Logging {
 }
 
 object MembershipMember {
-  def apply(m: Member): MembershipMember= new MembershipMember(
+  def apply(m: Member): MembershipMember = MembershipMember(
     universityId = m.universityId,
     departmentCode = m.homeDepartment.code,
     email = m.email,
@@ -793,7 +786,7 @@ case class SitsApplicantInfo(
   disability: String = null,
   disabilityFunding: String = null,
   nationality: String = null,
-  secondNationality: String = null
+  secondNationality: String = null,
 )
 
 
