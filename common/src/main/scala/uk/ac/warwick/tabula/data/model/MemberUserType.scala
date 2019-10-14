@@ -10,6 +10,7 @@ object MemberUserType {
 
   case object Staff extends MemberUserType("N", "Staff")
 
+  @deprecated(since = "2019.10.3", message = "Emeritus academics are now just being treated as Staff")
   case object Emeritus extends MemberUserType("A", "Emeritus Academic")
 
   case object Applicant extends MemberUserType("P", "Applicant")
@@ -24,7 +25,7 @@ object MemberUserType {
     case _ => throw new IllegalArgumentException("Unexpected value: " + code)
   }
 
-  val StudentTargetGroups = Set(
+  val StudentTargetGroups: Set[String] = Set(
     "FE shared student", "Distance learning student", "Foundation degree students",
     "HEFP students", "HE shared student", "PGCE student", "Postgraduate (research) FT",
     "Postgraduate (research) PT", "Postgraduate (taught) FT", "Postgraduate (taught) PT",
@@ -32,21 +33,16 @@ object MemberUserType {
     "Undergraduate - part-time", "Exchange student", "Bursary Researcher", "Student - non credit-bearing"
   )
 
-  val StaffTargetGroups = Set(
+  val StaffTargetGroups: Set[String] = Set(
     "Academic-related staff", "Clerical staff", "Manual staff",
     "Technical staff", "Security", "Casual staff", "Third party contract staff",
     "University Staff", "Visiting academic", "External business' staff", "Honorary Teaching Staff",
-    "Academic Partner", "External Partner", "Sessional tutor"
-  )
-
-  val AcademicTargetGroups = Set(
-    "Academic staff", "Emeritus Academic"
+    "Academic Partner", "External Partner", "Sessional tutor", "Academic staff", "Emeritus Academic"
   )
 
   def fromTargetGroup(targetGroup: String): MemberUserType = targetGroup match {
     case group if StudentTargetGroups.contains(group) => Student
     case group if StaffTargetGroups.contains(group) => Staff
-    case group if AcademicTargetGroups.contains(group) => Emeritus
     case "Applicant" => Applicant
     case null => null
     case _ => Other
