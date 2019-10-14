@@ -1,10 +1,9 @@
 <#escape x as x?html>
 <h3>Syllabus+ student timetable feed</h3>
-<a href="https://timetablefeed.warwick.ac.uk/xml${academicYear}/?StudentXML&p0=${command.warwickUniId}">
-  https://timetablefeed.warwick.ac.uk/xml${academicYear}/?StudentXML&p0=${command.warwickUniId}
-</a>
+<p>Below is the raw, unfiltered feed from Syllabus+.</p>
+<pre>${syllabusPlusFeed}</pre>
 
 <h3>WBS feed</h3>
-Below is the raw, unfiltered feed from WBS.
+<p>Below is the raw, unfiltered feed from WBS.</p>
 <pre>${wbsFeed}</pre>
 </#escape>
