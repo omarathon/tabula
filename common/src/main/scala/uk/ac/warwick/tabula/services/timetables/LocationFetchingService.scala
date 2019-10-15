@@ -104,7 +104,8 @@ trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponen
     val defaultParameters: Map[String, String] = Map(
       "client_id" -> clientId,
       "exact_limit" -> "2",
-      "limit" -> "2"
+      "limit" -> "2",
+      "substring" -> "false"
     )
     val queryParameter = "term"
   }

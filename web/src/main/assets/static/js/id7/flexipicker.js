@@ -839,6 +839,7 @@
             exact_limit: 2,
             limit: 1000,
             term: query,
+            substring: false,
             _ts: new Date().getTime()
           },
           success: function (data) {
