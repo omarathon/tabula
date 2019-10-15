@@ -101,7 +101,7 @@ trait AbstractScheduledMeetingRecordNotificationProcess {
 
   def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
     val onTheDayReminderDateTime =
-      if (meetingRecord.meetingDate.toLocalTime.isAfter(OnTheDayReminderTime))
+      if (meetingRecord.meetingDate.toLocalTime.isBefore(OnTheDayReminderTime))
         meetingRecord.meetingDate.minusHours(1)
       else
         meetingRecord.meetingDate.withTime(OnTheDayReminderTime)
