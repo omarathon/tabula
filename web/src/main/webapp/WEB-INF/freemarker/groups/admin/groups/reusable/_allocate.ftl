@@ -234,7 +234,7 @@
       });
 
       $(window).scroll(function () {
-        if (typeof Groups.fixHeaderFooter !== 'undefined') {
+        if (typeof Groups !== 'undefined' && typeof Groups.fixHeaderFooter !== 'undefined') {
           Groups.fixHeaderFooter.fixDirectionIcon();
           Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
         }
