@@ -114,6 +114,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doAssignments() {
     benchmark("Process Assessment components") {
+
+      val existingAssessmentComponents = transactional(readOnly = true) {
+        assessmentMembershipService.getAllAssessmentComponents
+      }
+
       val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
@@ -134,19 +139,57 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
           }
         }
       }
+
+      // find any existingAssessmentComponents that no longer appear in SITS
+        existingAssessmentComponents.foreach { existing =>
+          transactional() {
+          if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
+            if (!existing.links.isEmpty) {
+              logger.info(s"Removing linked Upstream Assessment Component as it no longer exists in SITS: ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence}")
+              existing.links.forEach { link =>
+                logger.info(s"Removed Upstream Assessment Component is linked to : $link. ")
+                assessmentMembershipService.delete(link)
+              }
+            } else {
+              logger.info(s"Removing unlinked Upstream Assessment Component as it no longer exists in SITS: ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence}")
+            }
+            existing.upstreamAssessmentGroups(AcademicYear.now()).foreach {
+              case uag if uag.members.isEmpty => logger.info(s"Removed Upstream Assessment Component ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence} - this year's membership was empty")
+              case uag => logger.info(s"Removed Upstream Assessment Component ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence} - this year's membership was : ${uag.members.asScala.map(_.universityId).mkString(", ")}")
+            }
+            assessmentMembershipService.delete(existing)
+          }
+        }
+      }
     }
-  }
+   }
 
   def doGroups() {
     benchmark("Import assessment groups") {
+      val existingUpstreamAssessmentGroupsForThisYear = transactional(readOnly = true) {
+        // We think we only need to worry about this year's assessment groups, as they generally get created in SITS in error and then swiftly deleted
+        assessmentMembershipService.getUpstreamAssessmentGroups(Seq(AcademicYear.now()))
+      }
+      val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups
       // Split into chunks so we commit transactions periodically.
-      for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
+      for (groups <- logSize(upstreamAssessmentGroupsFromSITS).grouped(ImportGroupSize)) {
         saveGroups(groups)
         transactional() {
           session.flush()
           groups foreach session.evict
         }
       }
+
+      existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
+        if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
+          if (existing.members.isEmpty) logger.info(s"Removing Upstream Assessment Group: $existing (empty membership)")
+          else logger.info(s"Removing Upstream Assessment Group: $existing - membership was : ${existing.members.asScala.map(_.universityId).mkString(", ")}")
+          transactional() {
+            assessmentMembershipService.delete(existing)
+          }
+        }
+      }
+
     }
   }
 
