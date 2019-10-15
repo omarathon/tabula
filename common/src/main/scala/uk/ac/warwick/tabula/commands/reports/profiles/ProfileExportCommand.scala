@@ -57,7 +57,9 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
             scd.map(_.currentRoute.name).getOrElse(""),
             scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
             scd.map(_.sprCode).getOrElse(""),
-            scd.map(_.latestStudentCourseYearDetails).exists { scyd => Option(scyd.casUsed).contains(true) || Option(scyd.tier4Visa).contains(true) }
+            scd.map(_.latestStudentCourseYearDetails).exists { scyd => Option(scyd.casUsed).contains(true) || Option(scyd.tier4Visa).contains(true) },
+            s.email,
+            None
           )
         })
       } else if (hasBeenFiltered) {
@@ -91,7 +93,7 @@ trait ProfileExportCommandState extends FiltersStudents {
 
   def academicYear: AcademicYear
 
-  var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
+  var studentsPerPage: Int = FiltersStudents.DefaultStudentsPerPage
   val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 
   var noPermissionIds: Seq[String] = Seq()

@@ -239,41 +239,41 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
     transactional { tx =>
       val now = org.joda.time.LocalDate.now()
       val student1ProjectionNullEndDateWithTier4Requirement: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true, "kai.lan@warwick.ac.uk", "foul.heron@warwick.ac.uk"
       ).map(_.asInstanceOf[Object])
 
       val student2ProjectionNullEndDateWithTier4Requirement: Array[Object] = Array(
-        "simon", "langford", "12121212", "12121212", now, "r2", "r2", 2, "spr2", true, true
+        "simon", "langford", "12121212", "12121212", now, "r2", "r2", 2, "spr2", true, true, "simon.langford@warwick.ac.uk", "foul.heron@warwick.ac.uk"
       ).map(_.asInstanceOf[Object])
 
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithoutEndDate(student1ProjectionNullEndDateWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", tier4Requirements = true))
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithoutEndDate(student2ProjectionNullEndDateWithTier4Requirement).get should be(AttendanceMonitoringStudentData("simon", "langford", "12121212", "12121212", now, None, "r2", "r2", "2", "spr2", tier4Requirements = true))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionNullEndDateWithTier4Requirement) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", tier4Requirements = true, "kai.lan@warwick.ac.uk", Some("foul.heron@warwick.ac.uk")))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student2ProjectionNullEndDateWithTier4Requirement) should be(AttendanceMonitoringStudentData("simon", "langford", "12121212", "12121212", now, None, "r2", "r2", "2", "spr2", tier4Requirements = true, "simon.langford@warwick.ac.uk", Some("foul.heron@warwick.ac.uk")))
 
       val student1ProjectionNullEndDateWithoutTier4Requirement: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, false
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, false, "kai.lan@warwick.ac.uk", null
       ).map(_.asInstanceOf[Object])
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithoutEndDate(student1ProjectionNullEndDateWithoutTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", tier4Requirements = false))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionNullEndDateWithoutTier4Requirement) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", tier4Requirements = false, "kai.lan@warwick.ac.uk", None))
 
       val student1ProjectionWithEndDateWithoutTier4Requirement: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, false, now
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, false, "kai.lan@warwick.ac.uk", "foul.heron@warwick.ac.uk", now
       ).map(_.asInstanceOf[Object])
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithEndDate(student1ProjectionWithEndDateWithoutTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = false))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithoutTier4Requirement) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = false, "kai.lan@warwick.ac.uk", Some("foul.heron@warwick.ac.uk")))
 
       val student1ProjectionWithEndDateWithTier4Requirement: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true, now
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true, "kai.lan@warwick.ac.uk", null, now
       ).map(_.asInstanceOf[Object])
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithEndDate(student1ProjectionWithEndDateWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = true))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithTier4Requirement) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = true, "kai.lan@warwick.ac.uk", None))
 
 
       val student1ProjectionWithEndDateWithOneOfTier4OrCasUsedNull: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", null, true, now
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", null, true, "kai.lan@warwick.ac.uk", null, now
       ).map(_.asInstanceOf[Object])
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithEndDate(student1ProjectionWithEndDateWithOneOfTier4OrCasUsedNull).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = true))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithOneOfTier4OrCasUsedNull) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = true, "kai.lan@warwick.ac.uk", None))
 
       val student2ProjectionWithEndDateWithOneOfTier4OrCasUsedNull: Array[Object] = Array(
-        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, null, now
+        "kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, null, "kai.lan@warwick.ac.uk", null, now
       ).map(_.asInstanceOf[Object])
-      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentDataWithEndDate(student2ProjectionWithEndDateWithOneOfTier4OrCasUsedNull).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = false))
+      attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student2ProjectionWithEndDateWithOneOfTier4OrCasUsedNull) should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", tier4Requirements = false, "kai.lan@warwick.ac.uk", None))
 
 
     }

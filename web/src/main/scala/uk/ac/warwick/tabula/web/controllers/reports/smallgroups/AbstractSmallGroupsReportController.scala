@@ -34,7 +34,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
   val pageRenderPath: String
   val filePrefix: String
 
-  def urlGeneratorFactory(department: Department): (AcademicYear) => String
+  def urlGeneratorFactory(department: Department): AcademicYear => String
 
   override val departmentPermission: Permission = Permissions.Department.Reports
 
@@ -81,7 +81,9 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
           "yearOfStudy" -> studentData.yearOfStudy,
           "sprCode" -> studentData.sprCode,
           "route" -> studentData.routeCode,
-          "tier4Requirements" -> studentData.tier4Requirements.toString
+          "tier4Requirements" -> studentData.tier4Requirements.toString,
+          "email" -> studentData.email,
+          "tutorEmail" -> studentData.tutorEmail.getOrElse("")
         )
       )
       val allEvents: Seq[Map[String, String]] = result.eventWeeks.map(sgew =>
