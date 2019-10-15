@@ -23,7 +23,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
   val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
     override val wbsConfiguration: CelcatDepartmentConfiguration = CelcatDepartmentConfiguration(
-      baseUri = "https://rimmer.wbs.ac.uk",
+      baseUri = "https://rimmer.wbs.ac.uk:4531",
       credentials = new UsernamePasswordCredentials(Wire.property("username"), "password")
     )
     val cacheEnabled = false

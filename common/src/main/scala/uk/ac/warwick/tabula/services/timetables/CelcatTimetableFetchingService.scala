@@ -54,7 +54,7 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 
   class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
     val wbsConfiguration = CelcatDepartmentConfiguration(
-      baseUri = "https://rimmer.wbs.ac.uk",
+      baseUri = "https://rimmer.wbs.ac.uk:4531",
       enabledFn = { () => features.celcatTimetablesWBS },
       credentials = new UsernamePasswordCredentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
     )
