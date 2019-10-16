@@ -20,6 +20,8 @@ import scala.util.Try
 object ImportAssignmentsCommand {
   def apply(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
     with ImportAssignmentsCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
     with ImportAssignmentsAllMembers
     with ImportAssignmentsDescription
     with AutowiringAssignmentImporterComponent
@@ -27,6 +29,8 @@ object ImportAssignmentsCommand {
 
   def applyAllYears(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
     with ImportAssignmentsAllYearsCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
     with ImportAssignmentsAllMembers
     with ImportAssignmentsDescription
     with AutowiringAssignmentImporterComponent
@@ -81,7 +85,8 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
   val importEverything: Boolean = false
 }
 
-trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent with AssignmentImporterComponent with ImportAssignmentsMembersToImport {
+trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent
+  with AssignmentImporterComponent with ImportAssignmentsMembersToImport with RemovesMissingAssessmentComponentsCommand with RemovesMissingUpstreamAssessmentGroupsCommand {
   def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
@@ -114,6 +119,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doAssignments() {
     benchmark("Process Assessment components") {
+
+      val existingAssessmentComponents = transactional(readOnly = true) {
+        assessmentMembershipService.getAllAssessmentComponents
+      }
       val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
@@ -134,17 +143,37 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
           }
         }
       }
+
+      // find any existing AssessmentComponents that no longer appear in SITS
+        existingAssessmentComponents.foreach { existing =>
+          transactional() {
+          if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
+            removeAssessmentComponent(existing)
+          }
+        }
+      }
     }
   }
 
   def doGroups() {
     benchmark("Import assessment groups") {
+      val existingUpstreamAssessmentGroupsForThisYear = transactional(readOnly = true) {
+        // We think we only need to worry about this year's assessment groups, as they generally get created in SITS in error and then swiftly deleted
+        assessmentMembershipService.getUpstreamAssessmentGroups(Seq(AcademicYear.now()))
+      }
+      val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups
       // Split into chunks so we commit transactions periodically.
-      for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
+      for (groups <- logSize(upstreamAssessmentGroupsFromSITS).grouped(ImportGroupSize)) {
         saveGroups(groups)
         transactional() {
           session.flush()
           groups foreach session.evict
+        }
+      }
+
+      existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
+        if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
+          removeUpstreamAssessmentGroup(existing)
         }
       }
     }
@@ -390,3 +419,20 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
   }
 
 }
+
+trait RemovesMissingAssessmentComponents {
+  def removeAssessmentComponent(assessmentComponent: AssessmentComponent)
+}
+
+trait RemovesMissingAssessmentComponentsCommand extends RemovesMissingAssessmentComponents {
+  override def removeAssessmentComponent(assessmentComponent: AssessmentComponent): Unit = new RemoveMissingAssessmentComponentCommand(assessmentComponent).apply()
+}
+
+trait RemovesMissingUpstreamAssessmentGroups {
+  def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup)
+}
+
+trait RemovesMissingUpstreamAssessmentGroupsCommand extends RemovesMissingUpstreamAssessmentGroups {
+  override def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit = new RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup).apply()
+}
+

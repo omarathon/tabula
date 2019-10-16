@@ -83,6 +83,10 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     */
   def cats: Option[String] = Module.extractCats(moduleCode)
 
+  def sameKey(other: AssessmentComponent): Boolean = {
+    this.sequence == other.sequence && this.moduleCode == other.moduleCode
+  }
+
   def needsUpdatingFrom(other: AssessmentComponent): Boolean =
     this.name != other.name ||
       this.module != other.module ||

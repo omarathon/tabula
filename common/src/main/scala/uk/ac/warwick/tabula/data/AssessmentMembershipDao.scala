@@ -45,6 +45,10 @@ trait AssessmentMembershipDao {
 
   def delete(group: AssessmentGroup): Unit
 
+  def delete(assessmentComponent: AssessmentComponent): Unit
+
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup)
+
   def getAssessmentGroup(id: String): Option[AssessmentGroup]
 
   def getUpstreamAssessmentGroup(id: String): Option[UpstreamAssessmentGroup]
@@ -69,6 +73,8 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
+  def getAllAssessmentComponents: Seq[AssessmentComponent]
+
   /**
     * Get all assessment groups that can serve this assignment this year.
     * Should return as many groups as there are distinct OCCURRENCE values for a given
@@ -81,6 +87,8 @@ trait AssessmentMembershipDao {
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember]
 
   def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+
+  def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
@@ -232,8 +240,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   def getUpstreamAssessmentGroup(id: String): Option[UpstreamAssessmentGroup] = getById[UpstreamAssessmentGroup](id)
 
   def delete(group: AssessmentGroup) {
-    group.assignment.assessmentGroups.remove(group)
+    if (group.assignment != null) group.assignment.assessmentGroups.remove(group)
+    if (group.exam != null) group.exam.assessmentGroups.remove(group)
+    if (group.smallGroupSet != null) group.smallGroupSet.assessmentGroups.remove(group)
     session.delete(group)
+    session.flush()
+  }
+
+  def delete(assessmentComponent: AssessmentComponent) {
+    session.delete(assessmentComponent)
+    session.flush()
+  }
+
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup) {
+    session.delete(upstreamAssessmentGroup)
     session.flush()
   }
 
@@ -325,6 +345,10 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
+  def getAllAssessmentComponents: Seq[AssessmentComponent] = {
+    session.newCriteria[AssessmentComponent].seq
+  }
+
   def countPublishedFeedback(assignment: Assignment): Int = {
     session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")
       .setString("assignmentId", assignment.id)
@@ -392,6 +416,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       criteria.setFetchMode("members", FetchMode.JOIN).distinct
     }
 
+    criteria.seq
+  }
+
+  def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] = {
+    val criteria = session.newCriteria[UpstreamAssessmentGroup]
+      .add(safeIn("academicYear", academicYears))
     criteria.seq
   }
 
