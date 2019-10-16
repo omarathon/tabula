@@ -128,7 +128,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
       result.rejectValue("file", "file.tooManyRows", Array(ExtractRelationshipsFromFileCommand.MaxUploadRows.toString), "")
       Map()
     } else {
-      rows.filter(row =>
+      rows.map(_.data).filter(row =>
         // Throw away any rows that don't have the required headers and that have empty cells
         row.keySet.contains(ExtractRelationshipsFromFileCommand.StudentColumnHeader) &&
           row.keySet.contains(ExtractRelationshipsFromFileCommand.EntityColumnHeader) &&
