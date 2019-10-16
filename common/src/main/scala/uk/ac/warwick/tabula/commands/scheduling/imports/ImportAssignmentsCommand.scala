@@ -20,6 +20,8 @@ import scala.util.Try
 object ImportAssignmentsCommand {
   def apply(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
     with ImportAssignmentsCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
     with ImportAssignmentsAllMembers
     with ImportAssignmentsDescription
     with AutowiringAssignmentImporterComponent
@@ -27,6 +29,8 @@ object ImportAssignmentsCommand {
 
   def applyAllYears(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
     with ImportAssignmentsAllYearsCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
     with ImportAssignmentsAllMembers
     with ImportAssignmentsDescription
     with AutowiringAssignmentImporterComponent
@@ -81,7 +85,8 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
   val importEverything: Boolean = false
 }
 
-trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent with AssignmentImporterComponent with ImportAssignmentsMembersToImport {
+trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent
+  with AssignmentImporterComponent with ImportAssignmentsMembersToImport with RemovesMissingAssessmentComponentsCommand with RemovesMissingUpstreamAssessmentGroupsCommand {
   def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
@@ -143,20 +148,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         existingAssessmentComponents.foreach { existing =>
           transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
-            if (!existing.links.isEmpty) {
-              logger.info(s"Removing linked Upstream Assessment Component as it no longer exists in SITS: ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence}")
-              existing.links.forEach { link =>
-                logger.info(s"Removed Upstream Assessment Component is linked to : $link. ")
-                assessmentMembershipService.delete(link)
-              }
-            } else {
-              logger.info(s"Removing unlinked Upstream Assessment Component as it no longer exists in SITS: ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence}")
-            }
-            existing.upstreamAssessmentGroups(AcademicYear.now()).foreach {
-              case uag if uag.members.isEmpty => logger.info(s"Removed Upstream Assessment Component ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence} - this year's membership was empty")
-              case uag => logger.info(s"Removed Upstream Assessment Component ${existing.moduleCode} - ${existing.name}, sequence: ${existing.sequence} - this year's membership was : ${uag.members.asScala.map(_.universityId).mkString(", ")}")
-            }
-            assessmentMembershipService.delete(existing)
+            removeAssessmentComponent(existing)
           }
         }
       }
@@ -181,11 +173,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
         if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
-          if (existing.members.isEmpty) logger.info(s"Removing Upstream Assessment Group: $existing (empty membership)")
-          else logger.info(s"Removing Upstream Assessment Group: $existing - membership was : ${existing.members.asScala.map(_.universityId).mkString(", ")}")
-          transactional() {
-            assessmentMembershipService.delete(existing)
-          }
+          removeUpstreamAssessmentGroup(existing)
         }
       }
     }
@@ -431,3 +419,20 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
   }
 
 }
+
+trait RemovesMissingAssessmentComponents {
+  def removeAssessmentComponent(assessmentComponent: AssessmentComponent)
+}
+
+trait RemovesMissingAssessmentComponentsCommand extends RemovesMissingAssessmentComponents {
+  override def removeAssessmentComponent(assessmentComponent: AssessmentComponent): Unit = new RemoveMissingAssessmentComponentCommand(assessmentComponent).apply()
+}
+
+trait RemovesMissingUpstreamAssessmentGroups {
+  def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup)
+}
+
+trait RemovesMissingUpstreamAssessmentGroupsCommand extends RemovesMissingUpstreamAssessmentGroups {
+  override def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit = new RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup).apply()
+}
+
