@@ -463,14 +463,10 @@
 
   <bean id="turnitinTcaSignatureFilter" class="uk.ac.warwick.tabula.web.filters.TurnitinTcaSignatureFilter" />
 
-  <bean id="userLookup" class="uk.ac.warwick.tabula.services.SwappableUserLookupService">
-    <constructor-arg ref="realUserLookup"/>
-  </bean>
-  <bean id="groupService" factory-bean="userLookup" factory-method="getGroupService"/>
-
-  <bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
+  <bean id="userLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl">
     <constructor-arg ref="userLookupDelegate"/>
   </bean>
+  <bean id="groupService" factory-bean="userLookup" factory-method="getGroupService"/>
 
   <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
         p:templateLoaderPath="/WEB-INF/freemarker/"

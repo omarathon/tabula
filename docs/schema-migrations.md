@@ -20,3 +20,10 @@ start if the migration file doesn't exactly match the checksum that it has in th
 `flyway_schema_history` table in the database.
 
 These schema migrations go in `common/src/main/resources/db/migration`.
+
+We configure the `flyway` bean such that Spring will call
+[Flyway#migrate()](https://flywaydb.org/documentation/api/javadoc/org/flywaydb/core/Flyway#migrate())
+as the `init-method` and perform necessary migrations when the bean is initialised at application
+startup time.
+
+<!-- https://flywaydb.org/documentation/api/#spring-configuration -->

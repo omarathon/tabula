@@ -50,9 +50,7 @@ class TcaSimilarityReportDeserializer extends JsonDeserializer[TcaSimilarityRepo
 
     json.validate[TcaSimilarityReport](TcaSimilarityReport.reads).fold(
       invalid => {
-        logger.error(s"Error parsing similarity complete request: $invalid")
-        logger.error(s"Original request was: $json")
-        null
+        throw ctxt.reportBadDefinition(classOf[TcaSimilarityReport], s"Error parsing TcaSimilarityReport: $invalid\nOriginal response was: $json")
       },
       s => s
     )

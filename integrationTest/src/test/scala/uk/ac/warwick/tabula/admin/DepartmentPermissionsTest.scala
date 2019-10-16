@@ -4,6 +4,7 @@ import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
+
 class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
   private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)

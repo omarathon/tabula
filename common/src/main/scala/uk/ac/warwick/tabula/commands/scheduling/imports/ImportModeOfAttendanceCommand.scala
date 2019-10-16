@@ -31,7 +31,7 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo)
 
     logger.debug("Importing mode of attendance " + code + " into " + modeOfAttendanceExisting)
 
-    val isTransient = !modeOfAttendanceExisting.isDefined
+    val isTransient = modeOfAttendanceExisting.isEmpty
 
     val modeOfAttendance = modeOfAttendanceExisting match {
       case Some(modeOfAttendance: ModeOfAttendance) => modeOfAttendance

@@ -86,15 +86,15 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           else benchmarkTask("Fetch user details") {
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
+            val usersByWarwickIds = benchmarkTask("getUsersByWarwickUniIds") {
+              userLookup.getUsersByWarwickUniIds(membershipInfos.map(_.member.universityId))
+                .collect { case (universityId, FoundUser(u)) => universityId -> u }
+            }
+
             membershipInfos.map { m =>
               val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-              val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
-                case FoundUser(u) => u
-                case _ => userLookup.getUserByUserId(usercode)
-              }
-
-              m.member.universityId -> user
+              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, userLookup.getUserByUserId(usercode))
             }.toMap
           }
 
@@ -158,13 +158,9 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
         }
 
         transactional() {
-          val members = importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
-          members.foreach(member => {
-            member.lastImportDate = DateTime.now
-            memberDao.saveOrUpdate(member)
-          })
-
-          profileIndexService.indexItemsWithoutNewTransaction(members)
+          val universityIds = importMemberCommands.map(_.universityId).distinct
+          memberDao.stampLastImportDate(universityIds, DateTime.now)
+          profileIndexService.indexItemsWithoutNewTransaction(memberDao.getAllWithUniversityIds(universityIds))
         }
       }
     }
@@ -253,21 +249,28 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     logger.info("Updating relationships")
 
     toStudentMembers(rowCommands).foreach { student =>
-      val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
-      val expireCommandErrors = new BindException(expireCommand, "expireCommand")
-      expireCommand.validate(expireCommandErrors)
-      if (!expireCommandErrors.hasErrors) {
-        logger.info(s"Expiring old relationships for ${student.universityId}")
-        expireCommand.apply()
-      } else {
-        logger.info(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
-      }
-      val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
-      val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
-      migrateCommand.validate(migrateCommandErrors)
-      if (!migrateCommandErrors.hasErrors) {
-        logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
-        migrateCommand.apply()
+      benchmarkTask(s"Rationalise relationships for ${student.universityId}") {
+        val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
+        val expireCommandErrors = new BindException(expireCommand, "expireCommand")
+        expireCommand.validate(expireCommandErrors)
+        if (!expireCommandErrors.hasErrors) {
+          logger.info(s"Expiring old relationships for ${student.universityId}")
+          expireCommand.apply()
+        } else {
+          logger.debug(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
+        }
+
+        benchmarkTask("Migrating meeting records from old relationships") {
+          val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
+          val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
+          migrateCommand.validate(migrateCommandErrors)
+          if (!migrateCommandErrors.hasErrors) {
+            logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
+            migrateCommand.apply()
+          } else {
+            logger.debug(s"Skipping meeting record migration for ${student.universityId} - ${migrateCommandErrors.getMessage}")
+          }
+        }
       }
     }
 
@@ -284,7 +287,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def refresh(universityId: String, userId: Option[String]): Option[Member] = {
     transactional() {
-      val user = userLookup.getUserByWarwickUniIdUncached(universityId, skipMemberLookup = true) match {
+      val user = userLookup.getUserByWarwickUniId(universityId) match {
         case FoundUser(u) => u
         case _ => userId.map(userLookup.getUserByUserId).getOrElse(new AnonymousUser)
       }
@@ -322,10 +325,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           // TAB-1435 refresh profile index
           profileIndexService.indexItemsWithoutNewTransaction(freshMembers)
 
-          freshMembers.foreach(member => {
-            member.lastImportDate = DateTime.now
-            memberDao.saveOrUpdate(member)
-          })
+          memberDao.stampLastImportDate(freshMembers.map(_.universityId), DateTime.now)
 
           for (thisMember <- members) session.evict(thisMember)
           for (modReg <- newModuleRegistrations) session.evict(modReg)
@@ -367,7 +367,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def updateMissingForIndividual(universityId: String): Option[Member] = {
     profileService.getMemberByUniversityIdStaleOrFresh(universityId).flatMap {
-      case member@(_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
+      case member @ (_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
       case stu: StudentMember =>
         val sitsRows = profileImporter.sitsStudentRows(Seq(universityId))
         val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct

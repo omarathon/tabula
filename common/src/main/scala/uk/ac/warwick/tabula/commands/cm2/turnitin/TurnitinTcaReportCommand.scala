@@ -14,7 +14,7 @@ import scala.concurrent.duration.Duration
 
 object TurnitinTcaReportCommand {
 
-  type Result = Option[Uri]
+  type Result = Either[String, Uri]
   type Command = Appliable[Result] with TurnitinTcaReportState with TurnitinTcaReportState
   val RequiredPermission: Permission = Permissions.Submission.ViewPlagiarismStatus
 

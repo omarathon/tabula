@@ -26,6 +26,8 @@ trait CourseDao {
 
   def getAllCourseCodes: Seq[String]
 
+  def getAll: Seq[Course]
+
   def findByDepartment(department: Department): Seq[Course]
 
   def findCoursesNamedLike(query: String): Seq[Course]
@@ -49,6 +51,8 @@ class CourseDaoImpl extends CourseDao with Daoisms {
 
   def getAllCourseCodes: Seq[String] =
     session.newQuery[String]("select distinct code from Course").seq
+
+  def getAll: Seq[Course] = session.newCriteria[Course].seq
 
   def findByDepartment(department: Department): Seq[Course] =
     session.newCriteria[Course]

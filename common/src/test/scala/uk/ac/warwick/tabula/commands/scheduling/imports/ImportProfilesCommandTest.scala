@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.scheduling.{SitsAcademicYearAware, SitsAcademicYearService}
+import uk.ac.warwick.tabula.services.scheduling.SitsAcademicYearAware
 import uk.ac.warwick.tabula.services.{ModuleRegistrationServiceImpl, SmallGroupService}
 
 import scala.language.implicitConversions
@@ -14,7 +14,7 @@ import scala.language.implicitConversions
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 
   trait Environment {
-    val year = AcademicYear(2013)
+    val year: AcademicYear = AcademicYear.now()
 
     // set up a department
     val dept: Department = Fixtures.department("EN", "English")
@@ -77,15 +77,11 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
     val key2 = new StudentCourseYearKey(scyd2.studentCourseDetails.scjCode, scyd2.sceSequenceNumber)
 
-    val sitsAcademicYearService: SitsAcademicYearService = smartMock[SitsAcademicYearService]
-    sitsAcademicYearService.getCurrentSitsAcademicYearString returns "13/14"
-
     val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 
     val command = new ImportProfilesCommand
     command.features = new FeaturesImpl
     command.sessionFactory = sessionFactory
-    command.sitsAcademicYearService = sitsAcademicYearService
     command.moduleRegistrationService = mrService
     command.smallGroupService = smallGroupService
     command.memberDao = memberDao

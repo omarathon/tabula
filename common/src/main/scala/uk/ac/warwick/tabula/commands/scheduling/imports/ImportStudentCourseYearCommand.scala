@@ -43,8 +43,8 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
     val hasChanged = (copyStudentCourseYearProperties(rowBean, studentCourseYearDetailsBean)
       | markAsSeenInSits(studentCourseYearDetailsBean))
 
-    if (isTransient || hasChanged) {
-      logger.debug("Saving changes for " + studentCourseYearDetails)
+    if (isTransient || studentCourseYearDetails.stale || hasChanged) {
+      logger.debug(s"Saving changes for $studentCourseYearDetails because ${if (isTransient) "it's a new object" else if (studentCourseYearDetails.stale) "it's re-appeared in SITS" else "it's changed"}")
 
       if (studentCourseDetails.latestStudentCourseYearDetails == null ||
         // need to include fresh or stale since this might be a row which was deleted but has been re-instated
@@ -54,6 +54,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
         studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
       }
 
+      studentCourseYearDetails.missingFromImportSince = null
       studentCourseYearDetails.lastUpdatedDate = DateTime.now
       studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
     }
@@ -72,9 +73,9 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 
   private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
     copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
-      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, enrolmentDepartment) |
+      copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode.safeLowercase, studentCourseYearBean, enrolmentDepartment) |
       copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
-      copyObjectProperty("route", row.sceRouteCode, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
+      copyObjectProperty("route", row.sceRouteCode.safeLowercase, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
       copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
       copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
       copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |
@@ -92,15 +93,18 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
     if (oldValue == null && code == null) false
     else if (oldValue == null) {
       // From no MOA to having an MOA
+      logger.debug(s"Detected property change for $property: $oldValue -> $code; setting value")
       studentCourseYearBean.setPropertyValue(property, toModeOfAttendance(code))
       true
     } else if (code == null) {
       // User had an SPR status code but now doesn't
+      logger.debug(s"Detected property change for $property: ${oldValue.code} -> $code; setting value")
       studentCourseYearBean.setPropertyValue(property, null)
       true
-    } else if (oldValue.code == code.toLowerCase) {
+    } else if (oldValue.code == code) {
       false
     } else {
+      logger.debug(s"Detected property change for $property: ${oldValue.code} -> $code; setting value")
       studentCourseYearBean.setPropertyValue(property, toModeOfAttendance(code))
       true
     }
@@ -111,8 +115,6 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
     val property = "moduleRegistrationStatus"
     val oldValue = destinationBean.getPropertyValue(property)
     val newValue = ModuleRegistrationStatus.fromCode(code)
-
-    logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
 
     // null == null in Scala so this is safe for unset values
     if (oldValue != newValue) {

@@ -35,26 +35,25 @@ class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember)
 }
 
 trait ExpireRelationshipsOnOldCoursesValidation extends SelfValidating {
-
   self: ExpireRelationshipsOnOldCoursesCommandState with RelationshipServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!student.freshStudentCourseDetails.exists(_.isEnded)) {
       errors.reject("No old courses for this student")
     } else {
       val hasExpirable = studentRelationships.groupBy(_.relationshipType).exists {
-        case (relType, relationships) =>
+        case (_, relationships) =>
           // Has a current relationship on a non-ended course or all the courses ended more than three months ago
           (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) &&
-            // Has some relationships to expire
-            relationships.exists(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
+          // Has some relationships to expire
+          relationships.exists(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
       }
+
       if (!hasExpirable) {
         errors.reject("No relationships to expire")
       }
     }
   }
-
 }
 
 trait ExpireRelationshipsOnOldCoursesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

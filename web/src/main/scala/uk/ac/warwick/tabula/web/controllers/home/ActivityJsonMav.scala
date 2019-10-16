@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.home
 
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 import uk.ac.warwick.tabula.data.model.Activity
+import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONView, MarkdownRenderer}
 
@@ -17,6 +18,7 @@ trait ActivityJsonMav {
     Map(
       "_id" -> item.id,
       "published" -> DateFormat.print(item.date),
+      "publishedFormatted" -> DateBuilder.format(item.date),
       "priority" -> item.priority,
       "title" -> item.title,
       "url" -> item.url,

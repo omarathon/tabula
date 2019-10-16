@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JHashMap, JMap}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.commands.attendance.view._
+import uk.ac.warwick.tabula.commands.attendance.view.{RecordMonitoringPointCommandState, SetFilterPointsResultOnRecordMonitoringPointCommand, _}
 import uk.ac.warwick.tabula.commands.attendance.{CSVAttendanceExtractor, CSVAttendanceExtractorInternal}
 import uk.ac.warwick.tabula.commands.{Appliable, FiltersStudentsBase, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
@@ -27,6 +27,9 @@ class RecordMonitoringPointUploadController extends AttendanceController {
   def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
     FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
 
+  type RecordMonitoringPointCommand = Appliable[Seq[AttendanceMonitoringCheckpoint]] with SetFilterPointsResultOnRecordMonitoringPointCommand
+    with SelfValidating with PopulateOnForm with RecordMonitoringPointCommandState
+
   @ModelAttribute("command")
   def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable templatePoint: AttendanceMonitoringPoint) =
     RecordMonitoringPointCommand(mandatory(department), mandatory(academicYear), mandatory(templatePoint), user)
@@ -34,13 +37,16 @@ class RecordMonitoringPointUploadController extends AttendanceController {
   @RequestMapping(method = Array(GET))
   def form(
     @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
+    @ModelAttribute("command") cmd: RecordMonitoringPointCommand,
+    errors: Errors,
     @PathVariable department: Department,
     @PathVariable academicYear: AcademicYear,
-    @PathVariable templatePoint: AttendanceMonitoringPoint
+    @PathVariable templatePoint: AttendanceMonitoringPoint,
   ): Mav = {
     Mav("attendance/upload_attendance",
       "uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
-      "ajax" -> ajax
+      "ajax" -> ajax,
+      "errors" -> errors
     ).crumbs(
       Breadcrumbs.View.HomeForYear(academicYear),
       Breadcrumbs.View.DepartmentForYear(department, academicYear),
@@ -52,9 +58,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
   def post(
     @ModelAttribute("extractor") extractor: CSVAttendanceExtractorInternal,
     @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
-    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
-      with SetFilterPointsResultOnRecordMonitoringPointCommand with SelfValidating
-      with PopulateOnForm with RecordMonitoringPointCommandState,
+    @ModelAttribute("command") cmd: RecordMonitoringPointCommand,
     errors: Errors,
     @PathVariable department: Department,
     @PathVariable academicYear: AcademicYear,
@@ -62,7 +66,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
   ): Mav = {
     val attendance = extractor.extract(errors)
     if (errors.hasErrors) {
-      form(filterCommand, department, academicYear, templatePoint)
+      form(filterCommand, cmd, errors, department, academicYear, templatePoint)
     } else {
       val filterResult = filterCommand.apply()
       cmd.setFilteredPoints(filterResult)
@@ -79,7 +83,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
       cmd.checkpointMap = newCheckpointMap
       cmd.validate(errors)
       if (errors.hasErrors) {
-        form(filterCommand, department, academicYear, templatePoint)
+        form(filterCommand, cmd, errors, department, academicYear, templatePoint)
       } else {
         cmd.apply()
         Redirect(Routes.View.points(department, academicYear))

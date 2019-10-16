@@ -20,7 +20,7 @@
       <ul>
         <#list events as event>
           <li>
-            ${event.group.name}: <@components.eventShortDetails event />
+            ${event.group.name!"Group"}: <@components.eventShortDetails event />
             has a named location <em>'${event.location.name}'</em>
             <a href="<@routes.groups.editseteventseditevent event/>?returnTo=${(info.requestedUri!"")?url}" class="btn btn-default btn-xs">Edit</a>
           </li>

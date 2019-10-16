@@ -29,7 +29,7 @@ class ImportAwardCommand(info: AwardInfo)
 
     logger.debug("Importing award " + code + " into " + awardExisting)
 
-    val isTransient = !awardExisting.isDefined
+    val isTransient = awardExisting.isEmpty
 
     val award = awardExisting.getOrElse(new Award)
 

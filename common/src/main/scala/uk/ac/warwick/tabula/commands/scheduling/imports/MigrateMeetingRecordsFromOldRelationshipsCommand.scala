@@ -32,15 +32,13 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandInternal(val student: Stud
 }
 
 trait MigrateMeetingRecordsFromOldRelationshipsValidation extends SelfValidating {
-
   self: MigrateMeetingRecordsFromOldRelationshipsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (migrations.isEmpty) {
       errors.reject("No meetings to migrate")
     }
   }
-
 }
 
 trait MigrateMeetingRecordsFromOldRelationshipsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -65,21 +63,22 @@ trait MigrateMeetingRecordsFromOldRelationshipsCommandState {
 
   lazy val studentRelationships: Seq[StudentRelationship] = relationshipService.getRelationships(personalTutorRelationshipType, student)
 
-  lazy val migrations: Map[StudentRelationship, StudentRelationship] = {
-    studentRelationships.groupBy(_.agent).flatMap { case (agent, agentRelationships) =>
-      agentRelationships.filter(!_.isCurrent).flatMap(nonCurrentRelationship => {
-        val meetingRecords = meetingRecordService.listAll(nonCurrentRelationship)
-        val correspondingRelationship = agentRelationships.find(r =>
+  lazy val migrations: Map[StudentRelationship, StudentRelationship] =
+    studentRelationships.groupBy(_.agent).flatMap { case (_, agentRelationships) =>
+      agentRelationships.filter(!_.isCurrent).flatMap { nonCurrentRelationship =>
+        val correspondingRelationship = agentRelationships.find { r =>
           r.isCurrent && sprMatch(r, nonCurrentRelationship) && departmentsMatch(r, nonCurrentRelationship)
-        )
-        if (meetingRecords.isEmpty || correspondingRelationship.isEmpty)
-          None
-        else {
-          Option(nonCurrentRelationship -> correspondingRelationship.get)
         }
-      })
+
+        correspondingRelationship.flatMap { relationship =>
+          if (meetingRecordService.countAll(nonCurrentRelationship) > 0) {
+            Some(nonCurrentRelationship -> relationship)
+          } else {
+            None
+          }
+        }
+      }
     }
-  }
 
   private def sprMatch(r1: StudentRelationship, r2: StudentRelationship) =
     r1.studentCourseDetails.sprCode == r2.studentCourseDetails.sprCode

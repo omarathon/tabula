@@ -30,7 +30,7 @@ class ImportLevelCommand(info: LevelInfo)
 
     logger.debug("Importing level " + code + " into " + levelExisting)
 
-    val isTransient = !levelExisting.isDefined
+    val isTransient = levelExisting.isEmpty
 
     val level = levelExisting match {
       case Some(crs: Level) => crs

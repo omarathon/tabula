@@ -447,6 +447,8 @@ preposition: Text to relate the title to the department name in the second line,
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
+
+		<#-- Awaiting fix in TAB-6657 -->
 		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
 		   data-html="true"
 		   data-trigger="hover focus"

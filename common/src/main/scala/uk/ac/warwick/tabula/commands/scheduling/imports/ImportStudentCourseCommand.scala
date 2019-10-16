@@ -30,7 +30,6 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   val courseRow: SitsStudentRow = rows.head
 
   override def applyInternal(): StudentCourseDetails = {
-
     logger.debug("Importing student course details for " + courseRow.scjCode)
 
     val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(courseRow.scjCode)
@@ -57,17 +56,20 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   def updateStudentCourseDetails(studentCourseDetails: StudentCourseDetails, isTransient: Boolean) {
     val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 
-    val hasChanged = copyStudentCourseProperties(new BeanWrapperImpl(courseRow), studentCourseDetailsBean) | markAsSeenInSits(studentCourseDetailsBean)
+    val hasChanged =
+      copyStudentCourseProperties(new BeanWrapperImpl(courseRow), studentCourseDetailsBean) |
+        markAsSeenInSits(studentCourseDetailsBean)
 
-    if (isTransient || hasChanged) {
+    if (isTransient || studentCourseDetails.stale || hasChanged) {
       try {
-        logger.debug("Saving changes for " + studentCourseDetails)
+        logger.debug(s"Saving changes for $studentCourseDetails because ${if (isTransient) "it's a new object" else if (studentCourseDetails.stale) "it's re-appeared in SITS" else "it's changed"}")
 
         if (courseRow.mostSignificant) {
           stuMem.mostSignificantCourse = studentCourseDetails
           logger.debug("Updating member most significant course to " + studentCourseDetails + " for " + stuMem)
         }
 
+        studentCourseDetails.missingFromImportSince = null
         studentCourseDetails.lastUpdatedDate = DateTime.now
         studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
       }
@@ -76,7 +78,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
           logger.warn("Couldn't update course details for SCJ "
             + studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
             + ".  Might be invalid data in SITS - working on the assumption "
-            + "there shouldn't be multiple SPR codes for one current SCJ code")
+            + "there shouldn't be multiple SPR codes for one current SCJ code", exception)
       }
     }
 
@@ -119,8 +121,8 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 
   private def copyStudentCourseProperties(rowBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
     copyBasicProperties(basicStudentCourseProperties, rowBean, studentCourseDetailsBean) |
-      copyObjectProperty("department", courseRow.departmentCode, studentCourseDetailsBean, courseDepartment) |
-      copyObjectProperty("currentRoute", courseRow.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(courseRow.routeCode)) |
+      copyObjectProperty("department", courseRow.departmentCode.safeLowercase, studentCourseDetailsBean, courseDepartment) |
+      copyObjectProperty("currentRoute", courseRow.routeCode.safeLowercase, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(courseRow.routeCode)) |
       copyObjectProperty("course", courseRow.courseCode, studentCourseDetailsBean, courseImporter.getCourseByCodeCached(courseRow.courseCode)) |
       copyObjectProperty("award", courseRow.awardCode, studentCourseDetailsBean, awardImporter.getAwardByCodeCached(courseRow.awardCode)) |
       copyObjectProperty("statusOnRoute", courseRow.sprStatusCode, studentCourseDetailsBean, toSitsStatus(courseRow.sprStatusCode)) |

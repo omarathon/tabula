@@ -39,8 +39,13 @@ object DateBuilder {
   ): String = {
     if (includeTime) {
       val pattern = new StringBuilder
-      pattern.append("HH:mm")
-      if (includeSeconds) pattern.append(":ss")
+      if (date.getHourOfDay == 12 && date.getMinuteOfHour == 0 && (!includeSeconds || date.getSecondOfMinute == 0)) {
+        pattern.append("12 'noon'")
+      } else {
+        pattern.append("HH:mm")
+        if (includeSeconds) pattern.append(":ss")
+      }
+
       if (includeTimezone) pattern.append(" (z)")
       //if (includeAt) pattern.append(" 'at'")
       (formatterMap.retrieve(pattern.toString()) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth, excludeCurrentYear)

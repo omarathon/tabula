@@ -64,7 +64,9 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
         routeName = null,
         yearOfStudy = properties.get("yearOfStudy"),
         sprCode = properties.get("sprCode"),
-        tier4Requirements = properties.get("tier4Requirements").toBoolean
+        tier4Requirements = properties.get("tier4Requirements").toBoolean,
+        email = properties.get("email"),
+        Option(properties.get("tutorEmail"))
       )
     }.sortBy(s => (s.lastName, s.firstName))
 

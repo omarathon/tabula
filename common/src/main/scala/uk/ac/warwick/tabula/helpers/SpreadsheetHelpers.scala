@@ -4,11 +4,11 @@ import java.io.InputStream
 
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.{CellReference, WorkbookUtil}
+import org.apache.poi.ss.util.{CellRangeAddress, CellReference, WorkbookUtil}
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
-import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.streaming.{SXSSFDrawing, SXSSFSheet, SXSSFWorkbook}
 import org.apache.poi.xssf.usermodel.XSSFComment
 import org.joda.time.{DateTime, LocalDate}
 import org.xml.sax.{InputSource, XMLReader}
@@ -138,6 +138,26 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
       sheets.append(Sheet(sheetName, handler.rows))
     }
     sheets
+  }
+
+  class CommentHelper(sheet: SXSSFSheet) {
+    private[this] lazy val workbook: SXSSFWorkbook = sheet.getWorkbook
+    private[this] lazy val factory: CreationHelper = workbook.getCreationHelper
+    private[this] lazy val drawing: SXSSFDrawing = sheet.createDrawingPatriarch()
+
+    def createComment(cell: Cell, text: String): Comment = {
+      val anchor = factory.createClientAnchor()
+
+      // By default the comment drawing starts at the end of the cell, is 4 cells wide and 4 rows high
+      anchor.setCol1(cell.getColumnIndex)
+      anchor.setCol2(cell.getColumnIndex + 4)
+      anchor.setRow1(cell.getRowIndex)
+      anchor.setRow2(cell.getRowIndex + 4)
+
+      val comment = drawing.createCellComment(anchor)
+      comment.setString(factory.createRichTextString(text))
+      comment
+    }
   }
 }
 

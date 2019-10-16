@@ -277,5 +277,29 @@
     "moduleCode": "IB1210",
     "moduleSchoolYear": "2016-2017",
     "room": "S0.09"
+  },
+  {
+    "solrDocId": "G-62900_30085_2016-12-06:12-G-1-SA",
+    "start": "2016-12-06T11:00:00Z",
+    "end": "2016-12-06T12:00:00Z",
+    "contactType": "L",
+    "seminarGroup": -1,
+    "moduleOccasion": 1,
+    "lectureStreamCount": 1,
+    "moduleCode": "IB9EM0",
+    "moduleSchoolYear": "2016-2017",
+    "room": "WBS M1"
+  },
+  {
+    "solrDocId": "G-63124_30200_2016-12-06:14-G3-SA",
+    "start": "2016-12-06T13:00:00Z",
+    "end": "2016-12-06T14:00:00Z",
+    "contactType": "S",
+    "seminarGroup": 3,
+    "moduleOccasion": 1,
+    "lectureStreamCount": 0,
+    "moduleCode": "IB1210",
+    "moduleSchoolYear": "2016-2017",
+    "room": "WBS 3.006"
   }
 ]

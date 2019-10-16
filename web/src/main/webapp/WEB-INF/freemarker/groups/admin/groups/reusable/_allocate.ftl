@@ -234,8 +234,10 @@
       });
 
       $(window).scroll(function () {
-        Groups.fixHeaderFooter.fixDirectionIcon();
-        Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+        if (typeof Groups !== 'undefined' && typeof Groups.fixHeaderFooter !== 'undefined') {
+          Groups.fixHeaderFooter.fixDirectionIcon();
+          Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+        }
       });
 
       // When the return list has changed, make sure the filter is re-run

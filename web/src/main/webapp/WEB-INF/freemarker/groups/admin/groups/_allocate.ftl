@@ -288,8 +288,10 @@
       });
 
       $(window).scroll(function () {
-        Groups.fixHeaderFooter.fixDirectionIcon();
-        Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+        if (typeof Groups !== 'undefined' && typeof Groups.fixHeaderFooter !== 'undefined') {
+          Groups.fixHeaderFooter.fixDirectionIcon();
+          Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+        }
       });
 
       $.getJSON('/groups/${smallGroupSet.id}/timetableclash', {ts: new Date().getTime()}, function (data) {

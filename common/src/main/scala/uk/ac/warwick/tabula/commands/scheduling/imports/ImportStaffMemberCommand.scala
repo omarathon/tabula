@@ -21,7 +21,7 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
 
     logger.debug("Importing staff member " + universityId + " into " + memberExisting)
 
-    val isTransient = memberExisting.nonEmpty
+    val isTransient = memberExisting.isEmpty
 
     def newMember: Member = {
       if (this.userType == MemberUserType.Emeritus) new EmeritusMember(universityId)
@@ -51,9 +51,10 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
     val hasChanged = copyMemberProperties(commandBean, memberBean) |
       (member.isInstanceOf[StaffProperties] && copyStaffProperties(commandBean, memberBean))
 
-    if (isTransient || hasChanged) {
-      logger.debug("Saving changes for " + member)
+    if (isTransient || member.stale || hasChanged) {
+      logger.debug(s"Saving changes for $member because ${if (isTransient) "it's a new object" else if (member.stale) "it's re-appeared in SITS" else "it's changed"}")
 
+      member.missingFromImportSince = null
       member.lastUpdatedDate = DateTime.now
       memberDao.saveOrUpdate(member)
     }

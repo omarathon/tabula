@@ -1,6 +1,5 @@
 /* eslint-env browser */
 import $ from 'jquery';
-import moment from 'moment-timezone';
 
 // Maps from priority classes to icon classes.
 var icons = {
@@ -25,10 +24,7 @@ Activity.prototype.render = function () {
   if (item.priority >= 0.5) priority = 'priority-warning';
   if (item.priority >= 0.75) priority = 'priority-critical';
 
-  var now = moment();
-  var time = moment(item.published);
-  var fullDate = time.format('LLLL');
-  var $timestamp = $('<div>', {'class': 'timestamp', title: fullDate}).html(toTimestamp(now, time));
+  var $timestamp = $('<div>', {'class': 'timestamp'}).html(item.publishedFormatted);
   var urlTitle = capitalise(item.urlTitle || 'further info');
   var url = (item.priority >= 0.1) ? $('<p>', {'class': 'url'}).append($('<a></a>', {'href': item.url}).html(urlTitle)) : "";
 
@@ -51,21 +47,6 @@ Activity.prototype.render = function () {
 function capitalise(text) {
   if (!text || text.length < 1) return text;
   return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function toTimestamp(now, then) {
-  var yesterday = now.clone().subtract(1, 'day');
-  if (now.diff(then) < 60000) { // less than a minute ago
-    return then.from(now);
-  } else if (now.isSame(then, 'day')) {
-    return then.format('LT [Today]');
-  } else if (yesterday.isSame(then, 'day')) {
-    return then.format('LT [Yesterday]');
-  } else if (now.isSame(then, 'year')) {
-    return then.format('ddd Do MMM LT');
-  } else {
-    return then.format('ddd Do MMM YYYY LT');
-  }
 }
 
 // Set up a rendered activity stream in the given container.

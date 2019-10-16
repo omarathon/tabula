@@ -17,17 +17,11 @@ import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
-import scala.concurrent.Future
-
 trait ComponentMixins extends Mockito
   with ProfileServiceComponent
-  with Tier4RequirementImporterComponent
-  with ModeOfAttendanceImporterComponent
-  with ReasonableAdjustmentsImporterComponent {
+  with ModeOfAttendanceImporterComponent {
   var profileService: ProfileService = smartMock[ProfileService]
-  var tier4RequirementImporter: Tier4RequirementImporter = smartMock[Tier4RequirementImporter]
   var modeOfAttendanceImporter: ModeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
-  var reasonableAdjustmentsImporter: ReasonableAdjustmentsImporter = smartMock[ReasonableAdjustmentsImporter]
 }
 
 trait ImportCommandFactoryForTesting extends ComponentMixins {
@@ -187,15 +181,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     profileService.getDisability(null) returns None
     profileService.getDisability("Q") returns Some(disabilityQ)
 
-    tier4RequirementImporter.hasTier4Requirement("0672089") returns false
-    reasonableAdjustmentsImporter.getReasonableAdjustments("0672089") returns Future.successful(None)
-
-    val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), importCommandFactory) with ComponentMixins
+    val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), None, importCommandFactory) with ComponentMixins
     rowCommand.memberDao = memberDao
     rowCommand.moduleAndDepartmentService = modAndDeptService
     rowCommand.profileService = profileService
-    rowCommand.tier4RequirementImporter = tier4RequirementImporter
-    rowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
 
     val row = SitsStudentRow(rs)
   }
@@ -289,7 +278,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
   @Test def testMarkAsSeenInSits() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       // first set up the studentCourseYearDetails as above
       var studentCourseDetails = new StudentCourseDetails
@@ -317,7 +306,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   @Test
   def testImportStudentRowCommandWorksWithNew() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -405,7 +394,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   @Test
   def testImportStudentRowCommandWorksWithNulls() {
     new EnvironmentWithNulls {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -451,7 +440,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   def worksWithExistingMember() {
     new Environment {
       val existing = new StudentMember("0672089")
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
       relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -476,7 +465,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       val existingStaffMember = new StaffMember("0070790")
 
       memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
       val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
@@ -514,16 +503,14 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
         department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
 
         memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
-        memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
+        memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
 
         importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
-        val member: Option[StudentMember] = rowCommand.applyInternal() match {
-          case stu: StudentMember => Some(stu)
-          case _ => None
+        val studentMember: StudentMember = rowCommand.applyInternal() match {
+          case stu: StudentMember => stu
+          case _ => fail("No student returned from command")
         }
-
-        val studentMember: StudentMember = member.get
 
         studentMember.mostSignificantCourseDetails should not be null
 
@@ -534,19 +521,17 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
   @Test def testDisabilityHandling() {
     new Environment {
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
       var student: StudentMember = rowCommand.applyInternal().asInstanceOf[StudentMember]
       student.disability should be(Some(disabilityQ))
 
       // override to test for attempted import of unknown disability
       rs.getString("disability") returns "Mystery"
-      val newRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), importCommandFactory) with ComponentMixins
+      val newRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), None, importCommandFactory) with ComponentMixins
       newRowCommand.memberDao = memberDao
       newRowCommand.moduleAndDepartmentService = modAndDeptService
       newRowCommand.profileService = profileService
-      newRowCommand.tier4RequirementImporter = tier4RequirementImporter
-      newRowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
       student = newRowCommand.applyInternal().asInstanceOf[StudentMember]
       student.disability should be(None)
     }
@@ -559,14 +544,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       val row3 = SitsStudentRow(getResultSet("0770884/2", 3))
       val row4 = SitsStudentRow(getResultSet("0770884/2", 2))
 
-      memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+      memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
-      val thisRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(row1, row2, row3, row4), importCommandFactory) with ComponentMixins
+      val thisRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(row1, row2, row3, row4), None, importCommandFactory) with ComponentMixins
       thisRowCommand.memberDao = memberDao
       thisRowCommand.moduleAndDepartmentService = modAndDeptService
       thisRowCommand.profileService = profileService
-      thisRowCommand.tier4RequirementImporter = tier4RequirementImporter
-      thisRowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
 
       val result: StudentMember = thisRowCommand.applyInternal().asInstanceOf[StudentMember]
       result.freshStudentCourseDetails.size should be(2)

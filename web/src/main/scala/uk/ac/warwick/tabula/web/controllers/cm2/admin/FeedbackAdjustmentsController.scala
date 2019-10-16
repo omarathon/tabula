@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.HibernateHelpers
@@ -13,6 +12,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
 
@@ -44,12 +44,14 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 }
 
 object FeedbackAdjustmentsController {
-  // TAB-3312 Source: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/faqs/penalties
-  final val LatePenaltyPerDay: Map[CourseType, Int] = Map(
-    CourseType.UG -> 5,
-    CourseType.PGR -> 3,
-    CourseType.PGT -> 3
-  ).withDefault { _ => 5 }
+  // TAB-3312 Source: https://warwick.ac.uk/services/aro/dar/quality/categories/examinations/faqs/penalties
+  // TAB-7564 As of 1st August 2019 penalties for PG students have changed
+  // Treat any unknowns as the standard 5 marks per day
+  def latePenaltyPerDay(scd: Option[StudentCourseDetails]): Int =
+    scd.flatMap(_.courseType) match {
+      case Some(CourseType.PGT) if Option(scd.get.sprStartAcademicYear).exists(_ < AcademicYear.starting(2019)) => 3
+      case _ => 5
+    }
 }
 
 @Profile(Array("cm2Enabled"))
@@ -72,16 +74,14 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
     val submission = assignment.findSubmission(student.getUserId)
     val daysLate = submission.map(_.workingDaysLate)
 
-    val courseType = submission.flatMap { submission =>
+    val studentCourseDetails = submission.flatMap { submission =>
       submission.universityId
         .flatMap(uid => profileService.getMemberByUniversityId(uid).map(HibernateHelpers.initialiseAndUnproxy))
         .collect { case stu: StudentMember => stu }
         .flatMap(_.mostSignificantCourseDetails)
-        .flatMap(_.courseType)
     }
 
-    // Treat any unknowns as an undergraduate
-    val latePenaltyPerDay = FeedbackAdjustmentsController.LatePenaltyPerDay(courseType.getOrElse(CourseType.UG))
+    val latePenaltyPerDay = FeedbackAdjustmentsController.latePenaltyPerDay(studentCourseDetails)
     val marksSubtracted = daysLate.map(latePenaltyPerDay * _)
 
     val proposedAdjustment = {
