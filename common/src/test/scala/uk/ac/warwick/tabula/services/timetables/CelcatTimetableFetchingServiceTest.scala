@@ -46,7 +46,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
       resourceAsString("1503003.json"),
       filterLectures = true
     )
-    // 24 events, of which 9 are filtered out - TAB-4754
+    // 26 events, of which 11 are filtered out - TAB-4754/TAB-7601
     events.events.size should be(15)
 
     val combined = service.combineIdenticalEvents(events).events.sorted

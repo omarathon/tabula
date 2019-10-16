@@ -316,8 +316,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
     JSON.parseFull(incomingJson) match {
       case Some(jsonData: List[Map[String, Any]]@unchecked) =>
         EventList.fresh(jsonData.filterNot { event =>
-          // TAB-4754 These lectures are already in Syllabus+ so we don't include them again
-          filterLectures && event("contactType") == "L" && event("lectureStreamCount") == 1 && !features.timetableIncludeLectureFeedWBS
+          // TAB-7601 The feed contains lots of additional events starting with G- which needs filtering
+          event("solrDocId").toString.startsWith("G-") ||
+            // TAB-4754 These lectures are already in Syllabus+ so we don't include them again
+            (filterLectures && event("contactType") == "L" && event("lectureStreamCount") == 1 && !features.timetableIncludeLectureFeedWBS)
         }.flatMap { event =>
           val start = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("start", "").toString)
           val end = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("end", "").toString)
