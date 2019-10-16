@@ -26,6 +26,10 @@ trait AssessmentMembershipService {
 
   def delete(group: AssessmentGroup): Unit
 
+  def delete(assessmentComponent: AssessmentComponent): Unit
+
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit
+
   def getAssessmentGroup(id: String): Option[AssessmentGroup]
 
   def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
@@ -60,6 +64,8 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
+  def getAllAssessmentComponents: Seq[AssessmentComponent]
+
   /**
     * Get all assessment groups that can serve this assignment this year.
     * Should return as many groups as there are distinct OCCURRENCE values for a given
@@ -70,6 +76,8 @@ trait AssessmentMembershipService {
   def getUpstreamAssessmentGroupInfo(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
   def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+
+  def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
   def save(assignment: AssessmentComponent): AssessmentComponent
 
@@ -222,6 +230,14 @@ class AssessmentMembershipServiceImpl
     dao.delete(group)
   }
 
+  def delete(assessmentComponent: AssessmentComponent) {
+    dao.delete(assessmentComponent)
+  }
+
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup) {
+    dao.delete(upstreamAssessmentGroup)
+  }
+
   def getAssessmentComponent(id: String): Option[AssessmentComponent] = dao.getAssessmentComponent(id)
 
   def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent] = dao.getAssessmentComponent(group)
@@ -236,6 +252,9 @@ class AssessmentMembershipServiceImpl
     */
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
     dao.getAssessmentComponents(moduleCode, inUseOnly)
+
+  def getAllAssessmentComponents: Seq[AssessmentComponent] =
+    dao.getAllAssessmentComponents
 
   /**
     * Gets assessment components for this department.
@@ -259,6 +278,9 @@ class AssessmentMembershipServiceImpl
 
   def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
     dao.getUpstreamAssessmentGroups(registration, eagerLoad)
+
+  def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+    dao.getUpstreamAssessmentGroups(academicYears)
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
     dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
