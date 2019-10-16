@@ -1460,9 +1460,9 @@ $(() => {
   $('.bulk-email').each((i, button) => {
     const $button = $(button);
     const emails = $button.data('emails');
-    const separator = $button.data('separator');
-    const userEmail = $button.data('userEmail');
-    const subject = $button.data('subject');
+    const separator = $('<div/>').append($button.data('separator')).text();
+    const userEmail = $('<div/>').append($button.data('userEmail')).text();
+    const subject = $('<div/>').append($button.data('subject')).text();
     const emailString = $('<div/>').append(emails.join(separator)).text();
 
     const $content = $(`
