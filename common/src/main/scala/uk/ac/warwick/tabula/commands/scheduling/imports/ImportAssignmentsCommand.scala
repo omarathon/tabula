@@ -118,7 +118,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       val existingAssessmentComponents = transactional(readOnly = true) {
         assessmentMembershipService.getAllAssessmentComponents
       }
-
       val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
@@ -140,7 +139,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         }
       }
 
-      // find any existingAssessmentComponents that no longer appear in SITS
+      // find any existing AssessmentComponents that no longer appear in SITS
         existingAssessmentComponents.foreach { existing =>
           transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
@@ -162,7 +161,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         }
       }
     }
-   }
+  }
 
   def doGroups() {
     benchmark("Import assessment groups") {
@@ -189,7 +188,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
           }
         }
       }
-
     }
   }
 
