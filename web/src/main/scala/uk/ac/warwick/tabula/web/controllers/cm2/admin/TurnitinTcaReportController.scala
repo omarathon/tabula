@@ -25,7 +25,10 @@ class TurnitinTcaReportController extends CourseworkController {
   ): TurnitinTcaReportCommand = TurnitinTcaReportCommand(mandatory(assignment), mandatory(attachment), user)
 
   @RequestMapping
-  def goToReport(@ModelAttribute("command") command: TurnitinTcaReportCommand): Mav = command.apply()
-    .map(uri => Mav("redirect:" + uri.toString))
-    .getOrElse(Mav("cm2/admin/assignments/turnitin/report_error", "problem" -> "There was a problem fetching the report from Turnitin")) // TODO - TAB-7647
+  def goToReport(@ModelAttribute("command") command: TurnitinTcaReportCommand): Mav = {
+    command.apply().fold(
+      error => Mav("cm2/admin/assignments/turnitin/report_error", "problem" -> error),
+      uri => Mav("redirect:" + uri.toString)
+    )
+  }
 }

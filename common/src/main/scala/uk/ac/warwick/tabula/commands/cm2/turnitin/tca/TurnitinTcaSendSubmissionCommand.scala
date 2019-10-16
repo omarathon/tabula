@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.turnitin.tca
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand.Result
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TurnitinTcaServiceComponent}
@@ -11,11 +12,13 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object TurnitinTcaSendSubmissionCommand {
-  type CommandType = Appliable[Option[TcaSubmission]]
+
+  type Result = Either[String, TcaSubmission]
+  type CommandType = Appliable[Result]
 
   def apply(attachment: FileAttachment, user: User) =
     new TurnitinTcaSendSubmissionCommandInternal(attachment, user)
-    with ComposableCommand[Option[TcaSubmission]]
+    with ComposableCommand[Result]
     with TurnitinTcaSendSubmissionCommandPermissions
     with TurnitinTcaSendSubmissionState
     with TurnitinTcaSendSubmissionDescription
@@ -23,9 +26,9 @@ object TurnitinTcaSendSubmissionCommand {
 }
 
 class TurnitinTcaSendSubmissionCommandInternal(val attachment: FileAttachment, val user: User)
-extends CommandInternal[Option[TcaSubmission]] {
+extends CommandInternal[Result] {
   self: TurnitinTcaServiceComponent =>
-  override def applyInternal(): Option[TcaSubmission] = {
+  override def applyInternal(): Result = {
     Await.result(turnitinTcaService.createSubmission(attachment, user), Duration.Inf)
   }
 }
@@ -35,7 +38,7 @@ trait TurnitinTcaSendSubmissionState {
   def user: User
 }
 
-trait TurnitinTcaSendSubmissionDescription extends Describable[Option[TcaSubmission]] {
+trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
   self: TurnitinTcaSendSubmissionState =>
   override lazy val eventName = "TurnitinTCASendSubmission"
 
@@ -43,15 +46,15 @@ trait TurnitinTcaSendSubmissionDescription extends Describable[Option[TcaSubmiss
     d.fileAttachments(Seq(attachment))
   }
 
-  override def describeResult(d: Description, result: Option[TcaSubmission]): Unit = {
-    d.property("tcaSubmissionCreated" -> result.isDefined)
+  override def describeResult(d: Description, result: Result): Unit = {
+    d.property("tcaSubmissionCreated" -> result.isRight)
     result match {
-      case Some(tcaSubmission:TcaSubmission) =>
+      case Right(tcaSubmission:TcaSubmission) =>
         d.properties(
           "tcaSubmissionId" -> tcaSubmission.id,
           "tcaStatus" -> tcaSubmission.status,
           "tcaCreatedTime" -> tcaSubmission.created)
-      case None =>
+      case Left(error) => "tcaError" -> error
     }
   }
 }

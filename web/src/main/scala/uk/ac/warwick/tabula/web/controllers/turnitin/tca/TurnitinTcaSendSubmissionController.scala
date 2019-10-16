@@ -23,8 +23,12 @@ class TurnitinTcaSendSubmissionController extends CourseworkController with Logg
 
   @RequestMapping(method = Array(POST))
   def submissionComplete(@ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
-    Mav(new JSONView(Map(
-      "succeeded" -> command.apply().isDefined
-    ))).noLayout()
+
+    val result = command.apply().fold(
+      error => Map("succeeded" -> false, "error" -> error),
+      s => Map("succeeded" -> false, "tcaSubmission" -> s.id)
+    )
+
+    Mav(new JSONView(result)).noLayout()
   }
 }

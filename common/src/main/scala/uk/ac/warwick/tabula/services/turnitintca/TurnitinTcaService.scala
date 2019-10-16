@@ -9,11 +9,10 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module, OriginalityReport, Submission}
-import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
@@ -23,6 +22,17 @@ import scala.util.Try
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.util.web.Uri
 
+case class TcaError(
+  status: Int,
+  message: String
+)
+
+object TcaError {
+  val readsTcaError: Reads[TcaError] = (
+    (__ \ "status").read[Int] and
+    (__ \ "message").read[String]
+  )(TcaError.apply _)
+}
 
 case class TurnitinTcaConfiguration(
   baseUri: String,
@@ -32,10 +42,10 @@ case class TurnitinTcaConfiguration(
 )
 
 trait TurnitinTcaService {
-  def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]]
+  def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
-  def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Option[Uri]]
+  def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
   def listWebhooks: Future[Seq[TcaWebhook]]
   def registerWebhook(webhook: TcaWebhook): Future[Unit]
 }
@@ -61,7 +71,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     "version"-> "v1beta"
   )
 
-  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Option[TcaSubmission]] = {
+  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]] = {
 
     Future {
       val tabulaSubmission: Submission = fileAttachment.submissionValue.submission
@@ -88,19 +98,26 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
         .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
         .build()
 
-      val handler: ResponseHandler[Option[TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
+      val handler: ResponseHandler[Either[String, TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
 
-        json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).fold(
+        val jsResult = json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).map(Right.apply).orElse(
+          json.validate[TcaError](TcaError.readsTcaError).map(Left.apply)
+        )
+
+        jsResult.fold[Either[String, TcaSubmission]](
           invalid => {
-            logger.error(s"Error creating submission : $invalid")
-            logger.error(s"Response was: $json")
-            null
+            val message = s"Error parsing response when creating submission : $invalid\nResponse was: $json"
+            logger.error(message)
+            Left(message)
           },
-          tcaSubmission => {
+          apiResponse => apiResponse.fold(
+            error => Left(error.message),
+            tcaSubmission =>
             fileAttachment.originalityReport match {
               case existingOriginalityReport if existingOriginalityReport != null =>
-                logger.error(s"Not creating an originality report as one already exists for file: ${fileAttachment.id}")
-                None
+                val message = s"Not creating an originality report as one already exists for file: ${fileAttachment.id}"
+                logger.warn(message)
+                Left(message)
               case _ =>
                 logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
                 val report = new OriginalityReport
@@ -110,18 +127,19 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
                 report.tcaSubmissionStatus = tcaSubmission.status
                 report.tcaSubmission = tcaSubmission.id
                 originalityReportService.saveOrUpdate(report)
-                Some(tcaSubmission)
+                Right(tcaSubmission)
             }
-          }
+          )
         )
       }
 
       Try(httpClient.execute(req, handler)).fold(
         t => {
-          logger.error(s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}", t)
-          None
+          val message = s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}"
+          logger.error(message, t)
+          Left(message)
         },
-          identity
+        identity
       )
     }
   }
@@ -194,13 +212,10 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     val req = tcaRequest(RequestBuilder.get(s"${tcaConfiguration.baseUri}/webhooks")).build()
 
     val handler: ResponseHandler[Seq[TcaWebhook]] = ApacheHttpClientUtils.jsonResponseHandler { json =>
-      json.validate[Seq[TcaWebhook]](Reads.seq(TcaWebhook.reads)).fold(
-        invalid => {
-          logger.error(s"Error fetching webhooks - $invalid")
+      json.validate[Seq[TcaWebhook]](Reads.seq(TcaWebhook.reads)).recoverTotal(invalid => {
+          logger.error(s"Error fetching webhooks - $invalid\nResponse $json")
           Seq()
-        },
-        identity
-      )
+      })
     }
 
     Try(httpClient.execute(req, handler)).fold(
@@ -248,7 +263,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     originalityReport
   }
 
-  override def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Option[Uri]] = Future {
+  override def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]] = Future {
     val requestBody: JsObject = Json.obj(
       "viewer_user_id" -> user.apparentId,
       "locale" -> "en",
@@ -262,20 +277,25 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
     val uriRead: Reads[Uri] = (__ \ "viewer_url").read[String].map(Uri.parse)
 
-    val handler: ResponseHandler[Option[Uri]] = ApacheHttpClientUtils.jsonResponseHandler { json =>
-      json.validate[Uri](uriRead).fold(
-        invalid => {
-          logger.error(s"Error fetching report url - $invalid")
-          None
-        },
-        uri => Some(uri)
+    val handler: ResponseHandler[Either[String, Uri]] = ApacheHttpClientUtils.jsonResponseHandler { json =>
+
+      val jsResult = json.validate[Uri](uriRead).map(Right.apply).orElse(
+        json.validate[TcaError](TcaError.readsTcaError).map(e => Left(e.message))
       )
+
+      jsResult.recoverTotal(invalid => {
+        val message = s"Error fetching report url - $invalid"
+        logger.error(message)
+        Left(message)
+      })
+
     }
 
     Try(httpClient.execute(req, handler)).fold(
       t => {
-        logger.error(s"Error requesting originality report for file ${originalityReport.attachment}", t)
-        None
+        val message = s"Error requesting originality report for file ${originalityReport.attachment}"
+        logger.error(message, t)
+        Left(message)
       },
       identity
     )
