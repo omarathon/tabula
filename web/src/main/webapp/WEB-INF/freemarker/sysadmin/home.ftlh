@@ -95,6 +95,12 @@
     </p>
 
     <p>
+      <@f.form method="post" action="${url('/sysadmin/stamp-missing')}" modelAttribute="">
+        <button class="btn btn-danger" type="submit">Stamp missing profiles in SITS</button>
+      </@f.form>
+    </p>
+
+    <p>
       <@f.form method="post" action="${url('/sysadmin/recheck-missing')}" modelAttribute="blankForm">
       Recheck missing stamps from
     <div class="input-group">
