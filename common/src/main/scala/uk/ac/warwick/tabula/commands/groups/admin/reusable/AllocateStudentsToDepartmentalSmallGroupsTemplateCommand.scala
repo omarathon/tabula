@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.{Cell, DataValidation, Row, Sheet}
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
@@ -53,14 +54,13 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
       val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
 
       // If this user is already in a group, prefill
-      groups.find {
-        _.students.includesUser(user)
-      }.foreach { group =>
+      groups.find(_.students.includesUser(user)).foreach { group =>
         groupNameCell.setCellValue(group.name)
       }
       row.createCell(3).setCellFormula(
         "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
       )
+      workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
     }
 
     formatWorkbook(workbook)
@@ -111,7 +111,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
 
   def generateAllocationSheet(workbook: SXSSFWorkbook): Sheet = {
     val sheet = workbook.createSheet(allocateSheetName)
-    sheet.trackAllColumnsForAutoSizing()
+    sheet.trackColumnsForAutoSizing((0 to 2).map(i => i: JInteger).asJava)
 
     // add header row
     val header = sheet.createRow(0)
@@ -136,10 +136,10 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
     val sheet = workbook.getSheet(allocateSheetName)
 
     // set style on all columns
-    0 to 3 foreach {
-      col =>
-        sheet.setDefaultColumnStyle(col, style)
-        sheet.autoSizeColumn(col)
+    // Don't auto-size column 3, we set it manually
+    (0 to 2).foreach { col =>
+      sheet.setDefaultColumnStyle(col, style)
+      sheet.autoSizeColumn(col)
     }
 
     // set ID column to be wider
