@@ -367,7 +367,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def updateMissingForIndividual(universityId: String): Option[Member] = {
     profileService.getMemberByUniversityIdStaleOrFresh(universityId).flatMap {
-      case member@(_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
+      case member @ (_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
       case stu: StudentMember =>
         val sitsRows = profileImporter.sitsStudentRows(Seq(universityId))
         val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct

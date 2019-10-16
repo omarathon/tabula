@@ -60,15 +60,16 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
       copyStudentCourseProperties(new BeanWrapperImpl(courseRow), studentCourseDetailsBean) |
         markAsSeenInSits(studentCourseDetailsBean)
 
-    if (isTransient || hasChanged) {
+    if (isTransient || studentCourseDetails.stale || hasChanged) {
       try {
-        logger.debug(s"Saving changes for $studentCourseDetails because ${if (isTransient) "it's a new object" else "it's changed"}")
+        logger.debug(s"Saving changes for $studentCourseDetails because ${if (isTransient) "it's a new object" else if (studentCourseDetails.stale) "it's re-appeared in SITS" else "it's changed"}")
 
         if (courseRow.mostSignificant) {
           stuMem.mostSignificantCourse = studentCourseDetails
           logger.debug("Updating member most significant course to " + studentCourseDetails + " for " + stuMem)
         }
 
+        studentCourseDetails.missingFromImportSince = null
         studentCourseDetails.lastUpdatedDate = DateTime.now
         studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
       }

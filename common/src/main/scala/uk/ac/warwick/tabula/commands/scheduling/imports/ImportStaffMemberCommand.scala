@@ -51,9 +51,10 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
     val hasChanged = copyMemberProperties(commandBean, memberBean) |
       (member.isInstanceOf[StaffProperties] && copyStaffProperties(commandBean, memberBean))
 
-    if (isTransient || hasChanged) {
-      logger.debug(s"Saving changes for $member because ${if (isTransient) "it's a new object" else "it's changed"}")
+    if (isTransient || member.stale || hasChanged) {
+      logger.debug(s"Saving changes for $member because ${if (isTransient) "it's a new object" else if (member.stale) "it's re-appeared in SITS" else "it's changed"}")
 
+      member.missingFromImportSince = null
       member.lastUpdatedDate = DateTime.now
       memberDao.saveOrUpdate(member)
     }
