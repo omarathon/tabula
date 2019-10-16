@@ -520,7 +520,7 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     // unbind in case asynchronous runs get pass our class guard
     .off('click.popoverDismiss')
     .on('click.popoverDismiss', (e) => {
-      const $target = $(e.currentTarget);
+      const $target = $(e.target);
       // if clicking anywhere other than the popover itself
       if ($target.closest('.popover').length === 0 && $target.closest('.use-popover').length === 0) {
         $('.popover-inner').find('button.close').click();
@@ -1455,6 +1455,39 @@ $(() => {
       .find(':input:not(:focus):visible')
       .first()
       .focus();
+  });
+
+  $('.bulk-email').each((i, button) => {
+    const $button = $(button);
+    const emails = $button.data('emails');
+    const separator = $button.data('separator');
+    const userEmail = $button.data('userEmail');
+    const subject = $button.data('subject');
+
+    const $content = $(`
+      <div class="copy-to-clipboard-container">
+        <div class="form-group">
+          <label class="control-label">${emails.length} email address${emails.length === 1 ? '' : 'es'}</label>
+          <textarea class="form-control copy-to-clipboard-target" rows="3">${emails.join(separator)}</textarea>
+        </div>
+        <button class="btn btn-default copy-to-clipboard"><i class="fas fa-paste"></i> Copy to clipboard</button>
+        <a class="btn btn-default" href="mailto:${userEmail}?bcc=${emails.join(separator)}${subject && subject.length > 0 ? `&subject=${subject}` : ''}"><i class="fas fa-external-link-alt"></i> Open email app</a>
+      </div>
+    `);
+
+    $button.tabulaPopover({
+      trigger: 'click',
+      content: $('<div/>').append($content).html(),
+      html: true,
+      placement: 'top',
+    });
+  });
+
+  $body.on('click', 'button.copy-to-clipboard', (e) => {
+    const $button = $(e.target);
+    const $target = $button.closest('.copy-to-clipboard-container').find('.copy-to-clipboard-target');
+    $target.get(0).select();
+    document.execCommand('copy');
   });
 }); // on ready
 
