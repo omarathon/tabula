@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, UserAccessMgrRoleDefinition}
 import uk.ac.warwick.tabula.services._
@@ -219,6 +220,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
         session.delete(dept)
 
         session.flush()
+        RequestLevelCache.evictAll()
         assert(moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).isEmpty)
         assert(sessionWithoutFreshFilters.createSQLQuery("select id from module where department_id not in (select id from department)").list.size() == 0)
         assert(sessionWithoutFreshFilters.createSQLQuery("select id from route where department_id not in (select id from department)").list.size() == 0)
@@ -272,6 +274,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
       session.save(department)
     }
     // make sure the new parent department is flushed to the DB before we fetch it to create the child
+    RequestLevelCache.evictAll()
     session.flush()
 
     val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, moduleAndDepartmentService)
