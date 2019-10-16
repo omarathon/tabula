@@ -1463,15 +1463,16 @@ $(() => {
     const separator = $button.data('separator');
     const userEmail = $button.data('userEmail');
     const subject = $button.data('subject');
+    const emailString = $('<div/>').append(emails.join(separator)).text();
 
     const $content = $(`
       <div class="copy-to-clipboard-container">
         <div class="form-group">
           <label class="control-label">${emails.length} email address${emails.length === 1 ? '' : 'es'}</label>
-          <textarea class="form-control copy-to-clipboard-target" rows="3">${emails.join(separator)}</textarea>
+          <textarea class="form-control copy-to-clipboard-target" rows="3">${emailString}</textarea>
         </div>
         <button class="btn btn-default copy-to-clipboard"><i class="fas fa-paste"></i> Copy to clipboard</button>
-        <a class="btn btn-default" href="mailto:${userEmail}?bcc=${emails.join(separator)}${subject && subject.length > 0 ? `&subject=${subject}` : ''}"><i class="fas fa-external-link-alt"></i> Open email app</a>
+        <a class="btn btn-default" href="mailto:${userEmail}?bcc=${emailString}${subject && subject.length > 0 ? `&subject=${subject}` : ''}"><i class="fas fa-external-link-alt"></i> Open email app</a>
       </div>
     `);
 
