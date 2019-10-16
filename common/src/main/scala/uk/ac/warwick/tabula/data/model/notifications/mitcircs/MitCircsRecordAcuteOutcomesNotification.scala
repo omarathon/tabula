@@ -77,6 +77,7 @@ class MitCircsRecordAcuteOutcomesNotification
 
       if (settings.notifyDepartmentAdministrators.value && (users.isEmpty || notifyAllGroups)) {
         users ++= submission.affectedAssessments.asScala
+          .filter(a => Option(a.acuteOutcome).isDefined)
           .map(_.module.adminDepartment)
           .distinct
           .flatMap(_.owners.users)
