@@ -43,8 +43,8 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
     val hasChanged = (copyStudentCourseYearProperties(rowBean, studentCourseYearDetailsBean)
       | markAsSeenInSits(studentCourseYearDetailsBean))
 
-    if (isTransient || hasChanged) {
-      logger.debug(s"Saving changes for $studentCourseYearDetails because ${if (isTransient) "it's a new object" else "it's changed"}")
+    if (isTransient || studentCourseYearDetails.stale || hasChanged) {
+      logger.debug(s"Saving changes for $studentCourseYearDetails because ${if (isTransient) "it's a new object" else if (studentCourseYearDetails.stale) "it's re-appeared in SITS" else "it's changed"}")
 
       if (studentCourseDetails.latestStudentCourseYearDetails == null ||
         // need to include fresh or stale since this might be a row which was deleted but has been re-instated
@@ -54,6 +54,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
         studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
       }
 
+      studentCourseYearDetails.missingFromImportSince = null
       studentCourseYearDetails.lastUpdatedDate = DateTime.now
       studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
     }
