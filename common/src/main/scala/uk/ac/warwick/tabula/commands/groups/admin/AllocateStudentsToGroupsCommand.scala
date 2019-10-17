@@ -53,7 +53,10 @@ class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: Small
       val userGroup = UserGroup.ofUniversityIds
       users.asScala.foreach { user =>
         userGroup.addUserId(user.getWarwickId)
-        smallGroupService.backFillAttendance(user.getWarwickId, groupEventOccurrences(group), viewer)
+        // if the user is being added to this group then back fill any attendance for past events they won't have been expected to attend
+        if(!group.students.includesUser(user)){
+          smallGroupService.backFillAttendance(user.getWarwickId, groupEventOccurrences(group), viewer)
+        }
       }
       group.students.copyFrom(userGroup)
       smallGroupService.saveOrUpdate(group)
