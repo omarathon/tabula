@@ -1460,10 +1460,10 @@ $(() => {
   $body.on('click', '.bulk-email:not(.bulk-email-init)', (e) => {
     const $button = $(e.target);
     const emails = $button.data('emails');
-    const separator = $('<div/>').append($button.data('separator')).text();
-    const userEmail = $('<div/>').append($button.data('userEmail')).text();
-    const subject = $('<div/>').append($button.data('subject')).text();
-    const emailString = $('<div/>').append(emails.join(separator)).text();
+    const separator = $button.data('separator');
+    const userEmail = encodeURI($button.data('userEmail'));
+    const subject = encodeURIComponent($button.data('subject'));
+    const emailString = $('<div/>').text(emails.join(separator)).html();
 
     const $content = $(`
       <div class="copy-to-clipboard-container">

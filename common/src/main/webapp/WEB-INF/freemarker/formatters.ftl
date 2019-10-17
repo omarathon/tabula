@@ -444,7 +444,7 @@ preposition: Text to relate the title to the department name in the second line,
 			data-emails="[<#list emails as email>&quot;${email}&quot;<#if email_has_next>,</#if></#list>]"
 			data-separator="${separator}"
 			data-user-email="${user.email!''}"
-			data-subject="${subject?url}"
+			data-subject="${subject}"
 		>
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
