@@ -1457,8 +1457,8 @@ $(() => {
       .focus();
   });
 
-  $('.bulk-email').each((i, button) => {
-    const $button = $(button);
+  $body.on('click', '.bulk-email:not(.bulk-email-init)', (e) => {
+    const $button = $(e.target);
     const emails = $button.data('emails');
     const separator = $('<div/>').append($button.data('separator')).text();
     const userEmail = $('<div/>').append($button.data('userEmail')).text();
@@ -1481,7 +1481,7 @@ $(() => {
       content: $('<div/>').append($content).html(),
       html: true,
       placement: 'top',
-    });
+    }).addClass('bulk-email-init').triggerHandler('click');
   });
 
   $body.on('click', 'button.copy-to-clipboard', (e) => {
