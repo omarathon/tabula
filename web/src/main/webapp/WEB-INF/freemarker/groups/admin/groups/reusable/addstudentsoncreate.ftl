@@ -35,7 +35,7 @@
                 Link to SITS
                 <#assign popoverContent><#noescape>
                   You can no longer link to SITS for the current academic year,
-                  as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
+                  as changes for the forthcoming academic year are being made that will make the students in this small group set inaccurate.
                 </#noescape></#assign>
                 <a class="use-popover"
                    tabindex="0" role="button" data-trigger="click focus"

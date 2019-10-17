@@ -56,7 +56,7 @@ abstract class UpdateStudentsForSmallGroupSetController extends GroupsController
     if (sitsCount == 0)
       ""
     else
-      s"${sitsCount + addedCount} students on this scheme <span class='very-subtle'>($sitsCount from SITS${
+      s"${sitsCount + addedCount} students in this small group set <span class='very-subtle'>($sitsCount from SITS${
         removedCount match {
           case 0 => ""
           case count => s" after $count removed manually"
