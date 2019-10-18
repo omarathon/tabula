@@ -63,8 +63,12 @@ trait CreateSmallGroupApi {
   self: SmallGroupSetController =>
 
   @ModelAttribute("createCommand")
-  def createCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet): ModifySmallGroupCommand =
+  def createCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet): ModifySmallGroupCommand = {
+    // This calls mandatory() inside it so doesn't need doing separately
+    mustBeLinked(smallGroupSet, module)
+
     ModifySmallGroupCommand.create(module, smallGroupSet)
+  }
 
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
   def createGroup(@RequestBody request: ModifySmallGroupRequest, @ModelAttribute("createCommand") command: ModifySmallGroupCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet)(implicit response: HttpServletResponse): Mav = {
@@ -92,8 +96,13 @@ trait EditSmallGroupApi {
   self: SmallGroupSetController =>
 
   @ModelAttribute("editCommand")
-  def editCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): ModifySmallGroupCommand =
+  def editCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): ModifySmallGroupCommand = {
+    // These call mandatory() inside them so doesn't need doing separately
+    mustBeLinked(smallGroup, smallGroupSet)
+    mustBeLinked(smallGroupSet, module)
+
     ModifySmallGroupCommand.edit(module, smallGroupSet, smallGroup)
+  }
 
   @RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
   def editGroup(@RequestBody request: ModifySmallGroupRequest, @ModelAttribute("editCommand") command: ModifySmallGroupCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): Mav = {
@@ -117,8 +126,13 @@ trait DeleteSmallGroupApi {
   self: SmallGroupSetController =>
 
   @ModelAttribute("deleteCommand")
-  def deleteCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): DeleteSmallGroupCommand =
+  def deleteCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): DeleteSmallGroupCommand = {
+    // These call mandatory() inside them so doesn't need doing separately
+    mustBeLinked(smallGroup, smallGroupSet)
+    mustBeLinked(smallGroupSet, module)
+
     DeleteSmallGroupCommand(smallGroupSet, smallGroup)
+  }
 
   @RequestMapping(method = Array(DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
   def deleteGroup(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupCommand, errors: Errors): Mav = {
