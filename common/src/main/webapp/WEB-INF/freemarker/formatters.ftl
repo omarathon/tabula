@@ -439,22 +439,15 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 
 	<#if emails?size gt 0>
-		<a class="btn btn-default <#if emails?size gt limit>use-tooltip disabled</#if>"
-			<#if emails?size gt limit>
-        title="Emailing is disabled for groups of more than ${limit}"
-			<#else>
-				href="mailto:${user.email!''}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>&subject=${subject?url}</#if>"
-			</#if> >
+		<a
+			class="btn btn-default bulk-email"
+			data-emails="[<#list emails as email>&quot;${email}&quot;<#if email_has_next>,</#if></#list>]"
+			data-separator="${separator}"
+			data-user-email="${user.email!''}"
+			data-subject="${subject}"
+		>
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-
-		<#-- Awaiting fix in TAB-6657 -->
-		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
-		   data-html="true"
-		   data-trigger="hover focus"
-		   class="use-popover tabulaPopover-init"
-		   title="" aria-label="Help" data-container="body"
-		   data-placement="left" href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
 
