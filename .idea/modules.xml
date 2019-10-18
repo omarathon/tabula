@@ -2,6 +2,19 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/IdeaProjects.tabula.iml" filepath="$PROJECT_DIR$/.idea/modules/IdeaProjects.tabula.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.iml" filepath="$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/api/IdeaProjects.tabula.api.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/IdeaProjects.tabula.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.main.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.test.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/IdeaProjects.tabula.integrationTest.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.iml" filepath="$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.main.iml" filepath="$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.test.iml" filepath="$PROJECT_DIR$/.idea/modules/web/IdeaProjects.tabula.web.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/bamboo-specs/bamboo-specs.iml" filepath="$PROJECT_DIR$/bamboo-specs/bamboo-specs.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tabula.iml" filepath="$PROJECT_DIR$/.idea/modules/tabula.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/tabula.api.iml" filepath="$PROJECT_DIR$/.idea/modules/api/tabula.api.iml" />
