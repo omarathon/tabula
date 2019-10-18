@@ -115,20 +115,22 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
             Await.result(reasonableAdjustmentsImporter.getReasonableAdjustments(universityIds), Duration.Inf)
           }
 
-          members.map { info =>
-            val universityId = info.member.universityId
-            val ssoUser = users(universityId)
+          members
+            .filter { info => allStudentSitsRows.contains(info.member.universityId) }
+            .map { info =>
+              val universityId = info.member.universityId
+              val ssoUser = users(universityId)
 
-            val sitsRows = allStudentSitsRows.getOrElse(universityId, Seq.empty)
+              val sitsRows = allStudentSitsRows.getOrElse(universityId, Seq.empty)
 
-            ImportStudentRowCommand(
-              info,
-              ssoUser,
-              sitsRows,
-              allStudentsReasonableAdjustments.get(universityId).flatten,
-              importCommandFactory
-            )
-          }.seq
+              ImportStudentRowCommand(
+                info,
+                ssoUser,
+                sitsRows,
+                allStudentsReasonableAdjustments.get(universityId).flatten,
+                importCommandFactory
+              )
+            }
 
         case Applicant | Other => members.map { info =>
           val ssoUser = users(info.member.universityId)
