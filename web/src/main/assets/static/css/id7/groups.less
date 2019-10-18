@@ -218,29 +218,77 @@ table.week-selector {
     text-align: center;
   }
 
-  div.scrollable-table div.right {
-    max-width: calc(100% - 150px);
-  }
-
-  .scrollable-table(150px, 90px, 90px, 300px);
-
+  // Nasty IE11 support
   .scrollable-table {
-    display: block;
+    position: relative;
+
+    .left {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 150px;
+
+      table {
+        table-layout: fixed;
+      }
+    }
+
+    .right {
+      position: relative;
+      left: 150px;
+      top: -5px;
+      width: calc(100% - 150px);
+    }
+
+    tbody tr .ellipsis {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    thead tr, tbody tr {
+      height: 90px;
+    }
   }
 
-  .scrollable-table div.scrollable-table-row {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: baseline;
-    justify-content: flex-end;
-  }
+  @supports (display: flex) {
+    .scrollable-table {
+      position: static;
 
-  .scrollable-table div.scrollable-table-row .right {
-    flex-grow: 1;
-  }
+      .left, .right {
+        position: static;
+        top: auto;
+        left: auto;
+        bottom: auto;
+        right: auto;
+        width: auto;
+      }
+    }
 
-  .scrollable-table div.scrollable-table-row .right {
-    flex-shrink: 0;
+    div.scrollable-table div.right {
+      max-width: calc(100% - 150px);
+    }
+
+    .scrollable-table(150px, 90px, 90px, 300px);
+
+    .scrollable-table {
+      display: block;
+    }
+
+    .scrollable-table div.scrollable-table-row {
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: baseline;
+      justify-content: flex-end;
+    }
+
+    .scrollable-table div.scrollable-table-row .right {
+      flex-grow: 1;
+    }
+
+    .scrollable-table div.scrollable-table-row .right {
+      flex-shrink: 0;
+    }
   }
 }
 
