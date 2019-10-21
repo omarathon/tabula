@@ -58,9 +58,10 @@ trait DeleteStudentRelationshipTypeCommandDescription extends Describable[Studen
 
   // describe the thing that's happening.
   override def describe(d: Description): Unit =
-    d.properties(
-      "id" -> relationshipType.id,
-      "urlPart" -> relationshipType.urlPart,
-      "description" -> relationshipType.description
-    )
+    d.studentRelationshipType(relationshipType)
+     .properties(
+       "id" -> relationshipType.id,
+       "urlPart" -> relationshipType.urlPart,
+       "description" -> relationshipType.description
+     )
 }

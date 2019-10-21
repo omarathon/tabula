@@ -49,13 +49,11 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "UploadFeedbackToSits"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assessment(assessment)
-  }
 
-  override def describeResult(d: Description, result: Seq[Feedback]): Unit = {
-    d.property("students" -> result.map(_.usercode))
-  }
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit =
+    d.feedbacks(result)
 }
 
 trait UploadFeedbackToSitsCommandState {

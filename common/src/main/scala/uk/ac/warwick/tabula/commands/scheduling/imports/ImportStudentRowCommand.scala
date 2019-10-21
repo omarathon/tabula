@@ -129,7 +129,11 @@ class ImportStudentRowCommandInternal(
   private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
     copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 
-  override def describe(d: Description): Unit = d.property("universityId" -> universityId).property("category" -> "student")
+  override def describe(d: Description): Unit =
+    d.properties(
+      "universityId" -> universityId,
+      "category" -> MemberUserType.Student.description
+    )
 }
 
 trait ImportStudentRowCommandState extends StudentProperties

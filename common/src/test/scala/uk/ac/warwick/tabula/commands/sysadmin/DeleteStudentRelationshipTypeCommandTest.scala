@@ -58,6 +58,8 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
       }
 
       val description: Description = mock[Description]
+      description.studentRelationshipType(testRelationshipType) returns description
+
       describable.describe(description)
       verify(description, times(1)).properties(
         "id" -> "trtId",

@@ -254,11 +254,11 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
     }
   }
 
-  override def describeResult(d: Description, s: Submission): Unit = {
-    d.assignment(assignment).properties("submission" -> s.id).fileAttachments(s.allAttachments)
-    if (s.isNoteworthy)
-      d.properties("submissionIsNoteworthy" -> true)
-  }
+  override def describeResult(d: Description, s: Submission): Unit =
+    d.assignment(assignment)
+     .submission(s)
+     .fileAttachments(s.allAttachments)
+     .property("submissionIsNoteworthy", s.isNoteworthy)
 }
 
 trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] with CompletesNotifications[Submission] {

@@ -54,8 +54,7 @@ trait DismissNotificationCommandPermissions extends RequiresPermissionsChecking 
 
 trait DismissNotificationCommandDescription extends Describable[Seq[Activity[_]]] {
   self: DismissNotificationCommandState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit =
     d.notifications(notifications)
-    d.property("dismiss", dismiss)
-  }
+     .property("dismiss", dismiss)
 }

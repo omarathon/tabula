@@ -118,7 +118,7 @@ trait GrantPermissionsCommandDescription[A <: PermissionsTarget] extends Describ
 
   def describe(d: Description): Unit = d.properties(
     "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
-    "usercodes" -> usercodes.asScala.mkString(","),
+    "users" -> usercodes.asScala,
     "permission" -> permission.getName,
     "overrideType" -> overrideType
   )

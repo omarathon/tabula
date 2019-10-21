@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import org.joda.time.DateTime
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Description, UploadedFile}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.permissions._
-import org.springframework.validation.Errors
 
 
 class OldAddMarkerFeedbackCommand(module: Module, assignment: Assignment, marker: User, val submitter: CurrentUser)
@@ -114,17 +114,13 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment: Assignment, marker
     item.duplicateFileNames = attachedFiles & feedbackFiles
   }
 
-  def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
-  }
+     .studentIds(items.asScala.map(_.uniNumber))
+     .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
 
-  override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
+  override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit =
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
-      .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
-      .properties("feedback" -> feedbacks.map(_.id))
-  }
+     .markerFeedbacks(feedbacks)
+     .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
 }

@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.commands.attendance.note
 
-import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState, AttendanceMonitoringCheckpoint, AttendanceMonitoringNote}
+import org.joda.time.DateTime
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.CurrentUser
-import org.joda.time.DateTime
-import org.springframework.validation.{Errors, BindingResult}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object EditAttendanceNoteCommand {
   def apply(student: StudentMember, point: AttendanceMonitoringPoint, user: CurrentUser, customStateStringOption: Option[String]) =
@@ -103,14 +103,12 @@ trait AttendanceNoteDescription extends Describable[AttendanceMonitoringNote] {
 
   override lazy val eventName = "UpdateAttendanceNote"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.studentIds(Seq(student.universityId))
-    d.attendanceMonitoringPoints(Seq(point))
-  }
+     .attendanceMonitoringPoints(Seq(point))
 
-  override def describeResult(d: Description, result: AttendanceMonitoringNote) {
-    d.property("note", result.note)
-  }
+  override def describeResult(d: Description, result: AttendanceMonitoringNote): Unit =
+    d.attendanceMonitoringNote(result)
 }
 
 trait AttendanceNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

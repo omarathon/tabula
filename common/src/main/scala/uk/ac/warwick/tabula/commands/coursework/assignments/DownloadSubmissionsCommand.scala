@@ -56,17 +56,13 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
   }
 
   override def describe(d: Description) {
-
     val downloads: Seq[Submission] = {
       if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
       else submissions.asScala
     }
 
     d.assignment(assignment)
-      .submissions(downloads)
-      .studentIds(downloads.flatMap(_.universityId))
-      .studentUsercodes(downloads.map(_.usercode))
-      .properties("submissionCount" -> Option(downloads).map(_.size).getOrElse(0))
+     .submissions(downloads)
   }
 
 }

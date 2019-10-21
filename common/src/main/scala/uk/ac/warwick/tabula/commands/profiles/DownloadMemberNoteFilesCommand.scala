@@ -43,11 +43,9 @@ class DownloadMemberNoteFilesCommand(val memberNote: MemberNote) extends Command
 
   private def zipped(memberNote: MemberNote) = Await.result(zipService.getSomeMemberNoteAttachmentsZip(memberNote), Duration.Inf)
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.property("filename", filename)
-  }
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 }

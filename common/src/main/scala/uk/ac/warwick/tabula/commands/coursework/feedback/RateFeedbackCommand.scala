@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Command, Description}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
 
 
 /**
@@ -73,7 +68,5 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 
   def enabled: Boolean = features.collectRatings && feedback.collectRatings
 
-  def describe(d: Description): Unit = d.feedback(feedback).properties( //			"rating" -> effectiveRating,
-    //			"previousRating" -> feedback.rating.orNull
-  )
+  def describe(d: Description): Unit = d.feedback(feedback)
 }

@@ -82,13 +82,10 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
     .studentIds(items.asScala.map(_.uniNumber))
     .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
 
-  override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit = {
+  override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit =
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
-      .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
-      .properties("feedback" -> feedbacks.map(_.id))
-  }
+     .feedbacks(feedbacks)
+     .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
 
   def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = {
     updatedFeedback.filter(_.released).flatMap { feedback =>

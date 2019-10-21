@@ -89,7 +89,5 @@ trait DownloadSubmissionsCommandDescription extends Describable[Result] {
 
   override def describeResult(d: Description, result: Result): Unit =
     d.submissions(result.submissions)
-      .studentIds(result.submissions.flatMap(_.universityId))
-      .studentUsercodes(result.submissions.map(_.usercode))
-      .properties("submissionCount" -> result.submissions.size)
+     .properties("submissionCount" -> result.submissions.size)
 }

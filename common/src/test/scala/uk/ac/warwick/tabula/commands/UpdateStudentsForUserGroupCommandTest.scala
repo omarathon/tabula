@@ -210,7 +210,8 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
       command.describe(d)
 
       d.allProperties should be(Map(
-        "smallGroupSet" -> "existingId"
+        "smallGroupSet" -> "existingId",
+        "department" -> "in"
       ))
     }
   }

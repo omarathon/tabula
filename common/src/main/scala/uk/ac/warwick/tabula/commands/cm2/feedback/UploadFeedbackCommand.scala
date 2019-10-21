@@ -61,8 +61,9 @@ case class ProblemFile(var path: String, var file: FileAttachment) {
 class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
   def applyInternal() {}
 
-  def describe(d: Description): Unit = d.assignment(cmd.assignment).properties(
-    "archive" -> cmd.archive.getOriginalFilename)
+  def describe(d: Description): Unit =
+    d.assignment(cmd.assignment)
+     .property("filename" -> cmd.archive.getOriginalFilename)
 }
 
 /**

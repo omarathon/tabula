@@ -91,10 +91,8 @@ trait AdminGetSingleSubmissionFileCommandDescription extends Describable[Result]
   override lazy val eventName: String = "AdminGetSingleSubmission"
 
   override def describe(d: Description): Unit =
-    d.submission(submission).properties(
-      "studentId" -> submission.studentIdentifier,
-      "filename" -> filename
-    )
+    d.submission(submission)
+     .property("filename" -> filename)
 }
 
 trait AdminGetSingleSubmissionAsZipCommandDescription extends Describable[Result] {
@@ -103,8 +101,6 @@ trait AdminGetSingleSubmissionAsZipCommandDescription extends Describable[Result
   override lazy val eventName: String = "AdminGetSingleSubmission"
 
   override def describe(d: Description): Unit =
-    d.submission(submission).properties(
-      "studentId" -> submission.studentIdentifier,
-      "attachmentCount" -> submission.allAttachments.size
-    )
+    d.submission(submission)
+     .property("attachmentCount" -> submission.allAttachments.size)
 }

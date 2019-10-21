@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.commands.sysadmin
 
-import org.hibernate.validator.constraints._
 import javax.validation.constraints._
-import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.services.RelationshipServiceComponent
+import org.hibernate.validator.constraints._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{CommandInternal, Describable, Description, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{StudentRelationshipSource, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 
 trait HasExistingStudentRelationshipType {
   val relationshipType: StudentRelationshipType
@@ -56,14 +52,16 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 }
 
 trait ModifyStudentRelationshipTypeCommandDescription extends Describable[StudentRelationshipType] {
-  this: StudentRelationshipTypeProperties =>
-  // describe the thing that's happening.
+  self: StudentRelationshipTypeProperties =>
   override def describe(d: Description): Unit =
     d.properties(
-      "id" -> id,
-      "urlPart" -> urlPart,
-      "description" -> description
-    )
+       "id" -> id,
+       "urlPart" -> urlPart,
+       "description" -> description
+     )
+
+  override def describeResult(d: Description, result: StudentRelationshipType): Unit =
+    d.studentRelationshipType(result)
 }
 
 trait StudentRelationshipTypeProperties {

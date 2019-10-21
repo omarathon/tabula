@@ -28,6 +28,9 @@ abstract class DeleteSyllabusPlusLocationCommandInternal(val location: SyllabusP
 
 trait DeleteSyllabusPlusLocationCommandDescription extends Describable[SyllabusPlusLocation]
   with DeleteSyllabusPlusLocationCommandState {
-  override def describe(d: Description): Unit = d.property("syllabusPlusLocation" -> location)
+  override lazy val eventName = "DeleteSyllabusPlusLocation"
+
+  override def describe(d: Description): Unit =
+    d.syllabusPlusLocation(location)
 }
 

@@ -57,14 +57,9 @@ trait ApplyScheduledStudentRelationshipChangesDescription extends Describable[Se
 
   override lazy val eventName = "ApplyScheduledStudentRelationshipChanges"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.studentRelationshipType(relationshipType)
-    d.property("relationships", relationships.asScala.map(relationship => Map(
-      "studentRelationship" -> relationship.id,
-      "studentCourseDetails" -> relationship.studentCourseDetails,
-      "agent" -> relationship.agent
-    )))
-  }
+     .studentRelationships(relationships.asScala)
 }
 
 trait ApplyScheduledStudentRelationshipChangesNotifications extends BulkRelationshipChangeNotifier[Seq[StudentRelationship], Seq[StudentRelationship]] {

@@ -86,11 +86,14 @@ trait ReplaceMarkerDescription extends Describable[CM2MarkingWorkflow] {
 
   override lazy val eventName: String = "ReplaceMarker"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit =
     d.department(department)
-    d.markingWorkflow(markingWorkflow)
-    d.properties(("assignments", assignmentsToUpdate.map(_.id)), ("oldMarker", oldMarker), ("newMarker", newMarker))
-  }
+     .markingWorkflow(markingWorkflow)
+     .properties(
+      "assignments" -> assignmentsToUpdate.map(_.id),
+      "oldMarker" -> oldMarker,
+      "newMarker" -> newMarker
+    )
 }
 
 trait ReplaceMarkerState {

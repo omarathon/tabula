@@ -18,9 +18,8 @@ class RemoveUserFromSmallGroupCommand(val user: User, val group: SmallGroup) ext
   }
 
   override def describe(d: Description): Unit =
-    d.smallGroup(group).properties(
-      "usercode" -> user.getUserId,
-      "universityId" -> user.getWarwickId
-    )
+    d.smallGroup(group)
+     .studentUsercodes(user.getUserId)
+     .studentIds(user.getWarwickId)
 
 }

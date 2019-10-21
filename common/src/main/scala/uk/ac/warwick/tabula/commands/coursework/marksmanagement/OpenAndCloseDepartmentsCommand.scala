@@ -70,12 +70,13 @@ trait OpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] 
 
   self: OpenAndCloseDepartmentsCommandState =>
 
-  def describe(d: Description): Unit = d.properties(
-    "degreeType" -> {
-      if (updatePostgrads) DegreeType.Postgraduate
-      else DegreeType.Undergraduate
-    }
-  )
+  def describe(d: Description): Unit =
+    d.properties(
+      "degreeType" -> {
+        if (updatePostgrads) DegreeType.Postgraduate.dbValue
+        else DegreeType.Undergraduate.dbValue
+      }
+    )
 }
 
 trait OpenAndCloseDepartmentsCommandState {

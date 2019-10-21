@@ -73,8 +73,7 @@ trait DeleteDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecki
 trait DeleteDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
   self: DeleteDepartmentSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
-    d.department(set.department).properties("smallGroupSet" -> set.id)
-  }
+  override def describe(d: Description): Unit =
+    d.departmentSmallGroupSet(set)
 
 }

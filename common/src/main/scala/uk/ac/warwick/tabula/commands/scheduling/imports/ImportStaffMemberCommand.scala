@@ -70,7 +70,11 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
     copyBasicProperties(basicStaffProperties, commandBean, memberBean)
 
 
-  override def describe(d: Description): Unit = d.property("universityId" -> universityId).property("category" -> "staff")
+  override def describe(d: Description): Unit =
+    d.properties(
+      "universityId" -> universityId,
+      "category" -> MemberUserType.Staff.description
+    )
 
 
 }

@@ -1,21 +1,17 @@
 package uk.ac.warwick.tabula.commands.coursework.departments
 
-import scala.collection.JavaConverters._
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import uk.ac.warwick.tabula.commands.{Description, Command}
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
-import org.springframework.transaction.annotation.Transactional
-import beans.BeanProperty
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.ZipService
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Department, FeedbackTemplate}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.system.BindListener
+
+import scala.collection.JavaConverters._
 
 abstract class FeedbackTemplateCommand(val department: Department)
   extends Command[Seq[FeedbackTemplate]] with Daoisms with BindListener {
@@ -35,11 +31,10 @@ abstract class FeedbackTemplateCommand(val department: Department)
     d.department(department)
   }
 
-  override def describeResult(d: Description, templates: Seq[FeedbackTemplate]) {
+  override def describeResult(d: Description, templates: Seq[FeedbackTemplate]): Unit =
     d.department(department)
-      .property("feedbackTemplate" -> templates.map(_.id))
-      .fileAttachments(templates.map(_.attachment))
-  }
+     .feedbackTemplates(templates)
+     .fileAttachments(templates.map(_.attachment))
 }
 
 class BulkFeedbackTemplateCommand(department: Department) extends FeedbackTemplateCommand(department) {

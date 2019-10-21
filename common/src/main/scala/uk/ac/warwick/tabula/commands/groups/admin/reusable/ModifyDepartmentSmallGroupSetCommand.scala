@@ -116,12 +116,12 @@ trait CreateDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecki
 trait CreateDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
   self: CreateDepartmentSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
-    d.department(department).properties("name" -> name)
-  }
+  override def describe(d: Description): Unit =
+    d.department(department)
+     .properties("name" -> name)
 
   override def describeResult(d: Description, set: DepartmentSmallGroupSet): Unit =
-    d.department(set.department).properties("smallGroupSet" -> set.id)
+    d.departmentSmallGroupSet(set)
 }
 
 trait EditDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -136,8 +136,7 @@ trait EditDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking
 trait EditDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
   self: EditDepartmentSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
-    d.department(smallGroupSet.department).properties("smallGroupSet" -> smallGroupSet.id)
-  }
+  override def describe(d: Description): Unit =
+    d.departmentSmallGroupSet(smallGroupSet)
 
 }

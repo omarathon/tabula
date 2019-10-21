@@ -42,10 +42,18 @@ trait AddMarkingDescriptorValidation extends ModifyMarkingDescriptorValidation {
 trait AddMarkingDescriptorDescription extends Describable[MarkingDescriptor] {
   self: ModifyMarkingDescriptorState =>
 
+  override lazy val eventName = "AddMarkingDescriptor"
+
   override def describe(d: Description): Unit = {
     d.department(department)
       .properties(
-        "markPoints" -> markPoints,
+        "markPoints" -> markPoints.asScala.map { markPoint =>
+          Map(
+            "mark" -> markPoint.mark,
+            "markClass" -> markPoint.markClass.name,
+            "name" -> markPoint.name
+          )
+        },
         "text" -> text
       )
   }

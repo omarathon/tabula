@@ -72,7 +72,7 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
     d.assignment(assignment)
       .submissions(submissions)
       .property("submissionCount" -> submissions.size)
-      .property("markedPlagarised" -> markPlagiarised)
+      .property("markedPlagiarised" -> markPlagiarised)
   }
 
 }

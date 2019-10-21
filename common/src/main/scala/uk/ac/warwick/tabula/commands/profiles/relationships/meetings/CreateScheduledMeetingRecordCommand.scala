@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
-import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions._
 
 import scala.collection.JavaConverters._
@@ -89,13 +87,10 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 
   override lazy val eventName = "CreateScheduledMeetingRecord"
 
-  override def describe(d: Description) {
-    relationships.asScala.flatMap(_.studentMember).headOption.map(d.member)
-    d.properties(
-      "creator" -> creator.universityId,
-      "relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", ")
-    )
-  }
+  override def describe(d: Description): Unit =
+    d.studentRelationships(relationships.asScala)
+     .studentRelationshipTypes(relationships.asScala.map(_.relationshipType).distinct)
+     .member(creator)
 }
 
 trait CreateScheduledMeetingRecordNotification extends AbstractScheduledMeetingRecordNotifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {

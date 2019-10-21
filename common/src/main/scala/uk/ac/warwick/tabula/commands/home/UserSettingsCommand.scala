@@ -70,9 +70,8 @@ trait UserSettingsDescription extends Describable[UserSettings] {
 
   self: UserSettingsCommandState =>
 
-  override def describe(d: Description) {
-    d.properties("user" -> user.apparentId)
-  }
+  override def describe(d: Description): Unit =
+    d.users(Seq(user.apparentUser))
 
   override def describeResult(d: Description, result: UserSettings): Unit = {
     result.activeDepartment.foreach(d.department)
@@ -84,7 +83,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
       "weekNumberingSystem" -> result.weekNumberingSystem,
       "bulkEmailSeparator" -> result.bulkEmailSeparator,
       "profilesDefaultView" -> result.profilesDefaultView,
-      "activeAcademicYear" -> result.activeAcademicYear.toString
+      "activeAcademicYear" -> result.activeAcademicYear.map(_.toString)
     )
   }
 }

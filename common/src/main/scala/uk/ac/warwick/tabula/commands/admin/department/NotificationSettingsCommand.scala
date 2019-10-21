@@ -174,12 +174,14 @@ trait NotificationSettingsPermissions extends RequiresPermissionsChecking with P
 trait NotificationSettingsDescription extends Describable[Department] {
   self: NotificationSettingsCommandState =>
 
+  override lazy val eventName = "NotificationSettings"
+
   override def describe(d: Description): Unit =
     d.department(department)
 
   override def describeResult(d: Description, result: Department): Unit =
     d.department(department)
-      .property("SmallGroupEventAttendanceReminder", department.notificationSettings("SmallGroupEventAttendanceReminder"))
-      .property("FinaliseFeedback", department.notificationSettings("FinaliseFeedback"))
-      .property("MitCircsRecordAcuteOutcomes", department.notificationSettings("MitCircsRecordAcuteOutcomes"))
+      .property("SmallGroupEventAttendanceReminder", department.notificationSettings("SmallGroupEventAttendanceReminder").toStringProps.toMap)
+      .property("FinaliseFeedback", department.notificationSettings("FinaliseFeedback").toStringProps.toMap)
+      .property("MitCircsRecordAcuteOutcomes", department.notificationSettings("MitCircsRecordAcuteOutcomes").toStringProps.toMap)
 }

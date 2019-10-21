@@ -57,14 +57,11 @@ class OldDownloadSelectedFeedbackCommand(val module: Module, val assignment: Ass
     }
   }
 
-  override def describe(d: Description): Unit = d
-    .assignment(assignment)
-    .studentUsercodes(students.asScala)
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+     .studentUsercodes(students.asScala)
 
-  override def describeResult(d: Description): Unit = d
-    .assignment(assignment)
-    .studentIds(feedbacks.asScala.flatMap(_.universityId))
-    .studentUsercodes(students.asScala) // is usercodes
-    .properties(
-    "feedbackCount" -> Option(feedbacks).map(_.size).getOrElse(0))
+  override def describeResult(d: Description): Unit =
+    d.assignment(assignment)
+     .feedbacks(feedbacks.asScala)
 }

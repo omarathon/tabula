@@ -63,7 +63,11 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
   private def copyApplicantProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
     copyBasicProperties(basicApplicantProperties, commandBean, memberBean)
 
-  override def describe(d: Description): Unit = d.property("universityId" -> universityId).property("category" -> this.userType)
+  override def describe(d: Description): Unit =
+    d.properties(
+      "universityId" -> universityId,
+      "category" -> userType.description
+    )
 
   def phoneNumberPermissions = Nil
 

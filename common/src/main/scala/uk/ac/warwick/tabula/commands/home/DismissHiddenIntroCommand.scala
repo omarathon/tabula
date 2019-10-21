@@ -23,9 +23,8 @@ class DismissHiddenIntroCommand(user: CurrentUser, settings: UserSettings, setti
     service.save(user, settings)
   }
 
-  override def describe(d: Description) {
-    d.properties("user" -> user.apparentId, "hash" -> settingHash)
-  }
+  override def describe(d: Description): Unit =
+    d.users(Seq(user.apparentUser)).property("hash" -> settingHash)
 
   override def validate(errors: Errors) {
     if (!user.exists) {

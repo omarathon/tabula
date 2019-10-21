@@ -210,9 +210,9 @@ trait UploadYearMarksDescription extends Describable[Seq[StudentCourseYearDetail
   override lazy val eventName = "UploadYearMarks"
 
   override def describe(d: Description) {
-    d.department(department).properties(Map(
+    d.department(department).properties(
       "academicYear" -> academicYear.toString
-    ))
+    )
   }
 }
 

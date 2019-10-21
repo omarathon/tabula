@@ -113,17 +113,8 @@ trait AgentPointRecordDescription extends Describable[(Seq[AttendanceMonitoringC
 
   override lazy val eventName = "AgentPointRecord"
 
-  override def describe(d: Description) {
-    d.property("checkpoints", checkpointMap.asScala.map { case (student, pointMap) =>
-      student.universityId -> pointMap.asScala.map { case (point, state) => point -> {
-        if (state == null)
-          "null"
-        else
-          state.dbValue
-      }
-      }
-    })
-  }
+  override def describe(d: Description): Unit =
+    d.attendanceMonitoringCheckpoints(checkpointMap.asScala.toMap.mapValues(_.asScala.toMap), verbose = true)
 }
 
 trait AgentPointRecordCommandState extends GroupsPoints {
