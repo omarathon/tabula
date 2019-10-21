@@ -115,21 +115,22 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
     val rowData = spreadsheetHelper.parseXSSFExcelFile(file.asByteSource.openStream())
 
     val (rowsToValidate, badRows) = rowData.partition(row => {
-      row.get(BulkAdjustmentCommand.StudentIdHeader.toLowerCase) match {
+      row.data.get(BulkAdjustmentCommand.StudentIdHeader.toLowerCase) match {
         case Some(studentId) if feedbackMap.get(studentId).isDefined => true
         case _ => false
       }
     })
 
-    ignoredRows = badRows
+    ignoredRows = badRows.map(_.data)
 
     rowsToValidate.foreach(row => {
-      val studentId = row(BulkAdjustmentCommand.StudentIdHeader.toLowerCase)
+      val data = row.data
+      val studentId = data(BulkAdjustmentCommand.StudentIdHeader.toLowerCase)
       students.add(studentId)
-      marks.put(studentId, row.get(BulkAdjustmentCommand.MarkHeader.toLowerCase).orNull)
-      grades.put(studentId, row.get(BulkAdjustmentCommand.GradeHeader.toLowerCase).orNull)
-      reasons.put(studentId, row.get(BulkAdjustmentCommand.ReasonHeader.toLowerCase).orNull)
-      comments.put(studentId, row.get(BulkAdjustmentCommand.CommentsHeader.toLowerCase).orNull)
+      marks.put(studentId, data.get(BulkAdjustmentCommand.MarkHeader.toLowerCase).orNull)
+      grades.put(studentId, data.get(BulkAdjustmentCommand.GradeHeader.toLowerCase).orNull)
+      reasons.put(studentId, data.get(BulkAdjustmentCommand.ReasonHeader.toLowerCase).orNull)
+      comments.put(studentId, data.get(BulkAdjustmentCommand.CommentsHeader.toLowerCase).orNull)
     })
   }
 

@@ -51,7 +51,7 @@ class OldMarkerAllocationExtractor() {
 
     val rowData = SpreadsheetHelpers.parseXSSFExcelFile(file)
     rowData
-      .map(parseRow(_, workflow, Markers(firstMarkers, secondMarkers)))
+      .map(r => parseRow(r.data, workflow, Markers(firstMarkers, secondMarkers)))
       .groupBy(_.position)
   }
 

@@ -4,7 +4,7 @@ import java.io.InputStream
 
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.{CellRangeAddress, CellReference, WorkbookUtil}
+import org.apache.poi.ss.util.{CellReference, WorkbookUtil}
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
@@ -18,7 +18,8 @@ import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.mutable
 
 trait SpreadsheetHelpers {
-  def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]]
+  def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[ParsedRow]
+  def parseXSSFExcelFileWithSheetMetadata(file: InputStream, simpleHeaders: Boolean = true): Seq[ParsedSheet]
 }
 
 object SpreadsheetHelpers extends SpreadsheetHelpers {
@@ -102,7 +103,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
       addNumericCell(num / total, row, percentageCellStyle(workbook))
   }
 
-  def formatWorksheet(sheet: org.apache.poi.ss.usermodel.Sheet, cols: Int) {
+  def formatWorksheet(sheet: Sheet, cols: Int) {
     (0 to cols).foreach(sheet.autoSizeColumn)
   }
 
@@ -112,12 +113,12 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
     * - lower-case all headers
     * - trim the header and remove all non-ascii characters
     */
-  def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]] = {
+  override def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[ParsedRow] = {
     val sheets = parseXSSFExcelFileWithSheetMetadata(file, simpleHeaders)
     sheets.flatMap(_.rows)
   }
 
-  def parseXSSFExcelFileWithSheetMetadata(file: InputStream, simpleHeaders: Boolean = true): Seq[Sheet] = {
+  override def parseXSSFExcelFileWithSheetMetadata(file: InputStream, simpleHeaders: Boolean = true): Seq[ParsedSheet] = {
     val pkg = OPCPackage.open(file)
     val sst = new ReadOnlySharedStringsTable(pkg)
     val reader = new XSSFReader(pkg)
@@ -126,7 +127,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
     val data = reader.getSheetsData.asInstanceOf[XSSFReader.SheetIterator]
 
     // can't asScala the SheetIterator as is lubs back to a Seq[InputStream] losing the sheet metadata
-    val sheets: mutable.Buffer[Sheet] = mutable.Buffer()
+    val sheets: mutable.Buffer[ParsedSheet] = mutable.Buffer()
     while (data.hasNext) {
       val sheet = data.next
       val sheetName = data.getSheetName
@@ -135,7 +136,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
       val sheetSource = new InputSource(sheet)
       parser.parse(sheetSource)
       sheet.close()
-      sheets.append(Sheet(sheetName, handler.rows))
+      sheets.append(ParsedSheet(sheetName, handler.rows))
     }
     sheets
   }
@@ -161,9 +162,14 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
   }
 }
 
-case class Sheet(
+case class ParsedSheet(
   name: String,
-  rows: Seq[Map[String, String]]
+  rows: Seq[ParsedRow]
+)
+
+case class ParsedRow(
+  rowNumber: Int,
+  data: Map[String, String]
 )
 
 class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val simpleHeaders: Boolean = true)
@@ -173,7 +179,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
   var columnMap: mutable.Map[Short, String] = scala.collection.mutable.Map[Short, String]()
   val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
-  var rows: scala.collection.mutable.MutableList[Map[String, String]] = scala.collection.mutable.MutableList()
+  var rows: scala.collection.mutable.MutableList[ParsedRow] = scala.collection.mutable.MutableList()
   var currentRow: mutable.Map[String, String] = scala.collection.mutable.Map[String, String]()
 
   def fetchSheetParser: XMLReader = {
@@ -207,6 +213,6 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 
   override def endRow(row: Int): Unit = {
     if (!isParsingHeader && currentRow.nonEmpty)
-      rows += currentRow.toMap
+      rows += ParsedRow(row, currentRow.toMap)
   }
 }
