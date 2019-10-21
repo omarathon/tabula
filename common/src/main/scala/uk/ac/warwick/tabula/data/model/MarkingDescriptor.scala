@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence._
 import org.hibernate.annotations.Proxy
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
 @Proxy
 @DiscriminatorColumn(name = "discriminator")
-sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
+sealed abstract class MarkingDescriptor extends GeneratedId with Serializable with FormattedHtml {
   @Column(name = "min_mark")
   var minMark: Int = _
 
@@ -15,6 +18,8 @@ sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
 
   @Column(name = "text")
   var text: String = _
+
+  def formattedText: TemplateHTMLOutputModel = formattedHtml(text.maybeText)
 
   def minMarkPoint_=(markPoint: MarkPoint): Unit = {
     minMark = markPoint.mark
