@@ -182,19 +182,19 @@
           </div>
 
           <#if (findCommandResult.membershipItems?size > 0)>
-            <div class="pull-right">
+            <div class="clearfix">
               <@pagination
               currentPage=findCommand.page
               resultsPerPage=findCommand.studentsPerPage
               totalResults=findCommand.totalResults
               />
-            </div>
 
-            <#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
-            <#assign endIndex = startIndex + findCommandResult.membershipItems?size />
-            <p class="not-relative">
-              Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
-            </p>
+              <#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
+              <#assign endIndex = startIndex + findCommandResult.membershipItems?size />
+              <p class="not-relative">
+                Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
+              </p>
+            </div>
 
             <@components.manageStudentTable
             membershipItems=findCommandResult.membershipItems
