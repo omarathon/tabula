@@ -97,7 +97,7 @@
             jQuery(function ($) {
               $(".remove-attachment").on("click", function (e) {
                 $(this).closest('form').find('.attendance-file').show();
-                $(this).closest(".control-group").remove();
+                $(this).closest(".form-group").remove();
                 return false;
               });
             });
