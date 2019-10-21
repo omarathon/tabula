@@ -4,6 +4,23 @@ import javax.persistence.{Entity, Id, NamedQueries, NamedQuery}
 import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 
+object SitsStatus {
+  // The reason this method isn't on SitsStatus is that P* can have a meaning other than
+  // permanently withdrawn in the context of applicants, but not in the context of
+  // the student's route status (sprStatus)
+  def isPermanentlyWithdrawnStatusOnRoute(status: SitsStatus): Boolean =
+    status.code.startsWith("P") || // Permanently withdrawn
+    status.code.startsWith("D")    // Deceased
+
+  // The reason this method isn't on SitsStatus is that P* can have a meaning other than
+  // permanently withdrawn in the context of applicants, but not in the context of
+  // the student's route status (sprStatus)
+  def isWithdrawnStatusOnRoute(status: SitsStatus): Boolean =
+    status.code.startsWith("P") || // Permanently withdrawn
+    status.code.startsWith("T") || // Temporarily withdrawn
+    status.code.startsWith("D")    // Deceased
+}
+
 @Entity
 @Proxy
 @NamedQueries(Array(
