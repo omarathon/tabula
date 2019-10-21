@@ -3,16 +3,17 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.{XSSFDataValidation, XSSFDataValidationConstraint, XSSFDataValidationHelper}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.ListMarkerAllocationsCommand.{Marker, _}
+import uk.ac.warwick.tabula.commands.cm2.assignments.ListMarkerAllocationsCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedSet
-
 
 object AssignMarkersTemplateCommand {
   def apply(assignment: Assignment) = new AssignMarkersTemplateCommandInternal(assignment)
@@ -54,7 +55,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 
       // create allocation sheets and headers
       val sheet = workbook.createSheet(role)
-      sheet.trackAllColumnsForAutoSizing()
+      sheet.trackColumnsForAutoSizing((0 to 2).map(i => i: JInteger).asJava)
 
       val columnCount = if (assignment.showSeatNumbers) 4 else 3
 
@@ -68,7 +69,8 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
         header.createCell(4).setCellValue(AssignMarkersTemplateCommand.SeatNumber)
       }
 
-      0 to columnCount foreach { col => // set style on all columns
+      // Don't auto-size column 3, we set it manually
+      (0 to columnCount).filterNot(_ == 3).foreach { col => // set style on all columns
         sheet.setDefaultColumnStyle(col, style)
         sheet.autoSizeColumn(col)
       }
@@ -106,6 +108,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
         row.createCell(3).setCellFormula(
           "IF(TRIM($C" + (row.getRowNum + 1) + ")<>\"\", VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
         )
+        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
 
         if (assignment.showSeatNumbers) {
           assignment.getSeatNumber(student).foreach(row.createCell(4).setCellValue(_))
