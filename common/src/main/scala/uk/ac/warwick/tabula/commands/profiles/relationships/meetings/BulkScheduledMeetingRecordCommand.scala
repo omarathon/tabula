@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
-import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -99,16 +94,15 @@ trait BulkScheduledMeetingRecordDescription extends Describable[Seq[ScheduledMee
 
   self: BulkScheduledMeetingRecordCommandState =>
 
-  override def describe(d: Description) {
-    d.member(creator)
-    d.studentIds(allRelationships.map(_.studentId))
-  }
+  override def describe(d: Description): Unit =
+    d.studentRelationships(allRelationships)
+     .member(creator)
 
-  override def describeResult(d: Description, scheduledMeetings: Seq[ScheduledMeetingRecord]) {
-    d.property("meetingTitle" -> scheduledMeetings.head.title)
-    d.property("meetings" -> scheduledMeetings.map(_.id))
-    d.fileAttachments(scheduledMeetings.flatMap(_.attachments.asScala))
-  }
+  override def describeResult(d: Description, scheduledMeetings: Seq[ScheduledMeetingRecord]): Unit =
+    d.properties(
+      "meetings" -> scheduledMeetings.map(_.id),
+      "meetingTitle" -> scheduledMeetings.head.title
+    ).fileAttachments(scheduledMeetings.flatMap(_.attachments.asScala))
 }
 
 trait BulkScheduledMeetingRecordCommandState extends AbstractScheduledMeetingRecordCommandState {

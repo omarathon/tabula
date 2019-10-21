@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
@@ -294,6 +294,8 @@ abstract class Description {
     * Record a Feedback item, plus its assignment, module, department
     */
   def feedback(feedback: Feedback): Description = {
+    studentUsercodes(feedback.usercode)
+    studentIds(feedback.universityId.toSeq)
     property("feedback" -> feedback.id)
     HibernateHelpers.initialiseAndUnproxy(feedback) match {
       case assignmentFeedback: AssignmentFeedback if assignmentFeedback.assignment != null => assignment(assignmentFeedback.assignment)
@@ -306,6 +308,8 @@ abstract class Description {
     * Record a Submission item, plus its assignment, module, department
     */
   def submission(submission: Submission): Description = {
+    studentUsercodes(submission.usercode)
+    studentIds(submission.universityId.toSeq)
     property("submission" -> submission.id)
     if (submission.assignment != null) assignment(submission.assignment)
     this
@@ -330,12 +334,25 @@ abstract class Description {
   /**
     * List of Submissions IDs
     */
-  def submissions(submissions: Seq[Submission]): Description = property("submissions" -> submissions.map(_.id))
+  def submissions(submissions: Seq[Submission]): Description = {
+    studentUsercodes(submissions.map(_.usercode))
+    studentIds(submissions.flatMap(_.universityId))
+    property("submissions" -> submissions.map(_.id))
+  }
 
   /**
     * List of Feedback IDs
     */
-  def feedbacks(feedbacks: Seq[Feedback]): Description = property("feedbacks" -> feedbacks.map(_.id))
+  def feedbacks(feedbacks: Seq[Feedback]): Description = {
+    studentUsercodes(feedbacks.map(_.usercode))
+    studentIds(feedbacks.flatMap(_.universityId))
+    property("feedbacks" -> feedbacks.map(_.id))
+  }
+
+  def markerFeedbacks(markerFeedbacks: Seq[MarkerFeedback]): Description = {
+    feedbacks(markerFeedbacks.map(_.feedback))
+    property("markerFeedbacks" -> markerFeedbacks.map(_.id))
+  }
 
   def fileAttachments(attachments: Seq[FileAttachment]): Description = property("attachments" -> attachments.map(a =>
     s"${a.id} - ${a.hash}"
@@ -361,13 +378,22 @@ abstract class Description {
     this
   }
 
+  def extension(extension: Extension): Description = {
+    studentUsercodes(extension.usercode)
+    studentIds(extension.universityId.toSeq)
+    property("extension" -> extension.id)
+    if (extension.assignment != null) assignment(extension.assignment)
+    this
+  }
+
   /**
     * Record meeting, plus its creator and relationship type if available.
     */
   def meeting(meeting: AbstractMeetingRecord): Description = {
     property("meeting" -> meeting.id)
+    if (meeting.student != null) studentIds(meeting.student.universityId)
     if (meeting.creator != null) member(meeting.creator)
-    if (meeting.relationshipTypes.nonEmpty) property("relationships" -> meeting.relationshipTypes.map(_.toString).mkString(", "))
+    if (meeting.relationshipTypes.nonEmpty) studentRelationshipTypes(meeting.relationshipTypes)
     this
   }
 
@@ -451,6 +477,14 @@ abstract class Description {
     property("markingWorkflow" -> markingWorkflow.id)
   }
 
+  def feedbackTemplate(feedbackTemplate: FeedbackTemplate): Description = {
+    if (feedbackTemplate.department != null) department(feedbackTemplate.department)
+    property("feedbackTemplate" -> feedbackTemplate.id)
+  }
+
+  def feedbackTemplates(feedbackTemplates: Seq[FeedbackTemplate]): Description =
+    property("feedbackTemplates" -> feedbackTemplates.map(_.id))
+
   /**
     * Record module, plus department.
     */
@@ -463,12 +497,18 @@ abstract class Description {
     property("department", department.code)
   }
 
-  def member(member: Member): Description = {
+  def member(member: Member): Description =
     property("member", member.universityId)
-  }
 
-  def studentRelationshipType(relationshipType: StudentRelationshipType): Description = {
+  def studentRelationshipType(relationshipType: StudentRelationshipType): Description =
     property("studentRelationshipType", relationshipType.agentRole)
+
+  def studentRelationshipTypes(relationshipTypes: Seq[StudentRelationshipType]): Description =
+    property("studentRelationshipTypes", relationshipTypes.map(_.agentRole).distinct)
+
+  def studentRelationships(relationships: Seq[StudentRelationship]): Description = {
+    studentIds(relationships.flatMap(_.studentMember).map(_.universityId))
+    property("studentRelationships", relationships.map(_.id))
   }
 
   def route(route: Route): Description = {
@@ -508,6 +548,22 @@ abstract class Description {
     attendanceMonitoringTemplate(templatePoint.scheme)
   }
 
+  def attendanceMonitoringCheckpoints(checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]], verbose: Boolean = false): Description = {
+    if (verbose) {
+      property("checkpoints", checkpoints.map { case (student, pointMap) =>
+        student.universityId -> pointMap.map { case (point, state) =>
+          point.id -> (if (state == null) "null" else state.dbValue)
+        }
+      })
+    } else {
+      studentIds(checkpoints.keys.map(_.universityId).toSeq)
+    }
+    attendanceMonitoringPoints(checkpoints.flatMap { case (_, pointMap) => pointMap.keys }.toSeq)
+  }
+
+  def attendanceMonitoringNote(note: AttendanceNote): Description =
+    property("attendanceNote", note.note)
+
   def notifications(notifications: Seq[Notification[_, _]]): Description = {
     property("notifications" -> notifications.map(_.id))
   }
@@ -535,6 +591,9 @@ abstract class Description {
     department(panel.department)
     property("mitCircsPanel", panel.id)
   }
+
+  def syllabusPlusLocation(location: SyllabusPlusLocation): Description =
+    property("syllabusPlusLocation", location.toStringProps.toMap)
 
   // delegate equality to the underlying map
   override def hashCode: Int = map.hashCode()

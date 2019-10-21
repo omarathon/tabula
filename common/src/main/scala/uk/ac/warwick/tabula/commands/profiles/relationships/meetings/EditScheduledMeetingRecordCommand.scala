@@ -117,13 +117,9 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 
   override lazy val eventName = "EditScheduledMeetingRecord"
 
-  override def describe(d: Description) {
-    d.member(meetingRecord.student)
-    d.properties(
-      "creator" -> editor.universityId,
-      "relationship" -> meetingRecord.relationshipTypes.mkString(", ")
-    )
-  }
+  override def describe(d: Description): Unit =
+    d.meeting(meetingRecord)
+     .member(editor)
 }
 
 trait EditScheduledMeetingRecordNotification

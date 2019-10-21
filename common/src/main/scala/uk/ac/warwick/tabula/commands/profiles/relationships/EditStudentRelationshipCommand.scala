@@ -92,7 +92,7 @@ trait EditStudentRelationshipDescription extends Describable[Seq[StudentRelation
   override lazy val eventName = "EditStudentRelationship"
 
   override def describe(d: Description) {
-    d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
+    d.studentIds(studentCourseDetails.student.universityId).properties(
       "sprCode" -> studentCourseDetails.sprCode,
       "oldAgent" -> Option(oldAgent).map(_.universityId).getOrElse(""),
       "newAgent" -> Option(newAgent).map(_.universityId).getOrElse("")

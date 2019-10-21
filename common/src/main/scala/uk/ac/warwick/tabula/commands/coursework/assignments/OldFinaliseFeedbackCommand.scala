@@ -83,11 +83,9 @@ trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with Permi
 trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
   self: FinaliseFeedbackCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("updatedFeedback" -> markerFeedbacks.size)
-  }
-
+     .markerFeedbacks(markerFeedbacks)
 }
 
 trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {

@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object ArchiveAssignmentsCommand {
   def apply(department: Department, modules: Seq[Module]) =
@@ -57,7 +57,9 @@ trait ArchiveAssignmentsState {
 
 trait ArchiveAssignmentsDescription extends Describable[Seq[Assignment]] {
   self: ArchiveAssignmentsState =>
-  def describe(d: Description): Unit = d
-    .properties("modules" -> modules.map(_.id))
-    .properties("assignments" -> assignments.asScala.map(_.id))
+  def describe(d: Description): Unit =
+    d.properties(
+      "modules" -> modules.map(_.id),
+      "assignments" -> assignments.asScala.map(_.id)
+    )
 }

@@ -86,8 +86,8 @@ trait FeedbackReportCommandDescription extends Describable[Result] {
 
   override def describe(d: Description): Unit =
     d.department(department).properties(
-      "startDate" -> startDate,
-      "endDate" -> endDate
+      "startDate" -> startDate.toString(),
+      "endDate" -> endDate.toString()
     )
 
   override def describeResult(d: Description, result: Result): Unit =

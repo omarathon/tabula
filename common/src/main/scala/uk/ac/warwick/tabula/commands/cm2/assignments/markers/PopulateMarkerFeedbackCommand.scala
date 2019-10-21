@@ -84,11 +84,9 @@ trait PopulateMarkerFeedbackDescription extends Describable[Seq[MarkerFeedback]]
 
   override lazy val eventName: String = "PopulateMarkerFeedback"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("copiedFeedback" -> markerFeedback.size)
-  }
-
+     .property("feedbackCount" -> markerFeedback.size)
 }
 
 trait PopulateMarkerFeedbackComponent {

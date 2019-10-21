@@ -188,8 +188,8 @@ trait EditAssignmentDetailsDescription extends Describable[Assignment] {
   override def describe(d: Description) {
     d.assignment(assignment).properties(
       "name" -> name,
-      "openDate" -> openDate,
-      "closeDate" -> closeDate,
+      "openDate" -> openDate.toString(),
+      "closeDate" -> closeDate.toString(),
       "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
       "workflowType" -> Option(workflowType).map(_.name).orNull,
       "anonymity" -> Option(anonymity).map(_.code).orNull

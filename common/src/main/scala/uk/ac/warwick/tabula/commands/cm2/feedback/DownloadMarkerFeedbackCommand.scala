@@ -49,15 +49,13 @@ trait DownloadMarkerFeedbackDescription extends Describable[Option[RenderableFil
 
   override lazy val eventName: String = "DownloadMarkerFeedback"
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-    d.fileAttachments(markerFeedback.attachments.asScala.toSeq)
-  }
+     .property("filename", filename)
+     .fileAttachments(markerFeedback.attachments.asScala.toSeq)
 
-  override def describeResult(d: Description, result: Option[RenderableFile]) {
+  override def describeResult(d: Description, result: Option[RenderableFile]): Unit =
     d.property("fileFound", result.isDefined)
-  }
 }
 
 trait DownloadMarkerFeedbackState {

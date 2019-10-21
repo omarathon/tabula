@@ -125,15 +125,15 @@ trait ManageCourseYearWeightingsDescription extends Describable[ManageCourseYear
   override def describeResult(d: Description, result: ManageCourseYearWeightingsCommand.Result): Unit = {
     d.property("updated", result.updated.map(weighting => Map(
       "course" -> weighting.course.code,
-      "academicYear" -> weighting.sprStartAcademicYear,
+      "academicYear" -> weighting.sprStartAcademicYear.toString,
       "yearOfStudy" -> weighting.yearOfStudy,
-      "weighting" -> weighting.weighting
+      "weighting" -> weighting.weighting.toString()
     )))
     d.property("removed", result.removed.map(weighting => Map(
       "course" -> weighting.course.code,
-      "academicYear" -> weighting.sprStartAcademicYear,
+      "academicYear" -> weighting.sprStartAcademicYear.toString,
       "yearOfStudy" -> weighting.yearOfStudy,
-      "weighting" -> weighting.weighting
+      "weighting" -> weighting.weighting.toString()
     )))
   }
 }

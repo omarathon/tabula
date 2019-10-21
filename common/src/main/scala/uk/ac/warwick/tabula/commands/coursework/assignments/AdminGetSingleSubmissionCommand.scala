@@ -18,7 +18,7 @@ class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assign
 
   override def applyInternal(): RenderableFile = Await.result(zipService.getSubmissionZip(submission), Duration.Inf)
 
-  override def describe(d: Description): Unit = d.submission(submission).properties(
-    "studentId" -> submission.studentIdentifier,
-    "attachmentCount" -> submission.allAttachments.size)
+  override def describe(d: Description): Unit =
+    d.submission(submission)
+     .properties("attachmentCount" -> submission.allAttachments.size)
 }

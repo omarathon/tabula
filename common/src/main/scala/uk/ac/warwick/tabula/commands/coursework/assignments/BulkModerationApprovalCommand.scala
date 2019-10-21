@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import org.joda.time.DateTime
-import org.springframework.validation.{Errors, BindingResult}
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.feedback.OnlineFeedbackState
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model._
-import collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 
 object BulkModerationApprovalCommand {
@@ -81,15 +82,12 @@ trait BulkModerationApprovalDescription extends Describable[Unit] {
 
   self: BulkModerationApprovalState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> markerFeedback.asScala.map(_.feedback.usercode))
-  }
+     .markerFeedbacks(markerFeedback.asScala)
 
-  override def describeResult(d: Description) {
-    d.assignment(assignment)
-      .property("numFeedbackUpdated" -> markerFeedback.size())
-  }
+  override def describeResult(d: Description): Unit =
+    d.property("feedbackCount" -> markerFeedback.size())
 }
 
 trait BulkModerationApprovalState extends OnlineFeedbackState {

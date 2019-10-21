@@ -27,18 +27,15 @@ class DownloadFeedbackTemplateCommand(
 
     fileFound = renderableAttachment.isDefined
     if (callback != null) {
-      renderableAttachment.map {
-        callback(_)
-      }
+      renderableAttachment.foreach(callback)
     }
     renderableAttachment
   }
 
-  override def describe(d: Description): Unit = d
-    .department(department)
-    .property("template", template.id)
+  override def describe(d: Description): Unit =
+    d.feedbackTemplate(template)
 
-  override def describeResult(d: Description): Unit = d
-    .property("fileFound", fileFound)
+  override def describeResult(d: Description): Unit =
+    d.property("fileFound", fileFound)
 
 }

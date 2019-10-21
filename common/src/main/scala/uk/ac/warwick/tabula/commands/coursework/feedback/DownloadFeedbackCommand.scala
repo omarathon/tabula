@@ -48,13 +48,12 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 
   private def zipped(feedback: Feedback) = Await.result(zip.getFeedbackZip(feedback), Duration.Inf)
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .feedback(feedback)
+     .property("filename", filename)
 
-  override def describeResult(d: Description, result: Option[RenderableFile]) {
+  override def describeResult(d: Description, result: Option[RenderableFile]): Unit =
     d.property("fileFound", result.isDefined)
-  }
 
 }

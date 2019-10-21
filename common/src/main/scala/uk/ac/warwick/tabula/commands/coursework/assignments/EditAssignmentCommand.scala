@@ -72,8 +72,8 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
     val desc = d.assignment(assignment)
     desc.properties(
       "name" -> name,
-      "openDate" -> openDate,
-      "closeDate" -> closeDate,
+      "openDate" -> openDate.toString(),
+      "closeDate" -> closeDate.toString(),
       "removeWorkflow" -> removeWorkflow
     )
     if (unapprovedExtensions.nonEmpty) {

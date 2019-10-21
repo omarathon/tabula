@@ -145,9 +145,11 @@ trait GenerateExamGridGridOptionsDescription extends Describable[(Seq[ExamGridCo
     d.department(department)
   }
 
-  override def describeResult(d: Description, result: (Seq[ExamGridColumnOption], Seq[String])): Unit = {
-    d.property("predefined", result._1.map(_.identifier)).property("custom", result._2)
-  }
+  override def describeResult(d: Description, result: (Seq[ExamGridColumnOption], Seq[String])): Unit =
+    d.properties(
+      "predefined" -> result._1.map(_.identifier),
+      "custom" -> result._2
+    )
 }
 
 trait GenerateExamGridGridOptionsCommandState {

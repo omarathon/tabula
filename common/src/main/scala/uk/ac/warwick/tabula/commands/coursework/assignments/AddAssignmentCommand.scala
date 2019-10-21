@@ -32,8 +32,8 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 
   override def describe(d: Description): Unit = d.module(module).properties(
     "name" -> name,
-    "openDate" -> openDate,
-    "closeDate" -> closeDate)
+    "openDate" -> openDate.toString(),
+    "closeDate" -> closeDate.toString())
 
   // can be overridden in concrete implementations to provide additional validation
   def contextSpecificValidation(errors: Errors) {}

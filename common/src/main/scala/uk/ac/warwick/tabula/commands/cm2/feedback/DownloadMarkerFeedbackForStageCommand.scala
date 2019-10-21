@@ -99,7 +99,5 @@ trait DownloadMarkerFeedbackForStageDescription extends Describable[Result] {
   override def describe(d: Description): Unit =
     d.assignment(assignment)
       .feedbacks(feedbacks)
-      .studentIds(feedbacks.flatMap(_.universityId))
-      .studentUsercodes(feedbacks.map(_.usercode))
       .properties("feedbackCount" -> previousFeedback.size)
 }

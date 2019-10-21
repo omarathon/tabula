@@ -79,16 +79,15 @@ trait BulkMeetingRecordDescription extends Describable[Seq[MeetingRecord]] {
 
   self: BulkMeetingRecordCommandState =>
 
-  override def describe(d: Description) {
-    d.property("creator" -> creator.universityId)
-    d.property("students" -> studentRelationships.map(_.studentId))
-  }
+  override def describe(d: Description): Unit =
+    d.studentRelationships(studentRelationships)
+     .member(creator)
 
-  override def describeResult(d: Description, meetings: Seq[MeetingRecord]) {
-    d.property("meetingTitle" -> meetings.head.title)
-    d.property("meetings" -> meetings.map(_.id))
-    d.fileAttachments(meetings.flatMap(_.attachments.asScala))
-  }
+  override def describeResult(d: Description, meetings: Seq[MeetingRecord]): Unit =
+    d.properties(
+      "meetings" -> meetings.map(_.id),
+      "meetingTitle" -> meetings.head.title
+    ).fileAttachments(meetings.flatMap(_.attachments.asScala))
 }
 
 trait BulkMeetingRecordCommandState extends MeetingRecordCommandState {

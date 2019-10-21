@@ -36,13 +36,11 @@ class DownloadAttachmentCommand(
     attachment
   }
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 
 }

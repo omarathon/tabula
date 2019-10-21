@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -54,15 +54,13 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
 
   override lazy val eventName: String = "ReleaseForMarking"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> students)
-  }
+     .studentUsercodes(students.asScala)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]) {
+  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
-      .property("feedbackReleased" -> result.size)
-  }
+     .feedbacks(result)
 }
 
 trait ReleaseForMarkingState extends SelectedStudentsState with UserAware {

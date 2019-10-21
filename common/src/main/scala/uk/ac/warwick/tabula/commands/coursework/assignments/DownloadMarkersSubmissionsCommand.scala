@@ -62,9 +62,6 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
 
     d.assignment(assignment)
       .submissions(downloads)
-      .studentIds(downloads.flatMap(_.universityId))
-      .studentUsercodes(downloads.map(_.usercode))
-      .properties("submissionCount" -> downloads.size)
   }
 
 }

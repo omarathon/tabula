@@ -131,7 +131,7 @@ trait UpdateStudentsForDepartmentSmallGroupSetDescription extends Describable[De
   override lazy val eventName = "UpdateStudentsForDepartmentSmallGroupSet"
 
   override def describe(d: Description) {
-    d.properties("smallGroupSet" -> set.id)
+    d.departmentSmallGroupSet(set)
   }
 }
 
@@ -142,8 +142,7 @@ trait UpdateStudentsForSmallGroupSetDescription extends Describable[SmallGroupSe
 
   override lazy val eventName = "UpdateStudentsForSmallGroupSet"
 
-  override def describe(d: Description) {
-    d.properties("smallGroupSet" -> set.id)
-  }
+  override def describe(d: Description): Unit =
+    d.smallGroupSet(set)
 }
 

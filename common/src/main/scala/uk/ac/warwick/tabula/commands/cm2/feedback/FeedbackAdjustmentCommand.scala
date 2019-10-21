@@ -168,13 +168,12 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 
   override lazy val eventName: String = "FeedbackAdjustment"
 
-  def describe(d: Description) {
-    d.assessment(assessment)
-    d.studentIds(Option(student.getWarwickId).toSeq)
-    d.studentUsercodes(student.getUserId)
-    d.property("adjustmentReason", reason)
-    d.property("adjustmentComments", comments)
-  }
+  def describe(d: Description): Unit =
+    d.feedback(feedback)
+     .properties(
+       "adjustmentReason" -> reason,
+       "adjustmentComments" -> comments
+     )
 }
 
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {

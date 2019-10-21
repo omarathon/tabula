@@ -38,7 +38,7 @@ class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: 
     Mav(s"redirect:${photoUrl(relationship.agentMember)}")
   }
 
-  override def describe(d: Description): Unit = d.member(member).property("relationship" -> relationship)
+  override def describe(d: Description): Unit = d.member(member).property("relationship" -> relationship.id)
 
 }
 

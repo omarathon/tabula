@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 @Entity
 @Proxy
-@DiscriminatorValue(value = "MarkedPlagarised")
+@DiscriminatorValue(value = "MarkedPlagarised") // Don't fix this spelling mistake
 class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
   with SingleItemNotification[Submission] with AutowiringUserLookupComponent
   with MyWarwickActivity {

@@ -587,7 +587,6 @@ trait ImportDepartmentsModulesState {
 
 trait ImportDepartmentsModulesDescription extends Describable[Unit] {
   self: ImportDepartmentsModulesState =>
-  def describe(d: Description) {
-    d.property("deptCodes", deptCode)
-  }
+  def describe(d: Description): Unit =
+    d.property("department" -> deptCode)
 }

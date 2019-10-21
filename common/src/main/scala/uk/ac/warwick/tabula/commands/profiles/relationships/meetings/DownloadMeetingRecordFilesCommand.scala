@@ -46,12 +46,10 @@ class DownloadMeetingRecordFilesCommand(val meetingRecord: AbstractMeetingRecord
   private def zipped(meetingRecord: AbstractMeetingRecord) =
     Await.result(zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord), Duration.Inf)
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.meeting(meetingRecord)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 }

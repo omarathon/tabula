@@ -50,11 +50,10 @@ class DownloadMarkerFeedbackFilesCommand(val module: Module, val assignment: Ass
 
   private def zipped(markerFeedback: MarkerFeedback) = Await.result(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)), Duration.Inf)
 
-  override def describe(d: Description): Unit = {
-    d.property("filename", filename)
-  }
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
-    d.property("fileFound", fileFound)
-  }
+  override def describeResult(d: Description, result: Option[RenderableFile]): Unit =
+    d.property("fileFound", result.isDefined)
 }

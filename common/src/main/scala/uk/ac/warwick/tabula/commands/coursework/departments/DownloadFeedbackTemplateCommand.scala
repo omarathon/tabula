@@ -38,11 +38,10 @@ class DownloadFeedbackTemplateCommand(
     renderableAttachment
   }
 
-  override def describe(d: Description): Unit = d
-    .department(department)
-    .property("template", template.id)
+  override def describe(d: Description): Unit =
+    d.feedbackTemplate(template)
 
-  override def describeResult(d: Description): Unit = d
-    .property("fileFound", fileFound)
+  override def describeResult(d: Description): Unit =
+    d.property("fileFound", fileFound)
 
 }

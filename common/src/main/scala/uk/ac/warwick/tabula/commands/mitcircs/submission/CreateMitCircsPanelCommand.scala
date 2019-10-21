@@ -92,7 +92,7 @@ trait CreateMitCircsPanelDescription extends Describable[MitigatingCircumstances
     d.department(department)
 
   override def describeResult(d: Description, result: Result): Unit =
-    d.properties("mitigatingCircumstancesSubmissions" -> result.submissions.map(_.key.toString))
+    d.properties("mitCircsSubmissions" -> result.submissions.map(_.id))
 }
 
 trait CreateMitCircsPanelState {

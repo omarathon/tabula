@@ -56,14 +56,15 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 }
 
 trait ModifyStudentRelationshipTypeCommandDescription extends Describable[StudentRelationshipType] {
-  this: StudentRelationshipTypeProperties =>
+  self: StudentRelationshipTypeProperties with HasExistingStudentRelationshipType =>
   // describe the thing that's happening.
   override def describe(d: Description): Unit =
-    d.properties(
-      "id" -> id,
-      "urlPart" -> urlPart,
-      "description" -> description
-    )
+    d.studentRelationshipType(relationshipType)
+     .properties(
+       "id" -> id,
+       "urlPart" -> urlPart,
+       "description" -> description
+     )
 }
 
 trait StudentRelationshipTypeProperties {

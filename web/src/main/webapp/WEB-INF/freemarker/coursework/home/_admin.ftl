@@ -8,6 +8,7 @@
 
         <#import "*/activity_macros.ftl" as activity />
         <div class="home-page-activity">
+          <#-- This spelling mistake is necessary (matches MarkedPlagiarisedNotification -->
           <@activity.activity_stream max=5 minPriority=0.5 types="SubmissionReceived,MarkedPlagarised"/>
         </div>
       </#if>

@@ -135,16 +135,12 @@ trait RequestExtensionCommandDescription extends Describable[Extension] {
 
   override lazy val eventName: String = "RequestExtension"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.module(assignment.module)
-  }
 
-  override def describeResult(d: Description, extension: Extension) {
-    d.assignment(assignment)
-      .property("extension" -> extension.id)
-      .fileAttachments(extension.attachments.asScala.toSeq)
-  }
+  override def describeResult(d: Description, extension: Extension): Unit =
+    d.extension(extension)
+     .fileAttachments(extension.attachments.asScala.toSeq)
 }
 
 
@@ -161,7 +157,7 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
       (relType.description, relationshipService.findCurrentRelationships(relType, scd.student))
     ).toMap
   } yield Map(
-    "relationships" -> relationships.filter({ case (relationshipType, relations) => relations.nonEmpty }),
+    "relationships" -> relationships.filter { case (_, relations) => relations.nonEmpty },
     "scdCourse" -> scd.course,
     "scdRoute" -> scd.currentRoute,
     "scdAward" -> scd.award

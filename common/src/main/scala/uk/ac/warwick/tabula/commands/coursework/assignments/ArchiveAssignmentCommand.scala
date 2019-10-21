@@ -53,10 +53,9 @@ trait ArchiveAssignmentDescription extends Describable[Assignment] {
 
   override lazy val eventName = "ArchiveAssignment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("unarchive" -> unarchive)
-  }
+     .property("archive" -> !unarchive)
 
 }
 

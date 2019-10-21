@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -65,15 +65,13 @@ trait ReturnToMarkerDescription extends Describable[Seq[AssignmentFeedback]] {
 
   override lazy val eventName: String = "ReturnToMarker"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> students)
-  }
+     .studentUsercodes(students.asScala)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]) {
+  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
-      .property("feedbackReturned" -> result.size)
-  }
+     .feedbacks(result)
 }
 
 trait ReturnToMarkerState extends SelectedStudentsState with UserAware {

@@ -63,17 +63,13 @@ trait ConvertScheduledMeetingRecordDescription extends Describable[MeetingRecord
 
   override lazy val eventName = "ConvertScheduledMeetingRecord"
 
-  override def describe(d: Description) {
-    d.member(meetingRecord.student)
-    d.properties(
-      "creator" -> creator.universityId,
-      "relationship" -> meetingRecord.relationshipTypes.mkString(", ")
-    )
-  }
+  override def describe(d: Description): Unit =
+    d.member(creator)
+     .meeting(meetingRecord)
+     .studentRelationshipTypes(meetingRecord.relationshipTypes)
 
-  override def describeResult(d: Description, result: MeetingRecord) {
+  override def describeResult(d: Description, result: MeetingRecord): Unit =
     d.meeting(result)
-  }
 }
 
 trait ConvertScheduledMeetingRecordState extends EditMeetingRecordCommandState {

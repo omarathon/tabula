@@ -17,9 +17,9 @@ class AdminGetSingleFeedbackCommand(assignment: Assignment, feedback: Feedback) 
 
   override def applyInternal(): RenderableFile = Await.result(zipService.getFeedbackZip(feedback), Duration.Inf)
 
-  override def describe(d: Description): Unit = d.feedback(feedback).properties(
-    "studentId" -> feedback.studentIdentifier,
-    "attachmentCount" -> feedback.attachments.size)
+  override def describe(d: Description): Unit =
+    d.feedback(feedback)
+     .properties("attachmentCount" -> feedback.attachments.size)
 }
 
 class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
@@ -35,14 +35,12 @@ class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedba
     attachment
   }
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 
 }
 
@@ -56,7 +54,7 @@ class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment
 
   override def applyInternal(): RenderableFile = Await.result(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)), Duration.Inf)
 
-  override def describe(d: Description): Unit = d.feedback(markerFeedback.feedback).properties(
-    "studentId" -> markerFeedback.feedback.studentIdentifier,
-    "attachmentCount" -> markerFeedback.attachments.size)
+  override def describe(d: Description): Unit =
+    d.feedback(markerFeedback.feedback)
+     .properties("attachmentCount" -> markerFeedback.attachments.size)
 }

@@ -23,7 +23,7 @@ class RemoveMissingAssessmentComponentCommand(assessmentComponent: AssessmentCom
       "moduleCode" -> assessmentComponent.moduleCode,
       "name" -> assessmentComponent.name,
       "sequence" -> assessmentComponent.sequence,
-      "thisYearsMembers" -> assessmentComponent.upstreamAssessmentGroups(AcademicYear.now()).flatMap(_.members.asScala).map(_.universityId).mkString(", "),
+      "thisYearsMembers" -> assessmentComponent.upstreamAssessmentGroups(AcademicYear.now()).flatMap(_.members.asScala).map(_.universityId),
     )
   }
 }

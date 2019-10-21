@@ -62,15 +62,13 @@ trait StopMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
 
   override lazy val eventName: String = "StopMarking"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> students)
-  }
+     .studentUsercodes(students.asScala)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]) {
+  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
-      .property("feedbackUnReleased" -> result.size)
-  }
+      .feedbacks(result)
 }
 
 trait StopMarkingState extends SelectedStudentsState with UserAware {

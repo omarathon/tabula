@@ -98,23 +98,13 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
 
   self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
-  override def describe(d: Description) {
-    relationships.asScala.flatMap(_.studentMember).map(d.member)
-    d.properties(
-      "creator" -> creator.universityId,
-      "relationship" -> relationships.asScala.mkString(", ")
-    )
-  }
+  override def describe(d: Description): Unit =
+    d.studentRelationships(relationships.asScala)
+     .member(creator)
 
-  override def describeResult(d: Description, meeting: MeetingRecord) {
-    relationships.asScala.flatMap(_.studentMember).map(d.member)
-    d.properties(
-      "creator" -> creator.universityId,
-      "relationship" -> relationships.asScala.mkString(", "),
-      "meeting" -> meeting.id
-    )
-    d.fileAttachments(meeting.attachments.asScala)
-  }
+  override def describeResult(d: Description, meeting: MeetingRecord): Unit =
+    d.meeting(meeting)
+     .fileAttachments(meeting.attachments.asScala)
 }
 
 trait ModifyMeetingRecordCommandState extends MeetingRecordCommandState {

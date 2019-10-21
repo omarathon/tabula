@@ -107,5 +107,7 @@ trait ViewModuleTimetableValidation extends SelfValidating {
 trait ViewModuleTimetableDescription extends Describable[ReturnType] with Unaudited {
   self: ViewModuleTimetableRequest =>
 
-  override def describe(d: Description): Unit = d.module(module).properties("academicYear" -> academicYear.toString)
+  override def describe(d: Description): Unit =
+    d.module(module)
+     .properties("academicYear" -> academicYear.toString)
 }

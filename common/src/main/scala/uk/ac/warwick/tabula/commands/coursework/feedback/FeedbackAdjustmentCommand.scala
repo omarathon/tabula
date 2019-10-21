@@ -170,13 +170,13 @@ trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking w
 
 trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
   self: FeedbackAdjustmentCommandState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit =
     d.assessment(assessment)
-    d.studentIds(Option(student.getWarwickId).toSeq)
-    d.studentUsercodes(student.getUserId)
-    d.property("adjustmentReason", reason)
-    d.property("adjustmentComments", comments)
-  }
+     .feedback(feedback)
+     .properties(
+       "adjustmentReason" -> reason,
+       "adjustmentComments" -> comments
+     )
 }
 
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {

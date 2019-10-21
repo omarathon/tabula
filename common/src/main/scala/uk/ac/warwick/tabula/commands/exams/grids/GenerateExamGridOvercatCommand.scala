@@ -111,14 +111,13 @@ trait GenerateExamGridOvercatDescription extends Describable[Seq[Module]] {
 
   override lazy val eventName = "GenerateExamGridOvercat"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.studentIds(Seq(scyd.studentCourseDetails.student.universityId))
-    d.properties(Map(
-      "studentCourseYearDetails" -> scyd.id,
-      "modules" -> chosenModuleSubset.map { case (_, modules) => modules.map(_.module.id) }.getOrElse(Seq()),
-      "mark" -> chosenModuleSubset.flatMap { case (mark, _) => Option(mark).map(_.toString) }.getOrElse("")
-    ))
-  }
+     .properties(
+       "studentCourseYearDetails" -> scyd.id,
+       "modules" -> chosenModuleSubset.map { case (_, modules) => modules.map(_.module.id) }.getOrElse(Seq()),
+       "mark" -> chosenModuleSubset.flatMap { case (mark, _) => Option(mark).map(_.toString) }.getOrElse("")
+     )
 }
 
 trait GenerateExamGridOvercatCommandState {

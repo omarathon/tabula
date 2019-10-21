@@ -135,9 +135,8 @@ trait AllocateStudentsToDepartmentalSmallGroupsPermissions extends RequiresPermi
 trait AllocateStudentsToDepartmentalSmallGroupsDescription extends Describable[DepartmentSmallGroupSet] {
   self: AllocateStudentsToDepartmentalSmallGroupsCommandState =>
 
-  override def describe(d: Description) {
-    d.department(set.department).properties("smallGroupSet" -> set.id)
-  }
+  override def describe(d: Description): Unit =
+    d.departmentSmallGroupSet(set)
 
 }
 
