@@ -21,7 +21,7 @@ object ManualMembershipWarningCommand {
 object ManualMembershipWarningCommandWithNotification {
   def apply() = new ManualMembershipWarningCommandInternal()
     with ComposableCommand[Seq[DepartmentWithManualUsers]]
-    with PubliclyVisiblePermissions with ReadOnly with Unaudited
+    with PubliclyVisiblePermissions with Unaudited // Not ReadOnly as needs to generate some notifications
     with AutowiringAssessmentMembershipServiceComponent
     with AutowiringModuleAndDepartmentServiceComponent
     with ManualMembershipWarningNotifications
