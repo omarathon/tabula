@@ -133,7 +133,7 @@ class StudentCourseDetails
   // permanently withdrawn in the context of applicants, but not in the context of
   // the student's route status (sprStatus)
   def permanentlyWithdrawn: Boolean = {
-    statusOnRoute != null && statusOnRoute.code.startsWith("P")
+    statusOnRoute != null && SitsStatus.isPermanentlyWithdrawnStatusOnRoute(statusOnRoute)
   }
 
   @OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately

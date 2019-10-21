@@ -61,7 +61,7 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
   def onBind(result: BindingResult) {
     // Add all non-withdrawn codes to SPR statuses by default
     if (!hasBeenFiltered) {
-      allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach {
+      allSprStatuses.filterNot(SitsStatus.isWithdrawnStatusOnRoute).foreach {
         sprStatuses.add
       }
     }

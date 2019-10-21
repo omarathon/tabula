@@ -243,14 +243,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
   def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
     studentCourseDetailsDao.getByRoute(route)
-      .filter { s => s.statusOnRoute != null && !s.statusOnRoute.code.startsWith("P") }
+      .filter { s => s.statusOnRoute != null && !SitsStatus.isPermanentlyWithdrawnStatusOnRoute(s.statusOnRoute) }
       .filter(s => s.mostSignificant == JBoolean(Option(true)))
       .map(_.student)
   }
 
   def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
     studentCourseDetailsDao.getByRoute(route)
-      .filter { s => s.statusOnRoute != null && !s.statusOnRoute.code.startsWith("P") }
+      .filter { s => s.statusOnRoute != null && !SitsStatus.isPermanentlyWithdrawnStatusOnRoute(s.statusOnRoute) }
       .filter(s => s.mostSignificant == JBoolean(Option(true)))
       .filter(_.freshStudentCourseYearDetails.exists(s => s.academicYear == academicYear))
       .map(_.student)

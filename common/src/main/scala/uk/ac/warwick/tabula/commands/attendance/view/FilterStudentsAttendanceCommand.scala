@@ -68,7 +68,7 @@ trait OnBindFilterStudentsAttendanceCommand extends BindListener {
 
   override def onBind(result: BindingResult): Unit = {
     if (!hasBeenFiltered) {
-      allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach {
+      allSprStatuses.filterNot(SitsStatus.isWithdrawnStatusOnRoute).foreach {
         sprStatuses.add
       }
     }
