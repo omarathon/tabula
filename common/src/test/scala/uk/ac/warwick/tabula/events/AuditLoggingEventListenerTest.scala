@@ -45,7 +45,7 @@ class AuditLoggingEventListenerTest extends TestBase with Mockito {
     val event = Event.resultFromDescribable(command, (), "eventId")
     listener.afterCommand(event, (), beforeEvent)
 
-    TestLoggerFactory.retrieveEvents(testLogger).map(_.getFormattedMessage) should be(Seq("{event_type=BulkModerationApproval, tabula={assignment=assignmentId, numFeedbackUpdated=2, module=moduleId, students=[u0000001, u0000002]}}"))
+    TestLoggerFactory.retrieveEvents(testLogger).map(_.getFormattedMessage) should be(Seq("{event_type=BulkModerationApproval, tabula={markerFeedbacks=[-, -], studentUsercodes=[u0000001, u0000002], assignment=assignmentId, feedbackCount=2, module=moduleId, feedbacks=[-, -], students=[0000001, 0000002]}}"))
   }
 
 }
