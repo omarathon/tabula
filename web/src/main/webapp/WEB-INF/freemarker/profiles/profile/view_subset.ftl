@@ -45,44 +45,50 @@
         <!-- basic course details -->
         <div class="data clearfix">
           <div class="col1 basic-course-details">
-            <table class="profile-or-course-info subset-course">
-              <tbody>
-              <#if (studentCourseDetails.currentRoute)??>
+            <#if studentCourseDetails??>
+              <table class="profile-or-course-info subset-course">
+                <tbody>
+                <#if (studentCourseDetails.currentRoute)??>
+                  <tr>
+                    <th>Route</th>
+                    <td>${(studentCourseDetails.currentRoute.name)!} (${(studentCourseDetails.currentRoute.code?upper_case)!})
+                    </td>
+                  </tr>
+                </#if>
+                <#if (studentCourseDetails.department)??>
+                  <tr>
+                    <th>Department</th>
+                    <td>${(studentCourseDetails.department.name)!} (${((studentCourseDetails.department.code)!)?upper_case})
+                    </td>
+                  </tr>
+                </#if>
                 <tr>
-                  <th>Route</th>
-                  <td>${(studentCourseDetails.currentRoute.name)!} (${(studentCourseDetails.currentRoute.code?upper_case)!})
+                  <th>Status on route</th>
+                  <td><@fmt.status_on_route studentCourseDetails />
                   </td>
                 </tr>
-              </#if>
-              <#if (studentCourseDetails.department)??>
                 <tr>
-                  <th>Department</th>
-                  <td>${(studentCourseDetails.department.name)!} (${((studentCourseDetails.department.code)!)?upper_case})
+                  <th>Attendance</th>
+                  <td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
                   </td>
                 </tr>
-              </#if>
-              <tr>
-                <th>Status on route</th>
-                <td><@fmt.status_on_route studentCourseDetails />
-                </td>
-              </tr>
-              <tr>
-                <th>Attendance</th>
-                <td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
-                </td>
-              </tr>
-              <tr>
-                <th>UG/PG</th>
-                <td>${(studentCourseDetails.currentRoute.degreeType.toString)!}
-                </td>
-              </tr>
-              <tr>
-                <th>Year of study</th>
-                <td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
-                </td>
-              </tr>
-              </tbody>
-            </table>
+                <tr>
+                  <th>UG/PG</th>
+                  <td>${(studentCourseDetails.currentRoute.degreeType.toString)!}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Year of study</th>
+                  <td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            <#else>
+              <div class="alert alert-warning">
+                Unable to find most significant course for this student
+              </div>
+            </#if>
           </div>
         </div>
 
