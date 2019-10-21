@@ -480,7 +480,7 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   const dismissHandlerClass = 'tabulaPopover-dismissHandler';
 
   // filter already initialized popovers
-  $items = $items.not(initClass);
+  $items = $items.not(`.${initClass}`);
 
   // set options, with defaults
   const defaults = {
@@ -504,6 +504,26 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     e.stopPropagation();
   });
 
+
+  // TAB-7486 If we want the popover to be tabbed into
+  // i.e. when we don't have a focus trigger, bind an enter trigger to click
+  const $nonFocusItems = $items.filter((i, el) => {
+    const elOpts = $.extend({}, opts, {
+      trigger: $(el).data('trigger'),
+    });
+    return elOpts.trigger.indexOf('focus') === -1;
+  });
+  $nonFocusItems.on('keypress', function handleEnter(event) {
+    if (event.keyCode === 13) {
+      // Prevent default behaviour for Enter
+      event.stopPropagation();
+      event.preventDefault();
+      $(this).triggerHandler('click');
+      return false;
+    }
+    return true;
+  });
+
   // TAB-2920
   $items.on('hidden', (e) => {
     e.stopPropagation();
@@ -514,16 +534,36 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     $target.tooltip('enable');
   });
 
+  // Dismiss popovers when clicking away
+  function closePopover($popover) {
+    const $creator = $popover.data('creator');
+    if ($creator) {
+      $creator.popover('hide');
+      $creator.tooltip('enable');
+      $creator.data('bs.popover').inState.click = false;
+    }
+  }
+
   // Click away to dismiss (TAB-7577 - make sure to only bind ONCE)
   $('html')
-    .not(dismissHandlerClass)
+    .not(`.${dismissHandlerClass}`)
     // unbind in case asynchronous runs get pass our class guard
     .off('click.popoverDismiss')
     .on('click.popoverDismiss', (e) => {
       const $target = $(e.target);
+
       // if clicking anywhere other than the popover itself
-      if ($target.closest('.popover').length === 0 && $target.closest('.use-popover').length === 0) {
-        $('.popover-inner').find('button.close').click();
+      if ($target.closest('.popover').length === 0 && $(e.target).closest('.has-popover').length === 0) {
+        $('.popover').each((i, popover) => closePopover($(popover)));
+      } else if ($target.closest('.close').length > 0) {
+        closePopover($target.closest('.popover'));
+      }
+    })
+    .off('keyup.popoverDismiss')
+    .on('keyup.popoverDismiss', (e) => {
+      const key = e.which || e.keyCode;
+      if (key === 27) {
+        $('.popover').each((i, popover) => closePopover($(popover)));
       }
     })
     .addClass(dismissHandlerClass);
@@ -554,14 +594,6 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   $items.on('shown.bs.popover', (e) => {
     const $po = $(e.currentTarget).popover().data('bs.popover').tip();
     $po.data('creator', $(e.currentTarget));
-  });
-  $('body').on('click', '.popover .close', (e) => {
-    const $creator = $(e.currentTarget).parents('.popover').data('creator');
-    if ($creator) {
-      $creator.popover('hide');
-      $creator.tooltip('enable');
-    }
-    e.stopPropagation();
   });
 
   // now that's all done, bind the popover
