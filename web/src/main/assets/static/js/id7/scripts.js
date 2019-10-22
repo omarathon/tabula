@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import _ from 'lodash-es';
 import './polyfills';
 import initErrorReporter from '../errorreporter';
 import CsrfForm from './csrf-form';
@@ -508,10 +509,10 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   // TAB-7486 If we want the popover to be tabbed into
   // i.e. when we don't have a focus trigger, bind an enter trigger to click
   const $nonFocusItems = $items.filter((i, el) => {
-    const elOpts = $.extend({}, opts, {
+    const elOpts = _.merge({}, opts, {
       trigger: $(el).data('trigger'),
     });
-    return elOpts.trigger.indexOf('focus') === -1;
+    return (elOpts.trigger || '').indexOf('focus') === -1;
   });
   $nonFocusItems.on('keypress', function handleEnter(event) {
     if (event.keyCode === 13) {
