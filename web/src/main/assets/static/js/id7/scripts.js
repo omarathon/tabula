@@ -1628,15 +1628,25 @@ $(() => {
       return;
     }
 
-    const pageErrorToken = $('body').data('error-token');
-    if (pageErrorToken) {
-      const errorModal = $(`#global-error-modal-${pageErrorToken}`);
+    if (jqXhr.getResponseHeader('X-Error') && jqXhr.getResponseHeader('X-Error').indexOf('CSRF token') !== -1) {
+      // Show bespoke CSRF error message as submitting any form on the generating page will fail
+      const errorModal = $('#global-error-modal-csrf');
       if (errorModal) errorModal.modal('show');
-    }
 
-    // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
-    // have reached backend (and logged)
-    throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
+      // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
+      // have reached backend (and logged)
+      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error: ${jqXhr.getResponseHeader('X-Error')}`);
+    } else {
+      const pageErrorToken = $('body').data('error-token');
+      if (pageErrorToken) {
+        const errorModal = $(`#global-error-modal-${pageErrorToken}`);
+        if (errorModal) errorModal.modal('show');
+      }
+
+      // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
+      // have reached backend (and logged)
+      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
+    }
   });
 });
 

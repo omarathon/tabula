@@ -321,6 +321,22 @@
         </@modal.footer>
     </@modal.wrapper>
 </@modal.modal>
+
+<@modal.modal cssClass="global-error-modal" id="global-error-modal-csrf" ariaLabelledby="error-modal-csrf-title">
+    <@modal.wrapper>
+        <@modal.header>
+          <h6 class="modal-title" id="error-modal-csrf-title">This request couldn't be processed, it was detected as potentially dangerous</h6>
+        </@modal.header>
+        <@modal.body>
+          <p>This error may be resolved by refreshing the page.</p>
+          <p><strong>WARNING:</strong> You will lose any data that you have previously entered if you refresh the page.</p>
+          <p>If the problem persists, please contact the <a href="mailto:tabula@warwick.ac.uk">Student Information Systems team</a> and describe the steps that resulted in reaching this page.</p>
+        </@modal.body>
+        <@modal.footer>
+          <a class="btn btn-primary" data-dismiss="modal">Close</a>
+        </@modal.footer>
+    </@modal.wrapper>
+</@modal.modal>
 </body>
 </html>
 </#escape>
