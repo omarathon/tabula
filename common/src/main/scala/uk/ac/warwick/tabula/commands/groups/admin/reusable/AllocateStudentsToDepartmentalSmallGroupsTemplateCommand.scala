@@ -51,7 +51,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
       // put the student details into the cells
       row.createCell(0).setCellValue(user.getWarwickId)
       row.createCell(1).setCellValue(user.getFullName)
-      val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
+      val groupNameCell = createUnprotectedCell(workbook, row, 2, isText = true) // unprotect cell for the dropdown group name
 
       // If this user is already in a group, prefill
       groups.find(_.students.includesUser(user)).foreach { group =>
@@ -67,8 +67,9 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
     workbook
   }
 
-  def createUnprotectedCell(workbook: SXSSFWorkbook, row: Row, col: Int, value: String = ""): Cell = {
+  def createUnprotectedCell(workbook: SXSSFWorkbook, row: Row, col: Int, value: String = "", isText: Boolean = false): Cell = {
     val lockedCellStyle = workbook.createCellStyle()
+    if(isText) lockedCellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"))
     lockedCellStyle.setLocked(false)
     val cell = row.createCell(col)
     cell.setCellValue(value)
@@ -101,7 +102,11 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
 
     for (group <- set.groups.asScala) {
       val row = groupSheet.createRow(groupSheet.getLastRowNum + 1)
-      row.createCell(0).setCellValue(group.name)
+      val groupNameCell = row.createCell(0)
+      val textStyle = workbook.createCellStyle()
+      textStyle.setDataFormat(workbook.createDataFormat().getFormat("@"))
+      groupNameCell.setCellStyle(textStyle)
+      groupNameCell.setCellValue(group.name)
       row.createCell(1).setCellValue(group.id)
     }
 
