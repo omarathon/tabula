@@ -102,7 +102,7 @@
 
             <small class="very-subtle help-block">
               This is the file attached to this attendance note.
-              Click the remove link next to a document to delete it.
+              Select the x next to the file to delete it.
             </small>
 
           </@bs3form.labelled_form_group>
