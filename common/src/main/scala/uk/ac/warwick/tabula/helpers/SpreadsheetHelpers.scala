@@ -213,6 +213,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 
   override def endRow(row: Int): Unit = {
     if (!isParsingHeader && currentRow.nonEmpty)
-      rows += ParsedRow(row, currentRow.toMap)
+      // POI indexes by 0 but we want to index by 1 like Excel et al
+      rows += ParsedRow(row+1, currentRow.toMap)
   }
 }
