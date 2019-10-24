@@ -171,11 +171,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         }
       }
 
-      existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
-        if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
-          removeUpstreamAssessmentGroup(existing)
-        }
-      }
+//      existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
+//        if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
+//          removeUpstreamAssessmentGroup(existing)
+//        }
+//      }
     }
   }
 
