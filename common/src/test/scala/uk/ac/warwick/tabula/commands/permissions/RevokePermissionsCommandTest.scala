@@ -219,7 +219,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
     d.allProperties should be(Map(
       "scope" -> "Department[department-id]",
-      "usercodes" -> "cuscav,cusebr",
+      "users" -> Seq("cuscav", "cusebr"),
       "permission" -> "Department.ManageExtensionSettings",
       "overrideType" -> false
     ))

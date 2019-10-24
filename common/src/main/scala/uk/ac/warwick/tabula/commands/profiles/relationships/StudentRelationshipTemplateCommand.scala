@@ -77,6 +77,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
   private def generateWorkbook(unallocated: Seq[StudentAssociationData], allocations: Seq[StudentAssociationEntityData]) = {
     val workbook = new SXSSFWorkbook
+    val formulaEvaluator = workbook.getCreationHelper.createFormulaEvaluator()
     val sheet = generateAllocationSheet(workbook)
     val allUniversityIds = allocations.map(_.entityId) ++ allocations.flatMap(_.students.map(_.universityId)) ++ unallocated.map(_.universityId)
     val usercodes = userLookup.getUsersByWarwickUniIds(allUniversityIds).mapValues(_.getUserId)
@@ -100,10 +101,12 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
         row.createCell(4).setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
         )
+        formulaEvaluator.evaluateFormulaCell(row.getCell(4))
 
         row.createCell(5).setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
         )
+        formulaEvaluator.evaluateFormulaCell(row.getCell(5))
       }
     }
 
@@ -119,10 +122,12 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
       row.createCell(4).setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
       )
+      formulaEvaluator.evaluateFormulaCell(row.getCell(4))
 
       row.createCell(5).setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
       )
+      formulaEvaluator.evaluateFormulaCell(row.getCell(5))
     }
 
     formatWorkbook(workbook)
@@ -182,19 +187,21 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
     val sheet = workbook.getSheet(allocateSheetName)
 
     // set style on all columns
-    0 to 3 foreach { col =>
+    // Don't auto-size columns 4 or 5, we set it manually
+    (0 to 3).foreach { col =>
       sheet.setDefaultColumnStyle(col, style)
       sheet.autoSizeColumn(col)
     }
 
-    // set ID column to be wider
-    sheet.setColumnWidth(3, 7000)
+    // set ID columns to be wider
+    sheet.setColumnWidth(4, 7000)
+    sheet.setColumnWidth(5, 7000)
 
   }
 
   private def generateAllocationSheet(workbook: SXSSFWorkbook): Sheet = {
     val sheet = workbook.createSheet(allocateSheetName)
-    sheet.trackAllColumnsForAutoSizing()
+    sheet.trackColumnsForAutoSizing((0 to 3).map(i => i: JInteger).asJava)
 
     // add header row
     val header = sheet.createRow(0)

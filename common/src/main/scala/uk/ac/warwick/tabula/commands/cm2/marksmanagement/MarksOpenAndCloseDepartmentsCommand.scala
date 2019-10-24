@@ -33,7 +33,7 @@ class MarksOpenAndCloseDepartmentsCommandInternal extends CommandInternal[Degree
 
   self: MarksOpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
 
-  def applyInternal(): DegreeType = {
+  def applyInternal(): DegreeType =
     if (updatePostgrads) {
       updateDepartments(pgMappings, DegreeType.Postgraduate)
       DegreeType.Postgraduate
@@ -41,21 +41,17 @@ class MarksOpenAndCloseDepartmentsCommandInternal extends CommandInternal[Degree
       updateDepartments(ugMappings, DegreeType.Undergraduate)
       DegreeType.Undergraduate
     }
-  }
 
-  private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType) {
+  private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType): Unit =
     mapping.asScala.foreach {
-      case (key, value) => {
+      case (key, value) =>
         val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).get
         dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
         dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
-      }
     }
-  }
 
-  private def thisYearOpen(deptStateValue: String) = deptStateValue != DepartmentMarksStateClosed.value
-
-  private def lastYearOpen(deptStateValue: String) = deptStateValue == DepartmentMarksStateThisYearAndLastYear.value
+  private def thisYearOpen(deptStateValue: String): Boolean = deptStateValue != DepartmentMarksStateClosed.value
+  private def lastYearOpen(deptStateValue: String): Boolean = deptStateValue == DepartmentMarksStateThisYearAndLastYear.value
 
 }
 
@@ -73,8 +69,8 @@ trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[DegreeT
 
   def describe(d: Description): Unit = d.properties(
     "degreeType" -> {
-      if (updatePostgrads) DegreeType.Postgraduate
-      else DegreeType.Undergraduate
+      if (updatePostgrads) DegreeType.Postgraduate.dbValue
+      else DegreeType.Undergraduate.dbValue
     }
   )
 }
@@ -93,28 +89,24 @@ trait MarksOpenAndCloseDepartmentsCommandState {
 }
 
 trait MarksPopulateOpenAndCloseDepartmentsCommand extends PopulateOnForm {
-
   self: MarksOpenAndCloseDepartmentsCommandState =>
 
   override def populate(): Unit = {
-
     ugMappings = departments.map { d =>
       d.code -> getState(d, DegreeType.Undergraduate).value
     }.toMap.asJava
+
     pgMappings = departments.map { d =>
       d.code -> getState(d, DegreeType.Postgraduate).value
     }.toMap.asJava
-
   }
 
   def getState(department: Department, degreeType: DegreeType): DepartmentMarksState = {
-
     val canUploadThisYear = department.canUploadMarksToSitsForYear(currentAcademicYear, degreeType)
     val canUploadLastYear = department.canUploadMarksToSitsForYear(previousAcademicYear, degreeType)
 
     if (canUploadThisYear && canUploadLastYear) DepartmentMarksStateThisYearAndLastYear
     else if (canUploadThisYear) DepartmentMarksStateThisYearOnly
     else DepartmentMarksStateClosed
-
   }
 }

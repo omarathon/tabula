@@ -166,11 +166,17 @@ trait RecheckAttendanceCommandDescription extends Describable[Seq[AttendanceMoni
 
   override lazy val eventName = "RecheckAttendance"
 
-  override def describe(d: Description) {
-    d.property("checkpoints", proposedChanges.map(change => change.student.universityId -> change.currentState.dbValue))
-  }
+  override def describe(d: Description): Unit =
+    d.attendanceMonitoringCheckpoints(proposedChanges.groupBy(_.student).mapValues { changes =>
+      changes.map { change =>
+        change.point -> change.currentState
+      }.toMap
+    }, verbose = true)
 
-  override def describeResult(d: Description, result: Seq[AttendanceMonitoringCheckpoint]): Unit = {
-    d.property("checkpoints", result.map(checkpoint => checkpoint.student.universityId -> checkpoint.state.dbValue))
-  }
+  override def describeResult(d: Description, result: Seq[AttendanceMonitoringCheckpoint]): Unit =
+    d.attendanceMonitoringCheckpoints(result.groupBy(_.student).mapValues { checkpoints =>
+      checkpoints.map { checkpoint =>
+        checkpoint.point -> checkpoint.state
+      }.toMap
+    }, verbose = true)
 }

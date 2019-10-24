@@ -46,17 +46,19 @@ trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
     d.fileAttachments(Seq(attachment))
   }
 
-  override def describeResult(d: Description, result: Result): Unit = {
-    d.property("tcaSubmissionCreated" -> result.isRight)
-    result match {
-      case Right(tcaSubmission:TcaSubmission) =>
-        d.properties(
-          "tcaSubmissionId" -> tcaSubmission.id,
-          "tcaStatus" -> tcaSubmission.status,
-          "tcaCreatedTime" -> tcaSubmission.created)
-      case Left(error) => "tcaError" -> error
-    }
-  }
+  override def describeResult(d: Description, result: Result): Unit =
+    result.fold(
+      error => d.properties(
+        "tcaSubmissionCreated" -> false,
+        "tcaError" -> error
+      ),
+      tcaSubmission => d.properties(
+        "tcaSubmissionCreated" -> true,
+        "tcaSubmissionId" -> tcaSubmission.id,
+        "tcaStatus" -> tcaSubmission.status,
+        "tcaCreatedTime" -> tcaSubmission.created.toString
+      )
+    )
 }
 
 trait TurnitinTcaSendSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

@@ -50,8 +50,6 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
   override def describe(d: Description) {
     d.assignment(assignment)
       .submissions(submissions)
-      .studentIds(submissions.flatMap(_.universityId))
-      .studentUsercodes(submissions.map(_.usercode))
       .properties("submissionCount" -> submissions.size)
   }
 

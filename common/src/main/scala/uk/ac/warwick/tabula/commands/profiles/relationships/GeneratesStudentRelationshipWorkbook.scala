@@ -4,7 +4,10 @@ import org.apache.poi.ss.usermodel.{Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddressList, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
+
+import scala.collection.JavaConverters._
 
 trait GeneratesStudentRelationshipWorkbook {
 
@@ -34,6 +37,7 @@ trait GeneratesStudentRelationshipWorkbook {
         row.createCell(3).setCellFormula(
           "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
         )
+        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
       }
 
     formatWorkbook(workbook, department, relationshipType)
@@ -92,7 +96,8 @@ trait GeneratesStudentRelationshipWorkbook {
     val sheet = workbook.getSheet(allocateSheetName(department, relationshipType))
 
     // set style on all columns
-    0 to 3 foreach { col =>
+    // Don't auto-size column 3, we set it manually
+    (0 to 2).foreach { col =>
       sheet.setDefaultColumnStyle(col, style)
       sheet.autoSizeColumn(col)
     }
@@ -104,7 +109,7 @@ trait GeneratesStudentRelationshipWorkbook {
 
   private def generateAllocationSheet(workbook: SXSSFWorkbook, department: Department, relationshipType: StudentRelationshipType): Sheet = {
     val sheet = workbook.createSheet(allocateSheetName(department, relationshipType))
-    sheet.trackAllColumnsForAutoSizing()
+    sheet.trackColumnsForAutoSizing((0 to 2).map(i => i: JInteger).asJava)
 
     // add header row
     val header = sheet.createRow(0)

@@ -24,11 +24,8 @@ class DownloadAllSubmissionsCommand(
 
   override def applyInternal(): RenderableFile = Await.result(zipService.getAllSubmissionsZip(assignment), Duration.Inf)
 
-  override def describe(d: Description): Unit = d
-    .assignment(assignment)
-    .studentIds(assignment.submissions.asScala.flatMap(_.universityId))
-    .studentUsercodes(assignment.submissions.asScala.map(_.usercode))
-    .properties(
-      "submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+     .submissions(assignment.submissions.asScala)
 
 }

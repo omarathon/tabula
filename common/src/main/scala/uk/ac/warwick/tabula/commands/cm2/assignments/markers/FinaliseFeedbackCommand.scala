@@ -50,11 +50,9 @@ trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName: String = "FinaliseFeedback"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("updatedFeedback" -> markerFeedback.size)
-  }
-
+     .property("feedbackCount" -> markerFeedback.size)
 }
 
 trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {

@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import _ from 'lodash-es';
 import './polyfills';
 import initErrorReporter from '../errorreporter';
 import CsrfForm from './csrf-form';
@@ -480,7 +481,7 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   const dismissHandlerClass = 'tabulaPopover-dismissHandler';
 
   // filter already initialized popovers
-  $items = $items.not(initClass);
+  $items = $items.not(`.${initClass}`);
 
   // set options, with defaults
   const defaults = {
@@ -504,6 +505,26 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     e.stopPropagation();
   });
 
+
+  // TAB-7486 If we want the popover to be tabbed into
+  // i.e. when we don't have a focus trigger, bind an enter trigger to click
+  const $nonFocusItems = $items.filter((i, el) => {
+    const elOpts = _.merge({}, opts, {
+      trigger: $(el).data('trigger'),
+    });
+    return (elOpts.trigger || '').indexOf('focus') === -1;
+  });
+  $nonFocusItems.on('keypress', function handleEnter(event) {
+    if (event.keyCode === 13) {
+      // Prevent default behaviour for Enter
+      event.stopPropagation();
+      event.preventDefault();
+      $(this).triggerHandler('click');
+      return false;
+    }
+    return true;
+  });
+
   // TAB-2920
   $items.on('hidden', (e) => {
     e.stopPropagation();
@@ -514,16 +535,36 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     $target.tooltip('enable');
   });
 
+  // Dismiss popovers when clicking away
+  function closePopover($popover) {
+    const $creator = $popover.data('creator');
+    if ($creator) {
+      $creator.popover('hide');
+      $creator.tooltip('enable');
+      $creator.data('bs.popover').inState.click = false;
+    }
+  }
+
   // Click away to dismiss (TAB-7577 - make sure to only bind ONCE)
   $('html')
-    .not(dismissHandlerClass)
+    .not(`.${dismissHandlerClass}`)
     // unbind in case asynchronous runs get pass our class guard
     .off('click.popoverDismiss')
     .on('click.popoverDismiss', (e) => {
-      const $target = $(e.currentTarget);
+      const $target = $(e.target);
+
       // if clicking anywhere other than the popover itself
-      if ($target.closest('.popover').length === 0 && $target.closest('.use-popover').length === 0) {
-        $('.popover-inner').find('button.close').click();
+      if ($target.closest('.popover').length === 0 && $(e.target).closest('.has-popover').length === 0) {
+        $('.popover').each((i, popover) => closePopover($(popover)));
+      } else if ($target.closest('.close').length > 0) {
+        closePopover($target.closest('.popover'));
+      }
+    })
+    .off('keyup.popoverDismiss')
+    .on('keyup.popoverDismiss', (e) => {
+      const key = e.which || e.keyCode;
+      if (key === 27) {
+        $('.popover').each((i, popover) => closePopover($(popover)));
       }
     })
     .addClass(dismissHandlerClass);
@@ -554,14 +595,6 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   $items.on('shown.bs.popover', (e) => {
     const $po = $(e.currentTarget).popover().data('bs.popover').tip();
     $po.data('creator', $(e.currentTarget));
-  });
-  $('body').on('click', '.popover .close', (e) => {
-    const $creator = $(e.currentTarget).parents('.popover').data('creator');
-    if ($creator) {
-      $creator.popover('hide');
-      $creator.tooltip('enable');
-    }
-    e.stopPropagation();
   });
 
   // now that's all done, bind the popover
@@ -1455,6 +1488,40 @@ $(() => {
       .find(':input:not(:focus):visible')
       .first()
       .focus();
+  });
+
+  $body.on('click', '.bulk-email:not(.bulk-email-init)', (e) => {
+    const $button = $(e.target);
+    const emails = $button.data('emails');
+    const separator = $button.data('separator');
+    const userEmail = encodeURI($button.data('userEmail'));
+    const subject = encodeURIComponent($button.data('subject'));
+    const emailString = $('<div/>').text(emails.join(separator)).html();
+
+    const $content = $(`
+      <div class="copy-to-clipboard-container">
+        <div class="form-group">
+          <label class="control-label">${emails.length} email address${emails.length === 1 ? '' : 'es'}</label>
+          <textarea class="form-control copy-to-clipboard-target" rows="3">${emailString}</textarea>
+        </div>
+        <button class="btn btn-default copy-to-clipboard"><i class="fas fa-paste"></i> Copy to clipboard</button>
+        <a class="btn btn-default" href="mailto:${userEmail}?bcc=${emailString}${subject && subject.length > 0 ? `&subject=${subject}` : ''}"><i class="fas fa-external-link-alt"></i> Open email app</a>
+      </div>
+    `);
+
+    $button.tabulaPopover({
+      trigger: 'click',
+      content: $('<div/>').append($content).html(),
+      html: true,
+      placement: 'top',
+    }).addClass('bulk-email-init').triggerHandler('click');
+  });
+
+  $body.on('click', 'button.copy-to-clipboard', (e) => {
+    const $button = $(e.target);
+    const $target = $button.closest('.copy-to-clipboard-container').find('.copy-to-clipboard-target');
+    $target.get(0).select();
+    document.execCommand('copy');
   });
 }); // on ready
 

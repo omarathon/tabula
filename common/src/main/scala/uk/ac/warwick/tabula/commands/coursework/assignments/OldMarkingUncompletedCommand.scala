@@ -81,15 +81,13 @@ trait MarkingUncompletedDescription extends Describable[Unit] {
 
   self: MarkingUncompletedState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> markerFeedback.asScala.map(_.feedback.usercode))
-  }
+     .markerFeedbacks(markerFeedback.asScala)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.assignment(assignment)
-      .property("numFeedbackUpdated" -> markerFeedback.size())
-  }
+     .property("feedbackCount" -> markerFeedback.size())
 }
 
 trait MarkingUncompletedState {

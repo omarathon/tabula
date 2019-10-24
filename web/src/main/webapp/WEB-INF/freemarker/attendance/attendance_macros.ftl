@@ -162,37 +162,37 @@ showResetButton=false
           <td>${item.userId}</td>
           <td>
             <#if item.existingSchemes?size == 0>
-            0 schemes
+              0 schemes
             <#else>
-            <#local popovercontent>
-            <ul>
-              <#list item.existingSchemes as scheme>
-                <li>${scheme.displayName}</li>
-              </#list>
-              <ul>
-                </#local>
+              <#local popovercontent>
+                <ul>
+                  <#list item.existingSchemes as scheme>
+                    <li>${scheme.displayName}</li>
+                  </#list>
+                <ul>
+              </#local>
 
-                <a href="#">
-									<span
-                          class="use-tooltip"
+              <a href="#">
+                <span
+                        class="use-tooltip"
+                        data-container="body"
+                        title="See which schemes apply to this student"
+                        tabindex="0"
+                >
+                  <span
+                          class="use-popover"
                           data-container="body"
-                          title="See which schemes apply to this student"
-                          tabindex="0"
-                  >
-										<span
-                            class="use-popover"
-                            data-container="body"
-                            data-html="true"
-                            data-content="${popovercontent}"
-                            data-placement="top"
+                          data-html="true"
+                          data-content="${popovercontent}"
+                          data-placement="top"
                             data-trigger="click focus"
-                            tabindex="0" role="button"
-                    >
-											<@fmt.p item.existingSchemes?size "scheme" />
-										</span>
-									</span>
-                </a>
-                </#if>
+                          tabindex="0" role="button"
+                  >
+                    <@fmt.p item.existingSchemes?size "scheme" />
+                  </span>
+                </span>
+              </a>
+            </#if>
           </td>
           <#if checkboxName?has_content>
             <td>
@@ -272,7 +272,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span tabindex="0" role="button" class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-trigger="click focus"
+  <span tabindex="0" role="button" class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-trigger="click" data-container=""
         data-placement="left">${formatResult.labelText}</span>
   <span class="hidden-desktop visible-print visible-print-inline">
 		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
@@ -324,7 +324,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span tabindex="0" role="button" class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true" data-trigger="click focus">
+  <span tabindex="0" role="button" class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true" data-trigger="click" data-container="">
 		<i class="fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>"></i>
 		<#if formatResult.noteUrl?has_content><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 	</span>

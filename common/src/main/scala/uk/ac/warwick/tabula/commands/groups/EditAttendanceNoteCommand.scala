@@ -103,9 +103,8 @@ trait AttendanceNoteDescription extends Describable[SmallGroupEventAttendanceNot
     d.smallGroupEventOccurrence(occurrence)
   }
 
-  override def describeResult(d: Description, result: SmallGroupEventAttendanceNote) {
-    d.property("note", result.note)
-  }
+  override def describeResult(d: Description, result: SmallGroupEventAttendanceNote): Unit =
+    d.attendanceMonitoringNote(result)
 }
 
 trait AttendanceNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

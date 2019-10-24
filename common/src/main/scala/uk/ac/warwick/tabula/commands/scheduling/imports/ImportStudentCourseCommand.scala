@@ -92,7 +92,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
     // current course (surprisingly).  In that case we don't want to go ahead and end all
     // relationships for the route code.
     if (courseRow.sprStatusCode != null && courseRow.sprStatusCode.startsWith("P")) {
-      // they are permanently withdrawn
+      // they are permanently withdrawn. don't do this for temporary withdrawal; deceased handled separately
       endRelationships()
     }
     else {

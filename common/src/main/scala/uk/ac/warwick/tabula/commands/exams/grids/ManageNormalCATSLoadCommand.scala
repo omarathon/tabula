@@ -127,15 +127,15 @@ trait ManageNormalCATSLoadDescription extends Describable[ManageNormalCATSLoadCo
   override def describeResult(d: Description, result: ManageNormalCATSLoadCommand.Result): Unit = {
     d.property("updated", result.updated.map(load => Map(
       "route" -> load.route.code,
-      "academicYear" -> load.academicYear,
+      "academicYear" -> load.academicYear.toString,
       "yearOfStudy" -> load.yearOfStudy,
-      "normalLoad" -> load.normalLoad
+      "normalLoad" -> load.normalLoad.toString()
     )))
     d.property("removed", result.removed.map(load => Map(
       "route" -> load.route.code,
-      "academicYear" -> load.academicYear,
+      "academicYear" -> load.academicYear.toString,
       "yearOfStudy" -> load.yearOfStudy,
-      "normalLoad" -> load.normalLoad
+      "normalLoad" -> load.normalLoad.toString()
     )))
   }
 }

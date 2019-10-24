@@ -18,9 +18,9 @@ class OldAdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, f
 
   override def applyInternal(): RenderableFile = Await.result(zipService.getFeedbackZip(feedback), Duration.Inf)
 
-  override def describe(d: Description): Unit = d.feedback(feedback).properties(
-    "studentId" -> feedback.studentIdentifier,
-    "attachmentCount" -> feedback.attachments.size)
+  override def describe(d: Description): Unit =
+    d.feedback(feedback)
+     .properties("attachmentCount" -> feedback.attachments.size)
 }
 
 class OldAdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
@@ -37,14 +37,12 @@ class OldAdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignmen
     attachment
   }
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
-    d.property("fileFound", fileFound)
-  }
+  override def describeResult(d: Description, result: Option[RenderableFile]): Unit =
+    d.property("fileFound", result.isDefined)
 
 }
 

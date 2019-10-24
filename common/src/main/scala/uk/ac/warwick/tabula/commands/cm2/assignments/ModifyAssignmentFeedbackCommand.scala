@@ -57,7 +57,7 @@ trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
       if (feedbackTemplate != null) {
         "feedbackTemplate" -> feedbackTemplate.name
       } else {
-        "feedbackTemplate" -> "No Template"
+        "feedbackTemplate" -> "-"
       },
       "automaticallyReleaseToMarkers" -> automaticallyReleaseToMarkers,
       "collectMarks" -> collectMarks,

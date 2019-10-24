@@ -91,17 +91,19 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   def getStudentsAsUsers: JList[User] = userLookup.getUsersByUserIds(students).values.asScala.toSeq.asJava
 
-  override def describe(d: Description): Unit = d
-    .assignment(assignment)
-    .property("students" -> students)
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+     .studentUsercodes(students.asScala)
 
   override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])): Unit = {
     val (submissions, feedbacks) = result
     val attachments = submissions.flatMap(_.allAttachments) ++ feedbacks.flatMap(_.attachments.asScala)
 
     d.assignment(assignment)
-      .property("submissionsDeleted" -> submissions.length)
-      .property("feedbacksDeleted" -> feedbacks.length)
-      .fileAttachments(attachments)
+     .properties(
+       "submissionsDeleted" -> submissions.length,
+       "feedbacksDeleted" -> feedbacks.length
+     )
+     .fileAttachments(attachments)
   }
 }

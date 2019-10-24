@@ -12,6 +12,14 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="bamboo-specs" target="1.8" />
+      <module name="IdeaProjects.tabula.api.main" target="1.8" />
+      <module name="IdeaProjects.tabula.api.test" target="1.8" />
+      <module name="IdeaProjects.tabula.common.main" target="1.8" />
+      <module name="IdeaProjects.tabula.common.test" target="1.8" />
+      <module name="IdeaProjects.tabula.integrationTest.main" target="1.8" />
+      <module name="IdeaProjects.tabula.integrationTest.test" target="1.8" />
+      <module name="IdeaProjects.tabula.web.main" target="1.8" />
+      <module name="IdeaProjects.tabula.web.test" target="1.8" />
       <module name="tabula.api.main" target="1.8" />
       <module name="tabula.api.test" target="1.8" />
       <module name="tabula.common.main" target="1.8" />

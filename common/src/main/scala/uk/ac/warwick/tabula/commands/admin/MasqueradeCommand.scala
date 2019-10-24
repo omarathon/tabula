@@ -12,13 +12,13 @@ import uk.ac.warwick.tabula.web.Cookie
 object MasqueradeCommand {
   def apply(user: CurrentUser) =
     new MasqueradeCommandInternal(user)
+      with ComposableCommand[Option[Cookie]]
       with MasqueradeCommandDescription
       with MasqueradeCommandValidation
       with AutowiringUserLookupComponent
       with AutowiringSecurityServiceComponent
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
-      with ComposableCommand[Option[Cookie]]
       with ReadOnly
       with PubliclyVisiblePermissions // Public because we always want to be able to remove the cookie, and we validate our own perms
 }
@@ -78,6 +78,8 @@ trait MasqueradeCommandValidation extends SelfValidating {
 
 trait MasqueradeCommandDescription extends Describable[Option[Cookie]] {
   self: MasqueradeCommandState =>
+
+  override lazy val eventName = "Masquerade"
 
   def describe(d: Description): Unit = d.properties(
     "usercode" -> usercode,

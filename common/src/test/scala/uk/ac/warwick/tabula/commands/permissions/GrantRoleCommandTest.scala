@@ -218,7 +218,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 
     d.allProperties should be(Map(
       "scope" -> "Department[dept-id]",
-      "usercodes" -> "cuscav,cusebr",
+      "users" -> Seq("cuscav", "cusebr"),
       "roleDefinition" -> "test"
     ))
   }

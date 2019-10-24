@@ -105,13 +105,13 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
       case None => ViewSmallGroupsForPointCommandResult.Course("", "", student.homeDepartment.name, "", "", "", "")
       case Some(scd) =>
         ViewSmallGroupsForPointCommandResult.Course(
-          student.mostSignificantCourseDetails.map(scd => scd.course.name).getOrElse(""),
-          student.mostSignificantCourseDetails.map(scd => s"${scd.currentRoute.name} (${scd.currentRoute.code.toUpperCase})").getOrElse(""),
+          scd.course.name,
+          s"${scd.currentRoute.name} (${scd.currentRoute.code.toUpperCase})",
           student.homeDepartment.name,
-          student.mostSignificantCourseDetails.map(scd => scd.statusOnRoute.fullName.toLowerCase.capitalize).getOrElse(""),
-          student.mostSignificantCourseDetails.map(scd => scd.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased).getOrElse(""),
-          student.mostSignificantCourseDetails.map(scd => scd.currentRoute.degreeType.toString).getOrElse(""),
-          student.mostSignificantCourseDetails.map(scd => scd.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse("")
+          scd.statusOnRoute.fullName.toLowerCase.capitalize,
+          scd.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased,
+          scd.currentRoute.degreeType.toString,
+          scd.latestStudentCourseYearDetails.yearOfStudy.toString
         )
     }
   }

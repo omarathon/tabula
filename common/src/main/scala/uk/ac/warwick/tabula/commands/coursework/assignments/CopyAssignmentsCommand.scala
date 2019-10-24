@@ -130,10 +130,12 @@ trait CopyAssignmentsState extends ArchiveAssignmentsState {
 
 trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
   self: CopyAssignmentsState =>
-  def describe(d: Description): Unit = d
-    .properties("modules" -> modules.map(_.id))
-    .properties("assignments" -> assignments.asScala.map(_.id))
-    .properties("isArchiving" -> archive)
+  def describe(d: Description): Unit =
+    d.properties(
+      "modules" -> modules.map(_.id),
+      "assignments" -> assignments.asScala.map(_.id),
+      "archive" -> archive
+    )
 }
 
 trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {

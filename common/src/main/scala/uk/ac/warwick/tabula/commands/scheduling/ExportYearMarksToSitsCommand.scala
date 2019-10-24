@@ -67,7 +67,11 @@ trait ExportYearMarksToSitsDescription extends Describable[Seq[StudentCourseYear
   override def describe(d: Description) {}
 
   override def describeResult(d: Description, result: Seq[StudentCourseYearDetails]) {
-    d.property("marks exported", result.size)
-    d.property("marks", result.map(scyd => scyd.id -> (scyd.academicYear, scyd.yearOfStudy, scyd.agreedMark)))
+    d.property("marksCount", result.size)
+    d.property("marks", result.map(scyd => scyd.id -> Map(
+      "academicYear" -> scyd.academicYear.toString,
+      "yearOfStudy" -> scyd.yearOfStudy,
+      "agreedMark" -> scyd.agreedMark.toString
+    )))
   }
 }

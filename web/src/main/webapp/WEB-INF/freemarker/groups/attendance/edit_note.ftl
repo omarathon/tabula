@@ -88,7 +88,7 @@
 
             <small class="very-subtle help-block">
               This is the file attached to this attendance note.
-              Click the remove link next to a document to delete it.
+              Select the x next to the file to delete it.
             </small>
 
           </@bs3form.labelled_form_group>
@@ -97,7 +97,7 @@
             jQuery(function ($) {
               $(".remove-attachment").on("click", function (e) {
                 $(this).closest('form').find('.attendance-file').show();
-                $(this).closest(".control-group").remove();
+                $(this).closest(".form-group").remove();
                 return false;
               });
             });

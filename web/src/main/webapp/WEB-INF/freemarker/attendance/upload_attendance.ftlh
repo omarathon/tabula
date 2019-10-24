@@ -31,15 +31,16 @@
           </#if>
 
           <p>
-            Each row in the uploaded file should have 2 values: University ID and the attendance.
-            Attendance should be specified as one of the following values:
+            The spreadsheet must be saved in CSV format with two columns. Put the student's University ID in the first column and
+            record their attendance in the second. The value for attendance must be one of the following:
           </p>
           <ul>
-            <li>attended</li>
-            <li>unauthorised</li>
-            <li>not-recorded</li>
+            <li><code>attended</code> </li>
+            <li><code>authorised</code> – you can only set this attendance value if you have created an attendance note in advance for those students with authorisation to miss this point</li>
+            <li><code>unauthorised</code> </li>
+            <li><code>not-recorded</code> </li>
           </ul>
-          It is not possible to record authorised absences using the CSV upload.
+
           <@bs3form.labelled_form_group "" "File">
             <input type="file" name="file.upload" />
           </@bs3form.labelled_form_group>

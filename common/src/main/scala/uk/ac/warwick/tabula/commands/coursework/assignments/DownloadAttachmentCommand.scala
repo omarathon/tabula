@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
 class DownloadAttachmentCommand(
   val module: Module,
@@ -40,13 +39,11 @@ class DownloadAttachmentCommand(
     attachment
   }
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 
 }

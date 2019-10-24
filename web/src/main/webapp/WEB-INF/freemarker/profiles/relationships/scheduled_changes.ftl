@@ -1,3 +1,4 @@
+<#import "*/csrf_macros.ftl" as csrf_macros />
 <#escape x as x?html>
 
   <h1>Scheduled ${relationshipType.agentRole} changes</h1>
@@ -6,6 +7,7 @@
     <div class="striped-section-contents">
       <div class="item-info">
         <form action="<@routes.profiles.relationship_scheduled_update department relationshipType />" method="post">
+          <@csrf_macros.csrfHiddenInputField />
           <input type="hidden" name="notifyStudent" value="false" />
           <input type="hidden" name="notifyOldAgent" value="false" />
           <input type="hidden" name="notifyNewAgent" value="false" />

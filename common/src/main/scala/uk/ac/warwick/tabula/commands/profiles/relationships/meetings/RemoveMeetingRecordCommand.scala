@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -29,9 +29,8 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 trait RemoveMeetingRecordDescription extends Describable[AbstractMeetingRecord] {
   self: RemoveMeetingRecordState =>
 
-  override def describe(d: Description): Unit = d.properties(
-    "meetingRecord" -> meetingRecord.id)
-
+  override def describe(d: Description): Unit =
+    d.meeting(meetingRecord)
 }
 
 trait RemoveMeetingRecordValidation {

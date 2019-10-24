@@ -27,6 +27,6 @@ class ArchiveSmallGroupSetCommand(val module: Module, val set: SmallGroupSet) ex
 
   def describe(description: Description): Unit = description
     .smallGroupSet(set)
-    .property("unarchive" -> unarchive)
+    .property("archive" -> !unarchive)
 
 }

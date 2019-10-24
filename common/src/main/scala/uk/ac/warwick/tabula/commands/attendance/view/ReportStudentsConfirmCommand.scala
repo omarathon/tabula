@@ -101,7 +101,7 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
     d.property("monitoringPeriod", period)
       .property("academicYear", academicYear.toString)
       .studentIds(studentMissedReportCounts.map(_.student.universityId))
-      .property("missedPoints", studentMissedReportCounts.map(src => src.student.userId -> src.missed).toMap)
+      .property("missedPoints", studentMissedReportCounts.map(src => src.student.universityId -> src.missed).toMap)
   }
 }
 

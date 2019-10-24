@@ -72,15 +72,7 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
   def describe(d: Description) {
     d.assignment(assignment)
       .submissions(submissions)
-      .property("submissionCount" -> submissions.size)
-      .property("markedPlagarised" -> markPlagiarised)
-  }
-
-  override def describeResult(d: Description) {
-    d.assignment(assignment)
-      .submissions(submissions)
-      .property("submissionCount" -> submissions.size)
-      .property("markedPlagarised" -> markPlagiarised)
+      .property("markedPlagiarised" -> markPlagiarised)
   }
 }
 

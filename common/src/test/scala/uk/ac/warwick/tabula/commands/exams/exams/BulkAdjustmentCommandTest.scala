@@ -6,7 +6,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.helpers.{ParsedRow, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
@@ -68,7 +68,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
   def bindValidationExtractDataNoStudentHeader() {
     new BindFixture {
       mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
-        Map("someheader" -> "123")
+        ParsedRow(1, Map("someheader" -> "123"))
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
@@ -81,7 +81,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
   def bindValidationExtractDataInvalidStudentIdFormat() {
     new BindFixture {
       mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
-        Map(BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> "student")
+        ParsedRow(1, Map(BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> "student"))
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
@@ -94,7 +94,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
   def bindValidationExtractDataInvalidStudentNoFeedback() {
     new BindFixture {
       mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
-        Map(BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> "2345")
+        ParsedRow(1, Map(BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> "2345"))
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
@@ -108,13 +108,13 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     new BindFixture {
       val studentId: String = thisAssessment.allFeedback.head._universityId
       mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
-        Map(
+        ParsedRow(1, Map(
           BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> studentId,
           BulkAdjustmentCommand.MarkHeader.toLowerCase -> "100",
           BulkAdjustmentCommand.GradeHeader.toLowerCase -> "A",
           BulkAdjustmentCommand.ReasonHeader.toLowerCase -> "Reason",
           BulkAdjustmentCommand.CommentsHeader.toLowerCase -> "Comments"
-        )
+        ))
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)

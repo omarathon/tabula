@@ -1,15 +1,10 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
-import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
-import beans.BeanProperty
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
 class DownloadSupportingFilesCommand(
   val module: Module,
@@ -37,13 +32,11 @@ class DownloadSupportingFilesCommand(
     attachment
   }
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.property("fileFound", fileFound)
-  }
 
 }

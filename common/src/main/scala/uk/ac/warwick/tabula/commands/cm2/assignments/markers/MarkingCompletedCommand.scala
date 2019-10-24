@@ -94,15 +94,13 @@ trait WorkflowProgressDescription extends Describable[Seq[AssignmentFeedback]] {
 
   self: WorkflowProgressState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> feedbackForRelease.map(_.feedback.usercode))
-  }
+     .studentUsercodes(feedbackForRelease.map(_.feedback.usercode))
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]) {
+  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
-      .property("numFeedbackUpdated" -> result.length)
-  }
+     .feedbacks(result)
 }
 
 trait WorkflowProgressState extends CanProxy with UserAware with HasAssignment {

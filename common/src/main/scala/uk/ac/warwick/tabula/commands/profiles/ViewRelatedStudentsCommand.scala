@@ -91,7 +91,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
   def onBind(result: BindingResult) {
     // Add all non-withdrawn codes to SPR statuses by default
     if (sprStatuses.isEmpty) {
-      allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach {
+      allSprStatuses.filterNot(SitsStatus.isWithdrawnStatusOnRoute).foreach {
         sprStatuses.add
       }
     }

@@ -135,10 +135,13 @@ trait ReplaceMarkerInMarkingWorkflowDescription extends Describable[MarkingWorkf
 
   override lazy val eventName = "ReplaceMarkerInMarkingWorkflow"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.markingWorkflow(markingWorkflow)
-    d.properties(("assignments", affectedAssignments.map(_.id)), ("oldMarker", oldMarker), ("newMarker", newMarker))
-  }
+     .properties(
+       "assignments" -> affectedAssignments.map(_.id),
+       "oldMarker" -> oldMarker,
+       "newMarker" -> newMarker
+     )
 }
 
 trait ReplaceMarkerInMarkingWorkflowCommandState {

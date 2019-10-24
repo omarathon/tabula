@@ -83,7 +83,6 @@ trait ExportAttendanceToSitsCommandPermissions extends RequiresPermissionsChecki
 trait ExportAttendanceToSitsCommandDescription extends Describable[Seq[MonitoringPointReport]] {
   override def describe(d: Description) {}
 
-  override def describeResult(d: Description, result: Seq[MonitoringPointReport]) {
-    d.property("reports exported", result.size)
-  }
+  override def describeResult(d: Description, result: Seq[MonitoringPointReport]): Unit =
+    d.property("reportCount", result.size)
 }

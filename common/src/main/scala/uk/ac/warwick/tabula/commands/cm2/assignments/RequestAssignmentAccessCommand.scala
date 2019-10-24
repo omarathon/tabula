@@ -55,5 +55,5 @@ trait RequestAssignmentAccessDescription extends Describable[Result] {
 
   override def describe(d: Description): Unit = d.assignment(assignment)
 
-  override def describeResult(d: Description): Unit = d.property("admins" -> admins.flatMap(_.getUserId))
+  override def describeResult(d: Description): Unit = d.users(admins)
 }

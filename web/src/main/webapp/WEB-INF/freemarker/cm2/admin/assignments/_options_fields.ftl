@@ -60,8 +60,13 @@
   <@bs3form.labelled_form_group path="wordCountConventions" labelText="Word count conventions">
     <@f.textarea path="wordCountConventions" id="wordCountConventions" rows="6" cssClass="form-control col-md-6" />
     <div class="help-block">
-      Tell students if there are specific items that they should include in or exclude from the word count e.g. a bibliography or appendices.
-      This only applies when you specify a minimum and/or maximum word count.
+      <div class="enabled">
+        Tell students if there are specific items that they should include in or exclude from the word count e.g. a bibliography or appendices.
+        This only applies when you specify a minimum and/or maximum word count.
+      </div>
+      <div class="disabled">
+        This only applies when you specify a minimum and/or maximum word count.
+      </div>
     </div>
   </@bs3form.labelled_form_group>
   <@bs3form.labelled_form_group path="comment" labelText="Text to show on submission form">
@@ -70,4 +75,31 @@
       You can start a new paragraph by inserting a blank line (i.e. press Enter twice).
     </div>
   </@bs3form.labelled_form_group>
+
+  <script nonce="${nonce()}">
+    jQuery(function ($) {
+
+      var updateWordCountConventions = function () {
+        if ($('input[name=wordCountMin]').val().length === 0 && $('input[name=wordCountMax]').val().length === 0) {
+          $('textarea[name=wordCountConventions]').prop('disabled', true).closest('div')
+            .find('.help-block .disabled').show()
+            .end().find('.help-block .enabled').hide();
+        } else {
+          $('textarea[name=wordCountConventions]').prop('disabled', false).closest('div')
+            .find('.help-block .enabled').show()
+            .end().find('.help-block .disabled').hide();
+        }
+      };
+
+      $('input[name=wordCountMin], input[name=wordCountMax]').on('change', function (e) {
+        e.stopPropagation();
+        updateWordCountConventions();
+      });
+
+      updateWordCountConventions();
+
+    });
+  </script>
+
+
 </#escape>

@@ -28,6 +28,8 @@
         <table class="table table-bordered table-condensed table-striped">
           <thead>
           <tr>
+            <th>Sheet name</th>
+            <th>Row</th>
             <th>Student usercode</th>
             <th>Student name</th>
             <th>Marker usercode</th>
@@ -38,6 +40,8 @@
           <#list assignMarkersBySpreadsheetCommand.rowsWithErrors as row>
             <#list row.errors as error>
               <tr class="no-bottom-border">
+                <th scope="row" rowspan="2">${row.sheetName}</th>
+                <th scope="row" rowspan="2">${row.rowNumber?c}</th>
                 <#if row.rowData["Student usercode"]??>
                   <td>${row.rowData["Student usercode"]}</td><#else>
                   <td></td></#if>

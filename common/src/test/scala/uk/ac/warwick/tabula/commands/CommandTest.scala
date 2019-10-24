@@ -99,6 +99,7 @@ class CommandTest extends TestBase {
       "department" -> "in",
       "submissions" -> Seq("submission1Id", "submission2Id"),
       "students" -> List("0000001", "0000002"),
+      "studentUsercodes" -> List("cuspxp", "cuspxp"),
       "markingWorkflow" -> "workflowId",
       "member" -> "1010101"
     ))

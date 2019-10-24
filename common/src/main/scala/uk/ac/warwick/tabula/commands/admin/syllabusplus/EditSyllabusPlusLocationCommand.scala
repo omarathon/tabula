@@ -52,6 +52,8 @@ trait SyllabusPlusLocationCommandValidation extends SelfValidating
 
 trait EditSyllabusPlusLocationDescription extends Describable[SyllabusPlusLocation]
   with SyllabusPlusLocationCommandRequest {
+  override lazy val eventName = "EditSyllabusPlusLocation"
+
   override def describe(d: Description): Unit =
     d.properties(
       "upstreamName" -> upstreamName,
@@ -60,7 +62,7 @@ trait EditSyllabusPlusLocationDescription extends Describable[SyllabusPlusLocati
     )
 
   override def describeResult(d: Description, result: SyllabusPlusLocation): Unit =
-    d.property("syllabusPlusLocation" -> result)
+    d.syllabusPlusLocation(result)
 }
 
 trait ModifySyllabusPlusLocationPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

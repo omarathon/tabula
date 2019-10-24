@@ -104,14 +104,12 @@ trait BulkAttendanceNoteDescription extends Describable[Seq[AttendanceMonitoring
 
   override lazy val eventName = "UpdateBulkAttendanceNote"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.studentIds(students.map(_.universityId))
-    d.attendanceMonitoringPoints(Seq(point))
-  }
+     .attendanceMonitoringPoints(Seq(point))
 
-  override def describeResult(d: Description, result: Seq[AttendanceMonitoringNote]) {
-    d.property("note", result.head.note)
-  }
+  override def describeResult(d: Description, result: Seq[AttendanceMonitoringNote]): Unit =
+    result.headOption.map(d.attendanceMonitoringNote).getOrElse(d)
 }
 
 trait BulkAttendanceNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

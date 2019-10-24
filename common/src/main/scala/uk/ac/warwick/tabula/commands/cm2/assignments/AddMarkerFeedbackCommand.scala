@@ -122,6 +122,6 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
       .studentIds(items.asScala.map(_.uniNumber))
       .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
       .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
-      .properties("feedback" -> feedbacks.map(_.id))
+      .markerFeedbacks(feedbacks)
   }
 }

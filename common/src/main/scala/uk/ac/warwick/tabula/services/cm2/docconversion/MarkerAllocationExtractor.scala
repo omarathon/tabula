@@ -19,6 +19,8 @@ object MarkerAllocationExtractor {
   val AcceptedFileExtensions = Seq(".xlsx")
 
   case class ParsedRow(
+    sheetName: String,
+    rowNumber: Int,
     marker: Option[User],
     student: Option[User],
     role: Option[String],
@@ -55,7 +57,7 @@ class MarkerAllocationExtractor {
       workflow.allStages.map(_.allocationName)
     }
 
-    def parseRow(role: Option[String], rowData: Map[String, String]): ParsedRow = {
+    def parseRow(sheetName: String, rowNumber: Int, role: Option[String], rowData: Map[String, String]): ParsedRow = {
 
       def getUser(id: String): Option[User] = Option(userLookup.getUserByUserId(id)).filter(_.isFoundUser)
 
@@ -93,11 +95,11 @@ class MarkerAllocationExtractor {
 
 
       val errors = Seq(student, marker).flatMap(_.left.toOption)
-      ParsedRow(marker.right.toOption, student.right.toOption, role, errors, rowData)
+      ParsedRow(sheetName, rowNumber, marker.right.toOption, student.right.toOption, role, errors, rowData)
     }
 
     val parsedRows: Seq[ParsedRow] = for (sheet <- sheets; row <- sheet.rows)
-      yield parseRow(roles.find(_ == sheet.name), row)
+      yield parseRow(sheet.name, row.rowNumber, roles.find(_ == sheet.name), row.data)
 
     parsedRows.groupBy(_.role.getOrElse("No role"))
   }

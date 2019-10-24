@@ -129,11 +129,8 @@ class StudentCourseDetails
     Option(latestStudentCourseYearDetails).exists(scyd => scyd.enrolmentStatus != null && !scyd.enrolmentStatus.code.startsWith("P"))
   }
 
-  // The reason this method isn't on SitsStatus is that P* can have a meaning other than
-  // permanently withdrawn in the context of applicants, but not in the context of
-  // the student's route status (sprStatus)
   def permanentlyWithdrawn: Boolean = {
-    statusOnRoute != null && statusOnRoute.code.startsWith("P")
+    statusOnRoute != null && SitsStatus.isPermanentlyWithdrawnStatusOnRoute(statusOnRoute)
   }
 
   @OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately

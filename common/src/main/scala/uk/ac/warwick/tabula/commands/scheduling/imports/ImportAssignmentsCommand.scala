@@ -103,7 +103,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       if (importEverything) {
         doAssignments()
         logger.debug("Imported AssessmentComponents. Importing assessment groups...")
-        doGroups()
+        doGroups(AcademicYear.now())
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
         doGradeBoundaries()
@@ -155,11 +155,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
-  def doGroups() {
+  def doGroups(year: AcademicYear) {
     benchmark("Import assessment groups") {
-      val existingUpstreamAssessmentGroupsForThisYear = transactional(readOnly = true) {
-        // We think we only need to worry about this year's assessment groups, as they generally get created in SITS in error and then swiftly deleted
-        assessmentMembershipService.getUpstreamAssessmentGroups(Seq(AcademicYear.now()))
+      val existingUpstreamAssessmentGroupsForThatYear = transactional(readOnly = true) {
+        assessmentMembershipService.getUpstreamAssessmentGroups(Seq(year))
       }
       val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups
       // Split into chunks so we commit transactions periodically.
@@ -171,7 +170,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         }
       }
 
-      existingUpstreamAssessmentGroupsForThisYear.foreach { existing =>
+      existingUpstreamAssessmentGroupsForThatYear.foreach { existing =>
         if (!upstreamAssessmentGroupsFromSITS.exists(upstream => upstream.isEquivalentTo(existing))) {
           removeUpstreamAssessmentGroup(existing)
         }
@@ -413,7 +412,7 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
     val next = AcademicYear.now().next.startYear
     for (year <- yearZero until next) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(year))
-      doGroups()
+      doGroups(AcademicYear(year))
       doGroupMembers()
     }
   }

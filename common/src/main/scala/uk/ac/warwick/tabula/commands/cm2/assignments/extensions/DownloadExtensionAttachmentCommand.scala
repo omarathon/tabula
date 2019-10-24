@@ -35,14 +35,12 @@ trait DownloadExtensionAttachmentDescription extends Describable[Option[Renderab
 
   override lazy val eventName: String = "DownloadExtensionAttachment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(extension.assignment)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description, result: Option[RenderableAttachment]) {
+  override def describeResult(d: Description, result: Option[RenderableAttachment]): Unit =
     d.property("fileFound", result.isDefined)
-  }
 }
 
 trait DownloadExtensionAttachmentState {

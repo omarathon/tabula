@@ -442,8 +442,8 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     } else logger.info("No students - so not updating component marks")
   }
 
-  def describe(d: Description): Unit = d.property("deptCode" -> deptCode)
+  def describe(d: Description): Unit = d.property("department" -> deptCode)
 
   // Makes the related event easier to spot in the logs
-  override def describeResult(d: Description, result: Unit): Unit = d.property("deptCode" -> deptCode)
+  override def describeResult(d: Description, result: Unit): Unit = d.property("department" -> deptCode)
 }

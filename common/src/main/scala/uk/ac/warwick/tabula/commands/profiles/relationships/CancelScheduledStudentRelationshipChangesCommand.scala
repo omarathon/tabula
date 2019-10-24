@@ -61,15 +61,9 @@ trait CancelScheduledStudentRelationshipChangesDescription extends Describable[S
 
   override lazy val eventName = "CancelScheduledStudentRelationshipChanges"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.studentRelationshipType(relationshipType)
-    d.property("relationships", relationships.asScala.map(relationship => Map(
-      "studentRelationship" -> relationship.id,
-      "studentCourseDetails" -> relationship.studentCourseDetails,
-      "agent" -> relationship.agent,
-      "action" -> (if (relationship.isCurrent) "cancelRemove" else "cancelAdd")
-    )))
-  }
+     .studentRelationships(relationships.asScala)
 }
 
 trait CancelScheduledStudentRelationshipChangesCommandNotifications extends Notifies[Seq[StudentRelationship], StudentRelationship] {

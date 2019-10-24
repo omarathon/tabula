@@ -393,7 +393,7 @@ class StudentMember extends Member with StudentProperties {
           .filter(_.statusOnRoute != null)
           .map(_.statusOnRoute)
           .filter(_.code != null)
-          .count(!_.code.startsWith("P")) == 0
+          .count(statusOnRoute => !statusOnRoute.code.startsWith("P") && !statusOnRoute.code.startsWith("D")) == 0
         )
   }
 

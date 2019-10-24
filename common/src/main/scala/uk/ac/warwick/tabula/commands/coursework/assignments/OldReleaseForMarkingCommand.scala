@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object OldReleaseForMarkingCommand {
@@ -122,15 +122,13 @@ trait ReleaseForMarkingCommandDescription extends Describable[List[Feedback]] {
 
   self: ReleaseForMarkingState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .property("students" -> students)
-  }
+     .studentUsercodes(students.asScala)
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit =
     d.assignment(assignment)
-      .property("submissionCount" -> feedbacksUpdated)
-  }
+     .property("feedbackCount" -> feedbacksUpdated)
 }
 
 trait FirstMarkerReleaseNotifier extends OldFeedbackReleasedNotifier[List[Feedback]] {
