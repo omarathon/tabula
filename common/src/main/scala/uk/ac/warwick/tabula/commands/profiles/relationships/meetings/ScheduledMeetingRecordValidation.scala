@@ -4,12 +4,14 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
+import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
-trait ScheduledMeetingRecordValidation {
+trait ScheduledMeetingRecordValidation extends AttachedFilesValidation {
   self: AbstractScheduledMeetingRecordCommandState =>
 
   def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String) {
@@ -50,6 +52,8 @@ trait ScheduledMeetingRecordValidation {
         }
       }
     }
+
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
 
   }
 }
