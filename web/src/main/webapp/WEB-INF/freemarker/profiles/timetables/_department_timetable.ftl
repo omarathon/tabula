@@ -343,7 +343,7 @@
 
       var doRequest = function () {
         if (typeof history.pushState !== 'undefined')
-          history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
+          history.pushState(null, null, $form.attr('action') + '?' + window.GlobalScripts.csrfForm.serializeWithoutCsrf($form));
 
         if ($calendar.is(':visible')) {
           $calendar.fullCalendar('refetchEvents');

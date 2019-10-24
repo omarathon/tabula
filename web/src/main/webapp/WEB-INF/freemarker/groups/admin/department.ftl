@@ -426,7 +426,7 @@
 
         var doRequest = function ($form, preventPageReset) {
           if (typeof history.pushState !== 'undefined')
-            history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
+            history.pushState(null, null, $form.attr('action') + '?' + window.GlobalScripts.csrfForm.serializeWithoutCsrf($form));
 
           if ($form.data('request')) {
             $form.data('request').abort();
