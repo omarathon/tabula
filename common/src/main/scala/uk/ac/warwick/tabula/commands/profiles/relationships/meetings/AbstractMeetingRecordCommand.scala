@@ -196,7 +196,6 @@ trait AttachedFilesValidation {
   }
 }
 
-
 trait MeetingRecordCommandState {
   def creator: Member
 
