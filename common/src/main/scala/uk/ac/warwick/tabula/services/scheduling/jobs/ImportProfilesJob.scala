@@ -38,7 +38,11 @@ class ImportProfilesJob extends AutowiredJobBean {
             moduleAndDepartmentService.allRootDepartments
               .sortBy { dept =>
                 auditEvents
-                  .filter(event => event.data == "{\"deptCode\":\"%s\"}".format(dept.code))
+                  .filter(event =>
+                    event.data == "{\"department\":\"%s\"}".format(dept.code)
+                    // legacy imports
+                    || event.data == "{\"deptCode\":\"%s\"}".format(dept.code)
+                  )
                   .find(_.isSuccessful)
                   .map(_.eventDate.getMillis)
               }

@@ -128,9 +128,9 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
   private def checkDepartment(imports: Seq[AuditEvent], department: Department): (Department, ServiceHealthcheck) = {
     val thisDepartmentImports = imports.filter(event =>
-      event.data == "{\"deptCode\":\"%s\"}".format(department.code)
+      event.data == "{\"department\":\"%s\"}".format(department.code)
         // legacy imports
-        || event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
+        || event.data == "{\"deptCode\":\"%s\"}".format(department.code) || event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
     )
     (department, getServiceHealthCheck(thisDepartmentImports))
   }
