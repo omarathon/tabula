@@ -35,9 +35,9 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
   ): Mav = {
     mandatory(member) match {
       case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
-        viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear, relationshipType, Option(scheduledAgentChange), Option(scheduledAgentChangeCancel).map(_.booleanValue))
+        viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear, mandatory(relationshipType), Option(scheduledAgentChange), Option(scheduledAgentChangeCancel).map(_.booleanValue))
       case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
-        viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear, relationshipType, Option(scheduledAgentChange), Option(scheduledAgentChangeCancel).map(_.booleanValue))
+        viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear, mandatory(relationshipType), Option(scheduledAgentChange), Option(scheduledAgentChangeCancel).map(_.booleanValue))
       case _ =>
         Redirect(Routes.Profile.identity(member))
     }
