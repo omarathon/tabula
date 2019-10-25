@@ -39,6 +39,13 @@
     </p>
 
     <h3>
+      <#if moduleRegistrationsAndComponents?has_content>
+        <#assign totalCats = 0 />
+        <#list moduleRegistrationsAndComponents as mrc>
+          <#assign totalCats = totalCats + (mrc.moduleRegistration.cats!0) />
+        </#list>
+        <strong>Total CATS:</strong> ${totalCats}
+      </#if>
       <strong>Year mark:</strong> ${yearMark!"-"}
       <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
         (weighted mean: ${weightedMeanYearMark!"-"})
@@ -53,9 +60,9 @@
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
         <div class="striped-section collapsible">
           <h3 class="section-title">
-            <a class="collapse-trigger icon-container" href="#">
+            <a class="collapse-trigger icon-container" href="#"><#compress>
               <@fmt.module_name moduleRegistration.module />
-            </a>
+            </#compress></a>
             <span class="mod-reg-summary">
               <#if showModuleResults>
                 <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
