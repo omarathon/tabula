@@ -1,5 +1,9 @@
 <@f.form method="post" cssClass="double-submit-protection" modelAttribute="command">
-  <@bs3form.labelled_form_group path="text" labelText="Descriptor">
+  <#assign markdownHelp>
+    <div class="help-block">You can use Markdown <i class="fab fa-markdown"></i> syntax <a target="_blank" href="https://warwick.ac.uk/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a></div>
+  </#assign>
+
+  <@bs3form.labelled_form_group path="text" labelText="Descriptor" help=markdownHelp>
     <@f.textarea path="text" cssClass="form-control" rows="5" />
   </@bs3form.labelled_form_group>
 

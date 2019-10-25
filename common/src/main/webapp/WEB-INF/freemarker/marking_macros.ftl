@@ -593,7 +593,7 @@
     <@bs3form.static>
     <#list assignment.availableMarkingDescriptors as markingDescriptor>
       <div class="hidden" data-mark-points="[<#list markingDescriptor.markPoints as markPoint>${markPoint.mark}<#if markPoint_has_next>,</#if></#list>]">
-        ${markingDescriptor.text}
+        ${markingDescriptor.formattedText}
       </div>
     </#list>
     </@bs3form.static>

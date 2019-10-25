@@ -85,7 +85,7 @@
       <p>
         <strong><em>${feedback.markPoint.name}</em></strong>
       </p>
-      <p><em>${feedback.markingDescriptor.text}</em></p>
+      ${feedback.markingDescriptor.formattedText}
     </div>
   </#if>
 
