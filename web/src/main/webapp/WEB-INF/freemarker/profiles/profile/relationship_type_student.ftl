@@ -313,6 +313,27 @@
 											</ul>
 										</span>
                   </div>
+                <#elseif user.sysadmin>
+                  <div class="pull-right">
+                    <i class="fa fa-spinner fa-spin invisible"></i>
+                    <span class="dropdown">
+											<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">Actions <span class="caret"></span></a>
+											<ul class="dropdown-menu pull-right">
+												<li>
+													<a href="<@routes.profiles.delete_meeting_record meeting />" class="delete-meeting-record <#if meeting.deleted>disabled</#if>"
+                             title="Delete record">Delete</a>
+												</li>
+												<li>
+													<a href="<@routes.profiles.restore_meeting_record meeting />" class="restore-meeting-record <#if !meeting.deleted>disabled</#if>"
+                             title="Restore record">Restore</a>
+												</li>
+												<li>
+													<a href="<@routes.profiles.purge_meeting_record meeting />" class="purge-meeting-record <#if !meeting.deleted>disabled</#if>"
+                             title="Purge record">Purge</a>
+												</li>
+											</ul>
+										</span>
+                  </div>
                 </#if>
               </td>
             </tr>

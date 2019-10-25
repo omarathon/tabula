@@ -71,7 +71,9 @@ trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMee
   override def validate(errors: Errors) {
     if (meetingRecord.deleted) errors.reject("meetingRecord.delete.alreadyDeleted")
 
-    sharedValidation(errors)
+    if (!user.sysadmin) {
+      sharedValidation(errors)
+    }
   }
 }
 
@@ -112,7 +114,9 @@ trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMe
   override def validate(errors: Errors) {
     if (!meetingRecord.deleted) errors.reject("meetingRecord.delete.notDeleted")
 
-    sharedValidation(errors)
+    if (!user.sysadmin) {
+      sharedValidation(errors)
+    }
   }
 }
 
