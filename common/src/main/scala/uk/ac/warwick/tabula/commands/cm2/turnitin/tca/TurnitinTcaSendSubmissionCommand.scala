@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2.turnitin.tca
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand.Result
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand.{Result, _}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TurnitinTcaServiceComponent}
@@ -11,9 +10,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import TurnitinTcaSendSubmissionCommand._
+import scala.concurrent.{Await, Future}
 
 object TurnitinTcaSendSubmissionCommand {
 

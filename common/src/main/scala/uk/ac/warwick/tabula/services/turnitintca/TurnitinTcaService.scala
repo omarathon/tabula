@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.services.turnitintca
 
-import java.io.File
-
-import com.google.common.io.Files
 
 import org.apache.http.HttpStatus
 import org.apache.http.client.ResponseHandler
@@ -153,13 +150,10 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
   override def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]] = Future {
     require(fileAttachment.originalityReport.tcaSubmission == tcaSubmission.id)
 
-    val tempFile = File.createTempFile(fileAttachment.id, null)
-    fileAttachment.asByteSource.copyTo(Files.asByteSink(tempFile))
-
-    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions/${tcaSubmission.id}/original"))
+    val req = tcaRequest(RequestBuilder.put(s"${tcaConfiguration.baseUri}/submissions/${tcaSubmission.id}/original"))
       .addHeader("Content-Type", s"binary/octet-stream")
       .addHeader("Content-Disposition", "inline;filename=\"" + fileAttachment.name + "\"")
-      .setEntity(EntityBuilder.create().setFile(tempFile).build())
+      .setEntity(EntityBuilder.create().setStream(fileAttachment.asByteSource.openStream()).build())
       .build()
 
     val handler: ResponseHandler[Either[String, TcaSubmission]] = ApacheHttpClientUtils.handler {
