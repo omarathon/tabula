@@ -87,8 +87,8 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
             "name" -> assignment.name
           ),
           "group_context" -> Json.obj(
-            "id" -> module.id,
-            "name"-> module.name
+            "id" -> s"${module.id}-${assignment.academicYear}",
+            "name"-> s"${module.name}-${assignment.academicYear}"
           )
         )
       )
@@ -254,9 +254,10 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
     // persist metadata
     originalityReport.foreach(or => {
-      or.matchPercentage = tcaSimilarityReport.overallMatch
+      or.overlap = tcaSimilarityReport.overallMatch
       or.similarityRequestedOn = new DateTime(tcaSimilarityReport.requested.toInstant.toEpochMilli)
       or.similarityLastGenerated = new DateTime(tcaSimilarityReport.generated.toInstant.toEpochMilli)
+      or.reportReceived = true
       originalityReportService.saveOrUpdate(or)
     })
 
@@ -270,7 +271,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
       "viewer_default_permission_set" -> "INSTRUCTOR"
     )
 
-    val req = tcaRequest(RequestBuilder.put(s"${tcaConfiguration.baseUri}/submissions/${originalityReport.tcaSubmission}/viewer-url"))
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions/${originalityReport.tcaSubmission}/viewer-url"))
       .addHeader("Content-Type", s"application/json")
       .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
       .build()
@@ -285,7 +286,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
       jsResult.recoverTotal(invalid => {
         val message = s"Error fetching report url - $invalid"
-        logger.error(message)
+        logger.error(s"$message\n$json")
         Left(message)
       })
 

@@ -172,8 +172,9 @@ class FileAttachment extends GeneratedId {
     newFile
   }
 
-  def originalityReportReceived: Boolean = {
-    originalityReport != null && originalityReport.reportReceived
+  // we have a result back from the Turnitin for this file - either a similarity score or an error relating to the file contents
+  def turnitinResultReceived: Boolean = {
+    originalityReport != null && (originalityReport.reportReceived || originalityReport.hasTcaError)
   }
 
   def urkundResponseReceived: Boolean = {

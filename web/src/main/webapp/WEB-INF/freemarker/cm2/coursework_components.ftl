@@ -1027,7 +1027,7 @@
           <#if submission??>
             <@fmt.p submission.allAttachments?size "file" />
             <#list submission.allAttachments as attachment>
-              <#if attachment.originalityReportReceived>
+              <#if attachment.turnitinResultReceived>
                 <@components.originalityReport attachment />
               </#if>
             </#list>
@@ -1412,17 +1412,31 @@
   <#local r=attachment.originalityReport />
   <#local assignment=attachment.submissionValue.submission.assignment />
 
-  <span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+  <span id="tool-tip-${attachment.id}" class="similarity-<#if r.similarity??>${r.similarity}<#else>4</#if> similarity-tooltip">
+    <#if r.overlap??>${r.overlap}% similarity<#elseif r.errorCode??>Unable to check for plagarism</#if>
+  </span>
   <div id="tip-content-${attachment.id}" class="hide">
     <p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+    <#if r.errorCode??><p>${r.errorCode.description}</p></#if>
     <p class="similarity-subcategories-tooltip">
-      Web: ${r.webOverlap!"-"}%<br>
-      Student papers: ${r.studentOverlap!"-"}%<br>
-      Publications: ${r.publicationOverlap!"-"}%
+      <#-- LTI overlap breakdowns (no longer available in the responses from TCA) -->
+      <#if r.webOverlap??>Web: ${r.webOverlap}%<br></#if>
+      <#if r.studentOverlap??>Student papers: ${r.studentOverlap}%<br></#if>
+      <#if r.publicationOverlap??>Publications: ${r.publicationOverlap}%<br></#if>
+      <#-- Submission metadata available in TCA -->
+      <#if r.pageCount??>Page count: ${r.pageCount}<br></#if>
+      <#if r.wordCount??>Word count: ${r.wordCount}<br></#if>
+      <#if r.characterCount??>Character count: ${r.characterCount}<br></#if>
     </p>
-    <p>
-      <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
-    </p>
+    <#if r.reportReceived>
+      <p>
+        <#if r.tcaReport>
+            <a target="turnitin-viewer" href="<@routes.cm2.turnitinTcaReport assignment attachment />">View full report</a>
+        <#else>
+            <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+        </#if>
+      </p>
+    </#if>
   </div>
   <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {

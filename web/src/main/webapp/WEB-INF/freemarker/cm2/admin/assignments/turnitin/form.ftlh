@@ -1,0 +1,41 @@
+<#import "*/cm2_macros.ftl" as cm2 />
+
+<@cm2.assignmentHeader "Check submissions for plagiarism" assignment "in" />
+
+<p>
+  This will send <strong>all</strong> submissions in the assignment to Turnitin to be scored for similarity.
+  <#if !features.turnitinTca>Scoring submissions will take some time so you'll receive an email when the scores are ready to view.</#if>
+  This upload will only include files that are not already in Turnitin. So, it's okay to send submissions to Turnitin more than once for an assignment.
+</p>
+
+
+
+<#if errors?? && errors.allErrors?size gt 0>
+  <div class="alert alert-danger">
+    <#list errors.allErrors as error>
+      <p><@spring.message code=error.code arguments=error.arguments/></p>
+    </#list>
+  </div>
+<#else>
+  <#if incompatibleFiles?size gt 0>
+    <div class="alert alert-warning">
+      <p>Some attachments won't be sent to Turnitin because they aren't a type that Turnitin is able
+        to process (supported types are <strong>MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format</strong>),
+        or they are too big to send (maximum Turnitin file size is 40MB)</p>
+
+      <ul class="file-list">
+        <#list incompatibleFiles as f>
+          <li>${f.name}</li>
+        </#list>
+      </ul>
+
+      <p>You can still continue but these files will be ignored.</p>
+    </div>
+  </#if>
+
+  <#assign action><#if features.turnitinTca><@routes.cm2.submitToTurnitinTca assignment/><#else><@routes.cm2.submitToTurnitin assignment/></#if></#assign>
+  <@f.form action="${action?markup_string}" method="POST">
+    <button type="submit" class="btn btn-primary">Send to Turnitin</button>
+  </@f.form>
+</#if>
+

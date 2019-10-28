@@ -8,7 +8,6 @@ class TurnitinLtiResponseTest extends TestBase {
     val response = TurnitinLtiResponse.fromJson(SubmittedPaperInfo)
     val submissionInfo = response.submissionInfo()
     submissionInfo.overlap should be(Some(67))
-    submissionInfo.similarity should be(Some(3))
     submissionInfo.publication_overlap should be(Some(35))
     submissionInfo.student_overlap should be(Some(67))
     submissionInfo.web_overlap should be(Some(0))

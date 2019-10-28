@@ -169,7 +169,7 @@
                   <#if submission??>
                     <#list submission.allAttachments as attachment>
                       <!-- Checking originality report for ${attachment.name} ... -->
-                      <#if attachment.originalityReportReceived>
+                      <#if attachment.turnitinResultReceived>
                         : <@components.originalityReport attachment />
                       </#if>
                       <#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
