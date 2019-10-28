@@ -1,10 +1,15 @@
 package uk.ac.warwick.tabula.services.turnitintca
 
+import java.io.File
+
+import com.google.common.io.Files
+
 import org.apache.http.HttpStatus
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.util.EntityUtils
+import org.apache.http.client.entity.EntityBuilder
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -43,6 +48,7 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
+  def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
@@ -142,6 +148,41 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
         identity
       )
     }
+  }
+
+  override def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]] = Future {
+    require(fileAttachment.originalityReport.tcaSubmission == tcaSubmission.id)
+
+    val tempFile = File.createTempFile(fileAttachment.id, null)
+    fileAttachment.asByteSource.copyTo(Files.asByteSink(tempFile))
+
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions/${tcaSubmission.id}/original"))
+      .addHeader("Content-Type", s"binary/octet-stream")
+      .addHeader("Content-Disposition", "inline;filename=\"" + fileAttachment.name + "\"")
+      .setEntity(EntityBuilder.create().setFile(tempFile).build())
+      .build()
+
+    val handler: ResponseHandler[Either[String, TcaSubmission]] = ApacheHttpClientUtils.handler {
+
+      case response if response.getStatusLine.getStatusCode == HttpStatus.SC_ACCEPTED =>
+        EntityUtils.consumeQuietly(response.getEntity)
+        logger.info(s"successfully uploaded file to TCA submission: ${tcaSubmission.id}")
+        Right(tcaSubmission)
+
+      case response =>
+        val message = s"Unexpected response when attempting to upload a file to TCA submission ${tcaSubmission.id}: $response"
+        logger.error(message)
+        Left(message)
+    }
+
+    Try(httpClient.execute(req, handler)).fold(
+      t => {
+        val message = s"Error when attempting to upload a file to TCA submission ${tcaSubmission.id}"
+        logger.error(message, t)
+        Left(message)
+      },
+      identity
+    )
   }
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {
