@@ -21,7 +21,7 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-  scalaVersion = "2.12.9"
+  scalaVersion = "2.12.10"
   scalaMajorVersion = "2.12"
   springVersion = "5.1.9.RELEASE"
   hibernateVersion = "5.4.4.Final"
