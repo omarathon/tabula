@@ -269,9 +269,14 @@ trait SmallGroupEventInFutureCheck {
 
 trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {
   this: RecordAttendanceState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.smallGroupEvent(event)
-    d.property("week", week)
+     .property("week", week)
+  }
+
+  override def describeResult(d: Description, result: (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])): Unit = {
+    d.smallGroupAttendaceState(result._2)
+     .studentIds(result._2.map(_.universityId))
   }
 }
 
