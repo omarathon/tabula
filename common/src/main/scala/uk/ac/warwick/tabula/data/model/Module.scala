@@ -119,13 +119,13 @@ object Module extends Logging {
   }
 
   def stripCats(fullModuleName: String): Option[String] = {
-    fullModuleName.replaceAll("\\s+", "") match {
+    Option(fullModuleName).flatMap(name => name.replaceAll("\\s+", "") match {
       case ModuleCatsPattern(module, _) => Option(module)
       case ModuleCodeOnlyPattern(module) => Option(module)
       case _ =>
         logger.warn(s"Module name $fullModuleName did not fit expected module code pattern")
         None
-    }
+    })
   }
 
   def extractCats(fullModuleName: String): Option[String] = fullModuleName.replaceAll("\\s+", "") match {
