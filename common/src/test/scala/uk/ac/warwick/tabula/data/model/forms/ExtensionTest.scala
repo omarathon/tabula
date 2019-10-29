@@ -151,9 +151,11 @@ class ExtensionTest extends PersistenceTestBase with Mockito {
     val extension = new Extension
     extension.assignment = assignment
 
-    extension.requestedExpiryDate = DateTime.now().plusHours(3)
+    val threeHoursInTheFuture = DateTime.now().plusHours(3)
 
-    extension.expiryDate = DateTime.now().plusHours(3)
+    extension.requestedExpiryDate = threeHoursInTheFuture
+
+    extension.expiryDate = threeHoursInTheFuture
     extension.approve(null)
 
     extension should not be 'expiryDateAdjusted
