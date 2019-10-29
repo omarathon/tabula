@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage,
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
+import uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatus.{Complete, Created, Processing}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -175,6 +176,10 @@ class FileAttachment extends GeneratedId {
   // we have a result back from the Turnitin for this file - either a similarity score or an error relating to the file contents
   def turnitinResultReceived: Boolean = {
     originalityReport != null && (originalityReport.reportReceived || originalityReport.hasTcaError)
+  }
+
+  def turnitinCheckInProgress: Boolean = {
+    Option(originalityReport).exists(or => Seq(Created, Processing, Complete).contains(or.tcaSubmissionStatus))
   }
 
   def urkundResponseReceived: Boolean = {

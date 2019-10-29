@@ -1027,7 +1027,7 @@
           <#if submission??>
             <@fmt.p submission.allAttachments?size "file" />
             <#list submission.allAttachments as attachment>
-              <#if attachment.turnitinResultReceived>
+              <#if attachment.turnitinResultReceived || attachment.turnitinCheckInProgress>
                 <@components.originalityReport attachment />
               </#if>
             </#list>
@@ -1412,8 +1412,16 @@
   <#local r=attachment.originalityReport />
   <#local assignment=attachment.submissionValue.submission.assignment />
 
-  <span id="tool-tip-${attachment.id}" class="similarity-<#if r.similarity??>${r.similarity}<#else>4</#if> similarity-tooltip">
-    <#if r.overlap??>${r.overlap}% similarity<#elseif r.errorCode??>Unable to check for plagarism</#if>
+    <#-- TODO - add tooltip so we can see metadata about the file while waiting for the similartiy check -->
+  <#assign similarityClass><#compress>
+    <#if r.hasTcaError>4
+    <#elseif r.similarity??>${r.similarity}
+    <#elseif r.tcaUploadComplete>pending
+    </#if>
+  </#compress></#assign>
+
+  <span id="tool-tip-${attachment.id}" class="similarity-${similarityClass} similarity-tooltip">
+    <#if r.overlap??>${r.overlap}% similarity<#elseif r.tcaUploadComplete>Pending results<#elseif r.errorCode??>Unable to check for plagarism</#if>
   </span>
   <div id="tip-content-${attachment.id}" class="hide">
     <p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
