@@ -113,14 +113,14 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
   def describe(d: Description) {
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+      .studentIds(items.asScala.toSeq.map(_.uniNumber))
+      .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
   }
 
   override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+      .studentIds(items.asScala.toSeq.map(_.uniNumber))
+      .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
       .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
       .markerFeedbacks(feedbacks)
   }

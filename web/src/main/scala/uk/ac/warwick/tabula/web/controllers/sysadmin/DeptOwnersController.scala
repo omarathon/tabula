@@ -77,7 +77,7 @@ class SysadminDepartmentAddPermissionController extends BaseSysadminController w
       form(department)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "add")
     }
   }
@@ -96,7 +96,7 @@ class SysadminDepartmentRemovePermissionController extends BaseSysadminControlle
       form(department)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "remove")
     }
   }

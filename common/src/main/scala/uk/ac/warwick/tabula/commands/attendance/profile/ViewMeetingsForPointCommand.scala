@@ -25,7 +25,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
 
   self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
-  override def applyInternal(): Seq[(MeetingRecord, mutable.Buffer[String])] = {
+  override def applyInternal(): Seq[(MeetingRecord, Seq[String])] = {
     // Get all the enabled relationship types for a department
     val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
@@ -57,7 +57,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
         if (meeting.meetingDate.toLocalDate.isAfter(point.endDate))
           reasons += "Took place after"
 
-        reasons
+        reasons.toSeq
       }
     }
   }

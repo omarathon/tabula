@@ -96,8 +96,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
     // Handle each request
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val (request, handler) = args.toList match {
         case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
         case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
       }
@@ -167,8 +167,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
     // Handle each request
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val (request, handler) = args.toList match {
         case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
         case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
       }
@@ -218,8 +218,8 @@ class UrkundServiceTest extends TestBase with Mockito {
     val submitHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 400, "Bad Request")
 
     // Handle each request
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val (request, handler) = args.toList match {
         case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
         case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
       }
@@ -245,8 +245,8 @@ class UrkundServiceTest extends TestBase with Mockito {
     // Mock the request
     val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 500, "Oh noes!")
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 
@@ -280,8 +280,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 
@@ -324,8 +324,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 
@@ -371,8 +371,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 
@@ -422,8 +422,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 
@@ -491,8 +491,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+    service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val handler = args(1).asInstanceOf[ResponseHandler[_]]
       handler.handleResponse(httpResponse)
     }
 

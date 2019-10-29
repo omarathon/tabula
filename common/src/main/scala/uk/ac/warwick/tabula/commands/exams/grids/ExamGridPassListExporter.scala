@@ -53,7 +53,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 
     val passedEntites = {
       entities.filter(entity => {
-        val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
+        val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey.route, ey.level)).toMap
         entity.years(yearOfStudy).exists { year =>
           progressionService.suggestedResult(
             year,

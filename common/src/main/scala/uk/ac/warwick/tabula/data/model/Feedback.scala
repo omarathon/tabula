@@ -276,12 +276,12 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
   def latestPrivateOrNonPrivateAdjustment: Option[Mark] = marks.asScala.headOption
 
-  def adminViewableAdjustments: Seq[Mark] = marks.asScala
+  def adminViewableAdjustments: Seq[Mark] = marks.asScala.toSeq
 
   // students can see the audit of non-private adjustments, back until the last private adjustment
   def studentViewableAdjustments: Seq[Mark] = {
     if (latestNonPrivateAdjustment.isDefined) {
-      marks.asScala.takeWhile(mark => mark.markType != MarkType.PrivateAdjustment)
+      marks.asScala.toSeq.takeWhile(mark => mark.markType != MarkType.PrivateAdjustment)
     } else Seq()
   }
 
@@ -305,17 +305,17 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   }
 
   def completedFeedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
-    feedbackByStage.filterKeys(stage => {
+    feedbackByStage.view.filterKeys(stage => {
       def isPrevious = stage.order < currentStageIndex
 
       def isCurrentAndFinished = stage.order == currentStageIndex && !outstandingStages.asScala.contains(stage)
 
       isPrevious || isCurrentAndFinished
-    })
+    }).to(SortedMap)
   }
 
   def feedbackMarkers: Map[MarkingWorkflowStage, User] =
-    feedbackByStage.mapValues(_.marker)
+    feedbackByStage.view.mapValues(_.marker).toMap
 
   def feedbackMarkersByAllocationName: Map[String, User] =
     allMarkerFeedback.groupBy(f => f.stage.allocationName).toSeq
@@ -454,7 +454,7 @@ class AssignmentFeedback extends Feedback {
   override def academicYear: AcademicYear = assignment.academicYear
 
   // Will only return assessment groups that are relevant to this Feedback item
-  override def assessmentGroups: Seq[AssessmentGroup] = assignment.assessmentGroups.asScala.filter { assessmentGroup =>
+  override def assessmentGroups: Seq[AssessmentGroup] = assignment.assessmentGroups.asScala.toSeq.filter { assessmentGroup =>
     assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
   }
 
@@ -496,7 +496,7 @@ class ExamFeedback extends Feedback {
 
   override def academicYear: AcademicYear = exam.academicYear
 
-  override def assessmentGroups: Seq[AssessmentGroup] = exam.assessmentGroups.asScala.filter { assessmentGroup =>
+  override def assessmentGroups: Seq[AssessmentGroup] = exam.assessmentGroups.asScala.toSeq.filter { assessmentGroup =>
     assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
   }
 

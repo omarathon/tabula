@@ -77,13 +77,13 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     val submission = new MitigatingCircumstancesSubmission(student, currentUser, department)
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
-    submission.issueTypes = issueTypes.asScala
+    submission.issueTypes = issueTypes.asScala.toSeq
     if (issueTypes.asScala.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     submission.contacted = contacted
     if (contacted) {
       submission.noContactReason = null
-      submission.contacts = contacts.asScala
+      submission.contacts = contacts.asScala.toSeq
       if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
     } else {
       submission.noContactReason = noContactReason

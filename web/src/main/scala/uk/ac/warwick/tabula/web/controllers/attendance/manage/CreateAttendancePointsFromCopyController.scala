@@ -65,7 +65,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
     @PathVariable academicYear: AcademicYear,
     @RequestParam schemes: JList[AttendanceMonitoringScheme]
   ) =
-    CreateNewAttendancePointsFromCopyCommand(department, academicYear, schemes.asScala)
+    CreateNewAttendancePointsFromCopyCommand(department, academicYear, schemes.asScala.toSeq)
 
   @RequestMapping(method = Array(POST))
   def form(

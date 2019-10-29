@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
+import uk.ac.warwick.tabula.AcademicPeriod._
 import uk.ac.warwick.tabula.AcademicWeek._
 import uk.ac.warwick.tabula.AcademicYear._
-import uk.ac.warwick.tabula.AcademicPeriod._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Convertible
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
@@ -86,7 +86,7 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 
   def placeholder: Boolean = underlying.isPlaceholder
 
-  def termsAndVacations: Seq[AcademicPeriod] = underlying.getPeriods.asScala.map { p => p: AcademicPeriod }
+  def termsAndVacations: Seq[AcademicPeriod] = underlying.getPeriods.asScala.toSeq.map { p => p: AcademicPeriod }
 
   def termOrVacationForDate(now: LocalDate): AcademicPeriod = underlying.getPeriod(now.asJava)
 
@@ -171,7 +171,7 @@ sealed trait AcademicPeriod extends Ordered[AcademicPeriod] {
 
   def lastDay: LocalDate = underlying.getLastDay.asJoda
 
-  def weeks: Seq[AcademicWeek] = underlying.getAcademicWeeks.asScala.map { w => w: AcademicWeek }
+  def weeks: Seq[AcademicWeek] = underlying.getAcademicWeeks.asScala.toSeq.map { w => w: AcademicWeek }
 
   def firstWeek: AcademicWeek = underlying.getFirstWeek
 

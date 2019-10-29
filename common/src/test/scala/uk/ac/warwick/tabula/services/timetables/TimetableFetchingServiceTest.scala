@@ -47,7 +47,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
       val httpClient: CloseableHttpClient = mock[CloseableHttpClient]
     }
 
-    service.moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers { codes =>
+    service.moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers { codes: Any =>
       codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
     }
 

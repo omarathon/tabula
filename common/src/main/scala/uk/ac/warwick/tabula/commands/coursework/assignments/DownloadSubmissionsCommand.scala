@@ -47,18 +47,18 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
     }
 
     if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
-      val zip = Await.result(zipService.getSomeSubmissionsZip(submissions.asScala), Duration.Inf)
+      val zip = Await.result(zipService.getSomeSubmissionsZip(submissions.asScala.toSeq), Duration.Inf)
       Left(zip)
     } else {
-      Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))
+      Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.toSeq.map(_.id))))
     }
 
   }
 
   override def describe(d: Description) {
     val downloads: Seq[Submission] = {
-      if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
-      else submissions.asScala
+      if (students.asScala.nonEmpty) students.asScala.toSeq.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
+      else submissions.asScala.toSeq
     }
 
     d.assignment(assignment)

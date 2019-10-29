@@ -25,14 +25,14 @@ class AdminDepartmentHomeCommandInternal(val department: Department, val user: C
 
   lazy val modules: Seq[Module] =
     if (securityService.can(user, Permissions.Module.Administer, department)) {
-      department.modules.asScala
+      department.modules.asScala.toSeq
     } else {
       modulesWithPermission.toList
     }
 
   lazy val routes: Seq[Route] =
     if (securityService.can(user, Permissions.Route.Administer, department)) {
-      department.routes.asScala
+      department.routes.asScala.toSeq
     } else {
       routesWithPermission.toList
     }

@@ -39,7 +39,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
     with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
   override def applyInternal(): MeetingRecord = {
-    meetingRecord.relationships = relationships.asScala
+    meetingRecord.relationships = relationships.asScala.toSeq
     applyCommon(meetingRecord)
   }
 
@@ -78,7 +78,7 @@ trait EditMeetingRecordCommandNotifications extends Notifies[MeetingRecord, Meet
 
   override def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
     CompletesNotificationsResult(
-      commandResult.approvals.asScala.flatMap(approval =>
+      commandResult.approvals.asScala.toSeq.flatMap(approval =>
         notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
       ),
       creator.asSsoUser

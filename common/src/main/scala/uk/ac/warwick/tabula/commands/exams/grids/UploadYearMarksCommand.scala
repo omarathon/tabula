@@ -54,8 +54,8 @@ class UploadYearMarksCommandInternal(val department: Department, val academicYea
 
   self: UploadYearMarksCommandState with StudentCourseYearDetailsDaoComponent =>
 
-  override def applyInternal(): ArrayBuffer[StudentCourseYearDetails] = {
-    processedYearMarks.flatMap(item =>
+  override def applyInternal(): Seq[StudentCourseYearDetails] = {
+    processedYearMarks.toSeq.flatMap(item =>
       if (item.scyd.isDefined && item.errors.isEmpty) {
         item.scyd.get.agreedMark = item.mark.underlying
         item.scyd.get.agreedMarkUploadedDate = null
@@ -93,7 +93,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
         result.popNestedPath()
 
         if (!file.attached.isEmpty) {
-          processFiles(file.attached.asScala)
+          processFiles(file.attached.asScala.toSeq)
         }
 
         def processFiles(files: Seq[FileAttachment]) {
@@ -118,7 +118,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 
   private def postProcessYearMarks(): Unit = {
     // Deal with rows with invalid academic years
-    val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.partition(item => item.academicYear.maybeText.forall(academicYearString => {
+    val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.toSeq.partition(item => item.academicYear.maybeText.forall(academicYearString => {
       try {
         AcademicYear.parse(academicYearString)
         true

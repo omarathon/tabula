@@ -53,12 +53,12 @@ class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, va
     with DeregisteredStudentsForSmallGroupSetCommandState {
   self: SmallGroupServiceComponent with ProfileServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[StudentNotInMembership] =
+  override def applyInternal(): Seq[StudentNotInMembership] =
     for {
-      student <- students.asScala
+      student <- students.asScala.toSeq
       if !set.members.includesUser(student) // Prevent irrelevant students being sent
 
-      group <- set.groups.asScala
+      group <- set.groups.asScala.toSeq
       if group.students.includesUser(student)
     } yield {
       smallGroupService.removeUserFromGroup(student, group)

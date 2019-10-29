@@ -27,8 +27,8 @@ class HomeControllerTest extends TestBase with Mockito {
     allocatedUser.setUserId("allocated")
 
     val userDatabase = Seq(unallocatedUser, allocatedUser)
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers {
-      _ match {
+    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+      arg match {
         case ids: Seq[String@unchecked] =>
           ids.map(id => (id, userDatabase.find {
             _.getWarwickId == id
@@ -152,7 +152,7 @@ class HomeControllerTest extends TestBase with Mockito {
   def viewModulesConvertsModuleToViewModule() {
     new Fixture {
       // dummy getGroupsToDisplay that always returns all groups in the set
-      def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala, StudentNotAssignedToGroup)
+      def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala.toSeq, StudentNotAssignedToGroup)
 
       val viewModules: Seq[ViewModule] = getViewModulesForStudent(Seq(groupSet), allGroups)
       viewModules.size should be(1)
@@ -167,7 +167,7 @@ class HomeControllerTest extends TestBase with Mockito {
   def viewModulesGroupsByModule() {
     new Fixture {
       // dummy getGroupsToDisplay that always returns all groups in the set
-      def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala, StudentNotAssignedToGroup)
+      def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala.toSeq, StudentNotAssignedToGroup)
 
       // two groupsets, both for the same module
       val viewModules: Seq[ViewModule] = getViewModulesForStudent(Seq(groupSet, groupSet2), allGroups)

@@ -13,7 +13,7 @@ class SubmissionsForMarkerTest extends TestBase with Mockito {
 
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignment.addDefaultFields()
     assignment.markingWorkflow = newMarkingWorkflow()

@@ -7,15 +7,13 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup}
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-
-import scala.collection.mutable
 
 object EditDepartmentSmallGroupsCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet) =
@@ -41,7 +39,7 @@ trait EditDepartmentSmallGroupsCommandState {
 class EditDepartmentSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet) extends CommandInternal[Seq[DepartmentSmallGroup]] with EditDepartmentSmallGroupsCommandState {
   self: SmallGroupServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[DepartmentSmallGroup] = {
+  override def applyInternal(): Seq[DepartmentSmallGroup] = {
     // Edit existing groups and add new groups
     groupNames.asScala.zipWithIndex.foreach { case (groupName, groupNameIndex) =>
       groupIds.asScala.zipWithIndex.find { case (_, groupIdIndex) => groupIdIndex == groupNameIndex } match {
@@ -83,7 +81,7 @@ class EditDepartmentSmallGroupsCommandInternal(val department: Department, val s
     smallGroupService.saveOrUpdate(set)
     set.linkedSets.asScala.foreach(smallGroupService.saveOrUpdate)
 
-    set.groups.asScala
+    set.groups.asScala.toSeq
   }
 }
 

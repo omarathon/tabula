@@ -78,7 +78,7 @@ class DepartmentAddPermissionController extends AdminController with DepartmentP
       form(department)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "add")
     }
 
@@ -99,7 +99,7 @@ class DepartmentRemovePermissionController extends AdminController with Departme
       form(department)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "remove")
     }
 

@@ -33,7 +33,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
         newFeedback
       })
 
-      val newAttachments = feedback.addAttachments(file.attached.asScala)
+      val newAttachments = feedback.addAttachments(file.attached.asScala.toSeq)
 
       if (newAttachments.nonEmpty) {
         session.saveOrUpdate(feedback)
@@ -65,7 +65,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
   private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback) {
     case class duplicatePair(attached: FileAttachment, feedback: FileAttachment)
 
-    val attachmentNames = item.file.attached.asScala.map(_.name)
+    val attachmentNames = item.file.attached.asScala.toSeq.map(_.name)
     val withSameName = for (
       attached <- item.file.attached.asScala;
       feedback <- feedback.attachments.asScala
@@ -74,13 +74,13 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
 
     item.duplicateFileNames = withSameName.filterNot(p => p.attached.isDataEqual(p.feedback)).map(_.attached.name).toSet
     item.ignoredFileNames = withSameName.map(_.attached.name).toSet -- item.duplicateFileNames
-    item.isModified = (attachmentNames -- item.ignoredFileNames).nonEmpty
+    item.isModified = (attachmentNames diff item.ignoredFileNames.toSeq).nonEmpty
   }
 
   def describe(d: Description): Unit = d
     .assignment(assignment)
-    .studentIds(items.asScala.map(_.uniNumber))
-    .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+    .studentIds(items.asScala.toSeq.map(_.uniNumber))
+    .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
 
   override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit = {
     d.assignment(assignment)

@@ -67,7 +67,7 @@ trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapCh
 
     filterCheckpointMapForChanges(
       Map(student -> checkpointMap.asScala.toMap),
-      studentPointCheckpointMap.mapValues(_.mapValues(Option(_).map(_.state).orNull))
+      studentPointCheckpointMap.view.mapValues(_.view.mapValues(Option(_).map(_.state).orNull).toMap).toMap
     ).getOrElse(student, Map()).foreach { case (point, state) =>
       errors.pushNestedPath(s"checkpointMap[${point.id}]")
 

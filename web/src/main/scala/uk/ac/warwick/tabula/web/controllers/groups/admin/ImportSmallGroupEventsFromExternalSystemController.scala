@@ -27,8 +27,8 @@ abstract class AbstractImportSmallGroupEventsFromExternalSystemController extend
       .crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
-  @ModelAttribute("groups") def groups(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[SmallGroup] =
-    set.groups.asScala.sorted
+  @ModelAttribute("groups") def groups(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[SmallGroup] =
+    set.groups.asScala.toSeq.sorted
 
   protected def postSaveRoute(set: SmallGroupSet): String
 

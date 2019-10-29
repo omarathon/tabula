@@ -39,7 +39,7 @@ class CreateMeetingRecordCommandInternal(val creator: Member, val allRelationshi
     with FileAttachmentServiceComponent =>
 
   override def applyInternal(): MeetingRecord = {
-    val meeting = new MeetingRecord(creator, relationships.asScala)
+    val meeting = new MeetingRecord(creator, relationships.asScala.toSeq)
     applyCommon(meeting)
   }
 

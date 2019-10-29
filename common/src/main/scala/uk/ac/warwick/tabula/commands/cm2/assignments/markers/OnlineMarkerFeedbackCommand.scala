@@ -88,10 +88,10 @@ class OnlineMarkerFeedbackCommandInternal(
 
     // save attachments
     if (markerFeedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
-      val filesToReplicate = filesToKeep -- existingFiles
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
+      val filesToReplicate = filesToKeep diff existingFiles
       filesToRemove.foreach { f =>
         f.markerFeedback = null
         Option(f.feedback).foreach(_.removeAttachment(f))
@@ -102,7 +102,7 @@ class OnlineMarkerFeedbackCommandInternal(
       replicatedFiles.foreach(markerFeedback.addAttachment)
     }
 
-    markerFeedback.addAttachments(file.attached.asScala)
+    markerFeedback.addAttachments(file.attached.asScala.toSeq)
   }
 }
 
@@ -187,7 +187,7 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState {
         case (workflowStage, markerFeedback) => workflowStage.order < currentStageIndex || (markerFeedback.marker == marker && feedback.exists(_.isMarkedByStage(workflowStage)))
       }
     else
-      allMarkerFeedback.filterKeys(_.order <= stage.order) // show all stages up to and including the current one
+      allMarkerFeedback.view.filterKeys(_.order <= stage.order).toMap // show all stages up to and including the current one
   }
 
   val currentMarkerFeedback: Option[MarkerFeedback] = feedback.flatMap(

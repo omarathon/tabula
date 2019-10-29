@@ -165,7 +165,7 @@ trait ModifyMarkingWorkflowState {
 
   var sampler: ModerationSampler = _
 
-  def markersAUsers: Seq[User] = userLookup.getUsersByUserIds(markersA.asScala).values.toSeq
+  def markersAUsers: Seq[User] = userLookup.getUsersByUserIds(markersA.asScala.toSeq).values.toSeq
 
-  def markersBUsers: Seq[User] = userLookup.getUsersByUserIds(markersB.asScala).values.toSeq
+  def markersBUsers: Seq[User] = userLookup.getUsersByUserIds(markersB.asScala.toSeq).values.toSeq
 }

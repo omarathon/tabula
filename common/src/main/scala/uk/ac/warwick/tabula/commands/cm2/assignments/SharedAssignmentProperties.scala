@@ -153,7 +153,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     for (file <- findFileField(assignment)) {
       file.attachmentLimit = fileAttachmentLimit
       file.minimumAttachmentLimit = minimumFileAttachmentLimit
-      file.attachmentTypes = fileAttachmentTypes.asScala
+      file.attachmentTypes = fileAttachmentTypes.asScala.toSeq
       file.individualFileSizeLimit = individualFileSizeLimit
     }
     if ((wordCountMin == null && wordCountMax == null) || (wordCountMin == 0 && wordCountMax == 0 )) {

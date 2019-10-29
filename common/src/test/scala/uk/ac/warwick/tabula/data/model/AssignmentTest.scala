@@ -51,7 +51,7 @@ class AssignmentTest extends TestBase with Mockito {
   @Test def unreleasedFeedback() {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignment.feedbacks should be('empty)
     assignment.unreleasedFeedback should be('empty)
@@ -67,7 +67,7 @@ class AssignmentTest extends TestBase with Mockito {
   @Test def placeholderFeedback() {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignment.fullFeedback should be('empty)
     assignment.markingWorkflow = new FirstMarkerOnlyWorkflow
@@ -90,7 +90,7 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.collectMarks = false
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     SubmissionsReport(assignment) should not be 'hasProblems
 
@@ -135,7 +135,7 @@ class AssignmentTest extends TestBase with Mockito {
   @Test def assignmentCanPublishFeedback() {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignment.feedbacks add mockFeedback(assignment)
 

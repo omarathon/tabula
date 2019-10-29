@@ -173,8 +173,8 @@ trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmiss
 
   override def submissions: Seq[Submission] = {
     val selectedStudents =
-      if (markerFeedback.isEmpty) students.asScala
-      else markerFeedback.asScala.map(_.student.getUserId)
+      if (markerFeedback.isEmpty) students.asScala.toSeq
+      else markerFeedback.asScala.toSeq.map(_.student.getUserId)
 
     val allMarkerSubmissions =
       if (assignment.cm2Assignment)

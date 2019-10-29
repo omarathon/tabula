@@ -219,13 +219,13 @@ class OvercattingOptionsView(
     new CoreRequiredModulesColumnOption().getColumns(overcattedEntitiesState),
     new CoreOptionalModulesColumnOption().getColumns(overcattedEntitiesState),
     new OptionalModulesColumnOption().getColumns(overcattedEntitiesState)
-  ).flatMap(_.toSeq).groupBy { case (year, _) => year }.mapValues(_.flatMap { case (_, columns) => columns })
+  ).flatMap(_.toSeq).groupBy { case (year, _) => year }.view.mapValues(_.flatMap { case (_, columns) => columns }).toMap
 
   lazy val perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]] =
     perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
 
   lazy val perYearColumnCategories: Map[YearOfStudy, Map[String, Seq[PerYearExamGridColumn with HasExamGridColumnCategory]]] =
-    perYearColumns.mapValues(_.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category))
+    perYearColumns.view.mapValues(_.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category)).toMap
 
 }
 

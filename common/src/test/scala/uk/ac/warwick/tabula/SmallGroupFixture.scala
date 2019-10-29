@@ -47,13 +47,11 @@ trait SmallGroupFixture extends Mockito {
   when(userLookup.getUsersByUserIds(Seq(tutor1.getUserId, tutor2.getUserId).asJava)).thenReturn(Map("tutor1" -> tutor1, "tutor2" -> tutor2).asJava)
 
   val students = Seq(student1, student2)
-  userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids =>
+  userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
     ids match {
       case ids: Seq[String@unchecked] =>
-        ids.map(id => (id, students.find {
-          _.getWarwickId == id
-        }.getOrElse(new AnonymousUser()))).toMap
-      case _ => Map()
+        ids.map(id => (id, students.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap
+      case _ => Map[String, User]()
     }
   }
 

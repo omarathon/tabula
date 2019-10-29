@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.commands.cm2
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{SelectedStudentsRequest, SelectedStudentsState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
@@ -13,6 +12,7 @@ import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -64,7 +64,7 @@ trait StopMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
@@ -97,7 +97,12 @@ trait StopMarkingNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFe
 
   def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
     // emit notifications to each marker that has new feedback
-    val markerMap: Map[String, Seq[MarkerFeedback]] = stoppedMarkerFeedback.asScala.groupBy(_.marker.getUserId).filterKeys(_.hasText)
+    val markerMap: Map[String, Seq[MarkerFeedback]] =
+      stoppedMarkerFeedback.asScala.toSeq
+        .groupBy(_.marker.getUserId)
+        .view
+        .filterKeys(_.hasText)
+        .toMap
 
     markerMap.map { case (usercode, markerFeedback) =>
       val notification = Notification.init(new StopMarkingNotification, user, markerFeedback, assignment)
@@ -112,7 +117,7 @@ trait StopMarkingNotificationCompletion extends CompletesNotifications[Seq[Assig
   self: StopMarkingRequest with StopMarkingState with NotificationHandling =>
 
   def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
-    val notificationsToComplete = stoppedMarkerFeedback.asScala.flatMap(mf =>
+    val notificationsToComplete = stoppedMarkerFeedback.asScala.toSeq.flatMap(mf =>
       notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
         notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
     )

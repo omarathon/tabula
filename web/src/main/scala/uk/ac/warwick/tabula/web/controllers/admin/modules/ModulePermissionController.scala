@@ -63,7 +63,7 @@ class ModuleAddPermissionController extends AdminController with ModulePermissio
       form(module)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(module, userCodes, role, "add")
     }
   }
@@ -83,7 +83,7 @@ class ModuleRemovePermissionController extends AdminController with ModulePermis
       form(module)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(module, userCodes, role, "remove")
     }
   }

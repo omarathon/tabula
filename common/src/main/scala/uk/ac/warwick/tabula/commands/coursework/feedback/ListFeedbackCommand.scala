@@ -73,8 +73,8 @@ abstract class ListFeedbackCommandInternal(val module: Module, val assignment: A
     val timeout = 15.seconds
 
     // Wrap each future in Future.optionalTimeout, which will return None if it times out early
-    val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment, assignment.feedbacks.asScala), timeout)
-    val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment, assignment.feedbacks.asScala), timeout)
+    val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment, assignment.feedbacks.asScala.toSeq), timeout)
+    val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment, assignment.feedbacks.asScala.toSeq), timeout)
     val latestOnlineAdded = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackAdded(assignment), timeout)
     val latestGenericFeedback = Futures.optionalTimeout(auditEventQueryService.latestGenericFeedbackAdded(assignment), timeout)
 

@@ -53,7 +53,7 @@ trait PlagiarismInvestigationCommandState {
   var confirm: Boolean = false
   var markPlagiarised: Boolean = true
 
-  lazy val submissions: Seq[Submission] = students.asScala.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
+  lazy val submissions: Seq[Submission] = students.asScala.toSeq.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
 }
 
 trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

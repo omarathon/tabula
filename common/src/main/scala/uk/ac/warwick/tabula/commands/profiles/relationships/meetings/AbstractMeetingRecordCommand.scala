@@ -71,8 +71,8 @@ abstract class AbstractMeetingRecordCommand {
 
     // delete attachments that have been removed
     if (meeting.attachments != null) {
-      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-      val filesToRemove = meeting.attachments.asScala -- filesToKeep
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
+      val filesToRemove = meeting.attachments.asScala.toSeq diff filesToKeep
       meeting.attachments = JArrayList[FileAttachment](filesToKeep)
       fileAttachmentService.deleteAttachments(filesToRemove)
     }
@@ -184,7 +184,7 @@ trait MeetingRecordValidation extends SelfValidating with AttachedFilesValidatio
       }
     }
 
-    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala.toSeq, Option(file.attached).getOrElse(JList()).asScala.toSeq)
   }
 }
 

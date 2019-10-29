@@ -30,13 +30,13 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
   }
 
   def createStudentNotification(groupSet: SmallGroupSet, actor: User, recipient: User): SmallGroupSetChangedStudentNotification = {
-    val n = Notification.init(new SmallGroupSetChangedStudentNotification, actor, groupSet.groups.asScala, groupSet)
+    val n = Notification.init(new SmallGroupSetChangedStudentNotification, actor, groupSet.groups.asScala.toSeq, groupSet)
     n.recipientUserId = recipient.getUserId
     n
   }
 
   def createTutorNotification(groupSet: SmallGroupSet, actor: User, recipient: User): SmallGroupSetChangedTutorNotification = {
-    val n = Notification.init(new SmallGroupSetChangedTutorNotification, actor, groupSet.groups.asScala, groupSet)
+    val n = Notification.init(new SmallGroupSetChangedTutorNotification, actor, groupSet.groups.asScala.toSeq, groupSet)
     n.recipientUserId = recipient.getUserId
     n
   }

@@ -73,11 +73,15 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
     // should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
-    val allPointsByPeriod = results.flatMap(_.groupedPointCheckpointPairs.toSeq).groupBy(_._1).mapValues(_.flatMap(_._2))
+    val allPointsByPeriod: Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] =
+      results.flatMap(_.groupedPointCheckpointPairs.toSeq)
+        .groupBy(_._1)
+        .view.mapValues(_.flatMap(_._2))
+        .toMap
 
     // All the distinct dates in a given period
-    val requiredDatesByPeriod = allPointsByPeriod.map {
-      case (period, pointCheckpointPairs) => period -> pointCheckpointPairs.map(_._1.startDate).distinct.sorted
+    val requiredDatesByPeriod = allPointsByPeriod.map { case (period, pointCheckpointPairs) =>
+      period -> pointCheckpointPairs.map(_._1.startDate).distinct.sorted
     }
 
     // For each period, for each distinct date, the maximum number of points

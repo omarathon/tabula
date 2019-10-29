@@ -39,7 +39,7 @@ trait GroupsObjectsWithFileUpload[A >: Null, B >: Null] extends GroupsObjects[A,
         result.popNestedPath()
 
         if (!file.attached.isEmpty) {
-          processFiles(file.attached.asScala)
+          processFiles(file.attached.asScala.toSeq)
         }
 
         def processFiles(files: Seq[FileAttachment]) {

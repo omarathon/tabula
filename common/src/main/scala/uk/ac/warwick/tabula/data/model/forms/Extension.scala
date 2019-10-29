@@ -23,6 +23,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.collection.JavaConverters._
+import scala.language.implicitConversions
 
 @Entity
 @Proxy

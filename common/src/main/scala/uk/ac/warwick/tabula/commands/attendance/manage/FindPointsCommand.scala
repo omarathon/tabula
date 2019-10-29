@@ -46,7 +46,7 @@ class FindPointsCommandInternal(val department: Department, val academicYear: Ac
   self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints with CourseworkPoints =>
 
   override def applyInternal(): FindPointsResult = {
-    val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+    val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala.toSeq, types.asScala.toSeq, styles.asScala.toSeq)
 
     restrictedStyle match {
       case Some(AttendanceMonitoringPointStyle.Date) =>

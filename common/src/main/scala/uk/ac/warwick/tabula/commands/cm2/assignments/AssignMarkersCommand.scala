@@ -256,7 +256,7 @@ trait ValidateMarkerChanges extends FetchMarkerAllocations {
         (stageAllocationName, priorAllocations) <- fetchAllocations(assignment).allocations
         (workflowStage, newAllocations) <- workflowStageAllocations(stageAllocationName)
         (oldMarker, students) <- priorAllocations
-        student <- students
+        student <- students.toSeq
         if isMarkerFeedbackFinalised(student, workflowStage) && isMarkerUnallocated(student, newAllocations)
       } yield {
         (workflowStage, oldMarker, student)

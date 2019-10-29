@@ -37,7 +37,7 @@ class CreateMissedMeetingRecordCommandInternal(val creator: Member, val allRelat
     with FileAttachmentServiceComponent =>
 
   override def applyInternal(): MeetingRecord = {
-    val meeting = new MeetingRecord(creator, relationships.asScala)
+    val meeting = new MeetingRecord(creator, relationships.asScala.toSeq)
     meeting.missed = true
     meeting.missedReason = missedReason
     applyCommon(meeting)

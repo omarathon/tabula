@@ -91,7 +91,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
     for (field <- findCommentField(assignment)) field.value = comment
     for (file <- findFileField(assignment)) {
       file.attachmentLimit = fileAttachmentLimit
-      file.attachmentTypes = fileAttachmentTypes.asScala
+      file.attachmentTypes = fileAttachmentTypes.asScala.toSeq
       file.individualFileSizeLimit = individualFileSizeLimit
     }
 

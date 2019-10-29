@@ -46,7 +46,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
   self: AttendanceReportProcessorState with ProfileServiceComponent =>
 
   override def applyInternal(): AttendanceReportProcessorResult = {
-    val processedStudents = students.asScala.map { properties =>
+    val processedStudents = students.asScala.toSeq.map { properties =>
       AttendanceMonitoringStudentData(
         properties.get("firstName"),
         properties.get("lastName"),
@@ -64,7 +64,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
       )
     }.sortBy(s => (s.lastName, s.firstName))
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-    val processedPoints = points.asScala.map { properties =>
+    val processedPoints = points.asScala.toSeq.map { properties =>
       PointData(
         properties.get("id"),
         properties.get("name"),

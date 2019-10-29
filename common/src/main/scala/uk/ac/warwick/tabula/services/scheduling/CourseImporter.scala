@@ -68,7 +68,7 @@ class SitsCourseImporter extends CourseImporter {
   lazy val coursesQuery = new CoursesQuery(sits)
 
   override def buildImportCommands(): Seq[ImportCourseCommand] = {
-    coursesQuery.execute.asScala
+    coursesQuery.execute.asScala.toSeq
   }
 }
 

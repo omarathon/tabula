@@ -30,7 +30,7 @@ class ListCustomRoleOverridesCommandInternal(val department: Department, val cus
   override def applyInternal(): CustomRoleOverridesInfo = {
     // Use Some(null) instead of None so we show scoped permissions too
     val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
-    val overrides = customRoleDefinition.overrides.asScala
+    val overrides = customRoleDefinition.overrides.asScala.toSeq
 
     CustomRoleOverridesInfo(role, overrides)
   }

@@ -20,7 +20,7 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
   self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
 
   def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
-    val recipients = notification.recipientNotificationInfos.asScala
+    val recipients = notification.recipientNotificationInfos.asScala.toSeq
       .filterNot(_.dismissed) // Not if the user has dismissed the notification already
       .map(_.recipient)
       .filter(_.isFoundUser) // Only users found in SSO

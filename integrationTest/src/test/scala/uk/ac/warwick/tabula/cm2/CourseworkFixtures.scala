@@ -22,7 +22,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   val TEST_ROUTE_CODE = "xx456"
   val TEST_DEPARTMENT_CODE = "xxx"
   val TEST_COURSE_CODE = "Ux456"
-  val moreBefore: () => Unit = () => Unit
+  val moreBefore: () => Unit = () => ()
 
   before {
     Given("The test department exists")

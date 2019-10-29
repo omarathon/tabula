@@ -31,7 +31,7 @@ object ListAllSmallGroupSetsResult {
       maxResults = request.num,
       firstResult = request.skip,
       academicYear = request.academicYear,
-      sets = sets.map { set => ViewSet(set, ViewGroup.fromGroups(set.groups.asScala.sorted), GroupsViewModel.Tutor) }
+      sets = sets.map { set => ViewSet(set, ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor) }
     )
 }
 

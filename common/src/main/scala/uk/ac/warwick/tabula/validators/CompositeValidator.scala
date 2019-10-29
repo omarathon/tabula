@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 class CompositeValidator(val list: Validator*) extends Validator {
 
   // Java compat
-  def this(list: JList[Validator]) = this(list.asScala: _*)
+  def this(list: JList[Validator]) = this(list.asScala.toSeq: _*)
 
   override def supports(cls: Class[_]): Boolean = list.exists(_.supports(cls))
 

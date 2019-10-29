@@ -33,8 +33,8 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
     SubmitToTurnitinCommand(assignment, user)
 
   @ModelAttribute("incompatibleFiles")
-  def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
-    val allAttachments = mandatory(assignment).submissions.asScala.flatMap(_.allAttachments)
+  def incompatibleFiles(@PathVariable assignment: Assignment): Seq[FileAttachment] = {
+    val allAttachments = mandatory(assignment).submissions.asScala.toSeq.flatMap(_.allAttachments)
     allAttachments.filterNot(a =>
       TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
     )

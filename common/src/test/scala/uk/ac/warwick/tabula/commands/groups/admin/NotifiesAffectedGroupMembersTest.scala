@@ -32,16 +32,16 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     user4.setUserId("user4")
 
     val userDatabase = Seq(user1, user2, user3, user4)
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers {
-      _ match {
+    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+      arg match {
         case ids: Seq[String@unchecked] =>
           ids.map(id => (id, userDatabase.find {
             _.getWarwickId == id
           }.getOrElse(new AnonymousUser()))).toMap
       }
     }
-    userLookup.getUserByUserId(any[String]) answers {
-      _ match {
+    userLookup.getUserByUserId(any[String]) answers { arg: Any =>
+      arg match {
         case id: String@unchecked =>
           userDatabase.find {
             _.getUserId == id

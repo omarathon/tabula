@@ -166,7 +166,7 @@ trait DownloadAdminSubmissionsForPrintingCommandRequest extends DownloadSubmissi
 
   self: DownloadSubmissionsForPrintingCommandState =>
 
-  override def submissions: Seq[Submission] = students.asScala.flatMap(s =>
+  override def submissions: Seq[Submission] = students.asScala.toSeq.flatMap(s =>
     assignment.submissions.asScala.find(_.usercode == s)
   )
 }

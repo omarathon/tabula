@@ -56,7 +56,7 @@ class OpenSmallGroupSetsController extends GroupsController with AutowiringSmall
     def getName: String = action.name
 
     def applyCommand(user: User): Seq[SmallGroupSet] = {
-      createCommand(user, checkedGroupsets.asScala).apply()
+      createCommand(user, checkedGroupsets.asScala.toSeq).apply()
     }
   }
 

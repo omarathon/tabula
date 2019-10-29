@@ -48,7 +48,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.acuteOutcome = acuteOutcome
 
     if(outcomeGrading == Rejected) {
-      submission.rejectionReasons = rejectionReasons.asScala
+      submission.rejectionReasons = rejectionReasons.asScala.toSeq
       if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
         submission.rejectionReasonsOther = rejectionReasonsOther
       } else {

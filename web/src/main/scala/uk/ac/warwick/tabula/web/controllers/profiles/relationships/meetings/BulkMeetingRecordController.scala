@@ -30,7 +30,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
     @RequestParam studentCourseDetails: JList[StudentCourseDetails]
   ): Seq[StudentRelationship] = {
     benchmarkTask("Get StudentRelationships") {
-      studentCourseDetails.asScala.flatMap { studentCourse =>
+      studentCourseDetails.asScala.toSeq.flatMap { studentCourse =>
         relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
       }
     }

@@ -24,7 +24,7 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
     val uri = "https://tabula.warwick.ac.uk/web/power/flight?super=magic"
     val currentUser = new CurrentUser(user, user)
 
-    val queryParams: Map[String, List[String]] = Uri.parse(uri).getQueryParameters().asScala.toMap.mapValues(_.asScala.toList)
+    val queryParams: Map[String, List[String]] = Uri.parse(uri).getQueryParameters().asScala.view.mapValues(_.asScala.toList).toMap
 
     val info = new RequestInfo(currentUser, Uri.parse(uri), queryParams)
     val request = testRequest(uri)

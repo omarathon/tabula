@@ -27,7 +27,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
     assignment.module = Fixtures.module("in101")
     assignment.module.adminDepartment = Fixtures.department("in")
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignment.assessmentMembershipService = assignmentMembershipService
     assignment.restrictSubmissions = true
@@ -46,7 +46,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
     assignment.assessmentMembershipService = assignmentMembershipService
     assignment.restrictSubmissions = true
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     assignmentMembershipService.isStudentCurrentMember(
       isEq(currentUser.apparentUser),

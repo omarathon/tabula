@@ -37,7 +37,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 
   lazy val modules: Seq[Module] =
     if (securityService.can(user, requiredPermission, department)) {
-      department.modules.asScala
+      department.modules.asScala.toSeq
     } else {
       modulesWithPermission.toList.sorted
     }

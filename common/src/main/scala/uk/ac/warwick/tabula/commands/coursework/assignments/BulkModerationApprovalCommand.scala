@@ -84,7 +84,7 @@ trait BulkModerationApprovalDescription extends Describable[Unit] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .markerFeedbacks(markerFeedback.asScala)
+     .markerFeedbacks(markerFeedback.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.property("feedbackCount" -> markerFeedback.size())

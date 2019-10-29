@@ -67,7 +67,7 @@ class SitsLevelImporter extends LevelImporter {
   lazy val levelsQuery = new LevelsQuery(sits)
 
   def getImportCommands(): Seq[ImportLevelCommand] = {
-    levelsQuery.execute.asScala
+    levelsQuery.execute.asScala.toSeq
   }
 }
 

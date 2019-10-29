@@ -14,7 +14,7 @@ class ReleaseForMarkingCommandTest extends TestBase with Mockito {
 
   trait MockCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
     val cm2MarkingWorkflowService: CM2MarkingWorkflowService = mock[CM2MarkingWorkflowService]
-    cm2MarkingWorkflowService.releaseForMarking(any[Seq[AssignmentFeedback]]) answers { f =>
+    cm2MarkingWorkflowService.releaseForMarking(any[Seq[AssignmentFeedback]]) answers { f: Any =>
       val released = f.asInstanceOf[Seq[AssignmentFeedback]]
       released.foreach(_.outstandingStages.add(SingleMarker))
       released

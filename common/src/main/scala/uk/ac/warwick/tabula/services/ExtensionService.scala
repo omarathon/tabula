@@ -82,7 +82,9 @@ abstract class AbstractExtensionService extends ExtensionService {
   def getApprovedExtensionsByUserId(assignment: Assignment): Map[String, Extension] = transactional(readOnly = true) {
     extensionDao.getApprovedExtensions(assignment)
       .groupBy(_.usercode)
+      .view
       .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+      .toMap
   }
 
   def getAllExtensionsByUserId(assignment: Assignment): Map[String, Seq[Extension]] = transactional(readOnly = true) {

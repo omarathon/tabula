@@ -33,26 +33,26 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   @Before def before() {
     userLookup = smartMock[UserLookupService]
-    userLookup.getUserByUserId(any[String]) answers { id =>
+    userLookup.getUserByUserId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getUserId == id
       } getOrElse new AnonymousUser()
     }
-    userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+    userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getWarwickId == id
       } getOrElse new AnonymousUser()
     }
-    userLookup.getUsersByUserIds(any[JList[String]]) answers { ids =>
-      val users = ids.asInstanceOf[JList[String]].asScala.map(id => (id, userDatabase find {
-        _.getUserId == id
-      } getOrElse new AnonymousUser()))
+    userLookup.getUsersByUserIds(any[JList[String]]) answers { ids: Any =>
+      val users = ids.asInstanceOf[JList[String]].asScala.toSeq.map { id =>
+        id -> userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser())
+      }
       JHashMap(users: _*)
     }
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids =>
-      ids.asInstanceOf[Seq[String]].map(id => (id, userDatabase.find {
-        _.getWarwickId == id
-      }.getOrElse(new AnonymousUser()))).toMap
+    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
+      ids.asInstanceOf[Seq[String]].map { id =>
+        id -> userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser())
+      }.toMap
     }
     val profileService = smartMock[ProfileService]
     profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
@@ -76,7 +76,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   @Test def plainSits() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
-    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(nobody), resitOnly = false).items
     membership.size should be(2)
     membership.head.user.getFullName should be("Roger Aaaaf")
@@ -85,7 +85,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   @Test def plainSitsWithNone() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
-    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = false).items
     membership.size should be(2)
     membership.head.user.getFullName should be("Roger Aaaaf")
@@ -95,7 +95,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
   @Test def resitOnly() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     upstream.members.get(0).resitExpected = Some(true)
-    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = true).items
     membership.size should be(1)
     membership.head.user.getFullName should be("Roger Aaaaf")
@@ -103,7 +103,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   @Test def includeAndExclude() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006"))
-    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala)
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq)
     val others = UserGroup.ofUsercodes
     others.userLookup = userLookup
     others.addUserId("aaaaa")
@@ -142,7 +142,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     */
   @Test def redundancy() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
-    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val others = UserGroup.ofUsercodes
     others.addUserId("aaaaf")
     others.excludeUserId("aaaah")

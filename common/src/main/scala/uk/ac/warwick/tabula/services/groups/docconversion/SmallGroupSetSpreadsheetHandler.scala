@@ -17,7 +17,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.XmlUtils
 import uk.ac.warwick.tabula.services._
@@ -28,7 +27,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.util.Try
+import scala.util.{Try, Using}
 
 case class ExtractedSmallGroupSet(
   module: Module,
@@ -171,7 +170,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
     with LocationFetchingServiceComponent
     with SyllabusPlusLocationServiceComponent =>
 
-  private def readSpreadsheet(file: InputStream, result: BindingResult): Map[String, Seq[Row]] = closeThis(file) { stream =>
+  private def readSpreadsheet(file: InputStream, result: BindingResult): Map[String, Seq[Row]] = Using.resource(file) { stream =>
     val pkg = OPCPackage.open(stream)
     val sst = new ReadOnlySharedStringsTable(pkg)
     val reader = new XSSFReader(pkg)
@@ -189,7 +188,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 
     val sheets = reader.getSheetsData.asInstanceOf[XSSFReader.SheetIterator]
     while (sheets.hasNext) {
-      closeThis(sheets.next()) { sheet =>
+      Using.resource(sheets.next()) { sheet =>
         val currentSheetName = sheets.getSheetName
         handler.startSheet(currentSheetName)
         parser.parse(new InputSource(sheet))

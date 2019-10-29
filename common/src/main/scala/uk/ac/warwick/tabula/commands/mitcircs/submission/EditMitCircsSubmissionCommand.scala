@@ -58,13 +58,13 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
     submission.endDate = endDate
-    submission.issueTypes = issueTypes.asScala
+    submission.issueTypes = issueTypes.asScala.toSeq
     if (issueTypes.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     submission.contacted = contacted
     if (contacted) {
       submission.noContactReason = null
-      submission.contacts = contacts.asScala
+      submission.contacts = contacts.asScala.toSeq
       if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
     } else {
       submission.noContactReason = noContactReason

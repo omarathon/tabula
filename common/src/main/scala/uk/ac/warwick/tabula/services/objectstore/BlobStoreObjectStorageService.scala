@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
+import scala.collection.parallel.CollectionConverters._
 
 /**
   * Implementation uses the Apache jclouds library to push and pull data to the cloud store

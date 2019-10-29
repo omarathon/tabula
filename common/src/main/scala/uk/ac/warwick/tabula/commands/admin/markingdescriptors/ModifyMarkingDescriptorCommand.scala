@@ -45,7 +45,7 @@ trait ModifyMarkingDescriptorState {
   var markPoints: JList[MarkPoint] = _
   var text: String = _
 
-  def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.sorted.distinct
+  def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.toSeq.sorted.distinct
 }
 
 trait ModifyMarkingDescriptorPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

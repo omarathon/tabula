@@ -78,9 +78,11 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       .flatMap(_.getColumns(state).toSeq)
       .filter { case (year, _) => selectedYears.contains(year) }
       .groupBy { case (year, _) => year }
+      .view
       .mapValues(_.flatMap { case (_, columns) => columns })
+      .toMap
 
-    val weightings = ListMap(selectCourseCommand.courses.asScala.map(course => {
+    val weightings = ListMap(selectCourseCommand.courses.asScala.toSeq.map(course => {
       course -> (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
         courseAndRouteService.getCourseYearWeighting(course.code, selectCourseCommand.academicYear, year)
       ).sorted

@@ -50,18 +50,18 @@ class OldDownloadSelectedFeedbackCommand(val module: Module, val assignment: Ass
     }
 
     if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
-      val zip = Await.result(zipService.getSomeFeedbacksZip(feedbacks.asScala), Duration.Inf)
+      val zip = Await.result(zipService.getSomeFeedbacksZip(feedbacks.asScala.toSeq), Duration.Inf)
       Left(zip)
     } else {
-      Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))
+      Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.toSeq.map(_.id))))
     }
   }
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.assignment(assignment)
-     .feedbacks(feedbacks.asScala)
+     .feedbacks(feedbacks.asScala.toSeq)
 }

@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionD
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-import scala.collection.convert.Wrappers.MapWrapper
 import scala.collection.mutable
 
 object AddAssignmentsCommand {
@@ -81,8 +80,8 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 
   self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[Assignment] = {
-    assignmentItems.asScala.filter(_.include).map(item => {
+  override def applyInternal(): Seq[Assignment] = {
+    assignmentItems.asScala.toSeq.filter(_.include).map(item => {
       val assignment = new Assignment()
       assignment.assignmentService = assessmentService
       assignment.addDefaultFields()
@@ -246,7 +245,7 @@ trait AddAssignmentsValidation extends SelfValidating with Logging {
     // check that all the selected items are part of this department. Otherwise you could post the IDs of
     // unrelated assignments and do stuff with them.
     // Use .exists() to see if there is at least one with a matching department code OR parent department code
-    def modules(d: Department): Seq[Module] = d.modules.asScala
+    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
 
     def modulesIncludingSubDepartments(d: Department): Seq[Module] =
       modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
@@ -302,13 +301,13 @@ trait AddAssignmentsCommandState {
   // All the possible assignments, prepopulated from SITS.
   var assignmentItems: JList[AssignmentItem] = LazyLists.create()
 
-  protected def includedItems: mutable.Buffer[AssignmentItem] = assignmentItems.asScala.filter(_.include)
+  protected def includedItems: Seq[AssignmentItem] = assignmentItems.asScala.toSeq.filter(_.include)
 
   /**
     * options which are referenced by key by AssignmentItem.optionsId
     */
   var optionsMap: JMap[String, SharedAssignmentPropertiesForm] =
-    new MapWrapper(LazyMaps.create { key: String => new SharedAssignmentPropertiesForm })
+    LazyMaps.create { _: String => new SharedAssignmentPropertiesForm }.asJava
 
   val DEFAULT_OPEN_HOUR = 12
   val DEFAULT_WEEKS_LENGTH = 4

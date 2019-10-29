@@ -57,7 +57,7 @@ trait DownloadRegistersAsPdfCommandRequest {
   var endDate: LocalDate = LocalDate.now().plusWeeks(1)
   var smallGroupSets: JList[SmallGroupSet] = JArrayList()
 
-  def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.map(_.id)
+  def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.toSeq.map(_.id)
 
   var showPhotos = true
   var displayName = DisplayName.Name

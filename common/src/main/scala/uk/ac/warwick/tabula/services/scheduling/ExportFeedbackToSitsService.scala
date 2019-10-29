@@ -146,7 +146,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
     parameterGetter.getQueryParams match {
       case Some(params) =>
-        matchQuery.executeByNamedParam(params.asScala.filterKeys(_ != "now").asJava).asScala
+        matchQuery.executeByNamedParam(params.asScala.view.filterKeys(_ != "now").toMap.asJava).asScala.toSeq
       case None =>
         logger.warn(s"Cannot get partial matching $tableName records for feedback ${feedback.id} as no assessment groups found")
         Nil

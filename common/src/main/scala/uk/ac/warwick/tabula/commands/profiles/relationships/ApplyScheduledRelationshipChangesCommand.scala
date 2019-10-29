@@ -30,7 +30,7 @@ class ApplyScheduledStudentRelationshipChangesCommandInternal(val relationshipTy
 
   override def applyInternal(): Seq[StudentRelationship] = {
     val applyDate = DateTime.now
-    relationships.asScala.map { relationship =>
+    relationships.asScala.toSeq.map { relationship =>
       if (!relationship.isCurrent) {
         // Future add or replace
         relationshipService.endStudentRelationships(relationship.replacesRelationships.asScala.toSeq, applyDate)
@@ -59,7 +59,7 @@ trait ApplyScheduledStudentRelationshipChangesDescription extends Describable[Se
 
   override def describe(d: Description): Unit =
     d.studentRelationshipType(relationshipType)
-     .studentRelationships(relationships.asScala)
+     .studentRelationships(relationships.asScala.toSeq)
 }
 
 trait ApplyScheduledStudentRelationshipChangesNotifications extends BulkRelationshipChangeNotifier[Seq[StudentRelationship], Seq[StudentRelationship]] {

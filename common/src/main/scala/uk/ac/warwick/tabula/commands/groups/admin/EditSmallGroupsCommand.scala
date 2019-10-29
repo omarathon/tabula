@@ -67,7 +67,7 @@ trait EditSmallGroupsCommandState {
 class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[Seq[SmallGroup]] with EditSmallGroupsCommandState {
   self: SmallGroupServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[SmallGroup] = {
+  override def applyInternal(): Seq[SmallGroup] = {
     // Manage existing groups
     existingGroups.asScala.values.filterNot(_.delete).foreach { props =>
       val group = props.group
@@ -92,7 +92,7 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
     }
 
     smallGroupService.saveOrUpdate(set)
-    set.groups.asScala
+    set.groups.asScala.toSeq
   }
 }
 

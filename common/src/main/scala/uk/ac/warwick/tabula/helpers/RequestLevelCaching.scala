@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.helpers.RequestLevelCache.Cache
 
 import scala.collection.JavaConverters._
-import scala.collection.convert.Wrappers.JConcurrentMapWrapper
 import scala.collection.mutable
 
 trait RequestLevelCaching[A, B] {
@@ -74,12 +73,12 @@ class RequestLevelCache {
   import RequestLevelCache._
 
   //TAB-7331 (Related with CPU Spike)
-  private val cacheMap: scala.collection.concurrent.Map[String, Cache[_, _]] = JConcurrentMapWrapper(new ConcurrentHashMap[String, Cache[_, _]]())
+  private val cacheMap: scala.collection.concurrent.Map[String, Cache[_, _]] = new ConcurrentHashMap[String, Cache[_, _]]().asScala
 
   def getCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
     case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
     case _ =>
-      val cache: scala.collection.concurrent.Map[A, B] = JConcurrentMapWrapper(new ConcurrentHashMap[A, B]())
+      val cache: scala.collection.concurrent.Map[A, B] = new ConcurrentHashMap[A, B]().asScala
       // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
   }

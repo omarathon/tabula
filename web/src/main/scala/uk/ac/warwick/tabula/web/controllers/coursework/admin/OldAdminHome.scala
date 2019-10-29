@@ -114,8 +114,8 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
       managedModules.asJava
     }
 
-  def applyInternal(): mutable.Buffer[Module] = {
-    modules.asScala.sortBy { module => (module.assignments.isEmpty, module.code) }
+  def applyInternal(): Seq[Module] = {
+    modules.asScala.toSeq.sortBy { module => (module.assignments.isEmpty, module.code) }
   }
 
   def gatherNotices(modules: Seq[Module]): Map[String, Seq[Assignment]] = benchmarkTask("Gather notices") {

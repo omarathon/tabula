@@ -165,7 +165,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
       assignment.feedbackService = smartMock[FeedbackService]
-      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
       val submission = Fixtures.submission()
       submission.assignment = assignment
@@ -252,7 +252,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       assignment.id = "1234"
 
       assignment.feedbackService = smartMock[FeedbackService]
-      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
       val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
       assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava

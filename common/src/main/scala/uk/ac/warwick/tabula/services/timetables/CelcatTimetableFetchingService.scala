@@ -29,6 +29,7 @@ import uk.ac.warwick.tabula.JavaImports._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
+import scala.util.Failure
 import scala.util.parsing.json.JSON
 
 trait CelcatConfiguration {
@@ -269,8 +270,11 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
         }
 
     // Extra logging
-    result.onFailure { case e =>
-      logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
+    result.onComplete {
+      case Failure(e) =>
+        logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
+
+      case _ =>
     }
 
     result

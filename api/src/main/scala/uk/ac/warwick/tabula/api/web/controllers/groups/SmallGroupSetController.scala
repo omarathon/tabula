@@ -60,7 +60,7 @@ trait GetSmallGroupSetApiFullOutput extends GetSmallGroupSetApiOutput {
 
   def outputJson(smallGroupSet: SmallGroupSet) = Map(
     "academicYear" -> smallGroupSet.academicYear.toString,
-    "groupSet" -> jsonSmallGroupSetObject(new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.sorted), GroupsViewModel.Tutor))
+    "groupSet" -> jsonSmallGroupSetObject(new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor))
   )
 
 }

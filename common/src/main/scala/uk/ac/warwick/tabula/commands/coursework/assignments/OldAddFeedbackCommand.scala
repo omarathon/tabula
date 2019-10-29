@@ -33,7 +33,7 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
         newFeedback
       })
 
-      val newAttachments = feedback.addAttachments(file.attached.asScala)
+      val newAttachments = feedback.addAttachments(file.attached.asScala.toSeq)
 
       if (newAttachments.nonEmpty) {
         session.saveOrUpdate(feedback)
@@ -74,13 +74,13 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 
     item.duplicateFileNames = withSameName.filterNot(p => p.attached.isDataEqual(p.feedback)).map(_.attached.name).toSet
     item.ignoredFileNames = withSameName.map(_.attached.name).toSet -- item.duplicateFileNames
-    item.isModified = (attachmentNames -- item.ignoredFileNames).nonEmpty
+    item.isModified = (attachmentNames.toSet -- item.ignoredFileNames).nonEmpty
   }
 
   def describe(d: Description): Unit = d
     .assignment(assignment)
-    .studentIds(items.asScala.map(_.uniNumber))
-    .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+    .studentIds(items.asScala.toSeq.map(_.uniNumber))
+    .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
 
   override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit =
     d.assignment(assignment)

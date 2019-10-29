@@ -63,7 +63,7 @@ class SitsDisabilityImporter extends DisabilityImporter {
   lazy val disabilitysQuery = new DisabilitysQuery(sits)
 
   def getImportCommands: Seq[ImportDisabilitiesCommand] = {
-    disabilitysQuery.execute.asScala
+    disabilitysQuery.execute.asScala.toSeq
   }
 }
 

@@ -31,7 +31,7 @@ class StudentCourseDetailsNoteImporterImpl extends StudentCourseDetailsNoteImpor
   override def getStudentCourseDetailsNotes: Seq[ImportCourseDetailsNoteCommand] = {
     benchmarkTask("Fetch student course detail notes") {
       val allNotes = studentCourseDetailNoteDao.getAllNotes
-      val foundNotes = studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r))
+      val foundNotes = studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r)).toSeq
       val foundCodes = foundNotes.map(_.code)
       val deletedNotes = allNotes.filterNot(note => foundCodes.contains(note.code))
       deletedNotes.foreach(note => {

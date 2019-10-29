@@ -33,7 +33,7 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 
     val setView = ViewSetWithProgress(
       set = set,
-      groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+      groups = ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted),
       viewerRole = Tutor,
       progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
       nextStage = progress.nextStage,

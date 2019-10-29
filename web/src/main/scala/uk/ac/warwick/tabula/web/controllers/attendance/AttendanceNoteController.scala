@@ -167,7 +167,7 @@ class BulkEditAttendanceNoteController extends AttendanceController {
     @PathVariable academicYear: AcademicYear,
     @PathVariable point: AttendanceMonitoringPoint,
     @RequestParam students: JList[StudentMember]
-  ) = BulkAttendanceNoteCommand(point, students.asScala, user)
+  ) = BulkAttendanceNoteCommand(point, students.asScala.toSeq, user)
 
 
   private def form(

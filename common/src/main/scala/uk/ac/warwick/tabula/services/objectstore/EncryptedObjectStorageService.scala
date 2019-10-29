@@ -29,7 +29,7 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
     metadata.copy(
       contentLength = metadata.userMetadata.get(metadataContentLengthKey).map(_.toLong).getOrElse(metadata.contentLength),
       contentType = metadata.userMetadata.getOrElse(metadataContentTypeKey, metadata.contentType),
-      userMetadata = metadata.userMetadata.filterKeys { k => k != metadataContentLengthKey && k != metadataContentTypeKey && k != metadataIVKey }
+      userMetadata = metadata.userMetadata.view.filterKeys { k => k != metadataContentLengthKey && k != metadataContentTypeKey && k != metadataIVKey }.toMap
     )
 
   private[this] class EncryptedRichByteSource(delegate: RichByteSource) extends RichByteSource {

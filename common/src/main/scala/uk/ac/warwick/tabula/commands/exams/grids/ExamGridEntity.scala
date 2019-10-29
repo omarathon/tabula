@@ -12,7 +12,7 @@ case class ExamGridEntity(
   years: Map[YearOfStudy, Option[ExamGridEntityYear]], // Int = year of study
   yearWeightings: Seq[CourseYearWeighting]
 ) {
-  def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
+  def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.view.mapValues(_.get).toMap
 }
 
 case class ExamGridEntityYear(

@@ -60,7 +60,7 @@ class ScalaQuery[A](c: org.hibernate.query.Query[A]) {
   }
 
   /** Returns a typed Seq of the results. */
-  def seq: Seq[A] = list.asScala
+  def seq: Seq[A] = list.asScala.toSeq
 
   /** Returns a typed list of the results. */
   def list: JList[A] = c.list()

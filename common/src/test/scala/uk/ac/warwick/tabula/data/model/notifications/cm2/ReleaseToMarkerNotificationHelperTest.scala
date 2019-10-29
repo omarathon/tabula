@@ -47,30 +47,30 @@ class ReleaseToMarkerNotificationHelperTest extends TestBase with Mockito {
 
     )
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFirstMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFirstMarker)) answers { _: Any =>
       allocations(DblFirstMarker)
-    })
+    }
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblSecondMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblSecondMarker)) answers { _: Any =>
       allocations(DblSecondMarker)
-    })
+    }
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFinalMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFinalMarker)) answers { _: Any =>
       allocations(DblFirstMarker)
-    })
+    }
 
 
     val workflow = DoubleWorkflow("test", dept, allocations(DblFirstMarker).keys.toSeq, allocations(DblSecondMarker).keys.toSeq)
     assignment.cm2MarkingWorkflow = workflow
 
 
-    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker1)) answers (_ => {
+    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker1)) answers { _: Any =>
       Seq(stu1, stu2, stu3)
-    })
+    }
 
-    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker2)) answers (_ => {
+    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker2)) answers { _: Any =>
       Seq(stu3)
-    })
+    }
 
     val marker1Helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, marker1, cm2MarkingWorkflowService)
 

@@ -63,7 +63,7 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
 
 
       val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreateCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
-      val markersBUsers: Seq[User] = JArrayList().asScala
+      val markersBUsers: Seq[User] = JArrayList().asScala.toSeq
 
       val oldSingleMarkerWorkflow = SingleMarkerWorkflow("Old single marker workflow", module.adminDepartment, markersAUsers)
       oldSingleMarkerWorkflow.academicYear = AcademicYear.now().previous

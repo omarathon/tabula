@@ -92,7 +92,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
         }
         doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
-        val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
+        val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey.route, ey.level)).toMap
         progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year.route), routeRules, calculateYearMarks, isLevelGrid, entity.yearWeightings) match {
           case FinalYearGrade.Ignore =>
           case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")

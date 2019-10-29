@@ -28,7 +28,7 @@ class CreateAttendancePointController extends AttendanceController {
     @PathVariable academicYear: AcademicYear,
     @RequestParam schemes: JList[AttendanceMonitoringScheme]
   ) =
-    CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala)
+    CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala.toSeq)
 
   @RequestMapping(method = Array(POST))
   def form(

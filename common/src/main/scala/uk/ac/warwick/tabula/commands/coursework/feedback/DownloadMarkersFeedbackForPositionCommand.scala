@@ -38,7 +38,7 @@ class DownloadMarkersFeedbackForPositionCommand(
 
   override def applyInternal(): RenderableFile = {
     val markersSubs = assignment.getMarkersSubmissions(marker)
-    val feedbacks = assignment.feedbacks.asScala.filter(f => markersSubs.exists(_.usercode == f.usercode))
+    val feedbacks = assignment.feedbacks.asScala.toSeq.filter(f => markersSubs.exists(_.usercode == f.usercode))
     val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
       case FirstFeedback => Option(f.firstMarkerFeedback)
       case SecondFeedback => Option(f.secondMarkerFeedback)

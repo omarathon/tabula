@@ -52,7 +52,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
   var stageMarkers: JList[StageMarkers] = JArrayList()
 
   def markers: ListMap[MarkingWorkflowStage, Seq[Marker]] =
-    ListMap(stageMarkers.asScala.map(sm => sm.stage -> sm.markers.users.toSeq.sorted).sortBy { case (stage, _) => stage.order }: _*)
+    ListMap(stageMarkers.asScala.toSeq.map(sm => sm.stage -> sm.markers.users.toSeq.sorted).sortBy { case (stage, _) => stage.order }: _*)
 
   def allMarkers: SortedSet[Marker] = SortedSet(markers.values.flatten.toSeq.distinct: _ *)
 

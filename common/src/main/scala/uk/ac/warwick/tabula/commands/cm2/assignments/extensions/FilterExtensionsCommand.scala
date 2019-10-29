@@ -94,7 +94,7 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
     val extensions = benchmarkTask("findExtensionsByRestrictions") {
       extensionService.filterExtensions(
         restrictions,
-        buildOrders(orders.asScala),
+        buildOrders(orders.asScala.toSeq),
         extensionsPerPage,
         extensionsPerPage * (page - 1)
       )

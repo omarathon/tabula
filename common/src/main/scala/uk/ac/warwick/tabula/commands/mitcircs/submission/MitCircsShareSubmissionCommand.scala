@@ -72,7 +72,7 @@ trait MitCircsShareSubmissionValidation extends GrantRoleCommandValidation {
   override def validate(errors: Errors) {
     super.validate(errors)
 
-    val students = userLookup.getUsersByUserIds(usercodes.asScala).values.filter(_.isStudent)
+    val students = userLookup.getUsersByUserIds(usercodes.asScala.toSeq).values.filter(_.isStudent)
     if(students.nonEmpty)
       errors.rejectValue("usercodes", "mitigatingCircumstances.submission.share.noStudents", Array(students.map(_.getFullName).mkString(", ")), "")
   }

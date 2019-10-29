@@ -26,7 +26,7 @@ class BulkScheduledMeetingRecordController extends ProfilesController with TaskB
     @RequestParam studentCourseDetails: JList[StudentCourseDetails]
   ): Seq[StudentRelationship] = {
     benchmarkTask("Get StudentRelationships") {
-      studentCourseDetails.asScala.flatMap { studentCourse =>
+      studentCourseDetails.asScala.toSeq.flatMap { studentCourse =>
         relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
       }
     }

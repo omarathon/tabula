@@ -20,5 +20,5 @@ class RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup: Upstr
 
   override def describe(d: Description): Unit =
     d.property("upstreamAssessmentGroup" -> upstreamAssessmentGroup.toString)
-     .studentIds(upstreamAssessmentGroup.members.asScala.map(_.universityId))
+     .studentIds(upstreamAssessmentGroup.members.asScala.toSeq.map(_.universityId))
 }

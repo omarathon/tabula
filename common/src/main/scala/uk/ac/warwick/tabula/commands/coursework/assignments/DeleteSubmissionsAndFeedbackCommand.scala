@@ -47,7 +47,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   def applyInternal(): (Seq[Submission], Seq[AssignmentFeedback]) = {
     val submissions = if (shouldDeleteSubmissions) {
-      val submissions = for (usercode <- students.asScala; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) yield {
+      val submissions = for (usercode <- students.asScala.toSeq; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) yield {
         HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
         submissionService.delete(mandatory(submission))
         submission
@@ -57,7 +57,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     } else Nil
 
     val feedbacks = if (shouldDeleteFeedback) {
-      val feedbacks = for (usercode <- students.asScala; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) yield {
+      val feedbacks = for (usercode <- students.asScala.toSeq; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) yield {
         HibernateHelpers.initialiseAndUnproxy(feedback.attachments)
         feedbackService.delete(mandatory(feedback))
         zipService.invalidateIndividualFeedbackZip(feedback)
@@ -93,7 +93,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])): Unit = {
     val (submissions, feedbacks) = result

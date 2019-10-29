@@ -110,7 +110,7 @@ trait DeleteSubmissionsAndFeedbackDescription extends Describable[Result] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-      .studentUsercodes(students.asScala)
+      .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: Result): Unit =
     d.submissions(result.submissions)

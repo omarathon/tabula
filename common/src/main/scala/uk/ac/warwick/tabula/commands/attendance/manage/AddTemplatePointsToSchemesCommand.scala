@@ -38,7 +38,7 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 
     val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
-    val newPoints = schemes.asScala.flatMap { scheme =>
+    val newPoints = schemes.asScala.toSeq.flatMap { scheme =>
       attendanceMonitoringPoints.map { point =>
         val newPoint = point.cloneTo(Option(scheme))
         newPoint.pointType = AttendanceMonitoringPointType.Standard
@@ -49,8 +49,8 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
       }
     }
 
-    generateNotifications(schemes.asScala)
-    updateCheckpointTotals(schemes.asScala)
+    generateNotifications(schemes.asScala.toSeq)
+    updateCheckpointTotals(schemes.asScala.toSeq)
 
     newPoints
   }
@@ -99,14 +99,14 @@ trait AddTemplatePointsToSchemesValidation extends AttendanceMonitoringPointVali
     if (templateScheme == null) {
       errors.reject("attendanceMonitoringPoints.templateScheme.Empty")
     } else {
-      validateSchemePointStyles(errors, templateScheme.pointStyle, schemes.asScala)
+      validateSchemePointStyles(errors, templateScheme.pointStyle, schemes.asScala.toSeq)
 
       attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear).foreach { point =>
         templateScheme.pointStyle match {
           case AttendanceMonitoringPointStyle.Date =>
-            validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes.asScala, global = true)
+            validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes.asScala.toSeq, global = true)
           case AttendanceMonitoringPointStyle.Week =>
-            validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes.asScala, global = true)
+            validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes.asScala.toSeq, global = true)
         }
       }
 

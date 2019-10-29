@@ -40,7 +40,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
   override def applyInternal(): ExcelView = {
     val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType)
-    val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
+    val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala.toSeq)
 
     val (unallocated, allocationsForTemplate) = {
       if (templateWithChanges) {
@@ -80,7 +80,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
     val formulaEvaluator = workbook.getCreationHelper.createFormulaEvaluator()
     val sheet = generateAllocationSheet(workbook)
     val allUniversityIds = allocations.map(_.entityId) ++ allocations.flatMap(_.students.map(_.universityId)) ++ unallocated.map(_.universityId)
-    val usercodes = userLookup.getUsersByWarwickUniIds(allUniversityIds).mapValues(_.getUserId)
+    val usercodes = userLookup.getUsersByWarwickUniIds(allUniversityIds).view.mapValues(_.getUserId).toMap
 
     generateAgentLookupSheet(workbook, allocations, usercodes)
     generateAgentDropdowns(sheet, allocations, unallocated)

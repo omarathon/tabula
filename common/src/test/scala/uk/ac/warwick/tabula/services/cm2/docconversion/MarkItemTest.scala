@@ -11,7 +11,7 @@ class MarkItemTest extends TestBase with Mockito {
 
   val assignment: Assignment = Fixtures.assignment("Essay")
   assignment.feedbackService = smartMock[FeedbackService]
-  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
   private def markItem(): MarkItem = {
     val item = new MarkItem

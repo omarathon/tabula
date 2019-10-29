@@ -39,7 +39,7 @@ class OldSmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
     val validStudents = assessmentMembershipService.determineMembershipUsers(assessment)
 
     val setAllocations = sets.map(set => {
-      def getGroupAllocations(markers: Seq[User]) = set.groups.asScala.map(group => {
+      def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = set.groups.asScala.toSeq.map(group => {
         val validMarkers = group.events
           .flatMap(_.tutors.users)
           .filter(markers.contains)

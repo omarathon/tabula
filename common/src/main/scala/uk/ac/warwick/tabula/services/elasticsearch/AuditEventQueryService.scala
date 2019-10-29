@@ -425,7 +425,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
     parsedEventsOfType(
       "PublishFeedback",
       boolQuery().should(queries),
-      afterFeedbackPublishedRestriction(assignment, assignment.feedbacks.asScala)
+      afterFeedbackPublishedRestriction(assignment, assignment.feedbacks.asScala.toSeq)
     ).map { events =>
       events.sortBy(_.eventDate).reverse
     }

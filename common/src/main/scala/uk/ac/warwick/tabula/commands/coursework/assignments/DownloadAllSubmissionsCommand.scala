@@ -26,6 +26,6 @@ class DownloadAllSubmissionsCommand(
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .submissions(assignment.submissions.asScala)
+     .submissions(assignment.submissions.asScala.toSeq)
 
 }

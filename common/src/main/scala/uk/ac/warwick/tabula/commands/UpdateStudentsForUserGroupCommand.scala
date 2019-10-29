@@ -88,10 +88,10 @@ trait UpdateStudentsForUserGroupCommandState extends UpdateEntityMembershipByMem
     }
 
     val staticMemberItems =
-      ((staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala)
+      ((staticStudentIds.asScala.toSeq diff excludedStudentIds.asScala.toSeq) diff includedStudentIds.asScala.toSeq)
         .map(toMembershipItem(_, Static))
 
-    val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
+    val includedMemberItems = includedStudentIds.asScala.toSeq.map(toMembershipItem(_, Include))
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }

@@ -36,8 +36,8 @@ class ViewExamCommandInternal(val module: Module, val academicYear: AcademicYear
   override def applyInternal(): ViewExamCommandResult = {
     val studentSeats = assessmentMembershipService.determineMembershipUsersWithOrder(exam)
     val studentUsers = studentSeats.map(_._1)
-    val feedbackMap = feedbackService.getExamFeedbackMap(exam, studentUsers).mapValues(Option(_)).withDefaultValue(None)
-    val sitsStatusMap = feedbackForSitsService.getByFeedbacks(feedbackMap.values.flatten.toSeq).mapValues(Option(_)).withDefaultValue(None)
+    val feedbackMap = feedbackService.getExamFeedbackMap(exam, studentUsers).view.mapValues(Option(_)).toMap.withDefaultValue(None)
+    val sitsStatusMap = feedbackForSitsService.getByFeedbacks(feedbackMap.values.flatten.toSeq).view.mapValues(Option(_)).toMap.withDefaultValue(None)
     ViewExamCommandResult(studentUsers, studentSeats.toMap, feedbackMap, sitsStatusMap)
   }
 

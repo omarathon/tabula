@@ -118,8 +118,8 @@ class DepartmentSmallGroupSet
     unallocatedStudents.size
   }
 
-  def studentsNotInMembership: mutable.Buffer[User] = {
-    val allocatedStudents = groups.asScala.flatMap(_.students.users)
+  def studentsNotInMembership: Seq[User] = {
+    val allocatedStudents = groups.asScala.toSeq.flatMap(_.students.users)
 
     allocatedStudents diff allStudents
   }

@@ -66,9 +66,9 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
     /** TODO- If a student is on 2 courses (mainly course transfer cases)-> when we create a new relationship for most significant course Ist time
       * If there is another course that is not most significant one, set end date for that particular relationship type with the same agent (if it is blank)
       * Also would need to move comments etc from old relationship to this new one. Probably part of JIRA TAB-4555 **/
-    val newRelationships: Seq[StudentRelationship] = additions.asScala.flatMap { case (entityId, addIDs) =>
+    val newRelationships: Seq[StudentRelationship] = additions.asScala.toSeq.flatMap { case (entityId, addIDs) =>
       val alreadyExist = dbAllocated.find(_.entityId == entityId).map(e => e.students.map(_.universityId)).getOrElse(Seq())
-      val students = profileService.getAllMembersWithUniversityIdsStaleOrFresh(addIDs.asScala.filterNot(alreadyExist.contains)).collect { case s: StudentMember => s }
+      val students = profileService.getAllMembersWithUniversityIdsStaleOrFresh(addIDs.asScala.toSeq.filterNot(alreadyExist.contains)).collect { case s: StudentMember => s }
       students.map { student =>
         val replacements = allocationType match {
           case AllocationTypes.Replace =>
@@ -151,7 +151,7 @@ trait AllocateStudentsToRelationshipCommandRequest extends ManageStudentRelation
   var additionalEntities: JList[String] = JArrayList()
 
   lazy val dbUnallocated: Seq[StudentAssociationData] = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
-  lazy val dbAllocated: Seq[StudentAssociationEntityData] = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
+  lazy val dbAllocated: Seq[StudentAssociationEntityData] = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala.toSeq)
   lazy val allStudents: Seq[StudentAssociationData] = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
 
   var additions: JMap[String, JList[String]] =
@@ -163,7 +163,7 @@ trait AllocateStudentsToRelationshipCommandRequest extends ManageStudentRelation
         .filterNot(s => entity.students.map(_.universityId).contains(s)) // Don't re-add existing relationships
         .flatMap(id => allStudents.find(_.universityId == id).map(student => (student, entity.displayName)))
     }.getOrElse(Seq())
-  }.groupBy(_._1).mapValues(pairs => pairs.map(_._2))
+  }.groupBy(_._1).view.mapValues(pairs => pairs.map(_._2)).toMap
 
   var removals: JMap[String, JList[String]] =
     LazyMaps.create { _: String => JArrayList(): JList[String] }.asJava
@@ -187,13 +187,13 @@ trait AllocateStudentsToRelationshipCommandRequest extends ManageStudentRelation
 
   lazy val renderRemovals: Map[StudentAssociationData, Seq[String]] = allocationType match {
     case AllocationTypes.Replace =>
-      relationshipsNotInAdditions.map { case (student, entity) => (student, entity.displayName) }.groupBy(_._1).mapValues(pairs => pairs.map(_._2))
+      relationshipsNotInAdditions.map { case (student, entity) => (student, entity.displayName) }.groupBy(_._1).view.mapValues(pairs => pairs.map(_._2)).toMap
     case AllocationTypes.Add =>
       removals.asScala.toSeq.flatMap { case (entityId, removeIDs) =>
         dbAllocated.find(_.entityId == entityId).map { entity =>
           removeIDs.asScala.flatMap(id => entity.students.find(_.universityId == id).map(student => (student, entity.displayName)))
         }.getOrElse(Seq())
-      }.groupBy(_._1).mapValues(pairs => pairs.map(_._2))
+      }.groupBy(_._1).view.mapValues(pairs => pairs.map(_._2)).toMap
     case _ => Map()
   }
 

@@ -30,7 +30,7 @@ class ReleaseSmallGroupSetController extends GroupsController {
       case releasedSet :: Nil => releasedSet.set
       case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
     }
-    val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.sorted), GroupsViewModel.Tutor)
+    val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor)
     val moduleItem = ViewModule(updatedSet.module, Seq(groupSetItem), canManageGroups = true)
     Mav("groups/admin/groups/single_groupset",
       "groupsetItem" -> groupSetItem,

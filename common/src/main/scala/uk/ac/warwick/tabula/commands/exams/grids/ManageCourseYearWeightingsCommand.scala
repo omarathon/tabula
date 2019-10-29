@@ -159,8 +159,9 @@ trait ManageCourseYearWeightingsCommandState {
   }
 
   lazy val originalWeightings: Map[Course, Map[YearOfStudy, CourseYearWeighting]] = {
-    getWeightings(startAcademicYear).mapValues(_.filter { case (_, weightingOption) => weightingOption.isDefined }.mapValues(_.get))
+    getWeightings(startAcademicYear).view.mapValues(_.filter { case (_, weightingOption) => weightingOption.isDefined }.view.mapValues(_.get).toMap)
       .filter { case (_, yearMap) => yearMap.nonEmpty }
+      .toMap
   }
 }
 

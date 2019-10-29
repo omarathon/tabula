@@ -45,7 +45,7 @@ class PassListDocument extends ExamGridDocument
     val document = ExamGridPassListExporter(
       entities,
       selectCourseCommand.department,
-      selectCourseCommand.courses.asScala,
+      selectCourseCommand.courses.asScala.toSeq,
       selectCourseCommand.yearOfStudy,
       selectCourseCommand.academicYear,
       progressionService,

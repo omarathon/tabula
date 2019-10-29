@@ -24,7 +24,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   def getAliasPaths(sitsTable: String): Seq[(String, AliasAndJoinType)]
 
   protected def buildOrders(): Seq[ScalaOrder] =
-    (sortOrder.asScala ++ defaultOrder).map { underlying =>
+    (sortOrder.asScala.toSeq ++ defaultOrder).map { underlying =>
       underlying.getPropertyName match {
         case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying.nulls(NullPrecedence.LAST), getAliasPaths(aliasPath): _*)
         case _ => ScalaOrder(underlying.nulls(NullPrecedence.LAST))

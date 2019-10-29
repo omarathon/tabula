@@ -97,7 +97,7 @@ trait DownloadsTimetable extends TaskBenchmarking {
 
       val eventGrid: Map[DayOfWeek, Seq[Map[LocalTime, TimetableEvent]]] = benchmarkTask("eventGrid") {
         val eventsByDay = events.groupBy(_.day)
-        eventsByDay.mapValues(dayEvents => {
+        eventsByDay.view.mapValues(dayEvents => {
           // Add events to rows where they fit; start with the longest
           val sortedEvents = dayEvents.sortBy(roundedEventTimes(_).duration).reverse
           sortedEvents.foldLeft(Seq[Map[LocalTime, TimetableEvent]](nullHourMap)) { (rows, event) =>
@@ -112,7 +112,7 @@ trait DownloadsTimetable extends TaskBenchmarking {
                 invalidHeadRows ++ Seq(addEventToRow(event, validRow)) ++ otherValidRows ++ tailRows
             }
           }
-        })
+        }).toMap
       }
 
       new PDFView(

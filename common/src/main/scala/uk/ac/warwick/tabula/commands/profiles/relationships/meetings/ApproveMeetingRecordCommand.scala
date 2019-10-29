@@ -152,10 +152,10 @@ trait ApproveMeetingRecordState {
   var rejectionComments: String = _
 
   lazy val approvals: Seq[MeetingRecordApproval] =
-    meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
+    meeting.approvals.asScala.toSeq.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
 
   lazy val notRequiredApprovals: Seq[MeetingRecordApproval] = meeting.approvalType match {
     case AllApprovals => Nil
-    case OneApproval => meeting.approvals.asScala -- approvals
+    case OneApproval => meeting.approvals.asScala.toSeq diff approvals
   }
 }

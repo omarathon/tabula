@@ -45,7 +45,7 @@ class BulkFeedbackTemplateCommand(department: Department) extends FeedbackTempla
   override def applyInternal(): Seq[FeedbackTemplate] = {
     transactional() {
       val feedbackTemplates = if (!file.attached.isEmpty) {
-        for (attachment <- file.attached.asScala) yield {
+        for (attachment <- file.attached.asScala.toSeq) yield {
           val feedbackForm = new FeedbackTemplate
           feedbackForm.name = attachment.name
           feedbackForm.department = department

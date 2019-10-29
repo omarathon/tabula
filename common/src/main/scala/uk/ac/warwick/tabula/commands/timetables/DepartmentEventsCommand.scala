@@ -86,7 +86,7 @@ class DepartmentEventsCommandInternal(
     with DepartmentTimetableEventsState =>
 
   override def applyInternal(): (EventOccurrenceList, Seq[String]) = {
-    val errors: mutable.Buffer[String] = mutable.Buffer()
+    val errors: mutable.ListBuffer[String] = mutable.ListBuffer()
 
     val moduleEvents = getModuleEvents(
       academicYear,
@@ -131,7 +131,7 @@ class DepartmentEventsCommandInternal(
       else occurrences.filter { o => eventTypes.contains(o.eventType) }
 
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-    (filtered.map(_.sortBy(_.start)), errors)
+    (filtered.map(_.sortBy(_.start)), errors.toSeq)
   }
 
   private def eventsToOccurrences(events: EventList) = EventOccurrenceList(

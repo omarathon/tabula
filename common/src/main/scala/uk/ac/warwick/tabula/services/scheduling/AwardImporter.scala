@@ -66,7 +66,7 @@ class SitsAwardImporter extends AwardImporter {
   lazy val awardsQuery = new AwardsQuery(sits)
 
   def getImportCommands: Seq[ImportAwardCommand] = {
-    awardsQuery.execute.asScala
+    awardsQuery.execute.asScala.toSeq
   }
 }
 

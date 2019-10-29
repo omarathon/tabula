@@ -132,7 +132,7 @@ trait AddMarksCommandBindListener extends BindListener {
         result.popNestedPath()
 
         if (!file.attached.isEmpty) {
-          processFiles(file.attached.asScala)
+          processFiles(file.attached.asScala.toSeq)
         }
 
         def processFiles(files: Seq[FileAttachment]) {
@@ -173,7 +173,7 @@ trait FetchDisabilities {
   def fetchDisabilities: Map[String, Disability] = {
     assessment match {
       case assignment: Assignment =>
-        marks.asScala.map { markItem =>
+        marks.asScala.toSeq.map { markItem =>
           markItem.universityId -> {
             if (submissionService.getSubmissionByUsercode(assignment, markItem.user.getUserId).exists(_.useDisability)) {
               profileService.getMemberByUniversityId(markItem.universityId).flatMap {
@@ -184,7 +184,7 @@ trait FetchDisabilities {
               None
             }
           }
-        }.toMap.filterNot { case (_, option) => option.isEmpty }.mapValues(_.get)
+        }.toMap.filterNot { case (_, option) => option.isEmpty }.view.mapValues(_.get).toMap
       case _ => Map()
     }
   }

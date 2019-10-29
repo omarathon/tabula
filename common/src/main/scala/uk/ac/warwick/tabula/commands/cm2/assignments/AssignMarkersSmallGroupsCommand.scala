@@ -54,7 +54,7 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
   self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest =>
 
   def applyInternal(): Assignment = {
-    val command: Appliable[Assignment] with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala)
+    val command: Appliable[Assignment] with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala.toSeq)
 
     command.allowSameMarkerForSequentialStages = allowSameMarkerForSequentialStages
 
@@ -65,7 +65,7 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 trait AssignMarkersSmallGroupsValidation extends SelfValidating {
   self: AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest =>
   override def validate(errors: Errors): Unit = {
-    val command: SelfValidating with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala)
+    val command: SelfValidating with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala.toSeq)
 
     command.allowSameMarkerForSequentialStages = allowSameMarkerForSequentialStages
 
@@ -99,12 +99,12 @@ trait AssignMarkersSmallGroupsCommandPopulate extends PopulateOnForm {
     val setAllocations = sets.map(set => {
       def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = {
         val validMarkers: Seq[User] = (for {
-          group <- set.groups.asScala
+          group <- set.groups.asScala.toSeq
           event <- group.events
           user <- event.tutors.users if markers.contains(user)
         } yield user).distinct
 
-        val groupAllocations = set.groups.asScala.map(group => {
+        val groupAllocations = set.groups.asScala.toSeq.map(group => {
           val students = group.students.users.filter(validStudents.contains).toSeq.sortBy { u => (u.getLastName, u.getFirstName) }
           val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
           val otherMarkers = validMarkers.diff(markers)

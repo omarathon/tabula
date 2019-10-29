@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.FileHasherComponent
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
 import uk.ac.warwick.tabula.system.exceptions.UserError
@@ -21,6 +21,7 @@ import uk.ac.warwick.util.core.spring.FileUtils
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Using
 
 /**
   * An item in a Zip file. Can be a file or a folder.
@@ -109,7 +110,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
             writeItems(items, zip, progressCallback)
           }
         }.flatMap { _ =>
-          val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
+          val hash = Using.resource(new FileInputStream(file))(fileHasher.hash)
 
           // Upload the zip to the object store
           objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
@@ -164,7 +165,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
           case _: ZipFileItem =>
             // do nothing
             progressCallback(index, items.size)
-          case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
+          case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items.toSeq)
         }
       }
     }

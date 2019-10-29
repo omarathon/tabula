@@ -19,7 +19,7 @@ class TestingJobTest extends TestBase with Mockito {
 
     val job = new TestingJob()
     job.jobService = mock[JobService]
-    doAnswer(_ => Some(instance)).when(job.jobService).getInstance(anyString)
+    doAnswer { _: Any => Some(instance) }.when(job.jobService).getInstance(anyString)
 
     job.run(instance)
 

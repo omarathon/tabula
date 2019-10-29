@@ -26,6 +26,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.{WorkingDaysHelper, WorkingDaysHelperImpl}
 
 import scala.collection.JavaConverters._
+import scala.language.implicitConversions
 import scala.util.{Random => SRandom}
 
 object MitCircsDataGenerationCommand {

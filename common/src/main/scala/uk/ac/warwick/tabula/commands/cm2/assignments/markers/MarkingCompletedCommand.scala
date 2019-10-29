@@ -40,15 +40,17 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
     val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect { case f: AssignmentFeedback => f }
 
     val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
+      .view
       .filterKeys(_.order == stagePosition)
       .mapValues(_.filter(feedbackForRelease.contains))
+      .toMap
 
     newReleasedFeedback = feedbackForReleaseByStage.flatMap { case (stage, mf) =>
       val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
       cm2MarkingWorkflowService.progress(stage, f)
     }.toSeq.asJava
 
-    val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
+    val toPopulate = newReleasedFeedback.asScala.toSeq.filter(_.stage.populateWithPreviousFeedback)
     if (toPopulate.nonEmpty) {
       populateMarkerFeedback(assignment, toPopulate)
     }
@@ -117,22 +119,22 @@ trait WorkflowProgressState extends CanProxy with UserAware with HasAssignment {
   val stagePosition: Int
 
   // Pre-submit validation
-  def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasContent)
+  def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasContent)
 
-  def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasMark) -- noContent
+  def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasMark) diff noContent
 
-  def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasFeedback) -- noContent
+  def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasFeedback) diff noContent
 
-  def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
+  def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(mf => {
     mf.stage.order < mf.feedback.currentStageIndex
   })
 
-  def notReadyToMark: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
+  def notReadyToMark: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(mf => {
     mf.stage.order > mf.feedback.currentStageIndex
   })
 
   // do not update previously released feedback or feedback belonging to other markers
-  lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback -- notReadyToMark -- noContent
+  lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(_.marker == marker) diff releasedFeedback diff notReadyToMark diff noContent
 }
 
 trait WorkflowProgressNotificationCompletion extends CompletesNotifications[Unit] {

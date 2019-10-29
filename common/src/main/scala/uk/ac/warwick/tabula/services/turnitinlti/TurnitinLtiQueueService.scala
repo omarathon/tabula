@@ -88,7 +88,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
   }
 
   def createEmptyOriginalityReports(assignment: Assignment): Seq[OriginalityReport] = {
-    val reports = assignment.submissions.asScala.flatMap(_.allAttachments).filter(attachment =>
+    val reports = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(attachment =>
       attachment.originalityReport == null &&
         TurnitinLtiService.validFileType(attachment) &&
         TurnitinLtiService.validFileSize(attachment)

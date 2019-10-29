@@ -32,7 +32,7 @@ class ViewDepartmentAttendanceCommandInternal(val department: Department, val ac
   override def applyInternal(): Seq[Module] = {
     val modules =
       if (securityService.can(user, Permissions.SmallGroupEvents.ViewRegister, department)) {
-        department.modules.asScala
+        department.modules.asScala.toSeq
       } else {
         moduleAndDepartmentService.modulesWithPermission(user, Permissions.SmallGroupEvents.ViewRegister, department).toSeq
       }

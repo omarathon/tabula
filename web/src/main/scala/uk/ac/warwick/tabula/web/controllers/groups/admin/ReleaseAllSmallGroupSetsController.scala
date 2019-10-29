@@ -55,7 +55,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
         // if  no modules are selected, spring binds null, not an empty list :-(
         Nil
       } else {
-        checkedModules.asScala.flatMap(mod =>
+        checkedModules.asScala.toSeq.flatMap(mod =>
           mod.groupSets.asScala.filter(_.academicYear == academicYear)
         )
       }

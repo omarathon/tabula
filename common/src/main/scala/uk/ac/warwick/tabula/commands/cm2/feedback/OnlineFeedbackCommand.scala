@@ -100,16 +100,16 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 
     // save attachments
     if (feedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
-      val filesToReplicate = filesToKeep -- existingFiles
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
+      val filesToReplicate = filesToKeep diff existingFiles
       fileAttachmentService.deleteAttachments(filesToRemove)
       feedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
       val replicatedFiles = filesToReplicate.map(_.duplicate())
       replicatedFiles.foreach(feedback.addAttachment)
     }
-    feedback.addAttachments(file.attached.asScala)
+    feedback.addAttachments(file.attached.asScala.toSeq)
   }
 }
 
@@ -244,7 +244,7 @@ trait OnlineFeedbackDescription[A] extends Describable[A] {
   }
 
   override def describeResult(d: Description): Unit = {
-    d.fileAttachments(file.attached.asScala)
+    d.fileAttachments(file.attached.asScala.toSeq)
   }
 }
 

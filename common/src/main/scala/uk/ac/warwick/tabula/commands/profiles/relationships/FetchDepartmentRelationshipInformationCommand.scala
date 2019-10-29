@@ -268,7 +268,7 @@ trait FetchDepartmentRelationshipInformationCommandState {
   var dbAllocated: Seq[StudentAssociationEntityData] = Seq()
 
   def updateDbAllocated(): Unit = {
-    dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala).getOrElse(Seq()))
+    dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala.toSeq).getOrElse(Seq()))
   }
 }
 
@@ -302,7 +302,7 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
     LazyMaps.create { entityId: String => JArrayList(): JList[String] }.asJava
 
   private def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-    (department.routes.asScala ++ department.children.asScala.flatMap {
+    (department.routes.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       routesForDepartmentAndSubDepartments
     }).sorted
 

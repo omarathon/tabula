@@ -53,7 +53,7 @@ trait ScheduledMeetingRecordValidation extends AttachedFilesValidation {
       }
     }
 
-    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala.toSeq, Option(file.attached).getOrElse(JList()).asScala.toSeq)
 
   }
 }

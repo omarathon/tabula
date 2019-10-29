@@ -99,12 +99,12 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
   self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
   override def describe(d: Description): Unit =
-    d.studentRelationships(relationships.asScala)
+    d.studentRelationships(relationships.asScala.toSeq)
      .member(creator)
 
   override def describeResult(d: Description, meeting: MeetingRecord): Unit =
     d.meeting(meeting)
-     .fileAttachments(meeting.attachments.asScala)
+     .fileAttachments(meeting.attachments.asScala.toSeq)
 }
 
 trait ModifyMeetingRecordCommandState extends MeetingRecordCommandState {

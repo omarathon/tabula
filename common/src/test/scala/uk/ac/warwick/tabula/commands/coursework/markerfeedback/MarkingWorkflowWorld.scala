@@ -51,7 +51,7 @@ trait MarkingWorkflowWorld extends TestHelpers with Mockito {
   addFeedback(assignment)
 
   assignment.feedbackService = smartMock[FeedbackService]
-  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
   var markingWorkflow = new SeenSecondMarkingWorkflow()
   markingWorkflow.department = assignment.module.adminDepartment

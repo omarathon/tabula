@@ -158,7 +158,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
     MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
-      .map(r => r -> affectedAssessments.asScala.filter(_.boardRecommendations.contains(r)))
+      .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
       .toMap
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")

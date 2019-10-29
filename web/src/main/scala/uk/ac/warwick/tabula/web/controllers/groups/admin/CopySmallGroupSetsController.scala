@@ -75,7 +75,7 @@ class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsControlle
 
   @ModelAttribute("copySmallGroupSetsCommand")
   def command(@PathVariable department: Department): CopySmallGroupSetsCommand = {
-    val modules = mandatory(department).modules.asScala.filter(_.groupSets.asScala.exists { set => !set.deleted && !set.archived }).sortBy(_.code)
+    val modules = mandatory(department).modules.asScala.toSeq.filter(_.groupSets.asScala.exists { set => !set.deleted && !set.archived }).sortBy(_.code)
     CopySmallGroupSetsCommand(department, modules)
   }
 

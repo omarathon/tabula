@@ -31,18 +31,18 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
     command.moduleAndDepartmentService = moduleService
 
     moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work
-    membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args =>
-      val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
+    membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args: Array[AnyRef] =>
+      val uag = args(0).asInstanceOf[UpstreamAssessmentGroup]
       uag.id = "seenGroupId"
-      val registrations = args.asInstanceOf[Array[_]](1).asInstanceOf[Seq[Any]].map(_.asInstanceOf[UpstreamModuleRegistration])
+      val registrations = args(1).asInstanceOf[Seq[Any]].map(_.asInstanceOf[UpstreamModuleRegistration])
       uag.replaceMembers(registrations.map(_.universityId))
       uag
     }
 
     val registrations: Seq[UpstreamModuleRegistration]
 
-    importer.allMembers(any[UpstreamModuleRegistration => Unit]) answers {
-      _ match {
+    importer.allMembers(any[UpstreamModuleRegistration => Unit]) answers { arg: Any =>
+      arg match {
         case fn: (UpstreamModuleRegistration => Unit)@unchecked => registrations.foreach(fn)
       }
     }
@@ -148,9 +148,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
       val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
-      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
+      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg: Any =>
         val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
         members.append(member)
+        ()
       }
 
       command.doGroupMembers()
@@ -188,9 +189,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
       val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
-      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
+      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg: Any =>
         val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
         members.append(member)
+        ()
       }
 
       command.doGroupMembers()
@@ -240,7 +242,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
     assignment.addFeedback(feedback)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     command.modifiedAssignments = Set(assignment)
 

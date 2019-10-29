@@ -28,7 +28,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
   module.adminDepartment = department
 
   assignment.feedbackService = smartMock[FeedbackService]
-  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
   val mockUserLookup = new MockUserLookup
   mockUserLookup.registerUserObjects(

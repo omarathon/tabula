@@ -312,7 +312,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   /** Just gets components of type Assignment for modules in this department, not all components. */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
     // TAB-2676 Include modules in sub-departments optionally
-    def modules(d: Department): Seq[Module] = d.modules.asScala
+    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
 
     def modulesIncludingSubDepartments(d: Department): Seq[Module] =
       modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)

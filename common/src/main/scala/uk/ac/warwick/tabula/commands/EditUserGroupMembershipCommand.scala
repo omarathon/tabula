@@ -63,8 +63,8 @@ class EditUserGroupMembershipCommandInternal(val adapter: MemberQueryMembershipA
     }
 
     val membershipItems: Seq[UserGroupMembershipItem] = {
-      val excludedMemberItems = excludedStudentIds.asScala.map(toMembershipItem(_, Exclude))
-      val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
+      val excludedMemberItems = excludedStudentIds.asScala.toSeq.map(toMembershipItem(_, Exclude))
+      val includedMemberItems = includedStudentIds.asScala.toSeq.map(toMembershipItem(_, Include))
       (excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
     }
 

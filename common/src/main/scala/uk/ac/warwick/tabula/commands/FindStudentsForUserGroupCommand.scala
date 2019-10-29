@@ -105,7 +105,7 @@ class FindStudentsForUserGroupCommandInternal(val department: Department, val ac
 
       val startResult = studentsPerPage * (page - 1)
       val staticMembershipItemsToDisplay =
-        staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, Static))
+        staticStudentIds.asScala.toSeq.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, Static))
 
       val membershipItems: Seq[UserGroupMembershipItem] = {
         staticMembershipItemsToDisplay.map { item =>

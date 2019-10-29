@@ -64,7 +64,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
   }
 
   override def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]] = {
-    studentMarks = marks.mapValues(m => m.toString).asJava
+    studentMarks = marks.view.mapValues(m => m.toString).toMap.asJava
     applyInternal()
   }
 

@@ -68,13 +68,13 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
     }
 
     // Get all the users and memebrs up front so we only have to call the profile service once
-    val regularUserMap: Map[String, User] = sortedOccurrences.flatMap(o => o.event.group.students.users).groupBy(_.getWarwickId).mapValues(_.head)
+    val regularUserMap: Map[String, User] = sortedOccurrences.flatMap(o => o.event.group.students.users).groupBy(_.getWarwickId).view.mapValues(_.head).toMap
     val extraAttendanceUserMap: Map[String, User] = userLookup.getUsersByWarwickUniIds(sortedOccurrences.flatMap(_.attendance.asScala.map(_.universityId)).distinct)
     val userMap = regularUserMap ++ extraAttendanceUserMap
     val allMembers = transactional(readOnly = true) {
       profileService.getAllMembersWithUniversityIds(userMap.keys.toSeq)
     }
-    val memberOrUserMap: Map[String, MemberOrUser] = userMap.mapValues(u => MemberOrUser(allMembers.find(_.universityId == u.getWarwickId), u))
+    val memberOrUserMap: Map[String, MemberOrUser] = userMap.view.mapValues(u => MemberOrUser(allMembers.find(_.universityId == u.getWarwickId), u)).toMap
 
     def toOrdering(order: String): Ordering[String] = order match {
       case "desc" => Ordering.String.reverse
@@ -89,7 +89,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 
     val fileAttachments = sortedOccurrences.map(occurrence => {
 
-      val memberOrdering = studentSortFields.asScala match {
+      val memberOrdering = studentSortFields.asScala.toSeq match {
         case fields if fields.isEmpty =>
           Ordering.by[MemberOrUser, (String, String, String)](mou => (mou.lastName, mou.firstName, mou.universityId))
         case nonEmptySortFields =>
@@ -196,7 +196,7 @@ trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences wi
       }
     }
     val events: Seq[SmallGroupEvent] = transactional(readOnly = true) {
-      smallGroupSets.asScala.flatMap(_.groups.asScala.flatMap(_.events))
+      smallGroupSets.asScala.toSeq.flatMap(_.groups.asScala.flatMap(_.events))
     }
     // Get the occurrences that happen on the week of the start or end date, or a week in-between,
     // so we don't have to calculate the true date time of every event

@@ -62,7 +62,7 @@ abstract class ApiAddMarksCommandInternal(val assignment: Assignment, val submit
     }
 
     // persist valid marks
-    students.asScala.filter(_.isValid).flatMap(saveFeedback)
+    students.asScala.toSeq.filter(_.isValid).flatMap(saveFeedback)
   }
 }
 

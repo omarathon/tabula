@@ -118,7 +118,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
     session.save(assignment)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     /** Had to construct this stream and then  extract assignment,module,dept from there to set expectations. If we set expectation
       * on assignemnet,dept,module objects directly they are somehow still null (expectation don't work). SubmissionReceivedNotification works on stream

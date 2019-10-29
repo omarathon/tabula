@@ -29,7 +29,7 @@ trait JobInstance {
 
   def getStrings(name: String): Seq[String] = propsMap(name) match {
     case seq: Seq[String]@unchecked => seq
-    case jList => jList.asInstanceOf[JList[String]].asScala
+    case jList => jList.asInstanceOf[JList[String]].asScala.toSeq
   }
 
   def setStrings(name: String, value: Seq[String]): Unit = propsMap = propsMap + (name -> value.asJava)

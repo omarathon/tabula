@@ -86,7 +86,7 @@ class ExtractRelationshipsFromFileCommandInternal(val department: Department, va
       }
     }
     }.toSeq
-    additions.putAll(result.filter(r => !r.error.hasText).groupBy(_.agentId).mapValues(_.map(_.studentId).asJava).asJava)
+    additions.putAll(result.filter(r => !r.error.hasText).groupBy(_.agentId).view.mapValues(_.map(_.studentId).asJava).toMap.asJava)
     additionalEntities.addAll(additions.keySet().asScala.filterNot(id => dbAllocated.exists(_.entityId == id)).asJava)
     result
   }
@@ -136,7 +136,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
           row(ExtractRelationshipsFromFileCommand.EntityColumnHeader).hasText
       ).map(row =>
         (row(ExtractRelationshipsFromFileCommand.StudentColumnHeader), row(ExtractRelationshipsFromFileCommand.EntityColumnHeader))
-      ).groupBy(_._1).mapValues(_.map(_._2))
+      ).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
     }
   }
 }

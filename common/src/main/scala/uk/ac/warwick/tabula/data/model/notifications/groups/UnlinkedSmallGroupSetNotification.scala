@@ -22,7 +22,7 @@ class UnlinkedSmallGroupSetNotification extends NotificationWithTarget[SmallGrou
   @transient
   lazy val department: Department = target.entity
   @transient
-  lazy val sets: mutable.Buffer[SmallGroupSet] = items.asScala.map(_.entity)
+  lazy val sets: Seq[SmallGroupSet] = items.asScala.toSeq.map(_.entity)
   @transient
   lazy val academicYear: AcademicYear = sets.head.academicYear
 

@@ -116,7 +116,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
       populate.templatePoint = scheme1point1
       Seq(student1, student2).foreach(populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, _).returns(true))
       populate.populate()
-      val result: collection.Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
+      val result: Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.view.mapValues(_.asScala).toMap
       // Student1 doesn't have any attendance, but the checkpoint map should still be populated for each valid point
       result(student1)(scheme1point1) should be(null)
       result(student1)(scheme2point1) should be(null)
@@ -131,7 +131,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
       populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, student1).returns(true)
       populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, student2).returns(false)
       populate.populate()
-      val result: collection.Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
+      val result: Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.view.mapValues(_.asScala).toMap
 
       result(student1)(scheme1point1) should be(null)
 

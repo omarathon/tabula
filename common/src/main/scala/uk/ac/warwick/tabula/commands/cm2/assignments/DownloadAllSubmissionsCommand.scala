@@ -54,8 +54,8 @@ trait DownloadAllSubmissionsCommandDescription extends Describable[Result] {
 
   override def describe(d: Description): Unit = d
     .assignment(assignment)
-    .studentIds(assignment.submissions.asScala.flatMap(_.universityId))
-    .studentUsercodes(assignment.submissions.asScala.map(_.usercode))
+    .studentIds(assignment.submissions.asScala.toSeq.flatMap(_.universityId))
+    .studentUsercodes(assignment.submissions.asScala.toSeq.map(_.usercode))
     .properties(
       "submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 }

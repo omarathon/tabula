@@ -225,7 +225,7 @@ class SmallGroupSet
 
   // converts the assessmentGroups to UpstreamAssessmentGroupInfo
   def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("SmallGroupSet.upstreamAssessmentGroupInfos", id) {
-    membershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
+    membershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala.toSeq, academicYear)
   }
 
   // Gets a breakdown of the membership for this small group set.
@@ -293,9 +293,9 @@ class SmallGroupSet
     }
   }
 
-  def studentsNotInMembership: mutable.Buffer[User] = {
+  def studentsNotInMembership: Seq[User] = {
     Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembership).getOrElse {
-      val allocatedStudents = groups.asScala.flatMap(_.students.users)
+      val allocatedStudents = groups.asScala.toSeq.flatMap(_.students.users)
 
       allocatedStudents diff allStudents
     }

@@ -453,7 +453,7 @@ class StudentMember extends Member with StudentProperties {
         // sort by the index
         val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
         // remove the index once sorted - This map contains values like 1,2,3,M1 for someone who is currently on PG course but was previously on UG course
-        val groupedByLevelMap: Map[String, Seq[StudentCourseYearDetails]] = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
+        val groupedByLevelMap: Map[String, Seq[StudentCourseYearDetails]] = groupedByLevelWithIndex.view.mapValues(_.map { case (scyds, _) => scyds }).toMap
 
         //Generate all level year entries.
         (1 to relevantYears).map { yr =>

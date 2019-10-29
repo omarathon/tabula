@@ -72,7 +72,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
     if (relationship != null) {
       Seq(relationship)
     } else {
-      _relationships.asScala
+      _relationships.asScala.toSeq
     }
   }
 

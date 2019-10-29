@@ -53,8 +53,8 @@ class UserLookupTag extends TemplateDirectiveModel {
       val userIds = users.get
 
       val returnedUsers =
-        if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala)
-        else userLookup.getUsersByUserIds(userIds).asScala
+        if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala.toSeq)
+        else userLookup.getUsersByUserIds(userIds).asScala.toMap
 
       val missingUserIds =
         returnedUsers.values

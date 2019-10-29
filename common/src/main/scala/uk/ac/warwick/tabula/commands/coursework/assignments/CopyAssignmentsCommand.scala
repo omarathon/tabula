@@ -33,7 +33,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
   def applyInternal(): Seq[Assignment] = {
 
-    val scalaAssignments = assignments.asScala
+    val scalaAssignments = assignments.asScala.toSeq
 
     if (archive) {
       for (assignment <- scalaAssignments) {
@@ -87,7 +87,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
     newAssignment.addDefaultFields()
 
-    newAssignment.addFields(assignment.fields.asScala.sortBy(_.position).map(field => {
+    newAssignment.addFields(assignment.fields.asScala.toSeq.sortBy(_.position).map(field => {
       newAssignment.findField(field.name).foreach(newAssignment.removeField)
       field.duplicate(newAssignment)
     }): _*)

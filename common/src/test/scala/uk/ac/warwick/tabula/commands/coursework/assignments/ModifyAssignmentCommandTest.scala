@@ -37,20 +37,20 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
   }
 
   var userLookup: UserLookupService = smartMock[UserLookupService]
-  userLookup.getUsersByUserIds(any[JList[String]]) answers {
-    _ match {
+  userLookup.getUsersByUserIds(any[JList[String]]) answers { arg: Any =>
+    arg match {
       case ids: JList[String@unchecked] =>
-        val users = ids.asScala.map(id => (id, new User(id)))
+        val users = ids.asScala.toSeq.map(id => (id, new User(id)))
         JHashMap(users: _*)
     }
   }
 
-  userLookup.getUserByUserId(any[String]) answers { id =>
+  userLookup.getUserByUserId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getUserId == id
     } getOrElse new AnonymousUser
   }
-  userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+  userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getWarwickId == id
     } getOrElse new AnonymousUser

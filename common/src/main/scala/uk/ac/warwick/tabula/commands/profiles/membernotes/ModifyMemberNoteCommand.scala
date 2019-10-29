@@ -21,8 +21,8 @@ abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractM
     copyTo(abstractMemberNote)
 
     if (abstractMemberNote.attachments != null) {
-      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-      val filesToRemove: mutable.Buffer[FileAttachment] = abstractMemberNote.attachments.asScala -- filesToKeep
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
+      val filesToRemove: Seq[FileAttachment] = abstractMemberNote.attachments.asScala.toSeq diff filesToKeep
       abstractMemberNote.attachments = JArrayList[FileAttachment](filesToKeep)
       fileAttachmentService.deleteAttachments(filesToRemove)
     }

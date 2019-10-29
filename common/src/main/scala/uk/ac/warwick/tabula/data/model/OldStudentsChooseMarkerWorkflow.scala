@@ -41,7 +41,7 @@ class OldStudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarke
 
 
   def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = assignment.markerSelectField.map { markerField =>
-    val releasedSubmission = assignment.submissions.asScala.filter(s => assignment.isReleasedForMarking(s.usercode))
+    val releasedSubmission = assignment.submissions.asScala.toSeq.filter(s => assignment.isReleasedForMarking(s.usercode))
     releasedSubmission.filter(submission => {
       submission.getValue(markerField) match {
         case Some(subValue) => user.getUserId == subValue.value

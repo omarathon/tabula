@@ -84,7 +84,7 @@ class SmallGroup
   @BatchSize(size = 200)
   private val _events: JList[SmallGroupEvent] = JArrayList()
 
-  def events: mutable.Buffer[SmallGroupEvent] = _events.asScala.sorted
+  def events: Seq[SmallGroupEvent] = _events.asScala.toSeq.sorted
 
   private def events_=(e: Seq[SmallGroupEvent]) {
     _events.clear()

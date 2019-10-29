@@ -80,7 +80,7 @@ object ViewSmallGroupAttendanceCommand {
     }
   }
 
-  def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]): mutable.Buffer[((SmallGroupEvent, Week), Option[SmallGroupEventOccurrence])] =
+  def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]): Seq[((SmallGroupEvent, Week), Option[SmallGroupEventOccurrence])] =
     group.events.filter {
       !_.isUnscheduled
     }.flatMap { event =>
@@ -160,7 +160,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     val existingAttendanceNotes = benchmarkTask("Get attendance notes") {
       smallGroupService.findAttendanceNotes(allStudents.map(_.getWarwickId), occurrences).groupBy(_.student).map {
         case (student, notes) =>
-          MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
+          MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).view.mapValues(_.head).toMap
       }.withDefaultValue(Map())
     }
     val attendanceNotes = allStudents.map { student => student -> existingAttendanceNotes.getOrElse(student, Map()) }.toMap

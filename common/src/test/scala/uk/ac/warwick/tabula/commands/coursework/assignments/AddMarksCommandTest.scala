@@ -32,7 +32,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -67,7 +67,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -118,7 +118,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -168,7 +168,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
       validator.gradeGenerator.applyForMarks(Map("0672088" -> 100)) returns Map("0672088" -> Seq(GradeBoundary(null, "A", 0, 100, null)))

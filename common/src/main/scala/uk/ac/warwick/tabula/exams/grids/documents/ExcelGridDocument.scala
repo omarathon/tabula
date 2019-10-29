@@ -112,8 +112,8 @@ class ExcelGridDocument extends ExamGridDocument
         GenerateExamGridExporter(
           department = department,
           academicYear = academicYear,
-          courses = selectCourseCommand.courses.asScala,
-          routes = selectCourseCommand.routes.asScala,
+          courses = selectCourseCommand.courses.asScala.toSeq,
+          routes = selectCourseCommand.routes.asScala.toSeq,
           yearOfStudy = selectCourseCommand.yearOfStudy,
           normalLoadLookup = normalLoadLookup,
           entities = entities,
@@ -156,8 +156,8 @@ class ExcelGridDocument extends ExamGridDocument
           GenerateExamGridShortFormExporter(
             department = department,
             academicYear = academicYear,
-            courses = selectCourseCommand.courses.asScala,
-            routes = selectCourseCommand.routes.asScala,
+            courses = selectCourseCommand.courses.asScala.toSeq,
+            routes = selectCourseCommand.routes.asScala.toSeq,
             yearOfStudy = selectCourseCommand.yearOfStudy,
             normalLoadLookup = normalLoadLookup,
             entities = entities,

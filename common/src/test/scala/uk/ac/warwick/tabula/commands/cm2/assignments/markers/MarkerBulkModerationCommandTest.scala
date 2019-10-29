@@ -42,7 +42,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
 
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 
-    gradeGenerator.applyForMarks(any[Map[String, Int]]) answers (arg => {
+    gradeGenerator.applyForMarks(any[Map[String, Int]]) answers { arg: Any =>
       val marks = arg.asInstanceOf[Map[String, Int]]
       marks.map { case (id, mark) => (id, mark) match {
         case (i, _) if id == "3" => i -> Seq() // Mocks that ID 3 isn't linked to an assessment component in SITS with a mark scheme
@@ -53,7 +53,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
         case (_, m) if m >= 70 => id -> Seq(GradeBoundary(null, "1", 70, 100, "N"))
       }
       }
-    })
+    }
 
     val assignment: Assignment = newDeepAssignment()
     val workflow = SelectedModeratedWorkflow("test", assignment.module.adminDepartment, ModerationSampler.Marker, Seq(marker1, marker2), Seq(moderator))
@@ -107,18 +107,16 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
     trait MockCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
       val cm2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
 
-      cm2MarkingWorkflowService.getAllFeedbackForMarker(any[Assignment], any[User]) answers (a => {
-        val args = a.asInstanceOf[Array[AnyRef]]
+      cm2MarkingWorkflowService.getAllFeedbackForMarker(any[Assignment], any[User]) answers { args: Array[AnyRef] =>
         val user = args(1).asInstanceOf[User]
         SortedMap(markerFeedback.filter(_.marker == user).groupBy(_.stage).toSeq: _*)
-      })
+      }
 
-      cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], any[User]) answers (a => {
-        val args = a.asInstanceOf[Array[AnyRef]]
+      cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], any[User]) answers { args: Array[AnyRef] =>
         val user = args(1).asInstanceOf[User]
 
         markerFeedback.filter(_.marker == user).map(_.student)
-      })
+      }
 
     }
 

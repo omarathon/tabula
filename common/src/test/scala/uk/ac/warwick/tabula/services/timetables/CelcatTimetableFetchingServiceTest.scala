@@ -33,7 +33,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
     val cacheStrategy = CacheStrategy.CaffeineRequired
     val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
     val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-    moduleAndDepartmentService.getModuleByCode(Matchers.any[String]) answers { moduleCode =>
+    moduleAndDepartmentService.getModuleByCode(Matchers.any[String]) answers { moduleCode: Any =>
       Some(Fixtures.module(moduleCode.asInstanceOf[String]))
     }
 

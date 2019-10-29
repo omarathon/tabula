@@ -72,8 +72,8 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
     with ImportSmallGroupEventsFromExternalSystemRequestState {
   self: SmallGroupEventGenerator with UserLookupComponent with SmallGroupServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[SmallGroupEvent] = transactional() {
-    val events = eventsToImport.asScala
+  override def applyInternal(): Seq[SmallGroupEvent] = transactional() {
+    val events = eventsToImport.asScala.toSeq
       .map { e => (e.timetableEvent, Option(e.group)) }
       .filter { case (_, group) => group.nonEmpty }
       .map { case (e, group) =>

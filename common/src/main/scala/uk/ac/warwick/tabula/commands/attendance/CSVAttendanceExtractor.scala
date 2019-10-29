@@ -49,7 +49,7 @@ class CSVAttendanceExtractorInternal extends BindListener {
       val doc = new GoodCsvDocument[JList[String]](null, reader)
       doc.read(file.attached.get(0).asByteSource.asCharSource(StandardCharsets.UTF_8).openStream())
 
-      val rows: Seq[Map[String, String]] = reader.getData.asScala.map(_.asScala.toMap)
+      val rows: Seq[Map[String, String]] = reader.getData.asScala.toSeq.map(_.asScala.toMap)
       val goodRows = rows.filter { row =>
         if (row.keys.size != 2) {
           errors.reject("attendanceMonitoringCheckpoint.upload.wrongFields", Array(row.values.mkString(",")), "")

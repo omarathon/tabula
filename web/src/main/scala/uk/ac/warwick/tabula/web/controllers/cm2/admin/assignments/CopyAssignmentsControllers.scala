@@ -97,7 +97,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 
 trait AliveAssignmentsMap {
   def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] =
-    modules.map { module => module.code -> module.assignments.asScala.filter(_.isAlive) }
+    modules.map { module => module.code -> module.assignments.asScala.toSeq.filter(_.isAlive) }
       .toMap
       .filter { case (_, assignments) => assignments.nonEmpty }
 }

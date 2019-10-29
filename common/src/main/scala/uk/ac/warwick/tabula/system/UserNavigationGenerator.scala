@@ -97,7 +97,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     }
 
     def create(keys: JList[String]): JMap[String, UserNavigation] = {
-      JMap(keys.asScala.map(id => (id, create(id))): _*)
+      JMap(keys.asScala.toSeq.map(id => (id, create(id))): _*)
     }
 
     def isSupportsMultiLookups: Boolean = true

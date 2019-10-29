@@ -92,7 +92,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
   lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
     studentPointMap.values.flatten.toSeq.groupBy { point =>
       academicYear.termOrVacationForDate(point.startDate).periodType.toString
-    }.mapValues(_.distinct)
+    }.view.mapValues(_.distinct).toMap
   }
 
   lazy val availablePeriods: Seq[(String, Boolean)] = benchmarkTask("availablePeriods") {

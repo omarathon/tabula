@@ -127,8 +127,8 @@ trait AttendanceFilterExtras extends FiltersStudents {
   // TAB-6907 but only active ones
   override lazy val allRoutes: Seq[Route] = {
     if (department.routes.isEmpty) {
-      department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
-    } else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+      department.rootDepartment.routes.asScala.toSeq.sorted(Route.DegreeTypeOrdering)
+    } else department.routes.asScala.toSeq.sorted(Route.DegreeTypeOrdering)
   }.filter(_.active)
 
   override lazy val allOtherCriteria: Seq[String] = Seq(

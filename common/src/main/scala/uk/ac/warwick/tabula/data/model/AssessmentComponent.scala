@@ -118,7 +118,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
 
-  def linkedAssignments: Seq[Assignment] = links.asScala.collect { case l if l.assignment != null => l.assignment }
+  def linkedAssignments: Seq[Assignment] = links.asScala.toSeq.collect { case l if l.assignment != null => l.assignment }
 }
 
 object AssessmentComponent {

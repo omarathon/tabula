@@ -124,7 +124,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   @BatchSize(size = 1)
   var items: JList[EntityReference[A]] = JArrayList()
 
-  def entities: Seq[A] = items.asScala.map(_.entity)
+  def entities: Seq[A] = items.asScala.toSeq.map(_.entity)
 
   var created: DateTime = _
 

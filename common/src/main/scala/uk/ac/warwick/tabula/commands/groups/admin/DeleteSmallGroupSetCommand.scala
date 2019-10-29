@@ -46,7 +46,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
   override def describe(d: Description): Unit = d.smallGroupSet(set)
 
   override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
-    set.groups.asScala.flatMap(
+    set.groups.asScala.toSeq.flatMap(
       _.events.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
     )
 

@@ -56,7 +56,7 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
@@ -72,7 +72,7 @@ trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
   var confirm: Boolean = false
 
   def studentsWithoutKnownMarkers: Seq[String] = {
-    val neverAssigned = students.asScala -- feedbacks.filter(f => {
+    val neverAssigned = students.asScala.toSeq diff feedbacks.filter(f => {
       val stagesWithoutAllocation = assignment.cm2MarkingWorkflow.allStages.filter(_.hasMarkers).toSet -- f.allMarkerFeedback.map(_.stage)
       stagesWithoutAllocation.isEmpty
     }).map(_.usercode)

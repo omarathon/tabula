@@ -162,7 +162,7 @@ trait ManageNormalCATSLoadCommandState {
   }
 
   lazy val originalNormalLoads: Map[Route, Map[YearOfStudy, NormalCATSLoad]] = {
-    getNormalLoads(academicYear).mapValues(_.filter { case (_, loadOption) => loadOption.isDefined }.mapValues(_.get))
+    getNormalLoads(academicYear).view.mapValues(_.filter { case (_, loadOption) => loadOption.isDefined }.view.mapValues(_.get).toMap).toMap
       .filter { case (_, yearMap) => yearMap.nonEmpty }
   }
 }

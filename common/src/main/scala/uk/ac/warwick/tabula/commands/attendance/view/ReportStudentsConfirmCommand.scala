@@ -118,5 +118,5 @@ trait ReportStudentsConfirmCommandState extends ReportStudentsChoosePeriodComman
   var students: JList[StudentMember] = LazyLists.create()
   var filterString: String = _
   var confirm: Boolean = false
-  override lazy val allStudents: mutable.Buffer[StudentMember] = students.asScala
+  override lazy val allStudents: Seq[StudentMember] = students.asScala.toSeq
 }

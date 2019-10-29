@@ -142,15 +142,15 @@ trait MarkerFeedbackStateCopy {
 
     // save attachments
     if (markerFeedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
-      val filesToReplicate = filesToKeep -- existingFiles
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
+      val filesToReplicate = filesToKeep diff existingFiles
       fileAttachmentService.deleteAttachments(filesToRemove)
       markerFeedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
       val replicatedFiles = filesToReplicate.map(_.duplicate())
       replicatedFiles.foreach(markerFeedback.addAttachment)
     }
-    markerFeedback.addAttachments(file.attached.asScala)
+    markerFeedback.addAttachments(file.attached.asScala.toSeq)
   }
 }

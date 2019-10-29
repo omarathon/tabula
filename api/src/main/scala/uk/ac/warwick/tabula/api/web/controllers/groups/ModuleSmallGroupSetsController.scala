@@ -94,7 +94,7 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
       response.setStatus(HttpStatus.CREATED.value())
       response.addHeader("Location", toplevelUrl + Routes.api.groupSet(smallGroupSet))
 
-      val viewSet = new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.sorted), GroupsViewModel.Tutor)
+      val viewSet = new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor)
       Mav(new JSONView(Map(
         "success" -> true,
         "status" -> "ok",

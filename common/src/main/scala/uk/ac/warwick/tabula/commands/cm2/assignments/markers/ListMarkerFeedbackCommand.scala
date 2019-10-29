@@ -181,11 +181,11 @@ trait MarkerProgress extends TaskBenchmarking {
       else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
     }.withDefault(new AnonymousUser(_))
 
-    feedbackByStage.mapValues(mfs => mfs.flatMap(mf => {
+    feedbackByStage.view.mapValues(mfs => mfs.flatMap(mf => {
       workflowStudents.find(_.user == students(mf.feedback.usercode)).map(ws => {
         val markingStages = allMarkingStages.flatMap(ms => ws.stages.get(ms.toString))
         EnhancedMarkerFeedback(mf, MarkingWorkflowStudent(markingStages, ws))
       })
-    }))
+    })).to(SortedMap)
   }
 }

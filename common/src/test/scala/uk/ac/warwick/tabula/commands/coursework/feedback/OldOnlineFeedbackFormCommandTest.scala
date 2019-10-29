@@ -24,7 +24,7 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     assignment.fields.remove(assignment.feedbackFields.last)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val module = new Module
     module.adminDepartment = new Department

@@ -36,7 +36,7 @@ class OldFeedbackItem {
   var duplicateFileNames: Set[String] = Set()
   var ignoredFileNames: Set[String] = Set()
 
-  def listAttachments(): mutable.Buffer[AttachmentItem] = file.attached.asScala.map(f => {
+  def listAttachments(): Seq[AttachmentItem] = file.attached.asScala.toSeq.map(f => {
     val duplicate = duplicateFileNames.contains(f.name)
     val ignore = ignoredFileNames.contains(f.name)
     new AttachmentItem(f.name, duplicate, ignore)
@@ -254,7 +254,7 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
       }
     } else {
       if (batch && !file.attached.isEmpty) {
-        val bits = file.attached.asScala.map { (attachment) => attachment.name -> attachment }
+        val bits = file.attached.asScala.toSeq.map { (attachment) => attachment.name -> attachment }
         processFiles(bits)
       }
 

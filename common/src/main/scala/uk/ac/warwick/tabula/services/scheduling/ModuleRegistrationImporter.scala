@@ -61,7 +61,7 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
         moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
       })
     }
-    rowsBySCD.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
+    rowsBySCD.view.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }.toSeq
   }
 }
 

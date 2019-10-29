@@ -53,7 +53,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 
   @ModelAttribute
   def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
-    val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
+    val modules = department.modules.asScala.toSeq.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
     CopyAssignmentsCommand(department, modules)
   }
 
@@ -82,7 +82,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 trait UnarchivedAssignmentsMap {
 
   def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-    for (module <- modules) yield module.code -> module.assignments.asScala.filter(_.isAlive)
+    for (module <- modules) yield module.code -> module.assignments.asScala.toSeq.filter(_.isAlive)
     ).toMap.filterNot(_._2.isEmpty)
 
 }

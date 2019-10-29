@@ -70,7 +70,7 @@ class CachedPartialTimetableFetchingService(
     }
 
     def create(keys: JList[TimetableCacheKey]): JMap[TimetableCacheKey, EventList] = {
-      JMap(keys.asScala.map(id => (id, create(id))): _*)
+      JMap(keys.asScala.toSeq.map(id => (id, create(id))): _*)
     }
 
     def isSupportsMultiLookups: Boolean = true

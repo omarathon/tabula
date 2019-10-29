@@ -37,7 +37,7 @@ class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourse
   self: MeetingRecordServiceComponent with AbstractScheduledMeetingCommandInternal =>
 
   def applyInternal(): ScheduledMeetingRecord = {
-    val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala)
+    val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala.toSeq)
     applyCommon(scheduledMeeting)
     scheduledMeeting.creationDate = DateTime.now
     persistAttachments(scheduledMeeting)
@@ -88,8 +88,8 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
   override lazy val eventName = "CreateScheduledMeetingRecord"
 
   override def describe(d: Description): Unit =
-    d.studentRelationships(relationships.asScala)
-     .studentRelationshipTypes(relationships.asScala.map(_.relationshipType).distinct)
+    d.studentRelationships(relationships.asScala.toSeq)
+     .studentRelationshipTypes(relationships.asScala.toSeq.map(_.relationshipType).distinct)
      .member(creator)
 }
 

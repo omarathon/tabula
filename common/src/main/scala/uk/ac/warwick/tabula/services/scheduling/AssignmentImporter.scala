@@ -64,7 +64,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   }
 
   def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala
+    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
 
   private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
 
@@ -72,7 +72,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   // 20k. Shouldn't cause any memory problems, so no point complicating
   // it by trying to stream or batch the data.
   def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala
+    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
 
   /**
     * Iterates through ALL module registration elements in SITS (that's many),
@@ -120,7 +120,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     if (string == null) AssessmentComponent.NoneAssessmentGroup
     else string
 
-  def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala
+  def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
 }
 
 @Profile(Array("sandbox"))

@@ -212,7 +212,7 @@ trait AssessmentMarkerMap {
         assignment.firstMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty) ++
           assignment.secondMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty)
 
-      assignment.submissions.asScala.filter(s => studentIds.contains(s.usercode))
+      assignment.submissions.asScala.toSeq.filter(s => studentIds.contains(s.usercode))
     }
 
     val allSubmissionsForMarker = getSubmissionsFromMap(assignment, marker)

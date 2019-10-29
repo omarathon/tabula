@@ -58,7 +58,7 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
     assignment.feedbacks = JArrayList(feedback)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
   }
 
 }

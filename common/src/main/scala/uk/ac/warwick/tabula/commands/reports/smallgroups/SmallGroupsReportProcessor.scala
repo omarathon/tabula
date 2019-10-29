@@ -52,7 +52,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
   self: SmallGroupsReportProcessorState with ProfileServiceComponent =>
 
   override def applyInternal(): SmallGroupsReportProcessorResult = {
-    val processedStudents = students.asScala.map { properties =>
+    val processedStudents = students.asScala.toSeq.map { properties =>
       AttendanceMonitoringStudentData(
         firstName = properties.get("firstName"),
         lastName = properties.get("lastName"),
@@ -73,7 +73,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
     val thisWeek = AcademicYear.now().weekForDate(LocalDate.now())
     val thisDay = DateTime.now.getDayOfWeek
 
-    val processedEvents = events.asScala.map { properties =>
+    val processedEvents = events.asScala.toSeq.map { properties =>
       val eventWeek = academicYear.weeks(properties.get("week").toInt)
       val eventDay = properties.get("day").toInt
 

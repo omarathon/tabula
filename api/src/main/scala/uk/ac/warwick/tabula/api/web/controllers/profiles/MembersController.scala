@@ -33,7 +33,7 @@ class MembersController extends ApiController with AutowiringProfileServiceCompo
 
   @ModelAttribute("command")
   def command(@RequestParam(name = "department", required = false) departments: JList[Department]): Command =
-    MemberSearchCommand(Option(departments).map(_.asScala).getOrElse(Seq[Department]()))
+    MemberSearchCommand(Option(departments).map(_.asScala.toSeq).getOrElse(Seq[Department]()))
 
   @GetMapping(produces = Array("application/json"))
   def search(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {

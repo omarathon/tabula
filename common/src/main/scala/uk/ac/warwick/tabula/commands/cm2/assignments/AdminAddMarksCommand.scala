@@ -64,7 +64,7 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
     }
 
     // persist valid marks
-    marks.asScala.filter(_.isValid).flatMap(saveFeedback)
+    marks.asScala.toSeq.filter(_.isValid).flatMap(saveFeedback)
   }
 }
 
@@ -107,5 +107,5 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
 trait AdminAddMarksState extends AddMarksState with FeedbackServiceComponent {
   self: AssessmentMembershipServiceComponent =>
-  def updatedReleasedFeedback: Seq[Feedback] = marks.asScala.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
+  def updatedReleasedFeedback: Seq[Feedback] = marks.asScala.toSeq.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
 }

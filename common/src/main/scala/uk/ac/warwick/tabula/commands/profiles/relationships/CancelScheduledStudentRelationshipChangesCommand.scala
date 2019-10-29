@@ -38,7 +38,7 @@ class CancelScheduledStudentRelationshipChangesCommandInternal(val relationshipT
     with UpdateScheduledStudentRelationshipChangesCommandRequest =>
 
   override def applyInternal(): Seq[StudentRelationship] = {
-    relationships.asScala.map(relationship =>
+    relationships.asScala.toSeq.map(relationship =>
       if (relationship.startDate.isAfterNow) {
         if (!relationship.replacesRelationships.isEmpty) {
           previouslyReplacedRelationships.put(relationship, Set(relationship.replacesRelationships.asScala.toSeq: _*))
@@ -63,7 +63,7 @@ trait CancelScheduledStudentRelationshipChangesDescription extends Describable[S
 
   override def describe(d: Description): Unit =
     d.studentRelationshipType(relationshipType)
-     .studentRelationships(relationships.asScala)
+     .studentRelationships(relationships.asScala.toSeq)
 }
 
 trait CancelScheduledStudentRelationshipChangesCommandNotifications extends Notifies[Seq[StudentRelationship], StudentRelationship] {

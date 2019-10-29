@@ -66,7 +66,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isPendingApproval: Boolean = approvals.asScala.exists(_.pending)
 
-  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.pending)
+  def pendingApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.pending)
 
   def pendingApprovalBy(user: CurrentUser): Boolean =
     approvals.asScala.exists(approval =>
@@ -80,7 +80,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isRejected: Boolean = approvals.asScala.exists(_.rejected)
 
-  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.rejected)
+  def rejectedApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.rejected)
 
   def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 

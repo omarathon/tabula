@@ -49,7 +49,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
   override def applyInternal(): (Seq[ExamGridColumnOption], Seq[String]) = {
     department.examGridOptions = ExamGridOptions(
       predefinedColumnIdentifiers.asScala.toSet,
-      customColumnTitles.asScala,
+      customColumnTitles.asScala.toSeq,
       nameToShow,
       marksToShow,
       componentsToShow,
@@ -63,7 +63,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 
     saveDepartment()
 
-    (predefinedColumnOptions, customColumnTitles.asScala)
+    (predefinedColumnOptions, customColumnTitles.asScala.toSeq)
   }
 
 }

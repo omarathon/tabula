@@ -532,7 +532,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
     stubScheme.academicYear = academicYear
 
     val attendanceMonitoringPoints =
-      templateScheme.points.asScala.map { templatePoint =>
+      templateScheme.points.asScala.toSeq.map { templatePoint =>
         val point = templatePoint.toPoint
         templateScheme.pointStyle match {
           case AttendanceMonitoringPointStyle.Date =>

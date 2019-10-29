@@ -176,7 +176,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
           title = memberNote.title,
           note = memberNote.note,
           noteHTML = memberNote.escapedNote,
-          attachments = memberNote.attachments.asScala
+          attachments = memberNote.attachments.asScala.toSeq
         ))
       else Nil
 
@@ -243,7 +243,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
           meeting.title,
           meeting.format.description,
           meeting.escapedDescription,
-          meeting.attachments.asScala
+          meeting.attachments.asScala.toSeq
         ))
     }
 

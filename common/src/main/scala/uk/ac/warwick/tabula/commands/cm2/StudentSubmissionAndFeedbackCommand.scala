@@ -134,7 +134,7 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
   self: CurrentUserSubmissionAndFeedbackCommandState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    var perms = collection.mutable.MutableList[CheckablePermission]()
+    var perms = collection.mutable.ListBuffer[CheckablePermission]()
 
     submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
     feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }

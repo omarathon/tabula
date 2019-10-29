@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 object Exam {
   final val NotDeletedFilter = "notDeleted"
@@ -50,7 +49,7 @@ class Exam
   @BatchSize(size = 200)
   var feedbacks: JList[ExamFeedback] = JArrayList()
 
-  override def allFeedback: mutable.Buffer[ExamFeedback] = feedbacks.asScala
+  override def allFeedback: Seq[ExamFeedback] = feedbacks.asScala.toSeq
 
   @ManyToOne(fetch = LAZY)
   @JoinColumn(name = "workflow_id")
@@ -73,7 +72,7 @@ class Exam
   @BatchSize(size = 200)
   var fields: JList[ExamFormField] = JArrayList()
 
-  def feedbackFields: Seq[ExamFormField] = fields.asScala.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+  def feedbackFields: Seq[ExamFormField] = fields.asScala.toSeq.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
   def addField(field: ExamFormField) {
     if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")

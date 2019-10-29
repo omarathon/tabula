@@ -32,7 +32,7 @@ class ProfileExportReportCommandInternal(val department: Department, val academi
   self: JobServiceComponent with ProfileExportReportCommandState =>
 
   override def applyInternal(): JobInstance = {
-    jobService.add(Option(user), ProfileExportJob(students.asScala, academicYear))
+    jobService.add(Option(user), ProfileExportJob(students.asScala.toSeq, academicYear))
   }
 
 }
@@ -45,7 +45,7 @@ trait ProfileExportReportValidation extends SelfValidating {
     if (students.isEmpty) {
       errors.rejectValue("students", "reports.profiles.export.noStudents")
     } else {
-      val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala).groupBy(_.universityId).mapValues(_.head)
+      val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala.toSeq).groupBy(_.universityId).mapValues(_.head)
       val notMembers = students.asScala.filter(uniId => memberMap.get(uniId).isEmpty)
       if (notMembers.nonEmpty) {
         errors.rejectValue("students", "reports.profiles.export.notMembers", Array(notMembers.mkString(", ")), "")

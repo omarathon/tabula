@@ -153,6 +153,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
     entities.map(entity => {
       val subsets = entity.validYears
         .filter { case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty }
+        .view
         .mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
           entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
@@ -163,6 +164,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
           if (overcattedModuleSubsets.size > 1) year -> overcattedModuleSubsets
           else year -> Seq()
         }
+        .toMap
       entity -> subsets
     }).toMap
 

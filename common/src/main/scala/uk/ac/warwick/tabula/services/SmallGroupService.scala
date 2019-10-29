@@ -443,7 +443,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
   private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(SmallGroup, Seq[User])] = {
     val currentGroupsWithOccurrencesAndDateInfo = benchmarkTask("currentGroupsWithOccurrencesAndDateInfo") {
-      set.groups.asScala.map { group =>
+      set.groups.asScala.toSeq.map { group =>
         (group, groupOccurrencesWithStartEndDateTimeInfo(group))
       }
     }

@@ -47,7 +47,7 @@ class OldArchiveDepartmentAssignmentsController extends OldCourseworkController 
 
   @ModelAttribute
   def archiveAssignmentsCommand(@PathVariable department: Department): ArchiveAssignmentsCommand with ComposableCommand[Seq[Assignment]] with ArchiveAssignmentsPermissions with ArchiveAssignmentsDescription with AutowiringAssessmentServiceComponent = {
-    val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive))
+    val modules = department.modules.asScala.toSeq.filter(_.assignments.asScala.exists(_.isAlive))
     ArchiveAssignmentsCommand(department, modules)
   }
 

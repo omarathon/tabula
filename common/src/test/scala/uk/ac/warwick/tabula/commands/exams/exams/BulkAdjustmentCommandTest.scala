@@ -26,7 +26,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     val mockSpreadsheetHelper: SpreadsheetHelpers = smartMock[SpreadsheetHelpers]
     val thisAssessment = new Assignment
     thisAssessment.feedbackService = smartMock[FeedbackService]
-    thisAssessment.feedbackService.loadFeedbackForAssignment(thisAssessment) answers { _ => thisAssessment.feedbacks.asScala }
+    thisAssessment.feedbackService.loadFeedbackForAssignment(thisAssessment) answers { _: Any => thisAssessment.feedbacks.asScala.toSeq }
 
     val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234")
     thisAssessment.feedbacks.add(feedback)

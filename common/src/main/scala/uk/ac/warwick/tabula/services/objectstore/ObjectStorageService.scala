@@ -47,7 +47,7 @@ object ObjectStorageService {
       contentLength = blobMetadata.getSize.longValue,
       contentType = blobMetadata.getContentMetadata.getContentType,
       fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText,
-      userMetadata = blobMetadata.getUserMetadata.asScala.toMap.filterKeys(_ != "shahex")
+      userMetadata = blobMetadata.getUserMetadata.asScala.view.filterKeys(_ != "shahex").toMap
     )
   }
 

@@ -48,7 +48,7 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
     val errors = new BindException(this, "command")
     validate(errors)
 
-    students.asScala
+    students.asScala.toSeq
       .filter(usercode =>
         !errors.hasFieldErrors(s"marks[$usercode]") &&
           !errors.hasFieldErrors(s"grades[$usercode]") &&
@@ -224,7 +224,7 @@ trait BulkAdjustmentCommandState {
 
   def user: CurrentUser
 
-  lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).mapValues(_.head)
+  lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).view.mapValues(_.head).toMap
 
   // Bind variables
   var file: UploadedFile = new UploadedFile

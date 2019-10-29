@@ -27,13 +27,12 @@ abstract class ArchiveAssignmentsCommand(val department: Department, val modules
   self: AssessmentServiceComponent =>
 
   def applyInternal(): Seq[Assignment] = transactional() {
-    assignments.asScala.foreach { assignment =>
+    assignments.asScala.toSeq.map { assignment =>
       assignment.archive()
 
       assessmentService.save(assignment)
+      assignment
     }
-
-    assignments.asScala
   }
 
 }

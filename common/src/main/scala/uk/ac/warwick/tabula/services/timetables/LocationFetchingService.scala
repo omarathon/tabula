@@ -53,7 +53,7 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
     def create(name: String): CacheEntry = delegate.mapLocationsFor(name).asInstanceOf[CacheEntry]
 
     def create(names: JList[String]): JMap[String, CacheEntry] = {
-      JMap(names.asScala.map(name => (name, create(name))): _*)
+      JMap(names.asScala.toSeq.map(name => (name, create(name))): _*)
     }
 
     def isSupportsMultiLookups = true

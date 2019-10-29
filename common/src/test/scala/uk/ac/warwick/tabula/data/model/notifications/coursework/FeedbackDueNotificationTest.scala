@@ -175,7 +175,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val submission = Fixtures.submission("1234567", "1234567")
     submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
@@ -225,7 +225,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val managers = UserGroup.ofUsercodes
     userLookup.registerUsers("cuscav", "cusebr")
@@ -272,7 +272,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val submission1 = Fixtures.submission("0000001", "0000001")
     val submission2 = Fixtures.submission("0000002", "0000002")

@@ -73,8 +73,8 @@ trait ExamReleasedNotifier extends Notifies[Exam, Exam] {
 
   self: ReleaseExamForMarkingCommandState =>
 
-  def emit(result: Exam): mutable.Buffer[ExamReleasedForMarkingNotification] = {
-    val notifications = exam.firstMarkers.asScala
+  def emit(result: Exam): Seq[ExamReleasedForMarkingNotification] = {
+    val notifications = exam.firstMarkers.asScala.toSeq
       .filterNot(map => map.students.isEmpty || map.marker_id == null) // don't notify markers with no assigned students
       .map(map => {
       val notification = Notification.init(new ExamReleasedForMarkingNotification, user, exam)

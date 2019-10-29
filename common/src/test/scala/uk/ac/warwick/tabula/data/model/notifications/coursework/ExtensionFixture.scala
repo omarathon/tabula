@@ -72,15 +72,17 @@ trait ExtensionFixture extends Mockito {
   val extensionService: ExtensionService = smartMock[ExtensionService]
   assignment.extensionService = extensionService
 
-  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj =>
+  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     !assignment._extensions.isEmpty
   }
-  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj =>
+  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     assignment._extensions.asScala.filter(_.approved)
       .groupBy(_.usercode)
+      .view
       .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+      .toMap
   }
 
   assignment.name = "Essay"

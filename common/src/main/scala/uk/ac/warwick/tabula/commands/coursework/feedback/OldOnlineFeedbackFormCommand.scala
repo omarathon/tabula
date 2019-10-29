@@ -137,13 +137,13 @@ abstract class OldOnlineFeedbackFormCommand(
 
     // save attachments
     if (feedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
       fileAttachmentService.deleteAttachments(filesToRemove)
       feedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
     }
-    feedback.addAttachments(file.attached.asScala)
+    feedback.addAttachments(file.attached.asScala.toSeq)
   }
 
 }

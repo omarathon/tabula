@@ -126,7 +126,7 @@ object ListEnhancedAssignmentsCommand {
       with Unaudited with ReadOnly
 
   def sortedModuleAssignments(module: Module, academicYear: AcademicYear) = {
-    module.assignments.asScala.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }
+    module.assignments.asScala.toSeq.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }
   }
 
 }
@@ -307,7 +307,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
     }
 
     override def create(ids: JList[AssignmentId]): JMap[AssignmentId, Json] =
-      JMap(ids.asScala.map(id => (id, create(id))): _*)
+      JMap(ids.asScala.toSeq.map(id => (id, create(id))): _*)
 
     override def isSupportsMultiLookups: Boolean = true
 
@@ -424,7 +424,7 @@ trait ListAssignmentsModulesWithPermission {
 
   lazy val allModulesWithPermission: Seq[Module] =
     if (securityService.can(user, AdminPermission, department)) {
-      department.modules.asScala
+      department.modules.asScala.toSeq
     } else {
       modulesWithPermission.toList.sorted
     }

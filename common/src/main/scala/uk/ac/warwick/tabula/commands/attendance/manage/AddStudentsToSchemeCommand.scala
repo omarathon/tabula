@@ -70,10 +70,10 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
     // but this protects against hand-rolled POSTs
     val members = benchmark("profileService.getAllMembersWithUniversityIds") {
       profileService.getAllMembersWithUniversityIds(
-        ((staticStudentIds.asScala
-          diff excludedStudentIds.asScala)
-          diff includedStudentIds.asScala)
-          ++ includedStudentIds.asScala
+        ((staticStudentIds.asScala.toSeq
+          diff excludedStudentIds.asScala.toSeq)
+          diff includedStudentIds.asScala.toSeq)
+          ++ includedStudentIds.asScala.toSeq
       )
     }
     val noPermissionMembers = benchmark("noPermissionMembers") {
@@ -133,11 +133,11 @@ trait AddStudentsToSchemeCommandState {
 
   def membershipItems: Seq[SchemeMembershipItem] = {
     val staticMemberItems = attendanceMonitoringService.findSchemeMembershipItems(
-      (staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala,
+      (staticStudentIds.asScala.toSeq diff excludedStudentIds.asScala.toSeq) diff includedStudentIds.asScala.toSeq,
       SchemeMembershipStaticType,
       scheme.academicYear
     )
-    val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
+    val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala.toSeq, SchemeMembershipIncludeType, scheme.academicYear)
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }
