@@ -94,7 +94,7 @@
 
               var cellHeight = $contentCell.css('padding-bottom', 0).outerHeight();
               var contentHeight = $content.outerHeight();
-              $contentCell.css('padding-bottom', contentHeight + 10);
+              $contentCell.css('padding-bottom', cellHeight + contentHeight + 10);
 
               // Position the content div in the correct location
               $content.css({
