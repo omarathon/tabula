@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.services.turnitintca
 
+
 import org.apache.http.HttpStatus
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.util.EntityUtils
+import org.apache.http.client.entity.EntityBuilder
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -43,6 +45,7 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
+  def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
@@ -87,8 +90,8 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
             "name" -> assignment.name
           ),
           "group_context" -> Json.obj(
-            "id" -> module.id,
-            "name"-> module.name
+            "id" -> s"${module.id}-${assignment.academicYear}",
+            "name"-> s"${module.name}-${assignment.academicYear}"
           )
         )
       )
@@ -142,6 +145,38 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
         identity
       )
     }
+  }
+
+  override def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]] = Future {
+    require(fileAttachment.originalityReport.tcaSubmission == tcaSubmission.id)
+
+    val req = tcaRequest(RequestBuilder.put(s"${tcaConfiguration.baseUri}/submissions/${tcaSubmission.id}/original"))
+      .addHeader("Content-Type", s"binary/octet-stream")
+      .addHeader("Content-Disposition", "inline;filename=\"" + fileAttachment.name + "\"")
+      .setEntity(EntityBuilder.create().setStream(fileAttachment.asByteSource.openStream()).build())
+      .build()
+
+    val handler: ResponseHandler[Either[String, TcaSubmission]] = ApacheHttpClientUtils.handler {
+
+      case response if response.getStatusLine.getStatusCode == HttpStatus.SC_ACCEPTED =>
+        EntityUtils.consumeQuietly(response.getEntity)
+        logger.info(s"successfully uploaded file to TCA submission: ${tcaSubmission.id}")
+        Right(tcaSubmission)
+
+      case response =>
+        val message = s"Unexpected response when attempting to upload a file to TCA submission ${tcaSubmission.id}: $response"
+        logger.error(message)
+        Left(message)
+    }
+
+    Try(httpClient.execute(req, handler)).fold(
+      t => {
+        val message = s"Error when attempting to upload a file to TCA submission ${tcaSubmission.id}"
+        logger.error(message, t)
+        Left(message)
+      },
+      identity
+    )
   }
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {
@@ -254,9 +289,10 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
     // persist metadata
     originalityReport.foreach(or => {
-      or.matchPercentage = tcaSimilarityReport.overallMatch
+      or.overlap = tcaSimilarityReport.overallMatch
       or.similarityRequestedOn = new DateTime(tcaSimilarityReport.requested.toInstant.toEpochMilli)
       or.similarityLastGenerated = new DateTime(tcaSimilarityReport.generated.toInstant.toEpochMilli)
+      or.reportReceived = true
       originalityReportService.saveOrUpdate(or)
     })
 
@@ -270,7 +306,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
       "viewer_default_permission_set" -> "INSTRUCTOR"
     )
 
-    val req = tcaRequest(RequestBuilder.put(s"${tcaConfiguration.baseUri}/submissions/${originalityReport.tcaSubmission}/viewer-url"))
+    val req = tcaRequest(RequestBuilder.post(s"${tcaConfiguration.baseUri}/submissions/${originalityReport.tcaSubmission}/viewer-url"))
       .addHeader("Content-Type", s"application/json")
       .setEntity(new StringEntity(Json.stringify(requestBody), ContentType.APPLICATION_JSON))
       .build()
@@ -285,7 +321,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
       jsResult.recoverTotal(invalid => {
         val message = s"Error fetching report url - $invalid"
-        logger.error(message)
+        logger.error(s"$message\n$json")
         Left(message)
       })
 

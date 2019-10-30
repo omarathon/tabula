@@ -238,7 +238,7 @@
                   <#if submission??>
                     <#list submission.allAttachments as attachment>
                       <!-- Checking originality report for ${attachment.name} ... -->
-                      <#if attachment.originalityReportReceived>
+                      <#if attachment.turnitinResultReceived || attachment.turnitinCheckInProgress>
                         <@components.originalityReport attachment />
                       </#if>
                     </#list>

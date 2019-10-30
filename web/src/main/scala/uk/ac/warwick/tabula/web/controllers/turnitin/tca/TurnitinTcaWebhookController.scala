@@ -16,14 +16,14 @@ class TurnitinTcaWebhookController extends BaseController with Logging with Auto
 
   @RequestMapping(method = Array(POST), value = Array("/submission-complete"))
   def submissionComplete(@RequestBody json: TcaSubmission): Mav = {
-    logger.debug(s"turnitin TCA - SUBMISSION_COMPLETE callback\n$json")
+    logger.info(s"turnitin TCA - SUBMISSION_COMPLETE callback\n$json")
     turnitinTcaService.requestSimilarityReport(json)
     Mav.empty()
   }
 
   @RequestMapping(method = Array(POST), value = Array("/similarity"))
   def similarityComplete(@RequestBody json: TcaSimilarityReport): Mav = {
-    logger.debug(s"turnitin TCA - SIMILARITY_COMPLETE callback\n$json")
+    logger.info(s"turnitin TCA - SIMILARITY_COMPLETE callback\n$json")
     turnitinTcaService.saveSimilarityReportScores(json)
     Mav.empty()
   }

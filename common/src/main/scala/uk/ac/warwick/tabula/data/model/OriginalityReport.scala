@@ -36,8 +36,16 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   var lastTurnitinError: String = _
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-  var similarity: Option[Int] = None
+  def similarity: Option[Int] = {
+    overlap match {
+      case Some(o) if o > 74 => Some(4)
+      case Some(o) if o > 49 => Some(3)
+      case Some(o) if o > 24 => Some(2)
+      case Some(o) if o > 0 => Some(1)
+      case Some(o) if o == 0 => Some(0)
+      case _ => None
+    }
+  }
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var overlap: Option[Int] = None
@@ -103,7 +111,12 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   var similarityLastGenerated: DateTime = _
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-  var matchPercentage: Option[Int] = None
+  def isTcaReport: Boolean = Option(tcaSubmission).isDefined
+
+  def tcaUploadComplete: Boolean = tcaSubmissionStatus == TcaSubmissionStatus.Complete
+
+  def tcaSimilarityCheckComplete: Boolean = Option(similarityLastGenerated).isDefined
+
+  def hasTcaError: Boolean = tcaSubmissionStatus == TcaSubmissionStatus.Error
 
 }
