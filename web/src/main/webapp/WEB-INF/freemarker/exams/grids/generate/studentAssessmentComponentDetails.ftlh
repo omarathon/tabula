@@ -259,7 +259,7 @@
                     <#list submission.boardRecommendations as recommendation><#if !(recommendation.assessmentSpecific!false)>
                       <li>
                         <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
-                        (all assessments)
+                        (all assessments) <@fmt.help_popover id="${recommendation.entryName}-${submission.key}" content="${recommendation.helpText}" />
                       </li>
                     </#if></#list>
 
@@ -271,6 +271,7 @@
                             <#list assessment.boardRecommendations as recommendation>
                               <li>
                                 <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                                <@fmt.help_popover id="${recommendation.entryName}-${submission.key}" content="${recommendation.helpText}" />
                               </li>
                             </#list>
                           </ul>
