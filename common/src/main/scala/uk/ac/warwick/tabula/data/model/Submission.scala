@@ -100,9 +100,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
   def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq.flatMap(_.attachments.asScala)
 
-  def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.originalityReportReceived)
+  def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.turnitinResultReceived)
 
-  def hasOriginalityReport: JBoolean = allAttachments.exists(_.originalityReportReceived)
+  def hasOriginalityReport: JBoolean = allAttachments.exists(_.turnitinResultReceived)
 
   def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 

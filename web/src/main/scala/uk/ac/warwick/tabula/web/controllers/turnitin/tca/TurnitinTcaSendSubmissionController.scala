@@ -4,31 +4,26 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.views.JSONView
 
 @Profile(Array("turnitinTca"))
 @Controller
-@RequestMapping(Array("/turnitin/tca/submit/{attachment}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/turnitin/tca"))
 class TurnitinTcaSendSubmissionController extends CourseworkController with Logging {
 
   type TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand.CommandType
 
   @ModelAttribute("command")
-  def command(@PathVariable attachment:FileAttachment, user: CurrentUser): TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand(attachment, user.apparentUser)
+  def command(@PathVariable assignment:Assignment, user: CurrentUser): TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand(assignment, user.apparentUser)
 
   @RequestMapping(method = Array(POST))
-  def submissionComplete(@ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
-
-    val result = command.apply().fold(
-      error => Map("succeeded" -> false, "error" -> error),
-      s => Map("succeeded" -> false, "tcaSubmission" -> s.id)
-    )
-
-    Mav(new JSONView(result)).noLayout()
+  def submissionComplete(@PathVariable assignment:Assignment, @ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
+    command.apply()
+    Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
   }
 }

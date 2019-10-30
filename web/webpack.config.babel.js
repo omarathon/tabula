@@ -117,7 +117,7 @@ const commonConfig = merge([
     plugins: shimFontAwesomePro ? [
       // Shim FontAwesome Pro if necessary
       new CopyWebpackPlugin([{
-        from: 'src/main/assets/static/css/id7/fontawesome-pro-shim',
+        from: 'src/main/assets/static/css/id7/@fortawesome/fontawesome-pro/less',
         to: path.join(__dirname, 'node_modules/@fortawesome/fontawesome-pro/less'),
       }]),
     ] : [],

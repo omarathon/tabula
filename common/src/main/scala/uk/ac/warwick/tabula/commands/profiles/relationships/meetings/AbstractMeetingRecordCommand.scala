@@ -126,7 +126,7 @@ trait MeetingRecordCommandBindListener extends BindListener {
   }
 }
 
-trait MeetingRecordValidation extends SelfValidating {
+trait MeetingRecordValidation extends SelfValidating with AttachedFilesValidation {
 
   self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
 
@@ -182,6 +182,16 @@ trait MeetingRecordValidation extends SelfValidating {
         case (Success(start), Success(end)) if end.isBefore(start) || start.isEqual(end) => errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
         case _ => // no validation errors
       }
+    }
+
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
+  }
+}
+
+trait AttachedFilesValidation {
+  def attachedFilesValidation(errors: Errors, existingAttachments: Seq[FileAttachment], newAttachments: Seq[FileAttachment]): Unit = {
+    for (attached <- newAttachments; existing <- existingAttachments if attached.name == existing.name) {
+      errors.rejectValue("attachedFiles", "meetingRecord.files.duplicateName")
     }
   }
 }

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendance, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -466,6 +466,10 @@ abstract class Description {
     property("smallGroupEventOccurrence" -> smallGroupEventOccurrence.id)
     if (smallGroupEventOccurrence.event != null) smallGroupEvent(smallGroupEventOccurrence.event)
     this
+  }
+
+  def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
+    property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
   }
 
   def markingWorkflow(scheme: MarkingWorkflow): Description = {
