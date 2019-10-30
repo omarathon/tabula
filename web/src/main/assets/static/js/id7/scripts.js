@@ -1649,7 +1649,8 @@ $(() => {
         statusCodeStr = `status code: ${jqXhr.status}`;
       }
       const thrownErrorStr = thrownError ? `thrown error: ${thrownError}` : 'thrown error: unknown';
-      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} ${settings.url}. Error token: ${pageErrorToken || 'NA'}, ${statusCodeStr}, ${thrownErrorStr}`);
+      const bodyStr = jqXhr.responseText ? `response body: ${jqXhr.responseText}` : 'response body: unavailable';
+      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} ${settings.url}. Error token: ${pageErrorToken || 'NA'}, ${statusCodeStr}, ${thrownErrorStr}, ${bodyStr}.`);
     }
   });
 });
