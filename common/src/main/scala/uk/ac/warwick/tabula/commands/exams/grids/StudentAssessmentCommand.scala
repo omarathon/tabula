@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, UpstreamRouteRuleServiceComponent}
+import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 object StudentAssessmentCommand {
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
@@ -17,10 +19,15 @@ object StudentAssessmentCommand {
       with AutowiringCourseAndRouteServiceComponent
       with AutowiringNormalCATSLoadServiceComponent
       with AutowiringUpstreamRouteRuleServiceComponent
+      with AutowiringMitCircsSubmissionServiceComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
-      with ReadOnly with Unaudited
+      with ReadOnly with Unaudited {
+
+      override def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] =
+        Some(mitCircsSubmissionService.submissionsWithOutcomes(studentCourseDetails.student))
+    }
 }
 
 object StudentAssessmentProfileCommand {
@@ -42,7 +49,8 @@ case class StudentMarksBreakdown(
   yearMark: Option[BigDecimal],
   weightedMeanYearMark: Option[BigDecimal],
   yearWeighting: Option[CourseYearWeighting],
-  modules: Seq[ModuleRegistrationAndComponents]
+  modules: Seq[ModuleRegistrationAndComponents],
+  mitigatingCircumstances: Option[Seq[MitigatingCircumstancesSubmission]]
 )
 
 case class ModuleRegistrationAndComponents(
@@ -60,6 +68,8 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     with CourseAndRouteServiceComponent
     with NormalCATSLoadServiceComponent
     with UpstreamRouteRuleServiceComponent =>
+
+  def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] = None
 
   override def applyInternal(): StudentMarksBreakdown = {
     val modules = studentCourseYearDetails.moduleRegistrations.map { mr =>
@@ -110,7 +120,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentCourseYearDetails.yearOfStudy
     )
 
-    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules)
+    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions)
   }
 }
 
