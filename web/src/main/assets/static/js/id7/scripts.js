@@ -1610,7 +1610,7 @@ $(() => {
 
 // TAB-7304 handle ajax error globally
 $(() => {
-  $(document).ajaxError((event, jqXhr, settings) => {
+  $(document).ajaxError((event, jqXhr, settings, thrownError) => {
     // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
     // we do not want to do anything if state is 0. e.g. user quickly navigated away.
     if (jqXhr.readyState === 0) return;
@@ -1633,9 +1633,8 @@ $(() => {
       const errorModal = $('#global-error-modal-csrf');
       if (errorModal) errorModal.modal('show');
 
-      // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
-      // have reached backend (and logged)
-      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error: ${jqXhr.getResponseHeader('X-Error')}`);
+      // this will already have been logged server-side
+      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} ${settings.url}. error: ${jqXhr.getResponseHeader('X-Error')}`);
     } else {
       const pageErrorToken = $('body').data('error-token');
       if (pageErrorToken) {
@@ -1645,7 +1644,13 @@ $(() => {
 
       // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
       // have reached backend (and logged)
-      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
+      let statusCodeStr = 'status code: unavailable';
+      if ('status' in jqXhr) {
+        statusCodeStr = `status code: ${jqXhr.status}`;
+      }
+      const thrownErrorStr = thrownError ? `thrown error: ${thrownError}` : 'thrown error: unknown';
+      const bodyStr = jqXhr.responseText ? `response body: ${jqXhr.responseText}` : 'response body: unavailable';
+      throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} ${settings.url}. Error token: ${pageErrorToken || 'NA'}, ${statusCodeStr}, ${thrownErrorStr}, ${bodyStr}.`);
     }
   });
 });

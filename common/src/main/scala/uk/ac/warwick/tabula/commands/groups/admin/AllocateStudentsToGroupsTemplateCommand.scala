@@ -54,14 +54,17 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
       row.createCell(0).setCellValue(user.getWarwickId)
       row.createCell(1).setCellValue(user.getFullName)
       val groupNameCell = createUnprotectedCell(workbook, row, 2, isText = true) // unprotect cell for the dropdown group name
+      val groupIdCell = row.createCell(3)
+      groupIdCell.setCellFormula(
+        "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
+      )
+      groupIdCell.setCellValue(" ")
+
       // If this user is already in a group, prefill
       groups.find(_.students.includesUser(user)).foreach { group =>
         groupNameCell.setCellValue(group.name)
+        groupIdCell.setCellValue(group.id)
       }
-      row.createCell(3).setCellFormula(
-        "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
-      )
-      workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
     }
     formatWorkbook(workbook)
     workbook

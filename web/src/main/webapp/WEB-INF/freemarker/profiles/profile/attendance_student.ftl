@@ -35,7 +35,7 @@
     <#else>
       <div class="monitoring-points-profile striped-section collapsible expanded">
         <h3 class="section-title">
-          <a href="#" class="collapse-trigger">Monitoring points</a>
+          <a class="collapse-trigger icon-container" href="#">Monitoring points</a>
         </h3>
         <#if can.do("MonitoringPoints.Record", student)>
             <#assign returnTo><@routes.profiles.profile_attendance studentCourseDetails academicYear /></#assign>
