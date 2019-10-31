@@ -49,7 +49,7 @@ extends CommandInternal[Result] {
 trait TurnitinTcaSendSubmissionState {
   def assignment: Assignment
   def user: User
-  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.flatMap(_.allAttachments).filter(_.originalityReport == null)
+  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(_.originalityReport == null)
 }
 
 trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {

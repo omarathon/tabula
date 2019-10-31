@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.scalatest.Assertions
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
@@ -168,7 +168,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.moduleRegistrationService.findCoreRequiredModules(null, academicYear, 2) returns Seq()
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(30))
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(120)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(120)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(30.0), Seq())
       )
 
@@ -190,7 +190,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.moduleRegistrationService.findCoreRequiredModules(null, academicYear, 2) returns Seq(new CoreRequiredModule(null, null, 2, module1))
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(90))
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(120)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(120)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq())
       )
 
@@ -212,7 +212,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.moduleRegistrationService.findCoreRequiredModules(null, academicYear, 2) returns Seq(new CoreRequiredModule(null, null, 2, module1))
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(90))
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(120)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(120)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq())
       )
 
@@ -307,7 +307,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(90.0))
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
       student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
-      service.courseAndRouteService.getCourseYearWeighting(Matchers.eq(course.code), Matchers.eq(student.mostSignificantCourse.sprStartAcademicYear), any[Int]) returns None
+      service.courseAndRouteService.getCourseYearWeighting(ArgumentMatchers.eq(course.code), ArgumentMatchers.eq(student.mostSignificantCourse.sprStartAcademicYear), any[Int]) returns None
 
       val mr1: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
@@ -333,7 +333,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 
     // Not overcat
     new TestFixture {
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2))
       )
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
@@ -343,7 +343,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 
     // Overcat, single subset
     new TestFixture {
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2))
       ) // One subset
 
@@ -364,7 +364,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = BigDecimal(50)
       )
       student.mostSignificantCourse.addModuleRegistration(mr3)
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
       ) // Two subsets
@@ -384,7 +384,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = BigDecimal(50)
       )
       student.mostSignificantCourse.addModuleRegistration(mr3)
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
       ) // Two subsets
@@ -403,7 +403,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(90.0))
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
       student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq())
       )
 
@@ -420,7 +420,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(90.0))
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
       student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
-      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180)), Matchers.eq(Seq())) returns Seq(
+      service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq())
       )
       val year1Weighting: CourseYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(20), student.mostSignificantCourse.sprStartAcademicYear, 1)

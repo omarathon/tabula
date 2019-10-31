@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
 import javax.sql.DataSource
-
 import org.hibernate.{Session, SessionFactory}
-import uk.ac.warwick.tabula.services.{RelationshipService, UserLookupService, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
-import uk.ac.warwick.tabula.{FunctionalContextTesting, FunctionalContext, TestBase, Mockito, Fixtures}
-import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{ExtensionManagerRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import org.hamcrest.Matchers._
-import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, RelationshipService, UserLookupService}
+import uk.ac.warwick.tabula._
 
 class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting with Mockito {
 
@@ -294,7 +293,7 @@ object EditDepartmentCommandTest {
 
     bean() {
       val permissionsService = mock[PermissionsService]
-      permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
+      permissionsService.ensureUserGroupFor(any[PermissionsTarget], any[RoleDefinition]) returns UserGroup.ofUsercodes
       permissionsService
     }
 

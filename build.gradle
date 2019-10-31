@@ -154,11 +154,8 @@ subprojects {
     /* ******* */
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.jmock:jmock-junit4:2.5.1'
-    testCompile 'jmock:jmock-cglib:1.2.0'
     testCompile "org.specs2:specs2-mock_${scalaMajorVersion}:4.8.0"
     testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.8"
-    testCompile 'org.mockito:mockito-all:1.10.19'
   }
 
   tasks.withType(ScalaCompile) {

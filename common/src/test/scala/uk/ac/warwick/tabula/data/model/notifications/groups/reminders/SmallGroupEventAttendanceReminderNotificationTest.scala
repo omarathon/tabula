@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups.reminders
 
 import javax.sql.DataSource
-
-import org.hamcrest.Matchers._
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventOccurrence, SmallGroupFormat, WeekRange}
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationTest._
 import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.AnonymousUser
 
 class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with FunctionalContextTesting with FreemarkerTestHelpers with FreemarkerRendering {
@@ -86,7 +86,7 @@ object SmallGroupEventAttendanceReminderNotificationTest {
     }
     bean() {
       val permissionsService = mock[PermissionsService]
-      permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
+      permissionsService.ensureUserGroupFor(any[PermissionsTarget], any[RoleDefinition]) returns UserGroup.ofUsercodes
       permissionsService
     }
     bean() {

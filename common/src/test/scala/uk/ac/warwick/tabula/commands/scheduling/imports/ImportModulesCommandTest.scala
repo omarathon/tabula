@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling.{ModuleImporter, ModuleImporterComponent, ModuleInfo}
 
-import scala.reflect._
-
-class ImportModulesCommandTest extends TestBase with MockitoSugar {
+class ImportModulesCommandTest extends TestBase with Mockito {
 
   trait Environment {
     // Test data
@@ -60,10 +57,6 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
       verify(mockModuleService, times(2)).saveOrUpdate(isA[Module])
       existingModule.name should be("Science for Computers")
     }
-  }
-
-  private def isA[A: ClassTag] = {
-    org.mockito.Matchers.isA[A](classTag[A].runtimeClass.asInstanceOf[Class[A]])
   }
 
 }
