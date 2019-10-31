@@ -11,6 +11,7 @@ import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact;
 import com.atlassian.bamboo.specs.api.builders.plan.configuration.ConcurrentBuilds;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
+import com.atlassian.bamboo.specs.api.builders.trigger.Trigger;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
 import com.atlassian.bamboo.specs.builders.task.*;
 import com.atlassian.bamboo.specs.builders.trigger.AfterSuccessfulBuildPlanTrigger;
@@ -199,11 +200,14 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
         .autoTomcatEnvironment("Development", "tabula-dev.warwick.ac.uk", "tabula", "dev", SLACK_CHANNEL)
         .tomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", env -> {
           String branch = System.getenv("TEST_DEPLOY_BRANCH");
+          final Trigger trigger;
           if (branch == null || branch.length() == 0) {
-            branch = "develop";
+            trigger = new AfterSuccessfulBuildPlanTrigger().triggerByMasterBranch();
+          } else {
+            trigger = new AfterSuccessfulBuildPlanTrigger().triggerByBranch(branch);
           }
 
-          env.triggers(new AfterSuccessfulBuildPlanTrigger().triggerByBranch(branch))
+          env.triggers(trigger)
               .notifications(
                 new Notification()
                   .type(new DeploymentFailedNotification())
