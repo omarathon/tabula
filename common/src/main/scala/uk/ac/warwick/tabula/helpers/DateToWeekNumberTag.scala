@@ -1,20 +1,16 @@
 package uk.ac.warwick.tabula.helpers
 
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.{TemplateMethodModelEx, TemplateModel}
 import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.AutowiringUserSettingsServiceComponent
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 import uk.ac.warwick.tabula.{AcademicYear, RequestInfo}
 
-import scala.collection.JavaConverters._
-
-class DateToWeekNumberTag extends TemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
+class DateToWeekNumberTag extends BaseTemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
 
   import WeekRangesFormatter.format
 
-  override def exec(list: JList[_]): String = {
+  override def execMethod(args: Seq[_]): String = {
     val user = RequestInfo.fromThread.get.user
 
     def formatDate(date: LocalDate): String = {
@@ -29,7 +25,6 @@ class DateToWeekNumberTag extends TemplateMethodModelEx with KnowsUserNumberingS
       }
     }
 
-    val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
     args match {
       case Seq(dt: DateTime) => formatDate(dt.toLocalDate)
       case Seq(date: LocalDate) => formatDate(date)

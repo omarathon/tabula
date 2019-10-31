@@ -1,26 +1,17 @@
 package uk.ac.warwick.tabula.web.views
 
-import scala.collection.JavaConverters._
-
-
 import org.springframework.beans.factory.annotation.Autowired
-
-import freemarker.template.TemplateMethodModelEx
-import freemarker.template.TemplateModel
-import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.services.UserSettingsService
 
 /**
   * Freemarker directive to retrieve a user setting
   */
-class UserSettingFunction extends TemplateMethodModelEx {
+class UserSettingFunction extends BaseTemplateMethodModelEx {
 
   @Autowired var userSettings: UserSettingsService = _
 
-  override def exec(args: java.util.List[_]): Object = {
-    val arguments = args.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-
+  override def execMethod(arguments: Seq[_]): Object = {
     val setting = arguments.toList match {
       case (setting: String) :: Nil => setting
       case _ => throw new IllegalArgumentException("Bad args: " + arguments)

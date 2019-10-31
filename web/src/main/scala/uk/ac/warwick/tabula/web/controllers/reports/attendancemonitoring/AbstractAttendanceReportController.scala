@@ -93,7 +93,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
           "name" -> point.name,
           "startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
           "endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
-          "intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))),
+          "intervalString" -> intervalFormatter.execMethod(Seq(point.startDate, point.endDate)),
           "late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
         )
       )
