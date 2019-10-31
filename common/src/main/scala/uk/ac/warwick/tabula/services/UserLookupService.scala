@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.UserLookupService._
+import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, _}
 import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{User, _}
 import uk.ac.warwick.util.cache._
@@ -92,6 +92,15 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
 
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
     ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
+
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] = {
+    warwickUniIds.asScala.map { uniId =>
+      profileService.getMemberByUniversityId(uniId) match {
+        case Some(member) => (uniId, sandboxUser(member))
+        case _ => (uniId, super.getUserByWarwickUniId(uniId))
+      }
+    }.toMap.asJava
+  }
 
   override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByUserId", id) {
     profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
