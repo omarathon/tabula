@@ -8,9 +8,20 @@ import uk.ac.warwick.tabula.commands.profiles.{ViewProfilePhotoCommand, ViewStud
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.web.Mav
 
+
+abstract class PhotoController extends ProfilesController {
+
+	import org.springframework.web.bind.annotation.ModelAttribute
+	import javax.servlet.http.HttpServletResponse
+
+	@ModelAttribute def setCacheControlHeaders(response: HttpServletResponse): Unit = {
+		response.setHeader("Cache-control", "private, max-age=7200")
+	}
+}
+
 @Controller
 @RequestMapping(value = Array("/profiles/view/photo/{member}.jpg"))
-class PhotoController extends ProfilesController {
+class ProfilePhotoController extends PhotoController {
 
   @ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable member: Member) =
     ViewProfilePhotoCommand(member)
@@ -24,7 +35,7 @@ class PhotoController extends ProfilesController {
 
 @Controller
 @RequestMapping(value = Array("/profiles/view/photo/{member}/{relationshipType}/{agent}.jpg"))
-class StudentRelationshipPhotoController extends ProfilesController {
+class StudentRelationshipPhotoController extends PhotoController {
 
   @ModelAttribute("viewStudentRelationshipPhotoCommand")
   def command(
