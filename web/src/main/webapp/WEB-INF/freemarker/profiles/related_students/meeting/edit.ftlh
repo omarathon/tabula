@@ -175,7 +175,7 @@
 
     <#if !isStudent>
       <div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
-        Submitting this record will mark a monitoring point as attended
+        Submitting this record will mark a monitoring point as <#if missed>missed<#else>attended</#if>
       </div>
       <script nonce="${nonce()}">
         jQuery(function ($) {
