@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -79,6 +79,10 @@ class ListAssignmentsForModuleController extends ModuleAssignmentsController {
   }
 }
 
+/**
+ * TODO This all needs rewriting to use CM2 controllers, it won't actually work at the moment because we
+ * don't let you create CM1 assignments after 2016/17
+ */
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments"))
 class CreateAssignmentController extends ModuleAssignmentsController {
@@ -124,8 +128,8 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
   with BooleanAssignmentProperties {
 
   @BeanProperty var name: String = null
-  @BeanProperty var openDate: DateTime = null
-  @BeanProperty var closeDate: DateTime = null
+  @BeanProperty var openDate: LocalDate = null
+  @BeanProperty var closeDate: LocalDate = null
   @BeanProperty var academicYear: AcademicYear = null
   @BeanProperty var feedbackTemplate: FeedbackTemplate = null
   @BeanProperty var markingWorkflow: CM2MarkingWorkflow = null
@@ -140,13 +144,13 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 
   override def copyTo(state: A, errors: Errors) {
     if (Option(openDate).isEmpty && Option(closeDate).nonEmpty) {
-      if (openEnded) openDate = DateTime.now
+      if (openEnded) openDate = LocalDate.now
       else openDate = closeDate.minusWeeks(2)
     }
 
     Option(name).foreach(state.name = _)
-    Option(openDate).foreach(state.openDate = _)
-    Option(closeDate).foreach(state.closeDate = _)
+    Option(openDate).foreach { d => state.openDate = d.toDateTime(Assignment.openTime) }
+    Option(closeDate).foreach { d => state.closeDate = d.toDateTime(Assignment.closeTime) }
     Option(academicYear).foreach(state.academicYear = _)
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
     Option(markingWorkflow).foreach(state.markingWorkflow = _)

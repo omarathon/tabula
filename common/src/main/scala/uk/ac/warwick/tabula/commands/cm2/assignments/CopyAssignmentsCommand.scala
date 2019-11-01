@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.Duration
+import org.joda.time.{DateTimeConstants, Duration, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -9,9 +9,12 @@ import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CopyMarkingWorkflowCo
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.collection.JavaConverters._
 
@@ -56,6 +59,8 @@ abstract class AbstractCopyAssignmentsCommandInternal
     }
   }
 
+  private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+
   def copy(assignment: Assignment): Assignment = {
     val newAssignment = new Assignment()
     newAssignment.assignmentService = assignment.assignmentService // FIXME Used in testing
@@ -63,8 +68,21 @@ abstract class AbstractCopyAssignmentsCommandInternal
 
     // best guess of new open and close dates. likely to be wrong by up to a few weeks but better than out by years
     val yearOffest = academicYear.startYear - assignment.academicYear.startYear
-    newAssignment.openDate = assignment.openDate.plusYears(yearOffest).withDayOfWeek(assignment.openDate.getDayOfWeek)
-    newAssignment.closeDate = newAssignment.openDate.plus(new Duration(assignment.openDate, assignment.closeDate))
+    newAssignment.openDate = assignment.openDate.plusYears(yearOffest).withDayOfWeek(assignment.openDate.getDayOfWeek).withTime(Assignment.openTime)
+
+    while (holidayDates.contains(newAssignment.openDate.toLocalDate) || newAssignment.openDate.getDayOfWeek == DateTimeConstants.SATURDAY || newAssignment.openDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+      newAssignment.openDate = newAssignment.openDate.plusDays(1)
+    }
+
+    if (assignment.openEnded) {
+      newAssignment.closeDate = null
+    } else {
+      newAssignment.closeDate = newAssignment.openDate.plus(new Duration(assignment.openDate, assignment.closeDate)).withTime(Assignment.closeTime)
+
+      while (holidayDates.contains(newAssignment.closeDate.toLocalDate) || newAssignment.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || newAssignment.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+        newAssignment.closeDate = newAssignment.closeDate.plusDays(1)
+      }
+    }
 
     // copy the other fields from the target assignment
     newAssignment.module = assignment.module

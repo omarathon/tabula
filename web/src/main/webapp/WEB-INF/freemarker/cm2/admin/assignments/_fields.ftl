@@ -22,8 +22,11 @@
 
   <@bs3form.labelled_form_group path="openDate" labelText="Open date">
     <div class="input-group">
-      <@f.input type="text" path="openDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+      <@f.input type="text" path="openDate" cssClass="form-control date-picker" placeholder="Pick the date" />
       <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+    </div>
+    <div class="help-block">
+      The assignment will open at 9am on this date.
     </div>
   </@bs3form.labelled_form_group>
 
@@ -52,8 +55,11 @@
     <fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
       <@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open-ended reminder date">
         <div class="input-group disabled">
-          <@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
+          <@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-picker" placeholder="Pick the date" />
           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+        </div>
+        <div class="help-block">
+          The reminder will be sent at 9am.
         </div>
       </@bs3form.labelled_form_group>
     </fieldset>
@@ -61,8 +67,11 @@
   <fieldset id="close-dt" <#if openEnd == 'true'>disabled</#if>>
     <@bs3form.labelled_form_group path="closeDate" labelText="Closing date">
       <div class="input-group">
-        <@f.input type="text" path="closeDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+        <@f.input type="text" path="closeDate" cssClass="form-control date-picker" placeholder="Pick the date" />
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+      </div>
+      <div class="help-block">
+        The assignment will close at 12 noon (<a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/forum?topic=8a1785d86dde8017016e26acf3e75bab" target="_blank">why?</a>) on this date.
       </div>
     </@bs3form.labelled_form_group>
   </fieldset>
