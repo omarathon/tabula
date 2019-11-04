@@ -256,6 +256,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingUserType")
   var outcomeGrading: MitigatingCircumstancesGrading = _
 
+  // '0' is appended to the grading code for acute mitigation to ensure that mitigation is not "double counted" in exam boards
+  def gradingCode: Option[String] = {
+    Option(outcomeGrading).map(o => if(isAcute) s"${o.code}0" else o.code)
+  }
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "outcomeReasons")
   private var encryptedOutcomeReasons: CharSequence = _

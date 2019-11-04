@@ -238,8 +238,11 @@ first page of the form to setup a bunch of assignments from SITS.
           <@f.form  class="dateTimePair dirty-check-ignore" modelAttribute=commandName>
             <@bs3form.labelled_form_group path="defaultOpenDate" labelText="Open date">
               <div class="input-group">
-                <input type="text" id="modal-open-date" name="openDate" class="form-control date-time-minute-picker" value="${status.value}">
+                <input type="text" id="modal-open-date" name="openDate" class="form-control date-picker" value="${status.value}">
                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+              <div class="help-block">
+                Assignments will open at 9am on this date.
               </div>
             </@bs3form.labelled_form_group>
             <@bs3form.labelled_form_group path="defaultOpenEnded" labelText="">
@@ -262,8 +265,11 @@ first page of the form to setup a bunch of assignments from SITS.
             </@bs3form.labelled_form_group>
             <@bs3form.labelled_form_group path="defaultCloseDate" labelText="Close date">
               <div class="input-group">
-                <input type="text" id="modal-close-date" name="closeDate" class="form-control date-time-minute-picker" value="${status.value}">
+                <input type="text" id="modal-close-date" name="closeDate" class="form-control date-picker" value="${status.value}">
                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+              <div class="help-block">
+                Assignments will close at 12 noon (<a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/forum?topic=8a1785d86dde8017016e26acf3e75bab" target="_blank">why?</a>) on this date.
               </div>
             </@bs3form.labelled_form_group>
           </@f.form>

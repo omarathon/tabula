@@ -8,6 +8,7 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -26,6 +27,7 @@ trait MitCircsSubmissionDao {
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
+  def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
   def getMessageById(id: String): Option[MitigatingCircumstancesMessage]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
@@ -63,6 +65,17 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       .add(is("student", studentMember))
       .addOrder(Order.desc("_lastModified"))
       .seq
+
+  override def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission] = {
+    session.newCriteria[MitigatingCircumstancesSubmission]
+      .add(safeIn("student", students))
+      .add(or(
+        is("_state", ApprovedByChair),
+        and(isNotNull("acuteOutcome"), is("_state", OutcomesRecorded))
+      ))
+      .add(isNotNull("outcomeGrading"))
+      .seq
+  }
 
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =

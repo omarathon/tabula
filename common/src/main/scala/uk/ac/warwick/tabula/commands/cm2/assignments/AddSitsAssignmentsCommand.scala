@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -8,13 +8,16 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.{LazyLists, LazyMaps, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.validators.DateWithinYears
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionDeniedException}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
@@ -62,11 +65,11 @@ class SitsAssignmentItem(
   // can share the same set of options without having to post many copies separately.
   var optionsId: String = _
 
-  @WithinYears(maxPast = 3, maxFuture = 3)
-  var openDate: DateTime = _
+  @DateWithinYears(maxPast = 3, maxFuture = 3)
+  var openDate: LocalDate = _
 
-  @WithinYears(maxPast = 3, maxFuture = 3)
-  var closeDate: DateTime = _
+  @DateWithinYears(maxPast = 3, maxFuture = 3)
+  var closeDate: LocalDate = _
 
   var openEnded: JBoolean = false
 
@@ -90,8 +93,8 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 
       assignment.module = findModule(item.upstreamAssignment).get
 
-      assignment.openDate = item.openDate
-      assignment.closeDate = item.closeDate
+      assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
+      assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
       assignment.cm2Assignment = true
 
@@ -205,6 +208,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     }
 
     validateNames(errors)
+    validateDates(errors)
 
     if (!errors.hasErrors) checkPermissions()
   }
@@ -240,6 +244,27 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
       }
     }
   }
+
+  private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+
+  def validateDates(errors: Errors): Unit =
+    includedItems.zipWithIndex.foreach { case (item, index) =>
+      errors.pushNestedPath(s"sitsAssignmentItems[$index]")
+
+      if (item.openDate != null) {
+        if (holidayDates.contains(item.openDate) || item.openDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.openDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+          errors.rejectValue("openDate", "openDate.notWorkingDay")
+        }
+      }
+
+      if (item.closeDate != null && !item.openEnded) {
+        if (holidayDates.contains(item.closeDate) || item.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+          errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+        }
+      }
+
+      errors.popNestedPath()
+    }
 
   private def checkPermissions() = {
     // check that all the selected items are part of this department. Otherwise you could post the IDs of
@@ -311,15 +336,15 @@ trait AddSitsAssignmentsCommandState {
   val DEFAULT_WEEKS_LENGTH = 4
 
   // just for prepopulating the date form fields.
-  @WithinYears(maxPast = 3, maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  @DateWithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
   @BeanProperty
-  val defaultOpenDate: DateTime = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
+  val defaultOpenDate: LocalDate = LocalDate.now()
 
-  @WithinYears(maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  @DateWithinYears(maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
   @BeanProperty
-  val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+  val defaultCloseDate: LocalDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 
   @BeanProperty
   val defaultOpenEnded = false

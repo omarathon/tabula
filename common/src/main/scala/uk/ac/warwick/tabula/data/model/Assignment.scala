@@ -6,7 +6,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, LocalDate, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
@@ -37,6 +37,9 @@ object Assignment {
   val defaultWordCountName = "wordcount"
   final val NotDeletedFilter = "notDeleted"
   final val MaximumFileAttachments = 50
+
+  val openTime = new LocalTime(9, 0)
+  val closeTime = new LocalTime(12, 0)
 
   case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 

@@ -69,7 +69,8 @@ class StudentAssessmentBreakdownController extends ExamsController
       "passMarkMap" -> passMarkMap,
       "assessmentComponents" -> assessmentComponents,
       "normalLoadLookup" -> normalLoadLookup,
-      "member" -> studentCourseDetails.student
+      "member" -> studentCourseDetails.student,
+      "mitigatingCircumstances" -> breakdown.mitigatingCircumstances.getOrElse(Nil)
     ).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
       .secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
 
