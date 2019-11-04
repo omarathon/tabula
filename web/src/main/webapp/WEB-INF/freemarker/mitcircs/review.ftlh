@@ -282,12 +282,12 @@
           <#else>
             <@components.detail "Recommendations to board">
               <ul class="list-unstyled">
-                <#list submission.boardRecommendations as recommendation>
+                <#list submission.boardRecommendations as recommendation><#if !(recommendation.assessmentSpecific!false)>
                   <li>
                     <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
-                    <#if recommendation.assessmentSpecific!false>(all assessments)</#if>
+                    (all assessments)
                   </li>
-                </#list>
+                </#if></#list>
 
                 <#list submission.affectedAssessments as assessment>
                   <#if assessment.boardRecommendations?has_content>
