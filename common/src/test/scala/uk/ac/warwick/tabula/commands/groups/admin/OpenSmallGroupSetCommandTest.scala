@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, Description, Notifies, UserAware}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetSelfSignUpState}
 import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsOtherSignUpNotification
@@ -9,6 +10,8 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCach
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
+import scala.jdk.CollectionConverters._
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
@@ -131,12 +134,12 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
       students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
     }
 
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+    userLookup.getUsersByWarwickUniIds(anyJavaListOf[String].asInstanceOf[JList[String]]) answers { arg: Any =>
       arg match {
         case ids: Seq[String@unchecked] =>
           ids.map(id => (id, students.find {
             _.getWarwickId == id
-          }.getOrElse(new AnonymousUser()))).toMap
+          }.getOrElse(new AnonymousUser()))).toMap.asJava
       }
     }
   }

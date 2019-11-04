@@ -63,14 +63,14 @@ class SortRoutesCommandTest extends TestBase with Mockito {
       command.mapping.asScala should be('empty)
 
       command.populate()
-      command.mapping.asScala.mapValues(_.asScala.toSeq) should be(Map(
+      command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         department -> Seq(route1, route2),
         ugDepartment -> Seq(route4, route5, route3), // wrong order until .sort() is called
         pgDepartment -> Seq(route6, route7)
       ))
 
       command.sort()
-      command.mapping.asScala.mapValues(_.asScala.toSeq) should be(Map(
+      command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         department -> Seq(route1, route2),
         ugDepartment -> Seq(route3, route4, route5),
         pgDepartment -> Seq(route6, route7)
@@ -86,7 +86,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
       command.sort()
 
       // Mapping by code is also sorted
-      command.mappingByCode.mapValues(_.asScala.toSeq) should be(Map(
+      command.mappingByCode.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         "in" -> Seq(route1, route2),
         "in-ug" -> Seq(route3, route4, route5),
         "in-pg" -> Seq(route6, route7)

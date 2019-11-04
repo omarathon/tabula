@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.permissions
 
 import org.junit.Before
 import org.springframework.beans.factory.InitializingBean
@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.{PermissionsDao, PermissionsDaoComponent, Permi
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
-import uk.ac.warwick.tabula.services.permissions._
+import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, PersistenceTestBase}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.util.queue.{Queue, QueueListener}

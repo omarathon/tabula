@@ -208,10 +208,12 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
         var userLookup: UserLookupService = mockUserLookup
       }
 
-      val notifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(())
-      notifications.foreach {
+      val unsortedNotifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(())
+      unsortedNotifications.foreach {
         case n: OldReleaseToMarkerNotification => n.userLookup = mockUserLookup
       }
+
+      val notifications: Seq[Notification[MarkerFeedback, Assignment]] = unsortedNotifications.sortBy(_.recipients.head.getUserId).reverse
 
       notifications.size should be(2)
       notifications.head.recipients should contain(marker3)

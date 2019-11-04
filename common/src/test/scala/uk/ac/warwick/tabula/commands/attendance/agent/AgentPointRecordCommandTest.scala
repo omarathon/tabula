@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.attendance.agent
 
 import org.joda.time.DateTime
+import org.mockito.ArgumentMatchers
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
@@ -147,7 +148,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
     validator.relationshipService.listCurrentStudentRelationshipsWithMember(validator.relationshipType, validator.member) returns Seq(student1rel, student2rel)
     validator.attendanceMonitoringService.listStudentsPoints(student1, None, validator.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
     validator.attendanceMonitoringService.listStudentsPoints(student2, None, validator.academicYear) returns Seq(scheme2point1, scheme2point2)
-    validator.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns Map(
+    validator.attendanceMonitoringService.getCheckpoints(ArgumentMatchers.any[Seq[AttendanceMonitoringPoint]], ArgumentMatchers.any[Seq[StudentMember]]) returns Map(
       student2 -> Map(
         scheme2point1 -> Fixtures.attendanceMonitoringCheckpoint(scheme2point1, student2, AttendanceState.MissedAuthorised)
       )

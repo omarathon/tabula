@@ -164,7 +164,7 @@ class UserGroup private(val universityIds: Boolean)
   private def getUsersFromIds(ids: Set[String]): Set[User] = ids.toSeq match {
     case Nil => Set.empty
     case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSet
-    case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSet
+    case list => userLookup.getUsersByUserIds(list).values.toSet
   }
 
   @transient private var _cachedUsers: Option[Set[User]] = None

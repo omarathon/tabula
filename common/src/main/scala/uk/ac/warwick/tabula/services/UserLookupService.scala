@@ -32,7 +32,6 @@ trait UserLookupService extends UserLookupInterface {
   override def getGroupService: LenientGroupService
 
   def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] = getUsersByWarwickUniIds(ids.asJava).asScala.toMap
-
   def getUsersByUserIds(ids: Seq[String]): Map[String, User] = getUsersByUserIds(ids.asJava).asScala.toMap
 }
 
