@@ -1,19 +1,23 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
+import scala.collection.JavaConverters._
 
 object CreateAssignmentDetailsCommand {
   def apply(module: Module, academicYear: AcademicYear) =
@@ -77,8 +81,8 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     * initial values for submission options.
     */
   def copyNonspecificFrom(assignment: Assignment) {
-    openDate = assignment.openDate
-    closeDate = assignment.closeDate
+    openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
+    closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
     if (assignment.workflowCategory.contains(WorkflowCategory.Reusable)) {
       reusableWorkflow = assignment.cm2MarkingWorkflow
@@ -93,14 +97,21 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
 
   def copyTo(assignment: Assignment) {
     assignment.name = name
-    assignment.openDate = openDate
+
+    if (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate)) {
+      assignment.openDate = openDate.toDateTime(Assignment.openTime)
+    }
+
     assignment.academicYear = academicYear
     if (openEnded) {
-      assignment.openEndedReminderDate = openEndedReminderDate
+      assignment.openEndedReminderDate = openEndedReminderDate.toDateTime(Assignment.openTime)
       assignment.closeDate = null
     } else {
       assignment.openEndedReminderDate = null
-      assignment.closeDate = closeDate
+
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate)) {
+        assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
+      }
     }
 
     assignment.workflowCategory = Some(workflowCategory)
@@ -125,11 +136,11 @@ trait ModifyAssignmentDetailsCommandState {
   @NotEmpty(message = "{NotEmpty.assignmentName}")
   var name: String = _
 
-  var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
+  var openDate: LocalDate = LocalDate.now
 
-  var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
+  var closeDate: LocalDate = openDate.plusWeeks(2)
 
-  var openEndedReminderDate: DateTime = _
+  var openEndedReminderDate: LocalDate = _
 
   var workflowCategory: WorkflowCategory = WorkflowCategory.NotDecided
 
@@ -159,6 +170,8 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
   self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
     with UserLookupComponent =>
 
+  private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+
   // validation shared between add and edit
   def genericValidate(errors: Errors): Unit = {
     if (openDate == null) {
@@ -184,6 +197,24 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
       }
     }
   }
+
+  // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
+  def validateOpenDate(errors: Errors): Unit = {
+    if (openDate != null) {
+      if (holidayDates.contains(openDate) || openDate.getDayOfWeek == DateTimeConstants.SATURDAY || openDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+        errors.rejectValue("openDate", "openDate.notWorkingDay")
+      }
+    }
+  }
+
+  // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
+  def validateCloseDate(errors: Errors): Unit = {
+    if (closeDate != null && !openEnded) {
+      if (holidayDates.contains(closeDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+        errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+      }
+    }
+  }
 }
 
 
@@ -196,11 +227,15 @@ trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidatio
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
       for (duplicate <- duplicates.headOption) {
-        errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name), "")
       }
     }
 
     genericValidate(errors)
+
+    // We always validate open and close dates for new assignments
+    validateOpenDate(errors)
+    validateCloseDate(errors)
   }
 }
 
