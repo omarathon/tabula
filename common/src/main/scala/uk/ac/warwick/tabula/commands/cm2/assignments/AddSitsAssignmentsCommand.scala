@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.validators.{DateWithinYears, WithinYears}
+import uk.ac.warwick.tabula.validators.DateWithinYears
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionDeniedException}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -337,15 +337,15 @@ trait AddSitsAssignmentsCommandState {
   val DEFAULT_WEEKS_LENGTH = 4
 
   // just for prepopulating the date form fields.
-  @WithinYears(maxPast = 3, maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  @DateWithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
   @BeanProperty
-  val defaultOpenDate: DateTime = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
+  val defaultOpenDate: LocalDate = LocalDate.now()
 
-  @WithinYears(maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  @DateWithinYears(maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
   @BeanProperty
-  val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+  val defaultCloseDate: LocalDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 
   @BeanProperty
   val defaultOpenEnded = false
