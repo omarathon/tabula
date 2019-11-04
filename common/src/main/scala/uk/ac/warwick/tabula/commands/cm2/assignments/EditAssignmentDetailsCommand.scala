@@ -94,11 +94,11 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 
   override def populate(): Unit = {
     name = assignment.name
-    openDate = assignment.openDate
+    openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
     openEnded = assignment.openEnded
     resitAssessment = assignment.resitAssessment
-    openEndedReminderDate = assignment.openEndedReminderDate
-    closeDate = assignment.closeDate
+    openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
+    closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
     reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
     anonymity = assignment._anonymity
@@ -141,11 +141,19 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive && !(existing eq assignment) }
       for (duplicate <- duplicates.headOption) {
-        errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name), "")
       }
     }
 
     genericValidate(errors)
+
+    // Only validate open date/close date where this has changed, to allow details to still be saved with invalid dates until they've been updated by us
+    if (openDate != null && (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate))) {
+      validateOpenDate(errors)
+    }
+    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate))) {
+      validateCloseDate(errors)
+    }
 
     if (workflowCategory != NoneUse && !assignment.restrictSubmissions) {
       errors.rejectValue("workflowCategory", "markingWorkflow.restrictSubmissions")
