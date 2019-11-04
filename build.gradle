@@ -194,11 +194,12 @@ task generateEncryptionKey() {
     keyGenerator.init(256, random)
     def secretKey = keyGenerator.generateKey()
 
+
     println new String(java.util.Base64.encoder.encode(secretKey.encoded), java.nio.charset.StandardCharsets.UTF_8)
   }
 }
 
 wrapper {
-  gradleVersion = '5.6.3'
+  gradleVersion = '6.0-rc-2'
   distributionType = 'ALL'
 }
