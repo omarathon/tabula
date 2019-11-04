@@ -119,7 +119,7 @@ trait AddSubDepartmentCommandState {
 
   var code: String = parent.code + "-"
   var name: String = parent.name + " "
-  var filterRule: FilterRule = Option(parent.filterRule).getOrElse(AllMembersFilterRule)
+  var filterRule: FilterRule = Option(parent.filterRule).orNull
 }
 
 trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

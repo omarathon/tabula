@@ -146,7 +146,7 @@ trait EditDepartmentCommandState {
   var code: String = department.code
   var fullName: String = department.fullName
   var shortName: String = department.shortName
-  var filterRule: FilterRule = Option(department.filterRule).getOrElse(AllMembersFilterRule)
+  var filterRule: FilterRule = Option(department.filterRule).orNull
 }
 
 trait EditDepartmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

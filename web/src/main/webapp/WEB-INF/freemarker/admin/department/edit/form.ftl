@@ -26,7 +26,8 @@
       <#if department.hasParent>
         <@bs3form.labelled_form_group path="filterRule" labelText="Filter rule">
           <@f.select path="filterRule" id="filterRule" cssClass="form-control">
-            <@f.options items=allFilterRules itemLabel="name" itemValue="name" />
+            <option></option>
+            <@f.options items=subDepartmentFilterRules itemLabel="name" itemValue="name" />
           </@f.select>
         </@bs3form.labelled_form_group>
       </#if>
