@@ -6,6 +6,6 @@ Course: ${(student.mostSignificantCourse.course.name)!""}
 <#list relationships?keys as relationshipType><@fmt.p number=mapGet(relationships, relationshipType)?size singular=relationshipType.agentRole?cap_first shownumber=false/>: <#list mapGet(relationships, relationshipType) as relationship>${relationship.agentName}<#if relationship_has_next>, </#if></#list>
 </#list>
 
-Please refer to the Teaching Quality website for guidance on the appropriate action to take:
+Please refer to the Education Policy and Quality website for guidance on the appropriate action to take:
 
 http://warwick.ac.uk/studentattendanceguide/principles
