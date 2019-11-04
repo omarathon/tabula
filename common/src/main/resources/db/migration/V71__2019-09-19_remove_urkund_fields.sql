@@ -1,0 +1,13 @@
+alter table originalityreport
+drop column nextSubmitAttempt,
+drop column submitAttempts,
+drop column submittedDate,
+drop column nextResponseAttempt,
+drop column responseAttempts,
+drop column responseReceived,
+drop column reportUrl,
+drop column significance,
+drop column matchCount,
+drop column sourceCount,
+drop column urkundResponse,
+drop column urkundResponseCode;
