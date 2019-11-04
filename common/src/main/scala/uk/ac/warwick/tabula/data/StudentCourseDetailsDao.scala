@@ -43,6 +43,8 @@ trait StudentCourseDetailsDao {
   def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime)
 
   def unstampPresentInImport(notStaleScjCodes: Seq[String])
+
+  def getCurrentStudents: Seq[StudentCourseDetails]
 }
 
 @Repository
@@ -85,6 +87,15 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
     session.newCriteria[StudentCourseDetails]
       .add(is("department", department))
       .add(isNull("missingFromImportSince"))
+      .seq
+  }
+
+  def getCurrentStudents: Seq[StudentCourseDetails] = benchmark("getCurrentStudents") {
+    session.newCriteria[StudentCourseDetails]
+      .add(is("mostSignificant", true))
+      .add(isNull("missingFromImportSince"))
+      .createAlias("statusOnRoute", "statusOnRoute")
+      .add(not(or(like("statusOnRoute.code", "P%"), like("statusOnRoute.code", "D%"))))
       .seq
   }
 
