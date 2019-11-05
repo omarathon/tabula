@@ -108,7 +108,6 @@ abstract class Features {
   @Value("${features.celcatTimetablesWBS:true}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
   @Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
   @Value("${features.notificationListeners.mywarwick:true}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
-  @Value("${features.urkund.submissions:false}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
 
   @Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport: Boolean = defaults.schedulingAcademicInformationImport
   @Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport: Boolean = defaults.schedulingProfilesImport
@@ -207,7 +206,6 @@ class FeaturesMessage {
   @BeanProperty var disabilityOnSubmission = true
   @BeanProperty var newSeenSecondMarkingWorkflows = true
   @BeanProperty var queueFeedbackForSits = true
-  @BeanProperty var urkundSubmissions = false
 
   @BeanProperty var profiles = true
   @BeanProperty var meetingRecordApproval = true
