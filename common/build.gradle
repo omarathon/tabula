@@ -94,7 +94,6 @@ dependencies {
   compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
   compile 'commons-codec:commons-codec:1.11'
   compile 'commons-configuration:commons-configuration:1.10'
-  compile 'commons-logging:commons-logging:1.2'
   compile 'commons-beanutils:commons-beanutils:1.9.4'
 
   compile "org.apache.tiles:tiles-api:${tilesVersion}"
@@ -128,7 +127,6 @@ dependencies {
 
   compile 'org.mnode.ical4j:ical4j:3.0.9'
 
-  compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
   compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
   compile "com.sksamuel.elastic4s:elastic4s-http_${scalaMajorVersion}:${elastic4sVersion}"
 
@@ -159,7 +157,8 @@ dependencies {
 
   testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}"
   testCompile "com.sksamuel.elastic4s:elastic4s-embedded_${scalaMajorVersion}:${elastic4sVersion}"
-  testCompile "org.apache.logging.log4j:log4j-core:2.12.1" // Thanks, Elasticsearch
+  testCompile "org.codelibs.elasticsearch.module:analysis-common:${elasticsearchVersion}" // Wrong version in elastic4s-embedded
+  testCompile "org.apache.logging.log4j:log4j-core:2.11.1" // Thanks, Elasticsearch
 }
 
 jar.dependsOn(generateRebel)

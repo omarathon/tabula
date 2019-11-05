@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.system.CustomDataBinder
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Module}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 
 class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {
 
@@ -211,10 +212,11 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
-    val roleService = mock[RoleService]
+    val roleService = smartMock[RoleService]
     roleService.getExplicitPermissionsFor(currentUser, mod1) returns Stream(
-      PermissionDefinition(Permissions.Assignment.Create, Some(mod1), true)
+      PermissionDefinition(Permissions.Assignment.Create, Some(mod1), permissionType = GrantedPermission.Allow)
     )
+    roleService.getRolesFor(currentUser, null) returns Stream.empty
     securityService.roleService = roleService
 
     PermissionCheckAny(

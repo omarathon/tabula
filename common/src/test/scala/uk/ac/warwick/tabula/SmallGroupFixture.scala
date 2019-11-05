@@ -35,31 +35,14 @@ trait SmallGroupFixture extends Mockito {
   val tutor3 = new User
   tutor3.setUserId("tutor3")
 
-  val userLookup: UserLookupService = smartMock[UserLookupService]
-  when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
-  when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
-  when(userLookup.getUserByUserId(student1.getUserId)).thenReturn(student1)
-  when(userLookup.getUserByUserId(student2.getUserId)).thenReturn(student2)
-  when(userLookup.getUserByUserId(tutor1.getUserId)).thenReturn(tutor1)
-  when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
-  when(userLookup.getUserByUserId(tutor3.getUserId)).thenReturn(tutor3)
-  // UserGroup does batched lookups for users when resolving by UserId...
-  when(userLookup.usersByUserIds(Seq(tutor1.getUserId, tutor2.getUserId))).thenReturn(Map("tutor1" -> tutor1, "tutor2" -> tutor2))
-
-  val students = Seq(student1, student2)
-  userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
-    ids match {
-      case ids: Seq[String@unchecked] =>
-        ids.map(id => (id, students.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap
-      case _ => Map[String, User]()
-    }
-  }
+  val userLookup: MockUserLookup = new MockUserLookup
+  userLookup.registerUserObjects(student1, student2, tutor1, tutor2, tutor3)
 
   val actor = new User
   val recipient = new User
   recipient.setWarwickId("recipient")
   recipient.setUserId("recipient")
-  when(userLookup.getUserByUserId(recipient.getUserId)).thenReturn(recipient)
+  userLookup.registerUserObjects(actor, recipient)
 
   val department: Department = Fixtures.department("in")
   val academicYear = AcademicYear(2015)

@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedUserIdRecipientNotification}
-import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupSetChangedUserIdRecipientNotification
+import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
@@ -31,25 +31,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     user4.setWarwickId("user4")
     user4.setUserId("user4")
 
-    val userDatabase = Seq(user1, user2, user3, user4)
-    userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
-      arg match {
-        case ids: Seq[String@unchecked] =>
-          ids.map(id => (id, userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap
-      }
-    }
-    userLookup.usersByUserIds(any[Seq[String]]) answers { arg: Any =>
-      arg match {
-        case ids: Seq[String@unchecked] =>
-          ids.map(id => (id, userDatabase.find(_.getUserId == id).getOrElse(new AnonymousUser()))).toMap
-      }
-    }
-    userLookup.getUserByUserId(any[String]) answers { arg: Any =>
-      arg match {
-        case id: String@unchecked =>
-          userDatabase.find(_.getUserId == id).getOrElse(new AnonymousUser())
-      }
-    }
+    userLookup.registerUserObjects(user1, user2, user3, user4)
 
     val eventA: SmallGroupEvent = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1", "tutor2"), identifierIsUniNumber = false)).build
     val groupA: SmallGroupBuilder = new SmallGroupBuilder()
