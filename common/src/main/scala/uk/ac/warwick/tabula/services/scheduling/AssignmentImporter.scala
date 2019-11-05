@@ -310,7 +310,7 @@ object AssignmentImporter {
       ${castToString("mab.mab_seq")} as seq,
       ${castToString("mab.mab_name")} as name,
       ${castToString("mab.mab_agrp")} as assessment_group,
-      ${castToString("mab.ast_code")} as assessment_code,
+      case when mab.mab_apac is not null then 'E' else 'A' end as assessment_code, -- infer that this is an exam if a paper code is defined
       ${castToString("mab.mab_udf1")} as in_use,
       ${castToString("mab.mks_code")} as marks_code,
       mab_perc as weight
