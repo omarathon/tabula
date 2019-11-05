@@ -21,7 +21,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider
     Wire[SmallGroupService]
   }
 
-  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for SmallGroupTutorRoleProvider") {
+  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for SmallGroupTutorRoleProvider") {
     scope match {
       case event: SmallGroupEvent => getRoles(user, Seq(event))
       case group: SmallGroup => getRoles(user, group.events)
@@ -36,16 +36,16 @@ class SmallGroupTutorRoleProvider extends RoleProvider
 
         if (isTutor) {
           val custom = customRoles(student, SmallGroupMembersTutorRoleDefinition)
-          Stream(custom.headOption.getOrElse(SmallGroupMembersTutor(student)))
-        } else Stream.empty
+          LazyList(custom.headOption.getOrElse(SmallGroupMembersTutor(student)))
+        } else LazyList.empty
 
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 
   private def getRoles(user: CurrentUser, events: Iterable[SmallGroupEvent]) = {
     val validEvents =
-      events.toStream
+      events.to(LazyList)
         .filter(_.group.groupSet.releasedToTutors)
         .filter(_.tutors.includesUser(user.apparentUser))
 

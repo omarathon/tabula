@@ -30,8 +30,8 @@ class MockPermissionsService extends PermissionsService {
   override def getAllGrantedRolesFor[A <: PermissionsTarget : ClassTag](scope: A): Seq[GrantedRole[A]] = ???
   override def getAllGrantedPermissionsFor[A <: PermissionsTarget : ClassTag](scope: A): Seq[GrantedPermission[A]] = ???
   override def getAllGrantedRolesForDefinition(roleDefinition: RoleDefinition): Seq[GrantedRole[_]] = ???
-  override def getGrantedRolesFor[A <: PermissionsTarget : ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = ???
-  override def getGrantedPermissionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = ???
+  override def getGrantedRolesFor[A <: PermissionsTarget : ClassTag](user: CurrentUser): LazyList[GrantedRole[A]] = ???
+  override def getGrantedPermissionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser): LazyList[GrantedPermission[A]] = ???
   override def getAllPermissionDefinitionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ???
   override def getCustomRoleDefinitionsBasedOn(roleDefinition: RoleDefinition): Seq[CustomRoleDefinition] = ???
   override def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition] = ???

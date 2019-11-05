@@ -12,15 +12,15 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class AssignmentSubmitterRoleProvider extends RoleProvider with TaskBenchmarking {
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for AssignmentSubmitterRoleProvider") {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for AssignmentSubmitterRoleProvider") {
     scope match {
       case assignment: Assignment =>
         if (assignment.canSubmit(user.apparentUser))
-          Stream(customRoleFor(assignment.module.adminDepartment)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
-        else Stream.empty
+          LazyList(customRoleFor(assignment.module.adminDepartment)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
+        else LazyList.empty
 
       // AssignmentSubmitter is only checked at the assignment level
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 

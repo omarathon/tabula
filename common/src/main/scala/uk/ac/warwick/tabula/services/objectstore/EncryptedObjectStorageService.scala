@@ -77,7 +77,7 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
 
   override def keyExists(key: String): Future[Boolean] = delegate.keyExists(key)
   override def delete(key: String): Future[Unit] = delegate.delete(key)
-  override def listKeys(): Future[Stream[String]] = delegate.listKeys()
+  override def listKeys(): Future[LazyList[String]] = delegate.listKeys()
 
   override def afterPropertiesSet(): Unit = delegate.afterPropertiesSet()
 }

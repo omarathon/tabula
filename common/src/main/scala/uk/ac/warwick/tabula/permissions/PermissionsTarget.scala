@@ -1,10 +1,5 @@
 package uk.ac.warwick.tabula.permissions
 
-import scala.jdk.CollectionConverters._
-
-import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports._
-
 /**
   * Applying this trait to an object signifies that it fulfils a contract for
   * being a target for permissions checking. Roles can grant permissions against
@@ -23,11 +18,11 @@ trait PermissionsTarget {
 
   /**
     * This should return a sequence of *DIRECT* permission parents. Usually this will
-    * return a singleton Stream(parent) or a Stream.empty (for a top-level permission element
+    * return a singleton LazyList(parent) or a LazyList.empty (for a top-level permission element
     * such as a Department) but there are some situations (such as for an object that
     * exists in multiple departments) where it will return more than one.
     */
-  def permissionsParents: Stream[PermissionsTarget]
+  def permissionsParents: LazyList[PermissionsTarget]
 
   /**
     * A unique identifier. If we were to pass this in as a PathVariable, we'd expect to be
@@ -48,7 +43,7 @@ trait PermissionsTarget {
 
 object PermissionsTarget {
   final val Global = new PermissionsTarget {
-    override def permissionsParents: Stream[Nothing] = Stream.empty
+    override def permissionsParents: LazyList[Nothing] = LazyList.empty
 
     override def id = null
 

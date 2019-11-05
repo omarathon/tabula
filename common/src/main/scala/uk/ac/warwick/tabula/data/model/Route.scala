@@ -67,7 +67,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
   override def toString: String = "Route[" + code + "]"
 
-  def permissionsParents: Stream[Department] = teachingDepartments.toStream
+  def permissionsParents: LazyList[Department] = teachingDepartments.to(LazyList)
 
   override def humanReadableId: String = code.toUpperCase + " " + name
 

@@ -491,7 +491,7 @@ object Fixtures extends Mockito {
     smm
   }
 
-  def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = {
+  def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = {
     target #:: target.permissionsParents.flatMap(withParents)
   }
 

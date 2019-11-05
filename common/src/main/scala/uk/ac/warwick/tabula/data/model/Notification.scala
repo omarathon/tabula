@@ -114,7 +114,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   @transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
   @transient final val dateTimeFormatter = DateFormats.NotificationDateTime
 
-  def permissionsParents: Stream[Nothing] = Stream.empty
+  def permissionsParents: LazyList[Nothing] = LazyList.empty
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")

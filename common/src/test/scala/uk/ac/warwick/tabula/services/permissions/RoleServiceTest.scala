@@ -34,7 +34,7 @@ class RoleServiceTest extends TestBase with Mockito {
     val provider2 = smartMock[ScopelessRoleProvider]
 
     when(scopedProvider.getRolesFor(isEq(currentUser), isA[PermissionsTarget])) thenThrow (classOf[RuntimeException])
-    when(provider1.getRolesFor(currentUser, null)) thenReturn (Stream(Sysadmin()))
+    when(provider1.getRolesFor(currentUser, null)) thenReturn (LazyList(Sysadmin()))
     when(provider2.getRolesFor(currentUser, null)) thenThrow (classOf[RuntimeException])
 
     val service = new RoleServiceImpl()
@@ -63,11 +63,11 @@ class RoleServiceTest extends TestBase with Mockito {
     val service = new RoleServiceImpl()
     service.roleProviders = Array(provider1, provider2, provider3, provider4)
 
-    when(provider1.getRolesFor(currentUser, null)) thenReturn (Stream(Sysadmin()))
-    when(provider2.getRolesFor(currentUser, module)) thenReturn (Stream(ModuleManager(module)))
-    when(provider3.getRolesFor(currentUser, dept)) thenReturn (Stream(DepartmentalAdministrator(dept)))
-    when(provider3.getRolesFor(currentUser, module)) thenReturn (Stream.empty)
-    when(provider4.getRolesFor(currentUser, null)) thenReturn (Stream.empty)
+    when(provider1.getRolesFor(currentUser, null)) thenReturn (LazyList(Sysadmin()))
+    when(provider2.getRolesFor(currentUser, module)) thenReturn (LazyList(ModuleManager(module)))
+    when(provider3.getRolesFor(currentUser, dept)) thenReturn (LazyList(DepartmentalAdministrator(dept)))
+    when(provider3.getRolesFor(currentUser, module)) thenReturn (LazyList.empty)
+    when(provider4.getRolesFor(currentUser, null)) thenReturn (LazyList.empty)
 
     (service.getRolesFor(currentUser, module) exists {
       _ == DepartmentalAdministrator(dept)
@@ -92,8 +92,8 @@ class RoleServiceTest extends TestBase with Mockito {
     val service = new RoleServiceImpl()
     service.roleProviders = Array(provider)
 
-    when(provider.getRolesFor(currentUser, module)) thenReturn (Stream(ModuleManager(module)))
-    when(provider.getRolesFor(currentUser, dept)) thenReturn (Stream(DepartmentalAdministrator(dept)))
+    when(provider.getRolesFor(currentUser, module)) thenReturn (LazyList(ModuleManager(module)))
+    when(provider.getRolesFor(currentUser, dept)) thenReturn (LazyList(DepartmentalAdministrator(dept)))
 
     (service.getRolesFor(currentUser, module) exists {
       _ == DepartmentalAdministrator(dept)
@@ -118,8 +118,8 @@ class RoleServiceTest extends TestBase with Mockito {
     insub2.parent = in
 
     val provider = mock[RoleProvider]
-    when(provider.getRolesFor(currentUser, insub1)) thenReturn (Stream.empty)
-    when(provider.getRolesFor(currentUser, in)) thenReturn (Stream(DepartmentalAdministrator(in)))
+    when(provider.getRolesFor(currentUser, insub1)) thenReturn (LazyList.empty)
+    when(provider.getRolesFor(currentUser, in)) thenReturn (LazyList(DepartmentalAdministrator(in)))
 
     val service = new RoleServiceImpl()
     service.roleProviders = Array(provider)
@@ -147,7 +147,7 @@ class RoleServiceTest extends TestBase with Mockito {
     val service = new RoleServiceImpl()
     service.roleProviders = Array(provider1, provider2, provider3, provider4)
 
-    when(provider2.getRolesFor(currentUser, module)) thenReturn (Stream(ModuleManager(module)))
+    when(provider2.getRolesFor(currentUser, module)) thenReturn (LazyList(ModuleManager(module)))
 
     service.hasRole(currentUser, ModuleManager(module)) should be(true)
     service.hasRole(currentUser, ExtensionManager(dept)) should be(false)
@@ -164,10 +164,10 @@ class RoleServiceTest extends TestBase with Mockito {
     val service = new RoleServiceImpl()
     service.permissionsProviders = Array(provider1, provider2)
 
-    when(provider1.getPermissionsFor(currentUser, module)) thenReturn (Stream(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
-    when(provider2.getPermissionsFor(currentUser, dept)) thenReturn (Stream(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
-    when(provider2.getPermissionsFor(currentUser, module)) thenReturn (Stream.empty)
-    when(provider1.getPermissionsFor(currentUser, null)) thenReturn Stream(PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
+    when(provider1.getPermissionsFor(currentUser, module)) thenReturn (LazyList(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
+    when(provider2.getPermissionsFor(currentUser, dept)) thenReturn (LazyList(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
+    when(provider2.getPermissionsFor(currentUser, module)) thenReturn (LazyList.empty)
+    when(provider1.getPermissionsFor(currentUser, null)) thenReturn LazyList(PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
 
     val explicitPermissionsForModule = service.getExplicitPermissionsFor(currentUser, module)
     val explicitScopelessPermissions = service.getExplicitPermissionsFor(currentUser, null)
@@ -198,10 +198,10 @@ class RoleServiceTest extends TestBase with Mockito {
     val service = new RoleServiceImpl()
     service.roleProviders = Array(provider1, provider2)
 
-    when(provider1.getRolesFor(currentUser, member)) thenReturn (Stream.empty)
-    when(provider2.getRolesFor(currentUser, member)) thenReturn (Stream.empty)
-    when(provider1.getRolesFor(currentUser, dept)) thenReturn (Stream(DepartmentalAdministrator(dept)))
-    when(provider2.getRolesFor(currentUser, dept)) thenReturn (Stream.empty)
+    when(provider1.getRolesFor(currentUser, member)) thenReturn (LazyList.empty)
+    when(provider2.getRolesFor(currentUser, member)) thenReturn (LazyList.empty)
+    when(provider1.getRolesFor(currentUser, dept)) thenReturn (LazyList(DepartmentalAdministrator(dept)))
+    when(provider2.getRolesFor(currentUser, dept)) thenReturn (LazyList.empty)
 
     service.getRolesFor(currentUser, member).contains(DepartmentalAdministrator(dept)) should be(true)
   }

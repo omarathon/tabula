@@ -392,11 +392,11 @@ class Department extends GeneratedId
     case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
   }
 
-  def subDepartmentsContaining(member: Member): Stream[Department] = {
+  def subDepartmentsContaining(member: Member): LazyList[Department] = {
     if (!includesMember(member, Option(this))) {
-      Stream.empty // no point looking further down the tree if this level doesn't contain the required member
+      LazyList.empty // no point looking further down the tree if this level doesn't contain the required member
     } else {
-      this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
+      this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).to(LazyList)
     }
   }
 
@@ -421,7 +421,7 @@ class Department extends GeneratedId
     }
   }
 
-  def permissionsParents: Stream[Department] = Option(parent).toStream
+  def permissionsParents: LazyList[Department] = Option(parent).to(LazyList)
 
   override def humanReadableId: String = name
 

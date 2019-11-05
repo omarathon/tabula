@@ -44,7 +44,7 @@ class MyObject extends PermissionsTarget {
 
   override def id = ""
 
-  override def permissionsParents: Stream[Nothing] = Stream.empty
+  override def permissionsParents: LazyList[Nothing] = LazyList.empty
 
 
   var restrictAccess: Boolean = false

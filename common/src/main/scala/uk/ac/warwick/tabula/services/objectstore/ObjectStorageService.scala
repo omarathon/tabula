@@ -139,7 +139,7 @@ trait ObjectStorageService extends InitializingBean {
 
   def delete(key: String): Future[Unit]
 
-  def listKeys(): Future[Stream[String]]
+  def listKeys(): Future[LazyList[String]]
 }
 
 @Service

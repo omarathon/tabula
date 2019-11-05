@@ -84,19 +84,19 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
     blobStore.removeBlob(objectContainerName, key)
   }
 
-  override def listKeys(): Future[Stream[String]] = Future {
-    def list(nextMarker: Option[String], accumulator: Stream[_ <: StorageMetadata]): Stream[_ <: StorageMetadata] = nextMarker match {
+  override def listKeys(): Future[LazyList[String]] = Future {
+    def list(nextMarker: Option[String], accumulator: LazyList[_ <: StorageMetadata]): LazyList[_ <: StorageMetadata] = nextMarker match {
       case None => // No more results
         accumulator
 
       case Some(marker) =>
-        accumulator.append({
+        accumulator.lazyAppendedAll({
           val nextResults = blobStore.list(objectContainerName, ListContainerOptions.Builder.afterMarker(marker))
-          list(Option(nextResults.getNextMarker), nextResults.asScala.toStream)
+          list(Option(nextResults.getNextMarker), nextResults.asScala.to(LazyList))
         })
     }
 
     val firstResults = blobStore.list(objectContainerName)
-    list(Option(firstResults.getNextMarker), firstResults.asScala.toStream).map(_.getName)
+    list(Option(firstResults.getNextMarker), firstResults.asScala.to(LazyList)).map(_.getName)
   }
 }

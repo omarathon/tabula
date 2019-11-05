@@ -14,7 +14,7 @@ class RoleProviderTest extends TestBase with Mockito {
 
   @Test def noElevatedSelector() = withUser("cuscav", "0672089") {
     val service = new RoleProvider {
-      override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = Stream()
+      override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = LazyList.empty
 
       override def rolesProvided: Set[Class[_ <: Role]] = Set()
 

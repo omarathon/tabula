@@ -23,12 +23,12 @@ abstract class WebgroupRoleProvider[A <: BuiltInRole : ClassTag](role: A) extend
 
   def groupService: LenientGroupService = userLookup.getGroupService
 
-  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for WebgroupRoleProvider") {
+  def getRolesFor(user: CurrentUser): LazyList[Role] = benchmarkTask("Get roles for WebgroupRoleProvider") {
     try {
-      if (user.realId.hasText && groupService.isUserInGroup(user.realId, webgroup)) Stream(role)
-      else Stream.empty
+      if (user.realId.hasText && groupService.isUserInGroup(user.realId, webgroup)) LazyList(role)
+      else LazyList.empty
     } catch {
-      case _: GroupServiceException => Stream.empty
+      case _: GroupServiceException => LazyList.empty
     }
   }
 

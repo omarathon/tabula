@@ -198,7 +198,7 @@ class Assignment
   @JoinColumn(name = "module_id")
   override var module: Module = _
 
-  override def permissionsParents: Stream[Module] = Option(module).toStream
+  override def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)

@@ -45,7 +45,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
   // Not all marking workflows are suitable for exams
   def validForExams: Boolean = false
 
-  def permissionsParents: Stream[Department] = Option(department).toStream
+  def permissionsParents: LazyList[Department] = Option(department).to(LazyList)
 
   def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String): String =
     Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)

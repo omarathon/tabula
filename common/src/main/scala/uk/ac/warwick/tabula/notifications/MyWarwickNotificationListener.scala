@@ -34,7 +34,7 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
 
       val permissionsTargets = allEntities.filter(_ != null).map(_.entity).collect { case pt: PermissionsTarget => pt }
 
-      def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+      def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
       val tags = permissionsTargets.flatMap(withParents).distinct.map { target =>
         val tag = new Tag()

@@ -158,7 +158,7 @@ dependencies {
   testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}"
   testCompile "com.sksamuel.elastic4s:elastic4s-embedded_${scalaMajorVersion}:${elastic4sVersion}"
   testCompile "org.codelibs.elasticsearch.module:analysis-common:${elasticsearchVersion}" // Wrong version in elastic4s-embedded
-  testCompile "org.apache.logging.log4j:log4j-core:2.11.1" // Thanks, Elasticsearch
+  testCompile 'org.apache.logging.log4j:log4j-core:2.11.1' // Thanks, Elasticsearch
 }
 
 jar.dependsOn(generateRebel)

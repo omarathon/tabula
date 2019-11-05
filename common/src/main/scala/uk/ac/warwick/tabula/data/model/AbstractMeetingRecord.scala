@@ -212,7 +212,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
     ))
   }
 
-  def permissionsParents: Stream[StudentCourseDetails] = relationships.map(_.studentCourseDetails).toStream
+  def permissionsParents: LazyList[StudentCourseDetails] = relationships.map(_.studentCourseDetails).to(LazyList)
 
   def toStringProps = Seq(
     "creator" -> creator,

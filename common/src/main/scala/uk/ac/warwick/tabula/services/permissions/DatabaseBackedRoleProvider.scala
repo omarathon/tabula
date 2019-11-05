@@ -13,7 +13,7 @@ class DatabaseBackedRoleProvider extends ScopelessRoleProvider with TaskBenchmar
 
   var service: PermissionsService = Wire[PermissionsService]
 
-  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for DatabaseBackedRoleProvider") {
+  def getRolesFor(user: CurrentUser): LazyList[Role] = benchmarkTask("Get roles for DatabaseBackedRoleProvider") {
     service.getGrantedRolesFor[PermissionsTarget](user).map(_.build())
   }
 

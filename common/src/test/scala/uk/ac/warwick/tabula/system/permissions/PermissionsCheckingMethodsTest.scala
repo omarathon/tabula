@@ -213,10 +213,10 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 
     val securityService = new SecurityService
     val roleService = smartMock[RoleService]
-    roleService.getExplicitPermissionsFor(currentUser, mod1) returns Stream(
+    roleService.getExplicitPermissionsFor(currentUser, mod1) returns LazyList(
       PermissionDefinition(Permissions.Assignment.Create, Some(mod1), permissionType = GrantedPermission.Allow)
     )
-    roleService.getRolesFor(currentUser, null) returns Stream.empty
+    roleService.getRolesFor(currentUser, mod1) returns LazyList.empty
     securityService.roleService = roleService
 
     PermissionCheckAny(
@@ -249,7 +249,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
       Permissions.Assignment.Create -> Set(Some(mod1))
     ))
 
-    roleService.getRolesFor(currentUser, null) returns Stream.empty
+    roleService.getRolesFor(currentUser, null) returns LazyList.empty
     try {
       withCurrentUser(currentUser) {
         new Binder(this, "OneFromOneScopedOneScopeless", securityService)

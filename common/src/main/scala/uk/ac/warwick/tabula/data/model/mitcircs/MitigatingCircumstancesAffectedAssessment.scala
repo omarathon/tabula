@@ -113,6 +113,6 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     "mitigatingCircumstancesSubmission" -> mitigatingCircumstancesSubmission.id,
   )
 
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(mitigatingCircumstancesSubmission)
+  override def permissionsParents: LazyList[PermissionsTarget] = LazyList(mitigatingCircumstancesSubmission)
 
 }

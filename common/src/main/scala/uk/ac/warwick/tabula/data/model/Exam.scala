@@ -131,6 +131,6 @@ class Exam
   @transient
   override val collectMarks: JBoolean = true
 
-  override def permissionsParents: Stream[Module] = Option(module).toStream
+  override def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
 }

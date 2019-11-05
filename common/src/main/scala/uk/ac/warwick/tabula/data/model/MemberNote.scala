@@ -59,7 +59,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
     attachments.add(attachment)
   }
 
-  def permissionsParents = Stream(member)
+  def permissionsParents: LazyList[Member] = LazyList(member)
 
   override def toString: String = "MemberNote(" + id + ")"
 

@@ -133,7 +133,7 @@ class DepartmentSmallGroupSet
     !_.students.isEmpty
   }
 
-  def permissionsParents: Stream[GeneratedId with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour with ToEntityReference with Logging] = Option(department).toStream ++ linkedSets.asScala.toStream
+  def permissionsParents: LazyList[PermissionsTarget] = Option(department).to(LazyList) #::: linkedSets.asScala.to(LazyList)
 
   def toStringProps = Seq(
     "id" -> id,

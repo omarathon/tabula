@@ -123,6 +123,6 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
     "id" -> id
   )
 
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(department)
+  override def permissionsParents: LazyList[PermissionsTarget] = LazyList(department)
 
 }

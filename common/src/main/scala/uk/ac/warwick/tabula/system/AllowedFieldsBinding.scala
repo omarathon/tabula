@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.system
 
-import scala.jdk.CollectionConverters._
-import scala.collection.immutable.Stream
 import java.lang.annotation.Annotation
-import javax.servlet.ServletRequest
 
 import org.springframework.stereotype
 
@@ -53,9 +50,9 @@ trait AllowedFieldsBinding extends CustomDataBinder {
   }
 
   // A stream of field names, going up through each field's parent.
-  def ancestors(field: String): Stream[String] = field match {
-    case parentPathPattern(tail, head) => field #:: ancestors(tail)
-    case _ => Stream(field)
+  def ancestors(field: String): LazyList[String] = field match {
+    case parentPathPattern(tail, _) => field #:: ancestors(tail)
+    case _ => LazyList(field)
   }
 
   def usesDisallowedAnnotation(c: Class[_]): Boolean = {

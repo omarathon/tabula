@@ -7,7 +7,7 @@ case class MitigatingCircumstancesStudent(student: StudentMember) extends Permis
 
   override def id: String = student.universityId
 
-  override def permissionsParents: Stream[PermissionsTarget] = {
+  override def permissionsParents: LazyList[PermissionsTarget] = {
     student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs)
   }
 

@@ -82,7 +82,7 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
   @Column(name = "updated_date")
   var updatedDate: DateTime = _
 
-  def permissionsParents: Stream[Department] = Option(department).toStream
+  def permissionsParents: LazyList[Department] = Option(department).to(LazyList)
 
   def hasRecordedCheckpoints: Boolean =
     attendanceMonitoringService.exists { service =>

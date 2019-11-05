@@ -64,7 +64,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
   def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map(_.department) + adminDepartment
 
-  def permissionsParents: Stream[Department] = Option(adminDepartment).toStream
+  def permissionsParents: LazyList[Department] = Option(adminDepartment).to(LazyList)
 
   override def humanReadableId: String = code.toUpperCase + " " + name
 

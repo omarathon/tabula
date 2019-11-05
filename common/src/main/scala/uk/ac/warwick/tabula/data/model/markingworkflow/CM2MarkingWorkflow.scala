@@ -95,7 +95,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 
   def initialStages: Seq[MarkingWorkflowStage] = workflowType.initialStages
 
-  def permissionsParents: Stream[Department] = Option(department).toStream
+  def permissionsParents: LazyList[Department] = Option(department).to(LazyList)
 
   // replace the markers for a specified stage in the workflow
   protected def replaceStageMarkers(stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {

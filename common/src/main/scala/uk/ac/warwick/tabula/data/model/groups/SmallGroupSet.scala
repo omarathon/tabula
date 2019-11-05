@@ -330,7 +330,7 @@ class SmallGroupSet
     !_.students.isEmpty
   }
 
-  def permissionsParents: Stream[Module] = Option(module).toStream
+  def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   override def humanReadableId: String = name
 

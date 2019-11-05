@@ -60,7 +60,7 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
   override def delete(key: String): Future[Unit] =
     Future.successful(targetFile(key).delete())
 
-  override def listKeys(): Future[Stream[String]] = Future {
+  override def listKeys(): Future[LazyList[String]] = Future {
     def toKey(file: File): String = {
       val stripped =
         file.getAbsolutePath.substring(attachmentDir.getAbsolutePath.length)
@@ -70,9 +70,9 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
       s"${stripped.substring(0, 8)}-${stripped.substring(8, 12)}-${stripped.substring(12, 16)}-${stripped.substring(16, 20)}-${stripped.substring(20)}"
     }
 
-    def files(base: File): Stream[String] =
-      if (base.isFile) Stream(toKey(base))
-      else base.listFiles().sortBy(_.getName).toStream.flatMap(files)
+    def files(base: File): LazyList[String] =
+      if (base.isFile) LazyList(toKey(base))
+      else base.listFiles().sortBy(_.getName).to(LazyList).flatMap(files)
 
     files(attachmentDir)
   }

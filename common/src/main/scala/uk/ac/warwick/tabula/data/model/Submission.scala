@@ -40,7 +40,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
   @JoinColumn(name = "assignment_id")
   var assignment: Assignment = _
 
-  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  def permissionsParents: LazyList[Assignment] = Option(assignment).to(LazyList)
 
   var submitted: Boolean = false
 

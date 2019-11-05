@@ -408,7 +408,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   )
 
   // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = panel.toStream :+ MitigatingCircumstancesStudent(student)
+  override def permissionsParents: LazyList[PermissionsTarget] = panel.to(LazyList) #::: LazyList(MitigatingCircumstancesStudent(student))
 }
 
 

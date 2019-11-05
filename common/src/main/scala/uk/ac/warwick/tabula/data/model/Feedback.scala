@@ -458,7 +458,7 @@ class AssignmentFeedback extends Feedback {
     assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
   }
 
-  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  def permissionsParents: LazyList[Assignment] = Option(assignment).to(LazyList)
 
   def fieldNameValuePairsMap: Map[String, String] =
     customFormValues.asScala.flatMap { formValue =>
@@ -500,7 +500,7 @@ class ExamFeedback extends Feedback {
     assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
   }
 
-  def permissionsParents: Stream[Exam] = Option(exam).toStream
+  def permissionsParents: LazyList[Exam] = Option(exam).to(LazyList)
 
   def fieldNameValuePairsMap: Map[String, String] = Map.empty
 

@@ -106,7 +106,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 
       benchmarkTask("Permissions checks") {
         sortedSets
-          .toStream
+          .to(LazyList)
           .filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
       }
     }

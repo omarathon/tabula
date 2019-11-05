@@ -207,8 +207,8 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
       permissionsService.getAllGrantedRolesFor(targetAssignment) returns Nil
       permissionsService.getAllGrantedRolesFor(targetDept) returns Nil
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (Stream(moduleGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (Stream(deptGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (LazyList(moduleGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (LazyList(deptGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
 
       val existing = GrantedPermission(targetDept, Permissions.Submission.Delete, true)
       existing.users.knownType.addUserId("admin3")

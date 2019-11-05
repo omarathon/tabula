@@ -100,7 +100,7 @@ class SmallGroup
   @JoinColumn(name = "linked_dept_group_id")
   var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
 
-  def permissionsParents: Stream[SmallGroupSet] = Option(groupSet).toStream
+  def permissionsParents: LazyList[SmallGroupSet] = Option(groupSet).to(LazyList)
 
   override def humanReadableId: String = name
 
