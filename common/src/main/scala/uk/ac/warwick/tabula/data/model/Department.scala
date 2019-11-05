@@ -452,13 +452,13 @@ object Department {
     // Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
     implicit val factory: String => FilterRule = { name: String => withName(name) }
 
-    val allFilterRules: Seq[FilterRule] = {
+    val subDepartmentFilterRules: Seq[FilterRule] = {
       val inYearRules = (1 until 9).map(InYearFilterRule)
-      Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
+      Seq(UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
     }
 
     def withName(name: String): FilterRule = {
-      allFilterRules.find(_.name == name).get
+      (AllMembersFilterRule +: subDepartmentFilterRules).find(_.name == name).get
     }
   }
 
