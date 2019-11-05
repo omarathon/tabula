@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, _}
+import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{User, _}
 import uk.ac.warwick.util.cache._
