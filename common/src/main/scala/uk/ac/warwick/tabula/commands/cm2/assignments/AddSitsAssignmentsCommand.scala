@@ -95,7 +95,9 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
       assignment.module = findModule(item.upstreamAssignment).get
 
       assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
-      assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+      if(!item.openEnded) {
+        assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+      }
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
       assignment.cm2Assignment = true
 
