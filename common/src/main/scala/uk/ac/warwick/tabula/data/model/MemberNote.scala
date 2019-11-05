@@ -19,7 +19,7 @@ import uk.ac.warwick.userlookup.User
 @Proxy
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "membernote")
-abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
+abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
   @transient
   var userLookup: UserLookupService = Wire.auto[UserLookupService]
@@ -36,7 +36,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   def note: String = Option(encryptedNote).flatMap(_.toString.maybeText).getOrElse(legacyNote)
   def note_=(note: String): Unit = encryptedNote = note
 
-  def escapedNote: TemplateHTMLOutputModel = formattedHtml(note)
+  def escapedNote: TemplateHTMLOutputModel = FormattedHtml(note)
 
   var title: String = _
 

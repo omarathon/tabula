@@ -162,10 +162,10 @@ abstract class AssignmentFormField extends FormField {
 @Entity
 @Proxy
 @DiscriminatorValue("comment")
-class CommentField extends AssignmentFormField with SimpleValue[String] with FormattedHtml {
+class CommentField extends AssignmentFormField with SimpleValue[String] {
   override def isReadOnly = true
 
-  def formattedHtml: TemplateHTMLOutputModel = formattedHtml(Option(value))
+  def formattedHtml: TemplateHTMLOutputModel = FormattedHtml(Option(value))
 
   override def duplicate(newAssignment: Assignment): CommentField = {
     val newField = new CommentField

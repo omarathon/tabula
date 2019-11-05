@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Entity
 @Proxy
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class AttendanceNote extends GeneratedId with FormattedHtml {
+abstract class AttendanceNote extends GeneratedId {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "student_id")
@@ -26,7 +26,7 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
   var note: String = _
 
-  def escapedNote: TemplateHTMLOutputModel = formattedHtml(note)
+  def escapedNote: TemplateHTMLOutputModel = FormattedHtml(note)
 
   def truncatedNote: String = {
     Option(note).fold("")(note => {
