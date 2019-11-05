@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.validators
 
 import javax.validation.{ConstraintValidator, ConstraintValidatorContext}
-import org.joda.time.{DateTime, LocalDate, ReadableInstant, Years}
+import org.joda.time.{LocalDate, Years}
 
-class WithinYearsValidatorForLocalDate extends ConstraintValidator[WithinYears, LocalDate] {
+class WithinYearsValidatorForLocalDate extends ConstraintValidator[DateWithinYears, LocalDate] {
 
   var maxPast: Int = _
   var maxFuture: Int = _
 
-  override def initialize(annotation: WithinYears) {
+  override def initialize(annotation: DateWithinYears) {
     maxPast = annotation.maxPast()
     maxFuture = annotation.maxFuture()
   }
