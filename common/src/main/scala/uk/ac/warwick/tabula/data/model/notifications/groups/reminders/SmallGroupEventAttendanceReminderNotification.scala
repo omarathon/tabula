@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.WholeWeekFormatter
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

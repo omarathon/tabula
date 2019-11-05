@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, Perm
 import uk.ac.warwick.tabula.permissions.Permissions
 import ListCustomRoleOverridesCommand._
 import uk.ac.warwick.tabula.roles.{Role, RoleBuilder}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ListCustomRoleOverridesCommand {
 

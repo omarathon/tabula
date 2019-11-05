@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object ExamGridStudentCheckCommand {

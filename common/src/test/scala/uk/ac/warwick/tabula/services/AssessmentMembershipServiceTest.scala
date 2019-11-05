@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
@@ -68,12 +68,12 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     service.userLookup = new MockUserLookup().tap(_.registerUserObjects(user))
     service.profileService = smartMock[ProfileService]
 
-    service.profileService.getAllMembersWithUniversityIds(Seq("0123456", "0123457", "0672089")) returns
-      Seq(
-        Fixtures.student("0123456"),
-        Fixtures.student("0123457"),
-        Fixtures.staff(universityId = "0672089", userId = "cuscav")
-      )
+    val allMembers: Seq[Member] = Seq(
+      Fixtures.student("0123456"),
+      Fixtures.student("0123457"),
+      Fixtures.staff(universityId = "0672089", userId = "cuscav")
+    )
+    service.profileService.getAllMembersWithUniversityIds(Seq("0123456", "0123457", "0672089")) returns allMembers
 
     val excludedGroup = smartMock[UnspecifiedTypeUserGroup]
     excludedGroup.excludesUser(user) returns true

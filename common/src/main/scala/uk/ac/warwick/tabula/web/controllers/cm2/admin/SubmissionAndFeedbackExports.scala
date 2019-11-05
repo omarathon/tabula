@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.cm2.{SubmissionListItem, WorkflowItems}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.xml._
 

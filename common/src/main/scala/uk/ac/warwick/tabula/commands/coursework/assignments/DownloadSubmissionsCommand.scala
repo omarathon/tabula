@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
 import uk.ac.warwick.tabula.services.{SubmissionService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 

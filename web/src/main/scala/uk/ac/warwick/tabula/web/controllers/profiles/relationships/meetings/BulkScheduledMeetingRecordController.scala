@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/bulk/schedule"))

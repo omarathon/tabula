@@ -4,7 +4,7 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.JavaImports._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.pdf.PDFGeneratorComponent
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class PDFView(filename: String, templateName: String, context: Map[String, _]) extends View {
   this: PDFGeneratorComponent =>

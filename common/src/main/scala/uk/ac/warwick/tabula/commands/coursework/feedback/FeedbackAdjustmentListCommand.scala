@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, Auto
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentListCommand {
   def apply(assessment: Assessment) =

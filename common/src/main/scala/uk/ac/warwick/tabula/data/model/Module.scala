@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.matching.Regex
 

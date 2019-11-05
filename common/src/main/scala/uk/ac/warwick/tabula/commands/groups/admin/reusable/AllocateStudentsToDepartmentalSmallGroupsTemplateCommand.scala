@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateStudentsToDepartmentalSmallGroupsTemplateCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet) =

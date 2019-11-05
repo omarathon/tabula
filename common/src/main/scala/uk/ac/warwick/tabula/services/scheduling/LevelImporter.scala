@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait LevelImporter extends Logging {
   var levelDao: LevelDao = Wire[LevelDao]

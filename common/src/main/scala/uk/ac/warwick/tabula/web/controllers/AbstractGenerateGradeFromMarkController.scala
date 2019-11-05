@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Assessment, GradeBoundary, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AbstractGenerateGradeFromMarkController.GenerateGradesFromMarkCommand
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AbstractGenerateGradeFromMarkController {
   type GenerateGradesFromMarkCommand = Appliable[Map[String, Seq[GradeBoundary]]] with GenerateGradesFromMarkCommandRequest

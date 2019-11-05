@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.TestBase
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UriParserTest extends TestBase {
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.admin.modules
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl, GroupsObjects}

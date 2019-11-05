@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FindPointsResult(
   termGroupedPoints: Map[String, Seq[GroupedPoint]],

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.

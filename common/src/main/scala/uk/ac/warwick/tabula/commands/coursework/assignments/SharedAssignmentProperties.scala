@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSel
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.services.ZipService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Bound as the value of a Map on a parent form object, to store multiple sets of

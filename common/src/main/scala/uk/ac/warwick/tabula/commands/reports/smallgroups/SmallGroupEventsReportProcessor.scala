@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.SmallGroupEventReportData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SmallGroupEventsReportProcessor {
   def apply(department: Department, academicYear: AcademicYear) =

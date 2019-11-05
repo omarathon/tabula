@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridDocumentJob {
   val identifier = "exam-document"

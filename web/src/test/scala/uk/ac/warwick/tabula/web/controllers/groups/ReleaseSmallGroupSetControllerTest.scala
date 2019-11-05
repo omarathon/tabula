@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.groups.admin.{ReleaseAllSmallGroupSe
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 

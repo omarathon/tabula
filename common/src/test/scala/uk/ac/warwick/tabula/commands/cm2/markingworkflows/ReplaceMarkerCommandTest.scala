@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off public.methods.have.type
 // scalastyle:off public.property.type.annotation

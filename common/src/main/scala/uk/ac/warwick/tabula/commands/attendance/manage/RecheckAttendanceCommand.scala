@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring._
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, _}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object RecheckAttendanceCommand {

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentGroup, AssignmentFeedback, Fee
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, ExportResitFeedbackToSitsQuery, SASPartialMatchQuery, SITSMarkRow, SRAPartialMatchQuery, SasCountQuery, SraCountQuery}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait ExportFeedbackToSitsServiceComponent {
   def exportFeedbackToSitsService: ExportFeedbackToSitsService

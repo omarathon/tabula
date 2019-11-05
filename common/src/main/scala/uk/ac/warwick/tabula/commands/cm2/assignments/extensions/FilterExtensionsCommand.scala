@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FilterExtensionResults(
   extensions: Seq[ExtensionGraph],

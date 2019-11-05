@@ -5,7 +5,7 @@ import org.openqa.selenium.support.ui.Select
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 /**

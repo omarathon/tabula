@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object StudentCourseDetails {

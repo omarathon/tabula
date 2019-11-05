@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

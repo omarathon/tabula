@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DepartmentInformationController extends ApiController {
   def jsonDepartmentObject(department: Department, subDepartments: Boolean = false): Map[String, Any] =

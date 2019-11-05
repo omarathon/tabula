@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable
 
@@ -147,7 +147,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     // Build the list of all users who are in the group, or have attended one or more occurrences of the group
     val allStudents = benchmarkTask("Get a list of all registered or attended users") {
       (group.students.users ++
-        userLookup.getUsersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
+        userLookup.usersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
         .toSeq
     }
 

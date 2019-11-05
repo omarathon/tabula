@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPic
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{Group, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 class FlexiPickerController extends BaseController {

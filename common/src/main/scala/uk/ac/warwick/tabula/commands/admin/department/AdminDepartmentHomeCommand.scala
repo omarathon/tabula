@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.{Route, Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited, ReadOnly}

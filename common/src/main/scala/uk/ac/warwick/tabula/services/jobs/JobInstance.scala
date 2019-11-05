@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Interface for a Job to update its status in the database.

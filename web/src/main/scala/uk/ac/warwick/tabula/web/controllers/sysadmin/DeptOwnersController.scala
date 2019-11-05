@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments"))

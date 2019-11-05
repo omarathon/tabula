@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ZipServiceTest extends TestBase with Mockito {
 

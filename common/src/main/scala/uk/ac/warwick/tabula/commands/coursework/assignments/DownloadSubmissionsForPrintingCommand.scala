@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
   extends FreemarkerXHTMLPDFGeneratorComponent

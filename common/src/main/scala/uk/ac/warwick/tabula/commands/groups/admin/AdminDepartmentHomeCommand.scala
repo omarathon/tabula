@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly}

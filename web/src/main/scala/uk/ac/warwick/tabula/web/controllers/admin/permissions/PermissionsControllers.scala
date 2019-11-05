@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 

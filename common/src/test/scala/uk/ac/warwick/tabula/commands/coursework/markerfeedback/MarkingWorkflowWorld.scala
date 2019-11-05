@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.{FeedbackService, ZipService}
 import uk.ac.warwick.tabula.{Features, MockUserLookup, Mockito, TestHelpers}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // reusable environment for marking workflow tests
 trait MarkingWorkflowWorld extends TestHelpers with Mockito {

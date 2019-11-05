@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._

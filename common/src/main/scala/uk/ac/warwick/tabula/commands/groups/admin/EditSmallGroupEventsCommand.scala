@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import EditSmallGroupEventsCommand._
 
 object EditSmallGroupEventsCommand {

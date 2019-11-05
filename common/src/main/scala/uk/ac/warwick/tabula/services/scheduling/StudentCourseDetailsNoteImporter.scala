@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import javax.sql.DataSource
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service

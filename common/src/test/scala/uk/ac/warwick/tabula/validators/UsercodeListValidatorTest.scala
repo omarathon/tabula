@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.validators
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.MockUserLookup
 import org.springframework.validation.BindException
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UsercodeListValidatorTest extends TestBase {
 

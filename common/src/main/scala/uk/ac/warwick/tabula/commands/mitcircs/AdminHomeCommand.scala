@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 case class MitigatingCircumstancesWorkflowProgress(percentage: Int, t: String, messageCode: String)

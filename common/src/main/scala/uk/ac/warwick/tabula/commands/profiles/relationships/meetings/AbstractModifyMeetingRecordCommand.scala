@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMe
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class AbstractModifyMeetingRecordCommand extends AbstractMeetingRecordCommand with CommandInternal[MeetingRecord] {
   self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest with MeetingRecordServiceComponent

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object Exam {
   final val NotDeletedFilter = "notDeleted"

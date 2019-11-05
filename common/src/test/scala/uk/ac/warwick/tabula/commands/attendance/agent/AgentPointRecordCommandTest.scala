@@ -9,14 +9,14 @@ import uk.ac.warwick.tabula.JavaImports.JHashMap
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class AgentPointRecordCommandTest extends TestBase with Mockito {
@@ -104,11 +104,13 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
     populate.relationshipService.listCurrentStudentRelationshipsWithMember(populate.relationshipType, populate.member) returns Seq(student1rel, student2rel)
     populate.attendanceMonitoringService.listStudentsPoints(student1, None, populate.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
     populate.attendanceMonitoringService.listStudentsPoints(student2, None, populate.academicYear) returns Seq(scheme2point1, scheme2point2)
-    populate.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns Map(
+
+    val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
       student2 -> Map(
         scheme2point1 -> Fixtures.attendanceMonitoringCheckpoint(scheme2point1, student2, AttendanceState.MissedAuthorised)
       )
     )
+    populate.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns checkpoints
   }
 
   @Test
@@ -148,11 +150,12 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
     validator.relationshipService.listCurrentStudentRelationshipsWithMember(validator.relationshipType, validator.member) returns Seq(student1rel, student2rel)
     validator.attendanceMonitoringService.listStudentsPoints(student1, None, validator.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
     validator.attendanceMonitoringService.listStudentsPoints(student2, None, validator.academicYear) returns Seq(scheme2point1, scheme2point2)
-    validator.attendanceMonitoringService.getCheckpoints(ArgumentMatchers.any[Seq[AttendanceMonitoringPoint]], ArgumentMatchers.any[Seq[StudentMember]]) returns Map(
+    val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
       student2 -> Map(
         scheme2point1 -> Fixtures.attendanceMonitoringCheckpoint(scheme2point1, student2, AttendanceState.MissedAuthorised)
       )
     )
+    validator.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns checkpoints
     validator.templatePoint = scheme2point1
 
     val conversionService = new GenericConversionService()
@@ -174,9 +177,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   @Test
   def validateInvalidPointNotMember() {
     new ValidatorFixture {
-      validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student2) returns {
-        true
-      }
+      validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student2) returns true
       validator.checkpointMap = JHashMap(
         student2 -> JHashMap(scheme1point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
       )

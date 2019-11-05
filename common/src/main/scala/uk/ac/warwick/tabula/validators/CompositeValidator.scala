@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.validators
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CompositeValidator(val list: Validator*) extends Validator {
 

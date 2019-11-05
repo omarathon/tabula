@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.helpers
 import org.junit.After
 import uk.ac.warwick.tabula.{TestBase, TestLoggerFactory}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import ch.qos.logback.classic.{Level, Logger}
 
 // scalastyle:off magic.number

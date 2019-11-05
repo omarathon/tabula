@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 object GrantRoleCommand {

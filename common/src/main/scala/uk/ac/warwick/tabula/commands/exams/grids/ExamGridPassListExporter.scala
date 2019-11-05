@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{ProgressionResult, ProgressionService}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWatermarkToDocument {
 

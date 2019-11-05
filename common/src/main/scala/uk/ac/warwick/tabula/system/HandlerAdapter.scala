@@ -14,7 +14,7 @@ import org.springframework.web.method.support.{HandlerMethodReturnValueHandler, 
 import org.springframework.web.servlet.mvc.method.annotation.{RequestMappingHandlerAdapter, ServletRequestDataBinderFactory}
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Extension of RequestMappingHandlerAdapter that allows you to place

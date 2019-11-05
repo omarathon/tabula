@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import CreateMitCircsSubmissionCommand._
 
 object CreateMitCircsSubmissionCommand {

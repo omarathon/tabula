@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DeleteMarkingWorkflowCommand {
 

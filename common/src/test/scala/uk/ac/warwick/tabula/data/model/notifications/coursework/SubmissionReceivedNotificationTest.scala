@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 

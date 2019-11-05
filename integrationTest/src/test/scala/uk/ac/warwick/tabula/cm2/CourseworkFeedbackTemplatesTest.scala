@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.cm2
 import org.openqa.selenium.{By, WebElement}
 import uk.ac.warwick.tabula.BrowserTest
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 

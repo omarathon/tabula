@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, SavedFormValue}
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.{Fixtures, Mockito, RequestInfo, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class SubmissionsForMarkerTest extends TestBase with Mockito {
 

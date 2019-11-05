@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FiltersExtensions {
   val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(

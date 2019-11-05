@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 trait ExamState extends UpdatesStudentMembership {

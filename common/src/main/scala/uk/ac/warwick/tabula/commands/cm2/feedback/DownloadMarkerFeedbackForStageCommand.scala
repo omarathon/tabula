@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceC
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 

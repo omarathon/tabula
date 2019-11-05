@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RecheckAttendanceCommandTest extends TestBase with Mockito {
 
@@ -183,7 +183,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
     // The student has submitted coursework that triggers auto-recording for this point
 
     // Checkpoint recorded as Attended
-    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns Seq(buildCheckpoint(state = Attended))
+    val allCheckpoints: Seq[AttendanceMonitoringCheckpoint] = Seq(buildCheckpoint(state = Attended))
+    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns allCheckpoints
 
     // No proposed changes
     command.proposedChanges shouldBe empty
@@ -235,7 +236,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
     // The student has a meeting record that triggers auto-recording for this point
 
     // Checkpoint recorded as Attended
-    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns Seq(buildCheckpoint(state = Attended))
+    val allCheckpoints: Seq[AttendanceMonitoringCheckpoint] = Seq(buildCheckpoint(state = Attended))
+    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns allCheckpoints
 
     // No proposed changes
     command.proposedChanges shouldBe empty
@@ -288,7 +290,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
     // The student has small group attendance that triggers auto-recording for this point
 
     // Checkpoint recorded as attended
-    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns Seq(buildCheckpoint(state = Attended))
+    val allCheckpoints: Seq[AttendanceMonitoringCheckpoint] = Seq(buildCheckpoint(state = Attended))
+    command.attendanceMonitoringService.getAllCheckpoints(templatePoint) returns allCheckpoints
 
     // No proposed changes
     command.proposedChanges shouldBe empty

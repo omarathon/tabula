@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 

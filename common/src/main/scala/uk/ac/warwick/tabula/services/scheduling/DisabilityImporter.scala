@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Disability
 import uk.ac.warwick.tabula.helpers.Logging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DisabilityImporter extends Logging {
   var disabilityDao: DisabilityDao = Wire[DisabilityDao]

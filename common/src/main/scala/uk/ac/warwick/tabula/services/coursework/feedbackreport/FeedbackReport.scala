@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, SubmissionService}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.TreeMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, TimeoutException}

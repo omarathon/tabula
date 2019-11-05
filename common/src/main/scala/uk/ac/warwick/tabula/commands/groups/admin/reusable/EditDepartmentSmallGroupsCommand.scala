@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditDepartmentSmallGroupsCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet) =

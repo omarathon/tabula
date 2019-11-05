@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Notification, StudentRelationshipType, T
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsSelector, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition, SelectorBuiltInRoleDefinition}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 object ReflectionHelper extends Logging {

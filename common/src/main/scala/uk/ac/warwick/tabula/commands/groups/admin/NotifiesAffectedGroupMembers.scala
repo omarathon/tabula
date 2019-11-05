@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedStudentNotification, SmallGroupSetChangedTutorNotification, SmallGroupSetChangedUserIdRecipientNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
 

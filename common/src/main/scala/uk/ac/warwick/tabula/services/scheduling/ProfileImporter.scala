@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, FileAttachment, Memb
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MemberNoteServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractMemberNote] {

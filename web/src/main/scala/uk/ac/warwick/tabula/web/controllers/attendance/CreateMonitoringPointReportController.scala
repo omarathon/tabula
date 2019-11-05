@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/report/{department}/create"))

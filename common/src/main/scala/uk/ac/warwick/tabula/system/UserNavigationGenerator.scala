@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.{CurrentUser, Features}
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class UserNavigation(
   collapsed: String,

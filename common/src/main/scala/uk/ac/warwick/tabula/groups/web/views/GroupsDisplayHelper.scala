@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 //
 // Stateless functions to munge groupsets and groups

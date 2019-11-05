@@ -36,7 +36,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.parallel.CollectionConverters._
 
 /** Base class for tests which boringly uses the JUnit support of

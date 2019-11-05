@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.api.web.helpers.MemberApiFreemarkerHelper._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfigurationComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * We use Freemarker to ensure that we use the same logic as in ScalaBeansWrapper, i.e. that we don't expose

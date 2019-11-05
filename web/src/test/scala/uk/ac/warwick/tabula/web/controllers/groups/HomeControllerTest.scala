@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.{Mockito, SmallGroupBuilder, SmallGroupSetBuilder, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class HomeControllerTest extends TestBase with Mockito {
 
@@ -27,7 +27,7 @@ class HomeControllerTest extends TestBase with Mockito {
     allocatedUser.setUserId("allocated")
 
     val userDatabase = Seq(unallocatedUser, allocatedUser)
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+    userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
       arg match {
         case ids: Seq[String@unchecked] =>
           ids.map(id => (id, userDatabase.find {

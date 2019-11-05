@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 

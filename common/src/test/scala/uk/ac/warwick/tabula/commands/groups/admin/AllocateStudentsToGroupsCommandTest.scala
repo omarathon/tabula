@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {

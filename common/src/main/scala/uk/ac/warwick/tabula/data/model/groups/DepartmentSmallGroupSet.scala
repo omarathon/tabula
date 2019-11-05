@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupSer
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object DepartmentSmallGroupSet {

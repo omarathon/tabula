@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait FiltersStudentsBase {
 

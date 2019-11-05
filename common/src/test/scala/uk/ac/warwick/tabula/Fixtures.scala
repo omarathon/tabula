@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -507,7 +507,7 @@ object Fixtures extends Mockito {
       JHashMap(u: _*)
     }
 
-    userLookup.getUsersByUserIds(any[Seq[String]]) answers { ids: Any =>
+    userLookup.usersByUserIds(any[Seq[String]]) answers { ids: Any =>
       val u = ids.asInstanceOf[Seq[String]].map(id => (id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
       Map(u: _*)
     }

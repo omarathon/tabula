@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
 trait MyWarwickNotificationListener extends NotificationListener with Logging {

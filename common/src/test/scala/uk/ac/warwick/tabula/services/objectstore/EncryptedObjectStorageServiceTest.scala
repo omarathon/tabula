@@ -15,7 +15,7 @@ import org.jclouds.logging.slf4j.config.SLF4JLoggingModule
 import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
 

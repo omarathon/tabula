@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyl
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CreateAttendanceTemplatePointCommand {
   def apply(template: AttendanceMonitoringTemplate) =

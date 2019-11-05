@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentType, Assignment, GeneratedId,
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitigatingCircumstancesAffectedAssessment {
   val EngagementCriteriaModuleCode = "OE"

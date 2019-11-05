@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait ExtensionFixture extends Mockito {
 

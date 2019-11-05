@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {

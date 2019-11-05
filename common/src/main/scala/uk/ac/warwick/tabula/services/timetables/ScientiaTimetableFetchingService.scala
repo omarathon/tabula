@@ -267,8 +267,8 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
         location = location,
         comments = Option((activity \\ "comments").text).flatMap(_.maybeText),
         parent = parent,
-        staff = userLookup.getUsersByWarwickUniIds((activity \\ "staffmember").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
-        students = userLookup.getUsersByWarwickUniIds((activity \\ "student").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
+        staff = userLookup.usersByWarwickUniIds((activity \\ "staffmember").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
+        students = userLookup.usersByWarwickUniIds((activity \\ "student").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
         year = year,
         relatedUrl = None,
         attendance = Map()

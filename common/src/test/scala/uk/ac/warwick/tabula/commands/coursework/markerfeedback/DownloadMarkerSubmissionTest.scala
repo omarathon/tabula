@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{Features, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld with Mockito {
 

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, ProfileService, Rel
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MemberTest extends TestBase with Mockito {
 
@@ -213,7 +213,10 @@ class MemberTest extends TestBase with Mockito {
     relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq()
     staff.isRelationshipAgent(relationshipType) should be (false)
 
-    relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq(StudentRelationship(staff, relationshipType, Fixtures.student(), DateTime.now))
+    reset(relationshipService)
+
+    val relationships: Seq[MemberStudentRelationship] = Seq(StudentRelationship(staff, relationshipType, Fixtures.student(), DateTime.now))
+    relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns relationships
     staff.isRelationshipAgent(relationshipType) should be (true)
   }
 

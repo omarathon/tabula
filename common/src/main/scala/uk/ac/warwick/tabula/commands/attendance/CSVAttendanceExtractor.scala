@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.util.csv.{GoodCsvDocument, NamedValueCSVLineReader}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object CSVAttendanceExtractor {

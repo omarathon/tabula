@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringLevelServiceComponent, CourseAndRouteServiceComponent, LevelServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.Range.Inclusive
 
 object GenerateExamGridSelectCourseCommand {

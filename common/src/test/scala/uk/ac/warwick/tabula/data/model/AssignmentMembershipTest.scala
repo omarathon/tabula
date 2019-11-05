@@ -6,7 +6,7 @@ import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports.{JHashMap, JList}
 
 class AssignmentMembershipTest extends TestBase with Mockito {
@@ -43,13 +43,12 @@ class AssignmentMembershipTest extends TestBase with Mockito {
         _.getWarwickId == id
       } getOrElse new AnonymousUser()
     }
-    userLookup.getUsersByUserIds(any[JList[String]]) answers { ids: Any =>
-      val users = ids.asInstanceOf[JList[String]].asScala.toSeq.map { id =>
-        id -> userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser())
-      }
-      JHashMap(users: _*)
+    userLookup.usersByUserIds(any[Seq[String]]) answers { ids: Any =>
+      ids.asInstanceOf[Seq[String]].map { id =>
+        id -> userDatabase.find(_.getUserId == id).getOrElse(new AnonymousUser())
+      }.toMap
     }
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
+    userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
       ids.asInstanceOf[Seq[String]].map { id =>
         id -> userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser())
       }.toMap

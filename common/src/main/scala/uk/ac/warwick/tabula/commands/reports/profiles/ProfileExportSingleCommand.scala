@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ProfileExportSingleCommand {
   type CommandType = Appliable[Seq[FileAttachment]]

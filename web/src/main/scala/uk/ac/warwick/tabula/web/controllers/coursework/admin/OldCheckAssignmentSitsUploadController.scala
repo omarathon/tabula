@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Profile(Array("cm1Enabled"))
 @Controller

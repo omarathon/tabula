@@ -23,7 +23,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.reflect._
 

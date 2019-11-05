@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, ProfileServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 trait ValidatesMarkItem {

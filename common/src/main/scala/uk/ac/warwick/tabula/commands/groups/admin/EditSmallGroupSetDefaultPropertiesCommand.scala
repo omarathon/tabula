@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditSmallGroupSetDefaultPropertiesCommand {
   val DefaultStartTime = new LocalTime(12, 0)

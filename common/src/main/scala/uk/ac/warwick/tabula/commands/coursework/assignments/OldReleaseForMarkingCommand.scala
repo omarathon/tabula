@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object OldReleaseForMarkingCommand {
@@ -48,7 +48,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
 
   override def applyInternal(): List[AssignmentFeedback] = {
 
-    val studentUsers = userLookup.getUsersByUserIds(students.asScala.toSeq)
+    val studentUsers = userLookup.usersByUserIds(students.asScala.toSeq)
 
     // get the parent feedback or create one if none exist
     val feedbacks = studentsWithKnownMarkers.map { usercode: String =>

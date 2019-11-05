@@ -23,7 +23,7 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {

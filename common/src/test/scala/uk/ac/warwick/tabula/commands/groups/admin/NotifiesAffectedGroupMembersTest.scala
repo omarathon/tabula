@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class NotifiesAffectedGroupMembersTest extends TestBase {
@@ -32,20 +32,22 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     user4.setUserId("user4")
 
     val userDatabase = Seq(user1, user2, user3, user4)
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+    userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
       arg match {
         case ids: Seq[String@unchecked] =>
-          ids.map(id => (id, userDatabase.find {
-            _.getWarwickId == id
-          }.getOrElse(new AnonymousUser()))).toMap
+          ids.map(id => (id, userDatabase.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap
+      }
+    }
+    userLookup.usersByUserIds(any[Seq[String]]) answers { arg: Any =>
+      arg match {
+        case ids: Seq[String@unchecked] =>
+          ids.map(id => (id, userDatabase.find(_.getUserId == id).getOrElse(new AnonymousUser()))).toMap
       }
     }
     userLookup.getUserByUserId(any[String]) answers { arg: Any =>
       arg match {
         case id: String@unchecked =>
-          userDatabase.find {
-            _.getUserId == id
-          }.getOrElse(new AnonymousUser())
+          userDatabase.find(_.getUserId == id).getOrElse(new AnonymousUser())
       }
     }
 
@@ -184,7 +186,8 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       group.students.add(test)
 
       val tutor: User = group.events.head.tutors.users.head
-      command.hasAffectedTutorsEvents(tutor1) should be (true)
+      println(tutor)
+      command.hasAffectedTutorsEvents(tutor) should be (true)
       // should return false for an arbitrary user (worryingly this failed pre TAB-2728)
       command.hasAffectedTutorsEvents(new User()) should be (false)
       //			command.hasAffectedTutorsEvents(tutor3) should be (false)

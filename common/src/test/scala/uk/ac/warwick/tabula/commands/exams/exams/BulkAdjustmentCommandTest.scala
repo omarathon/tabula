@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByte
 import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {

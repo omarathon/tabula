@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AttendanceMonitoringSchemeFixtureCommand {
   def apply() =

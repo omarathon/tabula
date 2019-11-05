@@ -4,7 +4,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.`type`.filter.AssignableTypeFilter
 import uk.ac.warwick.tabula.data.model.Notification
 import scala.reflect._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.lang.annotation.Annotation
 
 object PackageScanner {

@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, Gr
 import uk.ac.warwick.userlookup.{User, _}
 import uk.ac.warwick.util.cache._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 object UserLookupService {
@@ -31,8 +31,9 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 trait UserLookupService extends UserLookupInterface {
   override def getGroupService: LenientGroupService
 
-  def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] = getUsersByWarwickUniIds(ids.asJava).asScala.toMap
-  def getUsersByUserIds(ids: Seq[String]): Map[String, User] = getUsersByUserIds(ids.asJava).asScala.toMap
+  // Deliberately doesn't use the same name as the Java equivalents to avoid confusion
+  final def usersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] = getUsersByWarwickUniIds(ids.asJava).asScala.toMap
+  final def usersByUserIds(ids: Seq[String]): Map[String, User] = getUsersByUserIds(ids.asJava).asScala.toMap
 }
 
 class UserLookupServiceImpl(d: UserLookupInterface)

@@ -7,7 +7,7 @@ import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DateBuilder {
 

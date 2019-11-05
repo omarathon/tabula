@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.{Mav, Routes => WebRoutes}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.xml.Elem
 

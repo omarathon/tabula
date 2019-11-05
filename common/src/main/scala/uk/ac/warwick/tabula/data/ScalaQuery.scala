@@ -5,7 +5,7 @@ import org.hibernate.`type`.{BooleanType, IntegerType, LongType, StringType}
 import org.hibernate.transform.DistinctRootEntityResultTransformer
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Nice wrapper for a Query object. You usually won't create

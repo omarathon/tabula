@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SubmitAssignmentCommand {
   type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest

@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import scala.language.implicitConversions
 
@@ -305,7 +305,7 @@ trait PublishFeedbackDescription extends Describable[PublishFeedbackResults] {
   override lazy val eventName: String = "PublishFeedback"
 
   override def describe(d: Description) {
-    val students = userLookup.getUsersByUserIds(feedbackToRelease.map(_.usercode)).values.toSeq
+    val students = userLookup.usersByUserIds(feedbackToRelease.map(_.usercode)).values.toSeq
     d.assignment(assignment)
       .studentIds(students.flatMap(m => Option(m.getWarwickId)))
       .studentUsercodes(students.map(_.getUserId))

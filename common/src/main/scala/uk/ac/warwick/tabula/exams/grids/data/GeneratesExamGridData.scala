@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreRequiredModulesColum
 import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
 import uk.ac.warwick.tabula.services._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 trait GeneratesExamGridData extends CourseAndRouteServiceComponent with MaintenanceModeServiceComponent with ModuleRegistrationServiceComponent {

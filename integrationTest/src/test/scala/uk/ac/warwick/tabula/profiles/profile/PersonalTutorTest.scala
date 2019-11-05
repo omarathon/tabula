@@ -6,7 +6,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
 

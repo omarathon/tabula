@@ -5,7 +5,7 @@ import org.apache.tiles.request.Request
 import org.apache.tiles.{Attribute, Definition}
 import uk.ac.warwick.tabula.helpers.Logging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 /**

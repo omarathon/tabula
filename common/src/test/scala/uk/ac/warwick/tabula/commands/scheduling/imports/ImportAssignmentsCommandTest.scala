@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackServi
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])

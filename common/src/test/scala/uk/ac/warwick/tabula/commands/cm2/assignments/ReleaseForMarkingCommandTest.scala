@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class ReleaseForMarkingCommandTest extends TestBase with Mockito {

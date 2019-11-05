@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorWithFi
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AutowiringDownloadRegistersAsPdfCommandHelper
   extends AutowiringSmallGroupServiceComponent

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object TurnitinLtiQueueService {
 

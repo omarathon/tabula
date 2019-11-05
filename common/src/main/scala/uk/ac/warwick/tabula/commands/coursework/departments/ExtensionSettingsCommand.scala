@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.departments
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import org.springframework.validation.Errors

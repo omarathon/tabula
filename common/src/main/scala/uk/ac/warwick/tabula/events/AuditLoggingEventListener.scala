@@ -6,7 +6,7 @@ import uk.ac.warwick.util.logging.AuditLogger
 import uk.ac.warwick.util.logging.AuditLogger.{Field, RequestInformation}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * An event listener that sends events to CLogS using WarwickUtils' AuditLogger

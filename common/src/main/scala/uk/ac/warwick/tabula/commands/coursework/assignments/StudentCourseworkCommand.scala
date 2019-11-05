@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 trait CourseworkCommandTypes {

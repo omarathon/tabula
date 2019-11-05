@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, XmlUtils}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var allocateStudentItems: JList[AllocateStudentItem])

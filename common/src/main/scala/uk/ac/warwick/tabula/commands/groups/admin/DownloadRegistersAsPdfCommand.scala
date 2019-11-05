@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DownloadRegistersAsPdfCommand {
 
@@ -69,7 +69,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 
     // Get all the users and memebrs up front so we only have to call the profile service once
     val regularUserMap: Map[String, User] = sortedOccurrences.flatMap(o => o.event.group.students.users).groupBy(_.getWarwickId).view.mapValues(_.head).toMap
-    val extraAttendanceUserMap: Map[String, User] = userLookup.getUsersByWarwickUniIds(sortedOccurrences.flatMap(_.attendance.asScala.map(_.universityId)).distinct)
+    val extraAttendanceUserMap: Map[String, User] = userLookup.usersByWarwickUniIds(sortedOccurrences.flatMap(_.attendance.asScala.map(_.universityId)).distinct)
     val userMap = regularUserMap ++ extraAttendanceUserMap
     val allMembers = transactional(readOnly = true) {
       profileService.getAllMembersWithUniversityIds(userMap.keys.toSeq)

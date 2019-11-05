@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpers {
 

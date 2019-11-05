@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.AssessmentComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RemoveMissingAssessmentComponentCommand(assessmentComponent: AssessmentComponent) extends Command[Unit] with AutowiringAssessmentMembershipServiceComponent {
 

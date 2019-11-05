@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUserLookupComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {

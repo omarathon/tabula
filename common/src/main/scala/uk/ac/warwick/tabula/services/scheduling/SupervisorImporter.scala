@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait SupervisorImporter {
   /**

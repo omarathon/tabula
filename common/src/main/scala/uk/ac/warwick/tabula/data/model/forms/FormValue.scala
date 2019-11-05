@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Base object for binding an individual submitted field from an assignment

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
 

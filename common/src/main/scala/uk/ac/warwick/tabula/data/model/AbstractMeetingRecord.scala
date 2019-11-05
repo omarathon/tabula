@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEv
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait MeetingRecordAttachments {
   var attachments: JList[FileAttachment]

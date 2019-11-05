@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FetchDepartmentRelationshipsForReallocationCommand {
 

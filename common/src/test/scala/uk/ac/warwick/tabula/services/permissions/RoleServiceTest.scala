@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.Fixtures

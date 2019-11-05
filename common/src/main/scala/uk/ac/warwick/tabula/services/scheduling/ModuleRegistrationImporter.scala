@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.{HashMap, Iterable}
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try

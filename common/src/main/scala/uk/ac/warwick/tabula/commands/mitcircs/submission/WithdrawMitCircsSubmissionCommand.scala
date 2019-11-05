@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object WithdrawMitCircsSubmissionCommand {
   type Result = CreateMitCircsSubmissionCommand.Result

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait CasUsageImporter {
   // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa

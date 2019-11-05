@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.forms.{TextField, WordCountField}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.services._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 

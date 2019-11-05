@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object DepartmentTimetableCommand {

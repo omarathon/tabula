@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.admin.modules
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.{ValidationUtils, Errors}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}

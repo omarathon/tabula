@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

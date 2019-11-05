@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Au
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object StudentRelationshipTemplateCommand {
 
@@ -80,7 +80,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
     val formulaEvaluator = workbook.getCreationHelper.createFormulaEvaluator()
     val sheet = generateAllocationSheet(workbook)
     val allUniversityIds = allocations.map(_.entityId) ++ allocations.flatMap(_.students.map(_.universityId)) ++ unallocated.map(_.universityId)
-    val usercodes = userLookup.getUsersByWarwickUniIds(allUniversityIds).view.mapValues(_.getUserId).toMap
+    val usercodes = userLookup.usersByWarwickUniIds(allUniversityIds).view.mapValues(_.getUserId).toMap
 
     generateAgentLookupSheet(workbook, allocations, usercodes)
     generateAgentDropdowns(sheet, allocations, unallocated)

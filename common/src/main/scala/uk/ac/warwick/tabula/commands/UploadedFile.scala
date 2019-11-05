@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, Maintenan
 import uk.ac.warwick.tabula.system.{BindListener, NoBind}
 import uk.ac.warwick.util.virusscan.{VirusScanResult, VirusScanService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

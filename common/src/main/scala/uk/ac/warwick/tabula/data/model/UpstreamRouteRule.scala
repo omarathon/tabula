@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.LevelService
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 /**

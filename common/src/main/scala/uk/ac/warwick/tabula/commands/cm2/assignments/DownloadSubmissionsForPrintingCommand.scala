@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNo
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
   extends FreemarkerXHTMLPDFGeneratorComponent

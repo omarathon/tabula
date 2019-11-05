@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AuditEventService {
   def getById(id: Long): Option[AuditEvent]
@@ -160,7 +160,7 @@ class AuditEventServiceImpl extends AuditEventService {
     ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
       val query = session.createSQLQuery(idsSql)
       query.setParameterList("ids", group.asJava, StandardBasicTypes.LONG)
-      val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
+      val results = query.list.asScala.toSeq.asInstanceOf[Seq[Array[Object]]]
       addRelated(results.map(mapListToObject))
     }.toSeq
 
@@ -168,7 +168,7 @@ class AuditEventServiceImpl extends AuditEventService {
     ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
       val query = session.createSQLQuery(eventIdsSql)
       query.setParameterList("ids", group.asJava, StandardBasicTypes.STRING)
-      val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
+      val results = query.list.asScala.toSeq.asInstanceOf[Seq[Array[Object]]]
       results.map(mapListToObject).groupBy(_.eventId)
     }.toMap
 

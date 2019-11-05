@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepar
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 

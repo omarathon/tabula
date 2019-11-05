@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickAc
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 @Entity

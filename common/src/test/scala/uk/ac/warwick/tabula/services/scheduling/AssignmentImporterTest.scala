@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect._
 

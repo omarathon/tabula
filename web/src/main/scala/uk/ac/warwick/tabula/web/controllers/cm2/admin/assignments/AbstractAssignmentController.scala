@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class AbstractAssignmentController extends CourseworkController with CurrentAcademicYear {
   val createMode: String = "new"

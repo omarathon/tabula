@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.system
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.Stream
 import java.lang.annotation.Annotation
 import javax.servlet.ServletRequest

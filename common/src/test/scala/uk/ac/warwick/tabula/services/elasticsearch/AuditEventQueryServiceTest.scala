@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.{ElasticsearchTestBase, MockUserLookup, Mockito}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
 
 class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {

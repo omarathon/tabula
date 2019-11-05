@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService,
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators

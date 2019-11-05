@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.{Daoisms, AutowiringSmallGroupDaoComponent, SessionComponent, SmallGroupDaoComponent}
 import uk.ac.warwick.tabula.data.Transactions._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 trait UpdatesStudentMembership {

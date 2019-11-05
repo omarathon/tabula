@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.forms.{Extension, FormFieldContext, TextF
 import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase with Mockito {

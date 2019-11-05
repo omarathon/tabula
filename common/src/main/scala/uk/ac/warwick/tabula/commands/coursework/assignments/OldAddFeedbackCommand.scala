@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._

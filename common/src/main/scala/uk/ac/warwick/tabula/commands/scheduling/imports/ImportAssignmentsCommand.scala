@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.scheduling.{AssignmentImporterComponent, Au
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object ImportAssignmentsCommand {

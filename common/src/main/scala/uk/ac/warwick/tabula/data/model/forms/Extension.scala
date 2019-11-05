@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 @Entity

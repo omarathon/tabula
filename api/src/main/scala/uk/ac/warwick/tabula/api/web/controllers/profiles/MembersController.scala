@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONErrorView, JSONView}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/v1/members"))

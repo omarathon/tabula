@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 @Controller

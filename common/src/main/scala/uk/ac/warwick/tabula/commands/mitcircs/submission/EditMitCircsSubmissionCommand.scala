@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditMitCircsSubmissionCommand {
   def apply(submission: MitigatingCircumstancesSubmission, creator: User) =

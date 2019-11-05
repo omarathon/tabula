@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, Submiss
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 // scalastyle:off magic.number

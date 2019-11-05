@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.scheduling.{DepartmentInfo, ModuleInfo}
 import uk.ac.warwick.tabula.system.permissions.Public
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 /** This command is intentionally Public. It only exists on dev and is designed,

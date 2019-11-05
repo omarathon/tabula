@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, ToEntityReference}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AssignmentClosedTrigger {
   def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): AssignmentClosedTrigger = {

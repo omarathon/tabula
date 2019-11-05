@@ -71,8 +71,13 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
     mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
     mockAttendanceMonitoringService.getCheckpoints(Seq(assignmentPoint), Seq(student)) returns Map()
     mockAttendanceMonitoringService.studentAlreadyReportedThisTerm(student, assignmentPoint) returns false
-    mockAttendanceMonitoringService.setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
-      ((Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
+
+    val setAttendanceResult: (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) =
+      (
+        Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)),
+        Seq[AttendanceMonitoringCheckpointTotal]()
+      )
+    mockAttendanceMonitoringService.setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns setAttendanceResult
 
     mockAssignmentService.getSubmissionsForAssignmentsBetweenDates(
       student.userId,
@@ -162,12 +167,13 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   @Test
   def checkpointAlreadyExists() {
     new Fixture {
-      mockAttendanceMonitoringService.getCheckpoints(Seq(assignmentPoint), Seq(student)) returns
-        Map(
-          student -> Map(
-            assignmentPoint -> Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)
-          )
+      val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
+        student -> Map(
+          assignmentPoint -> Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)
         )
+      )
+      mockAttendanceMonitoringService.getCheckpoints(Seq(assignmentPoint), Seq(student)) returns checkpoints
+
       service.getCheckpoints(submission).size should be(0)
     }
   }

@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import org.slf4j.LoggerFactory
 import ch.qos.logback
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object TestLoggerFactory {
 

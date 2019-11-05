@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, 
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, NormalCATSLoadServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ManageNormalCATSLoadCommand {
 

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormField
 import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {

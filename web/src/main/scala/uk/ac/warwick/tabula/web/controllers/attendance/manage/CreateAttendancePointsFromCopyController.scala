@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMo
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/copy"))

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{CurrentUser, WorkflowStages}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 
 case class EnhancedMarkerFeedback(
@@ -178,7 +178,7 @@ trait MarkerProgress extends TaskBenchmarking {
     val usercodes = feedbackByStage.values.flatten.map(_.feedback.usercode).toSet
     val students = {
       if (usercodes.isEmpty) Map.empty[String, User]
-      else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+      else usercodes.toSeq.grouped(100).map(userLookup.usersByUserIds).reduce(_ ++ _)
     }.withDefault(new AnonymousUser(_))
 
     feedbackByStage.view.mapValues(mfs => mfs.flatMap(mf => {

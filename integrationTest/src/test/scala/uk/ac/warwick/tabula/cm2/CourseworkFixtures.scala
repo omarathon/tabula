@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, LoginDetails}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 

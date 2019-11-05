@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionD
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object AddSitsAssignmentsCommand {

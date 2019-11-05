@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object Submission {

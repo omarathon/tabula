@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.CM2MarkingWorkflowDao
 import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, SingleMarker, _}

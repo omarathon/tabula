@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceCompone
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridOvercatCommand {
   def overcatIdentifier(seq: Seq[_]): String = seq.map {

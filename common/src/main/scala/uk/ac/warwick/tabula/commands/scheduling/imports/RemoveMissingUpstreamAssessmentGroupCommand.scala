@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup: UpstreamAssessmentGroup) extends Command[Unit] with AutowiringAssessmentMembershipServiceComponent {
 

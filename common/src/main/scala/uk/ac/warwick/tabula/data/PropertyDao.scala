@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.springframework.stereotype.Repository
 

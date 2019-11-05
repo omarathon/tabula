@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{ApacheHttpClientComponent, AutowiringApach
 import uk.ac.warwick.util.cache.{Cache, CacheEntryFactory, Caches}
 import uk.ac.warwick.util.web.Uri
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.parsing.json.JSON
 import scala.util.{Failure, Success, Try}
 

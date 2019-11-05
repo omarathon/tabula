@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 sealed trait SmallGroupSetFilter {
   def description: String

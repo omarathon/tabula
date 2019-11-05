@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, ExtendedAcademicYear => JExtendedAcademicYear, Term => JTerm, Vacation => JVacation}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 /**

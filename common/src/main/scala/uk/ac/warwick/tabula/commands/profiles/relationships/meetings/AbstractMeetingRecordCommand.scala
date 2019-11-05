@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMe
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 abstract class AbstractMeetingRecordCommand {

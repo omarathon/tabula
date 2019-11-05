@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateStudentsToGroupsCommand {
   def apply(module: Module, set: SmallGroupSet, viewer: CurrentUser) =
@@ -100,7 +100,7 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
     val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
     // work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.toSeq.map(_.universityId).filter(_.hasText)).values.toSet
+    val allocateUsers = userLookup.usersByWarwickUniIds(allocations.asScala.toSeq.map(_.universityId).filter(_.hasText)).values.toSet
     val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
     for (user <- usersToAddToSet) set.members.add(user)
 

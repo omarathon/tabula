@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.Try

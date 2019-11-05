@@ -28,7 +28,7 @@ ext {
   jacksonVersion = "2.9.10"
   jacksonDatabindVersion = "2.9.10.1"
   jacksonScalaModuleVersion = "2.9.10"
-  elasticsearchVersion = "6.5.2"
+  elasticsearchVersion = "6.7.2"
   elastic4sVersion = "6.7.3"
   poiVersion = "4.1.1"
   tilesVersion = "3.0.8"

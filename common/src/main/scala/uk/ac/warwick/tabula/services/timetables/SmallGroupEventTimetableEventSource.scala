@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 trait SmallGroupEventTimetableEventSourceComponent {

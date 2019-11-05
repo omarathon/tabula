@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/schedule/{meetingRecord}/confirm"))

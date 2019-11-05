@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MarkItemTest extends TestBase with Mockito {
 

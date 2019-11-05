@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.validators
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.JavaImports._
@@ -24,7 +24,7 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
     } else if (alreadyHasCode) {
       errors.rejectValue(pathName, "userId.duplicate")
     } else {
-      val users = userLookup.getUsersByUserIds(trimmedCodes).values
+      val users = userLookup.usersByUserIds(trimmedCodes).values
       // Uses find() so we'll only show one missing user at any one time. Could change this to
       // use filter() and combine the result into one error message listing them all.
       val anonUsers = users.find {

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, DepartmentMarkingDescriptor, MarkingDescriptor}
 import uk.ac.warwick.tabula.services.{AutowiringMarkingDescriptorServiceComponent, MarkingDescriptorServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AddMarkingDescriptorCommand {
   def apply(department: Department): Appliable[MarkingDescriptor] with ModifyMarkingDescriptorState =

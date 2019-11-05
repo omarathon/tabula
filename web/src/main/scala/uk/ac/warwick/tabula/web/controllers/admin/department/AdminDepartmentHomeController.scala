@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.{AdminController, AdminDepartmentsModulesAndRoutes}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}"))

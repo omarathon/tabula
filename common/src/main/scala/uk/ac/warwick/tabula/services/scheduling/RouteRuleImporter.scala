@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, 
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.exams.grids.AutowiringUpstreamModuleListServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.matching.Regex
 
 

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNo
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: CurrentUser)
   extends UploadFeedbackCommand[Seq[Feedback]](assignment, marker) with Notifies[Seq[Feedback], Feedback] {

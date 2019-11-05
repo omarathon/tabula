@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.HibernateHelpers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command

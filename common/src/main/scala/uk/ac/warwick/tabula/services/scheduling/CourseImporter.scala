@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait CourseImporter extends Logging {
   var courseDao: CourseDao = Wire[CourseDao]

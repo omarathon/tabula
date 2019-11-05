@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.{SmallGroupService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait SmallGroupFixture extends Mockito {
 
@@ -44,10 +44,10 @@ trait SmallGroupFixture extends Mockito {
   when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
   when(userLookup.getUserByUserId(tutor3.getUserId)).thenReturn(tutor3)
   // UserGroup does batched lookups for users when resolving by UserId...
-  when(userLookup.getUsersByUserIds(Seq(tutor1.getUserId, tutor2.getUserId).asJava)).thenReturn(Map("tutor1" -> tutor1, "tutor2" -> tutor2).asJava)
+  when(userLookup.usersByUserIds(Seq(tutor1.getUserId, tutor2.getUserId))).thenReturn(Map("tutor1" -> tutor1, "tutor2" -> tutor2))
 
   val students = Seq(student1, student2)
-  userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
+  userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { ids: Any =>
     ids match {
       case ids: Seq[String@unchecked] =>
         ids.map(id => (id, students.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 import scala.collection.parallel.CollectionConverters._
 

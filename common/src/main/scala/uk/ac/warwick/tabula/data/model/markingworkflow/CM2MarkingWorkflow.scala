@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheManager}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.{ListMap, SortedSet}
 
 object CM2MarkingWorkflow {

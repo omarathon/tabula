@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ApproveMeetingRecordCommand {
   def apply(meeting: MeetingRecord, user: CurrentUser) =

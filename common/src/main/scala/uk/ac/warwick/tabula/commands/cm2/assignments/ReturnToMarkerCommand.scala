@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceCompone
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ReturnToMarkerCommand {
   def apply(assignment: Assignment, user: CurrentUser) = new ReturnToMarkerCommandInternal(assignment, user)

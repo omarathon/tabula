@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, Smal
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 abstract class AbstractImportSmallGroupEventsFromExternalSystemController extends SmallGroupEventsController {

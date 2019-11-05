@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.AutowiringApacheHttpClientComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.parsing.json.JSON
 
 case class DepartmentInfo(fullName: String, shortName: String, code: String, faculty: String, parentCode: Option[String] = None, filterName: Option[String] = None)

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.Queue
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AttendanceMonitoringServiceComponent {
   def attendanceMonitoringService: AttendanceMonitoringService

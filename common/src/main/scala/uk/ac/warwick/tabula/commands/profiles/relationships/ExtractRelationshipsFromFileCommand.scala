@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 case class ExtractRelationshipsFromFileCommandRow(

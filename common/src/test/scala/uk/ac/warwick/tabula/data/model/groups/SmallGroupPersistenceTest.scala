@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{FieldAccessByReflection, PersistenceTestBase, Acade
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import org.springframework.transaction.annotation.Transactional
 import org.joda.time.LocalTime
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.ModuleDaoImpl
 import org.junit.Before

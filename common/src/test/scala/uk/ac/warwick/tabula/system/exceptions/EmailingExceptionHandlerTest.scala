@@ -12,7 +12,7 @@ import javax.mail.internet.MimeMessage
 import uk.ac.warwick.tabula.Mockito
 import javax.mail.Session
 import java.util.Properties
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.hamcrest.Matcher
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description

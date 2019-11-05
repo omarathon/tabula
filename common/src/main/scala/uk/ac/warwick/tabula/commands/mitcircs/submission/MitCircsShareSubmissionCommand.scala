@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsShareSubmissionCommand {
   type AddCommand =
@@ -72,7 +72,7 @@ trait MitCircsShareSubmissionValidation extends GrantRoleCommandValidation {
   override def validate(errors: Errors) {
     super.validate(errors)
 
-    val students = userLookup.getUsersByUserIds(usercodes.asScala.toSeq).values.filter(_.isStudent)
+    val students = userLookup.usersByUserIds(usercodes.asScala.toSeq).values.filter(_.isStudent)
     if(students.nonEmpty)
       errors.rejectValue("usercodes", "mitigatingCircumstances.submission.share.noStudents", Array(students.map(_.getFullName).mkString(", ")), "")
   }

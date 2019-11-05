@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamRouteRuleLookup
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidentialWatermarkToDocument {
 

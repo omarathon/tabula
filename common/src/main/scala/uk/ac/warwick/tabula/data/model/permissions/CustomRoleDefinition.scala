@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, HibernateVersio
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

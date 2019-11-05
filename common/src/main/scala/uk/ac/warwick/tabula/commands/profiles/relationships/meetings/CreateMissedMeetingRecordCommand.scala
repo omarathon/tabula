@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CreateMissedMeetingRecordCommand {
   def apply(creator: Member, relationships: Seq[StudentRelationship]) =

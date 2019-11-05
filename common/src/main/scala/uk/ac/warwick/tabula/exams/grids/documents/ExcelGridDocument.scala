@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServic
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProgressionServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ExcelGridDocument extends ExamGridDocumentPrototype {
   override val identifier: String = "ExcelGrid"

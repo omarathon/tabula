@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroupInfo, UserGroup}
 import uk.ac.warwick.tabula.roles.AssignmentSubmitter
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditMarkingWorkflowCommand {
   def apply(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow) =
@@ -165,7 +165,7 @@ trait ModifyMarkingWorkflowState {
 
   var sampler: ModerationSampler = _
 
-  def markersAUsers: Seq[User] = userLookup.getUsersByUserIds(markersA.asScala.toSeq).values.toSeq
+  def markersAUsers: Seq[User] = userLookup.usersByUserIds(markersA.asScala.toSeq).values.toSeq
 
-  def markersBUsers: Seq[User] = userLookup.getUsersByUserIds(markersB.asScala.toSeq).values.toSeq
+  def markersBUsers: Seq[User] = userLookup.usersByUserIds(markersB.asScala.toSeq).values.toSeq
 }

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** A MarkingWorkflow defines how an assessment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions

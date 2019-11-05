@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringRelationshipServiceComponent, ModuleAndDepartmentServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DisplaySettingsCommand {
   def apply(department: Department) =

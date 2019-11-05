@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, 
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object BulkMeetingRecordCommand {
   def apply(studentRelationships: Seq[StudentRelationship], creator: Member) =

@@ -70,8 +70,12 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
     service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()
     service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns false
-    service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true) returns
-      ((Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
+
+    val setAttendanceResult: (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = (
+      Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended)),
+      Seq[AttendanceMonitoringCheckpointTotal]()
+    )
+    service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true) returns setAttendanceResult
 
   }
 
@@ -176,12 +180,13 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   @Test
   def checkpointAlreadyExists() {
     new Fixture {
-      service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns
-        Map(
-          student -> Map(
-            smallGroupPoint -> Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended)
-          )
+      val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
+        student -> Map(
+          smallGroupPoint -> Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended)
         )
+      )
+      service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns checkpoints
+
       service.getCheckpoints(Seq(attendance)).size should be(0)
 
     }

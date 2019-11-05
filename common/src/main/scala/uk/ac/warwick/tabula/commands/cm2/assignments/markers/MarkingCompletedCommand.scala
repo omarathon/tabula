@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MarkingCompletedCommand {
   def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =

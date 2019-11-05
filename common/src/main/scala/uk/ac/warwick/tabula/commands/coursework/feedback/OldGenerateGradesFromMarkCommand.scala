@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, AssessmentMember
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OldGenerateGradesFromMarkCommand {
   def apply(module: Module, assessment: Assessment) =

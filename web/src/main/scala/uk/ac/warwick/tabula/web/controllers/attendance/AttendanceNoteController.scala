@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/note/{academicYear}/{student}/{point}"))

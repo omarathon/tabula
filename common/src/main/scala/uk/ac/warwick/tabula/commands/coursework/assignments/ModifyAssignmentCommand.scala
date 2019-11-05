@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime

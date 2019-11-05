@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 object ListEnhancedAssignmentsCommand {

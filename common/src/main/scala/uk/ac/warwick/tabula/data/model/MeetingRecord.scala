@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object MeetingRecord {

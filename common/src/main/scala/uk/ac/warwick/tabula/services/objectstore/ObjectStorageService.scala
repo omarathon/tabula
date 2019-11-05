@@ -30,7 +30,7 @@ import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
 import uk.ac.warwick.util.files.hash.FileHashResolver
 import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 object ObjectStorageService {

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.controllers.{DepartmentScopedController, Departm
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class CopySmallGroupSetsController extends GroupsController {
 

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaOrder, ScalaRestriction
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class FilterStudentsCommandTest extends TestBase with Mockito {

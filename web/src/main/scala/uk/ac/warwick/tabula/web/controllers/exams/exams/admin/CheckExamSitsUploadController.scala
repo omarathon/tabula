@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/{feedback}/check-sits"))

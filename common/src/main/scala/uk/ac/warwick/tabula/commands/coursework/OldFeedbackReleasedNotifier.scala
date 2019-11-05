@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Notification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.UserLookupComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait OldFeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 

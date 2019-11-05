@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent, ProfileServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object SearchStudentsInSmallGroupSetCommand {

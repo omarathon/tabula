@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be

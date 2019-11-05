@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
 import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object PassListDocument extends ExamGridDocumentPrototype {
   override val identifier: String = "PassList"

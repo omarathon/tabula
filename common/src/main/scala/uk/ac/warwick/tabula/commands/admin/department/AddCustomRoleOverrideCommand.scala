@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AddCustomRoleOverrideCommand {
   def apply(department: Department, customRoleDefinition: CustomRoleDefinition) =

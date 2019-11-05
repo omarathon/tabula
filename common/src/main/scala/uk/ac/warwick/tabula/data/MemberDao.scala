@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.reflect.ClassTag
 

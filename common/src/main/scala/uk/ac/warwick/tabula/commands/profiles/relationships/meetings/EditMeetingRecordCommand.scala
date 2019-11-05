@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AutowiringAttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditMeetingRecordCommand {
   def apply(meetingRecord: MeetingRecord) =

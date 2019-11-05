@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class FeedbackTemplateCommand(val department: Department)
   extends Command[Seq[FeedbackTemplate]] with Daoisms with BindListener {

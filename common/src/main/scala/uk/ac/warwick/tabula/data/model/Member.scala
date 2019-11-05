@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 

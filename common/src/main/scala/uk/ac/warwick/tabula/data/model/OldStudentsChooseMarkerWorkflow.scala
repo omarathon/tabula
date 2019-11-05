@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
 import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

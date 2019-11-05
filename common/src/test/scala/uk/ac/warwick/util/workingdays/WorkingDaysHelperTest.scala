@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class WorkingDaysHelperTest extends TestBase {
 

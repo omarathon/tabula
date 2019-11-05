@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.Selec
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Filters a set of "Student" case objects (which are a representation of the current

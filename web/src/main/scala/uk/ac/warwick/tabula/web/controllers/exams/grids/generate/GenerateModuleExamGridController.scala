@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateModuleExamGridMappingParameters {
   final val selectModule = "selectModule"

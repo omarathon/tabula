@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object RequestExtensionCommand {

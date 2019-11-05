@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Award
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AwardImporter extends Logging {
   var awardDao: AwardDao = Wire[AwardDao]

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ExamsAdminDepartmentHomeCommand(val department: Department, val academicYear: AcademicYear, val user: CurrentUser) extends Command[Seq[Module]]
   with ReadOnly with Unaudited with AutowiringSecurityServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringAssessmentServiceComponent {

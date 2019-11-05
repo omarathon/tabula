@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Tap._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait FeedbackReleasedNotifier extends Notifies[Seq[Feedback], Seq[MarkerFeedback]] {
 

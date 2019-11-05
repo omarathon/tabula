@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserLook
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PackageScanner, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {

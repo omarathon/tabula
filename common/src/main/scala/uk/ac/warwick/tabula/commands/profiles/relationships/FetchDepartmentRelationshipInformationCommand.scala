@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{ItemNotFoundException, UniversityId}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FetchDepartmentRelationshipInformationCommand {
 

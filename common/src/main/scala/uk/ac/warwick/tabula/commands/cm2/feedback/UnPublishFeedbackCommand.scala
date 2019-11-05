@@ -74,7 +74,7 @@ trait UnPublishFeedbackDescription extends Describable[Seq[Feedback]] {
   override lazy val eventName: String = "UnPublishFeedback"
 
   override def describe(d: Description) {
-    val students = userLookup.getUsersByUserIds(feedbackToUnPublish.map(_.usercode)).values.toSeq
+    val students = userLookup.usersByUserIds(feedbackToUnPublish.map(_.usercode)).values.toSeq
     d.assignment(assignment)
       .studentIds(students.flatMap(m => Option(m.getWarwickId)))
       .studentUsercodes(students.map(_.getUserId))

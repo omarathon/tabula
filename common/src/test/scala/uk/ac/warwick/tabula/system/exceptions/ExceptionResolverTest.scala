@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.system.exceptions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{CurrentUser, Features, ItemNotFoundException, Mockito, PermissionDeniedException, RequestInfo, TestBase}
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import javax.servlet.http.HttpServletRequest

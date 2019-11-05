@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AutowiringTopLevelUrlComponent}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 import scala.util.Using
 
