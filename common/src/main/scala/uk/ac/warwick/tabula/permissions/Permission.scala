@@ -149,6 +149,7 @@ object Permissions {
   case object ViewObjectStorage extends ScopelessPermission("View and search object storage")
   case object DownloadZipFromJob extends ScopelessPermission("Download ZIP file from Job")
   case object ManageSyllabusPlusLocations extends ScopelessPermission("Manage Syllabus+ location mappings")
+  case object ReviewMitCircsDepartments extends ScopelessPermission("See a list of students without a valid mitcircs department")
 
   // Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
   case object Masquerade extends Permission("Masquerade as other users")
@@ -206,7 +207,6 @@ object Permissions {
     case object CheckForPlagiarism extends Permission("Check a coursework submission for plagiarism")
     case object SendReceipt extends Permission("Send a receipt for a coursework submission")
     case object ReleaseForMarking extends Permission("Release a coursework submission for marking")
-    case object ViewUrkundPlagiarismStatus extends Permission("View Urkund plagiarism status for a coursework submission")
     case object Create extends Permission("Add a coursework submission")
     case object Read extends Permission("View a coursework submission")
     case object Update extends Permission("Edit a coursework submission")

@@ -22,8 +22,7 @@ import scala.jdk.CollectionConverters._
 class MitigatingCircumstancesMessage extends GeneratedId
   with ToString
   with Serializable
-  with ToEntityReference
-  with FormattedHtml {
+  with ToEntityReference {
     type Entity = MitigatingCircumstancesMessage
 
   def this(submission: MitigatingCircumstancesSubmission, sender: User) {
@@ -42,7 +41,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   def message: String = Option(encryptedMessage).map(_.toString).orNull
   def message_=(message: String): Unit = encryptedMessage = message
 
-  def formattedMessage: TemplateHTMLOutputModel = formattedHtml(message.toString)
+  def formattedMessage: TemplateHTMLOutputModel = FormattedHtml(message.toString)
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")

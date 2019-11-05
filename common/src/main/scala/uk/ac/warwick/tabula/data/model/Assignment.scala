@@ -87,8 +87,7 @@ class Assignment
     with HasSettings
     with PostLoadBehaviour
     with Serializable
-    with ToEntityReference
-    with FormattedHtml {
+    with ToEntityReference {
 
   import uk.ac.warwick.tabula.data.model.Assignment._
 
@@ -187,7 +186,7 @@ class Assignment
 
   var genericFeedback: String = _
 
-  def genericFeedbackFormattedHtml: TemplateHTMLOutputModel = formattedHtml(genericFeedback)
+  def genericFeedbackFormattedHtml: TemplateHTMLOutputModel = FormattedHtml(genericFeedback)
 
   @Column(name = "turnitin_id")
   var turnitinId: String = _

@@ -43,7 +43,7 @@ object AbstractMeetingRecord {
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted
-  with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
+  with ToEntityReference with MeetingRecordAttachments {
 
   type Entity = AbstractMeetingRecord
 
@@ -144,7 +144,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
   @Column(name = "missed_reason")
   var missedReason: String = _
 
-  def escapedDescription: TemplateHTMLOutputModel = formattedHtml(description)
+  def escapedDescription: TemplateHTMLOutputModel = FormattedHtml(description)
 
   def this(creator: Member, relationship: StudentRelationship) {
     this()

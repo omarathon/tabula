@@ -645,7 +645,7 @@ trait ApplicantProperties {
 
 }
 
-trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber with FormattedHtml {
+trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {
 
   /**
     * The student's hall of residence. Unlike address this is data entered into SITS by an Accommodation process so it should be in a reliable format.
@@ -674,7 +674,7 @@ trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber w
   @Restricted(Array("Profiles.Read.ReasonableAdjustmentsNotes"))
   var reasonableAdjustmentsNotes: String = _
 
-  def formattedReasonableAdjustmentsNotes: TemplateHTMLOutputModel = formattedHtml(reasonableAdjustmentsNotes)
+  def formattedReasonableAdjustmentsNotes: TemplateHTMLOutputModel = FormattedHtml(reasonableAdjustmentsNotes)
 }
 
 trait RestrictedPhoneNumber {

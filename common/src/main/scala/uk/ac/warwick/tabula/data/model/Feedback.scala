@@ -175,7 +175,7 @@ trait CM1WorkflowSupport {
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference with CM1WorkflowSupport {
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with AssessmentFeedback with ToEntityReference with CM1WorkflowSupport {
 
   var uploaderId: String = _
 
@@ -381,7 +381,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
       }.value = value
   }
 
-  def commentsFormattedHtml: TemplateHTMLOutputModel = formattedHtml(comments)
+  def commentsFormattedHtml: TemplateHTMLOutputModel = FormattedHtml(comments)
 
   def hasContent: Boolean = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 

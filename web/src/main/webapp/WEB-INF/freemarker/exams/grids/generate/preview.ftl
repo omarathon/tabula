@@ -66,7 +66,7 @@
               <strong>
                 Please note that all Examination Boards are required to be conducted anonymously and student names should be
                 removed from/hidden in electronic or hard-copy versions of the grid used at the Exam Board meeting.
-                If you wish to query this requirement, please contact Teaching Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
+                If you wish to query this requirement, please contact Education Policy and Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
               </strong>
             </p>
           </div>

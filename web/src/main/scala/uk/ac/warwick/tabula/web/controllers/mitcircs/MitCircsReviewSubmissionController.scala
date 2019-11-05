@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import MitCircsReviewPanelSubmissionController._
 import uk.ac.warwick.tabula.CurrentUser
 
-abstract class AbstractMitCircsReviewSubmissionController extends BaseController with FormattedHtml {
+abstract class AbstractMitCircsReviewSubmissionController extends BaseController {
   @ModelAttribute("command")
   def command(@PathVariable submission: MitigatingCircumstancesSubmission): ReviewMitCircsSubmissionCommand.Command =
     ReviewMitCircsSubmissionCommand(mandatory(Option(submission).filterNot(_.isDraft).orNull))
@@ -22,7 +22,7 @@ abstract class AbstractMitCircsReviewSubmissionController extends BaseController
       "submission" -> result.submission,
       "reasonableAdjustments" -> result.reasonableAdjustments,
       "reasonableAdjustmentsNotes" -> result.reasonableAdjustmentsNotes,
-      "formattedReasonableAdjustmentsNotes" -> formattedHtml(result.reasonableAdjustmentsNotes),
+      "formattedReasonableAdjustmentsNotes" -> FormattedHtml(result.reasonableAdjustmentsNotes),
       "otherMitigatingCircumstancesSubmissions" -> result.otherMitigatingCircumstancesSubmissions,
       "relevantExtensions" -> result.relevantExtensions,
       "isPanelChair" -> submission.panel.exists(_.chair == currentUser.apparentUser)

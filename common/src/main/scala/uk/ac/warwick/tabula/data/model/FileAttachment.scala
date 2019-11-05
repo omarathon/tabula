@@ -182,10 +182,6 @@ class FileAttachment extends GeneratedId {
     Option(originalityReport).exists(or => Seq(Created, Processing, Complete).contains(or.tcaSubmissionStatus))
   }
 
-  def urkundResponseReceived: Boolean = {
-    originalityReport != null && originalityReport.reportUrl != null
-  }
-
   def generateToken(): FileAttachmentToken = {
     val token = new FileAttachmentToken
     token.fileAttachmentId = this.id

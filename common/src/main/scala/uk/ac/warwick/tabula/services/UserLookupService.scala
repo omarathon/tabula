@@ -93,6 +93,15 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
     ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
 
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] = {
+    super.getUsersByWarwickUniIds(warwickUniIds).asScala.map { case (uniId, userFromSSO) =>
+      if (userFromSSO.isFoundUser) (uniId, userFromSSO) else profileService.getMemberByUniversityId(uniId) match {
+        case Some(member) => (uniId, sandboxUser(member))
+        case _ => (uniId, userFromSSO)
+      }
+    }.asJava
+  }
+
   override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByUserId", id) {
     profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
       .map(sandboxUser)
