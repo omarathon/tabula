@@ -149,6 +149,7 @@ object Permissions {
   case object ViewObjectStorage extends ScopelessPermission("View and search object storage")
   case object DownloadZipFromJob extends ScopelessPermission("Download ZIP file from Job")
   case object ManageSyllabusPlusLocations extends ScopelessPermission("Manage Syllabus+ location mappings")
+  case object ReviewMitCircsDepartments extends ScopelessPermission("See a list of students without a valid mitcircs department")
 
   // Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
   case object Masquerade extends Permission("Masquerade as other users")
