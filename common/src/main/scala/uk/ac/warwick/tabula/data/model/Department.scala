@@ -38,8 +38,7 @@ class Department extends GeneratedId
   with PermissionsTarget
   with Serializable
   with ToEntityReference
-  with Logging
-  with FormattedHtml {
+  with Logging {
 
   import Department._
 
@@ -299,7 +298,7 @@ class Department extends GeneratedId
   def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
 
   def mitCircsGuidance: String = getStringSetting(Settings.MitCircsGuidance).orNull
-  def formattedMitCircsGuidance: TemplateHTMLOutputModel = formattedHtml(mitCircsGuidance.maybeText)
+  def formattedMitCircsGuidance: TemplateHTMLOutputModel = FormattedHtml(mitCircsGuidance.maybeText)
   def mitCircsGuidance_=(guidelines: String): Unit = settings += (Settings.MitCircsGuidance -> guidelines)
 
   def nameToShow: ExamGridStudentIdentificationColumnValue =

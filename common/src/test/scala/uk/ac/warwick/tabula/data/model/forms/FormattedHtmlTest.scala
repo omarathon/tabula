@@ -4,8 +4,6 @@ import uk.ac.warwick.tabula.TestBase
 
 class FormattedHtmlTest extends TestBase {
 
-  val formatter = new FormattedHtml {}
-
   @Test
   def normal(): Unit = {
     val input =
@@ -14,7 +12,7 @@ class FormattedHtmlTest extends TestBase {
         				|
         				|I hope you like it
       			""".stripMargin
-    val output = formatter.formattedHtml(input)
+    val output = FormattedHtml(input)
 
     output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it</p>")
   }
@@ -22,7 +20,7 @@ class FormattedHtmlTest extends TestBase {
   @Test
   def singleLine(): Unit = {
     val input = "Here is your feedback."
-    val output = formatter.formattedHtml(input)
+    val output = FormattedHtml(input)
 
     output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>")
   }
@@ -30,7 +28,7 @@ class FormattedHtmlTest extends TestBase {
   @Test
   def htmlEscaped(): Unit = {
     val input = """<a href="http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf">View Generic Feedback</a>"""
-    val output = formatter.formattedHtml(input)
+    val output = FormattedHtml(input)
 
     // TAB-6685 changed &quot; to &#34;
     // they are the same thing, and &quot; is preferred, but OWASP sanitiser preferred the latter, so i have to chenge this test case
@@ -48,7 +46,7 @@ class FormattedHtmlTest extends TestBase {
         				|
         				|[View Generic Feedback](http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf)
       			""".stripMargin
-    val output = formatter.formattedHtml(input)
+    val output = FormattedHtml(input)
 
     output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it.</p>\n<p><a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">View Generic Feedback</a></p>")
   }

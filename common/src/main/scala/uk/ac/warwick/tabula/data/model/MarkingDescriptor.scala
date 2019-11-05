@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Entity
 @Proxy
 @DiscriminatorColumn(name = "discriminator")
-sealed abstract class MarkingDescriptor extends GeneratedId with Serializable with FormattedHtml {
+sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
   @Column(name = "min_mark")
   var minMark: Int = _
 
@@ -19,7 +19,7 @@ sealed abstract class MarkingDescriptor extends GeneratedId with Serializable wi
   @Column(name = "text")
   var text: String = _
 
-  def formattedText: TemplateHTMLOutputModel = formattedHtml(text.maybeText)
+  def formattedText: TemplateHTMLOutputModel = FormattedHtml(text.maybeText)
 
   def minMarkPoint_=(markPoint: MarkPoint): Unit = {
     minMark = markPoint.mark
