@@ -104,7 +104,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
 
     assignment.academicYear = academicYear
     if (openEnded) {
-      assignment.openEndedReminderDate = openEndedReminderDate.toDateTime(Assignment.openTime)
+      assignment.openEndedReminderDate = Option(openEndedReminderDate).map(_.toDateTime(Assignment.openTime)).orNull
       assignment.closeDate = null
     } else {
       assignment.openEndedReminderDate = null
