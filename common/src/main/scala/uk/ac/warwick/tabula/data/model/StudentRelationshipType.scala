@@ -155,7 +155,7 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 
   def empty: Boolean = relationshipService.countStudentsByRelationship(this) == 0
 
-  def permissionsParents: Stream[Nothing] = Stream.empty
+  def permissionsParents: LazyList[PermissionsTarget] = LazyList.empty
 
   override def toString: String = "StudentRelationshipType(%s)".format(id)
 

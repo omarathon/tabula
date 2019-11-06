@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 
@@ -74,7 +74,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
       form(target)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(target, userCodes, role, "add")
     }
   }
@@ -87,7 +87,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
       form(target)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(target, userCodes, role, "remove")
     }
   }
@@ -99,7 +99,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
       form(target)
     } else {
       command.apply()
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(target, userCodes, None, "add")
     }
   }
@@ -112,7 +112,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
       form(target)
     } else {
       command.apply()
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(target, userCodes, None, "remove")
     }
   }

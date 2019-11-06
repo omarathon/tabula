@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
@@ -69,7 +69,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
       command.groupNames.add("Group D")
       command.groupNames.add("Group E")
 
-      val groups: mutable.Buffer[DepartmentSmallGroup] = command.applyInternal()
+      val groups: Seq[DepartmentSmallGroup] = command.applyInternal()
       groups.size should be(5)
 
       groups.head.name should be("Group A")
@@ -97,7 +97,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 
       command.onBind(smartMock[BindingResult])
 
-      val groups: mutable.Buffer[DepartmentSmallGroup] = command.applyInternal()
+      val groups: Seq[DepartmentSmallGroup] = command.applyInternal()
       groups should be(Seq(groupA, groupB, groupD))
 
       groupA.name should be("Group A")

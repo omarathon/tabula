@@ -108,7 +108,7 @@ trait OldGenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking
 
   mustBeLinked(assignment, module)
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.DownloadMarksTemplate, assignment)
   }
 
@@ -120,7 +120,7 @@ trait OldGenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking
 
   mustBeLinked(assignment, module)
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.DownloadMarksTemplate, assignment)
   }
 

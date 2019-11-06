@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
@@ -119,7 +119,7 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
-  def permissionsParents: Stream[PermissionsTarget] = Stream(Option(studentCourseDetails), Option(module)).flatten
+  def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
 
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()

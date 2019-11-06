@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import org.joda.time.LocalTime
-import org.mockito.Matchers._
-import uk.ac.warwick.tabula.JavaImports.JHashMap
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEvent}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{FreemarkerTestHelpers, SmallGroupEventBuilder, SmallGroupFixture, TestBase}
@@ -57,7 +56,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
       val output: String =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
           Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
-      verify(weekRangeFormatter.mock, times(2)).exec(anyList())
+      verify(weekRangeFormatter.mock, times(2)).exec(any[JList[_]])
     }
   }
 
@@ -67,7 +66,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
       val output: String =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
           Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
-      verify(timeBuilder.mock, times(2)).exec(anyList())
+      verify(timeBuilder.mock, times(2)).exec(any[JList[_]])
     }
   }
 

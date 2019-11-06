@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRec
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AbstractScheduledMeetingCommandInternal extends BindListener {
   self: AbstractScheduledMeetingRecordCommandState
@@ -42,8 +42,8 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
   def persistAttachments(meeting: ScheduledMeetingRecord) {
     // delete attachments that have been removed
     if (meeting.attachments != null) {
-      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-      val filesToRemove = meeting.attachments.asScala -- filesToKeep
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
+      val filesToRemove = meeting.attachments.asScala.toSeq diff filesToKeep
       meeting.attachments = JArrayList[FileAttachment](filesToKeep)
       fileAttachmentService.deleteAttachments(filesToRemove)
     }

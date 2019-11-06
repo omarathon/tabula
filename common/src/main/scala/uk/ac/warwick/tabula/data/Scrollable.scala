@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.{Session, ScrollableResults}
-import uk.ac.warwick.tabula.helpers.Closeables
+import org.hibernate.{ScrollableResults, Session}
 import java.io.Closeable
+
+import scala.util.Using
 
 object Scrollable {
   def apply[A](results: ScrollableResults, session: Session) =
@@ -67,7 +68,7 @@ class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFun
       } else throw new NoSuchElementException
     }
 
-    override def foreach[U](f: A => U): Unit = Closeables.closeThis(results) { r =>
+    override def foreach[U](f: A => U): Unit = Using.resource(results) { _ =>
       super.foreach { entity: A =>
         f(entity)
         safeEvict(entity)

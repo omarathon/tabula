@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 // scalastyle:off magic.number
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 trait ReportWorld extends TestBase with Mockito {
 
   var assignmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
-  assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
+  assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     val studentIds = assignment.members.knownType.includedUserIds
     val users = studentIds.map { userId =>
@@ -28,15 +28,17 @@ trait ReportWorld extends TestBase with Mockito {
   }
 
   val extensionService: ExtensionService = smartMock[ExtensionService]
-  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj =>
+  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     !assignment._extensions.isEmpty
   }
-  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj =>
+  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     assignment._extensions.asScala.filter(_.approved)
       .groupBy(_.usercode)
+      .view
       .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+      .toMap
   }
 
   val department = new Department
@@ -81,8 +83,7 @@ trait ReportWorld extends TestBase with Mockito {
 
   var auditEventQueryMethods: AuditEventQueryMethods = mock[AuditEventQueryMethods]
 
-  auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String], any[Option[String]]) answers { argsObj => {
-    val args = argsObj.asInstanceOf[Array[_]]
+  auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String], any[Option[String]]) answers { args: Array[AnyRef] => {
     val assignment = args(0).asInstanceOf[Assignment]
     val warwickId = args(1).asInstanceOf[String]
     Future.successful(auditEvents.filter(event => {
@@ -93,15 +94,14 @@ trait ReportWorld extends TestBase with Mockito {
 
 
   var submissionService: SubmissionService = mock[SubmissionService]
-  submissionService.getSubmissionsByAssignment(any[Assignment]) answers { assignmentObj =>
+  submissionService.getSubmissionsByAssignment(any[Assignment]) answers { assignmentObj: Any =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
-    assignment.submissions.asScala
+    assignment.submissions.asScala.toSeq
   }
 
 
   var feedbackService: FeedbackService = mock[FeedbackService]
-  feedbackService.getAssignmentFeedbackByUsercode(any[Assignment], any[String]) answers { argsObj => {
-    val args = argsObj.asInstanceOf[Array[_]]
+  feedbackService.getAssignmentFeedbackByUsercode(any[Assignment], any[String]) answers { args: Array[AnyRef] => {
     val assignment = args(0).asInstanceOf[Assignment]
     val usercode = args(1).asInstanceOf[String]
     assignment.feedbacks.asScala.find(_.usercode == usercode)

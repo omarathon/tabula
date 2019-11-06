@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.classTag
 
 object ExtensionSettingsCommand {

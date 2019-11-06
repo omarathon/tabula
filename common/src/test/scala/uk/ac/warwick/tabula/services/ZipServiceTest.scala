@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ZipServiceTest extends TestBase with Mockito {
 
@@ -41,12 +41,12 @@ class ZipServiceTest extends TestBase with Mockito {
   @Before def before() {
     userLookup = mock[UserLookupService]
 
-    userLookup.getUserByUserId(any[String]) answers { id =>
+    userLookup.getUserByUserId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getUserId == id
       } getOrElse new AnonymousUser()
     }
-    userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+    userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getWarwickId == id
       } getOrElse new AnonymousUser()

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OnlineModerationCommand {
   def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -116,7 +116,7 @@ abstract class OnlineModerationCommand(
     }
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.fieldValidation(errors)
 
     if (Option(approved).isEmpty)

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mockito {
@@ -102,7 +102,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
       command.students.add(user3) // user3 is a no-op because they are still in the group
       command.students.add(user4)
 
-      val results: mutable.Buffer[StudentNotInMembership] = command.applyInternal()
+      val results: Seq[StudentNotInMembership] = command.applyInternal()
       results.size should be(1)
 
       results.head.student.asUser should be(user4)

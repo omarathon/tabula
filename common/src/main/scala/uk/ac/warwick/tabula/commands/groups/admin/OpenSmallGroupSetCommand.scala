@@ -58,7 +58,7 @@ class OpenSmallGroupSet(val department: Department, val requestedSets: Seq[Small
 trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking {
   this: OpenSmallGroupSetState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (applicableSets.isEmpty) p.PermissionCheck(Permissions.SmallGroups.Update, department)
     else applicableSets.foreach(g => p.PermissionCheck(Permissions.SmallGroups.Update, g))
   }
@@ -66,7 +66,7 @@ trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking {
 
 trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]] {
   this: KnowsEventName with OpenSmallGroupSetState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.smallGroupSetCollection(applicableSets)
   }
 }

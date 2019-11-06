@@ -7,7 +7,7 @@ package uk.ac.warwick.tabula.helpers
 class ComposableOrdering[T](orderings: Ordering[T]*) extends Ordering[T] {
 
   override def compare(x: T, y: T): Int = {
-    orderings.toStream.map(_.compare(x, y)).find(_ != 0).getOrElse(0)
+    orderings.to(LazyList).map(_.compare(x, y)).find(_ != 0).getOrElse(0)
   }
 
 }

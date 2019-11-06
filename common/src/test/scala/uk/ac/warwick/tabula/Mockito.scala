@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 import org.mockito.verification.VerificationMode
 import org.specs2.matcher.Matchers._
+
 import scala.reflect.ClassTag
 
 trait Mockito extends org.specs2.mock.Mockito {
@@ -9,11 +10,11 @@ trait Mockito extends org.specs2.mock.Mockito {
 
   def isNotEq[A](arg: A): A = argThat(not(equalTo(arg))).asInstanceOf[A]
 
-  def isA[A](implicit tag: ClassTag[A]): A = org.mockito.Matchers.isA(tag.runtimeClass.asInstanceOf[Class[A]])
+  def isA[A](implicit tag: ClassTag[A]): A = org.mockito.ArgumentMatchers.isA(tag.runtimeClass.asInstanceOf[Class[A]])
 
   def isAn[A](implicit tag: ClassTag[A]): A = isA[A]
 
-  def isNull[A](implicit tag: ClassTag[A]): A = org.mockito.Matchers.isNull(tag.runtimeClass.asInstanceOf[Class[A]])
+  def isNull[A](implicit tag: ClassTag[A]): A = org.mockito.ArgumentMatchers.isNull()
 
   def reset[A](arg: A): Unit = org.mockito.Mockito.reset(arg)
 

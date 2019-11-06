@@ -37,7 +37,7 @@ trait ViewUnconfirmedMeetingRecordsPermissions extends RequiresPermissionsChecki
 
   self: ViewUnconfirmedMeetingRecordsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), department)
   }
 

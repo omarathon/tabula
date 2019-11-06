@@ -102,7 +102,7 @@ trait ModifySmallGroupValidation extends SelfValidating {
 trait CreateSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateSmallGroupCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(set))
   }
 }
@@ -110,7 +110,7 @@ trait CreateSmallGroupPermissions extends RequiresPermissionsChecking with Permi
 trait CreateSmallGroupDescription extends Describable[SmallGroup] {
   self: CreateSmallGroupCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 }
@@ -119,7 +119,7 @@ trait CreateSmallGroupDescription extends Describable[SmallGroup] {
 trait EditSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     mustBeLinked(smallGroup, set)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(smallGroup))
@@ -129,7 +129,7 @@ trait EditSmallGroupPermissions extends RequiresPermissionsChecking with Permiss
 trait EditSmallGroupDescription extends Describable[SmallGroup] {
   self: EditSmallGroupCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroup(smallGroup)
   }
 }

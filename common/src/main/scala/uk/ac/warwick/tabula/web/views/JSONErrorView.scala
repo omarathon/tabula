@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import org.springframework.http.HttpStatus
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.springframework.validation.Errors

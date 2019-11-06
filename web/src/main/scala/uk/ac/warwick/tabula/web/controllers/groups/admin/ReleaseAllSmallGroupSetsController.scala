@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/release"))
 @Controller
@@ -55,7 +55,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
         // if  no modules are selected, spring binds null, not an empty list :-(
         Nil
       } else {
-        checkedModules.asScala.flatMap(mod =>
+        checkedModules.asScala.toSeq.flatMap(mod =>
           mod.groupSets.asScala.filter(_.academicYear == academicYear)
         )
       }

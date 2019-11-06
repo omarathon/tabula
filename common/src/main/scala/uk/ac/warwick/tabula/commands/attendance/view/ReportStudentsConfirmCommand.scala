@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object ReportStudentsConfirmCommand {
@@ -67,7 +67,7 @@ trait ReportStudentsConfirmValidation extends SelfValidating {
 
   self: ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!availablePeriods.filter(_._2).map(_._1).contains(period)) {
       errors.rejectValue("availablePeriods", "attendanceMonitoringReport.invalidPeriod")
     }
@@ -85,7 +85,7 @@ trait ReportStudentsConfirmPermissions extends RequiresPermissionsChecking with 
 
   self: ReportStudentsConfirmCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Report, department)
   }
 
@@ -97,7 +97,7 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
 
   override lazy val eventName = "ReportStudentsConfirm"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.property("monitoringPeriod", period)
       .property("academicYear", academicYear.toString)
       .studentIds(studentMissedReportCounts.map(_.student.universityId))
@@ -118,5 +118,5 @@ trait ReportStudentsConfirmCommandState extends ReportStudentsChoosePeriodComman
   var students: JList[StudentMember] = LazyLists.create()
   var filterString: String = _
   var confirm: Boolean = false
-  override lazy val allStudents: mutable.Buffer[StudentMember] = students.asScala
+  override lazy val allStudents: Seq[StudentMember] = students.asScala.toSeq
 }

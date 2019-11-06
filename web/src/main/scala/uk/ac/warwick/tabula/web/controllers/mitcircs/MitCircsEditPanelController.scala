@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/mitcircs/panel/{panel}/edit"))

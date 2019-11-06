@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @RequestMapping(value = Array("/groups/event/{event}/register"))
 @Controller

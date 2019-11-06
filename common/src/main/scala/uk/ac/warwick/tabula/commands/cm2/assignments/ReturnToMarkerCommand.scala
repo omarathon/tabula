@@ -13,8 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceCompone
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
-
+import scala.jdk.CollectionConverters._
 
 object ReturnToMarkerCommand {
   def apply(assignment: Assignment, user: CurrentUser) = new ReturnToMarkerCommandInternal(assignment, user)
@@ -39,7 +38,7 @@ class ReturnToMarkerCommandInternal(val assignment: Assignment, val currentUser:
       targetIndex <= f.currentStageIndex
     })
 
-    returnedMarkerFeedback = cm2MarkingWorkflowService.returnFeedback(targetStages.asScala, feedbackToReturn).asJava
+    returnedMarkerFeedback = cm2MarkingWorkflowService.returnFeedback(targetStages.asScala.toSeq, feedbackToReturn).asJava
     feedbackToReturn
   }
 }
@@ -47,14 +46,14 @@ class ReturnToMarkerCommandInternal(val assignment: Assignment, val currentUser:
 trait ReturnToMarkerPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ReturnToMarkerState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
   }
 }
 
 trait ReturnToMarkerValidation extends SelfValidating {
   self: ReturnToMarkerRequest =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "return.marking.confirm")
     if (targetStages.isEmpty) errors.rejectValue("targetStages", "return.marking.targetStages")
   }
@@ -67,7 +66,7 @@ trait ReturnToMarkerDescription extends Describable[Seq[AssignmentFeedback]] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
@@ -99,7 +98,7 @@ trait ReturnToMarkerNotifier extends Notifies[Seq[AssignmentFeedback], Seq[Marke
   def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
 
     // emit notifications to each marker that has new feedback
-    val markerMap: Map[String, Seq[MarkerFeedback]] = returnedMarkerFeedback.asScala.groupBy(_.marker.getUserId)
+    val markerMap: Map[String, Seq[MarkerFeedback]] = returnedMarkerFeedback.asScala.toSeq.groupBy(_.marker.getUserId)
 
     markerMap.map { case (usercode, markerFeedback) =>
       val notification = Notification.init(new ReturnToMarkerNotification, user, markerFeedback, assignment)
@@ -114,9 +113,9 @@ trait ReturnToMarkerNotificationCompletion extends CompletesNotifications[Seq[As
   self: ReturnToMarkerRequest with ReturnToMarkerState with NotificationHandling =>
 
   def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
-    val notificationsToComplete = returnedMarkerFeedback.asScala.flatMap(mf =>
+    val notificationsToComplete = returnedMarkerFeedback.asScala.toSeq.flatMap(mf =>
       notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
-        notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+      notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
     )
     CompletesNotificationsResult(notificationsToComplete, user)
   }

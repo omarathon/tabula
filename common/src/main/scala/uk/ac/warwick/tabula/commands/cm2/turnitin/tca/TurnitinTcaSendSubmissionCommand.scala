@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceCo
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
@@ -49,7 +49,7 @@ extends CommandInternal[Result] {
 trait TurnitinTcaSendSubmissionState {
   def assignment: Assignment
   def user: User
-  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.flatMap(_.allAttachments).filter(_.originalityReport == null)
+  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(_.originalityReport == null)
 }
 
 trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
@@ -73,7 +73,7 @@ trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
 trait TurnitinTcaSendSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: TurnitinTcaSendSubmissionState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(assignment)
     p.PermissionCheck(RequiredPermission, assignment)
   }

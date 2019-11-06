@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEv
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait MeetingRecordAttachments {
   var attachments: JList[FileAttachment]
@@ -72,7 +72,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
     if (relationship != null) {
       Seq(relationship)
     } else {
-      _relationships.asScala
+      _relationships.asScala.toSeq
     }
   }
 
@@ -212,7 +212,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
     ))
   }
 
-  def permissionsParents: Stream[StudentCourseDetails] = relationships.map(_.studentCourseDetails).toStream
+  def permissionsParents: LazyList[StudentCourseDetails] = relationships.map(_.studentCourseDetails).to(LazyList)
 
   def toStringProps = Seq(
     "creator" -> creator,

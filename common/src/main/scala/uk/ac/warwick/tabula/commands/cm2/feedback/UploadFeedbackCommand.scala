@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.matching.Regex
 
@@ -36,7 +36,7 @@ class FeedbackItem {
   var duplicateFileNames: Set[String] = Set()
   var ignoredFileNames: Set[String] = Set()
 
-  def listAttachments(): mutable.Buffer[AttachmentItem] = file.attached.asScala.map(f => {
+  def listAttachments(): Seq[AttachmentItem] = file.attached.asScala.toSeq.map(f => {
     val duplicate = duplicateFileNames.contains(f.name)
     val ignore = ignoredFileNames.contains(f.name)
     new AttachmentItem(f.name, duplicate, ignore)
@@ -254,7 +254,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
       }
     } else {
       if (batch && !file.attached.isEmpty) {
-        val bits = file.attached.asScala.map { (attachment) => attachment.name -> attachment }
+        val bits = file.attached.asScala.toSeq.map { (attachment) => attachment.name -> attachment }
         processFiles(bits)
       }
 

@@ -26,7 +26,7 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
     val thisProfileService: ProfileService = smartMock[ProfileService]
     val thisSecurityService: SecurityService = smartMock[SecurityService]
     val thisAttendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
-    thisProfileService.getAllMembersWithUniversityIds(any[Seq[String]]) answers { arg =>
+    thisProfileService.getAllMembersWithUniversityIds(any[Seq[String]]) answers { arg: Any =>
       arg match {
         case universityIds: Seq[String]@unchecked => universityIds.flatMap(u => allStudents.find(_.universityId == u))
         case _ => Seq()

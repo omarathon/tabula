@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, LoginDetails}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
@@ -22,7 +22,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   val TEST_ROUTE_CODE = "xx456"
   val TEST_DEPARTMENT_CODE = "xxx"
   val TEST_COURSE_CODE = "Ux456"
-  val moreBefore: () => Unit = () => Unit
+  val moreBefore: () => Unit = () => ()
 
   before {
     Given("The test department exists")
@@ -444,10 +444,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       go to Path(s"/coursework/submission/$assignmentId")
     }
 
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource(file).getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource(file).getFile)
 
-    submit()
+    val submitButton = id("main").webElement.findElement(By.cssSelector("div.submit-buttons .btn-primary"))
+    click on submitButton
   }
 
   def getInputByLabel(label: String): Option[WebElement] =

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.util.csv.{GoodCsvDocument, NamedValueCSVLineReader}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object CSVAttendanceExtractor {
@@ -49,7 +49,7 @@ class CSVAttendanceExtractorInternal extends BindListener {
       val doc = new GoodCsvDocument[JList[String]](null, reader)
       doc.read(file.attached.get(0).asByteSource.asCharSource(StandardCharsets.UTF_8).openStream())
 
-      val rows: Seq[Map[String, String]] = reader.getData.asScala.map(_.asScala.toMap)
+      val rows: Seq[Map[String, String]] = reader.getData.asScala.toSeq.map(_.asScala.toMap)
       val goodRows = rows.filter { row =>
         if (row.keys.size != 2) {
           errors.reject("attendanceMonitoringCheckpoint.upload.wrongFields", Array(row.values.mkString(",")), "")

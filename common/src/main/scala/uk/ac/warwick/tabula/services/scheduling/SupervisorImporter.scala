@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait SupervisorImporter {
   /**
@@ -32,7 +32,7 @@ class SupervisorImporterImpl extends SupervisorImporter {
   lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
   def getSupervisorUniversityIds(scjCode: String, relationshipType: StudentRelationshipType): Seq[(String, JBigDecimal)] = {
-    supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType).asJava).asScala
+    supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType).asJava).asScala.toSeq
   }
 }
 

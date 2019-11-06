@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.MarkingDescriptorServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait ModifyMarkingDescriptorValidation extends SelfValidating {
   self: ModifyMarkingDescriptorState with MarkingDescriptorServiceComponent =>
@@ -45,7 +45,7 @@ trait ModifyMarkingDescriptorState {
   var markPoints: JList[MarkPoint] = _
   var text: String = _
 
-  def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.sorted.distinct
+  def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.toSeq.sorted.distinct
 }
 
 trait ModifyMarkingDescriptorPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {
@@ -32,7 +32,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -67,7 +67,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -118,7 +118,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
 
@@ -168,7 +168,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
         val userLookup: UserLookupService = smartMock[UserLookupService]
         val submitter: CurrentUser = null
       }
-      validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+      validator.userLookup.getUserByWarwickUniId("0672088") answers { id: Any =>
         currentUser.apparentUser
       }
       validator.gradeGenerator.applyForMarks(Map("0672088" -> 100)) returns Map("0672088" -> Seq(GradeBoundary(null, "A", 0, 100, null)))

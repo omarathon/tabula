@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FindStudentsForUserGroupCommandResult(
   staticStudentIds: JList[String],
@@ -105,7 +105,7 @@ class FindStudentsForUserGroupCommandInternal(val department: Department, val ac
 
       val startResult = studentsPerPage * (page - 1)
       val staticMembershipItemsToDisplay =
-        staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, Static))
+        staticStudentIds.asScala.toSeq.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, Static))
 
       val membershipItems: Seq[UserGroupMembershipItem] = {
         staticMembershipItemsToDisplay.map { item =>
@@ -163,7 +163,7 @@ trait FindStudentsForSmallGroupSetPermissions extends RequiresPermissionsCheckin
 
   def module: Module
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -174,7 +174,7 @@ trait FindStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissi
 
   def department: Department
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }

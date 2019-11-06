@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.ActivityStreamRequest
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.{JSONView, MarkdownRendererImpl}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 class ActivityStreamController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {

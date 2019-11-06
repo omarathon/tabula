@@ -69,7 +69,7 @@ class AccreditedPriorLearning() extends GeneratedId with PermissionsTarget with 
     "awardCode" -> award.code,
     "sequenceNumber" -> sequenceNumber)
 
-  def permissionsParents: Stream[StudentCourseDetails] = Stream(Option(studentCourseDetails)).flatten
+  def permissionsParents: LazyList[StudentCourseDetails] = Option(studentCourseDetails).to(LazyList)
 
   override def compare(that: AccreditedPriorLearning): Int = {
     new CompareToBuilder()

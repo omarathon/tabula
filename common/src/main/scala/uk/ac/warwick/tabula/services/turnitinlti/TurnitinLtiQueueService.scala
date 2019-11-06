@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object TurnitinLtiQueueService {
 
@@ -87,7 +87,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
   }
 
   def createEmptyOriginalityReports(assignment: Assignment): Seq[OriginalityReport] = {
-    val reports = assignment.submissions.asScala.flatMap(_.allAttachments).filter(attachment =>
+    val reports = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(attachment =>
       attachment.originalityReport == null &&
         TurnitinLtiService.validFileType(attachment) &&
         TurnitinLtiService.validFileSize(attachment)

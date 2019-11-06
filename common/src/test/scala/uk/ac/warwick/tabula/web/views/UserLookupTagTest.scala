@@ -11,7 +11,7 @@ import java.io.StringWriter
 import java.io.StringReader
 import uk.ac.warwick.tabula.MockUserLookup
 import freemarker.template.utility.DeepUnwrap
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UserLookupTagTest extends TestBase with Mockito {
 

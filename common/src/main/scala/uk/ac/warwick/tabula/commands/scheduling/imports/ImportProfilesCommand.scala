@@ -87,7 +87,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
             val usersByWarwickIds = benchmarkTask("getUsersByWarwickUniIds") {
-              userLookup.getUsersByWarwickUniIds(membershipInfos.map(_.member.universityId))
+              userLookup.usersByWarwickUniIds(membershipInfos.map(_.member.universityId))
                 .collect { case (universityId, FoundUser(u)) => universityId -> u }
             }
 

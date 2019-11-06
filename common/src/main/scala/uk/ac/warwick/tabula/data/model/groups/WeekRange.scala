@@ -5,10 +5,8 @@ import java.sql.Types
 import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
-import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
-
-import scala.collection.mutable
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
   if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
@@ -82,7 +80,7 @@ class WeekRangeListUserType extends AbstractBasicUserType[Seq[WeekRange], String
   val nullValue = null
   val nullObject = Nil
 
-  override def convertToObject(string: String): mutable.ArraySeq[WeekRange] = string.split(separator) map { rep => WeekRange.fromString(rep) }
+  override def convertToObject(string: String): Seq[WeekRange] = string.split(separator).map { rep => WeekRange.fromString(rep) }.toSeq
 
   override def convertToValue(list: Seq[WeekRange]): String = if (list.isEmpty) null else list.map(_.toString).mkString(separator)
 

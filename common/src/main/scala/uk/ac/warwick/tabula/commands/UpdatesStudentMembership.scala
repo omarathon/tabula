@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 trait UpdatesStudentMembership {
@@ -191,7 +191,7 @@ trait UpdatesStudentMembership {
       Nil
     else
     // Can't use the method on assessmentMembershipService as these may be transient
-      assessmentGroups.asScala.flatMap(_.toUpstreamAssessmentGroupInfo(academicYear))
+      assessmentGroups.asScala.toSeq.flatMap(_.toUpstreamAssessmentGroupInfo(academicYear))
 
   /**
     * Returns a sequence of MembershipItems

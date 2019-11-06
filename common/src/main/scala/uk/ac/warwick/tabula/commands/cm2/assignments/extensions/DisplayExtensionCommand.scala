@@ -49,7 +49,7 @@ class DisplayExtensionCommandInternal(val student: User, val assignment: Assignm
 trait DisplayExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DisplayExtensionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Read, assignment)
   }
 }

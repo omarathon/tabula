@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 
@@ -75,7 +75,7 @@ class MarkerBulkModerationCommandInternal(
 trait MarkerBulkModerationPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MarkerBulkModerationState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -85,7 +85,7 @@ trait MarkerBulkModerationPermissions extends RequiresPermissionsChecking with P
 
 trait MarkerBulkModerationValidation extends SelfValidating {
   self: MarkerBulkModerationState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
 
     if (!previousMarker.isFoundUser) {
       val previousRole = ModerationModerator.previousStages.headOption.map(_.roleName).getOrElse(MarkingWorkflowStage.DefaultRole)
@@ -110,7 +110,7 @@ trait MarkerBulkModerationDescription extends Describable[Seq[MarkerFeedback]] {
 
   override lazy val eventName: String = "MarkerBulkModeration"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     val students = validForAdjustment(previousMarker).map(_.student)
     d.assignment(assignment)
     d.studentIds(students.map(_.getWarwickId))

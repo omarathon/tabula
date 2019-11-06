@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
@@ -70,7 +70,7 @@ class CachedPartialTimetableFetchingService(
     }
 
     def create(keys: JList[TimetableCacheKey]): JMap[TimetableCacheKey, EventList] = {
-      JMap(keys.asScala.map(id => (id, create(id))): _*)
+      JMap(keys.asScala.toSeq.map(id => (id, create(id))): _*)
     }
 
     def isSupportsMultiLookups: Boolean = true

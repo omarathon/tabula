@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SmallGroupsByModuleReportProcessor {
   def apply(department: Department, academicYear: AcademicYear) =
@@ -41,7 +41,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
   self: SmallGroupsByModuleReportProcessorState with ProfileServiceComponent =>
 
   override def applyInternal(): SmallGroupsByModuleReportProcessorResult = {
-    val processedStudents = students.asScala.map { properties =>
+    val processedStudents = students.asScala.toSeq.map { properties =>
       AttendanceMonitoringStudentData(
         properties.get("firstName"),
         properties.get("lastName"),
@@ -58,7 +58,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
         Option(properties.get("tutorEmail"))
       )
     }.sortBy(s => (s.lastName, s.firstName))
-    val processedModules = modules.asScala.map { properties =>
+    val processedModules = modules.asScala.toSeq.map { properties =>
       ModuleData(
         properties.get("id"),
         properties.get("code"),

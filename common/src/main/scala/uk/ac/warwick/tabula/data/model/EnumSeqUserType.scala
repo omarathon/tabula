@@ -7,7 +7,7 @@ import enumeratum._
 import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.usertype.UserType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.classTag
 
 abstract class EnumSeqUserType[E <: EnumEntry](enum: Enum[E]) extends UserType {

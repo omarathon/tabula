@@ -27,7 +27,7 @@ class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, use
   // Returns the Seq of admin users
   override def applyInternal(): Seq[User] = admins
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 

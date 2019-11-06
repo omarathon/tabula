@@ -26,7 +26,7 @@ class ListStudentRelationshipTypesCommandInternal extends CommandInternal[Seq[St
 }
 
 trait ListStudentRelationshipTypesCommandPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.StudentRelationshipType.Read)
   }
 }

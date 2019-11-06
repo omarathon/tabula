@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.classTag
 
 object CreateMitCircsPanelCommand {
@@ -70,7 +70,7 @@ abstract class CreateMitCircsPanelCommandInternal(val department: Department, va
 trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateMitCircsPanelState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, department)
   }
 }
@@ -78,7 +78,7 @@ trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with Pe
 trait ModifyMitCircsPanelValidation extends SelfValidating {
   self: ModifyMitCircsPanelRequest =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if(!name.hasText) errors.rejectValue("name", "mitigatingCircumstances.panel.name.required")
   }
 }

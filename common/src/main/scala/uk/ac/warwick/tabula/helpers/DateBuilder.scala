@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.helpers
 
-import freemarker.template.{TemplateMethodModelEx, TemplateModel}
+import freemarker.template.TemplateModel
 import freemarker.template.utility.DeepUnwrap
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DateBuilder {
 
@@ -84,14 +85,12 @@ object DateBuilder {
   }
 }
 
-class DateBuilder extends TemplateMethodModelEx {
+class DateBuilder extends BaseTemplateMethodModelEx {
 
   import DateBuilder.format
 
   /** For Freemarker */
-  override def exec(list: JList[_]): String = {
-    val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-
+  override def execMethod(args: Seq[_]): String = {
     val date = args.head match {
       case partial: LocalDate => partial.toDateTimeAtStartOfDay
       case local: LocalDateTime => local.toDateTime

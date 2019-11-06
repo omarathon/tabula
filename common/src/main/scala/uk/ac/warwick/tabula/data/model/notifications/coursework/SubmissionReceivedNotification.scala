@@ -92,7 +92,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
       roleGrantedUsers ++ explicitlyGrantedUsers
     }
 
-    def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+    def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
     val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission)
       .filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }

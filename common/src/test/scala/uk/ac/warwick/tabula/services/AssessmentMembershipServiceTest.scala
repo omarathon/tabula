@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
@@ -49,7 +49,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     other.add(user6)
 
     val upstream = Seq[UpstreamAssessmentGroup](uag)
-    val uInfo = UpstreamAssessmentGroupInfo(uag, uag.members.asScala.filter(_.universityId != usr4.getWarwickId))
+    val uInfo = UpstreamAssessmentGroupInfo(uag, uag.members.asScala.toSeq.filter(_.universityId != usr4.getWarwickId))
 
     val others = Some(other)
 
@@ -68,12 +68,12 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     service.userLookup = new MockUserLookup().tap(_.registerUserObjects(user))
     service.profileService = smartMock[ProfileService]
 
-    service.profileService.getAllMembersWithUniversityIds(Seq("0123456", "0123457", "0672089")) returns
-      Seq(
-        Fixtures.student("0123456"),
-        Fixtures.student("0123457"),
-        Fixtures.staff(universityId = "0672089", userId = "cuscav")
-      )
+    val allMembers: Seq[Member] = Seq(
+      Fixtures.student("0123456"),
+      Fixtures.student("0123457"),
+      Fixtures.staff(universityId = "0672089", userId = "cuscav")
+    )
+    service.profileService.getAllMembersWithUniversityIds(Seq("0123456", "0123457", "0672089")) returns allMembers
 
     val excludedGroup = smartMock[UnspecifiedTypeUserGroup]
     excludedGroup.excludesUser(user) returns true
@@ -99,15 +99,15 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
     val upstream1 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
     //member 0123458 as PWD
-    val upstreamWithActiveMembers1 = UpstreamAssessmentGroupInfo(upstream1, upstream1.members.asScala.filter(m => m.universityId != "0123458"))
+    val upstreamWithActiveMembers1 = UpstreamAssessmentGroupInfo(upstream1, upstream1.members.asScala.toSeq.filter(m => m.universityId != "0123458"))
 
     val upstream2 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
     // Include the user in upstream2
     upstream2.members.add(new UpstreamAssessmentGroupMember(upstream2, "0672089"))
-    val upstreamWithActiveMembers2 = UpstreamAssessmentGroupInfo(upstream2, upstream2.members.asScala.filter(m => m.universityId != "0123458"))
+    val upstreamWithActiveMembers2 = UpstreamAssessmentGroupInfo(upstream2, upstream2.members.asScala.toSeq.filter(m => m.universityId != "0123458"))
 
     val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
-    val upstreamWithActiveMembers3 = UpstreamAssessmentGroupInfo(upstream3, upstream3.members.asScala.filter(m => m.universityId != "0123458"))
+    val upstreamWithActiveMembers3 = UpstreamAssessmentGroupInfo(upstream3, upstream3.members.asScala.toSeq.filter(m => m.universityId != "0123458"))
 
     val upstreams = Seq(upstreamWithActiveMembers1, upstreamWithActiveMembers2, upstreamWithActiveMembers3)
     service.isStudentCurrentMember(user, upstreams, None, resitOnly = false) should be(true)

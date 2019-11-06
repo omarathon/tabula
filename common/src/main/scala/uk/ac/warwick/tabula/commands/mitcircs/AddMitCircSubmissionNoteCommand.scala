@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AddMitCircSubmissionNoteCommand {
   type Result = MitigatingCircumstancesNote
@@ -59,7 +59,7 @@ trait AddMitCircsSubmissionNoteValidation extends SelfValidating {
 trait AddMitCircsSubmissionNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddMitCircsSubmissionNoteState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, mandatory(submission))
   }
 }

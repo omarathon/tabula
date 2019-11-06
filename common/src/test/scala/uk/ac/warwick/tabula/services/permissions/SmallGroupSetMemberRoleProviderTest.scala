@@ -58,7 +58,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
   @Test
   def nonMembersDontGetTheGroupsetMemberRole() {
     new Fixture {
-      roleProvider.getRolesFor(nonMember, groupSet) should be(Stream.Empty)
+      roleProvider.getRolesFor(nonMember, groupSet) should be(LazyList.empty)
     }
   }
 

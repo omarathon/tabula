@@ -35,11 +35,11 @@ object Reactor {
       * catch any exceptions that you wouldn't want
       * to effect the operation of the event source.
       */
-    def observe(ob: Observer) {
+    def observe(ob: Observer): Unit = {
       observers = ob :: observers
     }
 
-    def emit(a: A) {
+    def emit(a: A): Unit = {
       observers.foreach(_(a))
     }
   }

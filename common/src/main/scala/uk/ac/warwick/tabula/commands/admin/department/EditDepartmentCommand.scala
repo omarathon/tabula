@@ -55,7 +55,7 @@ class EditDepartmentCommandInternal(val department: Department) extends CommandI
 trait EditDepartmentCommandValidation extends SelfValidating {
   self: EditDepartmentCommandState with ModuleAndDepartmentServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // Code must be non-empty and start with parent code
     if (department.hasParent) {
       if (!code.hasText) {
@@ -152,7 +152,7 @@ trait EditDepartmentCommandState {
 trait EditDepartmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditDepartmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Manage, mandatory(department))
   }
 }
@@ -160,7 +160,7 @@ trait EditDepartmentCommandPermissions extends RequiresPermissionsChecking with 
 trait EditDepartmentCommandDescription extends Describable[Department] {
   self: EditDepartmentCommandState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department)
   }
 }

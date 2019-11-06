@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Represents an upstream assessment component as found in the central
@@ -118,7 +118,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
 
-  def linkedAssignments: Seq[Assignment] = links.asScala.collect { case l if l.assignment != null => l.assignment }
+  def linkedAssignments: Seq[Assignment] = links.asScala.toSeq.collect { case l if l.assignment != null => l.assignment }
 }
 
 object AssessmentComponent {

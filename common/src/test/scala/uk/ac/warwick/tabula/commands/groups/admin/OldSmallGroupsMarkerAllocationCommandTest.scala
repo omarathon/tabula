@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OldSmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
 
@@ -56,8 +56,8 @@ class OldSmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
     def userGroup(usercodes: String*): UserGroup = {
       val userGroup = UserGroup.ofUsercodes
       userGroup.userLookup = mockUserLookup
-      val map = usercodes.map(u => u -> users(u)).toMap.asJava
-      when(mockUserLookup.getUsersByUserIds(usercodes.asJava)) thenReturn map
+      val map = usercodes.map(u => u -> users(u)).toMap
+      when(mockUserLookup.usersByUserIds(usercodes)) thenReturn map
       userGroup.includedUserIds = usercodes.toSet
       userGroup
     }

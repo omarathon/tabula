@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OldMarkItemXslxSheetHandler {
   def apply(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem], userLookupService: UserLookupService) =

@@ -83,7 +83,7 @@ class ImportAddressCommandInternal(member: Member) extends CommandInternal[Unit]
 }
 
 trait ImportAddressCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }

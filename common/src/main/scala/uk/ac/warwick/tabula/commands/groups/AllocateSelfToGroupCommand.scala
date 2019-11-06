@@ -34,7 +34,7 @@ object DeallocateSelfFromGroupCommand {
 
 trait AllocateSelfToGroupValidator extends SelfValidating {
   this: StudentSignUpCommandState =>
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (group == null) {
       errors.reject("NotEmpty")
     } else {
@@ -53,7 +53,7 @@ trait AllocateSelfToGroupValidator extends SelfValidating {
 
 trait DeallocateSelfFromGroupValidator extends SelfValidating {
   this: StudentSignUpCommandState =>
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (group == null) {
       errors.reject("NotEmpty")
     } else {
@@ -96,14 +96,14 @@ class DeallocateSelfFromGroupCommand(val user: User, val groupSet: SmallGroupSet
 
 trait StudentSignUpCommandDescription extends Describable[SmallGroupSet] {
   this: StudentSignUpCommandState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.smallGroup(group)
   }
 }
 
 trait StudentSignupCommandPermissions extends RequiresPermissionsChecking {
   this: StudentSignUpCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     // n.b. have to use the groupset here, as this code will be called before the group is bound. Fortunately we know the groupset at construction time
     p.PermissionCheck(Permissions.SmallGroups.AllocateSelf, groupSet)
 

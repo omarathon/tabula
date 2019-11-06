@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorWithFi
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AutowiringDownloadRegistersAsPdfCommandHelper
   extends AutowiringSmallGroupServiceComponent
@@ -57,7 +57,7 @@ trait DownloadRegistersAsPdfCommandRequest {
   var endDate: LocalDate = LocalDate.now().plusWeeks(1)
   var smallGroupSets: JList[SmallGroupSet] = JArrayList()
 
-  def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.map(_.id)
+  def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.toSeq.map(_.id)
 
   var showPhotos = true
   var displayName = DisplayName.Name

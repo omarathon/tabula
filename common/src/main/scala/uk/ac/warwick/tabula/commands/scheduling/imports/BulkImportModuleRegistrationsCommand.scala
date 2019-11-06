@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceComponent, CopyModuleRegistrationProperties, SitsDataSourceComponent}
 
 import scala.collection.immutable.HashMap
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object BulkImportModuleRegistrationsCommand {
 

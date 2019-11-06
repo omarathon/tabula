@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin.assignments
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable

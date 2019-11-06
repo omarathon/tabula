@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent, ExtensionService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.joda.time.DateTime
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.beans.factory.annotation.Autowired

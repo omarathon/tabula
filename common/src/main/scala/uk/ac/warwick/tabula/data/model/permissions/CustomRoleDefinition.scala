@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, HibernateVersio
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
@@ -64,8 +64,8 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
   @Column(name = "REPLACES_PARENT")
   var replacesBaseDefinition: JBoolean = false
 
-  def permissionsParents: Stream[Department] =
-    Option(department).toStream
+  def permissionsParents: LazyList[Department] =
+    Option(department).to(LazyList)
 
   /**
     * This method eagerly resolves sub-roles, which is why we return

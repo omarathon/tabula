@@ -5,7 +5,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.servlet.mvc.condition.{ConsumesRequestCondition, ProducesRequestCondition}
 import uk.ac.warwick.util.web.Uri
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import HttpServletRequestUtils._
 import org.springframework.web.util.UriComponentsBuilder

@@ -34,13 +34,13 @@ class RemoveAgedApplicantsCommandInternal extends CommandInternal[Seq[String]] {
 }
 
 trait RemoveAgedApplicantsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
 
 trait RemoveAgedApplicantsDescription extends Describable[Seq[String]] {
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Seq[String]): Unit = {
     d.studentIds(result)

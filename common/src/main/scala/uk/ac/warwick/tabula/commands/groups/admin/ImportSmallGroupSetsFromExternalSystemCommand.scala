@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.util.Try
 
@@ -201,7 +201,7 @@ trait ImportSmallGroupSetsFromExternalSystemPermissions extends RequiresPermissi
   self: ImportSmallGroupSetsFromExternalSystemCommandState with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState
     with SecurityServiceComponent =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (canManageDepartment) {
       // This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
       p.PermissionCheck(RequiredPermission, department)

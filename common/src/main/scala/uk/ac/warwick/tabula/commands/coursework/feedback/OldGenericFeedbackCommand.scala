@@ -32,7 +32,7 @@ abstract class OldGenericFeedbackCommand(val module: Module, val assignment: Ass
 
 trait OldGenericFeedbackPermissions extends RequiresPermissionsChecking {
   this: OldGenericFeedbackState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
@@ -46,7 +46,7 @@ trait OldGenericFeedbackState {
 
 trait GenericFeedbackFormDescription[A] extends Describable[A] {
   this: OldGenericFeedbackState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 }

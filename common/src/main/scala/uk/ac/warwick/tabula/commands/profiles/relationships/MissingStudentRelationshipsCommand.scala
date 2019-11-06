@@ -36,7 +36,7 @@ trait MissingStudentRelationshipsPermissions extends RequiresPermissionsChecking
 
   self: MissingStudentRelationshipsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
   }
 

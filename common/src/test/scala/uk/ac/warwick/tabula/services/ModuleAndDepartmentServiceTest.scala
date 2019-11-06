@@ -9,7 +9,7 @@ import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import org.mockito.Mockito._
 

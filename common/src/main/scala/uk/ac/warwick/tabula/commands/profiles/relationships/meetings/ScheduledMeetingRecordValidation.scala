@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 trait ScheduledMeetingRecordValidation extends AttachedFilesValidation {
@@ -53,7 +53,7 @@ trait ScheduledMeetingRecordValidation extends AttachedFilesValidation {
       }
     }
 
-    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala.toSeq, Option(file.attached).getOrElse(JList()).asScala.toSeq)
 
   }
 }

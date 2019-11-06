@@ -26,7 +26,7 @@ class ListMessagesCommandInternal(val submission: MitigatingCircumstancesSubmiss
 trait ListMessagesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListMessagesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Read, submission)
   }
 }

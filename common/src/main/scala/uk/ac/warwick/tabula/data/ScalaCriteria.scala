@@ -75,7 +75,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
   }
 
   /** Returns a typed Seq of the results. */
-  def seq: Seq[A] = list.asScala
+  def seq: Seq[A] = list.asScala.toSeq
 
   /** Returns a typed list of the results. */
   def list: JList[A] = listOf[A]
@@ -112,7 +112,7 @@ class ProjectedScalaCriteria[A, B](c: ScalaCriteria[A]) {
   }
 
   /** Returns a typed Seq of the results. */
-  def seq: Seq[B] = c.listOf[B].asScala
+  def seq: Seq[B] = c.listOf[B].asScala.toSeq
 
   def uniqueResult: Option[B] = c.uniqueResultOf[B]
 

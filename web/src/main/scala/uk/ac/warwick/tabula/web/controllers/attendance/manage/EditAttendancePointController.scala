@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/editpoints/{templatePoint}/edit"))

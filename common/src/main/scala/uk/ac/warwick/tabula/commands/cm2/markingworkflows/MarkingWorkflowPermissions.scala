@@ -9,7 +9,7 @@ trait MarkingWorkflowPermissions extends RequiresPermissionsChecking with Permis
 
   def markingWorkflow: CM2MarkingWorkflow
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
   }
 }
@@ -18,7 +18,7 @@ trait MarkingWorkflowDepartmentPermissions extends RequiresPermissionsChecking w
 
   def department: Department
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, department)
   }
 }

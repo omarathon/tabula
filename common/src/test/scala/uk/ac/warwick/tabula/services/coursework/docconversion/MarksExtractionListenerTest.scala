@@ -5,11 +5,12 @@ import java.io.ByteArrayInputStream
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory
 import org.apache.poi.hssf.eventusermodel.HSSFRequest
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
-import uk.ac.warwick.tabula.helpers.Closeables.closeThis
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+
+import scala.util.Using
 
 // scalastyle:off magic.number
 class MarksExtractionListenerTest extends TestBase with Logging with Mockito {
@@ -53,18 +54,17 @@ class MarksExtractionListenerTest extends TestBase with Logging with Mockito {
   }
   mockUserLookup.registerUserObjects(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12)
 
-  @Test def readOLE2ExcelFile() {
-    closeThis(new ByteArrayInputStream(resourceAsBytes("marks.xls"))) { fin =>
-      closeThis(new POIFSFileSystem(fin).createDocumentInputStream("Workbook")) { din =>
-        val req = new HSSFRequest
-        val listener = new XslSheetHandler()
-        req.addListenerForAllRecords(listener)
-        val factory = new HSSFEventFactory
-        factory.processEvents(req, din)
-        listener.markItems.size should be(11) //header not skipped
-      }
-    }
-  }
+  @Test def readOLE2ExcelFile(): Unit = Using.Manager { use =>
+    val fin = use(new ByteArrayInputStream(resourceAsBytes("marks.xls")))
+    val din = use(new POIFSFileSystem(fin).createDocumentInputStream("Workbook"))
+
+    val req = new HSSFRequest
+    val listener = new XslSheetHandler()
+    req.addListenerForAllRecords(listener)
+    val factory = new HSSFEventFactory
+    factory.processEvents(req, din)
+    listener.markItems.size should be(11) //header not skipped
+  }.get
 
   // XLSX files are zips, but uploading any other zip gives a specific error
   // "Package should contain a content type part [M1.13]".

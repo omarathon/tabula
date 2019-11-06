@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import java.io.StringWriter
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.joda.time.ReadableInstant
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime

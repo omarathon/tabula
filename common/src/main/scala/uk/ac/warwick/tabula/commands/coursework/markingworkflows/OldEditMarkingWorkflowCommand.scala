@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -105,7 +105,7 @@ trait MarkerRemovalAware {
 trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditMarkingWorkflowCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(markingWorkflow), mandatory(department))
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
   }
@@ -114,7 +114,7 @@ trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking 
 trait EditMarkingWorkflowCommandDescription extends Describable[MarkingWorkflow] {
   self: EditMarkingWorkflowCommandState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department).markingWorkflow(markingWorkflow)
   }
 }

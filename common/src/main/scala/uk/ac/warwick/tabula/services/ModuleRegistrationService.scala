@@ -154,7 +154,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>
           // Add a definitive sort so subsets with the same mark always come out the same order
-          (mark.doubleValue(), modRegs.size, modRegs.map(_.module.code).mkString(","))
+          (mark.doubleValue, modRegs.size, modRegs.map(_.module.code).mkString(","))
         }
         .reverse
     }

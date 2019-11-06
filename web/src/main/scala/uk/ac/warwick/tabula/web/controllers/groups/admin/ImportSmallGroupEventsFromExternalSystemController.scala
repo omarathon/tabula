@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, Smal
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 abstract class AbstractImportSmallGroupEventsFromExternalSystemController extends SmallGroupEventsController {
@@ -27,8 +27,8 @@ abstract class AbstractImportSmallGroupEventsFromExternalSystemController extend
       .crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
-  @ModelAttribute("groups") def groups(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[SmallGroup] =
-    set.groups.asScala.sorted
+  @ModelAttribute("groups") def groups(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[SmallGroup] =
+    set.groups.asScala.toSeq.sorted
 
   protected def postSaveRoute(set: SmallGroupSet): String
 

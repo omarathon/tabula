@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 
 class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with Logging {
@@ -62,8 +62,8 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
       assignmentSrv.save(assignment)
 
 
-      val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreateCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
-      val markersBUsers: Seq[User] = JArrayList().asScala
+      val markersAUsers: Seq[User] = userLookup.usersByUserIds(CreateCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
+      val markersBUsers: Seq[User] = JArrayList().asScala.toSeq
 
       val oldSingleMarkerWorkflow = SingleMarkerWorkflow("Old single marker workflow", module.adminDepartment, markersAUsers)
       oldSingleMarkerWorkflow.academicYear = AcademicYear.now().previous

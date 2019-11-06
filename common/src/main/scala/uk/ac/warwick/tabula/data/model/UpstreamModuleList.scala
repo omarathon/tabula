@@ -5,7 +5,7 @@ import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Tabula store for a Formed Module Collection (CAM_FMC) from SITS.

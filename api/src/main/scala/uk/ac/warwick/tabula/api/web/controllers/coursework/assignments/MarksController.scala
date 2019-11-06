@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.Try
 
@@ -53,7 +53,7 @@ trait ApiAddMarksState extends Object with FeedbackServiceComponent {
     feedbackItem
   }).sortBy(_.user(assignment))
 
-  def updatedReleasedFeedback: Seq[Feedback] = students.asScala.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
+  def updatedReleasedFeedback: Seq[Feedback] = students.asScala.toSeq.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
 
   // bindable
   var students: JList[FeedbackItem] = LazyLists.create[FeedbackItem]()

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
@@ -63,7 +63,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
   // can be overridden in concrete implementations to provide additional validation
   def contextSpecificValidation(errors: Errors)
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     contextSpecificValidation(errors)
 
     // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.

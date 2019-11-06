@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment}
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ImportSmallGroupSetsFromSpreadsheetJob {
   val identifier = "import-small-group-sets"

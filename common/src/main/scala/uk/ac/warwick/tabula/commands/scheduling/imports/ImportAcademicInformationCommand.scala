@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.system.permissions._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 
 object ImportAcademicInformationCommand {
@@ -524,7 +524,7 @@ trait ImportLevels {
 }
 
 trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -532,7 +532,7 @@ trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
 trait ImportAcademicInformationDescription extends Describable[ImportAcademicInformationResults] {
   override lazy val eventName = "ImportAcademicInformation"
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: ImportAcademicInformationResults) {
     def importProperties(d: Description, name: String, result: ImportResult): Description = {

@@ -18,8 +18,8 @@ class TestingJobTest extends TestBase with Mockito {
     instance.status should be(null)
 
     val job = new TestingJob()
-    job.jobService = mock[JobService]
-    doAnswer(_ => Some(instance)).when(job.jobService).getInstance(anyString)
+    job.jobService = smartMock[JobService]
+    job.jobService.getInstance(null) returns Some(instance)
 
     job.run(instance)
 

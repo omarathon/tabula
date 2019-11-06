@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object RecordStudentAttendanceCommand {
 
@@ -36,7 +36,7 @@ trait RecordStudentAttendanceDescription extends Describable[(Seq[AttendanceMoni
 
   override lazy val eventName = "RecordStudentAttendance"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }

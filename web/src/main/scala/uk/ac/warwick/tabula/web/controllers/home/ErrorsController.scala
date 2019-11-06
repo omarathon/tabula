@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @JsonAutoDetect
 @JsonIgnoreProperties(ignoreUnknown = true)

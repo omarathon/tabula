@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.{MemberDaoImpl, SessionComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.util.core.StopWatch
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 

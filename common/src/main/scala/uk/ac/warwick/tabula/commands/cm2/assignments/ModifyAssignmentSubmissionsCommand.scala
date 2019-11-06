@@ -65,7 +65,7 @@ trait ModifyAssignmentSubmissionsDescription extends Describable[Assignment] {
 
   override lazy val eventName: String = "ModifyAssignmentSubmissions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
     d.properties(
       "collectSubmissions" -> collectSubmissions,

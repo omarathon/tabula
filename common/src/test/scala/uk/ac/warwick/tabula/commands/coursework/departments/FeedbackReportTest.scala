@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.departments
 
 import java.util.Date
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.apache.poi.ss.usermodel.{Cell, Row}
 import org.joda.time.base.AbstractInstant
 import org.junit.Ignore

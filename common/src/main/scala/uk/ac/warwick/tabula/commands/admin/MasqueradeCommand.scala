@@ -51,7 +51,7 @@ trait MasqueradeCommandState {
 trait MasqueradeCommandValidation extends SelfValidating {
   self: MasqueradeCommandState with UserLookupComponent with ProfileServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (action != "remove") {
       userLookup.getUserByUserId(usercode) match {
         case FoundUser(u) =>

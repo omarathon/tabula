@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object OldOnlineFeedbackFormCommand {
@@ -137,13 +137,13 @@ abstract class OldOnlineFeedbackFormCommand(
 
     // save attachments
     if (feedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
       fileAttachmentService.deleteAttachments(filesToRemove)
       feedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
     }
-    feedback.addAttachments(file.attached.asScala)
+    feedback.addAttachments(file.attached.asScala.toSeq)
   }
 
 }
@@ -204,7 +204,7 @@ trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
@@ -234,7 +234,7 @@ trait OnlineFeedbackFormDescription[A] extends Describable[A] {
 
   this: OnlineFeedbackState with OnlineFeedbackStudentState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)
     d.assignment(assignment)

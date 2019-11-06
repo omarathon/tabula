@@ -5,7 +5,7 @@ import org.mockito.Mockito._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{FreemarkerTestHelpers, SmallGroupFixture, TestBase}
-
+import uk.ac.warwick.tabula.JavaImports._
 
 class ReleaseSmallGroupNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 
@@ -48,7 +48,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
           Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
-      verify(weekRangeFormatter.mock, times(2)).exec(anyList())
+      verify(weekRangeFormatter.mock, times(2)).exec(any[JList[_]])
     }
   }
 
@@ -58,7 +58,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
           Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
-      verify(timeBuilder.mock, times(2)).exec(anyList())
+      verify(timeBuilder.mock, times(2)).exec(any[JList[_]])
     }
   }
 }

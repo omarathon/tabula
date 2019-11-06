@@ -33,7 +33,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
     val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
       val permissionsService = null
 
-      def populate() {
+      def populate(): Unit = {
         populateCalledCount += 1
       }
 
@@ -59,7 +59,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
     val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
       val permissionsService = null
 
-      def populate() {
+      def populate(): Unit = {
         populateCalledCount += 1
       }
 
@@ -87,7 +87,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
     val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
       val permissionsService = null
 
-      def populate() {
+      def populate(): Unit = {
         populateCalledCount += 1
       }
 

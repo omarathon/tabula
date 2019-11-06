@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FilterExtensionResults(
   extensions: Seq[ExtensionGraph],
@@ -94,7 +94,7 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
     val extensions = benchmarkTask("findExtensionsByRestrictions") {
       extensionService.filterExtensions(
         restrictions,
-        buildOrders(orders.asScala),
+        buildOrders(orders.asScala.toSeq),
         extensionsPerPage,
         extensionsPerPage * (page - 1)
       )

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditExamCommand {
   def apply(exam: Exam) =
@@ -50,7 +50,7 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 
   self: EditExamCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, exam)
   }
 }
@@ -74,7 +74,7 @@ trait EditExamCommandDescription extends Describable[Exam] {
   self: EditExamCommandState with AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
     with AssessmentMembershipServiceComponent =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.exam(exam)
   }
 }

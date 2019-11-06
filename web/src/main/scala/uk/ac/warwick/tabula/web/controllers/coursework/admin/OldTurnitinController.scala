@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{CurrentUser, Features}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 @Profile(Array("cm1Enabled"))
@@ -36,8 +36,8 @@ class OldTurnitinController extends OldCourseworkController with AutowiringTurni
     SubmitToTurnitinCommand(module, assignment, user)
 
   @ModelAttribute("incompatibleFiles")
-  def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
-    val allAttachments = mandatory(assignment).submissions.asScala.flatMap(_.allAttachments)
+  def incompatibleFiles(@PathVariable assignment: Assignment): Seq[FileAttachment] = {
+    val allAttachments = mandatory(assignment).submissions.asScala.toSeq.flatMap(_.allAttachments)
     allAttachments.filterNot(a =>
       TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
     )

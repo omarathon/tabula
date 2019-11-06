@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.{CurrentUser, Features}
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class UserNavigation(
   collapsed: String,
@@ -97,7 +97,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     }
 
     def create(keys: JList[String]): JMap[String, UserNavigation] = {
-      JMap(keys.asScala.map(id => (id, create(id))): _*)
+      JMap(keys.asScala.toSeq.map(id => (id, create(id))): _*)
     }
 
     def isSupportsMultiLookups: Boolean = true

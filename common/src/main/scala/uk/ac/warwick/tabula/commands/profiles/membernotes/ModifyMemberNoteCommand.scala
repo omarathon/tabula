@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, FileAttachment, Memb
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MemberNoteServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractMemberNote] {
@@ -21,8 +21,8 @@ abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractM
     copyTo(abstractMemberNote)
 
     if (abstractMemberNote.attachments != null) {
-      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-      val filesToRemove: mutable.Buffer[FileAttachment] = abstractMemberNote.attachments.asScala -- filesToKeep
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
+      val filesToRemove: Seq[FileAttachment] = abstractMemberNote.attachments.asScala.toSeq diff filesToKeep
       abstractMemberNote.attachments = JArrayList[FileAttachment](filesToKeep)
       fileAttachmentService.deleteAttachments(filesToRemove)
     }
@@ -46,7 +46,7 @@ trait ModifyMemberNoteCommandBindListener extends BindListener {
 
   self: ModifyMemberNoteCommandRequest =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

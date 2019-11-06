@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Copies the previous MarkerFeedback item to these marker feedbacks
@@ -74,7 +74,7 @@ abstract class PopulateMarkerFeedbackCommandInternal(val assignment: Assignment,
 trait PopulateMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PopulateMarkerFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
   }
 }

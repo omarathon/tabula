@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MarkingCompletedCommand {
   def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
@@ -40,15 +40,17 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
     val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect { case f: AssignmentFeedback => f }
 
     val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
+      .view
       .filterKeys(_.order == stagePosition)
       .mapValues(_.filter(feedbackForRelease.contains))
+      .toMap
 
     newReleasedFeedback = feedbackForReleaseByStage.flatMap { case (stage, mf) =>
       val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
       cm2MarkingWorkflowService.progress(stage, f)
     }.toSeq.asJava
 
-    val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
+    val toPopulate = newReleasedFeedback.asScala.toSeq.filter(_.stage.populateWithPreviousFeedback)
     if (toPopulate.nonEmpty) {
       populateMarkerFeedback(assignment, toPopulate)
     }
@@ -69,7 +71,7 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 trait WorkflowProgressPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: WorkflowProgressState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -79,7 +81,7 @@ trait WorkflowProgressPermissions extends RequiresPermissionsChecking with Permi
 
 trait WorkflowProgressValidation extends SelfValidating {
   self: WorkflowProgressState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
   }
@@ -117,22 +119,22 @@ trait WorkflowProgressState extends CanProxy with UserAware with HasAssignment {
   val stagePosition: Int
 
   // Pre-submit validation
-  def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasContent)
+  def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasContent)
 
-  def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasMark) -- noContent
+  def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasMark) diff noContent
 
-  def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasFeedback) -- noContent
+  def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filterNot(_.hasFeedback) diff noContent
 
-  def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
+  def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(mf => {
     mf.stage.order < mf.feedback.currentStageIndex
   })
 
-  def notReadyToMark: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
+  def notReadyToMark: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(mf => {
     mf.stage.order > mf.feedback.currentStageIndex
   })
 
   // do not update previously released feedback or feedback belonging to other markers
-  lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback -- notReadyToMark -- noContent
+  lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq.filter(_.marker == marker) diff releasedFeedback diff notReadyToMark diff noContent
 }
 
 trait WorkflowProgressNotificationCompletion extends CompletesNotifications[Unit] {

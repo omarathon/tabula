@@ -53,8 +53,8 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 
   override def applyInternal(): EditSchemeMembershipCommandResult = {
     val membershipItems: Seq[SchemeMembershipItem] = {
-      val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType, scheme.academicYear)
-      val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
+      val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala.toSeq, SchemeMembershipExcludeType, scheme.academicYear)
+      val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala.toSeq, SchemeMembershipIncludeType, scheme.academicYear)
       // TAB-4242 If a member has gone missing they can't be removed from the excluded or included students unless we add some stubs in
       val missingExcludedItems = excludedStudentIds.asScala.diff(excludedMemberItems.map(_.universityId)).map(universityId => SchemeMembershipItem(
         itemType = SchemeMembershipExcludeType,
@@ -172,7 +172,7 @@ trait EditSchemeMembershipPermissions extends RequiresPermissionsChecking with P
 
   self: EditSchemeMembershipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 

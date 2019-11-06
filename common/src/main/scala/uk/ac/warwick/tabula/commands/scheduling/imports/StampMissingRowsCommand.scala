@@ -175,7 +175,7 @@ class StampMissingRowsCommandInternal
 }
 
 trait MissingRowsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -183,7 +183,7 @@ trait MissingRowsPermissions extends RequiresPermissionsChecking with Permission
 trait StampMissingRowsDescription extends Describable[Unit] {
   override lazy val eventName = "StampMissingRows"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
   }
 }
 

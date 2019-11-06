@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateStudentsToGroupsTemplateCommand {
   def apply(module: Module, set: SmallGroupSet) =
@@ -174,7 +174,7 @@ trait AllocateStudentsToGroupsTemplateCommandState {
 trait AllocateStudentsToGroupsTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToGroupsTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }

@@ -166,7 +166,7 @@ class NotificationSettingsCommandInternal(val department: Department) extends Co
 
 trait NotificationSettingsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: NotificationSettingsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ManageNotificationSettings, mandatory(department))
   }
 }

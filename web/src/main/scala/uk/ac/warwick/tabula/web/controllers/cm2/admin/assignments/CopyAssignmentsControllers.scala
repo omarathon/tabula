@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class AbstractCopyAssignmentsController extends CourseworkController
   with AcademicYearScopedController
@@ -97,7 +97,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 
 trait AliveAssignmentsMap {
   def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] =
-    modules.map { module => module.code -> module.assignments.asScala.filter(_.isAlive) }
+    modules.map { module => module.code -> module.assignments.asScala.toSeq.filter(_.isAlive) }
       .toMap
       .filter { case (_, assignments) => assignments.nonEmpty }
 }

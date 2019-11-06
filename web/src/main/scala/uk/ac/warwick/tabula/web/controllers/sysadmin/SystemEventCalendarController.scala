@@ -70,7 +70,7 @@ class SystemEventCalendarController extends BaseSysadminController {
       "#8bada9", "#ef9fc9", "#d1d89c", "#f5c690", "#fff87f", "#a6d4e5", "#c4c4c5", "#d2e7e3"
     )
     // an infinitely repeating stream of colours
-    val colourStream = Stream.continually(colours.toStream).flatten
+    val colourStream = LazyList.continually(colours.to(LazyList)).flatten
     val contexts = uncoloured.map(_.context).distinct
     val contextsWithColours = contexts.zip(colourStream)
     uncoloured.map { event =>

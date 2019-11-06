@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait StudentRecordCommandHelper
   extends ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
@@ -67,7 +67,7 @@ trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapCh
 
     filterCheckpointMapForChanges(
       Map(student -> checkpointMap.asScala.toMap),
-      studentPointCheckpointMap.mapValues(_.mapValues(Option(_).map(_.state).orNull))
+      studentPointCheckpointMap.view.mapValues(_.view.mapValues(Option(_).map(_.state).orNull).toMap).toMap
     ).getOrElse(student, Map()).foreach { case (point, state) =>
       errors.pushNestedPath(s"checkpointMap[${point.id}]")
 
@@ -100,7 +100,7 @@ trait StudentRecordPermissions extends RequiresPermissionsChecking with Permissi
 
   self: StudentRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Record, student)
   }
 
@@ -112,7 +112,7 @@ trait StudentRecordDescription extends Describable[(Seq[AttendanceMonitoringChec
 
   override lazy val eventName = "StudentRecord"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }

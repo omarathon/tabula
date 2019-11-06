@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService, RelationshipService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy

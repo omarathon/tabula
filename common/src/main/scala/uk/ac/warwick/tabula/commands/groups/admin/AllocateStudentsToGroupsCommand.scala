@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateStudentsToGroupsCommand {
   def apply(module: Module, set: SmallGroupSet, viewer: CurrentUser) =
@@ -100,16 +100,18 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
     val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
     // work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map(_.universityId).filter(_.hasText)).values.toSet
+    val allocateUsers = userLookup.usersByWarwickUniIds(allocations.asScala.toSeq.map(_.universityId).filter(_.hasText)).values.toSet
     val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
     for (user <- usersToAddToSet) set.members.add(user)
 
     allocations.asScala
       .filter(_.groupId != null)
       .groupBy { x => smallGroupService.getSmallGroupById(x.groupId).orNull }
+      .view
       .mapValues { values =>
         values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).orNull).asJava
       }
+      .toMap
   }
 }
 
@@ -133,7 +135,7 @@ trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand with Has
 trait AllocateStudentsToGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }
@@ -144,7 +146,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 
   override lazy val eventName: String = "AllocateStudentsToGroups"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
     d.property("oldAllocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId).toIndexedSeq).toMap)
   }
@@ -158,7 +160,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 trait AllocateStudentsToGroupsValidation extends SelfValidating {
   self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Disallow submitting unrelated Groups
     if (!mapping.asScala.keys.forall(g => set.groups.contains(g))) {
       errors.reject("smallGroup.allocation.groups.invalid")
@@ -171,7 +173,7 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 
   for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 
-  override def populate() {
+  override def populate(): Unit = {
     for (group <- set.groups.asScala)
       mapping.put(group, JArrayList(group.students.users.toList))
 
@@ -210,7 +212,7 @@ trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends Task
   def loadMembersById: Map[String, Member] = {
     def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
-    val allUsers = unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten
+    val allUsers = unallocated.asScala.toSeq ++ (for ((_, users) <- mapping.asScala) yield users.asScala.toSeq).flatten
     val allUniversityIds = allUsers.filter(validUser).map(_.getWarwickId)
     val members = benchmarkTask("members") {
       profileService.getAllMembersWithUniversityIds(allUniversityIds)

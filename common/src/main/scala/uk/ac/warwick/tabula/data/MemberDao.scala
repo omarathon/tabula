@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
@@ -270,7 +270,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
       }
     }
 
-  def listUpdatedSince(startDate: DateTime, department: Department, max: Int): mutable.Buffer[Member] = {
+  def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member] = {
     val homeDepartmentMatches = session.newCriteria[Member]
       .add(gt("lastUpdatedDate", startDate))
       .add(is("homeDepartment", department))
@@ -292,7 +292,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
     // do not remove; import needed for sorting
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-    (homeDepartmentMatches.asScala ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
+    (homeDepartmentMatches.asScala.toSeq ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
   }
 
   def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member] =

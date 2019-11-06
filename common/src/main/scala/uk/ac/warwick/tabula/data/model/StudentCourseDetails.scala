@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object StudentCourseDetails {
@@ -111,18 +111,16 @@ class StudentCourseDetails
     "scjCode" -> scjCode,
     "sprCode" -> sprCode)
 
-  def permissionsParents: Stream[StringId with Serializable with PermissionsTarget] = {
+  def permissionsParents: LazyList[PermissionsTarget] = {
     val latestYearDetails = Option(latestStudentCourseYearDetails)
     val enrolmentDepartment = latestYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
 
-    Stream(Option(student), Option(currentRoute), Option(department), enrolmentDepartment).flatten
-      .append(
-        latestYearDetails.toStream.flatMap { scyd =>
-          // Only include module registrations for the latest year
-          // FIXME TAB-2971 See StudentMember.permissionsParents
-          moduleRegistrationsByYear(Some(scyd.academicYear)).map(_.module)
-        }
-      )
+    LazyList(Option(student), Option(currentRoute), Option(department), enrolmentDepartment).flatten #:::
+      latestYearDetails.to(LazyList).flatMap { scyd =>
+        // Only include module registrations for the latest year
+        // FIXME TAB-2971 See StudentMember.permissionsParents
+        moduleRegistrationsByYear(Some(scyd.academicYear)).map(_.module)
+      }
   }
 
   def hasCurrentEnrolment: Boolean = {

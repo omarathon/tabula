@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DeleteMarkingWorkflowCommand {
 
@@ -38,7 +38,7 @@ class DeleteMarkingWorkflowCommandInternal(val department: Department, val marki
 
 trait DeleteMarkingWorkflowValidation extends SelfValidating {
   self: DeleteMarkingWorkflowState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (markingWorkflow.assignments.asScala.nonEmpty) {
       errors.reject("workflow.cantDelete")
     }
@@ -50,7 +50,7 @@ trait DeleteMarkingWorkflowDescription extends Describable[String] {
 
   override lazy val eventName: String = "DeleteMarkingWorkflow"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department)
     d.markingWorkflow(markingWorkflow)
   }

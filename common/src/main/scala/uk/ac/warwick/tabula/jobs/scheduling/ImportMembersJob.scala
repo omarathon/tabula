@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ImportMembersJob {
   val identifier = "import-members"

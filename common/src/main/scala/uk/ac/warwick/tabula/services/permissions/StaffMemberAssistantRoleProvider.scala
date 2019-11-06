@@ -30,9 +30,9 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
     Wire[ProfileService]
   }
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
 
-    profileService.get.findStaffMembersWithAssistant(user.apparentUser).toStream.flatMap { staff =>
+    profileService.get.findStaffMembersWithAssistant(user.apparentUser).to(LazyList).flatMap { staff =>
       // Treat it as a masquerade, so if we have any role providers that explicitly ignore masquerade this is taken into account
       val staffCurrentUser =
         new CurrentUser(

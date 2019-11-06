@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DeleteDepartmentSmallGroupSetCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet) =
@@ -42,7 +42,7 @@ class DeleteDepartmentSmallGroupSetCommandInternal(val department: Department, v
 trait DeleteDepartmentSmallGroupSetValidation extends SelfValidating {
   self: DeleteDepartmentSmallGroupSetCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) {
       errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
     } else {
@@ -64,7 +64,7 @@ trait DeleteDepartmentSmallGroupSetValidation extends SelfValidating {
 trait DeleteDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteDepartmentSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(set))
   }

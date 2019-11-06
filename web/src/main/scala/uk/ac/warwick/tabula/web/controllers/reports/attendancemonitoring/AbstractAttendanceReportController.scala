@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONErrorView, JSONVi
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.xml.Elem
 
 abstract class AbstractAttendanceReportController extends ReportsController
@@ -93,7 +93,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
           "name" -> point.name,
           "startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
           "endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
-          "intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))),
+          "intervalString" -> intervalFormatter.execMethod(Seq(point.startDate, point.endDate)),
           "late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
         )
       )

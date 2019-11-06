@@ -54,7 +54,7 @@ trait DeleteMarkingWorkflowCommandValidation extends SelfValidating {
 trait DeleteMarkingWorkflowPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteMarkingWorkflowCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(markingWorkflow, department)
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
   }
@@ -63,6 +63,6 @@ trait DeleteMarkingWorkflowPermissions extends RequiresPermissionsChecking with 
 trait DeleteMarkingWorkflowDescription extends Describable[Unit] {
   self: DeleteMarkingWorkflowCommandState =>
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
 }

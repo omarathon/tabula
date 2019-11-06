@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentType, Assignment, GeneratedId,
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitigatingCircumstancesAffectedAssessment {
   val EngagementCriteriaModuleCode = "OE"
@@ -35,7 +35,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.name = item.name
     this.assessmentType = item.assessmentType
     this.deadline = item.deadline
-    this.boardRecommendations = item.boardRecommendations.asScala
+    this.boardRecommendations = item.boardRecommendations.asScala.toSeq
     this.extensionDeadline = item.extensionDeadline
   }
 
@@ -113,6 +113,6 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     "mitigatingCircumstancesSubmission" -> mitigatingCircumstancesSubmission.id,
   )
 
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(mitigatingCircumstancesSubmission)
+  override def permissionsParents: LazyList[PermissionsTarget] = LazyList(mitigatingCircumstancesSubmission)
 
 }

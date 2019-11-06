@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
@@ -157,7 +157,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
     MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
-      .map(r => r -> affectedAssessments.asScala.filter(_.boardRecommendations.contains(r)))
+      .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
       .toMap
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
@@ -408,7 +408,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   )
 
   // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = panel.toStream :+ MitigatingCircumstancesStudent(student)
+  override def permissionsParents: LazyList[PermissionsTarget] = panel.to(LazyList) #::: LazyList(MitigatingCircumstancesStudent(student))
 }
 
 

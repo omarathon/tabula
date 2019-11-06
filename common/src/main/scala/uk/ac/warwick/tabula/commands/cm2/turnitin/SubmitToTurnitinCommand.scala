@@ -90,7 +90,7 @@ abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
 trait SubmitToTurnitinPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitToTurnitinState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
   }
 }
@@ -106,7 +106,7 @@ trait SubmitToTurnitinDescription extends Describable[Assignment] {
 trait SubmitToTurnitinValidation extends SelfValidating {
   self: SubmitToTurnitinRequest with FeaturesComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!features.turnitinSubmissions) errors.reject("turnitin.submissions.disabled")
 
     if (!Option(submitter).exists(_.isFoundUser))

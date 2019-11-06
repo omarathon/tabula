@@ -71,7 +71,7 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 }
 
 trait AuditLogQueryCommandPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ViewAuditLog)
   }
 }

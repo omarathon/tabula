@@ -86,8 +86,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
     "academicYear" -> academicYear
   )
 
-  def permissionsParents: Stream[PermissionsTarget] =
-    Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
+  def permissionsParents: LazyList[PermissionsTarget] =
+    LazyList(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
 
   /**
     * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 // scalastyle:off magic.number
@@ -37,20 +37,19 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
   }
 
   var userLookup: UserLookupService = smartMock[UserLookupService]
-  userLookup.getUsersByUserIds(any[JList[String]]) answers {
-    _ match {
-      case ids: JList[String@unchecked] =>
-        val users = ids.asScala.map(id => (id, new User(id)))
-        JHashMap(users: _*)
+  userLookup.usersByUserIds(any[Seq[String]]) answers { arg: Any =>
+    arg match {
+      case ids: Seq[String@unchecked] =>
+        ids.map(id => id -> new User(id)).toMap
     }
   }
 
-  userLookup.getUserByUserId(any[String]) answers { id =>
+  userLookup.getUserByUserId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getUserId == id
     } getOrElse new AnonymousUser
   }
-  userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+  userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getWarwickId == id
     } getOrElse new AnonymousUser

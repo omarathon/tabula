@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Auto
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -72,8 +72,8 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
     with ImportSmallGroupEventsFromExternalSystemRequestState {
   self: SmallGroupEventGenerator with UserLookupComponent with SmallGroupServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[SmallGroupEvent] = transactional() {
-    val events = eventsToImport.asScala
+  override def applyInternal(): Seq[SmallGroupEvent] = transactional() {
+    val events = eventsToImport.asScala.toSeq
       .map { e => (e.timetableEvent, Option(e.group)) }
       .filter { case (_, group) => group.nonEmpty }
       .map { case (e, group) =>

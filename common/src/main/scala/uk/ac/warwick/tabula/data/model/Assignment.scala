@@ -23,7 +23,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 import scala.reflect._
 
 object Assignment {
@@ -197,7 +198,7 @@ class Assignment
   @JoinColumn(name = "module_id")
   override var module: Module = _
 
-  override def permissionsParents: Stream[Module] = Option(module).toStream
+  override def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)
@@ -322,9 +323,9 @@ class Assignment
 
   // IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
   // Use manual position management on add/removeFields, and in these getters
-  def submissionFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+  def submissionFields: Seq[AssignmentFormField] = fields.asScala.toSeq.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 
-  def feedbackFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+  def feedbackFields: Seq[AssignmentFormField] = fields.asScala.toSeq.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
   @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "membersgroup_id")
@@ -643,7 +644,7 @@ class Assignment
     * Get the latest requested extension, if there is one, per-user, falling back to an approved extension if there isn't one
     */
   def requestedOrApprovedExtensions: Map[String, Extension] =
-    allExtensions.mapValues { extensions =>
+    allExtensions.view.mapValues { extensions =>
       if (extensions.size == 1) extensions.head
       else extensions.find(_.awaitingReview).getOrElse {
         if (extensions.exists(_.requestedOn != null))
@@ -651,7 +652,7 @@ class Assignment
         else
           extensions.head
       }
-    }
+    }.toMap
 
   /**
     * Gets the currently in-review request
@@ -983,7 +984,7 @@ class Assignment
     val usercodes = cm2MarkerStudentUsercodes(marker)
 
     if (usercodes.isEmpty) Nil
-    else submissions.asScala.filter { s => usercodes.contains(s.usercode) }
+    else submissions.asScala.toSeq.filter { s => usercodes.contains(s.usercode) }
   }
 
   def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMe
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class AbstractModifyMeetingRecordCommand extends AbstractMeetingRecordCommand with CommandInternal[MeetingRecord] {
   self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest with MeetingRecordServiceComponent
@@ -70,7 +70,7 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 
   self: MeetingRecordCommandRequest with ModifyMeetingRecordCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     super.validate(errors)
 
@@ -86,7 +86,7 @@ trait ModifyMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 
   self: ModifyMeetingRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     allRelationships.foreach { relationship =>
       p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(relationship.relationshipType), mandatory(relationship.studentMember))
     }
@@ -99,12 +99,12 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
   self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
   override def describe(d: Description): Unit =
-    d.studentRelationships(relationships.asScala)
+    d.studentRelationships(relationships.asScala.toSeq)
      .member(creator)
 
   override def describeResult(d: Description, meeting: MeetingRecord): Unit =
     d.meeting(meeting)
-     .fileAttachments(meeting.attachments.asScala)
+     .fileAttachments(meeting.attachments.asScala.toSeq)
 }
 
 trait ModifyMeetingRecordCommandState extends MeetingRecordCommandState {

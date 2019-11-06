@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object SmallGroup {
@@ -84,7 +84,7 @@ class SmallGroup
   @BatchSize(size = 200)
   private val _events: JList[SmallGroupEvent] = JArrayList()
 
-  def events: mutable.Buffer[SmallGroupEvent] = _events.asScala.sorted
+  def events: Seq[SmallGroupEvent] = _events.asScala.toSeq.sorted
 
   private def events_=(e: Seq[SmallGroupEvent]) {
     _events.clear()
@@ -100,7 +100,7 @@ class SmallGroup
   @JoinColumn(name = "linked_dept_group_id")
   var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
 
-  def permissionsParents: Stream[SmallGroupSet] = Option(groupSet).toStream
+  def permissionsParents: LazyList[SmallGroupSet] = Option(groupSet).to(LazyList)
 
   override def humanReadableId: String = name
 

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, Auto
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentListCommand {
   def apply(assessment: Assessment) =
@@ -34,7 +34,7 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
       val allFeedback = assessment.fullFeedback
       val allStudents =
         if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
-        else students.asScala.map(userLookup.getUserByUserId)
+        else students.asScala.toSeq.map(userLookup.getUserByUserId)
 
       val (hasFeedback, noFeedback) = allStudents.map { student =>
         StudentInfo(student, allFeedback.find {
@@ -60,7 +60,7 @@ trait FeedbackAdjustmentListCommandState {
 
 trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackAdjustmentListCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)

@@ -34,7 +34,7 @@ trait SmallGroupSetTimetableClashCommandState {
 
 trait SmallGroupSetTimetableClashCommandPermissions extends RequiresPermissionsChecking {
   self: SmallGroupSetTimetableClashCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
   }
 }

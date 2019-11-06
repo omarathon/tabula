@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}

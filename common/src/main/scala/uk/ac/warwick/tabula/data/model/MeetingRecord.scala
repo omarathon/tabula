@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object MeetingRecord {
@@ -66,7 +66,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isPendingApproval: Boolean = approvals.asScala.exists(_.pending)
 
-  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.pending)
+  def pendingApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.pending)
 
   def pendingApprovalBy(user: CurrentUser): Boolean =
     approvals.asScala.exists(approval =>
@@ -80,7 +80,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isRejected: Boolean = approvals.asScala.exists(_.rejected)
 
-  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.rejected)
+  def rejectedApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.rejected)
 
   def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 

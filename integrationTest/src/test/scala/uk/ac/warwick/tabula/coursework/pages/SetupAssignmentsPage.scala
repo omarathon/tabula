@@ -6,7 +6,7 @@ import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
 import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDriver) extends WebBrowser with Matchers with Eventually with IntegrationPatience {

@@ -14,7 +14,7 @@ object AttendanceReportFilters {
       }.keySet
     }.toSeq
     result.map { case (studentData, pointMap) =>
-      studentData -> pointMap.filterKeys(unrecordedPoints.contains)
+      studentData -> pointMap.view.filterKeys(unrecordedPoints.contains).toMap
     }.filter { case (_, pointMap) => pointMap.nonEmpty }
   }
 
@@ -26,7 +26,7 @@ object AttendanceReportFilters {
       pointMap.filter { case (point, state) => state == AttendanceState.MissedUnauthorised }.keySet
     }.toSeq
     result.map { case (studentData, pointMap) =>
-      studentData -> pointMap.filterKeys(missedPoints.contains)
-    }.filterKeys(missedStudents.contains)
+      studentData -> pointMap.view.filterKeys(missedPoints.contains).toMap
+    }.view.filterKeys(missedStudents.contains).toMap
   }
 }

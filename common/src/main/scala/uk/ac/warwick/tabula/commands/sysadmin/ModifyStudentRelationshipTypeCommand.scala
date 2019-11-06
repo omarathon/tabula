@@ -43,7 +43,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
     tpe.sortOrder = sortOrder
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // Ensure that we don't dupe url part
     relationshipService.getStudentRelationshipTypeByUrlPart(urlPart).filter(_.id != id).foreach { dupe =>
       errors.rejectValue("urlPart", "relationshipType.urlPart.duplicate")

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class SmallGroupSetTest extends TestBase with Mockito {
 

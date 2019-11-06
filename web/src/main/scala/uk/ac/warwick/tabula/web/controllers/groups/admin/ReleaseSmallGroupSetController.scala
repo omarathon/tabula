@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewMod
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @RequestMapping(Array("/groups/admin/module/{module}/groups/{set}/release"))
 @Controller
@@ -30,7 +30,7 @@ class ReleaseSmallGroupSetController extends GroupsController {
       case releasedSet :: Nil => releasedSet.set
       case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
     }
-    val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.sorted), GroupsViewModel.Tutor)
+    val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor)
     val moduleItem = ViewModule(updatedSet.module, Seq(groupSetItem), canManageGroups = true)
     Mav("groups/admin/groups/single_groupset",
       "groupsetItem" -> groupSetItem,

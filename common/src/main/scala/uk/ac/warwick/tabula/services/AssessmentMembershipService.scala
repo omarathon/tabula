@@ -337,7 +337,7 @@ trait AssessmentMembershipMethods extends Logging {
 
   private def generateAssessmentMembershipInfo(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], includePWD: Boolean = false, resitOnly: Boolean = false): AssessmentMembershipInfo = {
     val sitsUsers =
-      userLookup.getUsersByWarwickUniIds(
+      userLookup.usersByWarwickUniIds(
         upstream.flatMap { uagInfo =>
           val members = if (resitOnly) uagInfo.resitMembers else if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
           members.map(_.universityId).filter(_.hasText)

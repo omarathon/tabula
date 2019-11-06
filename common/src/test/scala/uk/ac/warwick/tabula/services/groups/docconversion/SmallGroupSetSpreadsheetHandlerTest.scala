@@ -35,7 +35,7 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
     val ch134: Module = Fixtures.module("ch134", "Introduction to Chemistry Stuff")
     moduleAndDepartmentService.getModuleByCode("CH134") returns Some(ch134)
 
-    handler.syllabusPlusLocationService.getByUpstreamName(Matchers.any[String]) returns None
+    handler.syllabusPlusLocationService.getByUpstreamName(any[String]) returns None
     handler.syllabusPlusLocationService.getByUpstreamName("S0.28") returns Some(SyllabusPlusLocation("S0.28", "S0.28", "37406"))
     handler.syllabusPlusLocationService.getByUpstreamName("CS_CS1.04") returns Some(SyllabusPlusLocation("CS_CS1.04", "CS1.04", "26858"))
 

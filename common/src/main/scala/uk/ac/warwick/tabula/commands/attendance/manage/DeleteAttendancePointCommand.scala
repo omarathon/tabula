@@ -48,7 +48,7 @@ trait DeleteAttendancePointValidation extends SelfValidating {
 
   self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     val pointsWithCheckpoints = pointsToDelete.filter {
       point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0
@@ -65,7 +65,7 @@ trait DeleteAttendancePointPermissions extends RequiresPermissionsChecking with 
 
   self: DeleteAttendancePointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
   }
 
@@ -77,7 +77,7 @@ trait DeleteAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 
   override lazy val eventName = "DeleteAttendancePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringSchemes(schemesToEdit)
   }
 

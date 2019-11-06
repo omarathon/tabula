@@ -136,7 +136,7 @@ trait PublishFeedbackCommandState {
 
 
   // validation done even when showing initial form.
-  def prevalidate(errors: Errors) {
+  def prevalidate(errors: Errors): Unit = {
     if (!assignment.openEnded && !assignment.isClosed) {
       errors.reject("feedback.publish.notclosed")
     } else if (assignment.fullFeedback.isEmpty) {
@@ -159,7 +159,7 @@ trait PublishFeedbackPermissions extends RequiresPermissionsChecking with Permis
 
   self: PublishFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(assignment), mandatory(module))
     p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assignment)
   }
@@ -169,7 +169,7 @@ trait PublishFeedbackValidation extends SelfValidating {
 
   self: PublishFeedbackCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     prevalidate(errors)
     if (!confirm) {
       errors.rejectValue("confirm", "feedback.publish.confirm")
@@ -181,7 +181,7 @@ trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.Publ
 
   self: PublishFeedbackCommandState with FeedbackServiceComponent =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     val students = feedbackToRelease map { case (_, user, _) => user }
     d.assignment(assignment)
       .studentIds(students.flatMap(m => Option(m.getWarwickId)))

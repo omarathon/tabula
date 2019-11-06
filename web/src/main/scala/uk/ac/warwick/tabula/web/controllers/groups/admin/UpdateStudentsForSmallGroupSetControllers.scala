@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class UpdateStudentsForSmallGroupSetController extends GroupsController {
 

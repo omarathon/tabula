@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsShareSubmissionCommand {
   type AddCommand =
@@ -69,10 +69,10 @@ object MitCircsShareSubmissionCommand {
 trait MitCircsShareSubmissionValidation extends GrantRoleCommandValidation {
   self: RoleCommandState[MitigatingCircumstancesSubmission] with RoleCommandRequest with SecurityServiceComponent with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.validate(errors)
 
-    val students = userLookup.getUsersByUserIds(usercodes.asScala).values.filter(_.isStudent)
+    val students = userLookup.usersByUserIds(usercodes.asScala.toSeq).values.filter(_.isStudent)
     if(students.nonEmpty)
       errors.rejectValue("usercodes", "mitigatingCircumstances.submission.share.noStudents", Array(students.map(_.getFullName).mkString(", ")), "")
   }
@@ -85,7 +85,7 @@ trait MitCircsShareSubmissionState {
 trait MitCircsShareSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RoleCommandState[MitigatingCircumstancesSubmission] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(requiredPermission, mandatory(scope))
   }
 }

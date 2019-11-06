@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FetchDepartmentRelationshipsForReallocationCommand {
 
@@ -34,7 +34,7 @@ trait FetchDepartmentRelationshipsForReallocationCommandState extends FetchDepar
   lazy val agentEntityData: StudentAssociationEntityData = relationshipService.getStudentAssociationEntityData(
     department,
     relationshipType,
-    Option(additionalEntities).map(_.asScala).getOrElse(Seq())
+    Option(additionalEntities).map(_.asScala.toSeq).getOrElse(Seq())
   ).find(entityData =>
     entityData.entityId == agent
   ).getOrElse(throw new IllegalArgumentException)
@@ -45,7 +45,7 @@ trait FetchDepartmentRelationshipsForReallocationCommandState extends FetchDepar
     dbAllocated = relationshipService.getStudentAssociationEntityData(
       department,
       relationshipType,
-      Option(additionalEntities).map(_.asScala).getOrElse(Seq())
+      Option(additionalEntities).map(_.asScala.toSeq).getOrElse(Seq())
     ).filterNot(_.entityId == agent)
   }
 }

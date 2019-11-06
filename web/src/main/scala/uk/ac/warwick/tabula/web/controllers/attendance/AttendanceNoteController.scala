@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/note/{academicYear}/{student}/{point}"))
@@ -167,7 +167,7 @@ class BulkEditAttendanceNoteController extends AttendanceController {
     @PathVariable academicYear: AcademicYear,
     @PathVariable point: AttendanceMonitoringPoint,
     @RequestParam students: JList[StudentMember]
-  ) = BulkAttendanceNoteCommand(point, students.asScala, user)
+  ) = BulkAttendanceNoteCommand(point, students.asScala.toSeq, user)
 
 
   private def form(

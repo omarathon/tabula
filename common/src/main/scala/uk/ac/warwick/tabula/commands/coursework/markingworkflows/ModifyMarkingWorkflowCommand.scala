@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.SelfValidating
@@ -86,7 +86,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 
   def contextSpecificValidation(errors: Errors)
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     contextSpecificValidation(errors)
 
     rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
@@ -99,14 +99,14 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
       errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.none")
 
     val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers", universityIdRequired = true) {
-      override def alreadyHasCode: Boolean = hasDuplicates(firstMarkers.asScala)
+      override def alreadyHasCode: Boolean = hasDuplicates(firstMarkers.asScala.toSeq)
     }
     firstMarkersValidator.validate(errors)
 
     // validate only when second markers are used
     if (Seq(SeenSecondMarking, SeenSecondMarkingLegacy, ModeratedMarking).contains(markingMethod)) {
       val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers", universityIdRequired = true) {
-        override def alreadyHasCode: Boolean = hasDuplicates(secondMarkers.asScala)
+        override def alreadyHasCode: Boolean = hasDuplicates(secondMarkers.asScala.toSeq)
       }
       secondMarkersValidator.validate(errors)
     }

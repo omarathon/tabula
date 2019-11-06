@@ -29,14 +29,14 @@ import uk.ac.warwick.userlookup.User
   */
 trait BaseDescribable[A] {
   // describe the thing that's happening.
-  def describe(d: Description)
+  def describe(d: Description): Unit
 
   // optional extra description after the thing's happened.
-  def describeResult(d: Description, result: A) {
+  def describeResult(d: Description, result: A): Unit = {
     describeResult(d)
   }
 
-  def describeResult(d: Description) {}
+  def describeResult(d: Description): Unit = {}
 }
 
 trait Describable[A] extends BaseDescribable[A] with KnowsEventName
@@ -211,7 +211,7 @@ object Command {
         sw
     }
 
-  def endStopwatching() {
+  def endStopwatching(): Unit = {
     threadLocal.remove()
   }
 
@@ -238,7 +238,7 @@ object Command {
   * validation methods to simplify validation code.
   */
 trait SelfValidating {
-  def validate(errors: Errors)
+  def validate(errors: Errors): Unit
 }
 
 /**
@@ -260,7 +260,7 @@ trait ReadOnly {
 trait Unaudited {
   self: Describable[_] =>
   // override describe() with nothing, since it'll never be used.
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }
 
 /**

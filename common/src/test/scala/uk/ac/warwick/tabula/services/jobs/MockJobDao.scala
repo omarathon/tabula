@@ -25,9 +25,9 @@ class MockJobDao extends JobDao {
     instance
   }
 
-  def unfinishedInstances: ArrayBuffer[JobInstance] = instances.filterNot(_.finished)
+  def unfinishedInstances: Seq[JobInstance] = instances.toSeq.filterNot(_.finished)
 
-  def listRecent(start: Int, count: Int): ArrayBuffer[JobInstance] = instances.filter(_.finished).slice(start, start + count)
+  def listRecent(start: Int, count: Int): Seq[JobInstance] = instances.toSeq.filter(_.finished).slice(start, start + count)
 
   def getById(id: String): Option[JobInstance] = instances.find(id == _.id)
 
@@ -35,7 +35,7 @@ class MockJobDao extends JobDao {
 
   def update(instance: JobInstance) {}
 
-  override def listRunningJobs: ArrayBuffer[JobInstance] = instances.filterNot(_.finished).filter(_.started)
+  override def listRunningJobs: Seq[JobInstance] = instances.toSeq.filterNot(_.finished).filter(_.started)
 
   override def findRunningJobs(schedulerInstance: String): Seq[JobInstance] = listRunningJobs.filter(_.schedulerInstance == schedulerInstance)
 }

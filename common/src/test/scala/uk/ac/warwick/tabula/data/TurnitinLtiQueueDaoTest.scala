@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityR
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 

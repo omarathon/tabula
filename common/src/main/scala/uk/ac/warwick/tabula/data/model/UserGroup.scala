@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Wherever a group of users is referenced in the app, it will be
@@ -163,8 +163,8 @@ class UserGroup private(val universityIds: Boolean)
 
   private def getUsersFromIds(ids: Set[String]): Set[User] = ids.toSeq match {
     case Nil => Set.empty
-    case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSet
-    case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSet
+    case list if universityIds => userLookup.usersByWarwickUniIds(list).values.toSet
+    case list => userLookup.usersByUserIds(list).values.toSet
   }
 
   @transient private var _cachedUsers: Option[Set[User]] = None

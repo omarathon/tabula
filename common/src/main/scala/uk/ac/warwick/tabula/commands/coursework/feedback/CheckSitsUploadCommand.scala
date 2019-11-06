@@ -73,7 +73,7 @@ trait CheckSitsUploadValidation extends SelfValidating {
 
   self: CheckSitsUploadCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (feedbackForSits.isEmpty) {
       errors.reject("feedback.feedbackForSits.missing")
     }
@@ -85,7 +85,7 @@ trait CheckSitsUploadPermissions extends RequiresPermissionsChecking with Permis
 
   self: CheckSitsUploadCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(feedback) match {
       case assignmentFeedback: AssignmentFeedback =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assignmentFeedback)

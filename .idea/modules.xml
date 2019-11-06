@@ -29,6 +29,19 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/tabula.web.iml" filepath="$PROJECT_DIR$/.idea/modules/web/tabula.web.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/tabula.web.main.iml" filepath="$PROJECT_DIR$/.idea/modules/web/tabula.web.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/tabula.web.test.iml" filepath="$PROJECT_DIR$/.idea/modules/web/tabula.web.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/workspace.tabula.iml" filepath="$PROJECT_DIR$/.idea/modules/workspace.tabula.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.iml" filepath="$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/api/workspace.tabula.api.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/workspace.tabula.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.main.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.test.iml" filepath="$PROJECT_DIR$/.idea/modules/integrationTest/workspace.tabula.integrationTest.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.iml" filepath="$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.main.iml" filepath="$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.test.iml" filepath="$PROJECT_DIR$/.idea/modules/web/workspace.tabula.web.test.iml" />
     </modules>
   </component>
 </project>

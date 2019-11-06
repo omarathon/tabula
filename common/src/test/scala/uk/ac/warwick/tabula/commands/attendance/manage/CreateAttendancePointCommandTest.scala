@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class CreateAttendancePointCommandTest extends TestBase with Mockito {

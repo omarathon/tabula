@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class HomeInformation(
   submissions: Seq[MitigatingCircumstancesSubmission],

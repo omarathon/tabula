@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.services.ProfileService
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import MonitoringPointReportController._
 import uk.ac.warwick.tabula.web.Mav
 

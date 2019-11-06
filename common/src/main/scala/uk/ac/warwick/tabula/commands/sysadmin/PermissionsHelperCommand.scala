@@ -51,7 +51,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
     }
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (user == null || !user.isFoundUser) {
       errors.rejectValue("user", "permissionsHelper.user.invalid")
     }

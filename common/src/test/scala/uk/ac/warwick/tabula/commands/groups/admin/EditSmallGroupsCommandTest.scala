@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class EditSmallGroupsCommandTest extends TestBase with Mockito {
@@ -72,7 +72,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
       command.newGroups.get(1).name = "Group B"
       command.newGroups.get(1).maxGroupSize = 15
 
-      val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
+      val groups: Seq[SmallGroup] = command.applyInternal()
       set.groups.asScala should be(groups)
 
       groups(0).name should be("Group A")
@@ -93,7 +93,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
       command.newGroups.get(1).name = "Group B"
       command.newGroups.get(1).maxGroupSize = null
 
-      val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
+      val groups: Seq[SmallGroup] = command.applyInternal()
       set.groups.asScala should be(groups)
 
       groups(0).name should be("Group A")
@@ -114,7 +114,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
       command.onBind(mock[BindingResult])
 
-      val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
+      val groups: Seq[SmallGroup] = command.applyInternal()
       groups should be(Seq(groupA, groupB, groupC))
 
       groupA.name should be("Group A")

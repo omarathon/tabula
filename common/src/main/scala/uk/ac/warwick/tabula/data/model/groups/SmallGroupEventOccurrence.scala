@@ -28,7 +28,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
   @BatchSize(size = 200)
   var attendance: JSet[SmallGroupEventAttendance] = JHashSet()
 
-  def permissionsParents = Stream(event)
+  def permissionsParents: LazyList[SmallGroupEvent] = LazyList(event)
 
   def date: Option[LocalDate] = event.dateForWeek(week)
 

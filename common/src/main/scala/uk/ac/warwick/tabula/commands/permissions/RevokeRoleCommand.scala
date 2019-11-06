@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceCo
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 object RevokeRoleCommand {
@@ -76,7 +76,7 @@ trait RevokeRoleCommandValidation extends SelfValidating {
     with RoleCommandState[_ <: PermissionsTarget]
     with SecurityServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
@@ -113,7 +113,7 @@ trait RevokeRoleCommandValidation extends SelfValidating {
 trait RevokeRoleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RoleCommandState[_ <: PermissionsTarget] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Delete, mandatory(scope))
   }
 }

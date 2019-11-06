@@ -67,7 +67,7 @@ trait EditStudentRelationshipValidation extends SelfValidating {
 
   self: EditStudentRelationshipCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (oldAgent == null && newAgent == null) {
       errors.rejectValue("newAgent", "profiles.relationship.add.noAgent")
     }
@@ -79,7 +79,7 @@ trait EditStudentRelationshipPermissions extends RequiresPermissionsChecking wit
 
   self: EditStudentRelationshipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Manage(mandatory(relationshipType)), mandatory(studentCourseDetails))
   }
 
@@ -91,7 +91,7 @@ trait EditStudentRelationshipDescription extends Describable[Seq[StudentRelation
 
   override lazy val eventName = "EditStudentRelationship"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(studentCourseDetails.student.universityId).properties(
       "sprCode" -> studentCourseDetails.sprCode,
       "oldAgent" -> Option(oldAgent).map(_.universityId).getOrElse(""),

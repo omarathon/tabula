@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.events
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.commands.Description
 

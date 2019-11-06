@@ -312,11 +312,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
     }, "scd.scjCode", items.map(_._1))
     // Group by SCJ code-academic year pairs
     scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
+      .view
       // Only use the pairs that were passed in
       .filterKeys(items.contains)
       // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
       .mapValues(_.sorted.lastOption)
       .filter(_._2.isDefined).mapValues(_.get)
+      .toMap
   }
 
   def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
@@ -329,12 +331,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
         .setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
     }, "student.universityId", items.map(_._1))
     // Group by Uni ID-academic year pairs
-    scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
+    scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear)).view
       // Only use the pairs that were passed in
       .filterKeys(items.contains)
       // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
       .mapValues(_.sorted.lastOption)
-      .filter(_._2.isDefined).mapValues(_.get)
+      .filter(_._2.isDefined).mapValues(_.get).toMap
   }
 
   def listForYearMarkExport: Seq[StudentCourseYearDetails] = {

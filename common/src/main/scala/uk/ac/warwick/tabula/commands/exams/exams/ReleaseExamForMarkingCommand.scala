@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object ReleaseExamForMarkingCommand {
@@ -43,7 +43,7 @@ trait ReleaseExamForMarkingCommandPermissions extends RequiresPermissionsCheckin
 
   self: ReleaseExamForMarkingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(exam), mandatory(module))
     p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
   }
@@ -56,7 +56,7 @@ trait ReleaseExamForMarkingCommandDescription extends Describable[Exam] {
 
   override lazy val eventName = "ReleaseExamForMarking"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.exam(exam)
   }
 }
@@ -73,8 +73,8 @@ trait ExamReleasedNotifier extends Notifies[Exam, Exam] {
 
   self: ReleaseExamForMarkingCommandState =>
 
-  def emit(result: Exam): mutable.Buffer[ExamReleasedForMarkingNotification] = {
-    val notifications = exam.firstMarkers.asScala
+  def emit(result: Exam): Seq[ExamReleasedForMarkingNotification] = {
+    val notifications = exam.firstMarkers.asScala.toSeq
       .filterNot(map => map.students.isEmpty || map.marker_id == null) // don't notify markers with no assigned students
       .map(map => {
       val notification = Notification.init(new ExamReleasedForMarkingNotification, user, exam)

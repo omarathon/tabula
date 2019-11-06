@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DeleteSmallGroupEventCommand {
   type Command = Appliable[SmallGroupEvent] with SelfValidating with DeleteSmallGroupEventCommandState
@@ -42,7 +42,7 @@ class DeleteSmallGroupEventCommandInternal(val group: SmallGroup, val event: Sma
 trait DeleteSmallGroupEventPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteSmallGroupEventCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(event, group)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(event))
   }
@@ -51,7 +51,7 @@ trait DeleteSmallGroupEventPermissions extends RequiresPermissionsChecking with 
 trait DeleteSmallGroupEventDescription extends Describable[SmallGroupEvent] {
   self: DeleteSmallGroupEventCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupEvent(event)
   }
 }
@@ -59,7 +59,7 @@ trait DeleteSmallGroupEventDescription extends Describable[SmallGroupEvent] {
 trait DeleteSmallGroupEventValidation extends SelfValidating {
   self: DeleteSmallGroupEventCommandState with SmallGroupServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // Can't delete events that have attendance recorded against them
     val hasAttendance =
       smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)

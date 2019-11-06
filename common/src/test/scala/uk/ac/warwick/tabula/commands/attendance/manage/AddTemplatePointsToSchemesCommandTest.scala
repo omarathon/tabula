@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.joda.time.{DateTime, LocalDate}
-import org.mockito.Matchers
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringTemplate}
 import uk.ac.warwick.tabula.data.model.{Department, ScheduledNotification, StudentMember}
@@ -75,7 +74,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
       val newPoints: Seq[AttendanceMonitoringPoint] = command.applyInternal()
       newPoints.size should be(6)
       verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
-      verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
+      verify(command.thisScheduledNotificationService, atLeast(1)).push(any[ScheduledNotification[Department]])
       verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), department, academicYear)
     }
   }

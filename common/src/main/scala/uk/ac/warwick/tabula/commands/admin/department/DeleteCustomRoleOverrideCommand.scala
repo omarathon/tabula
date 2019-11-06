@@ -41,7 +41,7 @@ class DeleteCustomRoleOverrideCommandInternal(val department: Department, val cu
 trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteCustomRoleOverrideCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.mustBeLinked(mandatory(roleOverride), mandatory(customRoleDefinition))
     p.PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
@@ -51,7 +51,7 @@ trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChec
 trait DeleteCustomRoleOverrideCommandValidation extends SelfValidating {
   self: DeleteCustomRoleOverrideCommandState =>
 
-  override def validate(errors: Errors) {}
+  override def validate(errors: Errors): Unit = {}
 }
 
 trait DeleteCustomRoleOverrideCommandDescription extends Describable[RoleOverride] {

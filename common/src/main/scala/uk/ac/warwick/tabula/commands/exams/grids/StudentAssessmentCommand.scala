@@ -129,7 +129,7 @@ trait StudentAssessmentPermissions extends RequiresPermissionsChecking with Perm
 
   self: StudentAssessmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
         CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.studentCourseDetails.currentRoute))
@@ -141,7 +141,7 @@ trait StudentAssessmentPermissions extends RequiresPermissionsChecking with Perm
 trait StudentAssessmentProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: StudentAssessmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Profiles.Read.ModuleRegistration.Core, studentCourseDetails)
   }
 }

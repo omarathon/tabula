@@ -23,7 +23,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
     Wire[ModuleAndDepartmentService]
   }
 
-  private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
+  private def getRolesForMembers(members: Seq[Member]): LazyList[Role] = members.to(LazyList).flatMap { member =>
     if (member.active) {
       val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
 
@@ -31,10 +31,10 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
         case Staff | Emeritus => member.affiliatedDepartments.map { department =>
           customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
         }
-        case _ => Stream.empty
+        case _ => LazyList.empty
       })
     } else {
-      Stream(customRoleFor(Option(member.homeDepartment))(PreviousUniversityMemberRoleDefinition, member).getOrElse(PreviousUniversityMemberRole(member)))
+      LazyList(customRoleFor(Option(member.homeDepartment))(PreviousUniversityMemberRoleDefinition, member).getOrElse(PreviousUniversityMemberRole(member)))
     }
   }
 
@@ -47,20 +47,20 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
     if (user.departmentCode.hasText) {
       departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
         case Some(department) =>
-          if (user.isStaff) Stream(customRoleFor(department)(SSOStaffRoleDefinition, department).getOrElse(SSOStaffRole(department)))
-          else Stream.empty
-        case None => Stream.empty
+          if (user.isStaff) LazyList(customRoleFor(department)(SSOStaffRoleDefinition, department).getOrElse(SSOStaffRole(department)))
+          else LazyList.empty
+        case None => LazyList.empty
       }
     }
-    else Stream.empty
+    else LazyList.empty
 
-  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for UserTypeAndDepartmentRoleProvider") {
+  def getRolesFor(user: CurrentUser): LazyList[Role] = benchmarkTask("Get roles for UserTypeAndDepartmentRoleProvider") {
     if (user.realUser.isLoggedIn) {
       val members = profileService.getAllMembersWithUserId(user.apparentId, disableFilter = true, activeOnly = false)
 
       if (members.nonEmpty) getRolesForMembers(members) :+ LoggedInRole(user.apparentUser)
       else getRolesForSSO(user) :+ LoggedInRole(user.apparentUser)
-    } else Stream.empty
+    } else LazyList.empty
   }
 
   def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])

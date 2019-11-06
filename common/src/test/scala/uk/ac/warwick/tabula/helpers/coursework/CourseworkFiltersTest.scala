@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, Submiss
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 // scalastyle:off magic.number
@@ -28,7 +28,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
   module.adminDepartment = department
 
   assignment.feedbackService = smartMock[FeedbackService]
-  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
   val mockUserLookup = new MockUserLookup
   mockUserLookup.registerUserObjects(

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{WorkflowProgress, WorkflowStage, WorkflowStages}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Service
 class SmallGroupSetWorkflowService {

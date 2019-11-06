@@ -58,7 +58,9 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
       // mitCircsSubmissionDao.submissionsWithOutcomes only returns submission with a grade so the get is fine here
       .map(s => s.student.universityId -> MitigationGradeCode(s.gradingCode.get, if(s.isAcute) s.outcomesLastRecordedOn else s.outcomesApprovedOn))
       .groupBy(_._1)
+      .view
       .mapValues(_.map(_._2))
+      .toMap
   }
 
   override def getMessageById(id: String): Option[MitigatingCircumstancesMessage] = transactional(readOnly = true) {

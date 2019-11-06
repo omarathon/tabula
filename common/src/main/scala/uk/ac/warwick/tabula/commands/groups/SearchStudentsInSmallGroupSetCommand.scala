@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent, ProfileServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object SearchStudentsInSmallGroupSetCommand {
@@ -58,9 +58,9 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
       }
     }
 
-  def allUniversityIdsInSet: mutable.Buffer[String] = {
+  def allUniversityIdsInSet: Seq[String] = {
     // Include the university IDs of any users in any SmallGroupSet within this module for the relevant academic year
-    module.groupSets.asScala.filter(_.academicYear == set.academicYear).flatMap { set =>
+    module.groupSets.asScala.toSeq.filter(_.academicYear == set.academicYear).flatMap { set =>
       set.members.knownType.members ++ set.groups.asScala.flatMap { group =>
         group.students.users.map(_.getWarwickId) ++
           smallGroupService.findAttendanceByGroup(group).flatMap(_.attendance.asScala.toSeq.map(_.universityId))
@@ -94,7 +94,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 
 trait SearchStudentsInSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SearchStudentsInSmallGroupSetCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(set), mandatory(module))
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, mandatory(set))) ++

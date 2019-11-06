@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.exams.grids._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridCheckAndApplyOvercatCommand {
 
@@ -77,7 +77,7 @@ trait GenerateExamGridCheckAndApplyOvercatValidation extends SelfValidating {
 
   self: GenerateExamGridCheckAndApplyOvercatCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (filteredEntities.isEmpty) {
       errors.reject("", "No changes to apply")
     }
@@ -89,7 +89,7 @@ trait GenerateExamGridCheckAndApplyOvercatPermissions extends RequiresPermission
 
   self: GenerateExamGridCheckAndApplyOvercatCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -101,7 +101,7 @@ trait GenerateExamGridCheckAndApplyOvercatDescription extends Describable[Genera
 
   override lazy val eventName = "GenerateExamGridCheckAndApplyOvercat"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department).property("academicYear", academicYear.toString)
   }
 
@@ -153,6 +153,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
     entities.map(entity => {
       val subsets = entity.validYears
         .filter { case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty }
+        .view
         .mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
           entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
@@ -163,6 +164,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
           if (overcattedModuleSubsets.size > 1) year -> overcattedModuleSubsets
           else year -> Seq()
         }
+        .toMap
       entity -> subsets
     }).toMap
 

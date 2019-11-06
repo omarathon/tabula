@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.reflect._
 import scala.util.Try

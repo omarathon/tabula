@@ -22,9 +22,9 @@ trait FiltersCheckpointMapChanges {
       !existingCheckpointMap.get(student).flatMap(_.get(point)).contains(state)
     }
     changes.groupBy { case (student, _, _) => student }
-      .mapValues(_.groupBy { case (_, point, _) => point }
-        .mapValues(_.map { case (_, _, state) => state }.head)
-      )
+      .view.mapValues(_.groupBy { case (_, point, _) => point }
+        .view.mapValues(_.map { case (_, _, state) => state }.head).toMap
+      ).toMap
   }
 }
 

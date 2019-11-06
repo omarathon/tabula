@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringLevelServiceComponent, CourseAndRouteServiceComponent, LevelServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.Range.Inclusive
 
 object GenerateExamGridSelectCourseCommand {
@@ -36,9 +36,9 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
   override def applyInternal(): Seq[ExamGridEntity] = {
     val scyds = benchmarkTask("findByCourseRoutesYear") {
       if (yearOfStudy != null) {
-        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       } else {
-        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala, routes.asScala, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       }.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
     }
     val sorted = benchmarkTask("sorting") {
@@ -76,7 +76,7 @@ trait GenerateExamGridSelectCoursePermissions extends RequiresPermissionsCheckin
 
   self: GenerateExamGridSelectCourseCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 

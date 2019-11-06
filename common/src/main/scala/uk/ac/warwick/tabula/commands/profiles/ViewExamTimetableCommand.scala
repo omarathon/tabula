@@ -42,7 +42,7 @@ trait ViewExamTimetablePermissions extends RequiresPermissionsChecking with Perm
 
   self: ViewExamTimetableCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Read.Timetable, member)
   }
 

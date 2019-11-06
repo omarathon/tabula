@@ -12,7 +12,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.services.scheduling.AddressImporter.{AddressInfo, Addresses}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AddressImporter {
   def getAddressInfo(universityId: String): Addresses

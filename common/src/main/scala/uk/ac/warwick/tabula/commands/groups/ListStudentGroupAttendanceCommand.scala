@@ -75,22 +75,22 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
         weekAttendance.exists(hasExpectedAttendanceForWeek)
     }
 
-    val attendance = (groupByTerm(allInstances).mapValues { instances =>
+    val attendance = (groupByTerm(allInstances).view.mapValues { instances =>
       val groups = SortedMap(instances.groupBy { case ((event, _), _) => event.group }.toSeq: _*)
-      groups.filterKeys { smallGroup => smallGroup.groupSet.visibleToStudents }.mapValues { instances =>
-        SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq: _*).mapValues { instances =>
+      groups.view.filterKeys { smallGroup => smallGroup.groupSet.visibleToStudents }.mapValues { instances =>
+        SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq: _*).view.mapValues { instances =>
           attendanceForStudent(instances, isLate(user))(user)
-        }
-      }.filter(hasExpectedAttendanceForGroup)
-    }).filterNot { case (term, attendance) => attendance.isEmpty }
+        }.to(SortedMap)
+      }.filter(hasExpectedAttendanceForGroup).to(SortedMap)
+    }).filterNot { case (_, attendance) => attendance.isEmpty }.to(SortedMap)
 
-    val missedCountByTerm = attendance.mapValues { groups =>
+    val missedCountByTerm = attendance.view.mapValues { groups =>
       val count = groups.map { case (_, attendanceByInstance) =>
         attendanceByInstance.values.flatMap(_.values).count(_ == SmallGroupAttendanceState.MissedUnauthorised)
       }
 
       count.foldLeft(0) { (acc, missedCount) => acc + missedCount }
-    }
+    }.toMap
 
     val termWeeks = SortedMap(attendance.keySet.map { term =>
       term -> WeekRange(term.firstWeek.weekNumber, term.lastWeek.weekNumber)
@@ -100,7 +100,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
       smallGroupService.findAttendanceNotes(
         Seq(user.getWarwickId),
         allInstances.flatMap { case (_, occurenceOption) => occurenceOption }
-      ).groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
+      ).groupBy(n => (n.occurrence.event, n.occurrence.week)).view.mapValues(_.head).toMap
     }
 
     StudentGroupAttendance(
@@ -155,7 +155,7 @@ trait ListStudentGroupAttendanceCommandState {
 
 trait ListStudentGroupAttendanceCommandPermissions extends RequiresPermissionsChecking {
   self: ListStudentGroupAttendanceCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Read.SmallGroups, member)
     p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, member)
   }

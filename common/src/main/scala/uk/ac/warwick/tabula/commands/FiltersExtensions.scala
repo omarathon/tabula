@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FiltersExtensions {
   val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
@@ -129,7 +129,7 @@ trait DeserializesExtensionsFilterImpl extends DeserializesExtensionsFilter with
   def deserializeFilter(filterString: String): Unit = {
     val params: Map[String, Seq[String]] =
       URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8)
-        .asScala
+        .asScala.toSeq
         .groupBy(_.getName)
         .map { case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue) }
 

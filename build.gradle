@@ -11,30 +11,30 @@ buildscript {
 
   dependencies {
     classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.8"
-    classpath "com.bmuschko:gradle-cargo-plugin:2.5"
+    classpath "com.bmuschko:gradle-cargo-plugin:2.6.1"
   }
 }
 
 plugins {
-  id 'net.saliman.properties' version '1.4.6'
+  id 'net.saliman.properties' version '1.5.1'
 }
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-  scalaVersion = "2.12.10"
-  scalaMajorVersion = "2.12"
-  springVersion = "5.1.9.RELEASE"
-  hibernateVersion = "5.4.4.Final"
-  jacksonVersion = "2.9.9"
-  jacksonDatabindVersion = "2.9.9.3"
-  jacksonScalaModuleVersion = "2.9.9"
-  elasticsearchVersion = "6.5.2"
-  elastic4sVersion = "6.5.1"
-  poiVersion = "4.1.0"
+  scalaVersion = "2.13.1"
+  scalaMajorVersion = "2.13"
+  springVersion = "5.2.0.RELEASE"
+  hibernateVersion = "5.4.7.Final"
+  jacksonVersion = "2.9.10"
+  jacksonDatabindVersion = "2.9.10.1"
+  jacksonScalaModuleVersion = "2.9.10"
+  elasticsearchVersion = "6.7.2"
+  elastic4sVersion = "6.7.3"
+  poiVersion = "4.1.1"
   tilesVersion = "3.0.8"
-  jcloudsVersion = "2.1.2"
+  jcloudsVersion = "2.2.0"
   warwickUtilsVersion = "20191010"
-  surefireVersion = "2.19.1"
+  surefireVersion = "2.22.2"
 }
 
 allprojects {
@@ -128,7 +128,6 @@ subprojects {
 
   dependencies {
     compile "org.scala-lang:scala-library:${scalaVersion}"
-    compile "com.jsuereth:scala-arm_${scalaMajorVersion}:2.0"
 
     // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
@@ -155,11 +154,8 @@ subprojects {
     /* ******* */
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.jmock:jmock-junit4:2.5.1'
-    testCompile 'jmock:jmock-cglib:1.2.0'
-    testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.17"
-    testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.5"
-    testCompile 'org.mockito:mockito-all:1.10.19'
+    testCompile "org.specs2:specs2-mock_${scalaMajorVersion}:4.8.0"
+    testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.8"
   }
 
   tasks.withType(ScalaCompile) {
@@ -198,11 +194,12 @@ task generateEncryptionKey() {
     keyGenerator.init(256, random)
     def secretKey = keyGenerator.generateKey()
 
+
     println new String(java.util.Base64.encoder.encode(secretKey.encoded), java.nio.charset.StandardCharsets.UTF_8)
   }
 }
 
 wrapper {
-  gradleVersion = '6.0-rc-1'
+  gradleVersion = '6.0-rc-2'
   distributionType = 'ALL'
 }

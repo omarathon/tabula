@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object DeregisteredStudentsForSmallGroupSetCommand {
@@ -42,7 +42,7 @@ trait DeregisteredStudentsForSmallGroupSetCommandState {
 trait PopulateDeregisteredStudentsForSmallGroupSetCommandState extends PopulateOnForm {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  def populate() {
+  def populate(): Unit = {
     students.clear()
     students.addAll(set.studentsNotInMembership.sortBy { user => (user.getLastName, user.getFirstName, user.getWarwickId) }.asJavaCollection)
   }
@@ -53,12 +53,12 @@ class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, va
     with DeregisteredStudentsForSmallGroupSetCommandState {
   self: SmallGroupServiceComponent with ProfileServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[StudentNotInMembership] =
+  override def applyInternal(): Seq[StudentNotInMembership] =
     for {
-      student <- students.asScala
+      student <- students.asScala.toSeq
       if !set.members.includesUser(student) // Prevent irrelevant students being sent
 
-      group <- set.groups.asScala
+      group <- set.groups.asScala.toSeq
       if group.students.includesUser(student)
     } yield {
       smallGroupService.removeUserFromGroup(student, group)
@@ -73,7 +73,7 @@ class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, va
 trait DeregisteredStudentsForSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -82,7 +82,7 @@ trait DeregisteredStudentsForSmallGroupSetPermissions extends RequiresPermission
 trait DeregisteredStudentsForSmallGroupSetDescription extends Describable[Seq[StudentNotInMembership]] {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 

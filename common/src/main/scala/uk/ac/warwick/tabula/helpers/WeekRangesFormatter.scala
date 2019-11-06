@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.helpers
 
 import freemarker.core.{HTMLOutputFormat, TemplateHTMLOutputModel}
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.{TemplateMethodModelEx, TemplateModel}
+import freemarker.template.TemplateMethodModelEx
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEvent, WeekRange}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
@@ -42,14 +42,13 @@ object WeekRangesFormatter {
 
 /** Companion class for Freemarker.
   */
-class WeekRangesFormatterTag extends TemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
+class WeekRangesFormatterTag extends BaseTemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
 
   import WeekRangesFormatter.format
 
   /** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
-  override def exec(list: JList[_]): TemplateHTMLOutputModel = {
+  override def execMethod(args: Seq[_]): TemplateHTMLOutputModel = {
     val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
-    val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
     HTMLOutputFormat.INSTANCE.fromMarkup {
       args match {
@@ -394,14 +393,14 @@ object WholeWeekFormatter {
 
 /* Freemarker companion for the WholeWeekFormatter */
 
-class WholeWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
+class WholeWeekFormatterTag extends BaseTemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
 
   import WholeWeekFormatter.format
 
   /** Pass through all the arguments  */
-  override def exec(list: JList[_]): String = {
+  override def execMethod(args: Seq[_]): String = {
     val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
-    val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+
     args match {
       case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) =>
         format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, numberingSystem(user, Some(dept)), short)

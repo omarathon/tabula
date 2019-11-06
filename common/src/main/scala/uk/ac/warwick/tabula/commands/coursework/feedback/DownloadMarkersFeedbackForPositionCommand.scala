@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceC
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -38,7 +38,7 @@ class DownloadMarkersFeedbackForPositionCommand(
 
   override def applyInternal(): RenderableFile = {
     val markersSubs = assignment.getMarkersSubmissions(marker)
-    val feedbacks = assignment.feedbacks.asScala.filter(f => markersSubs.exists(_.usercode == f.usercode))
+    val feedbacks = assignment.feedbacks.asScala.toSeq.filter(f => markersSubs.exists(_.usercode == f.usercode))
     val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
       case FirstFeedback => Option(f.firstMarkerFeedback)
       case SecondFeedback => Option(f.secondMarkerFeedback)
@@ -49,14 +49,14 @@ class DownloadMarkersFeedbackForPositionCommand(
 }
 
 trait DownloadMarkersFeedbackForPositionDescription extends Describable[RenderableFile] {
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }
 
 trait DownloadMarkersFeedbackForPositionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
   self: DownloadMarkersFeedbackForPositionCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {

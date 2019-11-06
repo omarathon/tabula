@@ -44,7 +44,7 @@ trait ListMarkingWorkflowPermissions extends RequiresPermissionsChecking with Pe
 
   self: ListMarkingWorkflowCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MarkingWorkflow.Read, department)
   }
 

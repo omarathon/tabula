@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Transactiona
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInternal[UpstreamAssessmentGroup] {
   self: AssessmentMembershipServiceComponent with TransactionalComponent =>

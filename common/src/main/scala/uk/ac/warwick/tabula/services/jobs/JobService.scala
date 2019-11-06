@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.tabula.{CurrentUser, EarlyRequestInfo}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.parallel.CollectionConverters._
+
 trait JobServiceComponent {
   def jobService: JobService
 }

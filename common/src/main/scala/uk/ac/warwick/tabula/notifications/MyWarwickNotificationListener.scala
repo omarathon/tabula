@@ -13,14 +13,14 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
 trait MyWarwickNotificationListener extends NotificationListener with Logging {
   self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
 
   def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
-    val recipients = notification.recipientNotificationInfos.asScala
+    val recipients = notification.recipientNotificationInfos.asScala.toSeq
       .filterNot(_.dismissed) // Not if the user has dismissed the notification already
       .map(_.recipient)
       .filter(_.isFoundUser) // Only users found in SSO
@@ -34,7 +34,7 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
 
       val permissionsTargets = allEntities.filter(_ != null).map(_.entity).collect { case pt: PermissionsTarget => pt }
 
-      def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+      def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
       val tags = permissionsTargets.flatMap(withParents).distinct.map { target =>
         val tag = new Tag()

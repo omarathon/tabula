@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFeedbackForSitsDaoComponent, FeedbackForSitsDaoComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ValidateAndPopulateFeedbackResult(
   valid: Seq[Feedback],

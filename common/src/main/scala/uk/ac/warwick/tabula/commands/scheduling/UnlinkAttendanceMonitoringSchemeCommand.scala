@@ -45,7 +45,7 @@ class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Ma
 
 trait UnlinkAttendanceMonitoringSchemePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.UpdateMembership)
   }
 
@@ -55,7 +55,7 @@ trait UnlinkAttendanceMonitoringSchemeDescription extends Describable[Map[Depart
 
   override lazy val eventName = "UnlinkAttendanceMonitoringScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 

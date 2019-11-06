@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait FiltersStudentsBase {
 
@@ -44,12 +44,12 @@ trait FiltersStudentsBase {
   var otherCriteria: JList[String] = JArrayList()
 
   protected def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
-    (department.modules.asScala ++ department.children.asScala.flatMap {
+    (department.modules.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       modulesForDepartmentAndSubDepartments
     }).sorted
 
   protected def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-    (department.routes.asScala ++ department.children.asScala.flatMap {
+    (department.routes.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       routesForDepartmentAndSubDepartments
     }).sorted
 
@@ -97,7 +97,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
   with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
   def deserializeFilter(filterString: String): Unit = {
-    val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8).asScala.groupBy(_.getName).map {
+    val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8).asScala.toSeq.groupBy(_.getName).map {
       case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
     }
     courseTypes.clear()

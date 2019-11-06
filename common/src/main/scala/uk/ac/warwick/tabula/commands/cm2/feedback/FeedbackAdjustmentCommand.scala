@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentCommand {
 
@@ -93,7 +93,7 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 
 trait FeedbackAdjustmentCommandValidation extends SelfValidating {
   self: FeedbackAdjustmentCommandState with FeedbackAdjustmentSitsGradeValidation with CopiesMarkToFeedback =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!reason.hasText)
       errors.rejectValue("reason", "feedback.adjustment.reason.empty")
     else if (reason.length > FeedbackAdjustmentCommand.REASON_SIZE_LIMIT)
@@ -153,7 +153,7 @@ trait FeedbackAdjustmentCommandState {
 
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackAdjustmentCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)

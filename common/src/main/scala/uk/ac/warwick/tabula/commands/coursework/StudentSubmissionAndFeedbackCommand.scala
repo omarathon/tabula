@@ -128,7 +128,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: StudentMemberSubmissionAndFeedbackCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(assignment), mandatory(module))
 
     p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
@@ -139,10 +139,10 @@ trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermi
 trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CurrentUserSubmissionAndFeedbackCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(assignment), mandatory(module))
 
-    var perms = collection.mutable.MutableList[CheckablePermission]()
+    var perms = collection.mutable.ListBuffer[CheckablePermission]()
 
     submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
     feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }

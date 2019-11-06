@@ -16,8 +16,9 @@ import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMembe
 import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 case class AttendanceMonitoringCheckpointFormatterResult(
@@ -34,15 +35,12 @@ case class AttendanceMonitoringCheckpointFormatterResult(
 /**
   * Freemarker helper to build the necessary fields to display a checkpoint
   */
-class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
+class AttendanceMonitoringCheckpointFormatter extends BaseTemplateMethodModelEx {
 
   @Autowired var userLookup: UserLookupService = _
   @Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
-  override def exec(list: JList[_]): AttendanceMonitoringCheckpointFormatterResult = {
-    val args = list.asScala.map {
-      model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
-    }
+  override def execMethod(args: Seq[_]): AttendanceMonitoringCheckpointFormatterResult =
     args match {
       case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, urlProfile: JBoolean, _*) =>
         result(department, checkpoint, None, urlProfile)
@@ -54,7 +52,6 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         result(department, point, student, Option(note), urlProfile)
       case _ => throw new IllegalArgumentException("Bad args")
     }
-  }
 
   private def describeCheckpoint(checkpoint: AttendanceMonitoringCheckpoint) = {
     val isStudent = RequestInfo.fromThread.map(_.user.apparentUser.getUserId).contains(checkpoint.student.userId)

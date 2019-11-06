@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -39,7 +39,7 @@ class DownloadMarkerFeedbackCommandInternal(val assignment: Assignment, val mark
 trait DownloadMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DownloadMarkerFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
   }
 }

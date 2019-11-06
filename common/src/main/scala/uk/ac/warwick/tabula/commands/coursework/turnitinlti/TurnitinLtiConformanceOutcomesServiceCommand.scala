@@ -199,7 +199,7 @@ trait TurnitinLtiConformanceOutcomesServiceRequest extends TurnitinLtiConformanc
 trait TurnitinLtiConformanceOutcomesServiceValidation extends SelfValidating {
   self: TurnitinLtiConformanceOutcomesServiceRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (assignment == null) {
       errors.rejectValue("assignment", "NotEmpty")
     }

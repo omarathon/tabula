@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CreateScheduledMeetingRecordCommand {
   def apply(creator: Member, studentCourseDetails: StudentCourseDetails, allRelationships: Seq[StudentRelationship]) =
@@ -37,7 +37,7 @@ class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourse
   self: MeetingRecordServiceComponent with AbstractScheduledMeetingCommandInternal =>
 
   def applyInternal(): ScheduledMeetingRecord = {
-    val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala)
+    val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala.toSeq)
     applyCommon(scheduledMeeting)
     scheduledMeeting.creationDate = DateTime.now
     persistAttachments(scheduledMeeting)
@@ -49,7 +49,7 @@ class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourse
 trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
   self: CreateScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
     meetingRecordService.listScheduled(relationships.asScala.toSet, Some(creator)).foreach(
@@ -75,7 +75,7 @@ trait CreateScheduledMeetingRecordState extends ModifyScheduledMeetingRecordStat
 trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateScheduledMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     allRelationships.map(_.relationshipType).foreach { relationshipType =>
       p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), mandatory(studentCourseDetails.student))
     }
@@ -88,8 +88,8 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
   override lazy val eventName = "CreateScheduledMeetingRecord"
 
   override def describe(d: Description): Unit =
-    d.studentRelationships(relationships.asScala)
-     .studentRelationshipTypes(relationships.asScala.map(_.relationshipType).distinct)
+    d.studentRelationships(relationships.asScala.toSeq)
+     .studentRelationshipTypes(relationships.asScala.toSeq.map(_.relationshipType).distinct)
      .member(creator)
 }
 

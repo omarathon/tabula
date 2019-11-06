@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.groups.admin.{ReleaseAllSmallGroupSe
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
@@ -59,7 +59,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       cmd.describeOutcome returns Some("hello")
       val context = controller.submit(cmd).map
 
-      val expectedViewSet = new ViewSet(set, ViewGroup.fromGroups(set.groups.asScala), GroupsViewModel.Tutor)
+      val expectedViewSet = new ViewSet(set, ViewGroup.fromGroups(set.groups.asScala.toSeq), GroupsViewModel.Tutor)
       context("notificationSentMessage") should be(Some("hello"))
       context("groupsetItem") should be(expectedViewSet)
       context("moduleItem") should be(new ViewModule(set.module, Seq(expectedViewSet), true))

@@ -536,9 +536,8 @@ class SmallGroupDaoImpl extends SmallGroupDao
           .add(property("users.elements")),
         "id",
         eventIDs.map(_._1)
-      ).seq
-        .map(objArray => (objArray(0).asInstanceOf[String], userLookup.getUserByUserId(objArray(1).asInstanceOf[String])))
-        .groupBy(_._1).mapValues(_.map(_._2))
+      ).map(objArray => (objArray(0).asInstanceOf[String], userLookup.getUserByUserId(objArray(1).asInstanceOf[String])))
+       .groupBy(_._1).view.mapValues(_.map(_._2)).toMap
     }
 
     // Now get the data and mix in the group sizes and tutors

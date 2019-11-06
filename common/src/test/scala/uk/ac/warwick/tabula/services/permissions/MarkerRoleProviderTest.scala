@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 

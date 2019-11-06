@@ -7,7 +7,7 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor
 import org.hibernate.usertype.UserType
 import play.api.libs.json.{Format, Json}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ReasonableAdjustment(
   id: String,
