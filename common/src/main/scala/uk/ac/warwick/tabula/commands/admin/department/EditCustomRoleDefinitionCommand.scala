@@ -41,7 +41,7 @@ class EditCustomRoleDefinitionCommandInternal(val department: Department, val cu
 trait EditCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditCustomRoleDefinitionCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.PermissionCheck(Permissions.RolesAndPermissions.Update, customRoleDefinition)
   }
@@ -50,7 +50,7 @@ trait EditCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChec
 trait EditCustomRoleDefinitionCommandValidation extends AddCustomRoleDefinitionCommandValidation {
   self: EditCustomRoleDefinitionCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.validate(errors)
 
     if (baseDefinition == customRoleDefinition) {

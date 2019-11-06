@@ -55,7 +55,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 
   }
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     val downloads: Seq[Submission] = {
       if (students.asScala.nonEmpty) students.asScala.toSeq.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
       else submissions.asScala.toSeq

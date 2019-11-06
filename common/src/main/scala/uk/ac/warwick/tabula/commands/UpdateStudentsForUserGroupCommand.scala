@@ -104,7 +104,7 @@ trait UpdateStudentsForSmallGroupSetPermissions extends RequiresPermissionsCheck
 
   def module: Module
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, set)
   }
@@ -117,7 +117,7 @@ trait UpdateStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermis
 
   def department: Department
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, set)
   }
@@ -130,7 +130,7 @@ trait UpdateStudentsForDepartmentSmallGroupSetDescription extends Describable[De
 
   override lazy val eventName = "UpdateStudentsForDepartmentSmallGroupSet"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.departmentSmallGroupSet(set)
   }
 }

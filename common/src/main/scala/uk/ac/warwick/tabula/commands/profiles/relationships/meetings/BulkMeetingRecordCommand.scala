@@ -67,7 +67,7 @@ trait BulkMeetingRecordCommandNotifications extends Notifies[Seq[MeetingRecord],
 trait BulkMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: BulkMeetingRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     studentRelationships.foreach { studentRelationship =>
       p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(studentRelationship.relationshipType), mandatory(studentRelationship.studentMember))
     }

@@ -130,7 +130,7 @@ trait OldAdminAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "AdminAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     assessment match {
       case assignment: Assignment => d.assignment(assignment)
       case exam: Exam => d.exam(exam)
@@ -157,7 +157,7 @@ trait OldAdminAddMarksPermissions extends RequiresPermissionsChecking with Permi
 
   self: OldAdminAddMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assessment, module)
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>

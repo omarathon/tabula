@@ -296,7 +296,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     logger.info("Synchronising item " + item + " for " + context)
     item match {
       case copy: FeaturesMessage => features.update(copy)
@@ -304,7 +304,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
     }
   }
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
     queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
   }

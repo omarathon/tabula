@@ -55,7 +55,7 @@ trait AddMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidati
 trait AddMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MarkingWorkflowCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, mandatory(department))
   }
 }
@@ -63,7 +63,7 @@ trait AddMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking w
 trait AddMarkingWorkflowCommandDescription extends Describable[MarkingWorkflow] {
   self: MarkingWorkflowCommandState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department)
   }
 }

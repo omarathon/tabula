@@ -97,7 +97,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
 trait MitCircsRecordOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsRecordOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -136,7 +136,7 @@ trait MitCircsRecordOutcomesValidation extends SelfValidating {
 trait MitCircsRecordOutcomesDescription extends Describable[Result] {
   self: MitCircsRecordOutcomesState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

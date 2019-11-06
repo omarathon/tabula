@@ -74,7 +74,7 @@ class ApproveMeetingRecordCommand(val meeting: MeetingRecord, val user: CurrentU
 trait ApproveMeetingRecordValidation extends SelfValidating {
   self: ApproveMeetingRecordState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (meeting.deleted) {
       errors.reject("meetingRecordApproval.meetingRecord.deleted")
     }
@@ -92,7 +92,7 @@ trait ApproveMeetingRecordValidation extends SelfValidating {
 trait ApproveMeetingRecordPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ApproveMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(meeting.approvals.asScala.map(approval =>
       CheckablePermission(Permissions.Profiles.MeetingRecord.Approve, approval)
     ))
@@ -103,7 +103,7 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
 
   self: ApproveMeetingRecordState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.meeting(meeting)
      .property("approved" -> approved)
 

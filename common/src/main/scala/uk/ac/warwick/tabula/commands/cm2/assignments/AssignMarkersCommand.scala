@@ -152,7 +152,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 trait AssignMarkersPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     notDeleted(assignment)
     p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
   }
@@ -303,7 +303,7 @@ trait AssignMarkersDescription extends Describable[Assignment] {
     s"${marker.getUserId} -> ${students.map(_.getUserId).toSeq.sorted.mkString(",")}"
   }.mkString("\n")
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .properties("allocations" -> allocationMap.map {
         case (stage, allocation) => s"${stage.roleName}:\n${printAllocation(allocation)}"

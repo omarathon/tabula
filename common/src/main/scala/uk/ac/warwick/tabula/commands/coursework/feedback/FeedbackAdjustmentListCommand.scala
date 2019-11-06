@@ -60,7 +60,7 @@ trait FeedbackAdjustmentListCommandState {
 
 trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackAdjustmentListCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)

@@ -101,7 +101,7 @@ trait ViewPlagiarismReportValidation extends SelfValidating {
 trait ViewPlagiarismReportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewPlagiarismReportState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(attachment)
     mandatory(attachment.originalityReport)
     p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, mandatory(assignment))

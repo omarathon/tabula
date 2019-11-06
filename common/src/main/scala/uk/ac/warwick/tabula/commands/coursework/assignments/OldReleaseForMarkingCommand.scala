@@ -83,7 +83,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
     feedbackToUpdate.toList
   }
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     invalidFeedback.addAll((for {
       usercode <- students.asScala
       parentFeedback <- assignment.feedbacks.asScala.find(_.usercode == usercode)
@@ -91,7 +91,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
     } yield parentFeedback).asJava)
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
   }
 
@@ -113,7 +113,7 @@ trait ReleaseForMarkingState {
 
 trait ReleaseForMarkingCommandPermissions extends RequiresPermissionsChecking {
   self: ReleaseForMarkingState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
   }
 }

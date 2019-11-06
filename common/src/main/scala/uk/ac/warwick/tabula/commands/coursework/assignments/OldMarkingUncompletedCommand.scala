@@ -40,13 +40,13 @@ abstract class OldMarkingUncompletedCommand(val module: Module, val assignment: 
 
   self: StateServiceComponent with FeedbackServiceComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // do not update previously released feedback
     markerFeedback = Option(markerFeedback).map(mfs =>
       mfs.asScala.filterNot(mf => mf != null && mf.feedback.released)).orNull.asJava
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback == null || markerFeedback.isEmpty || !markerFeedback.asScala.exists(_ != null)) errors.rejectValue("markerFeedback", "markers.finishMarking.noStudents")
   }
@@ -69,7 +69,7 @@ abstract class OldMarkingUncompletedCommand(val module: Module, val assignment: 
 
 trait MarkingUncompletedCommandPermissions extends RequiresPermissionsChecking {
   self: MarkingUncompletedState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -139,7 +139,7 @@ abstract class OldAdminMarkingUncompletedCommand(module: Module, assignment: Ass
 
   var students: JList[String] = JArrayList()
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val parentFeedback = students.asScala.flatMap(assignment.findFeedback)
     markerFeedback = parentFeedback.filterNot(f => f.released || f.isPlaceholder).flatMap(_.getAllCompletedMarkerFeedback.lastOption).asJava
   }

@@ -35,7 +35,7 @@ trait ViewSchemesPermissions extends RequiresPermissionsChecking with Permission
 
   self: ViewSchemesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.MonitoringPoints.Manage, mandatory(department))) ++
         routesForPermission(user, Permissions.MonitoringPoints.Manage, department).map { route => CheckablePermission(Permissions.MonitoringPoints.Manage, route) }

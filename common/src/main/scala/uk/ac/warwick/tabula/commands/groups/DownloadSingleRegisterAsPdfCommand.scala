@@ -42,7 +42,7 @@ trait DownloadSingleRegisterAsPdfPermissions extends RequiresPermissionsChecking
 
   self: DownloadSingleRegisterAsPdfCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.Register, mandatory(event))
   }
 }

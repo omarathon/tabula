@@ -76,7 +76,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
     with SecurityServiceComponent
     with UserLookupComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
@@ -127,7 +127,7 @@ trait RoleCommandRequest {
 trait GrantRoleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RoleCommandState[_ <: PermissionsTarget] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
   }
 }

@@ -120,7 +120,7 @@ trait DownloadAdminSubmissionsForPrintingPermissions extends RequiresPermissions
 
   self: DownloadSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.Submission.Read, assignment)
   }
@@ -131,7 +131,7 @@ trait DownloadMarkerSubmissionsForPrintingPermissions extends RequiresPermission
 
   self: DownloadMarkerSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.Submission.Read, assignment)
     if (submitter.apparentUser != marker) {

@@ -29,7 +29,7 @@ trait DepartmentTimetableEventsState {
 trait DepartmentTimetableEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DepartmentTimetableEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(DepartmentTimetableEventsHelper.RequiredPermission, mandatory(department))
   }
 }
@@ -37,7 +37,7 @@ trait DepartmentTimetableEventsPermissions extends RequiresPermissionsChecking w
 trait DraftDepartmentTimetableEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DepartmentTimetableEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(DepartmentTimetableEventsHelper.DraftPermission, mandatory(department))
   }
 }

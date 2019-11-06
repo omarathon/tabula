@@ -148,7 +148,7 @@ trait AssignMarkersTemplateCommandState {
 trait AssignMarkersTemplateCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, assessment.module)
   }
 }

@@ -70,7 +70,7 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def populate() {
+  def populate(): Unit = {
     new Fixture {
       command.currentAcademicYear should be(currentYear)
       command.previousAcademicYear should be(currentYear.-(1))

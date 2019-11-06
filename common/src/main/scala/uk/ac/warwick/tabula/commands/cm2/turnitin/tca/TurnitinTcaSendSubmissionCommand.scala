@@ -73,7 +73,7 @@ trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
 trait TurnitinTcaSendSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: TurnitinTcaSendSubmissionState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(assignment)
     p.PermissionCheck(RequiredPermission, assignment)
   }

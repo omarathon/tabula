@@ -80,7 +80,7 @@ trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking wi
 
   self: FilterStudentsAttendanceCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, department)
   }
 

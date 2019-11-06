@@ -95,7 +95,7 @@ trait AllocateStudentsToRelationshipValidation extends SelfValidating {
 
   self: ManageStudentRelationshipsState with AllocateStudentsToRelationshipCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Should never happen in practice, but protects against direct POSTs
 
     val allChangedStudentIDs = additions.asScala.flatMap(_._2.asScala) ++ removals.asScala.flatMap(_._2.asScala)
@@ -115,7 +115,7 @@ trait AllocateStudentsToRelationshipPermissions extends RequiresPermissionsCheck
 
   self: ManageStudentRelationshipsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     // throw this request out if this relationship can't be edited in Tabula for this department
     if (relationshipType.readOnly(department)) {
       logger.info("Denying access to FetchDepartmentRelationshipInformationCommand since relationshipType %s is read-only".format(relationshipType))
@@ -132,7 +132,7 @@ trait AllocateStudentsToRelationshipDescription extends Describable[AllocateStud
 
   override lazy val eventName = "AllocateStudentsToRelationship"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
     d.studentRelationshipType(relationshipType)
     d.property("allocationType", allocationType)

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import org.hibernate.criterion.Restrictions
-import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
@@ -307,7 +306,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
     session.clear()
   }
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
 }
 

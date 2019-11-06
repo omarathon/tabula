@@ -116,7 +116,7 @@ trait AddMarksCommandBindListener extends BindListener {
 
   self: AddMarksCommandState with MarksExtractorComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val fileNames = file.fileNames map (_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 

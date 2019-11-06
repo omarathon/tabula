@@ -36,7 +36,7 @@ trait RecordStudentAttendanceDescription extends Describable[(Seq[AttendanceMoni
 
   override lazy val eventName = "RecordStudentAttendance"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }

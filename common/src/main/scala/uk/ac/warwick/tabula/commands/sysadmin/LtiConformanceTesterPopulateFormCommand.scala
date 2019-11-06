@@ -39,7 +39,7 @@ class LtiConformanceTesterPopulateFormCommandInternal(val user: CurrentUser) ext
 }
 
 trait LtiConformanceTesterPopulateFormCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -47,7 +47,7 @@ trait LtiConformanceTesterPopulateFormCommandPermissions extends RequiresPermiss
 trait LtiConformanceTesterPopulateFormValidation extends SelfValidating {
   self: LtiConformanceTesterPopulateFormCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (endpoint.isEmptyOrWhitespace) {
       errors.rejectValue("endpoint", "turnitin.turnitinassignment.empty", "Please specify an endpoint")
     }

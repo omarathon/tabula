@@ -31,7 +31,7 @@ trait DeleteAttendanceTemplateValidation extends SelfValidating {
 
   self: DeleteAttendanceTemplateCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "attendanceMonitoringTemplate.delete.confirm")
   }
 
@@ -43,7 +43,7 @@ trait DeleteAttendanceTemplateDescription extends Describable[Unit] {
 
   override lazy val eventName = "DeleteAttendanceTemplate"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringTemplate(template)
   }
 }

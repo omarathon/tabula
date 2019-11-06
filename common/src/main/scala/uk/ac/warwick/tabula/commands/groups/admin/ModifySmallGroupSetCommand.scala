@@ -151,7 +151,7 @@ trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRang
 trait SetDefaultSmallGroupSetName extends BindListener {
   self: CreateSmallGroupSetCommandState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // If we haven't set a name, make one up
     if (!name.hasText) {
       Option(format).foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
@@ -239,7 +239,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
 trait ModifySmallGroupSetValidation extends SelfValidating {
   self: ModifySmallGroupSetCommandState with SmallGroupServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
     else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 
@@ -300,7 +300,7 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 trait CreateSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(module))
   }
 }
@@ -308,7 +308,7 @@ trait CreateSmallGroupSetPermissions extends RequiresPermissionsChecking with Pe
 trait CreateSmallGroupSetDescription extends Describable[SmallGroupSet] {
   self: CreateSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.module(module).properties("name" -> name)
   }
 
@@ -319,7 +319,7 @@ trait CreateSmallGroupSetDescription extends Describable[SmallGroupSet] {
 trait EditSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -328,7 +328,7 @@ trait EditSmallGroupSetPermissions extends RequiresPermissionsChecking with Perm
 trait EditSmallGroupSetDescription extends Describable[SmallGroupSet] {
   self: EditSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 

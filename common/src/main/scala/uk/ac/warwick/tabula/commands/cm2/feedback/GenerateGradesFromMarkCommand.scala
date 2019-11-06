@@ -74,7 +74,7 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: GenerateGradesFromMarkCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
   }
 }

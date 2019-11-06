@@ -44,7 +44,7 @@ class MitCircsViewPanelCommandInternal(val panel: MitigatingCircumstancesPanel) 
 trait MitCircsViewPanelPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsViewPanelState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission,  mandatory(panel))
   }
 
@@ -53,7 +53,7 @@ trait MitCircsViewPanelPermissions extends RequiresPermissionsChecking with Perm
 trait MitCircsViewPanelDescription extends Describable[Result] {
   self: MitCircsViewPanelState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesPanel(panel)
   }
 }

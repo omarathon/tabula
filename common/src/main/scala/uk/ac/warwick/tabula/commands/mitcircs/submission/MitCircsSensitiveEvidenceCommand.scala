@@ -41,14 +41,14 @@ class MitCircsSensitiveEvidenceCommandInternal(val submission: MitigatingCircums
 trait MitCircsSensitiveEvidencePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsSensitiveEvidenceState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, submission)
   }
 }
 
 trait MitCircsSensitiveEvidenceValidation extends SelfValidating {
   self: MitCircsSensitiveEvidenceState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if(!sensitiveEvidenceComments.hasText) {
       errors.rejectValue("sensitiveEvidenceComments", "mitigatingCircumstances.sensitiveEvidenceComments.required")
     }
@@ -61,7 +61,7 @@ trait MitCircsSensitiveEvidenceValidation extends SelfValidating {
 trait MitCircsSensitiveEvidenceDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: MitCircsSensitiveEvidenceState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

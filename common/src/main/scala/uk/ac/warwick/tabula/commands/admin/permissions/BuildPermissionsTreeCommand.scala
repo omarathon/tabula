@@ -95,7 +95,7 @@ abstract class BuildPermissionsTreeCommandInternal[A <: PermissionsTarget : Clas
 trait BuildPermissionsTreeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: BuildPermissionsTreeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Read, mandatory(target))
   }
 }

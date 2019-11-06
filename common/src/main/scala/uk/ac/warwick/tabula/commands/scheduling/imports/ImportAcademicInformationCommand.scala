@@ -524,7 +524,7 @@ trait ImportLevels {
 }
 
 trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -532,7 +532,7 @@ trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
 trait ImportAcademicInformationDescription extends Describable[ImportAcademicInformationResults] {
   override lazy val eventName = "ImportAcademicInformation"
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: ImportAcademicInformationResults) {
     def importProperties(d: Description, name: String, result: ImportResult): Description = {

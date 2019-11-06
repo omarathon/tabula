@@ -87,7 +87,7 @@ trait ManageNormalCATSLoadValidation extends SelfValidating {
 
   self: ManageNormalCATSLoadCommandRequest with ManageNormalCATSLoadCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     normalLoads.asScala.foreach { case (route, yearOfStudyMap) =>
       if (!allRoutes.contains(route)) {
         errors.reject("examGrids.normalCATSLoad.route.invalid", Array(route.code.toUpperCase), "")
@@ -108,7 +108,7 @@ trait ManageNormalCATSLoadPermissions extends RequiresPermissionsChecking with P
 
   self: ManageNormalCATSLoadCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(ManageNormalCATSLoadCommand.RequiredPermission, department)
   }
 
@@ -120,7 +120,7 @@ trait ManageNormalCATSLoadDescription extends Describable[ManageNormalCATSLoadCo
 
   override lazy val eventName = "ManageNormalCATSLoad"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 

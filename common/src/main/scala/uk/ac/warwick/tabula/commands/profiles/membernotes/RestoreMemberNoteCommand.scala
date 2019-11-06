@@ -20,7 +20,7 @@ object RestoreMemberNoteCommand {
 
       override lazy val eventName = "RestoreMemberNote"
 
-      override def describe(d: Description) {
+      override def describe(d: Description): Unit = {
         d.memberNote(memberNote)
       }
     }
@@ -45,7 +45,7 @@ trait RestoreMemberNoteValidation extends SelfValidating {
 
   self: DeleteMemberNoteCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!abstractMemberNote.deleted) {
       errors.reject("profiles.memberNote.restore.notDeleted")
     }

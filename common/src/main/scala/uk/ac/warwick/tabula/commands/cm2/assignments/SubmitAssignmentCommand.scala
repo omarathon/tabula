@@ -181,7 +181,7 @@ trait SubmitAssignmentBinding extends BindListener {
 trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Create, mandatory(assignment))
   }
 }
@@ -189,7 +189,7 @@ trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with
 trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(assignment))
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
   }
@@ -199,7 +199,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
   self: SubmitAssignmentRequest
     with FeaturesComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!assignment.isOpened) {
       errors.reject("assignment.submit.notopen")
     }

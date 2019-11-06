@@ -140,7 +140,7 @@ trait BulkAdjustmentValidation extends SelfValidating {
 
   self: BulkAdjustmentCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val doGradeValidation = assessment.module.adminDepartment.assignmentGradeValidation
     students.asScala.foreach(id => {
       marks.asScala.get(id) match {
@@ -191,7 +191,7 @@ trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with Permiss
 
   self: BulkAdjustmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
@@ -208,7 +208,7 @@ trait BulkAdjustmentDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "BulkAdjustment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assessment(assessment)
     d.property("marks" -> marks.asScala.filter { case (_, mark) => mark.hasText })
   }

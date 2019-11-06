@@ -135,7 +135,7 @@ trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand with Has
 trait AllocateStudentsToGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }
@@ -146,7 +146,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 
   override lazy val eventName: String = "AllocateStudentsToGroups"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
     d.property("oldAllocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId).toIndexedSeq).toMap)
   }
@@ -160,7 +160,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 trait AllocateStudentsToGroupsValidation extends SelfValidating {
   self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Disallow submitting unrelated Groups
     if (!mapping.asScala.keys.forall(g => set.groups.contains(g))) {
       errors.reject("smallGroup.allocation.groups.invalid")
@@ -173,7 +173,7 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 
   for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 
-  override def populate() {
+  override def populate(): Unit = {
     for (group <- set.groups.asScala)
       mapping.put(group, JArrayList(group.students.users.toList))
 

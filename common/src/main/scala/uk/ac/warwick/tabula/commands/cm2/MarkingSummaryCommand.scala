@@ -378,12 +378,12 @@ trait MarkerWorkflowCache {
   }
 
   private def toJson(markerInformation: Map[Usercode, WorkflowProgressInformation]): Json =
-    JsonHelper.toJson(markerInformation.mapValues { progressInfo =>
+    JsonHelper.toJson(markerInformation.view.mapValues { progressInfo =>
       Map(
         "stages" -> progressInfo.stages,
         "nextStage" -> progressInfo.nextStage.map(_.toString)
       )
-    })
+    }.toMap)
 
   lazy val markerWorkflowCache: Cache[AssignmentId, Json] =
     Caches.builder(CacheName, markerWorkflowCacheEntryFactory, cacheStrategy)

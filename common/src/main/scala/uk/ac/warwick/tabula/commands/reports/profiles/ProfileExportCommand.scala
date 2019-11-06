@@ -82,7 +82,7 @@ trait ProfileExportPermissions extends RequiresPermissionsChecking with Permissi
 
   self: ProfileExportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 

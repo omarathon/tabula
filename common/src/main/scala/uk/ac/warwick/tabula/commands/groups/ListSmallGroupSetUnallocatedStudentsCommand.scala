@@ -49,7 +49,7 @@ trait ListSmallGroupSetUnallocatedStudentsCommandState {
 
 trait ListSmallGroupSetUnallocatedStudentsCommandPermissions extends RequiresPermissionsChecking {
   self: ListSmallGroupSetUnallocatedStudentsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
   }
 }

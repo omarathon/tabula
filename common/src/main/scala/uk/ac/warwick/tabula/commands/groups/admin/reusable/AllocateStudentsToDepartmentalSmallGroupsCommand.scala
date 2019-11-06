@@ -128,7 +128,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsCommandState extends HasAcademicY
 trait AllocateStudentsToDepartmentalSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToDepartmentalSmallGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }
@@ -145,7 +145,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsDescription extends Describable[D
 trait AllocateStudentsToDepartmentalSmallGroupsValidation extends SelfValidating {
   self: AllocateStudentsToDepartmentalSmallGroupsCommandState with GroupsObjects[User, DepartmentSmallGroup] =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Disallow submitting unrelated Groups
     if (!mapping.asScala.keys.forall(g => set.groups.contains(g))) {
       errors.reject("smallGroup.allocation.groups.invalid")
@@ -158,7 +158,7 @@ trait PopulateAllocateStudentsToDepartmentalSmallGroupsCommand extends PopulateO
 
   for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 
-  override def populate() {
+  override def populate(): Unit = {
     for (group <- set.groups.asScala)
       mapping.put(group, JArrayList(group.students.users.toList))
 

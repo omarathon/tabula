@@ -47,7 +47,7 @@ trait ViewExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 
   self: ViewExamCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(exam, module)
     p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
   }

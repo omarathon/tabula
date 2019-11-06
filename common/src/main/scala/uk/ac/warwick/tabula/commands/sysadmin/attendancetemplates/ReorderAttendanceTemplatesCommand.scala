@@ -39,7 +39,7 @@ trait ReorderAttendanceTemplatesDescription extends Describable[Seq[AttendanceMo
 
   override lazy val eventName = "ReorderAttendanceTemplates"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }
 
 trait ReorderAttendanceTemplatesCommandState {

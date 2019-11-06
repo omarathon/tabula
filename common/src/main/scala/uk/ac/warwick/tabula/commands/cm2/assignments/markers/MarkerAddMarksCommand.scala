@@ -85,7 +85,7 @@ trait MarkerAddMarksDescription extends Describable[Seq[MarkerFeedback]] {
 
   override lazy val eventName = "MarkerAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 
@@ -157,7 +157,7 @@ trait AddMarksCommandBindListener extends BindListener {
   // for marker versions of the AddMarksCommand check that the student belongs to this marker
   def canMark(markItem: MarkItem): Boolean
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val fileNames = file.fileNames map (_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !VALID_FILE_TYPES.exists(s.endsWith))
 

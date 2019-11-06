@@ -74,14 +74,14 @@ class MitCircsPendingEvidenceCommandInternal(val submission: MitigatingCircumsta
 trait MitCircsPendingEvidencePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsPendingEvidenceState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, submission)
   }
 }
 
 trait MitCircsPendingEvidenceValidation extends SelfValidating {
   self: MitCircsPendingEvidenceState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
 
     if(file.attached.isEmpty)
       errors.rejectValue("file.upload", "file.missing")
@@ -108,7 +108,7 @@ trait MitCircsPendingEvidenceDescription extends Describable[MitigatingCircumsta
 
   override lazy val eventName: String = "MitCircsPendingEvidence"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

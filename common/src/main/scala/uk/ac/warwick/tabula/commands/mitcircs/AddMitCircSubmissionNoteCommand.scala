@@ -59,7 +59,7 @@ trait AddMitCircsSubmissionNoteValidation extends SelfValidating {
 trait AddMitCircsSubmissionNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddMitCircsSubmissionNoteState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, mandatory(submission))
   }
 }

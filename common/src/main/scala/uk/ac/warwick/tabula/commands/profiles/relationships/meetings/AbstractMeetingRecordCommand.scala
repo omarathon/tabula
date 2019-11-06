@@ -130,7 +130,7 @@ trait MeetingRecordValidation extends SelfValidating with AttachedFilesValidatio
 
   self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
     if (title.length > MeetingRecord.MaxTitleLength) {

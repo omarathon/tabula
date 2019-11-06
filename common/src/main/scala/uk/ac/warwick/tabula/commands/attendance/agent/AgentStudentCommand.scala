@@ -45,7 +45,7 @@ trait AgentStudentPermissions extends RequiresPermissionsChecking with Permissio
 
   self: AgentStudentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, student)
   }
 

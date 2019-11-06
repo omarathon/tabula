@@ -57,7 +57,7 @@ class MarksOpenAndCloseDepartmentsCommandInternal extends CommandInternal[Degree
 
 trait MarksOpenAndCloseDepartmentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Marks.MarksManagement)
   }
 }

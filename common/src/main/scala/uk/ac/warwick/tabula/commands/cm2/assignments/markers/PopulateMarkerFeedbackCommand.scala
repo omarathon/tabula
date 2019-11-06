@@ -74,7 +74,7 @@ abstract class PopulateMarkerFeedbackCommandInternal(val assignment: Assignment,
 trait PopulateMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PopulateMarkerFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
   }
 }

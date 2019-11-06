@@ -100,7 +100,7 @@ trait StudentRecordPermissions extends RequiresPermissionsChecking with Permissi
 
   self: StudentRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Record, student)
   }
 
@@ -112,7 +112,7 @@ trait StudentRecordDescription extends Describable[(Seq[AttendanceMonitoringChec
 
   override lazy val eventName = "StudentRecord"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }

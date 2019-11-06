@@ -17,7 +17,7 @@ trait UpdateScheduledStudentRelationshipChangesValidation extends SelfValidating
   self: ManageStudentRelationshipsState with UpdateScheduledStudentRelationshipChangesCommandRequest
     with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     relationships.asScala.foreach { relationship =>
       errors.pushNestedPath(s"relationships[${relationship.id}]")
       if (!securityService.can(user, Permissions.Profiles.StudentRelationship.Manage(relationshipType), relationship.studentCourseDetails)) {
@@ -42,7 +42,7 @@ trait UpdateScheduledStudentRelationshipChangesPermissions extends RequiresPermi
 
   self: ManageStudentRelationshipsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), mandatory(department))
     // Need to check Manage permission on each of the requested relationships, but that can't be done before binding
     // so do in the validator

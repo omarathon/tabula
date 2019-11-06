@@ -116,7 +116,7 @@ trait BulkAttendanceNotePermissions extends RequiresPermissionsChecking with Per
 
   self: BulkAttendanceNoteCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAll(Permissions.MonitoringPoints.Record, students)
   }
 }

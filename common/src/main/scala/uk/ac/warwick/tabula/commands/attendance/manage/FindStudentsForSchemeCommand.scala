@@ -121,7 +121,7 @@ trait FindStudentsForSchemePermissions extends RequiresPermissionsChecking with 
 
   self: FindStudentsForSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 

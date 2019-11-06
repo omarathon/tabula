@@ -71,7 +71,7 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 trait WorkflowProgressPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: WorkflowProgressState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -81,7 +81,7 @@ trait WorkflowProgressPermissions extends RequiresPermissionsChecking with Permi
 
 trait WorkflowProgressValidation extends SelfValidating {
   self: WorkflowProgressState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
   }

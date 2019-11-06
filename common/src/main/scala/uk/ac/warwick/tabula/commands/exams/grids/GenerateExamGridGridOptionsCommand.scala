@@ -115,7 +115,7 @@ trait GenerateExamGridGridOptionsValidation extends SelfValidating {
 
   self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val allIdentifiers = allExamGridsColumns.map(_.identifier).toSet
     val invalidColumns = predefinedColumnIdentifiers.asScala.diff(allIdentifiers)
     if (invalidColumns.nonEmpty) {
@@ -129,7 +129,7 @@ trait GenerateExamGridGridOptionsPermissions extends RequiresPermissionsChecking
 
   self: GenerateExamGridGridOptionsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -141,7 +141,7 @@ trait GenerateExamGridGridOptionsDescription extends Describable[(Seq[ExamGridCo
 
   override lazy val eventName = "GenerateExamGridGridOptions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 

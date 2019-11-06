@@ -24,7 +24,7 @@ class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito
   dept.id = "dept"
 
   abstract class TestCommand extends Command[Boolean] {
-    def describe(d: Description) {}
+    def describe(d: Description): Unit = {}
 
     def applyInternal = true
   }

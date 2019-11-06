@@ -94,7 +94,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 
 trait SearchStudentsInSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SearchStudentsInSmallGroupSetCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(set), mandatory(module))
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, mandatory(set))) ++

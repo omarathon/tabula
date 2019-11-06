@@ -54,7 +54,7 @@ trait ViewAgentsPermissions extends RequiresPermissionsChecking with Permissions
 
   self: ViewAgentsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, department)
   }
 

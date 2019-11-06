@@ -444,10 +444,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       go to Path(s"/coursework/submission/$assignmentId")
     }
 
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource(file).getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource(file).getFile)
 
-    submit()
+    val submitButton = id("main").webElement.findElement(By.cssSelector("div.submit-buttons .btn-primary"))
+    click on submitButton
   }
 
   def getInputByLabel(label: String): Option[WebElement] =

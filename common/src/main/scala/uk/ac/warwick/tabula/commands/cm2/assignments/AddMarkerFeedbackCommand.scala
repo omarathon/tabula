@@ -111,7 +111,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
     item.duplicateFileNames = attachedFiles & feedbackFiles
   }
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .studentIds(items.asScala.toSeq.map(_.uniNumber))
       .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))

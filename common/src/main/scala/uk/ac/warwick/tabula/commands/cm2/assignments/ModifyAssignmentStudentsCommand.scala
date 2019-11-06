@@ -107,7 +107,7 @@ trait ModifyAssignmentStudentsValidation extends SelfValidating {
 
   self: ModifyAssignmentStudentsCommandState with AssessmentServiceComponent with UserLookupComponent with ModifiesAssignmentMembership =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     def isValidUniID(userString: String) = {
       UniversityId.isValid(userString) && userLookup.getUserByWarwickUniId(userString).isFoundUser

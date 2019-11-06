@@ -136,7 +136,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def populate() {
+  def populate(): Unit = {
     new PopulateFixture with FilteredPointsFixture with StudentDatasFixture {
       populate.filteredPoints = thisFilteredPoints
       populate.studentDatas = thisStudentDatas

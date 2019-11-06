@@ -204,7 +204,7 @@ trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
@@ -234,7 +234,7 @@ trait OnlineFeedbackFormDescription[A] extends Describable[A] {
 
   this: OnlineFeedbackState with OnlineFeedbackStudentState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)
     d.assignment(assignment)

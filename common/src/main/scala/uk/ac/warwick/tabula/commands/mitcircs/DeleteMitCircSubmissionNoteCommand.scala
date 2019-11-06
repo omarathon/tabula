@@ -45,7 +45,7 @@ trait DeleteMitCircsSubmissionNoteValidation extends SelfValidating {
 trait DeleteMitCircsSubmissionNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteMitCircsSubmissionNoteState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(note, submission)
     p.PermissionCheck(RequiredPermission, submission)
   }

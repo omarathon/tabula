@@ -55,7 +55,7 @@ trait ReportStudentsChoosePeriodValidation extends SelfValidating {
 
   self: ReportStudentsChoosePeriodCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!availablePeriods.filter(_._2).map(_._1).contains(period)) {
       errors.rejectValue("period", "attendanceMonitoringReport.invalidPeriod")
     }
@@ -67,7 +67,7 @@ trait ReportStudentsChoosePeriodPermissions extends RequiresPermissionsChecking 
 
   self: ReportStudentsChoosePeriodCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Report, department)
   }
 

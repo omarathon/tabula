@@ -163,7 +163,7 @@ trait FindStudentsForSmallGroupSetPermissions extends RequiresPermissionsCheckin
 
   def module: Module
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -174,7 +174,7 @@ trait FindStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissi
 
   def department: Department
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }

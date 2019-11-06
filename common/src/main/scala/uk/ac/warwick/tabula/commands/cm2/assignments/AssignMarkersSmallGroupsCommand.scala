@@ -78,7 +78,7 @@ trait AssignMarkersSmallGroupsValidation extends SelfValidating {
 trait AssignMarkersSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersSmallGroupsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     notDeleted(assignment)
 
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assignment))

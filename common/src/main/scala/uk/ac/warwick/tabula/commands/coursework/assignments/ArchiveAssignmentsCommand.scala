@@ -39,7 +39,7 @@ abstract class ArchiveAssignmentsCommand(val department: Department, val modules
 
 trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ArchiveAssignmentsState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
     else for (module <- modules) {
       p.mustBeLinked(p.mandatory(module), mandatory(department))

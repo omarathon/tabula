@@ -79,7 +79,7 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
 trait AdminHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AdminHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(AdminHomeCommand.RequiredPermission, mandatory(department))
   }
 }

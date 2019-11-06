@@ -119,7 +119,7 @@ class ListMarkerAllocationsCommandInternal(val assignment: Assignment, allocatio
 trait ListMarkerAllocationsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListMarkerAllocationsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
   }
 }

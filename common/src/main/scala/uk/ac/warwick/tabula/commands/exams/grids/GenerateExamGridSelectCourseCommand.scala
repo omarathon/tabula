@@ -76,7 +76,7 @@ trait GenerateExamGridSelectCoursePermissions extends RequiresPermissionsCheckin
 
   self: GenerateExamGridSelectCourseCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 

@@ -18,7 +18,7 @@ abstract class FeedbackTemplateCommand(val department: Department)
 
   var file: UploadedFile = new UploadedFile
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     transactional() {
       result.pushNestedPath("file")
       file.onBind(result)
@@ -27,7 +27,7 @@ abstract class FeedbackTemplateCommand(val department: Department)
   }
 
   // describe the thing that's happening.
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 

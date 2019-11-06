@@ -116,7 +116,7 @@ abstract class OnlineModerationCommand(
     }
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.fieldValidation(errors)
 
     if (Option(approved).isEmpty)

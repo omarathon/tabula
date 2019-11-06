@@ -43,7 +43,7 @@ trait ReleaseExamForMarkingCommandPermissions extends RequiresPermissionsCheckin
 
   self: ReleaseExamForMarkingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(exam), mandatory(module))
     p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
   }
@@ -56,7 +56,7 @@ trait ReleaseExamForMarkingCommandDescription extends Describable[Exam] {
 
   override lazy val eventName = "ReleaseExamForMarking"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.exam(exam)
   }
 }

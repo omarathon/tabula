@@ -40,7 +40,7 @@ trait UploadFeedbackToSitsPermissions extends RequiresPermissionsChecking with P
 
   self: UploadFeedbackToSitsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(assessment), mandatory(module))
     p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assessment)
   }
@@ -53,7 +53,7 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "UploadFeedbackToSits"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assessment(assessment)
   }
 

@@ -117,7 +117,7 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
 
   override lazy val eventName: String = "EditMitCircsSubmission"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.member(student)
     d.mitigatingCircumstancesSubmission(submission)
   }

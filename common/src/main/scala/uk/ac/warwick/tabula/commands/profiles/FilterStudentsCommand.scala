@@ -71,7 +71,7 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
 trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FilterStudentsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Search, department)
   }
 }

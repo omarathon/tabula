@@ -54,7 +54,7 @@ trait ExamValidation extends SelfValidating {
 
   self: ExamState with AssessmentServiceComponent with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     if (!name.hasText) {
       errors.rejectValue("name", "exam.name.empty")

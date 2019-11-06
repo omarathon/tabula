@@ -48,7 +48,7 @@ trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking wi
 
   self: ViewProfileSubsetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     studentMember.foreach(p.PermissionCheck(Permissions.Profiles.Read.Core, _))
     user.foreach(_ => p.PermissionCheck(UserPicker))
 

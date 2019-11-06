@@ -48,7 +48,7 @@ class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGr
 trait DeleteSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeleteSmallGroupCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(group, set)
     p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(group))
   }
@@ -57,7 +57,7 @@ trait DeleteSmallGroupPermissions extends RequiresPermissionsChecking with Permi
 trait DeleteSmallGroupDescription extends Describable[SmallGroup] {
   self: DeleteSmallGroupCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroup(group)
   }
 }
@@ -65,7 +65,7 @@ trait DeleteSmallGroupDescription extends Describable[SmallGroup] {
 trait DeleteSmallGroupValidation extends SelfValidating {
   self: DeleteSmallGroupCommandState with SmallGroupServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // when modifying ther groups via a spreadsheet allow groups with students to be deleted
     if (!group.students.isEmpty && !isSpreadsheetUpload) {
       errors.reject("smallGroup.delete.notEmpty")

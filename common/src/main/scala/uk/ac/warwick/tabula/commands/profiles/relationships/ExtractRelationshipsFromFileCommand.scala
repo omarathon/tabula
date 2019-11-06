@@ -145,7 +145,7 @@ trait ExtractRelationshipsFromFilePermissions extends RequiresPermissionsCheckin
 
   self: ExtractRelationshipsFromFileCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     // throw this request out if this relationship can't be edited in Tabula for this department
     if (relationshipType.readOnly(department)) {
       logger.info("Denying access to ExtractRelationshipsFromFileCommand since relationshipType %s is read-only".format(relationshipType))

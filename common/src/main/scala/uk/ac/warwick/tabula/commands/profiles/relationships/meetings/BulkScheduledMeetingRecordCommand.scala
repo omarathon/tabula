@@ -32,7 +32,7 @@ trait BulkScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
   self: BulkScheduledMeetingRecordCommandState
     with MeetingRecordServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
   }
 }
@@ -82,7 +82,7 @@ trait BulkScheduledMeetingRecordCommandNotifications extends SchedulesNotificati
 trait BulkScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: BulkScheduledMeetingRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     allRelationships.foreach { studentRelationship =>
       p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(studentRelationship.relationshipType), mandatory(studentRelationship.studentMember))
     }

@@ -135,7 +135,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 trait EditSmallGroupSetDefaultPropertiesValidation extends SelfValidating {
   self: EditSmallGroupSetDefaultPropertiesCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (defaultLocation.safeContains("|")) errors.rejectValue("defaultLocation", "smallGroupEvent.location.invalidChar")
 
     if (!defaultTutors.isEmpty) {
@@ -153,7 +153,7 @@ trait EditSmallGroupSetDefaultPropertiesValidation extends SelfValidating {
 trait EditSmallGroupSetDefaultPropertiesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupSetDefaultPropertiesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -162,7 +162,7 @@ trait EditSmallGroupSetDefaultPropertiesPermissions extends RequiresPermissionsC
 trait EditSmallGroupSetDefaultPropertiesDescription extends Describable[SmallGroupSet] {
   self: EditSmallGroupSetDefaultPropertiesCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 

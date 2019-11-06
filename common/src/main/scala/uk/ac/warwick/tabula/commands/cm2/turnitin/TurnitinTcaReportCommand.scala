@@ -40,7 +40,7 @@ class TurnitinTcaReportCommandInternal(val assignment: Assignment, val attachmen
 trait TurnitinTcaReportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: TurnitinTcaReportState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(attachment)
     mandatory(attachment.originalityReport)
     p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, mandatory(assignment))
@@ -50,7 +50,7 @@ trait TurnitinTcaReportPermissions extends RequiresPermissionsChecking with Perm
 trait TurnitinTcaReportDescription extends Describable[Result] {
   self: TurnitinTcaReportState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.fileAttachments(Seq(attachment))
      .assignment(assignment)
   }

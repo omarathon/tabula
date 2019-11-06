@@ -63,7 +63,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
   // can be overridden in concrete implementations to provide additional validation
   def contextSpecificValidation(errors: Errors)
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     contextSpecificValidation(errors)
 
     // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.

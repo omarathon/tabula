@@ -69,7 +69,7 @@ object MitCircsShareSubmissionCommand {
 trait MitCircsShareSubmissionValidation extends GrantRoleCommandValidation {
   self: RoleCommandState[MitigatingCircumstancesSubmission] with RoleCommandRequest with SecurityServiceComponent with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.validate(errors)
 
     val students = userLookup.usersByUserIds(usercodes.asScala.toSeq).values.filter(_.isStudent)
@@ -85,7 +85,7 @@ trait MitCircsShareSubmissionState {
 trait MitCircsShareSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RoleCommandState[MitigatingCircumstancesSubmission] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(requiredPermission, mandatory(scope))
   }
 }

@@ -83,7 +83,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
 trait MitCircsRecordAcuteOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -120,7 +120,7 @@ trait MitCircsRecordAcuteOutcomesValidation extends SelfValidating {
 trait MitCircsRecordAcuteOutcomesDescription extends Describable[Result] {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

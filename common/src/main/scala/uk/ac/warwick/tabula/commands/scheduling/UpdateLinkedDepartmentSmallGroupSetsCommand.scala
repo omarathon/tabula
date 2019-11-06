@@ -66,7 +66,7 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 
 trait UpdateLinkedDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.UpdateMembership)
   }
 
@@ -76,7 +76,7 @@ trait UpdateLinkedDepartmentSmallGroupSetsDescription extends Describable[Seq[De
 
   override lazy val eventName = "UpdateLinkedDepartmentSmallGroupSets"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 }

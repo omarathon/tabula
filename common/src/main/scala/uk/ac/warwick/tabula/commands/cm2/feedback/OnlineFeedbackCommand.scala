@@ -116,7 +116,7 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 trait OnlineFeedbackBindListener extends BindListener {
   self: OnlineFeedbackState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     if (fields != null) {
       for ((key, field) <- fields.asScala) {
         result.pushNestedPath(s"fields[$key]")
@@ -134,7 +134,7 @@ trait OnlineFeedbackBindListener extends BindListener {
 trait OnlineFeedbackValidation extends SelfValidating {
   self: OnlineFeedbackState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     fieldValidation(errors)
   }
 
@@ -229,7 +229,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }
@@ -237,7 +237,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 trait OnlineFeedbackDescription[A] extends Describable[A] {
   self: OnlineFeedbackState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)
     d.assignment(assignment)

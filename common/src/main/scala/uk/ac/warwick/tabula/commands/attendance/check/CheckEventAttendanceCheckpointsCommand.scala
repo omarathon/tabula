@@ -62,7 +62,7 @@ trait CheckEventAttendanceCheckpointsPermissions extends RequiresPermissionsChec
 
   self: CheckEventAttendanceCheckpointsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.Register, occurrence)
   }
 

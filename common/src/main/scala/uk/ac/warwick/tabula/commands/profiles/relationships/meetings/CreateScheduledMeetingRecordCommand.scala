@@ -49,7 +49,7 @@ class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourse
 trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
   self: CreateScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
     meetingRecordService.listScheduled(relationships.asScala.toSet, Some(creator)).foreach(
@@ -75,7 +75,7 @@ trait CreateScheduledMeetingRecordState extends ModifyScheduledMeetingRecordStat
 trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateScheduledMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     allRelationships.map(_.relationshipType).foreach { relationshipType =>
       p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), mandatory(studentCourseDetails.student))
     }

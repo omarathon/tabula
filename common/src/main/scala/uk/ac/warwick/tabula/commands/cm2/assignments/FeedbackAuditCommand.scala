@@ -43,7 +43,7 @@ trait FeedbackAuditCommandState {
 
 trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackAuditCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
   }
@@ -51,7 +51,7 @@ trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with P
 
 trait FeedbackAuditCommandDescription extends Describable[FeedbackAuditData] {
   self: FeedbackAuditCommandState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)
     d.assignment(assignment)

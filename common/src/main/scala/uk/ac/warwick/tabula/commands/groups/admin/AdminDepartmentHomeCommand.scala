@@ -49,7 +49,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 trait AdminDepartmentHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomeState with AdminDepartmentHomePermissionDefinition =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (securityService.can(user, requiredPermission, mandatory(department))) {
       // This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
       p.PermissionCheck(requiredPermission, department)

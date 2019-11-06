@@ -61,7 +61,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 
   self: ExamGridStudentCheckState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (member == null) {
       errors.reject("examGrid.studentcheck.missingstudentmember")
     } else if (!member.isInstanceOf[StudentMember]) {
@@ -74,7 +74,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 trait ExamGridStudentCheckPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ExamGridStudentCheckState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 }

@@ -27,7 +27,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
     set
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) {
       errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
     } else validateCanDelete(errors)

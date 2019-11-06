@@ -35,7 +35,7 @@ class ViewSmallGroupSetsWithMissingMapLocationsCommand(val academicYear: Academi
 trait ViewSmallGroupSetsWithMissingMapLocationPermissions extends RequiresPermissionsChecking {
   self: ViewSmallGroupSetsWithMissingMapLocationState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(ViewSmallGroupSetsWithMissingMapLocationsCommand.RequiredPermission, department)
   }
 }

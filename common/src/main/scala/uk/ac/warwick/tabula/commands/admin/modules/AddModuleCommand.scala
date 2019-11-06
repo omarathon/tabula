@@ -38,7 +38,7 @@ class AddModuleCommandInternal(val department: Department) extends CommandIntern
 trait AddModuleCommandValidation extends SelfValidating {
   self: AddModuleCommandState with ModuleAndDepartmentServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // TODO proper department checks before we open this up to non-sysadmins
 
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "code", "NotEmpty")
@@ -72,7 +72,7 @@ trait AddModuleCommandState {
 trait AddModuleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddModuleCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Module.Create, mandatory(department))
   }
 }

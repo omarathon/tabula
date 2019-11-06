@@ -278,7 +278,7 @@ trait PublishFeedbackSubmissionsReportGenerator extends SubmissionsReportGenerat
 trait PublishFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PublishFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Publish, mandatory(assignment))
   }
 }
@@ -286,7 +286,7 @@ trait PublishFeedbackPermissions extends RequiresPermissionsChecking with Permis
 trait PublishFeedbackValidation extends SelfValidating {
   self: PublishFeedbackCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!assignment.openEnded && !assignment.isClosed) {
       errors.reject("feedback.publish.notclosed")
     } else if (feedbackToRelease.isEmpty) {
@@ -304,7 +304,7 @@ trait PublishFeedbackDescription extends Describable[PublishFeedbackResults] {
 
   override lazy val eventName: String = "PublishFeedback"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     val students = userLookup.usersByUserIds(feedbackToRelease.map(_.usercode)).values.toSeq
     d.assignment(assignment)
       .studentIds(students.flatMap(m => Option(m.getWarwickId)))

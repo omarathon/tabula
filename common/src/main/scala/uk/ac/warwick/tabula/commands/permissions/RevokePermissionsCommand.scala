@@ -60,7 +60,7 @@ trait RevokePermissionsCommandValidation extends SelfValidating {
     with PermissionsCommandState[_ <: PermissionsTarget]
     with SecurityServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
@@ -86,7 +86,7 @@ trait RevokePermissionsCommandValidation extends SelfValidating {
 trait RevokePermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PermissionsCommandState[_ <: PermissionsTarget] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Delete, mandatory(scope))
   }
 }

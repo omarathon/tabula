@@ -54,7 +54,7 @@ trait AdminDepartmentHomeCommandState {
 trait AdminDepartmentHomeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     val allDeptPermission = Seq(Permissions.Module.Administer, Permissions.Route.Administer).find { requiredPermission =>
       securityService.can(user, requiredPermission, mandatory(department))
     }

@@ -29,7 +29,7 @@ trait GroupsObjectsWithFileUpload[A >: Null, B >: Null] extends GroupsObjects[A,
 
   def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[B, JList[A]]
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     validateUploadedFile(result)
 
     if (!result.hasErrors) {
@@ -42,7 +42,7 @@ trait GroupsObjectsWithFileUpload[A >: Null, B >: Null] extends GroupsObjects[A,
           processFiles(file.attached.asScala.toSeq)
         }
 
-        def processFiles(files: Seq[FileAttachment]) {
+        def processFiles(files: Seq[FileAttachment]): Unit = {
           val data = files.filter(_.hasData).flatMap {
             extractDataFromFile(_, result)
           }.toMap

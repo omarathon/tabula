@@ -34,7 +34,7 @@ class TurnitinLtiListEndpointsCommandInternal(val user: CurrentUser) extends Com
 }
 
 trait TurnitinLtiListEndpointsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -42,7 +42,7 @@ trait TurnitinLtiListEndpointsCommandPermissions extends RequiresPermissionsChec
 trait TurnitinLtiListEndpointsValidation extends SelfValidating {
   self: TurnitinLtiListEndpointsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (turnitinAssignmentId.isEmptyOrWhitespace) {
       errors.rejectValue("turnitinAssignmentId", "turnitin.turnitinassignment.empty")
     }

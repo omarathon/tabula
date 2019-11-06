@@ -173,7 +173,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
       })
   }
 
-  def populate() {
+  def populate(): Unit = {
     studentsState = members.map { member =>
       member.universityId ->
         occurrence.attendance.asScala
@@ -206,7 +206,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 trait RecordAttendanceCommandValidation extends SelfValidating {
   self: RecordAttendanceState with UserLookupComponent with SmallGroupEventInFutureCheck =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     val invalidUsers: Seq[UniversityId] = studentsState.asScala.map {
       case (studentId, _) => studentId
     }.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser).toSeq
@@ -240,7 +240,7 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 
 trait RecordAttendanceCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RecordAttendanceState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.Register, mandatory(event))
   }
 }

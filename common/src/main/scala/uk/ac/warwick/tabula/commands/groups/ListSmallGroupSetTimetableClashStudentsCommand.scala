@@ -53,7 +53,7 @@ trait ListSmallGroupSetTimetableClashStudentsCommandState {
 
 trait ListSmallGroupSetTimetableClashStudentsCommandPermissions extends RequiresPermissionsChecking {
   self: ListSmallGroupSetTimetableClashStudentsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
   }
 }

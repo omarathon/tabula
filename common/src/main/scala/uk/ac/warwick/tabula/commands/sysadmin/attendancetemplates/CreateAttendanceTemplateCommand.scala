@@ -40,7 +40,7 @@ trait CreateAttendanceTemplateValidation extends SelfValidating {
 
   self: ManageAttendanceTemplateCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!name.hasText) {
       errors.rejectValue("name", "NotEmpty.name")
     } else {
@@ -61,7 +61,7 @@ trait CreateAttendanceTemplateDescription extends Describable[AttendanceMonitori
 
   override lazy val eventName = "CreateAttendanceTemplate"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 }

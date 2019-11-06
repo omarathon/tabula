@@ -42,7 +42,7 @@ trait SortModulesCommandGrouping {
   self: SortModulesCommandState =>
 
   // Only called on initial form view
-  def populate() {
+  def populate(): Unit = {
     for (dept <- (departments))
       mapping.put(dept, JArrayList(dept.modules))
   }
@@ -60,7 +60,7 @@ trait SortModulesCommandGrouping {
 trait SortModulesCommandValidation extends SelfValidating {
   self: SortModulesCommandState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     val mappingMap = mapping.asScala
     val currentModules = departments.map(_.modules.asScala).flatten.toList
     val newModules = mappingMap.values.map(_.asScala).flatten.toList.filter(validModule)
@@ -97,7 +97,7 @@ trait SortModulesCommandState extends GroupsObjects[Module, Department] {
 trait SortModulesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SortModulesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, mandatory(department))
   }
 }

@@ -114,7 +114,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def populate() {
+  def populate(): Unit = {
     new PopulateFixture {
       populate.templatePoint = scheme1point1
       Seq(student1, student2).foreach(populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, _).returns(true))

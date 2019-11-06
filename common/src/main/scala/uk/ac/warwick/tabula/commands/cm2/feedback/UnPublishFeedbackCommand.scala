@@ -53,7 +53,7 @@ trait UnPublishFeedbackCommandRequest extends SelectedStudentsRequest with UnPub
 trait UnPublishFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: UnPublishFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.UnPublish, mandatory(assignment))
   }
 }
@@ -61,7 +61,7 @@ trait UnPublishFeedbackPermissions extends RequiresPermissionsChecking with Perm
 trait UnPublishFeedbackValidation extends SelfValidating {
   self: UnPublishFeedbackCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (feedbackToUnPublish.isEmpty) {
       errors.reject("feedback.unpublish.nofeedback")
     }
@@ -73,7 +73,7 @@ trait UnPublishFeedbackDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName: String = "UnPublishFeedback"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     val students = userLookup.usersByUserIds(feedbackToUnPublish.map(_.usercode)).values.toSeq
     d.assignment(assignment)
       .studentIds(students.flatMap(m => Option(m.getWarwickId)))

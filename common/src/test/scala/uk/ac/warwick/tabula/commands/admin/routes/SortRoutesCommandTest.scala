@@ -183,7 +183,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
       def sort() {}
 
-      def populate() {}
+      def populate(): Unit = {}
     }
 
     val checking = mock[PermissionsChecking]
@@ -201,7 +201,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
       def sort() {}
 
-      def populate() {}
+      def populate(): Unit = {}
     }
 
     val d = new DescriptionImpl

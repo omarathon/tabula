@@ -57,7 +57,7 @@ trait TurnitinLtiSubmitAssignmentResponseCommandDescription extends Describable[
 
   override lazy val eventName = "TurnitinLtiSubmitAssignmentResponse"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
     d.property("existingTurnitinId", assignment.turnitinId)
     d.property("newTurnitinId", assignmentid)

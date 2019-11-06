@@ -77,7 +77,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
     with StudentCourseYearDetailsDaoComponent
     with PermissionsServiceComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val fileNames = file.fileNames.map(_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
@@ -197,7 +197,7 @@ trait UploadYearMarksPermissions extends RequiresPermissionsChecking with Permis
 
   self: UploadYearMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -209,7 +209,7 @@ trait UploadYearMarksDescription extends Describable[Seq[StudentCourseYearDetail
 
   override lazy val eventName = "UploadYearMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department).properties(
       "academicYear" -> academicYear.toString
     )

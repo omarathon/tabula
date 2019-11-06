@@ -17,7 +17,7 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
 
   var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     val trimmedCodes = usercodes.asScala.toSeq.filter(_.hasText).map(_.trim)
     if (usercodesEmpty) {
       errors.rejectValue(pathName, "NotEmpty")

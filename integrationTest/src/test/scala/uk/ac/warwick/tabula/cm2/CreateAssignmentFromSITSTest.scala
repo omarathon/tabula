@@ -120,36 +120,32 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
     openDate.click()
 
     eventually {
-      val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
+      val datePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
 
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
-      dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
+      click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
+      datePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
 
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "2" }.head
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == "18:00" }.head
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == "18:00" }.head
+      click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "2" }.head
     }
 
     Then("The open date should be the new value")
-    openDate.getAttribute("value") should be("02-Aug-2017 18:00:00")
+    openDate.getAttribute("value") should be("02-Aug-2017")
 
     val closeDate = id("main").webElement.findElement(By.id("modal-close-date"))
     When("I change the close date")
     closeDate.click()
 
     eventually {
-      val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).toSeq.last
+      val datePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).toSeq.last
 
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
-      dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
+      click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
+      datePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
 
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "8" }.head
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == "9:00" }.head
-      click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == "9:30" }.head
+      click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "8" }.head
     }
 
     Then("The close date should be the new value")
-    closeDate.getAttribute("value") should be("08-Aug-2017 09:30:00")
+    closeDate.getAttribute("value") should be("08-Aug-2017")
 
     When("I click on the Set dates button")
     val setDatesButton = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Save dates')]")).get(0)

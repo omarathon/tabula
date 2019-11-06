@@ -93,7 +93,7 @@ trait EditExtensionCommandState {
 
 trait EditExtensionCommandValidation extends SelfValidating {
   self: EditExtensionCommandState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (state == ExtensionState.Unreviewed) {
       errors.rejectValue("state", "extension.state.empty")
     }
@@ -114,7 +114,7 @@ trait EditExtensionCommandValidation extends SelfValidating {
 trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
   self: EditExtensionCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     extension match {
       case e if e.isTransient => p.PermissionCheck(Permissions.Extension.Create, assignment)
       case _ => p.PermissionCheck(Permissions.Extension.Update, assignment)
@@ -227,7 +227,7 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
 
   override lazy val eventName: String = "EditExtension"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
     d.module(assignment.module)
     d.studentIds(Option(student.getWarwickId).toSeq)

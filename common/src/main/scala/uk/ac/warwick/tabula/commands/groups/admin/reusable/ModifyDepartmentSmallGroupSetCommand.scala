@@ -99,7 +99,7 @@ abstract class ModifyDepartmentSmallGroupSetCommandInternal
 trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
   self: ModifyDepartmentSmallGroupSetState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
     else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
   }
@@ -108,7 +108,7 @@ trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
 trait CreateDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateDepartmentSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
   }
 }
@@ -127,7 +127,7 @@ trait CreateDepartmentSmallGroupSetDescription extends Describable[DepartmentSma
 trait EditDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditDepartmentSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(smallGroupSet, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(smallGroupSet))
   }

@@ -67,7 +67,7 @@ trait ReportStudentsConfirmValidation extends SelfValidating {
 
   self: ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!availablePeriods.filter(_._2).map(_._1).contains(period)) {
       errors.rejectValue("availablePeriods", "attendanceMonitoringReport.invalidPeriod")
     }
@@ -85,7 +85,7 @@ trait ReportStudentsConfirmPermissions extends RequiresPermissionsChecking with 
 
   self: ReportStudentsConfirmCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Report, department)
   }
 
@@ -97,7 +97,7 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
 
   override lazy val eventName = "ReportStudentsConfirm"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.property("monitoringPeriod", period)
       .property("academicYear", academicYear.toString)
       .studentIds(studentMissedReportCounts.map(_.student.universityId))

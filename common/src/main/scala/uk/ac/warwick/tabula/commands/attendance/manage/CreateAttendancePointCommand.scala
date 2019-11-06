@@ -58,7 +58,7 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 
   self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     validateSchemePointStyles(errors, pointStyle, schemes)
 
     validateName(errors, name)
@@ -150,7 +150,7 @@ trait CreateAttendancePointPermissions extends RequiresPermissionsChecking with 
 
   self: CreateAttendancePointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
   }
 
@@ -162,7 +162,7 @@ trait CreateAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 
   override lazy val eventName = "CreateAttendancePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringSchemes(schemes)
   }
 

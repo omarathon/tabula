@@ -16,5 +16,5 @@ class CleanupTemporaryFilesCommand extends Command[Unit] {
     dao.deleteOldTemporaryFiles
   }
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }

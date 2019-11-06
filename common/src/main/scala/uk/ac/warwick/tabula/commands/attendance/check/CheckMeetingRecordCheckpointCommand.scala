@@ -40,7 +40,7 @@ trait CheckMeetingRecordCheckpointPermissions extends RequiresPermissionsCheckin
 
   self: CheckMeetingRecordCheckpointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.MeetingRecord.Read(mandatory(relationshipType)), student)
   }
 

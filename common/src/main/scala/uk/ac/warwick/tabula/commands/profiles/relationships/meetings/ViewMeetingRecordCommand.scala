@@ -43,7 +43,7 @@ class ViewMeetingRecordCommandInternal(
 trait ViewMeetingRecordCommandPermissions extends RequiresPermissionsChecking {
   this: ViewMeetingRecordCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
   }
 }

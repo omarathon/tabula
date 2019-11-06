@@ -41,7 +41,7 @@ trait ProfileExportReportValidation extends SelfValidating {
 
   self: ProfileExportReportCommandState with ProfileServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (students.isEmpty) {
       errors.rejectValue("students", "reports.profiles.export.noStudents")
     } else {
@@ -63,7 +63,7 @@ trait ProfileExportReportPermissions extends RequiresPermissionsChecking with Pe
 
   self: ProfileExportReportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 

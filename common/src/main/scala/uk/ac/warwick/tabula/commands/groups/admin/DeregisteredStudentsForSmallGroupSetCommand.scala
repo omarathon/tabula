@@ -42,7 +42,7 @@ trait DeregisteredStudentsForSmallGroupSetCommandState {
 trait PopulateDeregisteredStudentsForSmallGroupSetCommandState extends PopulateOnForm {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  def populate() {
+  def populate(): Unit = {
     students.clear()
     students.addAll(set.studentsNotInMembership.sortBy { user => (user.getLastName, user.getFirstName, user.getWarwickId) }.asJavaCollection)
   }
@@ -73,7 +73,7 @@ class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, va
 trait DeregisteredStudentsForSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -82,7 +82,7 @@ trait DeregisteredStudentsForSmallGroupSetPermissions extends RequiresPermission
 trait DeregisteredStudentsForSmallGroupSetDescription extends Describable[Seq[StudentNotInMembership]] {
   self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 

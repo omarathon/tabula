@@ -422,7 +422,7 @@ trait ProfileExportSinglePermissions extends RequiresPermissionsChecking with Pe
 
   self: ProfileExportSingleCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(Seq(
       CheckablePermission(Permissions.Department.Reports, student),
       CheckablePermission(Permissions.Profiles.Read.Core, student)
@@ -437,7 +437,7 @@ trait ProfileExportSingleDescription extends Describable[Seq[FileAttachment]] {
 
   override lazy val eventName = "ProfileExportSingle"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }

@@ -36,7 +36,7 @@ class ScheduledMeetingRecordMissedCommand(val meetingRecord: ScheduledMeetingRec
 trait ScheduledMeetingRecordMissedValidation extends SelfValidating {
   self: ScheduledMeetingRecordMissedState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (meetingRecord.meetingDate.isAfterNow) {
       errors.reject("meetingRecord.missed.future")
     }
@@ -49,7 +49,7 @@ trait ScheduledMeetingRecordMissedValidation extends SelfValidating {
 trait ScheduledMeetingRecordMissedPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ScheduledMeetingRecordMissedState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Confirm, mandatory(meetingRecord))
   }
 }
@@ -59,7 +59,7 @@ trait ScheduledMeetingRecordMissedDescription extends Describable[ScheduledMeeti
 
   override lazy val eventName = "ScheduledMeetingRecordMissed"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.meeting(meetingRecord)
   }
 }

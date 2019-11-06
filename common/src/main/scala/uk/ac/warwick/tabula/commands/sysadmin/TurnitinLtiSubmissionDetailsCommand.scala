@@ -30,7 +30,7 @@ class TurnitinLtiSubmissionDetailsCommandInternal extends CommandInternal[Turnit
 }
 
 trait TurnitinLtiSubmissionDetailsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -38,7 +38,7 @@ trait TurnitinLtiSubmissionDetailsCommandPermissions extends RequiresPermissions
 trait TurnitinLtiSubmissionDetailsValidation extends SelfValidating {
   self: TurnitinLtiSubmissionDetailsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (turnitinSubmissionId.isEmptyOrWhitespace) {
       errors.rejectValue("turnitinSubmissionId", "turnitin.submission.empty")
     }

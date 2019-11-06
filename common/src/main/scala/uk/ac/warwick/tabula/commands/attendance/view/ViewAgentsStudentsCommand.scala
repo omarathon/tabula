@@ -34,7 +34,7 @@ trait ViewAgentsStudentsPermissions extends RequiresPermissionsChecking with Per
 
   self: ViewAgentsStudentsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, department)
   }
 }

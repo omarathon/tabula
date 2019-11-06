@@ -70,7 +70,7 @@ abstract class CreateMitCircsPanelCommandInternal(val department: Department, va
 trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateMitCircsPanelState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, department)
   }
 }
@@ -78,7 +78,7 @@ trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with Pe
 trait ModifyMitCircsPanelValidation extends SelfValidating {
   self: ModifyMitCircsPanelRequest =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if(!name.hasText) errors.rejectValue("name", "mitigatingCircumstances.panel.name.required")
   }
 }

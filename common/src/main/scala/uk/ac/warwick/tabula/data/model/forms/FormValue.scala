@@ -28,7 +28,7 @@ import scala.jdk.CollectionConverters._
 abstract class FormValue extends BindListener {
   val field: FormField
 
-  override def onBind(result: BindingResult) {}
+  override def onBind(result: BindingResult): Unit = {}
 
   def persist(value: SavedFormValue)
 
@@ -64,7 +64,7 @@ class FileFormValue(val field: FormField) extends FormValue {
 
   lazy val fileDao: FileDao = Wire.auto[FileDao]
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

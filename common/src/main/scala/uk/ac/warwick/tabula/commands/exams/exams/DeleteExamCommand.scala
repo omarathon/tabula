@@ -35,7 +35,7 @@ trait DeleteExamPermissions extends RequiresPermissionsChecking {
 
   self: DeleteExamCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Delete, exam)
   }
 }
@@ -51,7 +51,7 @@ trait DeleteExamCommandDescription extends Describable[Exam] {
 
   self: DeleteExamCommandState with AssessmentServiceComponent =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.exam(exam)
   }
 }
@@ -60,7 +60,7 @@ trait DeleteExamValidation extends SelfValidating {
 
   self: DeleteExamCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) {
       errors.rejectValue("confirm", "exam.delete.confirm")
     } else validateCanDelete(errors)

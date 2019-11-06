@@ -37,14 +37,14 @@ class ReleaseForMarkingCommandInternal(val assignment: Assignment, val user: Use
 trait ReleaseForMarkingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ReleaseForMarkingState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
   }
 }
 
 trait ReleaseForMarkingValidation extends SelfValidating {
   self: ReleaseForMarkingRequest =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
   }
 }

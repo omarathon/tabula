@@ -47,7 +47,7 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
 
   override lazy val eventName = "DownloadMarkersSubmissions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
       .submissions(submissions)
       .properties("submissionCount" -> submissions.size)
@@ -59,7 +59,7 @@ trait DownloadMarkersSubmissionsPermissions extends PermissionsCheckingMethods w
 
   self: DownloadMarkersSubmissionsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)

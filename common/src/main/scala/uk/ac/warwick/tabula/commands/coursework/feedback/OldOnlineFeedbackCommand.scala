@@ -120,7 +120,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
     if (submitter.apparentUser != marker) {

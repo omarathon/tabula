@@ -161,7 +161,7 @@ trait OnlineMarkerFeedbackPermissions extends RequiresPermissionsChecking with P
 
   self: OnlineMarkerFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)

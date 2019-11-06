@@ -162,7 +162,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
 trait AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }

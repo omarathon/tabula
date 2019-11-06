@@ -25,7 +25,7 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
 
   val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (allowExtensionRequests) {
       if (!(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)) {
         errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
@@ -51,7 +51,7 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
   }
 
   // describe the thing that's happening.
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 }

@@ -33,7 +33,7 @@ class TurnitinLtiSubmitAssignmentCommandInternal(val user: CurrentUser) extends 
 }
 
 trait TurnitinLtiSubmitAssignmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -41,7 +41,7 @@ trait TurnitinLtiSubmitAssignmentCommandPermissions extends RequiresPermissionsC
 trait TurnitinLtiSubmitAssignmentValidation extends SelfValidating {
   self: TurnitinLtiSubmitAssignmentCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (null == assignment) {
       errors.rejectValue("assignment", "turnitin.assignment.empty")
     }

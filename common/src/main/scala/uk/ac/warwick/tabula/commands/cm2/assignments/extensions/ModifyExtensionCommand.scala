@@ -51,7 +51,7 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 trait ModifyExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ModifyExtensionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Extension.Update, extension)
   }
 }
@@ -69,7 +69,7 @@ trait ModifyExtensionState {
 
 trait ModifyExtensionValidation extends SelfValidating {
   self: ModifyExtensionState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (state == ExtensionState.Unreviewed) {
       errors.rejectValue("state", "extension.state.empty")
     }
@@ -92,7 +92,7 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 
   override lazy val eventName: String = "ModifyExtension"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(extension.assignment)
     d.module(extension.assignment.module)
     d.studentIds(extension.universityId.toSeq)

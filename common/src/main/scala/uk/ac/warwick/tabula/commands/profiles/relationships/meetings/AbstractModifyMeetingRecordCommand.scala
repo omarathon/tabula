@@ -70,7 +70,7 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 
   self: MeetingRecordCommandRequest with ModifyMeetingRecordCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     super.validate(errors)
 
@@ -86,7 +86,7 @@ trait ModifyMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 
   self: ModifyMeetingRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     allRelationships.foreach { relationship =>
       p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(relationship.relationshipType), mandatory(relationship.studentMember))
     }

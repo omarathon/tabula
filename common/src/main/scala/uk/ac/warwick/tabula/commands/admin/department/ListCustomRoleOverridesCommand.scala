@@ -39,7 +39,7 @@ class ListCustomRoleOverridesCommandInternal(val department: Department, val cus
 trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListCustomRoleOverridesCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
   }

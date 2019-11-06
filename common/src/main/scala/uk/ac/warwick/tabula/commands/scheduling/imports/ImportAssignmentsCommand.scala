@@ -87,7 +87,7 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
 
 trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent
   with AssignmentImporterComponent with ImportAssignmentsMembersToImport with RemovesMissingAssessmentComponentsCommand with RemovesMissingUpstreamAssessmentGroupsCommand {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 
@@ -401,7 +401,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 
 trait ImportAssignmentsDescription extends Describable[Unit] {
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 }
 
 trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {

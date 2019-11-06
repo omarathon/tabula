@@ -193,7 +193,7 @@ trait EditAssignmentDetailsDescription extends Describable[Assignment] {
 
   override lazy val eventName = "EditAssignmentDetails"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment).properties(
       "name" -> name,
       "openDate" -> Option(openDate).map(_.toString()).orNull,

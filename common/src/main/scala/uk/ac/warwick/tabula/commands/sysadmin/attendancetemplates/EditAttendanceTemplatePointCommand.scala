@@ -62,7 +62,7 @@ trait EditAttendanceTemplatePointValidation extends CreateAttendanceTemplatePoin
 
   self: EditAttendanceTemplatePointCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!name.hasText) {
       errors.rejectValue("name", "NotEmpty")
     } else if (name.length > 4000) {
@@ -93,7 +93,7 @@ trait EditAttendanceTemplatePointDescription extends Describable[AttendanceMonit
 
   override lazy val eventName = "EditAttendanceTemplatePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringTemplatePoint(point)
   }
 }

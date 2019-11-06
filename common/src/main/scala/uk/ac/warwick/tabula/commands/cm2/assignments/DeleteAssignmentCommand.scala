@@ -15,7 +15,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null)
 
   var confirm: JBoolean = false
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) {
       errors.rejectValue("confirm", "assignment.delete.confirm")
     } else {

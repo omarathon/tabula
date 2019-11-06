@@ -39,7 +39,7 @@ trait AttendanceNoteAttachmentPermissions extends RequiresPermissionsChecking wi
 
   self: AttendanceNoteCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, student)
   }
 }
@@ -49,7 +49,7 @@ trait AttendanceNoteAttachmentDescription extends Describable[Option[RenderableF
 
   override lazy val eventName = "DownloadAttendanceNoteAttachment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
     d.attendanceMonitoringPoints(Seq(point))
   }

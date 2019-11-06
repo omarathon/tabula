@@ -69,7 +69,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     (submissions, feedbacks)
   }
 
-  def prevalidate(errors: Errors) {
+  def prevalidate(errors: Errors): Unit = {
     for (usercode <- students.asScala; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) {
       if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
     }
@@ -83,7 +83,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     }
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     prevalidate(errors)
     if (!confirm) errors.rejectValue("confirm", "submissionOrFeedback.delete.confirm")
   }

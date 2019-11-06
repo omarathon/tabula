@@ -82,7 +82,7 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 
   override lazy val eventName = "AddTemplatePointsToScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     schemes.asScala.foreach(d.attendanceMonitoringScheme)
   }
 
@@ -95,7 +95,7 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 trait AddTemplatePointsToSchemesValidation extends AttendanceMonitoringPointValidation with SelfValidating {
   self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (templateScheme == null) {
       errors.reject("attendanceMonitoringPoints.templateScheme.Empty")
     } else {

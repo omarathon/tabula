@@ -98,7 +98,7 @@ trait AttendanceNoteDescription extends Describable[SmallGroupEventAttendanceNot
 
   override lazy val eventName = "UpdateAttendanceNote"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(member.universityId))
     d.smallGroupEventOccurrence(occurrence)
   }
@@ -111,7 +111,7 @@ trait AttendanceNotePermissions extends RequiresPermissionsChecking with Permiss
 
   self: AttendanceNoteCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.Register, occurrence)
   }
 }

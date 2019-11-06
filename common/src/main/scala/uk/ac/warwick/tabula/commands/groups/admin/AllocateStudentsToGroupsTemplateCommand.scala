@@ -174,7 +174,7 @@ trait AllocateStudentsToGroupsTemplateCommandState {
 trait AllocateStudentsToGroupsTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToGroupsTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }

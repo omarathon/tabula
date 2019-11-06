@@ -58,7 +58,7 @@ trait ReplaceMarkerValidation extends SelfValidating {
 
   self: ReplaceMarkerState with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!oldMarker.hasText) {
       errors.rejectValue("oldMarker", "markingWorkflow.marker.none")
     }

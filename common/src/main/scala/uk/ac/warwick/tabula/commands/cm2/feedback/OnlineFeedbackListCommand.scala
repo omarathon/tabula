@@ -48,7 +48,7 @@ class OnlineFeedbackListCommandInternal(val assignment: Assignment) extends Comm
 trait OnlineFeedbackListPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: OnlineFeedbackListState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }

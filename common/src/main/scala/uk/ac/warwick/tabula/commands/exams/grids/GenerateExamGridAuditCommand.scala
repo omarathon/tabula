@@ -36,7 +36,7 @@ trait GenerateExamGridAuditPermissions extends RequiresPermissionsChecking with 
 
   self: GenerateExamGridAuditState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -47,7 +47,7 @@ trait GenerateExamGridAuditDescription extends Describable[Unit] {
 
   override lazy val eventName = "GenerateExamGrid"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
       .property("academicYear", academicYear.toString)
       .property("courses", courses.asScala.map(_.code))

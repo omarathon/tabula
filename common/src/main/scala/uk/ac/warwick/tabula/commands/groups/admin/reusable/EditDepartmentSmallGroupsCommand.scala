@@ -88,7 +88,7 @@ class EditDepartmentSmallGroupsCommandInternal(val department: Department, val s
 trait PopulateEditDepartmentSmallGroupsCommand extends PopulateOnForm {
   self: EditDepartmentSmallGroupsCommandState =>
 
-  override def populate() {
+  override def populate(): Unit = {
     groupNames.clear()
     groupIds.clear()
     set.groups.asScala.sortBy(_.name).foreach(group => {
@@ -101,7 +101,7 @@ trait PopulateEditDepartmentSmallGroupsCommand extends PopulateOnForm {
 trait EditDepartmentSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditDepartmentSmallGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -118,7 +118,7 @@ trait EditDepartmentSmallGroupsDescription extends Describable[Seq[DepartmentSma
 trait EditDepartmentSmallGroupsValidation extends SelfValidating {
   self: EditDepartmentSmallGroupsCommandState with SmallGroupServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     groupNames.asScala.zipWithIndex.foreach { case (name, index) =>
       if (!name.hasText) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.NotEmpty")
       else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.Length", Array[Object](200: JInteger), "")
@@ -152,7 +152,7 @@ trait EditDepartmentSmallGroupsValidation extends SelfValidating {
 trait EditDepartmentSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
   self: EditDepartmentSmallGroupsCommandState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // If the last element of events is both a Creation and is empty, disregard it
     while (!groupNames.isEmpty && !groupNames.asScala.last.hasText) {
       groupNames.remove(groupNames.asScala.last)

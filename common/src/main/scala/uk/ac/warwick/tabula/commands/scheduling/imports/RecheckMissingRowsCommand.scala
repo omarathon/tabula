@@ -91,5 +91,5 @@ trait RecheckMissingRowsState {
 trait RecheckMissingRowsDescription extends Describable[Unit] {
   override lazy val eventName = "RecheckMissingRows"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }

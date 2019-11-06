@@ -128,7 +128,7 @@ trait DownloadRegistersAsPdfValidation extends SelfValidating {
 
   self: DownloadRegistersAsPdfCommandState with DownloadRegistersAsPdfCommandRequest with GetsOccurrences =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (startDate == null) {
       errors.rejectValue("startDate", "NotEmpty")
     }
@@ -155,7 +155,7 @@ trait DownloadRegistersAsPdfPermissions extends RequiresPermissionsChecking with
 
   self: DownloadRegistersAsPdfCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.Register, department)
   }
 

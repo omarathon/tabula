@@ -188,7 +188,7 @@ trait CopySmallGroupSetsPermissions extends RequiresPermissionsChecking with Per
 
   import CopySmallGroupSetsCommand._
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     if (modules.isEmpty) p.PermissionCheck(RequiredPermission, mandatory(department))
     else modules.foreach { module =>
       mustBeLinked(mandatory(module), mandatory(department))

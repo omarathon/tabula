@@ -99,7 +99,7 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 trait PopulateEditSmallGroupsCommand {
   self: EditSmallGroupsCommandState =>
 
-  def populate() {
+  def populate(): Unit = {
     existingGroups.clear()
     newGroups.clear()
 
@@ -112,7 +112,7 @@ trait PopulateEditSmallGroupsCommand {
 trait EditSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -121,7 +121,7 @@ trait EditSmallGroupsPermissions extends RequiresPermissionsChecking with Permis
 trait EditSmallGroupsDescription extends Describable[Seq[SmallGroup]] {
   self: EditSmallGroupsCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 
@@ -130,7 +130,7 @@ trait EditSmallGroupsDescription extends Describable[Seq[SmallGroup]] {
 trait EditSmallGroupsValidation extends SelfValidating {
   self: EditSmallGroupsCommandState with SmallGroupServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
       errors.reject("smallGroupSet.linked")
     }
@@ -181,7 +181,7 @@ trait EditSmallGroupsValidation extends SelfValidating {
 trait EditSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
   self: EditSmallGroupsCommandState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // If the last element of events is both a Creation and is empty, disregard it
     while (!newGroups.isEmpty && !newGroups.asScala.last.name.hasText) {
       newGroups.remove(newGroups.asScala.last)

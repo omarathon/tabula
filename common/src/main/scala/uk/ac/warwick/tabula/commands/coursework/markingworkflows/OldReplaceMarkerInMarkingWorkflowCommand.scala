@@ -98,7 +98,7 @@ trait ReplaceMarkerInMarkingWorkflowValidation extends SelfValidating {
 
   self: ReplaceMarkerInMarkingWorkflowCommandState with ReplaceMarkerInMarkingWorkflowCommandRequest with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!oldMarker.hasText) {
       errors.rejectValue("oldMarker", "markingWorkflow.marker.none")
     }
@@ -122,7 +122,7 @@ trait ReplaceMarkerInMarkingWorkflowPermissions extends RequiresPermissionsCheck
 
   self: ReplaceMarkerInMarkingWorkflowCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(markingWorkflow), mandatory(department))
     p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
   }

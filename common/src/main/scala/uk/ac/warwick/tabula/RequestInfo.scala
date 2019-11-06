@@ -50,7 +50,7 @@ object RequestInfo {
     }
     finally close()
 
-  def close() {
+  def close(): Unit = {
     fromThread.foreach(_.requestLevelCache.shutdown())
     threadLocal.remove()
   }
@@ -99,7 +99,7 @@ object EarlyRequestInfo {
     */
   def fromThread: Option[EarlyRequestInfo] = RequestInfo.fromThread orElse threadLocal.get
 
-  def close() {
+  def close(): Unit = {
     fromThread.foreach(_.requestLevelCache.shutdown())
     threadLocal.remove()
   }

@@ -36,7 +36,7 @@ abstract class OldMarkingCompletedCommand(val module: Module, val assignment: As
 
   self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // filter out any feedbacks where the current user is not the marker
     markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser.exists {
       _ == user
@@ -48,7 +48,7 @@ abstract class OldMarkingCompletedCommand(val module: Module, val assignment: As
     releasedFeedback = markerFeedback.asScala.toSeq.filter(_.state == MarkingState.MarkingCompleted)
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
   }
@@ -99,7 +99,7 @@ trait CreatesNextMarkerFeedback {
 
 trait MarkingCompletedCommandPermissions extends RequiresPermissionsChecking {
   self: MarkingCompletedState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)

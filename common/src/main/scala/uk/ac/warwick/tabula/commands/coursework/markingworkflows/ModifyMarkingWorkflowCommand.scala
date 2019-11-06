@@ -86,7 +86,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 
   def contextSpecificValidation(errors: Errors)
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     contextSpecificValidation(errors)
 
     rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")

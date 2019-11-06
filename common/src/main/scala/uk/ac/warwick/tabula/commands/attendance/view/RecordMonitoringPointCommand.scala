@@ -84,7 +84,7 @@ trait RecordMonitoringPointValidation extends SelfValidating with GroupedPointRe
 
   self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     validateGroupedPoint(
       errors,
       templatePoint,
@@ -100,7 +100,7 @@ trait RecordMonitoringPointPermissions extends RequiresPermissionsChecking with 
 
   self: RecordMonitoringPointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Record, department)
   }
 

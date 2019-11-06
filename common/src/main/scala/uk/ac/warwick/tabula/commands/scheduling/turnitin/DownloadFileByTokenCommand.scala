@@ -60,7 +60,7 @@ trait DownloadFileByTokenValidation extends SelfValidating {
 
   self: DownloadFileByTokenCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (Option(token.dateUsed).isDefined) {
       errors.reject("filedownload.token.used")
     } else if (token.expires.isBeforeNow) {

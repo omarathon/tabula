@@ -44,7 +44,7 @@ class StopMarkingMarkingCommandInternal(val assignment: Assignment, val currentU
 trait StopMarkingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: StopMarkingState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     // use the same permissions as release
     p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
   }
@@ -52,7 +52,7 @@ trait StopMarkingPermissions extends RequiresPermissionsChecking with Permission
 
 trait StopMarkingValidation extends SelfValidating {
   self: StopMarkingRequest =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "stop.marking.confirm")
   }
 }

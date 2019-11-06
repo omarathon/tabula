@@ -12,7 +12,7 @@ trait ReportPermissions extends RequiresPermissionsChecking with PermissionsChec
 
   self: ReportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 

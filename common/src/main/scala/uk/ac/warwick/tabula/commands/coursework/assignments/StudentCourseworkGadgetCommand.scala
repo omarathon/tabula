@@ -61,7 +61,7 @@ trait StudentCourseworkGadgetCommandState {
 
 trait StudentCourseworkGadgetCommandPermissions extends RequiresPermissionsChecking {
   self: StudentCourseworkGadgetCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Read.Coursework, student)
     p.PermissionCheck(Permissions.Submission.Read, student)
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, student)

@@ -49,14 +49,14 @@ class DownloadMarkersFeedbackForPositionCommand(
 }
 
 trait DownloadMarkersFeedbackForPositionDescription extends Describable[RenderableFile] {
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }
 
 trait DownloadMarkersFeedbackForPositionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
   self: DownloadMarkersFeedbackForPositionCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {

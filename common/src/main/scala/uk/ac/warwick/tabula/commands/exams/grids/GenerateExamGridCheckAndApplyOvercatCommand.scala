@@ -77,7 +77,7 @@ trait GenerateExamGridCheckAndApplyOvercatValidation extends SelfValidating {
 
   self: GenerateExamGridCheckAndApplyOvercatCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (filteredEntities.isEmpty) {
       errors.reject("", "No changes to apply")
     }
@@ -89,7 +89,7 @@ trait GenerateExamGridCheckAndApplyOvercatPermissions extends RequiresPermission
 
   self: GenerateExamGridCheckAndApplyOvercatCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -101,7 +101,7 @@ trait GenerateExamGridCheckAndApplyOvercatDescription extends Describable[Genera
 
   override lazy val eventName = "GenerateExamGridCheckAndApplyOvercat"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department).property("academicYear", academicYear.toString)
   }
 

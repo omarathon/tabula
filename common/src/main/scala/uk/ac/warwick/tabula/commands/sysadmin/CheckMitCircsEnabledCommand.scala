@@ -32,7 +32,7 @@ class CheckMitCircsEnabledCommandInternal() extends CommandInternal[Result] {
 trait CheckMitCircsEnabledPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, PermissionsTarget.Global)
   }
 }

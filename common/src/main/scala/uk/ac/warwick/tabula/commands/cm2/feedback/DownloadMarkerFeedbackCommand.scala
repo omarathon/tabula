@@ -39,7 +39,7 @@ class DownloadMarkerFeedbackCommandInternal(val assignment: Assignment, val mark
 trait DownloadMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DownloadMarkerFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
   }
 }

@@ -46,14 +46,14 @@ class ReturnToMarkerCommandInternal(val assignment: Assignment, val currentUser:
 trait ReturnToMarkerPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ReturnToMarkerState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
   }
 }
 
 trait ReturnToMarkerValidation extends SelfValidating {
   self: ReturnToMarkerRequest =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "return.marking.confirm")
     if (targetStages.isEmpty) errors.rejectValue("targetStages", "return.marking.targetStages")
   }

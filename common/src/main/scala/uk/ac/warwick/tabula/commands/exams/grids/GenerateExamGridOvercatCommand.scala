@@ -87,7 +87,7 @@ trait GenerateExamGridOvercatValidation extends SelfValidating {
 
   self: GenerateExamGridOvercatCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (chosenModuleSubset.isEmpty) {
       errors.reject("examGrid.overcatting.overcatChoice.invalid")
     }
@@ -99,7 +99,7 @@ trait GenerateExamGridOvercatPermissions extends RequiresPermissionsChecking wit
 
   self: GenerateExamGridOvercatCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 

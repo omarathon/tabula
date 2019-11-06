@@ -184,7 +184,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
 
   self: AddSitsAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
 
     // just get the items we're actually going to import
@@ -297,7 +297,7 @@ trait AddSitsAssignmentsPermissions extends RequiresPermissionsChecking with Per
 
   self: AddSitsAssignmentsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
   }
 
@@ -309,7 +309,7 @@ trait AddSitsAssignmentsDescription extends Describable[Seq[Assignment]] {
 
   override lazy val eventName = "AddSitsAssignments"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 }

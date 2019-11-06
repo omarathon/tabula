@@ -69,7 +69,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def populate() {
+  @Test def populate(): Unit = {
     new Fixture {
       val (d, s) = (department, set)
       val command = new PopulateFindStudentsForUserGroupCommand with FindStudentsForUserGroupCommandState with FiltersStudents with DeserializesFilterImpl {

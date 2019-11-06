@@ -42,7 +42,7 @@ class BaseControllerTest extends TestBase with Mockito {
 
   @Test def selfValidates {
     val command = new SelfValidating {
-      def validate(errors: Errors) {}
+      def validate(errors: Errors): Unit = {}
     }
 
     val controller = new BaseController {

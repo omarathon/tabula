@@ -60,7 +60,7 @@ trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
 
   override lazy val eventName: String = "ModifyAssignmentOptions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
     d.properties(
       "minimumFileAttachmentLimit" -> minimumFileAttachmentLimit,
@@ -76,7 +76,7 @@ trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
 trait ModifyAssignmentOptionsValidation extends SelfValidating {
   self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     validateSharedOptions(errors)
   }
 }

@@ -65,7 +65,7 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
 
   self: AddStudentsToSchemeCommandState with ProfileServiceComponent with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // In practice there should be no students that fail this validation
     // but this protects against hand-rolled POSTs
     val members = benchmark("profileService.getAllMembersWithUniversityIds") {
@@ -100,7 +100,7 @@ trait AddStudentsToSchemePermissions extends RequiresPermissionsChecking with Pe
 
   self: AddStudentsToSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 
@@ -112,7 +112,7 @@ trait AddStudentsToSchemeDescription extends Describable[AttendanceMonitoringSch
 
   override lazy val eventName = "AddStudentsToScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringScheme(scheme)
       .property("membershipCount" -> ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).size)
   }

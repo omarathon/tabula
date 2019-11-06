@@ -44,7 +44,7 @@ class StubEditAssignmentMembershipCommand(val assignment: Assignment, val update
 trait StubEditAssignmentMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditAssignmentMembershipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(Seq(CheckablePermission(Permissions.Assignment.Create, assignment.module),
       CheckablePermission(Permissions.Assignment.Update, assignment.module)))
   }

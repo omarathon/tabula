@@ -31,7 +31,7 @@ class AddStudentRelationshipTypeCommandInternal extends ModifyStudentRelationshi
 }
 
 trait AddStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
   }
 }

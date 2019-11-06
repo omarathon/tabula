@@ -25,7 +25,7 @@ class DownloadExtensionAttachmentCommandInternal(val extension: Extension, val f
 trait DownloadExtensionAttachmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DownloadExtensionAttachmentState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Extension.Read, extension)
   }
 }

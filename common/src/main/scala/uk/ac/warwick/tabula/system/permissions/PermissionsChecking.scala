@@ -248,7 +248,7 @@ trait RequiresPermissionsChecking {
 }
 
 trait PubliclyVisiblePermissions extends RequiresPermissionsChecking with Public {
-  def permissionsCheck(p: PermissionsChecking) {}
+  def permissionsCheck(p: PermissionsChecking): Unit = {}
 }
 
 trait PerformsPermissionsChecking extends PermissionsChecking {

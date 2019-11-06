@@ -54,7 +54,7 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 
   self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = false, Some(errors))
     if (!errors.hasErrors) {
       points.foreach(point => {
@@ -155,7 +155,7 @@ trait CreateNewAttendancePointsFromCopyPermissions extends RequiresPermissionsCh
 
   self: CreateNewAttendancePointsFromCopyCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
   }
 
@@ -167,7 +167,7 @@ trait CreateNewAttendancePointsFromCopyDescription extends Describable[Seq[Atten
 
   override lazy val eventName = "CreateNewAttendancePointsFromCopy"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringSchemes(schemes)
   }
 

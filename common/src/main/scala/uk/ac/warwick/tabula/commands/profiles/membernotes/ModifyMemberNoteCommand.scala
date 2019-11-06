@@ -46,7 +46,7 @@ trait ModifyMemberNoteCommandBindListener extends BindListener {
 
   self: ModifyMemberNoteCommandRequest =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

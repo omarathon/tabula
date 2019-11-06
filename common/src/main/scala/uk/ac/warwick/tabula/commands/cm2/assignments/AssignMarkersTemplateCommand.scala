@@ -122,7 +122,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 trait AssignMarkersTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersTemplateState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
   }
 }

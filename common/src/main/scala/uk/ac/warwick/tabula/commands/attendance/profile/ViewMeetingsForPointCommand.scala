@@ -67,7 +67,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
 trait ViewMeetingsForPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewMeetingsForPointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, student)
   }
 }

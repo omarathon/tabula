@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RemoveMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(meetingRecord) match {
       case m: MeetingRecord =>
         m.relationshipTypes.foreach { relationshipType =>
@@ -68,7 +68,7 @@ class DeleteMeetingRecordCommand(val meetingRecord: AbstractMeetingRecord, val u
 trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMeetingRecordValidation {
   self: RemoveMeetingRecordState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (meetingRecord.deleted) errors.reject("meetingRecord.delete.alreadyDeleted")
 
     if (!user.sysadmin) {
@@ -111,7 +111,7 @@ class RestoreMeetingRecordCommand(val meetingRecord: AbstractMeetingRecord, val 
 trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMeetingRecordValidation {
   self: RemoveMeetingRecordState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!meetingRecord.deleted) errors.reject("meetingRecord.delete.notDeleted")
 
     if (!user.sysadmin) {

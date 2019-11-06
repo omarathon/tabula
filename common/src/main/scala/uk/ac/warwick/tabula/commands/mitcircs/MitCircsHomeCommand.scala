@@ -53,7 +53,7 @@ class MitCircsHomeCommandInternal(val currentUser: CurrentUser) extends CommandI
 trait MitCircsHomeDescription extends Describable[Result] {
   override lazy val eventName: String = "MitCircsHome"
 
-  def describe(d: Description) { /* Do nothing - just audit that this page was visited by the user */ }
+  def describe(d: Description): Unit = { /* Do nothing - just audit that this page was visited by the user */ }
 }
 
 trait MitCircsHomeState {

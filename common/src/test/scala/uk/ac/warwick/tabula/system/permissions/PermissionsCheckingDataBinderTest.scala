@@ -23,7 +23,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
   val securityService: SecurityService = mock[SecurityService]
 
   abstract class TestCommand extends Command[Boolean] {
-    def describe(d: Description) {}
+    def describe(d: Description): Unit = {}
 
     def applyInternal = true
   }
@@ -79,7 +79,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
   class BindTestCommand() extends TestCommand with Public with BindListener {
     var bound = false
 
-    override def onBind(result: BindingResult) {
+    override def onBind(result: BindingResult): Unit = {
       bound = true
     }
   }

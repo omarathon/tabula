@@ -143,7 +143,7 @@ trait SmallGroupAutoDeregistration {
 trait EditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupSetMembershipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -152,7 +152,7 @@ trait EditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking
 trait EditSmallGroupSetMembershipDescription extends Describable[SmallGroupSet] {
   self: EditSmallGroupSetMembershipCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 
@@ -161,7 +161,7 @@ trait EditSmallGroupSetMembershipDescription extends Describable[SmallGroupSet] 
 trait EditSmallGroupSetMembershipValidation extends SelfValidating {
   self: EditSmallGroupSetMembershipCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
       errors.reject("smallGroupSet.linked")
     }
@@ -177,7 +177,7 @@ class StubEditSmallGroupSetMembershipCommand(val module: Module, val set: SmallG
 trait StubEditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupSetMembershipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(Seq(
       CheckablePermission(Permissions.SmallGroups.Create, mandatory(module)),
       CheckablePermission(Permissions.SmallGroups.Update, mandatory(module))

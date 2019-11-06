@@ -46,7 +46,7 @@ trait DeleteSchemeDescription extends Describable[AttendanceMonitoringScheme] {
 
   override lazy val eventName = "DeleteScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringScheme(scheme)
   }
 }
@@ -60,7 +60,7 @@ trait DeleteSchemePermissions extends RequiresPermissionsChecking with Permissio
 
   self: DeleteSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 
@@ -70,7 +70,7 @@ trait DeleteSchemeValidation extends SelfValidating {
 
   self: DeleteSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (scheme.points.asScala.exists { point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0 }) {
       errors.reject("attendanceMonitoringScheme.hasCheckpoints.remove")
     }

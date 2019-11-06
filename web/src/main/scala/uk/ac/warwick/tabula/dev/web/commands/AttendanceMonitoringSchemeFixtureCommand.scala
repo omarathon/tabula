@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudi
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentMember, UserGroup}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService, AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
@@ -57,6 +57,7 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 
 
     val scheme = new AttendanceMonitoringScheme
+    scheme.attendanceMonitoringService = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
     scheme.academicYear = academicYear
     scheme.department = department
     scheme.createdDate = DateTime.now

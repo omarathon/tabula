@@ -24,7 +24,7 @@ class DownloadFeedbackAsPdfCommandInternal(val assignment: Assignment, val feedb
 trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DownloadFeedbackAsPdfState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     notDeleted(assignment)
 
     student match {
@@ -42,7 +42,7 @@ trait DownloadFeedbackAsPdfAudit extends Describable[Feedback] {
 
   override lazy val eventName: String = "DownloadFeedbackAsPdf"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.feedback(feedback)
   }
 }

@@ -66,7 +66,7 @@ class AdminFinaliseCommandInternal(val assignment: Assignment, val user: User) e
 trait AllocateModeratorsActionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateModeratorsActionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, assignment)
   }
 }
@@ -74,7 +74,7 @@ trait AllocateModeratorsActionPermissions extends RequiresPermissionsChecking wi
 trait AllocateModeratorsActionValidation extends SelfValidating {
   self: AllocateModeratorsActionState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "return.marking.confirm")
   }
 }
@@ -82,7 +82,7 @@ trait AllocateModeratorsActionValidation extends SelfValidating {
 trait AllocateModeratorsActionDescription extends Describable[Seq[Feedback]] {
   self: AllocateModeratorsActionState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .studentUsercodes(students.asScala.toSeq)
   }

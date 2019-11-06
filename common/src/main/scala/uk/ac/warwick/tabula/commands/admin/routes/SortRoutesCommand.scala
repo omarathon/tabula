@@ -42,7 +42,7 @@ trait SortRoutesCommandGrouping {
   self: SortRoutesCommandState =>
 
   // Only called on initial form view
-  def populate() {
+  def populate(): Unit = {
     for (dept <- (departments))
       mapping.put(dept, JArrayList(dept.routes))
   }
@@ -60,7 +60,7 @@ trait SortRoutesCommandGrouping {
 trait SortRoutesCommandValidation extends SelfValidating {
   self: SortRoutesCommandState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     val mappingMap = mapping.asScala
     val currentRoutes = departments.map(_.routes.asScala).flatten.toList
     val newRoutes = mappingMap.values.map(_.asScala).flatten.toList.filter(validRoute)
@@ -97,7 +97,7 @@ trait SortRoutesCommandState extends GroupsObjects[Route, Department] {
 trait SortRoutesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SortRoutesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, mandatory(department))
   }
 }

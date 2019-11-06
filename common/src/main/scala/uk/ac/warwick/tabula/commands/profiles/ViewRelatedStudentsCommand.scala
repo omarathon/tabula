@@ -101,7 +101,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewRelatedStudentsCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), currentMember)
   }
 }

@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula
 
 import scala.reflect._
-
 import org.springframework.beans.factory.config.AbstractFactoryBean
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.databind.{DeserializationFeature, SerializationFeature, ObjectMapper}
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+
+import scala.collection.MapView
 
 abstract class ScalaFactoryBean[A: ClassTag] extends AbstractFactoryBean[A] {
   override def getObjectType: Class[_] = classTag[A].runtimeClass
@@ -33,7 +34,7 @@ object JsonHelper {
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-  def toJson(value: Map[Symbol, Any]): String = toJson(value map { case (k, v) => k.name -> v })
+  def toJson(value: Map[Symbol, Any]): String = toJson(value.map { case (k, v) => k.name -> v })
 
   def toJson(value: Any): String = mapper.writeValueAsString(value)
 

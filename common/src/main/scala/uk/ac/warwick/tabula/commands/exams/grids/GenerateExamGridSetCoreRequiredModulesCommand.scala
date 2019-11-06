@@ -82,7 +82,7 @@ trait GenerateExamGridSetCoreRequiredModulesPermissions extends RequiresPermissi
 
   self: GenerateExamGridSetCoreRequiredModulesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -95,7 +95,7 @@ trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Map[
 
   override lazy val eventName = "GenerateExamGridSetCoreRequiredModules"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
       .properties(
         "academicYear" -> academicYear.toString,

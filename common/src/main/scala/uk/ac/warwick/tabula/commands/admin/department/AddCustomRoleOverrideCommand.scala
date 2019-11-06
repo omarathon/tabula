@@ -48,7 +48,7 @@ class AddCustomRoleOverrideCommandInternal(val department: Department, val custo
 trait AddCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddCustomRoleOverrideCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, customRoleDefinition)
   }
@@ -59,7 +59,7 @@ trait AddCustomRoleOverrideCommandValidation extends SelfValidating {
 
   import RoleOverride._
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // permission must be non empty
     if (permission == null) errors.rejectValue("permission", "NotEmpty")
     else {

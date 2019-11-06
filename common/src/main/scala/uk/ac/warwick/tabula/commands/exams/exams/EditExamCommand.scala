@@ -50,7 +50,7 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 
   self: EditExamCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, exam)
   }
 }
@@ -74,7 +74,7 @@ trait EditExamCommandDescription extends Describable[Exam] {
   self: EditExamCommandState with AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
     with AssessmentMembershipServiceComponent =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.exam(exam)
   }
 }

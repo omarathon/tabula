@@ -4,12 +4,11 @@ import java.io.Serializable
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
-import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
-import uk.ac.warwick.userlookup.{User, _}
+import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 
 import scala.jdk.CollectionConverters._
@@ -43,29 +42,62 @@ class UserLookupServiceImpl(d: UserLookupInterface)
   override def getGroupService: LenientGroupService = new LenientGroupService(super.getGroupService)
 }
 
-class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
-  var profileService: ProfileService = Wire[ProfileService]
+/**
+ * Only Autowired in if the <code>dev</code> Spring profile is enabled; this checks the MEMBER database
+ * table as a <strong>last</strong> resort if a lookup returns an AnonymousUser; this is primarily to support the functional
+ * tests and overrides in <code>membership.usercode_overrides</code>.
+ */
+class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupAdapter(d) with AutowiringProfileServiceComponent {
+  override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
+    super.getUsersByUserIds(ids).asScala.map { case (userId, userFromSSO) =>
+      if (userFromSSO.isFoundUser) userId -> userFromSSO
+      else profileService.getAllMembersWithUserId(userId, disableFilter = true).headOption match {
+        case Some(member) => userId -> member.asSsoUser
+        case _ => userId -> userFromSSO
+      }
+    }.asJava
 
-  private def sandboxUser(member: Member): User = {
-    val ssoUser = new User(member.userId)
-    ssoUser.setFoundUser(true)
-    ssoUser.setVerified(true)
-    ssoUser.setDepartment(Option(member.homeDepartment).map(_.name).getOrElse(""))
-    ssoUser.setDepartmentCode(Option(member.homeDepartment).map(_.code).getOrElse(""))
-    ssoUser.setEmail(member.email)
-    ssoUser.setFirstName(member.firstName)
-    ssoUser.setLastName(member.lastName)
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] =
+    super.getUsersByWarwickUniIds(warwickUniIds).asScala.map { case (uniId, userFromSSO) =>
+      if (userFromSSO.isFoundUser) uniId -> userFromSSO
+      else profileService.getMemberByUniversityId(uniId) match {
+        case Some(member) => uniId -> member.asSsoUser
+        case _ => uniId -> userFromSSO
+      }
+    }.asJava
 
-    member.userType match {
-      case MemberUserType.Student => ssoUser.setStudent(true)
-      case _ => ssoUser.setStaff(true)
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId], ignored: Boolean): JMap[UniversityId, User] =
+    getUsersByWarwickUniIds(warwickUniIds)
+
+  override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByUserId", id) {
+    super.getUserByUserId(id) match {
+      case FoundUser(u) => u
+      case u =>
+        profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
+          .map(_.asSsoUser)
+          .getOrElse(u)
     }
-
-    ssoUser.setWarwickId(member.universityId)
-
-    ssoUser
   }
 
+  override def getUserByWarwickUniId(id: String): User = RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByWarwickUniId", id) {
+    super.getUserByWarwickUniId(id) match {
+      case FoundUser(u) => u
+      case u =>
+        profileService.getMemberByUniversityId(id)
+          .map(_.asSsoUser)
+          .getOrElse(u)
+    }
+  }
+
+  override def getUserByWarwickUniId(id: String, ignored: Boolean): User = getUserByWarwickUniId(id)
+}
+
+/**
+ * Only autowired in if the <code>sandbox</code> Spring profile is enabled. Similar to
+ * {@link DatabaseAwareUserLookupService} above, but looks in the database first rather than as a
+ * last resort.
+ */
+class SandboxUserLookup(d: UserLookupInterface) extends DatabaseAwareUserLookupService(d) {
   override def getUsersInDepartment(d: String): JList[User] =
     SandboxData.Departments.find { case (_, department) => department.name == d } match {
       case Some((code, _)) => getUsersInDepartmentCode(code)
@@ -77,12 +109,12 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
       case Some(department) =>
         val students = department.routes.values.flatMap { route =>
           (route.studentsStartId to route.studentsEndId).flatMap { uniId =>
-            profileService.getMemberByUniversityId(uniId.toString).map(sandboxUser)
+            profileService.getMemberByUniversityId(uniId.toString).map(_.asSsoUser)
           }
         }
 
         val staff = (department.staffStartId to department.staffEndId).flatMap { uniId =>
-          profileService.getMemberByUniversityId(uniId.toString).map(sandboxUser)
+          profileService.getMemberByUniversityId(uniId.toString).map(_.asSsoUser)
         }
 
         (students ++ staff).toSeq.asJava
@@ -90,32 +122,18 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
       case _ => super.getUsersInDepartmentCode(c)
     }
 
-  override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
-    ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
-
-  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] = {
-    super.getUsersByWarwickUniIds(warwickUniIds).asScala.map { case (uniId, userFromSSO) =>
-      if (userFromSSO.isFoundUser) (uniId, userFromSSO) else profileService.getMemberByUniversityId(uniId) match {
-        case Some(member) => (uniId, sandboxUser(member))
-        case _ => (uniId, userFromSSO)
-      }
-    }.asJava
-  }
-
+  // Flip these around on the Sandbox to be database-first
   override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByUserId", id) {
     profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
-      .map(sandboxUser)
+      .map(_.asSsoUser)
       .getOrElse(super.getUserByUserId(id))
   }
 
   override def getUserByWarwickUniId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByWarwickUniId", id) {
     profileService.getMemberByUniversityId(id)
-      .map(sandboxUser)
-      .getOrElse(super.getUserByUserId(id))
+      .map(_.asSsoUser)
+      .getOrElse(super.getUserByWarwickUniId(id))
   }
-
-  override def getUserByWarwickUniId(id: String, ignored: Boolean): User = getUserByWarwickUniId(id)
-
 }
 
 class LenientGroupService(delegate: GroupService) extends GroupService with Logging {

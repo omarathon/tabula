@@ -43,7 +43,7 @@ class AllocateModeratorsListCommandInternal(val assignment: Assignment, val user
 trait AllocateModeratorsListPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateModeratorsListState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, assignment)
   }
 }

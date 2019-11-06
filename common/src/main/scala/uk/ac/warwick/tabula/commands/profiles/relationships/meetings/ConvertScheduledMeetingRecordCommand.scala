@@ -41,7 +41,7 @@ class ConvertScheduledMeetingRecordCommand(override val creator: Member, val mee
 
 trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
   self: ConvertScheduledMeetingRecordState =>
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (meetingRecord.missed)
       errors.reject("meetingRecord.confirm.missed")
   }
@@ -50,7 +50,7 @@ trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
 trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ConvertScheduledMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(
       Permissions.Profiles.ScheduledMeetingRecord.Confirm,
       mandatory(meetingRecord)

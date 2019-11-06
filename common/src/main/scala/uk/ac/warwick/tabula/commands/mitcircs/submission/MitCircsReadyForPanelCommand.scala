@@ -38,14 +38,14 @@ class MitCircsReadyForPanelCommandInternal(val submission: MitigatingCircumstanc
 trait MitCircsReadyForPanelPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsReadyForPanelState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, submission)
   }
 }
 
 trait MitCircsReadyForPanelValidation extends SelfValidating {
   self: MitCircsReadyForPanelState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if(ready && !confirm) errors.rejectValue("confirm", "mitigatingCircumstances.readyForPanel.confirm.required")
   }
 }
@@ -55,7 +55,7 @@ trait MitCircsReadyForPanelDescription extends Describable[MitigatingCircumstanc
 
   override lazy val eventName: String = if(ready) "MitCircsReadyForPanel" else "MitCircsNotReadyForPanel"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

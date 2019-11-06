@@ -116,7 +116,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsSubmissionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, MitigatingCircumstancesStudent(student))
   }
 }
@@ -126,7 +126,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     with MitCircsSubmissionState
     with ModuleAndDepartmentServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Only validate at submission time, allow drafts to be saved that would be invalid
     if (approve) {
       // validate issue types
@@ -210,7 +210,7 @@ trait CreateMitCircsSubmissionDescription extends Describable[Result] {
 
   override lazy val eventName: String = "CreateMitCircsSubmission"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.member(student)
   }
 }

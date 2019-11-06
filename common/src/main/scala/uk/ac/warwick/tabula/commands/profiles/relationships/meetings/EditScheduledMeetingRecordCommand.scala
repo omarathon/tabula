@@ -81,7 +81,7 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
   self: EditScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
@@ -104,7 +104,7 @@ trait EditScheduledMeetingRecordState extends ModifyScheduledMeetingRecordState 
 trait EditScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditScheduledMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(meetingRecord)
     meetingRecord.relationships.map(_.relationshipType).distinct.foreach { relationshipType =>
       p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), meetingRecord)

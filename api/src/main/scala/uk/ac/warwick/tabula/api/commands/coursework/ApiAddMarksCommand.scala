@@ -70,7 +70,7 @@ abstract class ApiAddMarksCommandInternal(val assignment: Assignment, val submit
 trait ApiAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ApiAddMarksState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }
@@ -80,7 +80,7 @@ trait ApiAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "ApiAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 

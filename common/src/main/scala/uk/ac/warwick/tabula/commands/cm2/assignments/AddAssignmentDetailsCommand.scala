@@ -252,7 +252,7 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
 
   override lazy val eventName = "AddAssignmentDetails"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.module(module).properties(
       "name" -> name,
       "openDate" -> Option(openDate).map(_.toString()).orNull,
