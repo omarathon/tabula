@@ -173,9 +173,9 @@
         <@f.input path="meetingLocation" cssClass="form-control" />
       </@bs3form.labelled_form_group>
 
-    <#if !isStudent>
+    <#if !isStudent && !missed>
       <div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
-        Submitting this record will mark a monitoring point as <#if missed>missed<#else>attended</#if>
+        Submitting this record will mark a monitoring point as attended
       </div>
       <script nonce="${nonce()}">
         jQuery(function ($) {
