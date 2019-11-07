@@ -90,7 +90,7 @@ class FileFormValue(val field: FormField) extends FormValue {
 @Entity(name = "SubmissionValue")
 @Proxy
 @Access(AccessType.FIELD)
-class SavedFormValue extends GeneratedId with FormattedHtml {
+class SavedFormValue extends GeneratedId {
 
   @ManyToOne(fetch = LAZY)
   @JoinColumn(name = "submission_id")
@@ -118,7 +118,7 @@ class SavedFormValue extends GeneratedId with FormattedHtml {
 
   var value: String = _
 
-  def valueFormattedHtml: TemplateHTMLOutputModel = formattedHtml(value)
+  def valueFormattedHtml: TemplateHTMLOutputModel = FormattedHtml(value)
 }
 
 object SavedFormValue {

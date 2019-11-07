@@ -19,8 +19,8 @@ class EditDepartmentController extends AdminController {
   validatesSelf[SelfValidating]
   type EditDepartmentCommand = Appliable[Department] with EditDepartmentCommandState
 
-  @ModelAttribute("allFilterRules")
-  def allFilterRules: Seq[FilterRule] = Department.FilterRule.allFilterRules
+  @ModelAttribute("subDepartmentFilterRules")
+  def subDepartmentFilterRules: Seq[FilterRule] = Department.FilterRule.subDepartmentFilterRules
 
   @ModelAttribute("editDepartmentCommand")
   def command(@PathVariable department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))

@@ -54,8 +54,8 @@ class RecordMonitoringPointUploadController extends AttendanceController {
     ).noLayoutIf(ajax)
   }
 
-  @RequestMapping(method = Array(POST))
-  def post(
+  @RequestMapping(method = Array(POST), params = Array("!confirm"))
+  def preview(
     @ModelAttribute("extractor") extractor: CSVAttendanceExtractorInternal,
     @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
     @ModelAttribute("command") cmd: RecordMonitoringPointCommand,
@@ -71,6 +71,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
       val filterResult = filterCommand.apply()
       cmd.setFilteredPoints(filterResult)
       cmd.populate()
+      val existingCheckpointMap = cmd.checkpointMap.asScala
       val newCheckpointMap: JMap[StudentMember, JMap[AttendanceMonitoringPoint, AttendanceState]] =
         JHashMap(cmd.checkpointMap.asScala.map { case (student, pointMap) =>
           student -> JHashMap(pointMap.asScala.map { case (point, oldState) =>
@@ -85,10 +86,40 @@ class RecordMonitoringPointUploadController extends AttendanceController {
       if (errors.hasErrors) {
         form(filterCommand, cmd, errors, department, academicYear, templatePoint)
       } else {
-        cmd.apply()
-        Redirect(Routes.View.points(department, academicYear))
+        val (valid, invalid) = attendance.partition { case (s, _) => cmd.checkpointMap.keySet.contains(s) }
+        val (identical, updated) = valid.partition { case (s, a) => existingCheckpointMap.get(s).flatMap(_.asScala.get(templatePoint)) match {
+          case Some(null) if a == AttendanceState.NotRecorded => true
+          case Some(state) if state == a => true
+          case _ => false
+        } }
+        Mav("attendance/upload_attendance_confirm",
+          "uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
+          "valid" -> valid.toSeq,
+          "updated" -> updated.toSeq.sortBy { case (s, _) => (s.lastName, s.firstName) },
+          "identical" -> identical.toSeq.sortBy { case (s, _) => (s.lastName, s.firstName) },
+          "invalid" -> invalid.toSeq.sortBy { case (s, _) => (s.lastName, s.firstName) },
+        )
       }
     }
   }
 
+  @RequestMapping(method = Array(POST), params = Array("confirm"))
+  def confirm(
+    @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
+    @ModelAttribute("command") cmd: RecordMonitoringPointCommand,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable templatePoint: AttendanceMonitoringPoint,
+  ): Mav = {
+    val filterResult = filterCommand.apply()
+    cmd.setFilteredPoints(filterResult)
+    cmd.validate(errors)
+    if (errors.hasErrors) {
+      form(filterCommand, cmd, errors, department, academicYear, templatePoint)
+    } else {
+      cmd.apply()
+      Redirect(Routes.View.points(department, academicYear))
+    }
+  }
 }

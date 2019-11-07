@@ -26,8 +26,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
   with PermissionsTarget
   with Serializable
-  with ToEntityReference
-  with FormattedHtml {
+  with ToEntityReference {
     type Entity = MitigatingCircumstancesSubmission
 
   def this(student: StudentMember, creator: User, department: Department) {
@@ -148,7 +147,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def reason: String = Option(encryptedReason).map(_.toString).orNull
   def reason_=(reason: String): Unit = encryptedReason = reason
 
-  def formattedReason: TemplateHTMLOutputModel = formattedHtml(reason)
+  def formattedReason: TemplateHTMLOutputModel = FormattedHtml(reason)
 
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
   @JoinColumn(name = "submission_id")
@@ -167,7 +166,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def pendingEvidence: String = Option(encryptedPendingEvidence).map(_.toString).orNull
   def pendingEvidence_=(pendingEvidence: String): Unit = encryptedPendingEvidence = pendingEvidence
 
-  def formattedPendingEvidence: TemplateHTMLOutputModel = formattedHtml(pendingEvidence)
+  def formattedPendingEvidence: TemplateHTMLOutputModel = FormattedHtml(pendingEvidence)
 
   var pendingEvidenceDue: LocalDate = _
 
@@ -184,7 +183,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   private var encryptedSensitiveEvidenceComments: CharSequence = _
   def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
   def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
-  def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = formattedHtml(sensitiveEvidenceComments)
+  def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = FormattedHtml(sensitiveEvidenceComments)
 
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
@@ -256,13 +255,18 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingUserType")
   var outcomeGrading: MitigatingCircumstancesGrading = _
 
+  // '0' is appended to the grading code for acute mitigation to ensure that mitigation is not "double counted" in exam boards
+  def gradingCode: Option[String] = {
+    Option(outcomeGrading).map(o => if(isAcute) s"${o.code}0" else o.code)
+  }
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "outcomeReasons")
   private var encryptedOutcomeReasons: CharSequence = _
   def outcomeReasons: String = Option(encryptedOutcomeReasons).map(_.toString).orNull
   def outcomeReasons_=(outcomeReasons: String): Unit = encryptedOutcomeReasons = outcomeReasons
 
-  def formattedOutcomeReasons: TemplateHTMLOutputModel = formattedHtml(outcomeReasons)
+  def formattedOutcomeReasons: TemplateHTMLOutputModel = FormattedHtml(outcomeReasons)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
   var boardRecommendations: Seq[MitCircsExamBoardRecommendation] = _
@@ -281,7 +285,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 
-  def formattedBoardRecommendationComments: TemplateHTMLOutputModel = formattedHtml(boardRecommendationComments)
+  def formattedBoardRecommendationComments: TemplateHTMLOutputModel = FormattedHtml(boardRecommendationComments)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonUserType")
   var rejectionReasons: Seq[MitigatingCircumstancesRejectionReason] = _

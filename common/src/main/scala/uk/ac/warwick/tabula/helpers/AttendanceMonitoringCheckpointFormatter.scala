@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import freemarker.core.Environment
+import freemarker.core.{Environment, TemplateHTMLOutputModel}
 import freemarker.template._
 import freemarker.template.utility.DeepUnwrap
 import org.joda.time.DateTime
@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.attendance.web.{Routes => AttendanceRoutes}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType.{AssignmentSubmission, Meeting, SmallGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.Attended
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceState}
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -26,7 +27,7 @@ case class AttendanceMonitoringCheckpointFormatterResult(
   status: String,
   metadata: String,
   noteType: String,
-  noteText: String,
+  noteText: TemplateHTMLOutputModel,
   noteUrl: String
 )
 
@@ -139,7 +140,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Attended: ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       case AttendanceState.MissedAuthorised =>
@@ -150,7 +151,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Missed (authorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       // Monitoring point still use Id6 -label-important can be removed when we later migrate that
@@ -162,11 +163,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Missed (unauthorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       // Should never be the case, but stops a compile warning
-      case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", "", "")
+      case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", FormattedHtml(""), "")
     }
   }
 
@@ -195,7 +196,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
-        noteText,
+        FormattedHtml(noteText),
         noteUrl
       )
     } else {
@@ -206,7 +207,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
-        noteText,
+        FormattedHtml(noteText),
         noteUrl
       )
     }

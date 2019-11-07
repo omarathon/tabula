@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.exams.grids.columns.administration
 
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
+
 import scala.collection.JavaConverters._
 
 @Component
-class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption {
+class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption with AutowiringMitCircsSubmissionServiceComponent {
 
   override val identifier: ExamGridColumnOption.Identifier = "mitigating"
 
@@ -23,17 +26,30 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
     override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
     override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
-      if (state.department.rootDepartment.code == "es") {
-        state.entities.map(entity => {
-          val notes = entity.validYears.headOption
+      val students = state.entities.flatMap(
+        _.validYears.headOption
+          .flatMap { case (_, year) => year.studentCourseYearDetails }
+          .map(_.studentCourseDetails.student)
+      )
+
+      val gradeCodes = mitCircsSubmissionService.mitigationGradesForStudents(students)
+
+      state.entities.map(entity => entity -> {
+        val mitCircsCodes = gradeCodes.getOrElse(entity.universityId, Nil)
+          .map(gc => s"${gc.code} - (${DateFormats.CSVDate.print(gc.date)})")
+          .mkString(", ")
+
+        val notes = if (state.department.rootDepartment.code == "es") {
+          entity.validYears.headOption
             .flatMap { case (_, year) => year.studentCourseYearDetails }
-            .map(_.studentCourseDetails.notes.asScala.mkString(", "))
+            .map(notes => s"\n${notes.studentCourseDetails.notes.asScala.mkString(", ")}")
             .getOrElse("")
-          entity -> ExamGridColumnValueString(notes)
-        }).toMap
-      } else {
-        state.entities.map(entity => entity -> ExamGridColumnValueString("")).toMap
-      }
+        } else {
+          ""
+        }
+
+        ExamGridColumnValueString(s"$mitCircsCodes$notes")
+      }).toMap
     }
 
   }
