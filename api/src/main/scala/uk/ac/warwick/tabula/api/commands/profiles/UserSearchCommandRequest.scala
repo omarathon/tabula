@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
 
 trait UserSearchCommandRequest extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   var department: Department = _
@@ -28,4 +30,11 @@ trait UserSearchCommandRequest extends RequiresPermissionsChecking with Permissi
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
   }
+
+  def departmentRestriction: ScalaRestriction = Option(department).map(d =>
+    Aliasable.addAliases(
+      new ScalaRestriction(HibernateHelpers.is("studentCourseYearDetails.enrolmentDepartment", d)),
+      FiltersStudents.AliasPaths("studentCourseYearDetails"):_*
+    )).getOrElse(throw new IllegalArgumentException("Department not defined")
+  )
 }
