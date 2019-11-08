@@ -24,18 +24,13 @@ abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(AcademicYear.now())
-
-    Option(department) match {
-      case Some(d) =>
-        Seq(d).flatMap(department =>
-          profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
-            department,
-            restrictions
-          )
-        ).distinct
-      case _ =>
-        profileService.findAllUserIdsByRestrictions(restrictions).distinct
+    val restrictions = Option(department) match {
+      case Some(_) => Seq(departmentRestriction) ++ buildRestrictions(AcademicYear.now())
+      case _ => buildRestrictions(AcademicYear.now())
     }
+
+    profileService.findAllUserIdsByRestrictions(
+      restrictions
+    ).distinct
   }
 }
