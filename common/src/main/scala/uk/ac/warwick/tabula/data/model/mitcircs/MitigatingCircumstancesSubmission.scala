@@ -185,6 +185,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
   def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = FormattedHtml(sensitiveEvidenceComments)
 
+  // Date the student approved (finally submits) the submission - (may have been raised on their behalf)
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
 
