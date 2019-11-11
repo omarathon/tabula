@@ -14,7 +14,13 @@ class StudentTargetGroupListController extends ApiController {
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def index(): Mav = {
-    Mav(new JSONView(MemberUserType.StudentTargetGroups))
+    Mav(new JSONView(
+      Map(
+        "success" -> true,
+        "status" -> "ok",
+        "groups" -> MemberUserType.StudentTargetGroups
+      )
+    ))
   }
 
 }
