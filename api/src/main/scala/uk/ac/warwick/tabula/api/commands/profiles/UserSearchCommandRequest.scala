@@ -8,7 +8,9 @@ import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.data.ScalaRestriction.inIfNotEmpty
 import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
+import scala.jdk.CollectionConverters._
 
 trait UserSearchCommandRequest extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   var department: Department = _
@@ -28,14 +30,20 @@ trait UserSearchCommandRequest extends RequiresPermissionsChecking with Permissi
   var modules: JList[Module] = JArrayList()
   var hallsOfResidence: JList[String] = JArrayList()
 
+  var groupNames: JList[String] = JArrayList()
+
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
   }
 
-  def departmentRestriction: ScalaRestriction = Option(department).map(d =>
+  def enrolmentDepartmentRestriction: ScalaRestriction = Option(department).map(d =>
     Aliasable.addAliases(
       new ScalaRestriction(HibernateHelpers.is("studentCourseYearDetails.enrolmentDepartment", d)),
       FiltersStudents.AliasPaths("studentCourseYearDetails"):_*
     )).getOrElse(throw new IllegalArgumentException("Department not defined")
+  )
+
+  def groupNameRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+    "groupName", groupNames.asScala
   )
 }
