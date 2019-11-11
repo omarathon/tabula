@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.jobs.scheduling
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.commands.scheduling.imports.{BulkImportModuleRegistrationsCommand, ImportProfilesCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
@@ -37,6 +37,10 @@ class ImportMembersJob extends Job {
       val yearsToImport = job.getStrings(ImportMembersJob.YearsKey).map { s => AcademicYear.starting(s.toInt) }
 
       updateProgress(0)
+
+      transactional() {
+        BulkImportModuleRegistrationsCommand(memberIds).apply()
+      }
 
       memberIds.zipWithIndex.foreach { case (universityId, index) =>
         updateStatus(ImportMembersJob.status(universityId))
