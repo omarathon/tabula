@@ -7,7 +7,7 @@ import org.quartz._
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
 import org.springframework.beans.factory.{FactoryBean, InitializingBean}
 import org.springframework.context.annotation.{Bean, Configuration, Profile}
-import org.springframework.core.env.Environment
+import org.springframework.core.env.{Environment, Profiles}
 import org.springframework.core.io.ClassPathResource
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.quartz.{JobDetailFactoryBean, QuartzJobBean, SchedulerFactoryBean, SpringBeanJobFactory}
@@ -16,10 +16,10 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.ScheduledJob
 import uk.ac.warwick.tabula.services.scheduling.jobs._
-import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
 import uk.ac.warwick.util.web.Uri
@@ -114,7 +114,7 @@ object SchedulingConfiguration {
     CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
     CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
     CronTriggerJob[StampMissingRowsJob](cronExpression = "0 0 23 * * ?"), // 11:00pm
-    CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
+    CronTriggerJob[ImportModuleMembershipDataJob](cronExpression = "0 0 0-3,5-23 * * ?"), // On the hour, every hour, except for at 4am (PostgreSQL reboot time)
     CronTriggerJob[ManualMembershipWarningJob](cronExpression = "0 0 9 ? 1/1 MON#1 *"), // first Monday of the month at 9am
     CronTriggerJob[ManualMembershipWarningJob](cronExpression = "0 0 9 ? 1/1 MON#3 *"), // third Monday of the month at 9am
     CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
@@ -122,10 +122,6 @@ object SchedulingConfiguration {
     CronTriggerJob[RemoveAgedApplicantsJob](cronExpression = "0 0 3 * * ?"), // 3am everyday
 
     CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 10 ? * SUN *"), // 10am every Sunday
-
-    CronTriggerJob[UpdateMonitoringPointSchemeMembershipJob](cronExpression = "0 0 4 * * ?"), // 4am
-    CronTriggerJob[UpdateLinkedDepartmentSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
-    CronTriggerJob[UpdateLinkedSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
 
     SimpleTriggerJob[ProcessScheduledNotificationsJob](repeatInterval = 20.seconds),
     SimpleTriggerJob[ProcessTriggersJob](repeatInterval = 10.seconds),
@@ -204,9 +200,9 @@ class SchedulingConfiguration {
 
     // We only auto-startup on the scheduler, and only if we're not in maintenance mode. This allows us
     // to wire a scheduler on nodes that wouldn't normally get one and use it to schedule jobs. Neat!
-    factory.setAutoStartup(env.acceptsProfiles("scheduling") && !maintenanceModeService.enabled)
+    factory.setAutoStartup(env.acceptsProfiles(Profiles.of("scheduling")) && !maintenanceModeService.enabled)
 
-    if (!env.acceptsProfiles("scheduling")) {
+    if (!env.acceptsProfiles(Profiles.of("scheduling"))) {
       factory.setQuartzProperties(new Properties() {
         {
           setProperty("org.quartz.jobStore.isClustered", "false")
