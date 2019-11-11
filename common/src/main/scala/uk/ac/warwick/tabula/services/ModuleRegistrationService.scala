@@ -31,6 +31,8 @@ trait ModuleRegistrationService {
 
   def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
+
   /**
     * Gets the weighted mean mark for the given module registrations.
     * Each agreed mark is multiplied by the CAT weighing of the module then added together, and the result is divided by the total CATS.
@@ -87,6 +89,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
   def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYear(academicYear)
+
+  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByUniversityIds(universityIds)
 
   private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {

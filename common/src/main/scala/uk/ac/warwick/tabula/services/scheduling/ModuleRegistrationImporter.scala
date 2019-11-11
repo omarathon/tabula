@@ -305,6 +305,78 @@ object ModuleRegistrationImporter {
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
        and smo.ayr_code = :academicYear"""
 
+  def UnconfirmedModuleRegistrationsForUniversityIds =
+    s"""
+      select
+      scj_code,
+      sms.mod_code,
+      sms.sms_mcrd as credit,
+      sms.sms_agrp as assess_group,
+      sms.ses_code,
+      sms.ayr_code,
+      sms.sms_occl as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_sms sms
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = sms.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = sms.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on sms.spr_code = smr.spr_code
+        and sms.ayr_code = smr.ayr_code
+        and sms.mod_code = smr.mod_code
+        and sms.sms_occl = smr.mav_occur
+
+       where spr.spr_stuc in (:universityIds)"""
+
+  def ConfirmedModuleRegistrationsForUniversityIds =
+    s"""
+      select
+      scj_code,
+      smo.mod_code,
+      smo.smo_mcrd as credit,
+      smo.smo_agrp as assess_group,
+      smo.ses_code,
+      smo.ayr_code,
+      smo.mav_occur as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_smo smo
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = smo.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = smo.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on smo.spr_code = smr.spr_code
+        and smo.ayr_code = smr.ayr_code
+        and smo.mod_code = smr.mod_code
+        and smo.mav_occur = smr.mav_occur
+
+       where
+       (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
+       and spr.spr_stuc in (:universityIds)"""
+
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     new ModuleRegistrationRow(
       resultSet.getString("scj_code"),
@@ -342,6 +414,14 @@ object ModuleRegistrationImporter {
   class ModuleRegistrationsByAcademicYearQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+  }
+
+  class ModuleRegistrationsByUniversityIdsQuery(ds: DataSource)
+    extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForUniversityIds union $ConfirmedModuleRegistrationsForUniversityIds") {
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)

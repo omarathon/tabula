@@ -38,6 +38,8 @@ trait ModuleRegistrationDao {
 
   def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
+
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
   def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
@@ -94,6 +96,17 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .addOrder(asc("_scjCode"))
       .seq
   }
+
+  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
+    session.newQuery[ModuleRegistration](
+      """
+         select distinct mr
+         from ModuleRegistration mr
+         where studentCourseDetails.missingFromImportSince is null
+          and studentCourseDetails.student.universityId in :universityIds
+      """)
+      .setParameterList("universityIds", universityIds)
+      .seq
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {
     session.newCriteria[CoreRequiredModule]

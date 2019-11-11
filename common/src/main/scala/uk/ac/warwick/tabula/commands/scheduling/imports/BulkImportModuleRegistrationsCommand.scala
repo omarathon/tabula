@@ -4,21 +4,22 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.imports.BulkImportModuleRegistrationsCommand._
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.ModuleRegistrationsByAcademicYearQuery
+import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearQuery, ModuleRegistrationsByUniversityIdsQuery}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceComponent, CopyModuleRegistrationProperties, ModuleRegistrationRow, SitsDataSourceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
 
-import scala.collection.immutable.HashMap
 import scala.jdk.CollectionConverters._
 
 object BulkImportModuleRegistrationsCommand {
   case class Result(created: Int, updated: Int, deleted: Int)
-  type Command = Appliable[Result] with BulkImportModuleRegistrationsState
+  type Command = Appliable[Result]
 
-  def apply(academicYear: AcademicYear): Command =
-    new BulkImportModuleRegistrationsCommandInternal(academicYear)
+  def apply(year: AcademicYear): Command =
+    new BulkImportModuleRegistrationsCommandInternal
       with ComposableCommand[Result]
       with ImportSystemDataPermissions
       with CopyModuleRegistrationProperties
@@ -26,22 +27,33 @@ object BulkImportModuleRegistrationsCommand {
       with AutowiringSitsDataSourceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
-      with BulkImportModuleRegistrationsDescription
+      with BulkImportModuleRegistrationsForAcademicYearDescription
+      with BulkImportModuleRegistrationsForAcademicYearRequest {
+      override val academicYear: AcademicYear = year
+    }
+
+  def apply(ids: Seq[String]): Command =
+    new BulkImportModuleRegistrationsCommandInternal
+      with ComposableCommand[Result]
+      with ImportSystemDataPermissions
+      with CopyModuleRegistrationProperties
+      with PropertyCopying
+      with AutowiringSitsDataSourceComponent
+      with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with BulkImportModuleRegistrationsForUniversityIdsDescription
+      with BulkImportModuleRegistrationsForUniversityIdsRequest {
+      override val universityIds: Seq[String] = ids
+    }
 }
 
-abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Result] with BulkImportModuleRegistrationsState
-  with TaskBenchmarking {
-  self: SitsDataSourceComponent
+abstract class BulkImportModuleRegistrationsCommandInternal extends CommandInternal[Result] with TaskBenchmarking {
+  self: BulkImportModuleRegistrationsRequest
     with ModuleRegistrationServiceComponent
     with ModuleAndDepartmentServiceComponent
     with CopyModuleRegistrationProperties =>
 
   def applyInternal(): Result = transactional() {
-    val params = HashMap(("academicYear", academicYear)).asJava
-    val allRows = benchmarkTask("Fetching registrations from SITS") {
-      new ModuleRegistrationsByAcademicYearQuery(sitsDataSource).executeByNamedParam(params).asScala.distinct
-    }
-
     val rows = benchmarkTask("Combine duplicate rows with best guesses") {
       allRows.groupBy(_.notionalKey).view.mapValues { duplicates =>
         if (duplicates.size == 1) duplicates.head
@@ -59,9 +71,6 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
     }
 
     // key the existing registrations by scj code and module to make finding them faster
-    val existingRegistrations =  benchmarkTask("Fetching existing module registrations") {
-      moduleRegistrationService.getByYear(academicYear)
-    }
     val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by scj and module code") {
       existingRegistrations.groupBy(mr => (mr._scjCode, mr.module.code))
     }
@@ -110,22 +119,69 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
   }
 }
 
-trait BulkImportModuleRegistrationsState {
-  val academicYear: AcademicYear
+trait BulkImportModuleRegistrationsRequest {
+  def allRows: Seq[ModuleRegistrationRow]
+  def existingRegistrations: Seq[ModuleRegistration]
+}
+
+trait BulkImportModuleRegistrationsForAcademicYearRequest extends BulkImportModuleRegistrationsRequest with TaskBenchmarking {
+  self: SitsDataSourceComponent
+    with ModuleRegistrationServiceComponent =>
+
+  def academicYear: AcademicYear
+
+  lazy val allRows: Seq[ModuleRegistrationRow] = benchmarkTask("Fetching registrations from SITS") {
+    new ModuleRegistrationsByAcademicYearQuery(sitsDataSource).executeByNamedParam(Map("academicYear" -> academicYear).asJava).asScala.distinct
+  }.toSeq
+
+  lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
+    moduleRegistrationService.getByYear(academicYear)
+  }
+}
+
+trait BulkImportModuleRegistrationsForUniversityIdsRequest extends BulkImportModuleRegistrationsRequest with TaskBenchmarking {
+  self: SitsDataSourceComponent
+    with ModuleRegistrationServiceComponent =>
+
+  def universityIds: Seq[String]
+
+  lazy val allRows: Seq[ModuleRegistrationRow] = benchmarkTask("Fetching registrations from SITS") {
+    val query = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
+
+    universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
+      query.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.distinct.toSeq
+    }
+
+  }.toSeq
+
+  lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
+    moduleRegistrationService.getByUniversityIds(universityIds)
+  }
 }
 
 trait BulkImportModuleRegistrationsDescription extends Describable[Result] {
-  self: BulkImportModuleRegistrationsState =>
-
-  override lazy val eventName: String = "BulkImportModuleRegistrations"
-
-  override def describe(d: Description): Unit =
-    d.property("academicYear" -> academicYear.toString)
-
   override def describeResult(d: Description, result: Result): Unit =
     d.properties(
       "moduleRegistrationsAdded" -> result.created,
       "moduleRegistrationsChanged" -> result.updated,
       "moduleRegistrationsDeleted" -> result.deleted,
     )
+}
+
+trait BulkImportModuleRegistrationsForAcademicYearDescription extends BulkImportModuleRegistrationsDescription {
+  self: BulkImportModuleRegistrationsForAcademicYearRequest =>
+
+  override lazy val eventName: String = "BulkImportModuleRegistrationsForAcademicYear"
+
+  override def describe(d: Description): Unit =
+    d.property("academicYear" -> academicYear.toString)
+}
+
+trait BulkImportModuleRegistrationsForUniversityIdsDescription extends BulkImportModuleRegistrationsDescription {
+  self: BulkImportModuleRegistrationsForUniversityIdsRequest =>
+
+  override lazy val eventName: String = "BulkImportModuleRegistrationsForUniversityIds"
+
+  override def describe(d: Description): Unit =
+    d.studentIds(universityIds)
 }
