@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleRegistrationsCommand
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleResult, ModuleSelectionStatus, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
@@ -24,8 +24,8 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.{HashMap, Iterable}
+import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
@@ -425,6 +425,8 @@ class ModuleRegistrationRow(
 
   def moduleCode: Option[String] = Module.stripCats(sitsModuleCode).map(_.toLowerCase)
 
+  def notionalKey: String = Seq(scjCode, sitsModuleCode, AcademicYear.parse(academicYear), scaled(cats), occurrence).mkString("-")
+
   override def toString: String =
     new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
       .append(scjCode)
@@ -494,5 +496,31 @@ class ModuleRegistrationRow(
         .append(passFail, that.passFail)
         .build()
     case _ => false
+  }
+}
+
+object ModuleRegistrationRow {
+  def combine(rows: Seq[ModuleRegistrationRow]): ModuleRegistrationRow = {
+    require(rows.size > 1, "Can't combine fewer than 2 rows")
+    require(rows.forall(_.notionalKey == rows.head.notionalKey), "Rows must all have the same notional key")
+
+    def coalesce[A >: Null](values: Seq[A]): A = values.filterNot(_ == null).headOption.orNull
+
+    // scjCode, sitsModuleCode, AcademicYear.parse(academicYear), scaled(cats), occurrence
+    new ModuleRegistrationRow(
+      scjCode = rows.head.scjCode, // Part of notional key
+      sitsModuleCode = rows.head.sitsModuleCode, // Part of notional key
+      cats = rows.head.cats, // Part of notional key
+      assessmentGroup = coalesce(rows.map(_.assessmentGroup)),
+      selectionStatusCode = coalesce(rows.map(_.selectionStatusCode)),
+      occurrence = rows.head.occurrence, // Part of notional key
+      academicYear = rows.head.academicYear, // Part of notional key
+      actualMark = rows.flatMap(_.actualMark).headOption,
+      actualGrade = coalesce(rows.map(_.actualGrade)),
+      agreedMark = rows.flatMap(_.agreedMark).headOption,
+      agreedGrade = coalesce(rows.map(_.agreedGrade)),
+      passFail = rows.exists(_.passFail),
+      moduleResult = coalesce(rows.map(_.moduleResult))
+    )
   }
 }
