@@ -4,15 +4,11 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.imports.BulkImportModuleRegistrationsCommand._
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearQuery, ModuleRegistrationsByUniversityIdsQuery}
-import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceComponent, CopyModuleRegistrationProperties, ModuleRegistrationRow, SitsDataSourceComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringModuleRegistrationImporterComponent, CopyModuleRegistrationProperties, ModuleRegistrationImporterComponent, ModuleRegistrationRow}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
-
-import scala.jdk.CollectionConverters._
 
 object BulkImportModuleRegistrationsCommand {
   case class Result(created: Int, updated: Int, deleted: Int)
@@ -24,7 +20,7 @@ object BulkImportModuleRegistrationsCommand {
       with ImportSystemDataPermissions
       with CopyModuleRegistrationProperties
       with PropertyCopying
-      with AutowiringSitsDataSourceComponent
+      with AutowiringModuleRegistrationImporterComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with BulkImportModuleRegistrationsForAcademicYearDescription
@@ -38,7 +34,7 @@ object BulkImportModuleRegistrationsCommand {
       with ImportSystemDataPermissions
       with CopyModuleRegistrationProperties
       with PropertyCopying
-      with AutowiringSitsDataSourceComponent
+      with AutowiringModuleRegistrationImporterComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with BulkImportModuleRegistrationsForUniversityIdsDescription
@@ -125,14 +121,12 @@ trait BulkImportModuleRegistrationsRequest {
 }
 
 trait BulkImportModuleRegistrationsForAcademicYearRequest extends BulkImportModuleRegistrationsRequest with TaskBenchmarking {
-  self: SitsDataSourceComponent
+  self: ModuleRegistrationImporterComponent
     with ModuleRegistrationServiceComponent =>
 
   def academicYear: AcademicYear
 
-  lazy val allRows: Seq[ModuleRegistrationRow] = benchmarkTask("Fetching registrations from SITS") {
-    new ModuleRegistrationsByAcademicYearQuery(sitsDataSource).executeByNamedParam(Map("academicYear" -> academicYear).asJava).asScala.distinct
-  }.toSeq
+  lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForAcademicYear(academicYear)
 
   lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
     moduleRegistrationService.getByYear(academicYear)
@@ -140,19 +134,12 @@ trait BulkImportModuleRegistrationsForAcademicYearRequest extends BulkImportModu
 }
 
 trait BulkImportModuleRegistrationsForUniversityIdsRequest extends BulkImportModuleRegistrationsRequest with TaskBenchmarking {
-  self: SitsDataSourceComponent
+  self: ModuleRegistrationImporterComponent
     with ModuleRegistrationServiceComponent =>
 
   def universityIds: Seq[String]
 
-  lazy val allRows: Seq[ModuleRegistrationRow] = benchmarkTask("Fetching registrations from SITS") {
-    val query = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
-
-    universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
-      query.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.distinct.toSeq
-    }
-
-  }.toSeq
+  lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForUniversityIds(universityIds)
 
   lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
     moduleRegistrationService.getByUniversityIds(universityIds)
