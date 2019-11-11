@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.scheduling.imports.BulkImportModuleRegistra
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.ModuleRegistrationsByAcademicYearQuery
-import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceComponent, CopyModuleRegistrationProperties, SitsDataSourceComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringSitsDataSourceComponent, CopyModuleRegistrationProperties, ModuleRegistrationRow, SitsDataSourceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
 
 import scala.collection.immutable.HashMap
@@ -38,11 +38,18 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
 
   def applyInternal(): Result = transactional() {
     val params = HashMap(("academicYear", academicYear)).asJava
-    val rows = benchmarkTask(s"Fetching registrations from SITS") {
+    val allRows = benchmarkTask("Fetching registrations from SITS") {
       new ModuleRegistrationsByAcademicYearQuery(sitsDataSource).executeByNamedParam(params).asScala.distinct
     }
 
-    val modulesBySitsCode = benchmarkTask(s"Fetching Tabula modules") {
+    val rows = benchmarkTask("Combine duplicate rows with best guesses") {
+      allRows.groupBy(_.notionalKey).view.mapValues { duplicates =>
+        if (duplicates.size == 1) duplicates.head
+        else ModuleRegistrationRow.combine(duplicates.toSeq)
+      }.values
+    }
+
+    val modulesBySitsCode = benchmarkTask("Fetching Tabula modules") {
       rows
         .groupBy(_.sitsModuleCode)
         .keys
@@ -52,10 +59,10 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
     }
 
     // key the existing registrations by scj code and module to make finding them faster
-    val existingRegistrations =  benchmarkTask(s"Fetching existing module registrations") {
+    val existingRegistrations =  benchmarkTask("Fetching existing module registrations") {
       moduleRegistrationService.getByYear(academicYear)
     }
-    val existingRegistrationsGrouped = benchmarkTask(s"Keying module registrations by scj and module code") {
+    val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by scj and module code") {
       existingRegistrations.groupBy(mr => (mr._scjCode, mr.module.code))
     }
 
@@ -63,7 +70,7 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
     var updated: Int = 0
 
     // registrations that we found in SITS that already existed in Tabula (don't delete these)
-    val foundRegistrations = benchmarkTask(s"Updating registrations") { rows.flatMap(row => {
+    val foundRegistrations = benchmarkTask("Updating registrations") { rows.flatMap(row => {
       val existing = existingRegistrationsGrouped.getOrElse((row.scjCode, row.moduleCode.orNull), Nil).find(row.matches)
       val registration = existing.orElse(modulesBySitsCode.get(row.sitsModuleCode).map(row.toModuleRegistration))
 
@@ -87,7 +94,7 @@ abstract class BulkImportModuleRegistrationsCommandInternal(val academicYear: Ac
       existing
     })}
 
-    val deleted = benchmarkTask(s"Deleting registrations that weren't found in SITS") {
+    val deleted = benchmarkTask("Deleting registrations that weren't found in SITS") {
       val missingRegistrations = (existingRegistrations.toSet -- foundRegistrations).filterNot(_.deleted)
       missingRegistrations.foreach(mr => {
         logger.debug(s"Marking $mr as deleted")
