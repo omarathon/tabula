@@ -7,14 +7,12 @@ import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 object MeetingRecord {
   val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -111,9 +109,9 @@ class MeetingRecord extends AbstractMeetingRecord {
       s"${init.mkString(", ")} $andOr $last"
   }
 
-  def department: Department = student.homeDepartment
+  def departmentToCheck: Department = student.homeDepartment.subDepartmentsContaining(student).lastOption.getOrElse(student.homeDepartment)
 
-  def approvalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
+  def approvalType: MeetingRecordApprovalType = departmentToCheck.meetingRecordApprovalType
 
   // End of workflow definitions
 }
