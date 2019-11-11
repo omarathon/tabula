@@ -141,6 +141,11 @@ class StudentCourseDetails
     else Some(CourseType.fromCourseCode(course.code))
   }
 
+  def specificCourseType: Option[SpecificCourseType] = {
+    if (course == null) None
+    else Some(SpecificCourseType.fromCourseCode(course.code))
+  }
+
   @OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))
   @Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
   @BatchSize(size = 200)
@@ -341,3 +346,40 @@ object CourseType {
 
 // converter for spring
 class CourseTypeConverter extends ConvertibleConverter[String, CourseType]
+
+sealed abstract class SpecificCourseType(val code: Char) extends Convertible[String] with Product with Serializable {
+  def value: String = code.toString
+}
+
+object SpecificCourseType {
+
+  implicit val factory: String => SpecificCourseType = { code: String => SpecificCourseType.fromCourseCode(code) }
+
+  case object PGR extends SpecificCourseType('R')
+  case object PGT extends SpecificCourseType('T')
+  case object PGTE extends SpecificCourseType('E')
+  case object UG extends SpecificCourseType('U')
+  case object UGD extends SpecificCourseType('D')
+  case object Foundation extends SpecificCourseType('F')
+  case object PreSessional extends SpecificCourseType('N')
+
+  def fromCourseCode(cc: String): SpecificCourseType = {
+    if (cc == null || cc.isEmpty) {
+      null
+    } else {
+      cc.charAt(0) match {
+        case UG.code => UG
+        case UGD.code => UGD
+        case PGT.code => PGT
+        case PGTE.code => PGTE
+        case PGR.code => PGR
+        case Foundation.code => Foundation
+        case PreSessional.code => PreSessional
+        case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
+      }
+    }
+  }
+}
+
+// converter for spring
+class SpecificCourseTypeConverter extends ConvertibleConverter[String, SpecificCourseType]

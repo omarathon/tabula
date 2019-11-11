@@ -95,6 +95,7 @@ trait AdminHomeCommandState {
 trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState {
   // This is for filtering the student who has made the submission
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

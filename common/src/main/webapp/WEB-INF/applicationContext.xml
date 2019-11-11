@@ -171,6 +171,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.SpecificCourseTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>

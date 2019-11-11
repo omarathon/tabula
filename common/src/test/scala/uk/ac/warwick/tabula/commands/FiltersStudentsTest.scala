@@ -48,6 +48,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
       val filter = new FiltersStudents {
         val department: Department = dept
         val courseTypes: JavaImports.JList[CourseType] = JArrayList()
+        val specificCourseTypes: JavaImports.JList[SpecificCourseType] = JArrayList()
         val modesOfAttendance: JavaImports.JList[ModeOfAttendance] = JArrayList()
         val defaultOrder: Seq[Order] = Seq()
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList()
@@ -80,6 +81,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
       val filter = new FiltersStudents {
         val department: Department = dept
         val courseTypes: JavaImports.JList[CourseType] = JArrayList(CourseType.UG)
+        val specificCourseTypes: JavaImports.JList[SpecificCourseType] = JArrayList(SpecificCourseType.UGD)
         val modesOfAttendance: JavaImports.JList[ModeOfAttendance] = JArrayList(moaFT)
         val defaultOrder: Seq[Order] = Seq()
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList(sprF)
@@ -97,6 +99,8 @@ class FiltersStudentsTest extends TestBase with Mockito {
       val serialized: String = filter.serializeFilter
       serialized.contains("courseTypes=" + CourseType.UG.value) should be(true)
       serialized.contains("courseTypes=" + CourseType.PGT.value) should be(false)
+      serialized.contains("specificCourseTypes=" + SpecificCourseType.UGD.value) should be(true)
+      serialized.contains("specificCourseTypes=" + SpecificCourseType.UG.value) should be(false)
       serialized.contains("modesOfAttendance=" + moaFT.code) should be(true)
       serialized.contains("modesOfAttendance=" + moaPT.code) should be(false)
       serialized.contains("sprStatuses=" + sprF.code) should be(true)
@@ -120,6 +124,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
       val filter = new FiltersStudents {
         val department: Department = dept
         val courseTypes: JavaImports.JList[CourseType] = JArrayList()
+        val specificCourseTypes: JavaImports.JList[SpecificCourseType] = JArrayList()
         val modesOfAttendance: JavaImports.JList[ModeOfAttendance] = JArrayList()
         val defaultOrder: Seq[Order] = Seq()
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList()

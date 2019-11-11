@@ -41,6 +41,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
     getAliasPaths("course"): _*
   )
 
+  def specificCourseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
+    "course.code", specificCourseTypes.asScala.map(_.code.toString),
+    getAliasPaths("course"): _*
+  )
+
   def routeRestriction: Option[ScalaRestriction]
 
   def courseRestriction: Option[ScalaRestriction] = inIfNotEmpty(
@@ -102,6 +107,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
     val restrictions = Seq(
       courseTypeRestriction,
+      specificCourseTypeRestriction,
       routeRestriction,
       courseRestriction,
       attendanceRestriction,
