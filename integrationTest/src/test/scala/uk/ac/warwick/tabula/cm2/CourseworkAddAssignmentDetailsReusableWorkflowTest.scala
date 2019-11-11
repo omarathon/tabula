@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.openqa.selenium.{By, WebElement}
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.openqa.selenium.support.ui.Select
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.{BrowserTest, DateFormats}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 /**
   * Test the setup-assignments form.
@@ -35,6 +38,22 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
   private def createReusableAssigmentDetails(assignmentName: String, reusableWorkflowName: String): Unit = {
     When("I go to assignment creation page")
     currentUrl should include("/assignments/new")
+
+    val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+    def isWorkingDay(date: LocalDate): Boolean =
+      !holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY
+
+    var openDate: LocalDate = LocalDate.now().minusDays(1)
+    while (!isWorkingDay(openDate)) {
+      openDate = openDate.minusDays(1)
+    }
+    textField("openDate").value = DateFormats.DatePickerFormatter.print(openDate)
+
+    var closeDate: LocalDate = openDate.plusWeeks(2)
+    while (!isWorkingDay(closeDate)) {
+      closeDate = closeDate.plusDays(1)
+    }
+    textField("closeDate").value = DateFormats.DatePickerFormatter.print(closeDate)
 
     Then("I should be able to enter the necessary data")
     textField("name").value = assignmentName
