@@ -3,8 +3,9 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.Department.AllMembersFilterRule
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
-import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.OneApproval
+import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -23,7 +24,8 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
   trait Fixture {
     val student: StudentMember = Fixtures.student()
-    student.homeDepartment = Fixtures.department(code = "IN")
+    val department: Department = Fixtures.department(code = "IN")
+    student.homeDepartment = department
     val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 
     val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
@@ -91,6 +93,36 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
   @Test
   def otherApprovalsNotRequired(): Unit = new Fixture {
     student.homeDepartment.meetingRecordApprovalType = OneApproval
+
+    val otherTutor: StaffMember = Fixtures.staff()
+
+    val otherRelationship = StudentRelationship(otherTutor, relationshipType, student, DateTime.now)
+    meetingRecord.relationships = Seq(relationship, otherRelationship)
+
+    val otherApproval = new MeetingRecordApproval
+    meetingRecord.approvals.add(otherApproval)
+    otherApproval.meetingRecord = meetingRecord
+    otherApproval.state = Pending
+    otherApproval.approver = otherTutor
+
+    cmd.approved = true
+    cmd.applyInternal()
+
+    meetingRecord should be('approved)
+
+    proposedApproval should be('approved)
+    otherApproval should not be 'required
+  }
+
+  @Test
+  def otherApprovalsNotRequiredWhenCheckingSubDept(): Unit = new Fixture {
+
+    student.homeDepartment.meetingRecordApprovalType = AllApprovals
+    val subDepartment: Department = Fixtures.department(code = "IN-UG")
+    subDepartment.filterRule = AllMembersFilterRule
+    subDepartment.meetingRecordApprovalType = OneApproval
+    department.children.add(subDepartment)
+    subDepartment.parent = department
 
     val otherTutor: StaffMember = Fixtures.staff()
 
