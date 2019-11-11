@@ -114,6 +114,7 @@ trait UpdateAttendanceMonitoringSchemeMembershipCommandState extends FiltersStud
   var sortOrder: JList[Order] = JArrayList() // Never used
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

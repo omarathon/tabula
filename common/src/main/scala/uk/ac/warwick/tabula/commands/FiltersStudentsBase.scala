@@ -19,6 +19,8 @@ trait FiltersStudentsBase {
 
   def courseTypes: JList[CourseType]
 
+  def specificCourseTypes: JList[SpecificCourseType]
+
   def routes: JList[Route]
 
   def courses: JList[Course]
@@ -56,6 +58,7 @@ trait FiltersStudentsBase {
   def serializeFilter: String = {
     val result = new UriBuilder()
     courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
+    specificCourseTypes.asScala.foreach(p => result.addQueryParameter("specificCourseTypes", p.code.toString))
     routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
     courses.asScala.foreach(p => result.addQueryParameter("courses", p.code))
     modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
@@ -75,6 +78,7 @@ trait FiltersStudentsBase {
   def filterMap: Map[String, String] = {
     Map(
       "courseTypes" -> courseTypes.asScala.map(_.code).mkString(","),
+      "specificCourseTypes" -> specificCourseTypes.asScala.map(_.code).mkString(","),
       "routes" -> routes.asScala.map(_.code).mkString(","),
       "courses" -> courses.asScala.map(_.code).mkString(","),
       "modesOfAttendance" -> modesOfAttendance.asScala.map(_.code).mkString(","),
@@ -105,8 +109,17 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
       try {
         courseTypes.add(CourseType(item))
       } catch {
-        case e: IllegalArgumentException =>
+        case _: IllegalArgumentException =>
           logger.warn(s"Could not deserialize filter with courseType $item")
+      }
+    })
+    specificCourseTypes.clear()
+    params.get("specificCourseTypes").foreach(_.foreach { item =>
+      try {
+        specificCourseTypes.add(SpecificCourseType.fromCourseCode(item))
+      } catch {
+        case _: IllegalArgumentException =>
+          logger.warn(s"Could not deserialize filter with specificCourseTypes $item")
       }
     })
     routes.clear()

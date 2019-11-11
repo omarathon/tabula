@@ -100,6 +100,7 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
   var sortOrder: JList[Order] = null // No sorting in this command
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

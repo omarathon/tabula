@@ -155,6 +155,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 
   // Filter binds
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   lazy val outOfDepartmentRoutes: Seq[Route] = routes.asScala.toSeq.diff(allRoutes)
   var courses: JList[Course] = JArrayList()

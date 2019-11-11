@@ -98,6 +98,7 @@ trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
   var hasBeenFiltered = false
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
