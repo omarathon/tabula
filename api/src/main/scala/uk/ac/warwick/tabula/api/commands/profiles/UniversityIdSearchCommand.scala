@@ -6,18 +6,19 @@ import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 object UniversityIdSearchCommand {
-  def apply() =
-    new UniversityIdSearchCommandInternal
+  def apply(academicYear: AcademicYear) =
+    new UniversityIdSearchCommandInternal(academicYear)
       with ComposableCommand[Seq[String]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with UserSearchCommandRequest
+      with UserSearchCommandState
       with ReadOnly with Unaudited
 }
 
-abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UniversityIdSearchCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Seq[String]] with FiltersStudents {
 
-  self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+  self: UserSearchCommandRequest with UserSearchCommandState with ModuleAndDepartmentServiceComponent =>
 
   override def applyInternal(): Seq[String] = {
     if (Option(department).isEmpty && serializeFilter.isEmpty) {
@@ -25,7 +26,7 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
     }
 
     val restrictions = if (studentsOnly) {
-      buildRestrictions(AcademicYear.now()) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+      buildRestrictions(academicYear) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
     } else {
       groupNameRestriction ++ homeDepartmentRestriction
     }.toSeq

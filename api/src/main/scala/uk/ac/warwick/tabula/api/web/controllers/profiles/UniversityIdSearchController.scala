@@ -1,8 +1,11 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
+import java.util.Optional
+
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.api.commands.profiles.UniversityIdSearchCommand
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.api.commands.profiles.{UniversityIdSearchCommand, UserCodeSearchCommand}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
@@ -12,28 +15,25 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(Array("/v1/universityIdSearch"))
-class UniversityIdSearchController extends ApiController
-  with AutowiringProfileServiceComponent {
-
-  final override def onPreRequest {
-    session.enableFilter(Member.ActiveOnlyFilter)
-    session.enableFilter(Member.FreshOnlyFilter)
-  }
+class UniversityIdSearchController extends AbstractUserSearchController {
 
   @ModelAttribute("getCommand")
-  def getCommand: Appliable[Seq[String]] = UniversityIdSearchCommand()
+  override protected def getCommand(@PathVariable academicYear: Optional[AcademicYear]): Appliable[Seq[String]] =
+    UniversityIdSearchCommand(academicYear.orElse(AcademicYear.now()))
+
+  override protected val resultKey: String = "universityIds"
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def search(
-    @ModelAttribute("getCommand") command: Appliable[Seq[String]],
-    @RequestParam(required = false) level: String
+    @ModelAttribute("getCommand") command: Appliable[Seq[String]]
   ): Mav = {
-    Mav(new JSONView(Map(
-      "success" -> true,
-      "status" -> "ok",
-      "universityIds" -> command.apply()
-    )))
+    doSearch(command)
+  }
 
-
+  @RequestMapping(value = Array("/{academicYear}"), method = Array(GET), produces = Array("application/json"))
+  def searchWithYear(
+    @ModelAttribute("getCommand") command: Appliable[Seq[String]]
+  ): Mav = {
+    doSearch(command)
   }
 }
