@@ -31,16 +31,21 @@ trait UserSearchCommandRequest extends RequiresPermissionsChecking with Permissi
   var hallsOfResidence: JList[String] = JArrayList()
 
   var groupNames: JList[String] = JArrayList()
+  var studentsOnly: JBoolean = true
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
   }
 
-  def enrolmentDepartmentRestriction: ScalaRestriction = Option(department).map(d =>
+  def enrolmentDepartmentRestriction: Option[ScalaRestriction] = Option(department).map(d =>
     Aliasable.addAliases(
       new ScalaRestriction(HibernateHelpers.is("studentCourseYearDetails.enrolmentDepartment", d)),
       FiltersStudents.AliasPaths("studentCourseYearDetails"):_*
-    )).getOrElse(throw new IllegalArgumentException("Department not defined")
+    )
+  )
+
+  def homeDepartmentRestriction: Option[ScalaRestriction] = Option(department).map(d =>
+    new ScalaRestriction(HibernateHelpers.is("homeDepartment", d)),
   )
 
   def groupNameRestriction: Option[ScalaRestriction] = inIfNotEmpty(
