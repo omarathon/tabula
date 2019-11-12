@@ -24,12 +24,11 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val baseRestrictions = buildRestrictions(AcademicYear.now()) ++ groupNameRestriction
-
-    val restrictions = Option(department) match {
-      case Some(_) => Seq(enrolmentDepartmentRestriction) ++ baseRestrictions
-      case _ => baseRestrictions
-    }
+    val restrictions = if (studentsOnly) {
+      buildRestrictions(AcademicYear.now()) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+    } else {
+      groupNameRestriction ++ homeDepartmentRestriction
+    }.toSeq
 
     profileService.findAllUniversityIdsByRestrictions(
       restrictions,
