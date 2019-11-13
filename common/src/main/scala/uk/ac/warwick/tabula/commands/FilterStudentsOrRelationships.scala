@@ -99,6 +99,8 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
   def isFinalistRestriction: Option[ScalaRestriction]
 
+  def isNotFinalistRestriction: Option[ScalaRestriction]
+
   def hallOfResidenceRestriction: Option[ScalaRestriction] = inIfNotEmpty(
     "termtimeAddress.line2", hallsOfResidence.asScala,
     getAliasPaths("termtimeAddress"): _*
@@ -121,6 +123,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       visitingRestriction,
       enrolledOrCompletedRestriction,
       isFinalistRestriction,
+      isNotFinalistRestriction,
       hallOfResidenceRestriction
     ).flatten
 
