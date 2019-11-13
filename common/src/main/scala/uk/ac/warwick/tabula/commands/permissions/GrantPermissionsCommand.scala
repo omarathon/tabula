@@ -60,21 +60,19 @@ abstract class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag
 trait GrantPermissionsCommandValidation extends SelfValidating {
   self: PermissionsCommandRequest
     with PermissionsCommandState[_ <: PermissionsTarget]
-    with SecurityServiceComponent =>
+    with SecurityServiceComponent
+    with UserLookupComponent =>
 
   def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      grantedPermission.map(_.users).foreach { users =>
-        val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes", staffOnlyForADS = true) {
-          override def alreadyHasCode: Boolean = usercodes.asScala.exists {
-            users.knownType.includesUserId
-          }
-        }
-
-        usercodeValidator.validate(errors)
+      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes", staffOnlyForADS = true) {
+        override def alreadyHasCode: Boolean = usercodes.asScala.exists { u => grantedPermission.exists(_.users.knownType.includesUserId(u)) }
       }
+      usercodeValidator.userLookup = userLookup
+
+      usercodeValidator.validate(errors)
     }
 
     // Ensure that the current user can do everything that they're trying to grant permissions for
