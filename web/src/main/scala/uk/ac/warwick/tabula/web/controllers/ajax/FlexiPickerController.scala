@@ -134,19 +134,19 @@ object FlexiPickerController {
         if (user.isFoundUser) {
           users = users :+ user
         } else {
-          users = users ++ userLookup.findUsersWithFilter((item("sn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+          users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava).asScala
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava).asScala
           }
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter((item("cn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+            users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava).asScala
           }
         }
       }
       else if (terms.length >= 2) {
-        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1))).asJava).asScala
         if (users.size < EnoughResults) {
-          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1))).asJava).asScala
         }
       }
 
@@ -161,8 +161,9 @@ object FlexiPickerController {
           if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
-
-        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
+        val isStaffIfNecessary = !staffOnly || user.isStaff
+        val isStudentOrPGRIfNecessary = !studentsOnly || user.isStudent || user.getExtraProperty("warwickitsclass") == "PG(R)"
+        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary && isStudentOrPGRIfNecessary
       }
 
     private def searchGroups: FlexiPickerResult = {
@@ -217,12 +218,6 @@ object FlexiPickerController {
     private def item(name: String, value: String): Map[String, AnyRef] = value match {
       case s: String if s.hasText => Map(name -> (value + "*"))
       case _ => Map.empty
-    }
-
-    private def staffOrStudentOnlyOptionFilter: Map [String, AnyRef] = {
-      if (staffOnly) Map("warwickitsclass" -> "Staff") // this doesn't include PG(R)
-      else if (studentsOnly) Map("warwickukfedgroup" -> "Student") // this includes PG(R)
-      else Map.empty
     }
   }
 

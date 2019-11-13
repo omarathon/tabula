@@ -216,7 +216,7 @@ Macros for customised form elements, containers and more complex pickers.
     delete_existing: whether the UI element will allow you to remove existing users that are pre-populated
 
   -->
-    <#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" universityId="false" multiple=false auto_multiple=true delete_existing=true>
+    <#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" staffOnly="false" studentOnly="false" universityId="false" multiple=false auto_multiple=true delete_existing=true>
       <#if name="">
         <@spring.bind path=path>
         <#-- This handles whether we're binding to a list or not but I think
@@ -231,14 +231,14 @@ Macros for customised form elements, containers and more complex pickers.
               <#local ids=[status.value] />
             </#if>
           </#if>
-          <@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
+          <@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly staffOnly=staffOnly studentOnly=studentOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
         </@spring.bind>
       <#else>
-        <@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
+        <@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly staffOnly=staffOnly studentOnly=studentOnly universityId=universityId multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
       </#if>
     </#macro>
 
-    <#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly universityId delete_existing htmlId="">
+    <#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly staffOnly studentOnly universityId delete_existing htmlId="">
       <#if multiple><div class="flexi-picker-collection" data-automatic="${auto_multiple?string}"></#if>
       <#local nested><#nested /></#local>
     <#-- List existing values -->
@@ -249,8 +249,8 @@ Macros for customised form elements, containers and more complex pickers.
                 name="${expression}" id="${htmlId}" placeholder="${placeholder}"
                 data-include-users="${includeUsers}" data-include-email="${includeEmail}"
                 data-include-groups="${includeGroups}" data-members-only="${membersOnly}"
-                data-universityid="${universityId}" data-prefix-groups="webgroup:"
-                data-can-delete="${delete_existing?c}" value="${id}" data-type="" autocomplete="off"
+                data-staff-only="${staffOnly}" data-student-only="${studentOnly}" data-universityid="${universityId}"
+                data-prefix-groups="webgroup:" data-can-delete="${delete_existing?c}" value="${id}" data-type="" autocomplete="off"
             />
             <#noescape>${nested}</#noescape>
           </div>
@@ -263,7 +263,7 @@ Macros for customised form elements, containers and more complex pickers.
                 name="${expression}" id="${htmlId}" placeholder="${placeholder}"
                 data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
                 data-members-only="${membersOnly}" data-universityid="${universityId}" data-can-delete="true"
-                data-prefix-groups="webgroup:" data-type="" autocomplete="off"
+                data-staff-only="${staffOnly}" data-student-only="${studentOnly}" data-prefix-groups="webgroup:" data-type="" autocomplete="off"
           />
           <#noescape>${nested}</#noescape>
         </div>

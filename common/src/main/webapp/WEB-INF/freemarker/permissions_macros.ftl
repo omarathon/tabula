@@ -45,7 +45,7 @@
               <input type="hidden" name="_command" value="add">
               <input type="hidden" name="roleDefinition" value="${roleDefinition}">
 
-              <@bs3form.flexipicker cssClass="pickedUser" name="usercodes" placeholder="Enter name or ID">
+              <@bs3form.flexipicker cssClass="pickedUser" name="usercodes" staffOnly="true" placeholder="Enter name or ID">
                 <span class="input-group-btn">
 								<#if can_delegate>
                   <button class="btn btn-default" type="submit">Add</button>
