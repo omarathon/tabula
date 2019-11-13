@@ -151,7 +151,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (openDate != null && (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate))) {
       validateOpenDate(errors)
     }
-    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate))) {
+    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate))) {
       validateCloseDate(errors)
     }
 

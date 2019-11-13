@@ -6,7 +6,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
-import org.joda.time.{DateTime, Duration, LocalDate, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, Duration, LocalDate, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
@@ -40,6 +40,7 @@ object Assignment {
 
   val openTime = new LocalTime(9, 0)
   val closeTime = new LocalTime(12, 0)
+  val closeTimeEnforcementDate: LocalDate = new LocalDate(2019, DateTimeConstants.DECEMBER, 1)
   val onTheDaySubmissionReminderTime = new LocalTime(8, 0)
   val minimumOnTheDaySubmissionReminderNotice: Duration = Duration.standardHours(4)
 

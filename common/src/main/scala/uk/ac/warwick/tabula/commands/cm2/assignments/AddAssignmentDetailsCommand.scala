@@ -109,7 +109,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     } else {
       assignment.openEndedReminderDate = null
 
-      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate)) {
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate)) {
         assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
       }
     }
