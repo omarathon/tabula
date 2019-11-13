@@ -272,7 +272,7 @@ trait GeneratesNotificationsForAssignment {
     if (!assignment.collectSubmissions || assignment.openEnded) {
       Seq()
     } else {
-      val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
+      val dayOfDeadline = Assignment.onTheDayReminderDateTime(assignment.closeDate)
 
       val submissionNotifications = {
         // skip the week late notification if late submission isn't possible
