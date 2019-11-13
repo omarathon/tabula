@@ -11,10 +11,9 @@ import AcceptedUserSourceFilter._
 object AcceptedUserSourceFilter {
   val whitelist: Set[String] = Set(
     "WarwickADS",
-    "WarwickNDS", // Very legacy
     "WarwickExtUsers",
-    "WarwickGradAssoc",
-    // Implicit blacklist: WBSLdap, WBSAlumni
+    "WGAAluminati",
+    // Implicit blacklist: WBSLdap, WBSAlumni, ResourceAccountsADS
   )
 
   def isWhitelistedUserSource(userSource: String): Boolean =
