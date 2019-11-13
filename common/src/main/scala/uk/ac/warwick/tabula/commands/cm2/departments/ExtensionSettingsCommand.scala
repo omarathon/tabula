@@ -100,8 +100,8 @@ trait ExtensionSettingsCommandValidation extends SelfValidating {
         errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
       }
 
-      val firstMarkersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers")
-      firstMarkersValidator.validate(errors)
+      val extensionManagersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers", staffOnlyForADS = true)
+      extensionManagersValidator.validate(errors)
     }
 
     if (extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)) {

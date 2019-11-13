@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
   *
   * Could be extended with options such as allowing it to be empty.
   */
-class UsercodeListValidator(usercodes: JList[String], pathName: String, universityIdRequired: Boolean = false) {
+class UsercodeListValidator(usercodes: JList[String], pathName: String, universityIdRequired: Boolean = false, staffOnlyForADS: Boolean = false) {
 
   var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
@@ -25,20 +25,25 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
       errors.rejectValue(pathName, "userId.duplicate")
     } else {
       val users = userLookup.usersByUserIds(trimmedCodes).values
+
       // Uses find() so we'll only show one missing user at any one time. Could change this to
       // use filter() and combine the result into one error message listing them all.
-      val anonUsers = users.find {
-        !_.isFoundUser
-      }
+      val anonUsers = users.find(!_.isFoundUser)
       for (user <- anonUsers) {
         errors.rejectValue(pathName, "userId.notfound.specified", Array(user.getUserId), "")
       }
+
       if (universityIdRequired) {
-        val noUniIdUsers = users.find {
-          !_.getWarwickId.hasText
-        }
+        val noUniIdUsers = users.find(!_.getWarwickId.hasText)
         for (user <- noUniIdUsers) {
           errors.rejectValue(pathName, "userId.missingUniId", Array(user.getUserId), "")
+        }
+      }
+
+      if (staffOnlyForADS) {
+        val nonStaffUsers = users.find(u => u.getUserSource == "WarwickADS" && !u.isStaff)
+        for (user <- nonStaffUsers) {
+          errors.rejectValue(pathName, "userId.notStaff", Array(user.getUserId), "")
         }
       }
     }
