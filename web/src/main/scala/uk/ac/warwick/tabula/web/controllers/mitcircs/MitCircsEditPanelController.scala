@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.mitcircs
 
+import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
@@ -40,7 +41,7 @@ class MitCircsEditPanelController extends BaseController {
   }
 
   @PostMapping(params = Array("submit"))
-  def submit(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, errors: Errors, @PathVariable panel: MitigatingCircumstancesPanel): Mav =
+  def submit(@Valid @ModelAttribute("command") command: EditMitCircsPanelCommand.Command, errors: Errors, @PathVariable panel: MitigatingCircumstancesPanel): Mav =
     if (errors.hasErrors) form(command, panel)
     else {
       val p = command.apply()

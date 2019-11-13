@@ -80,7 +80,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes", staffOnlyForADS = true) {
         override def alreadyHasCode: Boolean = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
       }
       usercodeValidator.userLookup = userLookup

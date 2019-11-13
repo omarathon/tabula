@@ -109,7 +109,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     } else {
       assignment.openEndedReminderDate = null
 
-      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate)) {
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate)) {
         assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
       }
     }
@@ -272,7 +272,7 @@ trait GeneratesNotificationsForAssignment {
     if (!assignment.collectSubmissions || assignment.openEnded) {
       Seq()
     } else {
-      val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
+      val dayOfDeadline = Assignment.onTheDayReminderDateTime(assignment.closeDate)
 
       val submissionNotifications = {
         // skip the week late notification if late submission isn't possible

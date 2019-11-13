@@ -11,7 +11,7 @@ class UsercodeListValidatorTest extends TestBase {
     var usercodes: List[String] = _
   }
 
-  @Test def passes {
+  @Test def passes(): Unit = {
     val errors = new BindException(new ValidateMe(), "command")
 
     val userLookup = new MockUserLookup
@@ -25,7 +25,7 @@ class UsercodeListValidatorTest extends TestBase {
     errors.hasErrors should be(false)
   }
 
-  @Test def notEmpty {
+  @Test def notEmpty(): Unit = {
     val errors = new BindException(new ValidateMe(), "command")
 
     val userLookup = new MockUserLookup
@@ -42,7 +42,7 @@ class UsercodeListValidatorTest extends TestBase {
     errors.getFieldError.getCode should be("NotEmpty")
   }
 
-  @Test def alreadyHasCode {
+  @Test def alreadyHasCode(): Unit = {
     val errors = new BindException(new ValidateMe(), "command")
 
     val userLookup = new MockUserLookup
@@ -62,7 +62,7 @@ class UsercodeListValidatorTest extends TestBase {
     errors.getFieldError.getCode should be("userId.duplicate")
   }
 
-  @Test def invalidUser {
+  @Test def invalidUser(): Unit = {
     val errors = new BindException(new ValidateMe(), "command")
 
     val userLookup = new MockUserLookup
