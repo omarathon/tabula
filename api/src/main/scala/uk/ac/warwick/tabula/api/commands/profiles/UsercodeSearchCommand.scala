@@ -6,18 +6,19 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 
 
 object UserCodeSearchCommand {
-  def apply() =
-    new UserCodeSearchCommandInternal
+  def apply(academicYear: AcademicYear) =
+    new UserCodeSearchCommandInternal(academicYear)
       with ComposableCommand[Seq[String]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with UserSearchCommandRequest
+      with UserSearchCommandState
       with ReadOnly with Unaudited
 }
 
-abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Seq[String]] with FiltersStudents {
 
-  self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+  self: UserSearchCommandRequest with UserSearchCommandState with ModuleAndDepartmentServiceComponent =>
 
   override def applyInternal(): Seq[String] = {
     if (Option(department).isEmpty && serializeFilter.isEmpty) {
@@ -25,7 +26,7 @@ abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]
     }
 
     val restrictions = if (studentsOnly) {
-      buildRestrictions(AcademicYear.now()) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+      buildRestrictions(academicYear) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
     } else {
       groupNameRestriction ++ homeDepartmentRestriction
     }.toSeq
