@@ -5,7 +5,7 @@ import java.util.Optional
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.api.commands.profiles.{UniversityIdSearchCommand, UserCodeSearchCommand}
+import uk.ac.warwick.tabula.api.commands.profiles.{UniversityIdSearchCommand, UserCodeSearchCommand, UserSearchCommandState}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
@@ -25,14 +25,14 @@ class UniversityIdSearchController extends AbstractUserSearchController {
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def search(
-    @ModelAttribute("getCommand") command: Appliable[Seq[String]]
+    @ModelAttribute("getCommand") command: Appliable[Seq[String]] with UserSearchCommandState
   ): Mav = {
     doSearch(command)
   }
 
   @RequestMapping(value = Array("/{academicYear}"), method = Array(GET), produces = Array("application/json"))
   def searchWithYear(
-    @ModelAttribute("getCommand") command: Appliable[Seq[String]]
+    @ModelAttribute("getCommand") command: Appliable[Seq[String]] with UserSearchCommandState
   ): Mav = {
     doSearch(command)
   }
