@@ -90,6 +90,8 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
         command.usercodes.add("cusebr")
         command.overrideType = GrantedPermission.Allow
 
+        command.userLookup.registerUsers("cuscav", "cusebr")
+
         command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (None)
         command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (true)
 
@@ -154,6 +156,8 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
         command.usercodes.add("cusebr")
         command.overrideType = GrantedPermission.Allow
 
+        command.userLookup.registerUsers("cuscav", "cusebr")
+
         command.permissionsService.getGrantedPermission(department, null, true) returns (None)
 
         val errors = new BindException(command, "command")
@@ -174,6 +178,8 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
         command.usercodes.add("cuscav")
         command.usercodes.add("cusebr")
         command.overrideType = GrantedPermission.Allow
+
+        command.userLookup.registerUsers("cuscav", "cusebr")
 
         command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (None)
         command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (false)
