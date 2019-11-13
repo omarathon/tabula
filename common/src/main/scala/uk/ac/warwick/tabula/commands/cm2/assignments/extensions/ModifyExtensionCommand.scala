@@ -3,16 +3,16 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
+import uk.ac.warwick.tabula.data.model.{Assignment, Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 
 
 object ModifyExtensionCommand {
@@ -137,7 +137,7 @@ trait ModifyExtensionScheduledNotification extends SchedulesNotifications[Extens
     ) yield {
 
       val assignment = extension.assignment
-      val dayOfDeadline = expiryDate.withTime(0, 0, 0, 0)
+      val dayOfDeadline = Assignment.onTheDayReminderDateTime(expiryDate)
 
       val submissionNotifications = {
         // skip the week late notification if late submission isn't possible

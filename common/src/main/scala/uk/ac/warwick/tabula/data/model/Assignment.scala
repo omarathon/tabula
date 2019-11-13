@@ -6,7 +6,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
-import org.joda.time.{DateTime, LocalDate, LocalTime}
+import org.joda.time.{DateTime, Duration, LocalDate, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
@@ -40,6 +40,29 @@ object Assignment {
 
   val openTime = new LocalTime(9, 0)
   val closeTime = new LocalTime(12, 0)
+  val onTheDaySubmissionReminderTime = new LocalTime(8, 0)
+  val minimumOnTheDaySubmissionReminderNotice: Duration = Duration.standardHours(4)
+
+  /**
+   * Picks an appropriate time to send an on-the-day submission reminder, based on the deadline passed in.
+   *
+   * Example input & output:
+   * - Deadline: 1am, reminder time: midnight
+   * - Deadline: 8am, reminder time: 4am
+   * - Deadline: 12 noon (or later), reminder time: 8am
+   */
+  def onTheDayReminderDateTime(deadline: DateTime): DateTime = {
+    val reminderTime = Seq(
+      deadline.withTime(Assignment.onTheDaySubmissionReminderTime),
+      deadline.minus(Assignment.minimumOnTheDaySubmissionReminderNotice)
+    ).min
+
+    // Don't allow the reminder to go to the previous day or the notifications don't make sense, pathological case
+    Seq(
+      reminderTime,
+      deadline.withTimeAtStartOfDay()
+    ).max
+  }
 
   case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 
