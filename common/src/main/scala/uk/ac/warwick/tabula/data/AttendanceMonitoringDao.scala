@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
-import org.hibernate.criterion.ProjectionList
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.{ProjectionList, Restrictions}
 import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.stereotype.Repository
@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 import scala.reflect.ClassTag
-import scala.util.Try
 
 abstract class SchemeMembershipItemType(val value: String)
 
@@ -699,9 +698,17 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
           .createAlias("studentCourseDetails", "studentCourseDetails")
           .createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
           .createAlias("studentCourseDetails.currentRoute", "route")
-          .createAlias("studentCourseDetails.allRelationships", "relationships", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN, Option(is("relationshipType.id", "personalTutor")))
+          .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN)
+            .add(Restrictions.or(
+            Restrictions.isNull("currentRelationships.endDate"),
+            Restrictions.ge("currentRelationships.endDate", DateTime.now)
+            ))
+            .add(Restrictions.or(
+              Restrictions.isNull("currentRelationships.startDate"),
+              Restrictions.le("currentRelationships.startDate", DateTime.now)
+            ))
+          .createAlias("currentRelationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN)
+          .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN, Option(is("relationshipType.id", "personalTutor")))
           .add(isNull("studentCourseDetails.missingFromImportSince"))
           .add(is("studentCourseYearDetails.academicYear", academicYear))
 
