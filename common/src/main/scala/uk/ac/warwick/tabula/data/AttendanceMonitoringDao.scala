@@ -700,8 +700,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
           .createAlias("studentCourseDetails.currentRoute", "route")
           .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN)
             .add(Restrictions.or(
-            Restrictions.isNull("currentRelationships.endDate"),
-            Restrictions.ge("currentRelationships.endDate", DateTime.now)
+              Restrictions.isNull("currentRelationships.endDate"),
+              Restrictions.ge("currentRelationships.endDate", DateTime.now)
             ))
             .add(Restrictions.or(
               Restrictions.isNull("currentRelationships.startDate"),
