@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring._
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, _}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object RecheckAttendanceCommand {
@@ -167,16 +167,16 @@ trait RecheckAttendanceCommandDescription extends Describable[Seq[AttendanceMoni
   override lazy val eventName = "RecheckAttendance"
 
   override def describe(d: Description): Unit =
-    d.attendanceMonitoringCheckpoints(proposedChanges.groupBy(_.student).mapValues { changes =>
+    d.attendanceMonitoringCheckpoints(proposedChanges.groupBy(_.student).view.mapValues { changes =>
       changes.map { change =>
         change.point -> change.currentState
       }.toMap
-    }, verbose = true)
+    }.toMap, verbose = true)
 
   override def describeResult(d: Description, result: Seq[AttendanceMonitoringCheckpoint]): Unit =
-    d.attendanceMonitoringCheckpoints(result.groupBy(_.student).mapValues { checkpoints =>
+    d.attendanceMonitoringCheckpoints(result.groupBy(_.student).view.mapValues { checkpoints =>
       checkpoints.map { checkpoint =>
         checkpoint.point -> checkpoint.state
       }.toMap
-    }, verbose = true)
+    }.toMap, verbose = true)
 }

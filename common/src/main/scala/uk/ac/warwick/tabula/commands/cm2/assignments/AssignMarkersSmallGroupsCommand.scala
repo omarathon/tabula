@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.helpers.LazyLists
@@ -54,7 +54,7 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
   self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest =>
 
   def applyInternal(): Assignment = {
-    val command: Appliable[Assignment] with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala)
+    val command: Appliable[Assignment] with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala.toSeq)
 
     command.allowSameMarkerForSequentialStages = allowSameMarkerForSequentialStages
 
@@ -65,7 +65,7 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 trait AssignMarkersSmallGroupsValidation extends SelfValidating {
   self: AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest =>
   override def validate(errors: Errors): Unit = {
-    val command: SelfValidating with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala)
+    val command: SelfValidating with AssignMarkersState = AssignMarkersBySmallGroupsCommand(assignment, markerAllocations.asScala.toSeq)
 
     command.allowSameMarkerForSequentialStages = allowSameMarkerForSequentialStages
 
@@ -78,7 +78,7 @@ trait AssignMarkersSmallGroupsValidation extends SelfValidating {
 trait AssignMarkersSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersSmallGroupsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     notDeleted(assignment)
 
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assignment))
@@ -99,12 +99,12 @@ trait AssignMarkersSmallGroupsCommandPopulate extends PopulateOnForm {
     val setAllocations = sets.map(set => {
       def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = {
         val validMarkers: Seq[User] = (for {
-          group <- set.groups.asScala
+          group <- set.groups.asScala.toSeq
           event <- group.events
           user <- event.tutors.users if markers.contains(user)
         } yield user).distinct
 
-        val groupAllocations = set.groups.asScala.map(group => {
+        val groupAllocations = set.groups.asScala.toSeq.map(group => {
           val students = group.students.users.filter(validStudents.contains).toSeq.sortBy { u => (u.getLastName, u.getFirstName) }
           val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
           val otherMarkers = validMarkers.diff(markers)

@@ -30,10 +30,8 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   var profileImporter: ProfileImporter = Wire[ProfileImporter]
   var profileService: ProfileService = Wire[ProfileService]
   var userLookup: UserLookupService = Wire[UserLookupService]
-  var moduleRegistrationImporter: ModuleRegistrationImporter = Wire[ModuleRegistrationImporter]
   var accreditedPriorLearningImporter: AccreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
   var studentCourseDetailsNoteImporter: StudentCourseDetailsNoteImporter = Wire[StudentCourseDetailsNoteImporter]
-  var moduleRegistrationService: ModuleRegistrationService = Wire[ModuleRegistrationService]
   var smallGroupService: SmallGroupService = Wire[SmallGroupService]
   var profileIndexService: ProfileIndexService = Wire[ProfileIndexService]
   var memberDao: MemberDao = Wire[MemberDao]
@@ -87,7 +85,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
             val usersByWarwickIds = benchmarkTask("getUsersByWarwickUniIds") {
-              userLookup.getUsersByWarwickUniIds(membershipInfos.map(_.member.universityId))
+              userLookup.usersByWarwickUniIds(membershipInfos.map(_.member.universityId))
                 .collect { case (universityId, FoundUser(u)) => universityId -> u }
             }
 
@@ -133,12 +131,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           }
         }
 
-        benchmarkTask("Update module registrations and small groups") {
-          transactional() {
-            updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
-          }
-        }
-
         benchmarkTask("Update accredited prior learning") {
           transactional() {
             updateAccreditedPriorLearning(membershipInfos, users)
@@ -174,33 +166,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   private def toStudentOrApplicantMembers(rowCommands: Seq[ImportMemberCommand]): Seq[Member] = {
     memberDao.getAllWithUniversityIds(rowCommands.collect { case s@(_: ImportStudentRowCommandInternal | _: ImportOtherMemberCommand) => s }.map(_.universityId))
       .collect { case s@(_: StudentMember | _: ApplicantMember) => s }
-  }
-
-  def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
-    logger.info("Fetching module registrations")
-
-    val importModRegCommands = benchmarkTask("Get module registrations details for users") {
-      moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
-    }
-
-    logger.info("Saving or updating module registrations")
-
-    val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
-      importModRegCommands.flatMap(_.apply())
-    }
-
-    val usercodesProcessed: Seq[String] = membershipInfo.map(_.member.usercode)
-
-    logger.info("Removing old module registrations")
-
-    benchmarkTask("Delete old module registrations") {
-      deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
-    }
-
-    session.flush()
-    session.clear()
-
-    newModuleRegistrations
   }
 
   def updateAccreditedPriorLearning(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[AccreditedPriorLearning] = {
@@ -312,8 +277,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           updateVisa(importMemberCommands)
           updateAddress(importMemberCommands)
 
-          // re-import module registrations and delete old module and group registrations:
-          val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))
           updateComponentMarks(List(membInfo))
           updateAccreditedPriorLearning(List(membInfo), Map(universityId -> user))
           rationaliseRelationships(importMemberCommands)
@@ -328,7 +291,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           memberDao.stampLastImportDate(freshMembers.map(_.universityId), DateTime.now)
 
           for (thisMember <- members) session.evict(thisMember)
-          for (modReg <- newModuleRegistrations) session.evict(modReg)
 
           logger.info("Data refreshed for " + universityId)
           members.headOption
@@ -415,18 +377,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
         }
         Some(stu)
       case _ => None
-    }
-  }
-
-  def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
-    val existingModuleRegistrations = moduleRegistrationService.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
-    for (existingMR <- existingModuleRegistrations.filterNot(mr => newModuleRegistrations.contains(mr))) {
-      existingMR.studentCourseDetails.removeModuleRegistration(existingMR)
-      session.delete(existingMR)
-
-      if (features.autoGroupDeregistration) {
-        smallGroupService.removeFromSmallGroups(existingMR)
-      }
     }
   }
 

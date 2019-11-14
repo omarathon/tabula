@@ -8,7 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.util.concurrency.TaskExecutionService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import javax.servlet.{Filter, FilterChain, ReadListener, ServletInputStream}
 import javax.servlet.http.{HttpServletRequest, HttpServletRequestWrapper, HttpServletResponse}
 

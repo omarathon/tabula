@@ -6,23 +6,21 @@ import javax.sql.DataSource
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.commands.sysadmin.TutorSource._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDaoComponent}
-import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
-import uk.ac.warwick.tabula.services.scheduling.ProfileImporter.GetSingleStudentInformation
-import uk.ac.warwick.tabula.services.scheduling.SupervisorImporter.SupervisorMappingDebugQuery
-import uk.ac.warwick.tabula.services.scheduling.SupervisorImportDebugRow
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.scheduling.ProfileImporter.GetSingleStudentInformation
+import uk.ac.warwick.tabula.services.scheduling.SupervisorImportDebugRow
+import uk.ac.warwick.tabula.services.scheduling.SupervisorImporter.SupervisorMappingDebugQuery
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
-import TutorSource._
+import scala.jdk.CollectionConverters._
 
 case class CheckStudentRelationshipImport(
   isStudent: Boolean,
@@ -146,7 +144,7 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
 
     val relationships = relationshipService.getStudentRelationshipTypesWithRdxType.map { relationshipType =>
       val rows = if (studentUser.isFoundUser && studentUser.getWarwickId.hasText) {
-        query.executeByNamedParam(Map("scj_code" -> s"${studentUser.getWarwickId}%", "sits_examiner_type" -> relationshipType.defaultRdxType).asJava).asScala
+        query.executeByNamedParam(Map("scj_code" -> s"${studentUser.getWarwickId}%", "sits_examiner_type" -> relationshipType.defaultRdxType).asJava).asScala.toSeq
       } else {
         Seq()
       }

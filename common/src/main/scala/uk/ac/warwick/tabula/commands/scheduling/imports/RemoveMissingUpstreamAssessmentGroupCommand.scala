@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup: UpstreamAssessmentGroup) extends Command[Unit] with AutowiringAssessmentMembershipServiceComponent {
 
@@ -20,5 +20,5 @@ class RemoveMissingUpstreamAssessmentGroupCommand(upstreamAssessmentGroup: Upstr
 
   override def describe(d: Description): Unit =
     d.property("upstreamAssessmentGroup" -> upstreamAssessmentGroup.toString)
-     .studentIds(upstreamAssessmentGroup.members.asScala.map(_.universityId))
+     .studentIds(upstreamAssessmentGroup.members.asScala.toSeq.map(_.universityId))
 }

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByte
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
 import JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 // scalastyle:off magic.number

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CopyAssignmentsCommand {
   type Result = Seq[Assignment]
@@ -52,7 +52,7 @@ abstract class AbstractCopyAssignmentsCommandInternal
   self: AssessmentServiceComponent with AssessmentMembershipServiceComponent with CopyMarkingWorkflowComponent =>
 
   override def applyInternal(): Result = {
-    assignments.asScala.map { assignment =>
+    assignments.asScala.toSeq.map { assignment =>
       val newAssignment = copy(assignment)
       assessmentService.save(newAssignment)
       newAssignment
@@ -132,7 +132,7 @@ abstract class AbstractCopyAssignmentsCommandInternal
 
     newAssignment.addDefaultFields()
 
-    newAssignment.addFields(assignment.fields.asScala.sortBy(_.position).map(field => {
+    newAssignment.addFields(assignment.fields.asScala.toSeq.sortBy(_.position).map(field => {
       newAssignment.findField(field.name).foreach(newAssignment.removeField)
       field.duplicate(newAssignment)
     }): _*)
@@ -188,7 +188,7 @@ trait CopyAssignmentsState {
 trait CopyDepartmentAssignmentsState extends CopyAssignmentsState {
   def department: Department
 
-  def modules: Seq[Module] = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
+  def modules: Seq[Module] = department.modules.asScala.toSeq.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
 }
 
 trait CopyModuleAssignmentsState extends CopyAssignmentsState {

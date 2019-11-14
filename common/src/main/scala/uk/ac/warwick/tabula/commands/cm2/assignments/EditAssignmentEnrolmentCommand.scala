@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditAssignmentMembershipCommand {
   /*
@@ -44,7 +44,7 @@ class StubEditAssignmentMembershipCommand(val assignment: Assignment, val update
 trait StubEditAssignmentMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditAssignmentMembershipCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(Seq(CheckablePermission(Permissions.Assignment.Create, assignment.module),
       CheckablePermission(Permissions.Assignment.Update, assignment.module)))
   }

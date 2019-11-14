@@ -91,13 +91,13 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 }
 
 trait ExportFeedbackToSitsCommandPermissions extends RequiresPermissionsChecking {
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Marks.UploadToSits)
   }
 }
 
 trait ExportFeedbackToSitsCommandDescription extends Describable[Seq[FeedbackForSits]] {
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Seq[FeedbackForSits]) {
     d.property("feedbackForSits", result.map(feedback => Map(

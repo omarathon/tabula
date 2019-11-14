@@ -7,14 +7,12 @@ import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object MeetingRecord {
   val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -66,7 +64,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isPendingApproval: Boolean = approvals.asScala.exists(_.pending)
 
-  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.pending)
+  def pendingApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.pending)
 
   def pendingApprovalBy(user: CurrentUser): Boolean =
     approvals.asScala.exists(approval =>
@@ -80,7 +78,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 
   def isRejected: Boolean = approvals.asScala.exists(_.rejected)
 
-  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.rejected)
+  def rejectedApprovals: Seq[MeetingRecordApproval] = approvals.asScala.toSeq.filter(_.rejected)
 
   def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 
@@ -111,9 +109,9 @@ class MeetingRecord extends AbstractMeetingRecord {
       s"${init.mkString(", ")} $andOr $last"
   }
 
-  def department: Department = student.homeDepartment
+  def departmentToCheck: Department = student.homeDepartment.subDepartmentsContaining(student).lastOption.getOrElse(student.homeDepartment)
 
-  def approvalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
+  def approvalType: MeetingRecordApprovalType = departmentToCheck.meetingRecordApprovalType
 
   // End of workflow definitions
 }

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import EditSmallGroupsCommand._
 
@@ -67,7 +67,7 @@ trait EditSmallGroupsCommandState {
 class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[Seq[SmallGroup]] with EditSmallGroupsCommandState {
   self: SmallGroupServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[SmallGroup] = {
+  override def applyInternal(): Seq[SmallGroup] = {
     // Manage existing groups
     existingGroups.asScala.values.filterNot(_.delete).foreach { props =>
       val group = props.group
@@ -92,14 +92,14 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
     }
 
     smallGroupService.saveOrUpdate(set)
-    set.groups.asScala
+    set.groups.asScala.toSeq
   }
 }
 
 trait PopulateEditSmallGroupsCommand {
   self: EditSmallGroupsCommandState =>
 
-  def populate() {
+  def populate(): Unit = {
     existingGroups.clear()
     newGroups.clear()
 
@@ -112,7 +112,7 @@ trait PopulateEditSmallGroupsCommand {
 trait EditSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -121,7 +121,7 @@ trait EditSmallGroupsPermissions extends RequiresPermissionsChecking with Permis
 trait EditSmallGroupsDescription extends Describable[Seq[SmallGroup]] {
   self: EditSmallGroupsCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupSet(set)
   }
 
@@ -130,7 +130,7 @@ trait EditSmallGroupsDescription extends Describable[Seq[SmallGroup]] {
 trait EditSmallGroupsValidation extends SelfValidating {
   self: EditSmallGroupsCommandState with SmallGroupServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
       errors.reject("smallGroupSet.linked")
     }
@@ -181,7 +181,7 @@ trait EditSmallGroupsValidation extends SelfValidating {
 trait EditSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
   self: EditSmallGroupsCommandState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // If the last element of events is both a Creation and is empty, disregard it
     while (!newGroups.isEmpty && !newGroups.asScala.last.name.hasText) {
       newGroups.remove(newGroups.asScala.last)

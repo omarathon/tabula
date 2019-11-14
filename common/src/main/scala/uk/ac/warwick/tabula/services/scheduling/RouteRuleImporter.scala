@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, 
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.exams.grids.AutowiringUpstreamModuleListServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.matching.Regex
 
 
@@ -46,7 +46,7 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
       routeRuleQuery.execute
     }
     // Remove rows that have null entires that aren't allowed
-    val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null && r.moduleListCode.nonEmpty)
+    val nonEmptyRows = rows.asScala.toSeq.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null && r.moduleListCode.nonEmpty)
     // Batch fetch the routes and module lists
     val routeCodes = nonEmptyRows.map(_.routeCode).distinct
     val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct

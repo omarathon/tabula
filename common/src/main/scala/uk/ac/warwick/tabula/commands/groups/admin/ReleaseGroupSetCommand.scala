@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
 import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Lecture
 import uk.ac.warwick.tabula.services.UserLookupService

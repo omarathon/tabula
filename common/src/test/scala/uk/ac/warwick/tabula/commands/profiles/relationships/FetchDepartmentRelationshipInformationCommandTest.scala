@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociation
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait StudentAssociationFixture {
   val student1 = StudentAssociationData("1", "", "", null, null, 0)

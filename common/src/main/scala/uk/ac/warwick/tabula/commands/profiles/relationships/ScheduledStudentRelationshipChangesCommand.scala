@@ -40,7 +40,7 @@ trait ScheduledStudentRelationshipChangesPermissions extends RequiresPermissions
 
   self: ScheduledStudentRelationshipChangesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
   }
 

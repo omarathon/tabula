@@ -40,7 +40,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
     validSubsetsWithWieghtedMeanMark.collect { case (Right(mark), modRegs) => (mark, modRegs) }
       .sortBy { case (mark, modRegs) =>
         // Add a definitive sort so subsets with the same mark always come out the same order
-        (mark.doubleValue(), modRegs.size, modRegs.map(_.module.code).mkString(","))
+        (mark.doubleValue, modRegs.size, modRegs.map(_.module.code).mkString(","))
       }.reverse
   }
 

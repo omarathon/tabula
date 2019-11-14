@@ -43,7 +43,7 @@ class MitCircsApproveOutcomesCommandInternal(val submission: MitigatingCircumsta
 trait MitCircsApproveOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsApproveOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -53,7 +53,7 @@ trait MitCircsApproveOutcomesDescription extends Describable[Result] {
 
   override lazy val eventName: String = if(approve) "MitCircsApproveOutcomes" else "MitCircsUnApproveOutcomes"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

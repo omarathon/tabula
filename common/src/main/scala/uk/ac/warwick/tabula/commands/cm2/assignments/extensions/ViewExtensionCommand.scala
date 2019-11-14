@@ -50,7 +50,7 @@ class ViewExtensionCommandInternal(val extension: Extension) extends CommandInte
 trait ViewExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewExtensionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Extension.Read, extension)
   }
 }

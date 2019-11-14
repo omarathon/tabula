@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{Member, Module}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @RequestMapping(value = Array("/groups/module/{module}/groups/{smallGroupSet}/students/search.json"))
 @Controller

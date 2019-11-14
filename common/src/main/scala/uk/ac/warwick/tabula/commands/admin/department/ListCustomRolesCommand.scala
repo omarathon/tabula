@@ -37,7 +37,7 @@ class ListCustomRolesCommandInternal(val department: Department) extends Command
 trait ListCustomRolesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListCustomRolesCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
   }
 }

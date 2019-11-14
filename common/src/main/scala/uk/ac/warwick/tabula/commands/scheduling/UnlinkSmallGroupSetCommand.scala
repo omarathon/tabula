@@ -45,7 +45,7 @@ class UnlinkSmallGroupSetCommandInternal extends CommandInternal[Map[Department,
 
 trait UnlinkSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.UpdateMembership)
   }
 
@@ -55,7 +55,7 @@ trait UnlinkSmallGroupSetDescription extends Describable[Map[Department, Seq[Sma
 
   override lazy val eventName = "UnlinkSmallGroupSet"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 

@@ -21,7 +21,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
     val module: Module = Fixtures.module("heron101")
     val assignment: Assignment = Fixtures.assignment("my assignment")
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
     assignment.id = "1"
     assignment.module = module
 

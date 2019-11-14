@@ -21,7 +21,7 @@ class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
     val gr1 = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
     val gr2 = GrantedRole(module, ModuleManagerRoleDefinition)
 
-    service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream(gr1, gr2).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
+    service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (LazyList(gr1, gr2).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
 
     // Can't do exact equality because a granted role with no overrides is still a generated role, not a strict built in role
     val roles = provider.getRolesFor(currentUser, dept)
@@ -31,8 +31,8 @@ class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
   }
 
   @Test def noRoles = withUser("cuscav") {
-    service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream.empty)
-    provider.getRolesFor(currentUser) should be(Stream.empty)
+    service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (LazyList.empty)
+    provider.getRolesFor(currentUser) should be(LazyList.empty)
   }
 
 }

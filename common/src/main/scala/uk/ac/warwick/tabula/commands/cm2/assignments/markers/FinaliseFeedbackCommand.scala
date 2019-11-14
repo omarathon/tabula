@@ -40,7 +40,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FinaliseFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
   }
 }

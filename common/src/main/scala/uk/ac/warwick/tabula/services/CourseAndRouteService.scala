@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 /**

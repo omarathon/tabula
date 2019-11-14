@@ -52,7 +52,7 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
     feedback.ratingPrompt = wasPrompt.toBoolean
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (enabled) {
       wasPrompt.update
       wasHelpful.update

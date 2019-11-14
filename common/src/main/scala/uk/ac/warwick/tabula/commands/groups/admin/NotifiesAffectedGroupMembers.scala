@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedStudentNotification, SmallGroupSetChangedTutorNotification, SmallGroupSetChangedUserIdRecipientNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
 
@@ -68,12 +68,12 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 
   def createTutorNotification(tutor: User): Option[Notification[SmallGroup, SmallGroupSet]] = {
     val filteredGroupSet = tutorsEvents(set, tutor)
-    createNotification(set, filteredGroupSet.groups.asScala, tutor, new SmallGroupSetChangedTutorNotification, set.emailTutorsOnChange)
+    createNotification(set, filteredGroupSet.groups.asScala.toSeq, tutor, new SmallGroupSetChangedTutorNotification, set.emailTutorsOnChange)
   }
 
   def createStudentNotification(student: User): Option[Notification[SmallGroup, SmallGroupSet]] = {
     val filteredGroups = studentsEvents(set, student)
-    createNotification(set, filteredGroups.asScala, student, new SmallGroupSetChangedStudentNotification, set.emailStudentsOnChange)
+    createNotification(set, filteredGroups.asScala.toSeq, student, new SmallGroupSetChangedStudentNotification, set.emailStudentsOnChange)
   }
 
   def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedUserIdRecipientNotification, sendEmail: Boolean): Option[SmallGroupSetChangedUserIdRecipientNotification] = {
@@ -92,7 +92,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 
   def emit(set: SmallGroupSet): Seq[Notification[SmallGroup, SmallGroupSet]] = {
     val tutorNotifications = if (set.releasedToTutors) {
-      val allEvents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.events)
+      val allEvents = (setBeforeUpdates.groups.asScala.toSeq ++ set.groups.asScala.toSeq).flatMap(g => g.events)
       val allTutors = allEvents.flatMap(e => e.tutors.users).distinct
       val affectedTutors = allTutors.filter(hasAffectedTutorsEvents)
       affectedTutors.flatMap(createTutorNotification)
@@ -101,7 +101,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
     }
 
     val studentNotifications = if (set.releasedToStudents) {
-      val allStudents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.students.users).distinct
+      val allStudents = (setBeforeUpdates.groups.asScala.toSeq ++ set.groups.asScala.toSeq).flatMap(g => g.students.users).distinct
       val affectedStudents = allStudents.filter(hasAffectedStudentsGroups)
       affectedStudents.flatMap(createStudentNotification)
     } else {

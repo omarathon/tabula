@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.system
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.InitializingBean
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Closeables._
-import org.springframework.beans.factory.BeanInitializationException
-import org.hibernate.SessionFactory
 import javax.sql.DataSource
+import org.hibernate.SessionFactory
 import org.hibernate.`type`.StringType
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.{BeanInitializationException, InitializingBean}
+import uk.ac.warwick.tabula.helpers.Logging
+
+import scala.util.Using
 
 /**
   * Selects a Unicode string from the database to see if it gets there and
@@ -35,7 +35,7 @@ trait DatabaseEncodingChecker extends InitializingBean with Logging {
 
 class SessionFactoryDatabaseEncodingChecker @Autowired()(val sessionFactory: SessionFactory) extends DatabaseEncodingChecker {
 
-  override def fetchString: String = closeThis(sessionFactory.openSession()) { session =>
+  override def fetchString: String = Using.resource(sessionFactory.openSession()) { session =>
     val query = session.createSQLQuery("select :string")
     query.setParameter("string", testString, StringType.INSTANCE)
     query.uniqueResult().toString
@@ -45,14 +45,15 @@ class SessionFactoryDatabaseEncodingChecker @Autowired()(val sessionFactory: Ses
 
 class DataSourceDatabaseEncodingChecker @Autowired()(val dataSource: DataSource) extends DatabaseEncodingChecker {
 
-  override def fetchString: String = closeThis(dataSource.getConnection) { conn =>
-    closeThis(conn.prepareStatement("select ?")) { stmt =>
+  override def fetchString: String =
+    Using.Manager { use =>
+      val conn = use(dataSource.getConnection)
+      val stmt = use(conn.prepareStatement("select ?"))
       stmt.setString(1, testString)
-      closeThis(stmt.executeQuery()) { rs =>
-        rs.next()
-        rs.getString(1)
-      }
-    }
-  }
+
+      val rs = use(stmt.executeQuery())
+      rs.next()
+      rs.getString(1)
+    }.get
 
 }

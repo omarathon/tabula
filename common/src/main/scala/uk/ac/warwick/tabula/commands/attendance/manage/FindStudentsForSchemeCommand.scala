@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 case class FindStudentsForSchemeCommandResult(
@@ -64,7 +64,7 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 
       val startResult = studentsPerPage * (page - 1)
       val staticMembershipItemsToDisplay = attendanceMonitoringService.findSchemeMembershipItems(
-        staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage),
+        staticStudentIds.asScala.toSeq.slice(startResult, startResult + studentsPerPage),
         SchemeMembershipStaticType,
         scheme.academicYear
       )
@@ -121,7 +121,7 @@ trait FindStudentsForSchemePermissions extends RequiresPermissionsChecking with 
 
   self: FindStudentsForSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 
@@ -155,8 +155,9 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 
   // Filter binds
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
-  lazy val outOfDepartmentRoutes: mutable.Buffer[Route] = routes.asScala.diff(allRoutes)
+  lazy val outOfDepartmentRoutes: Seq[Route] = routes.asScala.toSeq.diff(allRoutes)
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
   var yearsOfStudy: JList[JInteger] = JArrayList()

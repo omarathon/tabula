@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OldOnlineFeedbackCommand {
   def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
@@ -34,7 +34,7 @@ abstract class OldOnlineFeedbackCommand(val module: Module, val assignment: Assi
   def applyInternal(): Seq[StudentFeedbackGraph] = {
 
     val usercodes = assignment.getUsercodesWithSubmissionOrFeedback.filter(_.hasText).toSeq
-    val studentsWithSubmissionOrFeedback = userLookup.getUsersByUserIds(usercodes)
+    val studentsWithSubmissionOrFeedback = userLookup.usersByUserIds(usercodes)
       .values
       .filter(_.isFoundUser)
       .toSeq
@@ -120,7 +120,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
     if (submitter.apparentUser != marker) {

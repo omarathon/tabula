@@ -27,7 +27,7 @@ class ComposableCommandTest extends TestBase with Mockito {
   trait HelloCommandPermissions extends RequiresPermissionsChecking {
     this: HelloCommand =>
 
-    def permissionsCheck(p: PermissionsChecking) {
+    def permissionsCheck(p: PermissionsChecking): Unit = {
       if (name != "noperms") {
         p.PermissionCheck(GodMode)
       }
@@ -39,7 +39,7 @@ class ComposableCommandTest extends TestBase with Mockito {
     */
   trait HelloCommandNotification extends Describable[String] {
     this: HelloCommand =>
-    def describe(d: Description) {
+    def describe(d: Description): Unit = {
       d.property("name", name)
     }
   }
@@ -61,13 +61,13 @@ class ComposableCommandTest extends TestBase with Mockito {
   @Test def canComposeCommandWithMocksForTesting() {
 
     val stubbedCommand = new HelloCommandInternals(sampleName) with RequiresPermissionsChecking with Describable[String] {
-      def describe(d: Description) {
+      def describe(d: Description): Unit = {
         mockDescribable.describe(d)
       }
 
       val eventName: String = name
 
-      def permissionsCheck(p: PermissionsChecking) {
+      def permissionsCheck(p: PermissionsChecking): Unit = {
         mockPerms.permissionsCheck(p)
       }
     }

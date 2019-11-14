@@ -50,6 +50,7 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
   var sortOrder: JList[Order] = JArrayList()
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
@@ -101,7 +102,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewRelatedStudentsCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), currentMember)
   }
 }

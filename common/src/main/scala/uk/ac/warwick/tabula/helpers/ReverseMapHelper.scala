@@ -10,8 +10,10 @@ object ReverseMapHelper {
         values.map { v => v -> key }
       }
       .groupBy { case (key, _) => key }
+      .view
       .mapValues {
         _.map { case (_, value) => value }.toSet
       }
+      .toMap
   }
 }

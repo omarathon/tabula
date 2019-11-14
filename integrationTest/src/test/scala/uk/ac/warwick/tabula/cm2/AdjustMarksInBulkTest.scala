@@ -78,8 +78,7 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
   private def adjustMarks(): Unit = {
 
     When("I upload an adjustments file")
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
     And("Click on the upload button")
     click on cssSelector("button.btn-primary").webElement

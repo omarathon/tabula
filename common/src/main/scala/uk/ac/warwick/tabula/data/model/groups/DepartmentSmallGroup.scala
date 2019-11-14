@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DepartmentSmallGroup {
 
@@ -54,7 +54,7 @@ class DepartmentSmallGroup
   @BatchSize(size = 200)
   var linkedGroups: JSet[SmallGroup] = JHashSet()
 
-  def permissionsParents: Stream[GeneratedId with ToString with PermissionsTarget with Serializable with ToEntityReference] = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
+  def permissionsParents: LazyList[PermissionsTarget] = Option(groupSet).to(LazyList) #::: linkedGroups.asScala.to(LazyList)
 
   override def humanReadableId: String = name
 

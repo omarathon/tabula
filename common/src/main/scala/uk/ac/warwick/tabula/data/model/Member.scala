@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
@@ -122,21 +122,21 @@ abstract class Member
     * Get all departments that this member is affiliated to.
     * (Overriden by StudentMember).
     */
-  def affiliatedDepartments: Stream[Department] = homeDepartment match {
-    case null => Stream()
-    case _ => Stream(homeDepartment)
+  def affiliatedDepartments: LazyList[Department] = homeDepartment match {
+    case null => LazyList.empty
+    case _ => LazyList(homeDepartment)
   }
 
   /**
     * Get all departments that this member touches.
     * (Overridden by StudentMember).
     */
-  def touchedDepartments: Stream[Department] = {
+  def touchedDepartments: LazyList[Department] = {
     val topLevelDepts = affiliatedDepartments
     topLevelDepts flatMap (_.subDepartmentsContaining(this))
   }
 
-  def permissionsParents: Stream[PermissionsTarget] = touchedDepartments
+  def permissionsParents: LazyList[PermissionsTarget] = touchedDepartments
 
   override def humanReadableId: String = fullName.getOrElse(toString())
 
@@ -310,16 +310,17 @@ class StudentMember extends Member with StudentProperties {
     * Get all departments that this student is affiliated with at a departmental level.
     * This includes their home department, and the department running their course.
     */
-  override def affiliatedDepartments: Stream[Department] = {
-    val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
-    val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-    val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.currentRoute)).flatMap(route => route.teachingDepartments).toStream
+  override def affiliatedDepartments: LazyList[Department] = {
+    val sprDepartments: LazyList[Department] = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).to(LazyList)
+    val sceDepartments: LazyList[Department] = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).to(LazyList)
+    val routeDepartments: LazyList[Department] = freshStudentCourseDetails.flatMap(scd => Option(scd.currentRoute)).flatMap(route => route.teachingDepartments).to(LazyList)
+    val homeDepartments: LazyList[Department] = Option(homeDepartment).to(LazyList)
 
-    (Option(homeDepartment).toStream #:::
+    (homeDepartments #:::
       sprDepartments #:::
       sceDepartments #:::
       routeDepartments
-      ).distinct
+    ).distinct
   }
 
   /**
@@ -328,21 +329,21 @@ class StudentMember extends Member with StudentProperties {
     *
     * For each department, enumerate any sub-departments that the member matches
     */
-  override def touchedDepartments: Stream[Department] = {
-    def moduleDepts = registeredModulesByYear(None).map(_.adminDepartment).toStream
+  override def touchedDepartments: LazyList[Department] = {
+    def moduleDepts = registeredModulesByYear(None).map(_.adminDepartment).to(LazyList)
 
     val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
     topLevelDepts flatMap (_.subDepartmentsContaining(this))
   }
 
-  override def permissionsParents: Stream[PermissionsTarget] = {
+  override def permissionsParents: LazyList[PermissionsTarget] = {
     // TAB-3007 We shouldn't swim downstream to the StudentCourseDetails or StudentCourseYearDetails for things here,
     // rely on them swimming up.
 
     // TAB-3598 - Add study departments and routes for any current course
     val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
     val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
-    val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.flatMap { c => Option(c.currentRoute) }.toStream
+    val currentCourseRoutes: LazyList[PermissionsTarget] = currentCourses.flatMap { c => Option(c.currentRoute) }.to(LazyList)
 
     // Cache the def result
     val mostSignificantCourse = mostSignificantCourseDetails
@@ -351,8 +352,8 @@ class StudentMember extends Member with StudentProperties {
     val latestStudentCourseYearDetails = mostSignificantCourse.flatMap { scd => Option(scd.latestStudentCourseYearDetails) }
     val enrolmentDepartment = latestStudentCourseYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
 
-    val departments: Stream[PermissionsTarget] =
-      (Stream(Option(homeDepartment), enrolmentDepartment).flatten ++ studyDepartments.toStream).distinct.flatMap(_.subDepartmentsContaining(this))
+    val departments: LazyList[PermissionsTarget] =
+      (LazyList(Option(homeDepartment), enrolmentDepartment).flatten #::: studyDepartments.to(LazyList)).distinct.flatMap(_.subDepartmentsContaining(this))
 
     /*
      * FIXME TAB-2971 The modules from registrations here shouldn't be in permissionsParents, because the Module doesn't wholly
@@ -361,8 +362,8 @@ class StudentMember extends Member with StudentProperties {
      * to markers and module managers, which could be achieved via a separate role provider that searches for module registrations when
      * given the scope of a StudentMember.
      */
-    val modules: Stream[PermissionsTarget] = mostSignificantCourse.toStream.flatMap { scd =>
-      latestStudentCourseYearDetails.toStream.flatMap { scyd =>
+    val modules: LazyList[PermissionsTarget] = mostSignificantCourse.to(LazyList).flatMap { scd =>
+      latestStudentCourseYearDetails.to(LazyList).flatMap { scyd =>
         // Only include module registrations for the latest year of the most significant course
         scd.moduleRegistrationsByYear(Some(scyd.academicYear)).map(_.module)
       }
@@ -453,7 +454,7 @@ class StudentMember extends Member with StudentProperties {
         // sort by the index
         val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
         // remove the index once sorted - This map contains values like 1,2,3,M1 for someone who is currently on PG course but was previously on UG course
-        val groupedByLevelMap: Map[String, Seq[StudentCourseYearDetails]] = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
+        val groupedByLevelMap: Map[String, Seq[StudentCourseYearDetails]] = groupedByLevelWithIndex.view.mapValues(_.map { case (scyds, _) => scyds }).toMap
 
         //Generate all level year entries.
         (1 to relevantYears).map { yr =>
@@ -540,7 +541,7 @@ class OtherMember extends Member with RestrictedPhoneNumber {
 }
 
 class RuntimeMember(user: CurrentUser) extends Member(user) with RestrictedPhoneNumber {
-  override def permissionsParents: Stream[Nothing] = Stream.empty
+  override def permissionsParents: LazyList[Nothing] = LazyList.empty
 }
 
 trait MemberProperties extends StringId {

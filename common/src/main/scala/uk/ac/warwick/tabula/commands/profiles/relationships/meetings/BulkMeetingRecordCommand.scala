@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, 
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object BulkMeetingRecordCommand {
   def apply(studentRelationships: Seq[StudentRelationship], creator: Member) =
@@ -67,7 +67,7 @@ trait BulkMeetingRecordCommandNotifications extends Notifies[Seq[MeetingRecord],
 trait BulkMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: BulkMeetingRecordCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     studentRelationships.foreach { studentRelationship =>
       p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(studentRelationship.relationshipType), mandatory(studentRelationship.studentMember))
     }

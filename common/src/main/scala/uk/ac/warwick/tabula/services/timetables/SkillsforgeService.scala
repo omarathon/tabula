@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, FeaturesComponent, RequestFailedException}
 
-import scala.collection.Seq
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 

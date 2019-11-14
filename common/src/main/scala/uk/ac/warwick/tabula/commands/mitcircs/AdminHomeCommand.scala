@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 case class MitigatingCircumstancesWorkflowProgress(percentage: Int, t: String, messageCode: String)
@@ -79,7 +79,7 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
 trait AdminHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AdminHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(AdminHomeCommand.RequiredPermission, mandatory(department))
   }
 }
@@ -95,6 +95,7 @@ trait AdminHomeCommandState {
 trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState {
   // This is for filtering the student who has made the submission
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

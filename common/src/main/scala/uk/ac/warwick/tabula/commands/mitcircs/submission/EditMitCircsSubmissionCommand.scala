@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditMitCircsSubmissionCommand {
   def apply(submission: MitigatingCircumstancesSubmission, creator: User) =
@@ -58,13 +58,13 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
     submission.endDate = endDate
-    submission.issueTypes = issueTypes.asScala
+    submission.issueTypes = issueTypes.asScala.toSeq
     if (issueTypes.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     submission.contacted = contacted
     if (contacted) {
       submission.noContactReason = null
-      submission.contacts = contacts.asScala
+      submission.contacts = contacts.asScala.toSeq
       if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
     } else {
       submission.noContactReason = noContactReason
@@ -117,7 +117,7 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
 
   override lazy val eventName: String = "EditMitCircsSubmission"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.member(student)
     d.mitigatingCircumstancesSubmission(submission)
   }

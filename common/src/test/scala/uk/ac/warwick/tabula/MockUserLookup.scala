@@ -1,23 +1,17 @@
 package uk.ac.warwick.tabula
 
-import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang3.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.UserFlavour.{Anonymous, Applicant, Unverified, Vanilla}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
-import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.services.{LenientGroupService, UserLookupService}
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException}
-import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MockUserLookup(var defaultFoundUser: Boolean)
   extends UserLookupAdapter(null)
     with UserLookupService
-    with JavaImports
     with MockUser {
 
   def this() = {
@@ -64,7 +58,11 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 
   override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean): User = getUserByWarwickUniId(warwickId)
 
-  override def getUsersByWarwickUniIds(warwickIds: Seq[String]): Map[UniversityId, User] = warwickIds.map { id => id -> getUserByWarwickUniId(id) }.toMap
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] =
+    getUsersByWarwickUniIds(warwickUniIds, includeDisabledLogins = true)
+
+  override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId], includeDisabledLogins: Boolean): JMap[UniversityId, User] =
+    warwickUniIds.asScala.map { id => id -> getUserByWarwickUniId(id) }.toMap.asJava
 
   override def findUsersWithFilter(filterValues: JMap[String, AnyRef]): JList[User] = {
     if (filterValues.size() == 1 && filterValues.containsKey("warwickuniid")) {
@@ -81,11 +79,8 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 
   override def findUsersWithFilter(filterValues: JMap[String, AnyRef], returnDisabledUsers: Boolean): JList[User] = findUsersWithFilter(filterValues)
 
-  override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
-    val map: Map[String, User] = userIds.asScala.map { id => id -> getUserByUserId(id) }.toMap
-
-    map.asJava
-  }
+  override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] =
+    userIds.asScala.map { id => id -> getUserByUserId(id) }.toMap.asJava
 
   /**
     * Method to quickly add some mock users who exist and definitely

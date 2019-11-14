@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.cm2.{SubmissionListItem, WorkflowItems}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.xml._
 
@@ -198,17 +198,17 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
   protected def itemData(item: WorkflowItems): Map[String, Any] =
     (
       prefix(identityData(item), "student") ++
-        prefix(submissionData(item), "submission") ++
-        prefix(extraFieldData(item), "submission") ++
-        prefix(submissionStatusData(item), "submission") ++
-        prefix(markerData(item), "marking") ++
-        prefix(plagiarismData(item), "marking") ++
-        prefix(feedbackData(item), "feedback") ++
-        prefix(adjustmentData(item), "adjustment")
-      ).mapValues {
+      prefix(submissionData(item), "submission") ++
+      prefix(extraFieldData(item), "submission") ++
+      prefix(submissionStatusData(item), "submission") ++
+      prefix(markerData(item), "marking") ++
+      prefix(plagiarismData(item), "marking") ++
+      prefix(feedbackData(item), "feedback") ++
+      prefix(adjustmentData(item), "adjustment")
+    ).view.mapValues {
       case Some(any) => any
       case any => any
-    }
+    }.toMap
 
   private def prefix(fields: Seq[String], prefix: String) = fields map { name => prefix + "-" + name }
 
@@ -304,15 +304,15 @@ trait SubmissionAndFeedbackExport {
         "second-marker" -> assignment.getStudentsSecondMarker(student.student.getUserId).map(_.getFullName).getOrElse("")
       )
     } else if (assignment.cm2MarkingWorkflow != null) {
-      val markerNames = student.enhancedFeedback.map(ef => {
+      val markerNames: Map[String, Any] = student.enhancedFeedback.map(ef => {
         ef.feedback.feedbackByStage.map(fbs => fbs._1.description -> ef.feedback.feedbackMarkerByAllocationName(fbs._1.roleName).map(_.getFullName).getOrElse(""))
       }).getOrElse(Map())
 
-      val markerMarks = student.enhancedFeedback.map(ef => {
+      val markerMarks: Map[String, Any] = student.enhancedFeedback.map(ef => {
         ef.feedback.feedbackByStage.map(fbs => fbs._1.description.concat("-mark") -> fbs._2.mark.getOrElse(""))
       }).getOrElse(Map())
 
-      val markerGrades = student.enhancedFeedback.map(ef => {
+      val markerGrades: Map[String, Any] = student.enhancedFeedback.map(ef => {
           ef.feedback.feedbackByStage.map(fbs => fbs._1.description.concat("-grade") -> fbs._2.grade.getOrElse(""))
       }).getOrElse(Map())
 

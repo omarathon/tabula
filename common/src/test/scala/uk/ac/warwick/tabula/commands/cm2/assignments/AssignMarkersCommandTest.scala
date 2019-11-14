@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpers {
 
@@ -75,7 +75,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         feedback.markerFeedback.add(mf)
         a1.feedbacks.add(feedback)
         a1.feedbackService = smartMock[FeedbackService]
-        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
         mf should not be 'finalised
 
@@ -124,7 +124,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         feedback.markerFeedback.add(mf)
         a1.feedbacks.add(feedback)
         a1.feedbackService = smartMock[FeedbackService]
-        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
         mf shouldBe 'finalised
 
@@ -180,7 +180,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         feedback.markerFeedback.add(mf)
         a1.feedbacks.add(feedback)
         a1.feedbackService = smartMock[FeedbackService]
-        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
         mf should not be 'finalised
         val department = new Department
@@ -247,7 +247,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         feedback.markerFeedback.add(mf)
         a1.feedbacks.add(feedback)
         a1.feedbackService = smartMock[FeedbackService]
-        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+        a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
         mf shouldBe 'finalised
 

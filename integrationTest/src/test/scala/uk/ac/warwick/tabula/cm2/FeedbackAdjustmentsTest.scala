@@ -32,8 +32,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
     eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
 
     Then("I upload a valid adjustments file")
-    click on "file.upload"
-    pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+    find("file.upload").get.underlying.sendKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
     And("submit the form")
     click on cssSelector(".btn-primary")

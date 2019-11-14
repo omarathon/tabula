@@ -32,7 +32,7 @@ abstract class ListMitCircSubmissionNotesCommandInternal(val submission: Mitigat
 trait ListMitCircSubmissionNotesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListMitCircSubmissionNotesState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, mandatory(submission))
   }
 }

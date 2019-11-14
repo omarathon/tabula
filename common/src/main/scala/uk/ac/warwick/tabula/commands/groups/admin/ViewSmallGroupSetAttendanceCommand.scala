@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.commands.ComposableCommand
@@ -44,7 +44,7 @@ class ViewSmallGroupSetAttendanceCommand(val set: SmallGroupSet)
 trait ViewSmallGroupSetAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewSmallGroupSetAttendanceState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, set)
   }
 }

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * An assessment group is basically the smallest group of people
@@ -145,6 +145,6 @@ trait UpstreamAssessmentGroupMemberProperties {
 
 /** currentMembers are all members excluding PWD)  **/
 case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, currentMembers: Seq[UpstreamAssessmentGroupMember]) {
-  lazy val allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala
+  lazy val allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala.toSeq
   lazy val resitMembers: Seq[UpstreamAssessmentGroupMember] = allMembers.filter(_.resitExpected.exists(identity))
 }

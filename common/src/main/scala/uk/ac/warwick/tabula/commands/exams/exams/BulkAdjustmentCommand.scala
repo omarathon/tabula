@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object BulkAdjustmentCommand {
   val StudentIdHeader = "Student ID"
@@ -48,7 +48,7 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
     val errors = new BindException(this, "command")
     validate(errors)
 
-    students.asScala
+    students.asScala.toSeq
       .filter(usercode =>
         !errors.hasFieldErrors(s"marks[$usercode]") &&
           !errors.hasFieldErrors(s"grades[$usercode]") &&
@@ -140,7 +140,7 @@ trait BulkAdjustmentValidation extends SelfValidating {
 
   self: BulkAdjustmentCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val doGradeValidation = assessment.module.adminDepartment.assignmentGradeValidation
     students.asScala.foreach(id => {
       marks.asScala.get(id) match {
@@ -191,7 +191,7 @@ trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with Permiss
 
   self: BulkAdjustmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
@@ -208,7 +208,7 @@ trait BulkAdjustmentDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "BulkAdjustment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assessment(assessment)
     d.property("marks" -> marks.asScala.filter { case (_, mark) => mark.hasText })
   }
@@ -224,7 +224,7 @@ trait BulkAdjustmentCommandState {
 
   def user: CurrentUser
 
-  lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).mapValues(_.head)
+  lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).view.mapValues(_.head).toMap
 
   // Bind variables
   var file: UploadedFile = new UploadedFile

@@ -14,12 +14,12 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 
   var userDatabase = Seq(new User())
   var userLookup: UserLookupService = smartMock[UserLookupService]
-  userLookup.getUserByUserId(any[String]) answers { id =>
+  userLookup.getUserByUserId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getUserId == id
     } getOrElse new AnonymousUser()
   }
-  userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+  userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
     userDatabase find {
       _.getWarwickId == id
     } getOrElse new AnonymousUser()

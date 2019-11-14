@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import CreateMitCircsSubmissionCommand._
 
 object CreateMitCircsSubmissionCommand {
@@ -77,13 +77,13 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     val submission = new MitigatingCircumstancesSubmission(student, currentUser, department)
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
-    submission.issueTypes = issueTypes.asScala
+    submission.issueTypes = issueTypes.asScala.toSeq
     if (issueTypes.asScala.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     submission.contacted = contacted
     if (contacted) {
       submission.noContactReason = null
-      submission.contacts = contacts.asScala
+      submission.contacts = contacts.asScala.toSeq
       if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
     } else {
       submission.noContactReason = noContactReason
@@ -116,7 +116,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsSubmissionState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, MitigatingCircumstancesStudent(student))
   }
 }
@@ -126,7 +126,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     with MitCircsSubmissionState
     with ModuleAndDepartmentServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Only validate at submission time, allow drafts to be saved that would be invalid
     if (approve) {
       // validate issue types
@@ -210,7 +210,7 @@ trait CreateMitCircsSubmissionDescription extends Describable[Result] {
 
   override lazy val eventName: String = "CreateMitCircsSubmission"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.member(student)
   }
 }

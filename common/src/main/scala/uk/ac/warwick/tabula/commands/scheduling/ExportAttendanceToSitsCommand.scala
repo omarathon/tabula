@@ -75,13 +75,13 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
 }
 
 trait ExportAttendanceToSitsCommandPermissions extends RequiresPermissionsChecking {
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Export)
   }
 }
 
 trait ExportAttendanceToSitsCommandDescription extends Describable[Seq[MonitoringPointReport]] {
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Seq[MonitoringPointReport]): Unit =
     d.property("reportCount", result.size)

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AddStudentsToSchemeCommand {
   def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
@@ -65,15 +65,15 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
 
   self: AddStudentsToSchemeCommandState with ProfileServiceComponent with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // In practice there should be no students that fail this validation
     // but this protects against hand-rolled POSTs
     val members = benchmark("profileService.getAllMembersWithUniversityIds") {
       profileService.getAllMembersWithUniversityIds(
-        ((staticStudentIds.asScala
-          diff excludedStudentIds.asScala)
-          diff includedStudentIds.asScala)
-          ++ includedStudentIds.asScala
+        ((staticStudentIds.asScala.toSeq
+          diff excludedStudentIds.asScala.toSeq)
+          diff includedStudentIds.asScala.toSeq)
+          ++ includedStudentIds.asScala.toSeq
       )
     }
     val noPermissionMembers = benchmark("noPermissionMembers") {
@@ -100,7 +100,7 @@ trait AddStudentsToSchemePermissions extends RequiresPermissionsChecking with Pe
 
   self: AddStudentsToSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 
@@ -112,7 +112,7 @@ trait AddStudentsToSchemeDescription extends Describable[AttendanceMonitoringSch
 
   override lazy val eventName = "AddStudentsToScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringScheme(scheme)
       .property("membershipCount" -> ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).size)
   }
@@ -133,11 +133,11 @@ trait AddStudentsToSchemeCommandState {
 
   def membershipItems: Seq[SchemeMembershipItem] = {
     val staticMemberItems = attendanceMonitoringService.findSchemeMembershipItems(
-      (staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala,
+      (staticStudentIds.asScala.toSeq diff excludedStudentIds.asScala.toSeq) diff includedStudentIds.asScala.toSeq,
       SchemeMembershipStaticType,
       scheme.academicYear
     )
-    val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
+    val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala.toSeq, SchemeMembershipIncludeType, scheme.academicYear)
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }

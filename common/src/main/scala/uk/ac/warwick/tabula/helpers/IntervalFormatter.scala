@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.joda.time._
-import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
-import scala.collection.JavaConverters._
-import freemarker.template.TemplateMethodModelEx
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.TemplateModel
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter._
 import java.util.Date
+
+import org.joda.time._
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 /**
   * Formats an Interval (which is a start and an end date together)
@@ -49,17 +46,12 @@ object IntervalFormatter {
 /**
   * Companion class for Freemarker.
   */
-class IntervalFormatter extends TemplateMethodModelEx {
+class IntervalFormatter extends BaseTemplateMethodModelEx {
 
   import IntervalFormatter.format
 
   /** Two-argument method taking a start and end date. */
-  override def exec(list: JList[_]): String = {
-    val args = list.asScala.map {
-      model => {
-        DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
-      }
-    }
+  override def execMethod(args: Seq[_]): String =
     args match {
       case Seq(start: DateTime) => format(start)
       case Seq(start: DateTime, end: DateTime) => format(start, end)
@@ -67,7 +59,6 @@ class IntervalFormatter extends TemplateMethodModelEx {
       case Seq(start: Date, end: Date) => format(new LocalDate(start).toDateTimeAtStartOfDay, new LocalDate(end).toDateTimeAtStartOfDay, includeTime = false)
       case _ => throw new IllegalArgumentException("Bad args")
     }
-  }
 }
 
 /**

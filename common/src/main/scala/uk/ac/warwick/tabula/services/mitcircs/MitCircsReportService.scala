@@ -27,11 +27,12 @@ abstract class AbstractMitCircsReportService extends MitCircsReportService with 
 
   def studentsUnableToSubmit: Seq[StudentsUnableToSubmitForDepartment] = benchmark("studentsUnableToSubmitMitcircs"){
     studentCourseDetailsDao.getCurrentStudents
+      .filter(_.department != null)
       .filter(scd => !scd.department.subDepartmentsContaining(scd.student).exists(canSubmitMitCircs))
       .groupBy(_.department)
-      .mapValues(s => TreeMap(s.groupBy(s => Option(s.currentRoute).getOrElse(noRoute)).mapValues(_.map(_.student)).toSeq:_*))
+      .view.mapValues(s => TreeMap(s.groupBy(s => Option(s.currentRoute).getOrElse(noRoute)).view.mapValues(_.map(_.student)).toSeq:_*)).toSeq
       .map{ case (d, s) => StudentsUnableToSubmitForDepartment(d, s) }
-      .toSeq.sortBy(_.department.code)
+      .sortBy(_.department.code)
   }
 }
 

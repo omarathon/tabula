@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.markingworkflows
 
 import org.springframework.validation.Errors
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.data.model.markingworkflow._
@@ -58,7 +58,7 @@ trait ReplaceMarkerValidation extends SelfValidating {
 
   self: ReplaceMarkerState with UserLookupComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!oldMarker.hasText) {
       errors.rejectValue("oldMarker", "markingWorkflow.marker.none")
     }

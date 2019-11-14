@@ -7,14 +7,14 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class ReleaseForMarkingCommandTest extends TestBase with Mockito {
 
   trait MockCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
     val cm2MarkingWorkflowService: CM2MarkingWorkflowService = mock[CM2MarkingWorkflowService]
-    cm2MarkingWorkflowService.releaseForMarking(any[Seq[AssignmentFeedback]]) answers { f =>
+    cm2MarkingWorkflowService.releaseForMarking(any[Seq[AssignmentFeedback]]) answers { f: Any =>
       val released = f.asInstanceOf[Seq[AssignmentFeedback]]
       released.foreach(_.outstandingStages.add(SingleMarker))
       released

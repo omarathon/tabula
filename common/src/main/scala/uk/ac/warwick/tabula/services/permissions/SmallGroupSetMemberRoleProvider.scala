@@ -13,26 +13,26 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class SmallGroupSetMemberRoleProvider extends RoleProvider with TaskBenchmarking {
 
-  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
+  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
     scope match {
       case set: SmallGroupSet => getRoles(user, Seq(set))
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 
-  private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]): Stream[Role] = {
+  private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]): LazyList[Role] = {
     val memberSets =
-      sets.toStream
+      sets.to(LazyList)
         .filter { set =>
           set.visibleToStudents &&
             set.isStudentMember(user.apparentUser)
         }
         .distinct
 
-    val memberRoles: Stream[Role] = memberSets.map { set =>
+    val memberRoles: LazyList[Role] = memberSets.map { set =>
       customRoleFor(set.module.adminDepartment)(SmallGroupSetMemberRoleDefinition, set).getOrElse(SmallGroupSetMember(set))
     }
-    val viewerRoles: Stream[Role] = memberSets.filter(_.studentsCanSeeOtherMembers).map { set =>
+    val viewerRoles: LazyList[Role] = memberSets.filter(_.studentsCanSeeOtherMembers).map { set =>
       customRoleFor(set.module.adminDepartment)(SmallGroupSetViewerRoleDefinition, set).getOrElse(SmallGroupSetViewer(set))
     }
 

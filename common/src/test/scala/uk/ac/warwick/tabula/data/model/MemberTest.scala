@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, ProfileService, Rel
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MemberTest extends TestBase with Mockito {
 
@@ -29,7 +29,7 @@ class MemberTest extends TestBase with Mockito {
 
     // set home department and test
     member.homeDepartment = homeDept
-    member.affiliatedDepartments should be(Stream(homeDept))
+    member.affiliatedDepartments should be(LazyList(homeDept))
 
     // set course department and test
     // create their course department
@@ -56,8 +56,8 @@ class MemberTest extends TestBase with Mockito {
     member.mostSignificantCourseDetails.get.department = courseDept
 
     // now test that the member is attached to the right departments
-    member.affiliatedDepartments should be(Stream(homeDept, courseDept))
-    member.touchedDepartments should be(Stream(homeDept, courseDept, extDept))
+    member.affiliatedDepartments should be(LazyList(homeDept, courseDept))
+    member.touchedDepartments should be(LazyList(homeDept, courseDept, extDept))
 
     // also set route department and test
     val routeDept = new Department
@@ -67,26 +67,26 @@ class MemberTest extends TestBase with Mockito {
     member.mostSignificantCourseDetails.get.currentRoute = route
     member.attachStudentCourseDetails(studentCourseDetails)
 
-    member.affiliatedDepartments should be(Stream(homeDept, courseDept, routeDept))
-    member.touchedDepartments should be(Stream(homeDept, courseDept, routeDept, extDept))
+    member.affiliatedDepartments should be(LazyList(homeDept, courseDept, routeDept))
+    member.touchedDepartments should be(LazyList(homeDept, courseDept, routeDept, extDept))
 
     // reset route to home, and check it appears only once
     route.adminDepartment = homeDept
     member.mostSignificantCourseDetails.get.currentRoute = route
 
-    member.affiliatedDepartments should be(Stream(homeDept, courseDept))
-    member.touchedDepartments should be(Stream(homeDept, courseDept, extDept))
+    member.affiliatedDepartments should be(LazyList(homeDept, courseDept))
+    member.touchedDepartments should be(LazyList(homeDept, courseDept, extDept))
 
     // check teaching departments aren't included
     val teachingDepartment = new Department
     teachingDepartment.code = "td"
     route.teachingInfo = Fixtures.routeTeachingInformation(route, Seq(homeDept, teachingDepartment)).toSet.asJava
     route.teachingDepartmentsActive = false
-    member.affiliatedDepartments should be(Stream(homeDept, courseDept))
+    member.affiliatedDepartments should be(LazyList(homeDept, courseDept))
 
     // check teaching departments are included when the flag is true
     route.teachingDepartmentsActive = true
-    member.affiliatedDepartments should be(Stream(homeDept, courseDept, teachingDepartment))
+    member.affiliatedDepartments should be(LazyList(homeDept, courseDept, teachingDepartment))
   }
 
   @Test def testModuleRegistrations(): Unit = {
@@ -213,7 +213,10 @@ class MemberTest extends TestBase with Mockito {
     relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq()
     staff.isRelationshipAgent(relationshipType) should be (false)
 
-    relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq(StudentRelationship(staff, relationshipType, Fixtures.student(), DateTime.now))
+    reset(relationshipService)
+
+    val relationships: Seq[MemberStudentRelationship] = Seq(StudentRelationship(staff, relationshipType, Fixtures.student(), DateTime.now))
+    relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns relationships
     staff.isRelationshipAgent(relationshipType) should be (true)
   }
 

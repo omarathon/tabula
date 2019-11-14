@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMo
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/bulk/create"))
@@ -30,7 +30,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
     @RequestParam studentCourseDetails: JList[StudentCourseDetails]
   ): Seq[StudentRelationship] = {
     benchmarkTask("Get StudentRelationships") {
-      studentCourseDetails.asScala.flatMap { studentCourse =>
+      studentCourseDetails.asScala.toSeq.flatMap { studentCourse =>
         relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
       }
     }

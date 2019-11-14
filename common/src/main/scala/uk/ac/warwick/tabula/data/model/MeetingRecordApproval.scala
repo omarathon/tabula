@@ -37,7 +37,7 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
   @JoinColumn(name = "approved_by")
   var approvedBy: Member = _
 
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(meetingRecord)
+  override def permissionsParents: LazyList[PermissionsTarget] = LazyList(meetingRecord)
 
   def approved: Boolean = state == Approved
 

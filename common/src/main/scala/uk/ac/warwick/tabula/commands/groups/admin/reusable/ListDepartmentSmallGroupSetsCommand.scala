@@ -33,7 +33,7 @@ trait ListDepartmentSmallGroupSetsCommandState {
 trait ListDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListDepartmentSmallGroupSetsCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
   }
 }

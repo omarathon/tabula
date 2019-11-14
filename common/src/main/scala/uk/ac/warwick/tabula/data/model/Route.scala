@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 @Entity
@@ -67,7 +67,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
   override def toString: String = "Route[" + code + "]"
 
-  def permissionsParents: Stream[Department] = teachingDepartments.toStream
+  def permissionsParents: LazyList[Department] = teachingDepartments.to(LazyList)
 
   override def humanReadableId: String = code.toUpperCase + " " + name
 

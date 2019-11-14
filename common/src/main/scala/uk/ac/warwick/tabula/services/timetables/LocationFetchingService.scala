@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{ApacheHttpClientComponent, AutowiringApach
 import uk.ac.warwick.util.cache.{Cache, CacheEntryFactory, Caches}
 import uk.ac.warwick.util.web.Uri
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.parsing.json.JSON
 import scala.util.{Failure, Success, Try}
 
@@ -53,7 +53,7 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
     def create(name: String): CacheEntry = delegate.mapLocationsFor(name).asInstanceOf[CacheEntry]
 
     def create(names: JList[String]): JMap[String, CacheEntry] = {
-      JMap(names.asScala.map(name => (name, create(name))): _*)
+      JMap(names.asScala.toSeq.map(name => (name, create(name))): _*)
     }
 
     def isSupportsMultiLookups = true

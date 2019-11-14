@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
-import org.mockito.Matchers
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.tabula.data.model.attendance._
@@ -83,7 +82,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
       scheme.points.size should be(1)
       scheme2.points.size should be(1)
       verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
-      verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
+      verify(command.thisScheduledNotificationService, atLeast(1)).push(any[ScheduledNotification[Department]])
       verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), department, academicYear2015)
     }
   }

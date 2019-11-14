@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/selfsignup/{action}"))
@@ -56,7 +56,7 @@ class OpenSmallGroupSetsController extends GroupsController with AutowiringSmall
     def getName: String = action.name
 
     def applyCommand(user: User): Seq[SmallGroupSet] = {
-      createCommand(user, checkedGroupsets.asScala).apply()
+      createCommand(user, checkedGroupsets.asScala.toSeq).apply()
     }
   }
 

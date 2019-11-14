@@ -6,7 +6,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
-import org.joda.time.{DateTime, LocalDate, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, Duration, LocalDate, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
@@ -23,7 +23,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 import scala.reflect._
 
 object Assignment {
@@ -39,6 +40,30 @@ object Assignment {
 
   val openTime = new LocalTime(9, 0)
   val closeTime = new LocalTime(12, 0)
+  val closeTimeEnforcementDate: LocalDate = new LocalDate(2019, DateTimeConstants.DECEMBER, 1)
+  val onTheDaySubmissionReminderTime = new LocalTime(8, 0)
+  val minimumOnTheDaySubmissionReminderNotice: Duration = Duration.standardHours(4)
+
+  /**
+   * Picks an appropriate time to send an on-the-day submission reminder, based on the deadline passed in.
+   *
+   * Example input & output:
+   * - Deadline: 1am, reminder time: midnight
+   * - Deadline: 8am, reminder time: 4am
+   * - Deadline: 12 noon (or later), reminder time: 8am
+   */
+  def onTheDayReminderDateTime(deadline: DateTime): DateTime = {
+    val reminderTime = Seq(
+      deadline.withTime(Assignment.onTheDaySubmissionReminderTime),
+      deadline.minus(Assignment.minimumOnTheDaySubmissionReminderNotice)
+    ).min
+
+    // Don't allow the reminder to go to the previous day or the notifications don't make sense, pathological case
+    Seq(
+      reminderTime,
+      deadline.withTimeAtStartOfDay()
+    ).max
+  }
 
   case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 
@@ -197,7 +222,7 @@ class Assignment
   @JoinColumn(name = "module_id")
   override var module: Module = _
 
-  override def permissionsParents: Stream[Module] = Option(module).toStream
+  override def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)
@@ -322,9 +347,9 @@ class Assignment
 
   // IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
   // Use manual position management on add/removeFields, and in these getters
-  def submissionFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+  def submissionFields: Seq[AssignmentFormField] = fields.asScala.toSeq.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 
-  def feedbackFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+  def feedbackFields: Seq[AssignmentFormField] = fields.asScala.toSeq.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
   @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "membersgroup_id")
@@ -643,7 +668,7 @@ class Assignment
     * Get the latest requested extension, if there is one, per-user, falling back to an approved extension if there isn't one
     */
   def requestedOrApprovedExtensions: Map[String, Extension] =
-    allExtensions.mapValues { extensions =>
+    allExtensions.view.mapValues { extensions =>
       if (extensions.size == 1) extensions.head
       else extensions.find(_.awaitingReview).getOrElse {
         if (extensions.exists(_.requestedOn != null))
@@ -651,7 +676,7 @@ class Assignment
         else
           extensions.head
       }
-    }
+    }.toMap
 
   /**
     * Gets the currently in-review request
@@ -983,7 +1008,7 @@ class Assignment
     val usercodes = cm2MarkerStudentUsercodes(marker)
 
     if (usercodes.isEmpty) Nil
-    else submissions.asScala.filter { s => usercodes.contains(s.usercode) }
+    else submissions.asScala.toSeq.filter { s => usercodes.contains(s.usercode) }
   }
 
   def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)

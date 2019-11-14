@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.admin.modules
 
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl, GroupsObjects}
@@ -63,14 +63,14 @@ class SortModulesCommandTest extends TestBase with Mockito {
       command.mapping.asScala should be('empty)
 
       command.populate()
-      command.mapping.asScala.mapValues(_.asScala.toSeq) should be(Map(
+      command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         department -> Seq(mod1, mod2),
         ugDepartment -> Seq(mod4, mod5, mod3), // wrong order until .sort() is called
         pgDepartment -> Seq(mod6, mod7)
       ))
 
       command.sort()
-      command.mapping.asScala.mapValues(_.asScala.toSeq) should be(Map(
+      command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         department -> Seq(mod1, mod2),
         ugDepartment -> Seq(mod3, mod4, mod5),
         pgDepartment -> Seq(mod6, mod7)
@@ -86,7 +86,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
       command.sort()
 
       // Mapping by code is also sorted
-      command.mappingByCode.mapValues(_.asScala.toSeq) should be(Map(
+      command.mappingByCode.view.mapValues(_.asScala.toSeq).toMap should be(Map(
         "in" -> Seq(mod1, mod2),
         "in-ug" -> Seq(mod3, mod4, mod5),
         "in-pg" -> Seq(mod6, mod7)
@@ -198,7 +198,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
 
       def sort() {}
 
-      def populate() {}
+      def populate(): Unit = {}
     }
 
     val checking = mock[PermissionsChecking]
@@ -216,7 +216,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
 
       def sort() {}
 
-      def populate() {}
+      def populate(): Unit = {}
     }
 
     val d = new DescriptionImpl

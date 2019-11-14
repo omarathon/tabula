@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/groups/admin/module/{module}/groups/{smallGroupSet}"))
@@ -33,7 +33,7 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 
     val setView = ViewSetWithProgress(
       set = set,
-      groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+      groups = ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted),
       viewerRole = Tutor,
       progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
       nextStage = progress.nextStage,

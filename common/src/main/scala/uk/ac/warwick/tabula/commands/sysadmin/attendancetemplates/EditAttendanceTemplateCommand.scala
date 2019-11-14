@@ -48,7 +48,7 @@ trait EditAttendanceTemplateValidation extends CreateAttendanceTemplateValidatio
 
   self: EditAttendanceTemplateCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.validate(errors)
     if (template.points.size() > 0 && template.pointStyle != pointStyle) {
       errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.pointsExist")
@@ -63,7 +63,7 @@ trait EditAttendanceTemplateDescription extends Describable[AttendanceMonitoring
 
   override lazy val eventName = "EditAttendanceTemplate"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringTemplate(template)
   }
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.departments
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import org.springframework.validation.Errors
@@ -25,13 +25,13 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
 
   val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (allowExtensionRequests) {
       if (!(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)) {
         errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
       }
-      val firstMarkersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers")
-      firstMarkersValidator.validate(errors)
+      val extensionManagersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers", staffOnlyForADS = true)
+      extensionManagersValidator.validate(errors)
     }
     if (extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)) {
       errors.rejectValue("extensionGuidelineLink", "department.settings.invalidURL")
@@ -51,7 +51,7 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
   }
 
   // describe the thing that's happening.
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 }

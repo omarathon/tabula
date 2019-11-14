@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.{ElasticsearchTestBase, MockUserLookup, Mockito}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
 
 class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
@@ -29,7 +29,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
     queryService.client = AuditEventQueryServiceTest.this.client
     queryService.indexName = AuditEventQueryServiceTest.this.index.name
 
-    queryService.auditEventService.parseData(any[String]) answers { data =>
+    queryService.auditEventService.parseData(any[String]) answers { data: Any =>
       try {
         Option(data.asInstanceOf[String]).map {
           json.readValue(_, classOf[Map[String, Any]])
@@ -92,7 +92,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be('empty)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be('empty)
 
       // Index the audit event
       client.execute {
@@ -100,7 +100,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
       }
       blockUntilCount(1, index.name)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be(assignment.submissions.asScala)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be(assignment.submissions.asScala)
     }
   }
 
@@ -138,7 +138,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be('empty)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be('empty)
 
       // Index the audit event
       client.execute {
@@ -146,7 +146,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
       }
       blockUntilCount(1, index.name)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be(assignment.submissions.asScala)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be(assignment.submissions.asScala)
     }
   }
 
@@ -234,7 +234,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
         auditEvent.related = events.filter(_.eventId == auditEvent.eventId)
       }
 
-      queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
+      queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids: Any =>
         ids.asInstanceOf[Seq[Long]].flatMap { id => beforeEvents.find {
           _.id == id
         }
@@ -312,7 +312,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
         }
       }
 
-      queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
+      queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids: Any =>
         ids.asInstanceOf[Seq[Long]].flatMap { id => events.find {
           _.id == id
         }

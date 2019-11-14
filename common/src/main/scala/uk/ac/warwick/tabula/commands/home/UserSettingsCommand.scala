@@ -58,7 +58,7 @@ trait UserSettingsCommandValidation extends SelfValidating {
 
   self: UserSettingsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!user.exists) {
       errors.reject("user.mustBeLoggedIn")
     }
@@ -92,7 +92,7 @@ trait UserSettingsPermission extends RequiresPermissionsChecking with Permission
 
   self: UserSettingsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.UserSettings.Update, settings)
   }
 

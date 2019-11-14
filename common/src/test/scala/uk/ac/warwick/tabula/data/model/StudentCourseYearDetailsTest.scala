@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase

@@ -50,7 +50,7 @@ trait AgentStudentsPermissions extends RequiresPermissionsChecking with Permissi
 
   self: AgentStudentsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), currentMember)
   }
 

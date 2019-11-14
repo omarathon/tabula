@@ -53,7 +53,7 @@ trait ViewMemberRelationshipsCommandState {
 trait ViewMemberRelationshipsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewMemberRelationshipsCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), currentMember)
   }
 }

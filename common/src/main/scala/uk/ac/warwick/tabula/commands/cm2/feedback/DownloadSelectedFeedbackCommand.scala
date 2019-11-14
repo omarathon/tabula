@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
 import uk.ac.warwick.tabula.services.{AssessmentService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -48,18 +48,18 @@ class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentU
     }
 
     if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
-      val zip = Await.result(zipService.getSomeFeedbacksZip(feedbacks.asScala), Duration.Inf)
+      val zip = Await.result(zipService.getSomeFeedbacksZip(feedbacks.asScala.toSeq), Duration.Inf)
       Left(zip)
     } else {
-      Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))
+      Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.toSeq.map(_.id))))
     }
   }
 
   override def describe(d: Description): Unit = d
     .assignment(assignment)
-    .studentUsercodes(students.asScala)
+    .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.assignment(assignment)
-     .feedbacks(feedbacks.asScala)
+     .feedbacks(feedbacks.asScala.toSeq)
 }

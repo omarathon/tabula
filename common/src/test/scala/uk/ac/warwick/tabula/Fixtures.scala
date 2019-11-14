@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -186,7 +186,7 @@ object Fixtures extends Mockito {
     //add one PWD
     val uagm = new UpstreamAssessmentGroupMember(uag, "1000006")
     uag.members.add(uagm)
-    UpstreamAssessmentGroupInfo(uag, activeMembers.asScala)
+    UpstreamAssessmentGroupInfo(uag, activeMembers.asScala.toSeq)
   }
 
   def assessmentGroup(assignment: AssessmentComponent): UpstreamAssessmentGroup =
@@ -310,7 +310,7 @@ object Fixtures extends Mockito {
     scd.levelService = mockLevelService
     scyd.levelService = mockLevelService
 
-    mockLevelService.levelFromCode(any[String]) answers { arg =>
+    mockLevelService.levelFromCode(any[String]) answers { arg: Any =>
       val levelCode = arg.asInstanceOf[String]
       Some(new Level(levelCode, levelCode))
     }
@@ -333,7 +333,7 @@ object Fixtures extends Mockito {
     scyd.casUsed = false
     scyd.tier4Visa = false
     scyd.levelService = smartMock[LevelService]
-    scyd.levelService.levelFromCode(any[String]) answers { arg =>
+    scyd.levelService.levelFromCode(any[String]) answers { arg: Any =>
       val levelCode = arg.asInstanceOf[String]
       Some(new Level(levelCode, levelCode))
     }
@@ -491,7 +491,7 @@ object Fixtures extends Mockito {
     smm
   }
 
-  def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = {
+  def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = {
     target #:: target.permissionsParents.flatMap(withParents)
   }
 
@@ -502,12 +502,12 @@ object Fixtures extends Mockito {
     }
     userLookup.getUserByUserId(null) returns new AnonymousUser
 
-    userLookup.getUsersByUserIds(any[JList[String]]) answers { ids =>
-      val u = ids.asInstanceOf[JList[String]].asScala.map(id => (id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
+    userLookup.getUsersByUserIds(any[JList[String]]) answers { ids: Any =>
+      val u = ids.asInstanceOf[JList[String]].asScala.toSeq.map(id => (id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
       JHashMap(u: _*)
     }
 
-    userLookup.getUsersByUserIds(any[Seq[String]]) answers { ids =>
+    userLookup.usersByUserIds(any[Seq[String]]) answers { ids: Any =>
       val u = ids.asInstanceOf[Seq[String]].map(id => (id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
       Map(u: _*)
     }

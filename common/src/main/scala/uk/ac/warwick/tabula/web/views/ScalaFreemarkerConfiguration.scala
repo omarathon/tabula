@@ -8,7 +8,7 @@ import org.springframework.web.servlet.tags.form.FormTag
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Adapted from http://code.google.com/p/sweetscala

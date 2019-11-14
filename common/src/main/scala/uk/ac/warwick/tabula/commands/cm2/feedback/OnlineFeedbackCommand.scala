@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object OnlineFeedbackCommand {
@@ -100,23 +100,23 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 
     // save attachments
     if (feedback.attachments != null) {
-      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala
-      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
-      val filesToRemove = existingFiles -- filesToKeep
-      val filesToReplicate = filesToKeep -- existingFiles
+      val filesToKeep = Option(attachedFiles).getOrElse(JList()).asScala.toSeq
+      val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toSeq
+      val filesToRemove = existingFiles diff filesToKeep
+      val filesToReplicate = filesToKeep diff existingFiles
       fileAttachmentService.deleteAttachments(filesToRemove)
       feedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
       val replicatedFiles = filesToReplicate.map(_.duplicate())
       replicatedFiles.foreach(feedback.addAttachment)
     }
-    feedback.addAttachments(file.attached.asScala)
+    feedback.addAttachments(file.attached.asScala.toSeq)
   }
 }
 
 trait OnlineFeedbackBindListener extends BindListener {
   self: OnlineFeedbackState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     if (fields != null) {
       for ((key, field) <- fields.asScala) {
         result.pushNestedPath(s"fields[$key]")
@@ -134,7 +134,7 @@ trait OnlineFeedbackBindListener extends BindListener {
 trait OnlineFeedbackValidation extends SelfValidating {
   self: OnlineFeedbackState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     fieldValidation(errors)
   }
 
@@ -229,7 +229,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 
   self: OnlineFeedbackState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }
@@ -237,14 +237,14 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 trait OnlineFeedbackDescription[A] extends Describable[A] {
   self: OnlineFeedbackState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)
     d.assignment(assignment)
   }
 
   override def describeResult(d: Description): Unit = {
-    d.fileAttachments(file.attached.asScala)
+    d.fileAttachments(file.attached.asScala.toSeq)
   }
 }
 

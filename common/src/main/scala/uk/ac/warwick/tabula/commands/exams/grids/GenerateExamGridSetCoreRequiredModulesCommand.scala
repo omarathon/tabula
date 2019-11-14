@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridSetCoreRequiredModulesCommand {
   def apply(department: Department, academicYear: AcademicYear) =
@@ -82,7 +82,7 @@ trait GenerateExamGridSetCoreRequiredModulesPermissions extends RequiresPermissi
 
   self: GenerateExamGridSetCoreRequiredModulesCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -95,7 +95,7 @@ trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Map[
 
   override lazy val eventName = "GenerateExamGridSetCoreRequiredModules"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
       .properties(
         "academicYear" -> academicYear.toString,
@@ -117,11 +117,11 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
   private lazy val routesForDisplay: Seq[Route] = {
     if (routes.isEmpty) {
-      studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, studyYearByLevelOrBlock, includeTempWithdrawn, resitOnly = false, eagerLoad = true, disableFreshFilter = true)
+      studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, studyYearByLevelOrBlock, includeTempWithdrawn, resitOnly = false, eagerLoad = true, disableFreshFilter = true)
         .filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
         .map(scyd => scyd.studentCourseDetails.currentRoute).distinct
     } else {
-      routes.asScala.distinct
+      routes.asScala.toSeq.distinct
     }
   }
   lazy val allModules: Map[Route, Seq[Module]] = routesForDisplay.map(r =>

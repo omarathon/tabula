@@ -29,7 +29,7 @@ trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with R
 
   val year: AcademicYear
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 
@@ -55,5 +55,5 @@ trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with R
 trait ImportSmallGroupEventLocationsDescription extends Describable[Unit] {
   override lazy val eventName = "ImportSmallGroupEventLocations"
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 }

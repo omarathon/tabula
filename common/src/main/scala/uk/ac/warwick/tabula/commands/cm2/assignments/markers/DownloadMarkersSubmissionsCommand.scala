@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -47,7 +47,7 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
 
   override lazy val eventName = "DownloadMarkersSubmissions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
       .submissions(submissions)
       .properties("submissionCount" -> submissions.size)
@@ -59,7 +59,7 @@ trait DownloadMarkersSubmissionsPermissions extends PermissionsCheckingMethods w
 
   self: DownloadMarkersSubmissionsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -77,7 +77,7 @@ trait DownloadMarkersSubmissionsCommandState {
 
   var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-  def students: Seq[User] = markerFeedback.asScala.map(_.student)
+  def students: Seq[User] = markerFeedback.asScala.toSeq.map(_.student)
 
   // can only download these students submissions or a subset
   def markersStudents: Seq[User] = assignment.cm2MarkerAllocations(marker).flatMap(_.students).distinct
@@ -85,6 +85,6 @@ trait DownloadMarkersSubmissionsCommandState {
   lazy val submissions: Seq[Submission] = {
     // filter out ones we aren't the marker for
     val studentsToDownload = students.filter(markersStudents.contains).map(_.getUserId)
-    assignment.submissions.asScala.filter(s => studentsToDownload.contains(s.usercode))
+    assignment.submissions.asScala.toSeq.filter(s => studentsToDownload.contains(s.usercode))
   }
 }

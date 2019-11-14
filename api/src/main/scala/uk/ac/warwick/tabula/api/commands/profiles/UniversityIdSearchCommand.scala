@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.api.commands.profiles
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 object UniversityIdSearchCommand {
@@ -23,22 +24,15 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(AcademicYear.now())
+    val restrictions = if (studentsOnly) {
+      buildRestrictions(AcademicYear.now()) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+    } else {
+      groupNameRestriction ++ homeDepartmentRestriction
+    }.toSeq
 
-    Option(department) match {
-      case Some(d) =>
-        Seq(d).flatMap(dept =>
-          profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-            dept,
-            restrictions,
-            buildOrders()
-          )
-        ).distinct
-      case _ =>
-        profileService.findAllUniversityIdsByRestrictions(
-          restrictions,
-          buildOrders()
-        ).distinct
-    }
+    profileService.findAllUniversityIdsByRestrictions(
+      restrictions,
+      buildOrders()
+    ).distinct
   }
 }

@@ -82,7 +82,7 @@ trait ProfileExportPermissions extends RequiresPermissionsChecking with Permissi
 
   self: ProfileExportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 
@@ -113,6 +113,7 @@ trait ProfileExportCommandState extends FiltersStudents {
     else multiSearch split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

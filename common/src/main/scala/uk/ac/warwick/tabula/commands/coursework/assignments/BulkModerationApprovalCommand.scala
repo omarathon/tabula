@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object BulkModerationApprovalCommand {
@@ -36,14 +36,14 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
   val user: User = marker
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // filter out any feedbacks where the current user is not the marker
     markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser.exists {
       _ == marker
     }).asJava
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback.isEmpty)
       errors.rejectValue("students", "markers.finishMarking.noStudents")
@@ -70,7 +70,7 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
 trait BulkModerationApprovalPermissions extends RequiresPermissionsChecking {
   self: BulkModerationApprovalState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -84,7 +84,7 @@ trait BulkModerationApprovalDescription extends Describable[Unit] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .markerFeedbacks(markerFeedback.asScala)
+     .markerFeedbacks(markerFeedback.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.property("feedbackCount" -> markerFeedback.size())

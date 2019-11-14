@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ReleaseToMarkerNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"

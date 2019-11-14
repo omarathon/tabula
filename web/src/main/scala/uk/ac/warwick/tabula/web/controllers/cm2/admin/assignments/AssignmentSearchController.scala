@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.JSONView
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Profile(Array("cm2Enabled"))
 @Controller

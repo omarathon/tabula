@@ -7,7 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait GeneratesStudentRelationshipWorkbook {
 

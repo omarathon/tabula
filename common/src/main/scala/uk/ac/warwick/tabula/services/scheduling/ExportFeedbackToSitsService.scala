@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentGroup, AssignmentFeedback, Fee
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, ExportResitFeedbackToSitsQuery, SASPartialMatchQuery, SITSMarkRow, SRAPartialMatchQuery, SasCountQuery, SraCountQuery}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait ExportFeedbackToSitsServiceComponent {
   def exportFeedbackToSitsService: ExportFeedbackToSitsService
@@ -146,7 +146,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
     parameterGetter.getQueryParams match {
       case Some(params) =>
-        matchQuery.executeByNamedParam(params.asScala.filterKeys(_ != "now").asJava).asScala
+        matchQuery.executeByNamedParam(params.asScala.view.filterKeys(_ != "now").toMap.asJava).asScala.toSeq
       case None =>
         logger.warn(s"Cannot get partial matching $tableName records for feedback ${feedback.id} as no assessment groups found")
         Nil

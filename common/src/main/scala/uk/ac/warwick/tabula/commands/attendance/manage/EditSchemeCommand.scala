@@ -51,7 +51,7 @@ trait EditSchemeValidation extends SelfValidating {
 
   self: EditSchemeCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     if (!scheme.points.isEmpty && pointStyle != scheme.pointStyle) {
       errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.pointsExist")
@@ -64,7 +64,7 @@ trait EditSchemePermissions extends RequiresPermissionsChecking with Permissions
 
   self: EditSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, scheme)
   }
 
@@ -76,7 +76,7 @@ trait EditSchemeDescription extends Describable[AttendanceMonitoringScheme] {
 
   override lazy val eventName = "EditScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringScheme(scheme)
   }
 }

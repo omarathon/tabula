@@ -169,7 +169,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
       command.eventsToImport.get(0).group = group1
       command.eventsToImport.get(1).group = group2
 
-      val sets: mutable.Buffer[SmallGroupEvent] = command.applyInternal()
+      val sets: Seq[SmallGroupEvent] = command.applyInternal()
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 

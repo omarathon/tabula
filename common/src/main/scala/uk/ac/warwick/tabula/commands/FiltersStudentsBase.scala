@@ -13,11 +13,13 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait FiltersStudentsBase {
 
   def courseTypes: JList[CourseType]
+
+  def specificCourseTypes: JList[SpecificCourseType]
 
   def routes: JList[Route]
 
@@ -44,18 +46,19 @@ trait FiltersStudentsBase {
   var otherCriteria: JList[String] = JArrayList()
 
   protected def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
-    (department.modules.asScala ++ department.children.asScala.flatMap {
+    (department.modules.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       modulesForDepartmentAndSubDepartments
     }).sorted
 
   protected def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-    (department.routes.asScala ++ department.children.asScala.flatMap {
+    (department.routes.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       routesForDepartmentAndSubDepartments
     }).sorted
 
   def serializeFilter: String = {
     val result = new UriBuilder()
     courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
+    specificCourseTypes.asScala.foreach(p => result.addQueryParameter("specificCourseTypes", p.code.toString))
     routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
     courses.asScala.foreach(p => result.addQueryParameter("courses", p.code))
     modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
@@ -75,6 +78,7 @@ trait FiltersStudentsBase {
   def filterMap: Map[String, String] = {
     Map(
       "courseTypes" -> courseTypes.asScala.map(_.code).mkString(","),
+      "specificCourseTypes" -> specificCourseTypes.asScala.map(_.code).mkString(","),
       "routes" -> routes.asScala.map(_.code).mkString(","),
       "courses" -> courses.asScala.map(_.code).mkString(","),
       "modesOfAttendance" -> modesOfAttendance.asScala.map(_.code).mkString(","),
@@ -97,7 +101,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
   with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
   def deserializeFilter(filterString: String): Unit = {
-    val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8).asScala.groupBy(_.getName).map {
+    val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8).asScala.toSeq.groupBy(_.getName).map {
       case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
     }
     courseTypes.clear()
@@ -105,8 +109,17 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
       try {
         courseTypes.add(CourseType(item))
       } catch {
-        case e: IllegalArgumentException =>
+        case _: IllegalArgumentException =>
           logger.warn(s"Could not deserialize filter with courseType $item")
+      }
+    })
+    specificCourseTypes.clear()
+    params.get("specificCourseTypes").foreach(_.foreach { item =>
+      try {
+        specificCourseTypes.add(SpecificCourseType.fromCourseCode(item))
+      } catch {
+        case _: IllegalArgumentException =>
+          logger.warn(s"Could not deserialize filter with specificCourseTypes $item")
       }
     })
     routes.clear()

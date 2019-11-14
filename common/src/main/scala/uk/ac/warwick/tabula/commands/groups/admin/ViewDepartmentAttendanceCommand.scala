@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ViewDepartmentAttendanceCommand {
   val RequiredPermission = Permissions.SmallGroupEvents.ViewRegister
@@ -32,7 +32,7 @@ class ViewDepartmentAttendanceCommandInternal(val department: Department, val ac
   override def applyInternal(): Seq[Module] = {
     val modules =
       if (securityService.can(user, Permissions.SmallGroupEvents.ViewRegister, department)) {
-        department.modules.asScala
+        department.modules.asScala.toSeq
       } else {
         moduleAndDepartmentService.modulesWithPermission(user, Permissions.SmallGroupEvents.ViewRegister, department).toSeq
       }

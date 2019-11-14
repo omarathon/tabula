@@ -19,7 +19,7 @@ class ScalaRestrictionTest extends TestBase {
     )
 
     val currentAcademicYear = AcademicYear.now()
-    mrRestriction.get.toString should be(s"ScalaRestriction[underlying=(moduleRegistration.module in (Module[advanced foraging], Module[fungal forays]) and moduleRegistration.year in (${currentAcademicYear.toString})),aliases=Map()]")
+    mrRestriction.get.toString should be(s"ScalaRestriction[underlying=(moduleRegistration.module in (Module[advanced foraging], Module[fungal forays]) and moduleRegistration.year in (${currentAcademicYear.toString})),aliases=HashMap()]")
   }
 
   @Test def validateNoModuleRestriction: Unit = {

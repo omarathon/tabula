@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.openqa.selenium.interactions.Actions
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, LoginDetails}
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, DateFormats, LoginDetails}
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
@@ -22,7 +24,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   val TEST_ROUTE_CODE = "xx456"
   val TEST_DEPARTMENT_CODE = "xxx"
   val TEST_COURSE_CODE = "Ux456"
-  val moreBefore: () => Unit = () => Unit
+  val moreBefore: () => Unit = () => ()
 
   before {
     Given("The test department exists")
@@ -173,6 +175,24 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     }
 
     textField("name").value = assignmentName
+
+    // Roll the dates to working days
+    val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+    def isWorkingDay(date: LocalDate): Boolean =
+      !holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY
+
+    var openDate: LocalDate = LocalDate.now().minusDays(1)
+    while (!isWorkingDay(openDate)) {
+      openDate = openDate.minusDays(1)
+    }
+    textField("openDate").value = DateFormats.DatePickerFormatter.print(openDate)
+
+    var closeDate: LocalDate = openDate.plusWeeks(2)
+    while (!isWorkingDay(closeDate)) {
+      closeDate = closeDate.plusDays(1)
+    }
+    textField("closeDate").value = DateFormats.DatePickerFormatter.print(closeDate)
+
     singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
     cssSelector(s"input[name=createAndAddFeedback]").webElement.click()
@@ -444,10 +464,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       go to Path(s"/coursework/submission/$assignmentId")
     }
 
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource(file).getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource(file).getFile)
 
-    submit()
+    val submitButton = id("main").webElement.findElement(By.cssSelector("div.submit-buttons .btn-primary"))
+    click on submitButton
   }
 
   def getInputByLabel(label: String): Option[WebElement] =

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, Notific
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(

@@ -71,7 +71,7 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
 trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FilterStudentsState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Search, department)
   }
 }
@@ -86,6 +86,7 @@ trait FilterStudentsState extends ProfileFilterExtras {
   var sortOrder: JList[Order] = JArrayList()
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

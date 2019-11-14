@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Component
 class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption with AutowiringMitCircsSubmissionServiceComponent {

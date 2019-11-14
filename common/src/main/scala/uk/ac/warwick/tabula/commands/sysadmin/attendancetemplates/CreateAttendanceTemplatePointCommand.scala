@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyl
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CreateAttendanceTemplatePointCommand {
   def apply(template: AttendanceMonitoringTemplate) =
@@ -48,7 +48,7 @@ trait CreateAttendanceTemplatePointValidation extends SelfValidating {
 
   self: CreateAttendanceTemplatePointCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!name.hasText) {
       errors.rejectValue("name", "NotEmpty")
     } else if (name.length > 4000) {
@@ -99,7 +99,7 @@ trait CreateAttendanceTemplatePointDescription extends Describable[AttendanceMon
 
   override lazy val eventName = "CreateAttendanceTemplatePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringTemplate(template)
   }
 }

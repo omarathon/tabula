@@ -28,7 +28,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       eventually(currentUrl should include(s"/admin/assignments/$assignmentId/marker/"))
 
       When("I expand the student")
-      eventually(click on cssSelector(".toggle-icon-large.student-col").webElement)
+      eventually(click on cssSelector(".student-col .row-toggle-collapse-link").webElement)
       Then("Marking and feedback")
       eventually(pageSource contains "Marking and feedback" should be (true))
 
@@ -57,8 +57,8 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       eventually(currentUrl should include(s"/admin/assignments/$assignmentId/marker/"))
 
       When("I expand the student again")
-      eventually(cssSelector(".toggle-icon-large.student-col").webElement.isDisplayed shouldBe true)
-      click on cssSelector(".toggle-icon-large.student-col").webElement
+      eventually(cssSelector(".student-col .row-toggle-collapse-link").webElement.isDisplayed shouldBe true)
+      click on cssSelector(".student-col .row-toggle-collapse-link").webElement
       Then("The feedback I entered before should be present")
       eventually(pageSource contains "Marking and feedback" should be (true))
       numberField("mark").value should be("90")

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FilterStudentsOrRelationships {
 
@@ -24,7 +24,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   def getAliasPaths(sitsTable: String): Seq[(String, AliasAndJoinType)]
 
   protected def buildOrders(): Seq[ScalaOrder] =
-    (sortOrder.asScala ++ defaultOrder).map { underlying =>
+    (sortOrder.asScala.toSeq ++ defaultOrder).map { underlying =>
       underlying.getPropertyName match {
         case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying.nulls(NullPrecedence.LAST), getAliasPaths(aliasPath): _*)
         case _ => ScalaOrder(underlying.nulls(NullPrecedence.LAST))
@@ -38,6 +38,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
   def courseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
     "course.code", courseTypes.asScala.flatMap(_.courseCodeChars.map(_.toString)),
+    getAliasPaths("course"): _*
+  )
+
+  def specificCourseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
+    "course.code", specificCourseTypes.asScala.map(_.code.toString),
     getAliasPaths("course"): _*
   )
 
@@ -102,6 +107,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
     val restrictions = Seq(
       courseTypeRestriction,
+      specificCourseTypeRestriction,
       routeRestriction,
       courseRestriction,
       attendanceRestriction,

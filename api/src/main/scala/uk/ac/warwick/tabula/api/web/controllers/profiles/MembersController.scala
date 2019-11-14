@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONErrorView, JSONView}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/v1/members"))
@@ -33,7 +33,7 @@ class MembersController extends ApiController with AutowiringProfileServiceCompo
 
   @ModelAttribute("command")
   def command(@RequestParam(name = "department", required = false) departments: JList[Department]): Command =
-    MemberSearchCommand(Option(departments).map(_.asScala).getOrElse(Seq[Department]()))
+    MemberSearchCommand(Option(departments).map(_.asScala.toSeq).getOrElse(Seq[Department]()))
 
   @GetMapping(produces = Array("application/json"))
   def search(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {

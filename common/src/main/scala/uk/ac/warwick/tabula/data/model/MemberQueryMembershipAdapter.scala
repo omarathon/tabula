@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentS
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 sealed trait MemberQueryMembershipAdapter {
   def memberQuery: String
@@ -58,7 +58,7 @@ class DepartmentSmallGroupSetMemberQueryMembershipAdapter(set: DepartmentSmallGr
 
   override def users: Set[User] = set.members.users
 
-  override def groups: Seq[DepartmentSmallGroup] = set.groups.asScala
+  override def groups: Seq[DepartmentSmallGroup] = set.groups.asScala.toSeq
 
   override def userInGroup(user: User, group: DepartmentSmallGroup): Boolean = group.students.includesUser(user)
 
@@ -92,7 +92,7 @@ class SmallGroupSetMemberQueryMembershipAdapter(set: SmallGroupSet) extends Memb
 
   override def users: Set[User] = set.members.users
 
-  override def groups: Seq[SmallGroup] = set.groups.asScala
+  override def groups: Seq[SmallGroup] = set.groups.asScala.toSeq
 
   override def userInGroup(user: User, group: SmallGroup): Boolean = group.students.includesUser(user)
 

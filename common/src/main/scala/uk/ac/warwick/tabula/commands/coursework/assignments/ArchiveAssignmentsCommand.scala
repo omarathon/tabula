@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ArchiveAssignmentsCommand {
   def apply(department: Department, modules: Seq[Module]) =
@@ -27,20 +27,19 @@ abstract class ArchiveAssignmentsCommand(val department: Department, val modules
   self: AssessmentServiceComponent =>
 
   def applyInternal(): Seq[Assignment] = transactional() {
-    assignments.asScala.foreach { assignment =>
+    assignments.asScala.toSeq.map { assignment =>
       assignment.archive()
 
       assessmentService.save(assignment)
+      assignment
     }
-
-    assignments.asScala
   }
 
 }
 
 trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ArchiveAssignmentsState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
     else for (module <- modules) {
       p.mustBeLinked(p.mandatory(module), mandatory(department))

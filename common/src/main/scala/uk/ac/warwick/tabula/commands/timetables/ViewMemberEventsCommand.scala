@@ -179,7 +179,7 @@ trait ViewMemberEventsRequest extends ViewMemberEventsState with TimetableEvents
 trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewMemberEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(ViewMemberEventsCommand.RequiredPermission, mandatory(member))
   }
 }
@@ -187,7 +187,7 @@ trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with Permi
 trait ViewMemberEventsValidation extends SelfValidating {
   self: ViewMemberEventsRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Must have either an academic year or a start and an end
     if (academicYear == null && (start == null || end == null)) {
       errors.rejectValue("academicYear", "NotEmpty")

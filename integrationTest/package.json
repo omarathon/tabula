@@ -4,7 +4,7 @@
   "description": "Tabula integration tests",
   "private": true,
   "dependencies": {
-    "chromedriver": "75.0.1",
-    "puppeteer": "1.15.0"
+    "chromedriver": "78.0.1",
+    "puppeteer": "1.20.0"
   }
 }

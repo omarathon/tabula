@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.math.BigDecimal.RoundingMode
 
@@ -54,8 +54,8 @@ class UploadYearMarksCommandInternal(val department: Department, val academicYea
 
   self: UploadYearMarksCommandState with StudentCourseYearDetailsDaoComponent =>
 
-  override def applyInternal(): ArrayBuffer[StudentCourseYearDetails] = {
-    processedYearMarks.flatMap(item =>
+  override def applyInternal(): Seq[StudentCourseYearDetails] = {
+    processedYearMarks.toSeq.flatMap(item =>
       if (item.scyd.isDefined && item.errors.isEmpty) {
         item.scyd.get.agreedMark = item.mark.underlying
         item.scyd.get.agreedMarkUploadedDate = null
@@ -77,7 +77,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
     with StudentCourseYearDetailsDaoComponent
     with PermissionsServiceComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val fileNames = file.fileNames.map(_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
@@ -93,7 +93,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
         result.popNestedPath()
 
         if (!file.attached.isEmpty) {
-          processFiles(file.attached.asScala)
+          processFiles(file.attached.asScala.toSeq)
         }
 
         def processFiles(files: Seq[FileAttachment]) {
@@ -118,7 +118,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 
   private def postProcessYearMarks(): Unit = {
     // Deal with rows with invalid academic years
-    val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.partition(item => item.academicYear.maybeText.forall(academicYearString => {
+    val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.toSeq.partition(item => item.academicYear.maybeText.forall(academicYearString => {
       try {
         AcademicYear.parse(academicYearString)
         true
@@ -176,7 +176,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
   }
 
   private def validateStudent(studentId: String, maybeScyd: Option[StudentCourseYearDetails], isSCJCode: Boolean): Seq[String] = {
-    def departmentAndParents(department: Department): Stream[Department] = Stream(department) ++ (if (department.hasParent) departmentAndParents(department.parent) else Stream())
+    def departmentAndParents(department: Department): LazyList[Department] = department #:: (if (department.hasParent) departmentAndParents(department.parent) else LazyList.empty)
 
     maybeScyd match {
       case None =>
@@ -197,7 +197,7 @@ trait UploadYearMarksPermissions extends RequiresPermissionsChecking with Permis
 
   self: UploadYearMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -209,7 +209,7 @@ trait UploadYearMarksDescription extends Describable[Seq[StudentCourseYearDetail
 
   override lazy val eventName = "UploadYearMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department).properties(
       "academicYear" -> academicYear.toString
     )

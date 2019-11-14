@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.beans.{InvalidPropertyException, MutablePropertyValues}
 import uk.ac.warwick.tabula.helpers.LazyLists
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CustomDataBinderTest extends TestBase {
 

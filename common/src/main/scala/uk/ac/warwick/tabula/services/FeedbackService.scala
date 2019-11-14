@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.hibernate.FetchMode
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Daoisms
@@ -58,7 +58,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
     val plagiarisedIds = plagiarisedSubmissions.map(_.usercode)
     val unreleasedIds = assignment.unreleasedFeedback.map(_.usercode)
     val unplagiarisedUnreleasedIds = unreleasedIds.filter { usercode => !plagiarisedIds.contains(usercode) }
-    userLookup.getUsersByUserIds(unplagiarisedUnreleasedIds).toSeq
+    userLookup.usersByUserIds(unplagiarisedUnreleasedIds).toSeq
   }
 
   def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback] = {

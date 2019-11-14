@@ -115,7 +115,7 @@ trait AttendanceNotePermissions extends RequiresPermissionsChecking with Permiss
 
   self: AttendanceNoteCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Record, student)
   }
 }

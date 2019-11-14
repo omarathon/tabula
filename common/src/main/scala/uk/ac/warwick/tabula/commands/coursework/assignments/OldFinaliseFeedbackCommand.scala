@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService,
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
@@ -75,7 +75,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FinaliseFeedbackCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
   }
 }

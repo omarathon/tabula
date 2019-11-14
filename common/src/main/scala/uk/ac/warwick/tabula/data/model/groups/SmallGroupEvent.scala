@@ -102,7 +102,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     _tutors = group
   }
 
-  def permissionsParents: Stream[SmallGroup] = Option(group).toStream
+  def permissionsParents: LazyList[SmallGroup] = Option(group).to(LazyList)
 
   def toStringProps = Seq(
     "id" -> id,

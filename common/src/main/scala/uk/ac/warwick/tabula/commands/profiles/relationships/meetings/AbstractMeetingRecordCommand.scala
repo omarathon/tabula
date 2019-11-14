@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMe
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 abstract class AbstractMeetingRecordCommand {
@@ -71,8 +71,8 @@ abstract class AbstractMeetingRecordCommand {
 
     // delete attachments that have been removed
     if (meeting.attachments != null) {
-      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-      val filesToRemove = meeting.attachments.asScala -- filesToKeep
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
+      val filesToRemove = meeting.attachments.asScala.toSeq diff filesToKeep
       meeting.attachments = JArrayList[FileAttachment](filesToKeep)
       fileAttachmentService.deleteAttachments(filesToRemove)
     }
@@ -130,7 +130,7 @@ trait MeetingRecordValidation extends SelfValidating with AttachedFilesValidatio
 
   self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
 
     rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
     if (title.length > MeetingRecord.MaxTitleLength) {
@@ -184,7 +184,7 @@ trait MeetingRecordValidation extends SelfValidating with AttachedFilesValidatio
       }
     }
 
-    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala, Option(file.attached).getOrElse(JList()).asScala)
+    attachedFilesValidation(errors, Option(attachedFiles).getOrElse(JList()).asScala.toSeq, Option(file.attached).getOrElse(JList()).asScala.toSeq)
   }
 }
 

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
   extends FreemarkerXHTMLPDFGeneratorComponent
@@ -120,7 +120,7 @@ trait DownloadAdminSubmissionsForPrintingPermissions extends RequiresPermissions
 
   self: DownloadSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.Submission.Read, assignment)
   }
@@ -131,7 +131,7 @@ trait DownloadMarkerSubmissionsForPrintingPermissions extends RequiresPermission
 
   self: DownloadMarkerSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(assignment, module)
     p.PermissionCheck(Permissions.Submission.Read, assignment)
     if (submitter.apparentUser != marker) {
@@ -166,7 +166,7 @@ trait DownloadAdminSubmissionsForPrintingCommandRequest extends DownloadSubmissi
 
   self: DownloadSubmissionsForPrintingCommandState =>
 
-  override def submissions: Seq[Submission] = students.asScala.flatMap(s =>
+  override def submissions: Seq[Submission] = students.asScala.toSeq.flatMap(s =>
     assignment.submissions.asScala.find(_.usercode == s)
   )
 }

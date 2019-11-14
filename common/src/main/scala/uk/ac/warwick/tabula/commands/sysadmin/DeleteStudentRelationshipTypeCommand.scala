@@ -34,7 +34,7 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
     relationshipType
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // Don't allow removal if non-empty
     if (!relationshipType.empty) {
       errors.reject("relationshipType.delete.nonEmpty")
@@ -47,7 +47,7 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   this: HasExistingStudentRelationshipType =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(relationshipType)
     p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
   }

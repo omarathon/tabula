@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.controllers.{DepartmentScopedController, Departm
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class CopySmallGroupSetsController extends GroupsController {
 
@@ -75,7 +75,7 @@ class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsControlle
 
   @ModelAttribute("copySmallGroupSetsCommand")
   def command(@PathVariable department: Department): CopySmallGroupSetsCommand = {
-    val modules = mandatory(department).modules.asScala.filter(_.groupSets.asScala.exists { set => !set.deleted && !set.archived }).sortBy(_.code)
+    val modules = mandatory(department).modules.asScala.toSeq.filter(_.groupSets.asScala.exists { set => !set.deleted && !set.archived }).sortBy(_.code)
     CopySmallGroupSetsCommand(department, modules)
   }
 

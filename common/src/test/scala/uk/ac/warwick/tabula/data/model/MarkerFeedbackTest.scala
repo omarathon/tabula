@@ -4,7 +4,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Random
 
 // scalastyle:off magic.number

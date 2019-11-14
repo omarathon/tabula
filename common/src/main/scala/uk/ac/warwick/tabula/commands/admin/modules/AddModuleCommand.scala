@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.admin.modules
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.{ValidationUtils, Errors}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -38,7 +38,7 @@ class AddModuleCommandInternal(val department: Department) extends CommandIntern
 trait AddModuleCommandValidation extends SelfValidating {
   self: AddModuleCommandState with ModuleAndDepartmentServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // TODO proper department checks before we open this up to non-sysadmins
 
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "code", "NotEmpty")
@@ -72,7 +72,7 @@ trait AddModuleCommandState {
 trait AddModuleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddModuleCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Module.Create, mandatory(department))
   }
 }

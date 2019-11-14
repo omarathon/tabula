@@ -62,7 +62,7 @@ class ImportProfilesJob extends AutowiredJobBean {
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportProfilesSingleDepartmentJob extends AutowiredJobBean with Logging {
 
-  override def executeInternal(context: JobExecutionContext): Unit = {
+  override def executeInternal(context: JobExecutionContext): Unit =
     if (features.schedulingProfilesImport)
       exceptionResolver.reportExceptions {
         EarlyRequestInfo.wrap() {
@@ -76,7 +76,5 @@ class ImportProfilesSingleDepartmentJob extends AutowiredJobBean with Logging {
           }
         }
       }
-
-  }
 
 }

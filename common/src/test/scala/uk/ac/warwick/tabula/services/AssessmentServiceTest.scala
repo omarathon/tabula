@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormField
 import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
@@ -189,7 +189,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     assignment.foreach { assmt =>
       assmt.feedbackService = smartMock[FeedbackService]
-      assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _ => assmt.feedbacks.asScala }
+      assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _: Any => assmt.feedbacks.asScala.toSeq }
 
       // create a feedback for the assignment, not yet released
       val feedback = new AssignmentFeedback
@@ -786,9 +786,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentMembershipService.save(upstreamAg2)
     assignmentMembershipService.save(upstreamAg3)
 
-    val uagInfo1 = UpstreamAssessmentGroupInfo(upstreamAg1, upstreamAg1.members.asScala)
-    val uagInfo2 = UpstreamAssessmentGroupInfo(upstreamAg2, upstreamAg2.members.asScala)
-    val uagInfo3 = UpstreamAssessmentGroupInfo(upstreamAg3, upstreamAg3.members.asScala.filter(_.universityId != "1000006"))
+    val uagInfo1 = UpstreamAssessmentGroupInfo(upstreamAg1, upstreamAg1.members.asScala.toSeq)
+    val uagInfo2 = UpstreamAssessmentGroupInfo(upstreamAg2, upstreamAg2.members.asScala.toSeq)
+    val uagInfo3 = UpstreamAssessmentGroupInfo(upstreamAg3, upstreamAg3.members.asScala.toSeq.filter(_.universityId != "1000006"))
 
 
     assignment1.members.knownType.addUserId("manual1")

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OldOnlineFeedbackCommandTest extends TestBase with Mockito {
 
@@ -36,7 +36,7 @@ class OldOnlineFeedbackCommandTest extends TestBase with Mockito {
     assignment.feedbacks.add(feedback2)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) returns assignment.feedbacks.asScala
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) returns assignment.feedbacks.asScala.toSeq
 
     val command = new OldOnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 

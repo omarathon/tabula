@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object ExamGridStudentCheckCommand {
@@ -61,7 +61,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 
   self: ExamGridStudentCheckState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (member == null) {
       errors.reject("examGrid.studentcheck.missingstudentmember")
     } else if (!member.isInstanceOf[StudentMember]) {
@@ -74,7 +74,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 trait ExamGridStudentCheckPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ExamGridStudentCheckState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 }

@@ -5,23 +5,20 @@ import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.{AcademicYear, EarlyRequestInfo}
 import uk.ac.warwick.tabula.commands.scheduling.{UnlinkAttendanceMonitoringSchemeCommand, UpdateAttendanceMonitoringSchemeMembershipCommand}
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
+import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
+import uk.ac.warwick.tabula.{AcademicYear, EarlyRequestInfo, Features}
 
-@Component
-@Profile(Array("scheduling"))
-@DisallowConcurrentExecution
-@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-class UpdateMonitoringPointSchemeMembershipJob extends AutowiredJobBean {
-
-  override def executeInternal(context: JobExecutionContext): Unit = {
+object UpdateMonitoringPointSchemeMembershipJob {
+  def execute(features: Features, exceptionResolver: ExceptionResolver): Unit =
     if (features.schedulingAttendanceUpdateSchemes) {
       exceptionResolver.reportExceptions {
         EarlyRequestInfo.wrap() {
           UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
         }
       }
+
       exceptionResolver.reportExceptions {
         EarlyRequestInfo.wrap() {
           val thisAcademicYear = AcademicYear.now()
@@ -31,6 +28,15 @@ class UpdateMonitoringPointSchemeMembershipJob extends AutowiredJobBean {
         }
       }
     }
-  }
+}
+
+@Component
+@Profile(Array("scheduling"))
+@DisallowConcurrentExecution
+@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
+class UpdateMonitoringPointSchemeMembershipJob extends AutowiredJobBean {
+
+  override def executeInternal(context: JobExecutionContext): Unit =
+    UpdateMonitoringPointSchemeMembershipJob.execute(features, exceptionResolver)
 
 }

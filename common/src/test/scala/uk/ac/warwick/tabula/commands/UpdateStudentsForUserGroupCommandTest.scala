@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceCompon
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 

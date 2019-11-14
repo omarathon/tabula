@@ -110,7 +110,7 @@ class CommandTest extends TestBase {
 // these commands need to not be nested inside "CommandTest", otherwise the name-munging code gets
 // confused by the fact that "Command" appears in the outer class name.
 class TestCommand extends Command[Boolean] {
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
   def applyInternal() = true
 }

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringRelationshipServiceComponent, ModuleAndDepartmentServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DisplaySettingsCommand {
   def apply(department: Department) =
@@ -51,7 +51,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   var enableMitCircs: Boolean = department.enableMitCircs
   var mitCircsGuidance: String = department.mitCircsGuidance
 
-  def populate() {
+  def populate(): Unit = {
     relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
       if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
         studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
@@ -96,7 +96,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 
 trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking {
   this: DisplaySettingsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
   }
 }

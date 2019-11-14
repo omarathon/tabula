@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
@@ -165,7 +165,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
       assignment.feedbackService = smartMock[FeedbackService]
-      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
       val submission = Fixtures.submission()
       submission.assignment = assignment
@@ -207,8 +207,8 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
       permissionsService.getAllGrantedRolesFor(targetAssignment) returns Nil
       permissionsService.getAllGrantedRolesFor(targetDept) returns Nil
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (Stream(moduleGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (Stream(deptGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (LazyList(moduleGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (LazyList(deptGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
 
       val existing = GrantedPermission(targetDept, Permissions.Submission.Delete, true)
       existing.users.knownType.addUserId("admin3")
@@ -252,7 +252,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       assignment.id = "1234"
 
       assignment.feedbackService = smartMock[FeedbackService]
-      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
       val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
       assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava

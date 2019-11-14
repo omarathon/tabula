@@ -106,7 +106,7 @@ trait CreateMonitoringPointReportCommandDescription extends Describable[Seq[Moni
 
   override lazy val eventName = "MonitoringPointReport"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     val students = missedPoints.map { case (student, count) => student.universityId -> count }
 
     d.department(department)
@@ -119,7 +119,7 @@ trait CreateMonitoringPointReportCommandDescription extends Describable[Seq[Moni
 trait CreateMonitoringPointReportCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateMonitoringPointReportCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Report, mandatory(department))
   }
 }

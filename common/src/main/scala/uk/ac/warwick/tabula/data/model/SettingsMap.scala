@@ -86,7 +86,7 @@ trait HasSettings {
   }
 
   protected def getStringMapSetting(key: String): Option[Map[String, String]] = {
-    parseMapFromAny(getSetting(key)).map(_.mapValues(_.asInstanceOf[String]))
+    parseMapFromAny(getSetting(key)).map(_.view.mapValues(_.asInstanceOf[String]).toMap)
   }
 
   protected def getUserSeqSetting(key: String): Option[Seq[String]] = getSetting(key) match {

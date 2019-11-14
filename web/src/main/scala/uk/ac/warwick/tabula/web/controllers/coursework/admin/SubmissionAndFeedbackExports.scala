@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.XmlUtils._
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.xml._
 
@@ -195,17 +195,17 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
   protected def itemData(item: Student): Map[String, Any] =
     (
       prefix(identityData(item), "student") ++
-        prefix(submissionData(item), "submission") ++
-        prefix(extraFieldData(item), "submission") ++
-        prefix(submissionStatusData(item), "submission") ++
-        (if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++
-        prefix(plagiarismData(item), "marking") ++
-        prefix(feedbackData(item), "feedback") ++
-        prefix(adjustmentData(item), "adjustment")
-      ).mapValues {
+      prefix(submissionData(item), "submission") ++
+      prefix(extraFieldData(item), "submission") ++
+      prefix(submissionStatusData(item), "submission") ++
+      (if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++
+      prefix(plagiarismData(item), "marking") ++
+      prefix(feedbackData(item), "feedback") ++
+      prefix(adjustmentData(item), "adjustment")
+    ).view.mapValues {
       case Some(any) => any
       case any => any
-    }
+    }.toMap
 
   private def prefix(fields: Seq[String], prefix: String) = fields map { name => prefix + "-" + name }
 

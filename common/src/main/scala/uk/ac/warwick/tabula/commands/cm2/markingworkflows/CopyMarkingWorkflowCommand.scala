@@ -69,7 +69,7 @@ trait CopyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 
   override lazy val eventName: String = "CopyMarkingWorkflow"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department)
     d.markingWorkflow(markingWorkflow)
   }

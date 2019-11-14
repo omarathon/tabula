@@ -87,7 +87,7 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   override def toString: String = "UserSettings [" + settings + "]"
 
-  def permissionsParents: Stream[Nothing] = Stream.empty
+  def permissionsParents: LazyList[PermissionsTarget] = LazyList.empty
 }
 
 object UserSettings {

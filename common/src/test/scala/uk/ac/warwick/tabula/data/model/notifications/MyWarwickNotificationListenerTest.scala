@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.Activity
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class MyWarwickNotificationListenerTest extends TestBase with Mockito {

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentAnonymity}
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -35,7 +35,7 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
     val existingAllocations = listAllocationsCmd.apply()
 
     val stages: Map[String, Seq[String]] = if (workflow.workflowType.rolesShareAllocations) {
-      workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name))
+      workflow.allStages.groupBy(_.roleName).view.mapValues(_.map(_.name)).toMap
     } else {
       workflow.allStages.map(s => s.allocationName -> Seq(s.name)).toMap
     }

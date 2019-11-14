@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups.reminders
 
 import javax.sql.DataSource
-
-import org.hamcrest.Matchers._
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventOccurrence, SmallGroupFormat, WeekRange}
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationTest._
-import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.services.permissions.MockPermissionsService
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.AnonymousUser
 
 class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with FunctionalContextTesting with FreemarkerTestHelpers with FreemarkerRendering {
@@ -84,10 +82,8 @@ object SmallGroupEventAttendanceReminderNotificationTest {
     bean() {
       mock[RelationshipService]
     }
-    bean() {
-      val permissionsService = mock[PermissionsService]
-      permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
-      permissionsService
+    bean("permissionsService") {
+      new MockPermissionsService
     }
     bean() {
       mock[AssessmentMembershipService]

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object RecordMonitoringPointCommand {
   def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, user: CurrentUser) =
@@ -74,9 +74,9 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
           stateOption.orNull
         }))
       }.toSeq
-    checkpointMap = studentPointStateTuples.groupBy(_._1).mapValues(
-      _.groupBy(_._2).mapValues(_.head._3).asJava
-    ).asJava
+    checkpointMap = studentPointStateTuples.groupBy(_._1).view.mapValues(
+      _.groupBy(_._2).view.mapValues(_.head._3).toMap.asJava
+    ).toMap.asJava
   }
 }
 
@@ -84,12 +84,12 @@ trait RecordMonitoringPointValidation extends SelfValidating with GroupedPointRe
 
   self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     validateGroupedPoint(
       errors,
       templatePoint,
-      checkpointMap.asScala.mapValues(_.asScala.toMap).toMap,
-      studentPointCheckpointMap.mapValues(_.mapValues(Option(_).map(_.state).orNull)),
+      checkpointMap.asScala.view.mapValues(_.asScala.toMap).toMap,
+      studentPointCheckpointMap.view.mapValues(_.view.mapValues(Option(_).map(_.state).orNull).toMap).toMap,
       user
     )
   }
@@ -100,7 +100,7 @@ trait RecordMonitoringPointPermissions extends RequiresPermissionsChecking with 
 
   self: RecordMonitoringPointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Record, department)
   }
 
@@ -113,7 +113,7 @@ trait RecordMonitoringPointDescription extends Describable[(Seq[AttendanceMonito
   override lazy val eventName = "RecordMonitoringPoint"
 
   override def describe(d: Description): Unit =
-    d.attendanceMonitoringCheckpoints(checkpointMap.asScala.toMap.mapValues(_.asScala.toMap), verbose = true)
+    d.attendanceMonitoringCheckpoints(checkpointMap.asScala.view.mapValues(_.asScala.toMap).toMap, verbose = true)
 }
 
 trait RecordMonitoringPointCommandState {

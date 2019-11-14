@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class UpstreamAffectedAssessment(module: Module, academicYear: AcademicYear, name: String, deadline: Option[LocalDate], assessmentComponent: AssessmentComponent, upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup], tabulaAssignments: Seq[Assignment])
 object UpstreamAffectedAssessment {

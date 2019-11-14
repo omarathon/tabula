@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityR
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait SubmissionService {
   def saveSubmission(submission: Submission)

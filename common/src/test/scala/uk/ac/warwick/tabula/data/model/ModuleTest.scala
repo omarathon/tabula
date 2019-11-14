@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 
 class ModuleTest extends TestBase {

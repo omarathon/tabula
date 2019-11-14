@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ImportSmallGroupSetsFromSpreadsheetCommand {
   val RequiredPermission = Permissions.SmallGroups.ImportFromExternalSystem
@@ -43,7 +43,7 @@ object ImportSmallGroupSetsFromSpreadsheetCommand {
 abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department: Department, val academicYear: AcademicYear) extends CommandInternal[Seq[SmallGroupSet]]
   with ImportSmallGroupSetsFromSpreadsheetRequest {
 
-  override def applyInternal(): Seq[SmallGroupSet] = commands.asScala.map { sHolder =>
+  override def applyInternal(): Seq[SmallGroupSet] = commands.asScala.toSeq.map { sHolder =>
     val set = sHolder.command.apply()
 
     // don't apply the delete group command if linked - the set command will have deleted the groups
@@ -312,7 +312,7 @@ trait ImportSmallGroupSetsFromSpreadsheetDescription extends Describable[Seq[Sma
 trait ImportSmallGroupSetsFromSpreadsheetWarnings {
   self: ImportSmallGroupSetsFromSpreadsheetRequest =>
   def warnings(): Seq[String] = {
-    commands.asScala
+    commands.asScala.toSeq
       .flatMap { setHolder =>
         val set = setHolder.command
         setHolder.modifyGroupCommands.asScala.flatMap { groupHolder =>

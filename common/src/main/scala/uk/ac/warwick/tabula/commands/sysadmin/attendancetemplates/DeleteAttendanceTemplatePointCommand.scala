@@ -31,7 +31,7 @@ trait DeleteAttendanceTemplatePointDescription extends Describable[Unit] {
 
   override lazy val eventName = "DeleteAttendanceTemplatePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringTemplatePoint(point)
   }
 }

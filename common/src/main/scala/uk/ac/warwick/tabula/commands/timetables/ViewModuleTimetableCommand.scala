@@ -86,7 +86,7 @@ trait ViewModuleTimetableRequest extends ViewModuleTimetableState
 trait ViewModuleTimetablePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewModuleTimetableState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Module.ViewTimetable, mandatory(module))
   }
 }
@@ -94,7 +94,7 @@ trait ViewModuleTimetablePermissions extends RequiresPermissionsChecking with Pe
 trait ViewModuleTimetableValidation extends SelfValidating {
   self: ViewModuleTimetableRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (academicYear == null) {
       errors.rejectValue("academicYear", "NotEmpty")
     }

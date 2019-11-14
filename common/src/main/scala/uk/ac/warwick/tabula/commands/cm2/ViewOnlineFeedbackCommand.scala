@@ -33,7 +33,7 @@ trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
 trait ViewOnlineFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewOnlineFeedbackCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(feedback))
   }
 }

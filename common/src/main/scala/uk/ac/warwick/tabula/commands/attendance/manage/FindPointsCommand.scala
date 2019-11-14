@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class FindPointsResult(
   termGroupedPoints: Map[String, Seq[GroupedPoint]],
@@ -46,7 +46,7 @@ class FindPointsCommandInternal(val department: Department, val academicYear: Ac
   self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints with CourseworkPoints =>
 
   override def applyInternal(): FindPointsResult = {
-    val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+    val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala.toSeq, types.asScala.toSeq, styles.asScala.toSeq)
 
     restrictedStyle match {
       case Some(AttendanceMonitoringPointStyle.Date) =>
@@ -64,7 +64,7 @@ trait FindPointsPermissions extends RequiresPermissionsChecking with Permissions
 
   self: FindPointsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
   }
 

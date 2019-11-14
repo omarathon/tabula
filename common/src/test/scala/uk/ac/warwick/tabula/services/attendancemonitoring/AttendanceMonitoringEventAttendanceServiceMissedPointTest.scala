@@ -73,8 +73,13 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
     service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq(smallGroupPoint)
     service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()
     service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns false
-    service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true) returns
-      ((Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.MissedAuthorised)), Seq[AttendanceMonitoringCheckpointTotal]()))
+
+    val setAttendanceResult: (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) =
+      (
+        Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.MissedAuthorised)),
+        Seq[AttendanceMonitoringCheckpointTotal]()
+      )
+    service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true) returns setAttendanceResult
 
   }
 

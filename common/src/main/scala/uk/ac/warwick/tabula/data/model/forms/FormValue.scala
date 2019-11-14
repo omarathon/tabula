@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Base object for binding an individual submitted field from an assignment
@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
 abstract class FormValue extends BindListener {
   val field: FormField
 
-  override def onBind(result: BindingResult) {}
+  override def onBind(result: BindingResult): Unit = {}
 
   def persist(value: SavedFormValue)
 
@@ -64,7 +64,7 @@ class FileFormValue(val field: FormField) extends FormValue {
 
   lazy val fileDao: FileDao = Wire.auto[FileDao]
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

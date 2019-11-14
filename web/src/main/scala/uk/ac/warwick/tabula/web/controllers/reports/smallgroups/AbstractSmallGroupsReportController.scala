@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONErrorView, JSONVi
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.xml.Elem
 
 abstract class AbstractSmallGroupsReportController extends ReportsController

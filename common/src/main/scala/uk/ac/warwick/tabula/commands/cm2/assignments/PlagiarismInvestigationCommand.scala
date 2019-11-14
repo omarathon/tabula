@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.notifications.cm2.Cm2MarkedPlagiarisedNotification
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -41,7 +41,7 @@ class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
 
 trait PlagiarismInvestigationCommandValidation extends SelfValidating {
   self: PlagiarismInvestigationCommandState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.mark.plagiarised.confirm")
   }
 }
@@ -53,12 +53,12 @@ trait PlagiarismInvestigationCommandState {
   var confirm: Boolean = false
   var markPlagiarised: Boolean = true
 
-  lazy val submissions: Seq[Submission] = students.asScala.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
+  lazy val submissions: Seq[Submission] = students.asScala.toSeq.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
 }
 
 trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PlagiarismInvestigationCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ManagePlagiarismStatus, mandatory(assignment))
   }
 }
@@ -68,7 +68,7 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
 
   override lazy val eventName: String = "PlagiarismInvestigation"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .submissions(submissions)
       .property("submissionCount" -> submissions.size)

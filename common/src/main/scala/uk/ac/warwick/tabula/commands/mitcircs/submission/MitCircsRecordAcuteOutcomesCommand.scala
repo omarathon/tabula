@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsRecordAcuteOutcomesCommand {
   type Result = MitigatingCircumstancesSubmission
@@ -48,7 +48,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.acuteOutcome = acuteOutcome
 
     if(outcomeGrading == Rejected) {
-      submission.rejectionReasons = rejectionReasons.asScala
+      submission.rejectionReasons = rejectionReasons.asScala.toSeq
       if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
         submission.rejectionReasonsOther = rejectionReasonsOther
       } else {
@@ -83,7 +83,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
 trait MitCircsRecordAcuteOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -120,7 +120,7 @@ trait MitCircsRecordAcuteOutcomesValidation extends SelfValidating {
 trait MitCircsRecordAcuteOutcomesDescription extends Describable[Result] {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

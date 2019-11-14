@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateStudentsToDepartmentalSmallGroupsCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet, viewer: CurrentUser) =
@@ -98,16 +98,18 @@ trait AllocateStudentsToDepartmentalSmallGroupsFileUploadSupport extends GroupsO
     val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
     // work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map(_.universityId).filter(_.hasText)).values.toSet
+    val allocateUsers = userLookup.usersByWarwickUniIds(allocations.asScala.toSeq.map(_.universityId).filter(_.hasText)).values.toSet
     val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
     for (user <- usersToAddToSet) set.members.add(user)
 
     allocations.asScala
       .filter(_.groupId != null)
       .groupBy { x => smallGroupService.getDepartmentSmallGroupById(x.groupId).orNull }
+      .view
       .mapValues { values =>
         values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).orNull).asJava
       }
+      .toMap
   }
 }
 
@@ -126,7 +128,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsCommandState extends HasAcademicY
 trait AllocateStudentsToDepartmentalSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AllocateStudentsToDepartmentalSmallGroupsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
   }
@@ -143,7 +145,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsDescription extends Describable[D
 trait AllocateStudentsToDepartmentalSmallGroupsValidation extends SelfValidating {
   self: AllocateStudentsToDepartmentalSmallGroupsCommandState with GroupsObjects[User, DepartmentSmallGroup] =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Disallow submitting unrelated Groups
     if (!mapping.asScala.keys.forall(g => set.groups.contains(g))) {
       errors.reject("smallGroup.allocation.groups.invalid")
@@ -156,7 +158,7 @@ trait PopulateAllocateStudentsToDepartmentalSmallGroupsCommand extends PopulateO
 
   for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 
-  override def populate() {
+  override def populate(): Unit = {
     for (group <- set.groups.asScala)
       mapping.put(group, JArrayList(group.students.users.toList))
 

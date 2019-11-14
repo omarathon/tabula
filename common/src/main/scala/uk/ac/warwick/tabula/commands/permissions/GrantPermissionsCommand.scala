@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 object GrantPermissionsCommand {
@@ -60,21 +60,19 @@ abstract class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag
 trait GrantPermissionsCommandValidation extends SelfValidating {
   self: PermissionsCommandRequest
     with PermissionsCommandState[_ <: PermissionsTarget]
-    with SecurityServiceComponent =>
+    with SecurityServiceComponent
+    with UserLookupComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      grantedPermission.map(_.users).foreach { users =>
-        val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-          override def alreadyHasCode: Boolean = usercodes.asScala.exists {
-            users.knownType.includesUserId
-          }
-        }
-
-        usercodeValidator.validate(errors)
+      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes", staffOnlyForADS = true) {
+        override def alreadyHasCode: Boolean = usercodes.asScala.exists { u => grantedPermission.exists(_.users.knownType.includesUserId(u)) }
       }
+      usercodeValidator.userLookup = userLookup
+
+      usercodeValidator.validate(errors)
     }
 
     // Ensure that the current user can do everything that they're trying to grant permissions for
@@ -105,7 +103,7 @@ trait PermissionsCommandRequest {
 trait GrantPermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PermissionsCommandState[_ <: PermissionsTarget] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
   }
 }

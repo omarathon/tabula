@@ -106,7 +106,7 @@ trait ViewModuleEventsRequest extends ViewModuleEventsState {
 trait ViewModuleEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewModuleEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Module.ViewTimetable, mandatory(module))
   }
 }
@@ -114,7 +114,7 @@ trait ViewModuleEventsPermissions extends RequiresPermissionsChecking with Permi
 trait ViewModuleEventsValidation extends SelfValidating {
   self: ViewModuleEventsRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // Must have either an academic year or a start and an end
     if (academicYear == null && (start == null || end == null)) {
       errors.rejectValue("academicYear", "NotEmpty")

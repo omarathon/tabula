@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 trait SmallGroupEventTimetableEventSourceComponent {
@@ -53,7 +53,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
       val autoTimetableEvents: Seq[TimetableEvent] = allEvents.map { event =>
         attendanceMap.get(event) match {
           case Some(attendanceList) =>
-            val attendanceForEvent = attendanceList.groupBy(_.occurrence.week).mapValues(_.head.state)
+            val attendanceForEvent = attendanceList.groupBy(_.occurrence.week).view.mapValues(_.head.state).toMap
             val weeksToRemove = attendanceList.filter(a => a.state == AttendanceState.MissedAuthorised && !a.replacedBy.isEmpty).map(_.occurrence.week)
             TimetableEvent(event, attendanceForEvent, withoutWeeks = weeksToRemove)
           case None =>

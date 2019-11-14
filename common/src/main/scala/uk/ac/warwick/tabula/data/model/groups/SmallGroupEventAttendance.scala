@@ -67,7 +67,7 @@ class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with 
   @BatchSize(size = 5)
   var replacedBy: JSet[SmallGroupEventAttendance] = JHashSet()
 
-  def permissionsParents = Stream(occurrence)
+  def permissionsParents: LazyList[SmallGroupEventOccurrence] = LazyList(occurrence)
 
   def date: Option[LocalDate] = occurrence.date
 

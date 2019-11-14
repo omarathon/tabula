@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, Auto
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ApiAddMarksCommand {
   def apply(assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -62,7 +62,7 @@ abstract class ApiAddMarksCommandInternal(val assignment: Assignment, val submit
     }
 
     // persist valid marks
-    students.asScala.filter(_.isValid).flatMap(saveFeedback)
+    students.asScala.toSeq.filter(_.isValid).flatMap(saveFeedback)
   }
 }
 
@@ -70,7 +70,7 @@ abstract class ApiAddMarksCommandInternal(val assignment: Assignment, val submit
 trait ApiAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ApiAddMarksState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }
@@ -80,7 +80,7 @@ trait ApiAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "ApiAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 

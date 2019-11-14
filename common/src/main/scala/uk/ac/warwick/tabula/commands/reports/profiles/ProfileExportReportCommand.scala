@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ProfileExportReportCommand {
   def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -32,7 +32,7 @@ class ProfileExportReportCommandInternal(val department: Department, val academi
   self: JobServiceComponent with ProfileExportReportCommandState =>
 
   override def applyInternal(): JobInstance = {
-    jobService.add(Option(user), ProfileExportJob(students.asScala, academicYear))
+    jobService.add(Option(user), ProfileExportJob(students.asScala.toSeq, academicYear))
   }
 
 }
@@ -41,11 +41,11 @@ trait ProfileExportReportValidation extends SelfValidating {
 
   self: ProfileExportReportCommandState with ProfileServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (students.isEmpty) {
       errors.rejectValue("students", "reports.profiles.export.noStudents")
     } else {
-      val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala).groupBy(_.universityId).mapValues(_.head)
+      val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala.toSeq).groupBy(_.universityId).mapValues(_.head)
       val notMembers = students.asScala.filter(uniId => memberMap.get(uniId).isEmpty)
       if (notMembers.nonEmpty) {
         errors.rejectValue("students", "reports.profiles.export.notMembers", Array(notMembers.mkString(", ")), "")
@@ -63,7 +63,7 @@ trait ProfileExportReportPermissions extends RequiresPermissionsChecking with Pe
 
   self: ProfileExportReportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 

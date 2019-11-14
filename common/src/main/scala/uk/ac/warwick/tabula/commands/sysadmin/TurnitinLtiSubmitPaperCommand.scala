@@ -54,7 +54,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 }
 
 trait TurnitinLtiSubmitPaperCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -62,7 +62,7 @@ trait TurnitinLtiSubmitPaperCommandPermissions extends RequiresPermissionsChecki
 trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
   self: TurnitinLtiSubmitPaperCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (assignment.turnitinId.isEmptyOrWhitespace) {
       errors.rejectValue("assignment", "assignment.turnitinid.empty")
     }

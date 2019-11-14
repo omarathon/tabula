@@ -30,7 +30,7 @@ import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
 import uk.ac.warwick.util.files.hash.FileHashResolver
 import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 object ObjectStorageService {
@@ -47,7 +47,7 @@ object ObjectStorageService {
       contentLength = blobMetadata.getSize.longValue,
       contentType = blobMetadata.getContentMetadata.getContentType,
       fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText,
-      userMetadata = blobMetadata.getUserMetadata.asScala.toMap.filterKeys(_ != "shahex")
+      userMetadata = blobMetadata.getUserMetadata.asScala.view.filterKeys(_ != "shahex").toMap
     )
   }
 
@@ -139,7 +139,7 @@ trait ObjectStorageService extends InitializingBean {
 
   def delete(key: String): Future[Unit]
 
-  def listKeys(): Future[Stream[String]]
+  def listKeys(): Future[LazyList[String]]
 }
 
 @Service

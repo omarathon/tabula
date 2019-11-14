@@ -27,8 +27,9 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, DateFormats, FeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
+import scala.util.Failure
 import scala.util.parsing.json.JSON
 
 trait CelcatConfiguration {
@@ -182,7 +183,7 @@ object CelcatHttpTimetableFetchingService {
           }.getOrElse(Nil)
       else Nil
 
-      val staff = userLookup.getUsersByWarwickUniIds(staffIds).values.collect { case FoundUser(u) => u }.toSeq
+      val staff = userLookup.usersByWarwickUniIds(staffIds).values.collect { case FoundUser(u) => u }.toSeq
 
       Some(TimetableEvent(
         uid = event.getUid.getValue,
@@ -269,8 +270,11 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
         }
 
     // Extra logging
-    result.onFailure { case e =>
-      logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
+    result.onComplete {
+      case Failure(e) =>
+        logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
+
+      case _ =>
     }
 
     result

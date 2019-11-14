@@ -284,10 +284,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       // the safeInSeq does multiple queries which will mess up the group-by, returning e.g. (Autumn,1) and (Autumn,3)
       // separately. This will merge it back into (Autumn,4)
       val mergedTermCounts = termCounts.groupBy(_._1)
+        .view
         .mapValues { value => value.map(_._2).sum } // christ.
 
       val reportedTerms = mergedTermCounts.toSeq
-        .filter { case (term, count) => count.intValue() == students.size }
+        .filter { case (_, count) => count.intValue() == students.size }
         .map(_._1)
       AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
     }
@@ -323,7 +324,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
           .add(property("userId")),
         "universityId",
         universityIds
-      ).seq.map { objArray =>
+      ).map { objArray =>
         SchemeMembershipItem(
           itemType,
           objArray(0).asInstanceOf[String],
@@ -415,7 +416,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
         .add(safeIn("point", points))
         .seq
 
-      checkpoints.groupBy(_.student).mapValues(_.groupBy(_.point).mapValues(_.head))
+      checkpoints.groupBy(_.student).view.mapValues(_.groupBy(_.point).view.mapValues(_.head).toMap).toMap
     }
   }
 

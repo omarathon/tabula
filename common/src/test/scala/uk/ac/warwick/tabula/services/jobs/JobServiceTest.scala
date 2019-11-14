@@ -28,7 +28,7 @@ class JobServiceTest extends TestBase with Mockito {
     service.jobs = Array(job)
 
     val inst = service.add(Some(currentUser), TestingJob("job", sleepTime = 50))
-    doAnswer(_ => Some(inst)).when(jobDao).getById(anyString)
+    jobDao.getById(null) returns Some(inst)
     verify(jobDao, times(1)).saveJob(inst)
 
     jobDao.findOutstandingInstances(10) returns Seq(inst)

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ReorderAttendanceTemplatesCommand {
   def apply() =
@@ -39,7 +39,7 @@ trait ReorderAttendanceTemplatesDescription extends Describable[Seq[AttendanceMo
 
   override lazy val eventName = "ReorderAttendanceTemplates"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 }
 
 trait ReorderAttendanceTemplatesCommandState {

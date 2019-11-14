@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{AcademicYear, BreadcrumbsMatcher, FunctionalTestPro
 import org.scalatest.selenium.Page
 import org.scalatest.selenium.WebBrowser
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}

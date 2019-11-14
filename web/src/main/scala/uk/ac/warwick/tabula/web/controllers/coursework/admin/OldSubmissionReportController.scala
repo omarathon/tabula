@@ -44,7 +44,7 @@ class OldSubmissionReportController extends OldCourseworkController {
   }
 
   def usersByUsercodes(usercodes: Seq[String]): Seq[User] =
-    userLookup.getUsersByUserIds(usercodes).values.toSeq.sortBy { u => s"${u.getWarwickId}${u.getUserId}" }
+    userLookup.usersByUserIds(usercodes).values.toSeq.sortBy { u => s"${u.getWarwickId}${u.getUserId}" }
 
   def surname(user: User): String = user.getLastName
 

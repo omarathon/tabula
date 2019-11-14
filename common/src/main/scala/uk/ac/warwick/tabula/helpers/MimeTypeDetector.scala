@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.util
-
 import com.google.common.io.ByteSource
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.{TemplateMethodModelEx, TemplateModel}
 import org.apache.tika.io.{IOUtils, TikaInputStream}
 import org.apache.tika.mime.MediaType
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.MimeTypeDetector._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 case class MimeTypeDetectionResult(
   mediaType: MediaType,
@@ -68,11 +63,9 @@ object MimeTypeDetector {
 
 }
 
-class MimeTypeDetectorTag extends TemplateMethodModelEx {
+class MimeTypeDetectorTag extends BaseTemplateMethodModelEx {
 
-  override def exec(arguments: util.List[_]): MimeTypeDetectionResult = {
-    val args = arguments.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-
+  override def execMethod(args: Seq[_]): MimeTypeDetectionResult =
     args match {
       case Seq(file: RenderableFile) =>
         detect(file)
@@ -82,6 +75,5 @@ class MimeTypeDetectorTag extends TemplateMethodModelEx {
 
       case s => throw new IllegalArgumentException(s"Bad argument $s")
     }
-  }
 
 }

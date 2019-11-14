@@ -11,17 +11,17 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class MeetingRecordApproverRoleProvider extends RoleProvider with TaskBenchmarking {
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MeetingRecordApproverRoleProvider") {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for MeetingRecordApproverRoleProvider") {
     scope match {
       case meeting: MeetingRecord =>
         meeting.approvals.asScala.find(_.approver.universityId == user.universityId).map(approval => {
-          Stream(
+          LazyList(
             customRoleFor(approval.approver.homeDepartment)(MeetingRecordApproverRoleDefinition, approval)
               .getOrElse(MeetingRecordApprover(approval))
           )
-        }).getOrElse(Stream.empty)
+        }).getOrElse(LazyList.empty)
       // MeetingRecordApprover is only checked at the meeting level
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 

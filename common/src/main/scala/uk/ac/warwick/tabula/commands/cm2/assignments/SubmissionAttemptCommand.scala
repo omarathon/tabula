@@ -24,7 +24,7 @@ trait SubmissionAttemptDescription extends Describable[Unit] {
 
   override lazy val eventName = "SubmissionAttempt"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 }

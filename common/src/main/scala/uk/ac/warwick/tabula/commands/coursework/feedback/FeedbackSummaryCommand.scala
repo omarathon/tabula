@@ -33,14 +33,14 @@ trait FeedbackSummaryCommandState {
 
 trait FeedbackSummaryCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackSummaryCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
   }
 }
 
 trait FeedbackSummaryCommandDescription extends Describable[Option[Feedback]] {
   self: FeedbackSummaryCommandState =>
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
     d.studentIds(Option(student.getWarwickId).toSeq)
     d.studentUsercodes(student.getUserId)

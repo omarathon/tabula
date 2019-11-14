@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.{HibernateHelpers, AliasAndJoinType, ScalaRestr
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FiltersRelationships {
   val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(

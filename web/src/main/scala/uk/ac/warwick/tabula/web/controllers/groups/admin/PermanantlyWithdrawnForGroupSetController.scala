@@ -45,7 +45,7 @@ trait PermanantlyWithdrawnForGroupSetPermissions extends RequiresPermissionsChec
 
   self: PermanantlyWithdrawnForGroupSetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }

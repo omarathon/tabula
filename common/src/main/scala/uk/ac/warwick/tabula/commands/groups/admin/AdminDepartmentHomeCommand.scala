@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly}
@@ -37,7 +37,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 
   lazy val modules: Seq[Module] =
     if (securityService.can(user, requiredPermission, department)) {
-      department.modules.asScala
+      department.modules.asScala.toSeq
     } else {
       modulesWithPermission.toList.sorted
     }
@@ -49,7 +49,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 trait AdminDepartmentHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomeState with AdminDepartmentHomePermissionDefinition =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (securityService.can(user, requiredPermission, mandatory(department))) {
       // This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
       p.PermissionCheck(requiredPermission, department)

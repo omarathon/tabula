@@ -49,7 +49,7 @@ class ModuleListImporterImpl extends ModuleListImporter with InitializingBean
     val rows = benchmarkTask("Fetch module lists") {
       moduleListQuery.execute
     }
-    val validRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.academicYear.nonEmpty)
+    val validRows = rows.asScala.toSeq.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.academicYear.nonEmpty)
     val routeCodes = validRows.map(_.routeCode).distinct
     val routes = courseAndRouteService.getRoutesByCodes(routeCodes)
     validRows.groupBy(_.routeCode).flatMap { case (routeCode, groupedRows) => routes.find(_.code == routeCode) match {

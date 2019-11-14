@@ -93,7 +93,7 @@ trait AppCommentValidation extends SelfValidating {
 
   self: AppCommentCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!message.hasText) {
       errors.rejectValue("message", "NotEmpty")
     }
@@ -110,7 +110,7 @@ trait AppCommentDescription extends Describable[Future[JBoolean]] {
 
   override lazy val eventName = "AppComment"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description): Unit = d.properties(
     "name" -> name,

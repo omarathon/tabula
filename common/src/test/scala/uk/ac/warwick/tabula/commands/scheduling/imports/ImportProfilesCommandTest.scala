@@ -82,36 +82,10 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
     val command = new ImportProfilesCommand
     command.features = new FeaturesImpl
     command.sessionFactory = sessionFactory
-    command.moduleRegistrationService = mrService
     command.smallGroupService = smallGroupService
     command.memberDao = memberDao
     command.studentCourseDetailsDao = scdDao
     command.studentCourseYearDetailsDao = scydDao
-  }
-
-  @Transactional
-  @Test def testDeleteOldModuleRegistrations() {
-    new Environment {
-      command.features.autoGroupDeregistration = true
-
-      // check that if the new MR matches the old, it will not be deleted:
-      command.deleteOldModuleRegistrations(Seq("abcde"), Seq(existingMr))
-      scd.moduleRegistrations.contains(existingMr) should be(true)
-      session.flush()
-
-      val newMr = new ModuleRegistration(scd.scjCode, newMod, new JBigDecimal(30), AcademicYear(2013), "A")
-      session.saveOrUpdate(newMr)
-      session.flush()
-      scd.addModuleRegistration(newMr)
-      session.flush()
-      // manually set the studentCourseDetails for the test
-      newMr.studentCourseDetails = scd
-
-      // now check that if the new MR does not match the old, the old will be deleted:
-      command.deleteOldModuleRegistrations(Seq("abcde"), Seq(newMr))
-      session.flush()
-      scd.moduleRegistrations.contains(existingMr) should be(false)
-    }
   }
 
   @Transactional

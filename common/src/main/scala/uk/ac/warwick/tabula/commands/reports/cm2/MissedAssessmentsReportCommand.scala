@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MissedAssessmentsReportCommand {
   def apply(department: Department, academicYear: AcademicYear) =

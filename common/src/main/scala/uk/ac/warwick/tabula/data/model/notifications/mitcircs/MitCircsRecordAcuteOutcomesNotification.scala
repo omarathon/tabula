@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsRecordAcuteOutcomesNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/mit_circs_acute_outcomes.ftl"

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceCompone
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object ReleaseForMarkingCommand {
@@ -37,14 +37,14 @@ class ReleaseForMarkingCommandInternal(val assignment: Assignment, val user: Use
 trait ReleaseForMarkingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ReleaseForMarkingState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
   }
 }
 
 trait ReleaseForMarkingValidation extends SelfValidating {
   self: ReleaseForMarkingRequest =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
   }
 }
@@ -56,7 +56,7 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
     d.assignment(assignment)
@@ -72,7 +72,7 @@ trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
   var confirm: Boolean = false
 
   def studentsWithoutKnownMarkers: Seq[String] = {
-    val neverAssigned = students.asScala -- feedbacks.filter(f => {
+    val neverAssigned = students.asScala.toSeq diff feedbacks.filter(f => {
       val stagesWithoutAllocation = assignment.cm2MarkingWorkflow.allStages.filter(_.hasMarkers).toSet -- f.allMarkerFeedback.map(_.stage)
       stagesWithoutAllocation.isEmpty
     }).map(_.usercode)

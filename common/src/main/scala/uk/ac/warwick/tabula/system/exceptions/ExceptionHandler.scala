@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ExceptionContext(token: String, exception: Throwable, request: Option[HttpServletRequest] = None)
 

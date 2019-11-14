@@ -1,28 +1,21 @@
 package uk.ac.warwick.tabula.web.views
 
 import org.springframework.beans.factory.annotation.Autowired
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.TemplateModel
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget, ScopelessPermission, SelectorPermission}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
-import freemarker.template.TemplateMethodModelEx
-import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget, ScopelessPermission, SelectorPermission}
-import uk.ac.warwick.tabula.JavaImports._
-
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
   * Freemarker directive to show the contents of the tag
   */
-class PermissionFunction extends TemplateMethodModelEx with Logging {
+class PermissionFunction extends BaseTemplateMethodModelEx with Logging {
   @Autowired var securityService: SecurityService = _
 
-  override def exec(args: JList[_]): Object = {
+  override def execMethod(arguments: Seq[_]): Object = {
     val currentUser = RequestInfo.fromThread.get.user
-
-    val arguments = args.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
     arguments match {
       case Seq(actionName: String, item: PermissionsTarget) => RequestLevelCache.cachedBy("PermissionFunction.exec", s"$actionName-${item.id}") {

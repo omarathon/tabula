@@ -14,18 +14,15 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleRegistrationsCommand
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleResult, ModuleSelectionStatus, StudentCourseDetails}
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearQuery, ModuleRegistrationsByUniversityIdsQuery}
 
-import scala.collection.JavaConverters._
-import scala.collection.immutable.{HashMap, Iterable}
+import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
@@ -34,7 +31,8 @@ import scala.util.Try
   *
   */
 trait ModuleRegistrationImporter {
-  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand]
+  def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow]
+  def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow]
 }
 
 trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with Logging {
@@ -42,7 +40,7 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
   var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
   var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-  protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Iterable[ImportModuleRegistrationsCommand] = {
+  protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Seq[ImportModuleRegistrationsCommand] = {
     val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
       moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
         case None =>
@@ -61,56 +59,46 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
         moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
       })
     }
-    rowsBySCD.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
+    rowsBySCD.view.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }.toSeq
   }
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with TaskBenchmarking {
+class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking {
+  lazy val moduleRegistrationsByAcademicYearQuery: ModuleRegistrationsByAcademicYearQuery = new ModuleRegistrationsByAcademicYearQuery(sitsDataSource)
+  lazy val moduleRegistrationsByUniversityIdsQuery: ModuleRegistrationsByUniversityIdsQuery = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
 
-  var sits: DataSource = Wire[DataSource]("sitsDataSource")
-
-  lazy val queries: Seq[MappingSqlQuery[ModuleRegistrationRow]] = Seq(
-    new UnconfirmedModuleRegistrationsQuery(sits),
-    new ConfirmedModuleRegistrationsQuery(sits)
-  )
-
-  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
+  def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
-      val rows = membersAndCategories.filter(_.member.userType == Student).flatMap { mac =>
-        val universityId = mac.member.universityId
-        val params = HashMap(("universityId", universityId))
-        queries.flatMap { query =>
-          query.executeByNamedParam(params.asJava).asScala
-        }.distinct
-      }.seq
-
-      applyForRows(rows).toSeq
+      moduleRegistrationsByAcademicYearQuery.executeByNamedParam(Map("academicYear" -> academicYear).asJava).asScala.distinct.toSeq
     }
-  }
+
+  def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
+    benchmarkTask("Fetch module registrations") {
+      universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
+        moduleRegistrationsByUniversityIdsQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.distinct.toSeq
+      }.toSeq
+    }
 }
 
 @Profile(Array("sandbox"))
 @Service
 class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
-  var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
+  override def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow] =
+    SandboxData.Departments.values
+      .flatMap(_.routes.values)
+      .flatMap(route => route.studentsStartId to route.studentsEndId)
+      .flatMap(universityId => studentModuleRegistrationRows(universityId.toString))
+      .toSeq
 
-  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
-    membersAndCategories.flatMap { mac =>
-      val universityId = mac.member.universityId
-      val ssoUser = users(universityId)
+  override def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
+    universityIds.flatMap(studentModuleRegistrationRows)
 
-      mac.member.userType match {
-        case Student => studentModuleRegistrationDetails(universityId, ssoUser)
-        case _ => Seq()
-      }
-    }
-
-  def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
+  def studentModuleRegistrationRows(universityId: String): Seq[ModuleRegistrationRow] = {
     val yearOfStudy = ((universityId.toLong % 3) + 1).toInt
 
-    val rows = (for {
+    (for {
       (_, d) <- SandboxData.Departments
       route <- d.routes.values.toSeq
       if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
@@ -159,8 +147,6 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         moduleResult = result
       )
     }).toSeq
-
-    applyForRows(rows)
   }
 }
 
@@ -173,65 +159,6 @@ object ModuleRegistrationImporter {
   // union 2 things -
   // 1. unconfirmed module registrations from the SMS table
   // 2. confirmed module registrations from the SMO table
-
-  def UnconfirmedModuleRegistrations =
-    s"""
-			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
-			sms.ses_code, -- e.g. C for core or O for option
-			sms.ayr_code, sms_occl as occurrence,
-			smr_actm, -- actual overall module mark
-			smr_actg, -- actual overall module grade
-			smr_agrm, -- agreed overall module mark
-			smr_agrg, -- agreed overall module grade
-			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-			smr_rslt  -- result of module
-				from $sitsSchema.ins_stu stu -- student
-					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
-						on spr.spr_stuc = stu.stu_code
-
-					join $sitsSchema.srs_scj scj -- Student Course Join, needed for SCJ code
-						on scj.scj_sprc = spr.spr_code
-
-					join $sitsSchema.cam_sms sms -- Student Module Selection (unconfirmed module choices)
-						on sms.spr_code = spr.spr_code
-
-					left join $sitsSchema.ins_smr smr -- Student Module Result
-						on sms.spr_code = smr.spr_code
-						and sms.ayr_code = smr.ayr_code
-						and sms.mod_code = smr.mod_code
-						and sms.sms_occl = smr.mav_occur
-
-				where stu.stu_code = :universityId"""
-
-  // The check on SMO_RTSC excludes WMG cancelled modules or module registrations
-  def ConfirmedModuleRegistrations =
-    s"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
-			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
-			smr_actm, -- actual overall module mark
-			smr_actg, -- actual overall module grade
-			smr_agrm, -- agreed overall module mark
-			smr_agrg, -- agreed overall module grade
-			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-			smr_rslt  -- result of module
-				from $sitsSchema.ins_stu stu
-					join $sitsSchema.ins_spr spr
-						on spr.spr_stuc = stu.stu_code
-
-					join $sitsSchema.srs_scj scj
-						on scj.scj_sprc = spr.spr_code
-
-					join $sitsSchema.cam_smo smo
-						on smo.spr_code = spr.spr_code
-						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
-
-					left join $sitsSchema.ins_smr smr -- Student Module Result
-						on smo.spr_code = smr.spr_code
-						and smo.ayr_code = smr.ayr_code
-						and smo.mod_code = smr.mod_code
-						and smo.mav_occur = smr.mav_occur
-
-				where stu.stu_code = :universityId"""
 
   def UnconfirmedModuleRegistrationsForAcademicYear =
     s"""
@@ -305,6 +232,78 @@ object ModuleRegistrationImporter {
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
        and smo.ayr_code = :academicYear"""
 
+  def UnconfirmedModuleRegistrationsForUniversityIds =
+    s"""
+      select
+      scj_code,
+      sms.mod_code,
+      sms.sms_mcrd as credit,
+      sms.sms_agrp as assess_group,
+      sms.ses_code,
+      sms.ayr_code,
+      sms.sms_occl as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_sms sms
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = sms.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = sms.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on sms.spr_code = smr.spr_code
+        and sms.ayr_code = smr.ayr_code
+        and sms.mod_code = smr.mod_code
+        and sms.sms_occl = smr.mav_occur
+
+       where spr.spr_stuc in (:universityIds)"""
+
+  def ConfirmedModuleRegistrationsForUniversityIds =
+    s"""
+      select
+      scj_code,
+      smo.mod_code,
+      smo.smo_mcrd as credit,
+      smo.smo_agrp as assess_group,
+      smo.ses_code,
+      smo.ayr_code,
+      smo.mav_occur as occurrence,
+      smr_actm, -- actual overall module mark
+      smr_actg, -- actual overall module grade
+      smr_agrm, -- agreed overall module mark
+      smr_agrg, -- agreed overall module grade
+      smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+      smr_rslt  -- result of module
+
+      from $sitsSchema.cam_smo smo
+
+      join $sitsSchema.ins_spr spr
+        on spr.spr_code = smo.spr_code
+
+      join $sitsSchema.srs_scj scj
+        on scj.scj_sprc = spr.spr_code
+
+      join ins_mod mod on mod.mod_code = smo.mod_code
+
+      left join $sitsSchema.ins_smr smr -- Student Module Result
+        on smo.spr_code = smr.spr_code
+        and smo.ayr_code = smr.ayr_code
+        and smo.mod_code = smr.mod_code
+        and smo.mav_occur = smr.mav_occur
+
+       where
+       (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
+       and spr.spr_stuc in (:universityIds)"""
+
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     new ModuleRegistrationRow(
       resultSet.getString("scj_code"),
@@ -323,22 +322,6 @@ object ModuleRegistrationImporter {
     )
   }
 
-  class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
-    extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
-    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-    compile()
-
-    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
-  }
-
-  class ConfirmedModuleRegistrationsQuery(ds: DataSource)
-    extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
-    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-    compile()
-
-    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
-  }
-
   class ModuleRegistrationsByAcademicYearQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
@@ -347,6 +330,22 @@ object ModuleRegistrationImporter {
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
   }
 
+  class ModuleRegistrationsByUniversityIdsQuery(ds: DataSource)
+    extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForUniversityIds union $ConfirmedModuleRegistrationsForUniversityIds") {
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+  }
+
+}
+
+trait ModuleRegistrationImporterComponent {
+  def moduleRegistrationImporter: ModuleRegistrationImporter
+}
+
+trait AutowiringModuleRegistrationImporterComponent extends ModuleRegistrationImporterComponent {
+  var moduleRegistrationImporter: ModuleRegistrationImporter = Wire[ModuleRegistrationImporter]
 }
 
 trait CopyModuleRegistrationProperties {
@@ -425,6 +424,8 @@ class ModuleRegistrationRow(
 
   def moduleCode: Option[String] = Module.stripCats(sitsModuleCode).map(_.toLowerCase)
 
+  def notionalKey: String = Seq(scjCode, sitsModuleCode, AcademicYear.parse(academicYear), scaled(cats), occurrence).mkString("-")
+
   override def toString: String =
     new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
       .append(scjCode)
@@ -494,5 +495,31 @@ class ModuleRegistrationRow(
         .append(passFail, that.passFail)
         .build()
     case _ => false
+  }
+}
+
+object ModuleRegistrationRow {
+  def combine(rows: Seq[ModuleRegistrationRow]): ModuleRegistrationRow = {
+    require(rows.size > 1, "Can't combine fewer than 2 rows")
+    require(rows.forall(_.notionalKey == rows.head.notionalKey), "Rows must all have the same notional key")
+
+    def coalesce[A >: Null](values: Seq[A]): A = values.filterNot(_ == null).headOption.orNull
+
+    // scjCode, sitsModuleCode, AcademicYear.parse(academicYear), scaled(cats), occurrence
+    new ModuleRegistrationRow(
+      scjCode = rows.head.scjCode, // Part of notional key
+      sitsModuleCode = rows.head.sitsModuleCode, // Part of notional key
+      cats = rows.head.cats, // Part of notional key
+      assessmentGroup = coalesce(rows.map(_.assessmentGroup)),
+      selectionStatusCode = coalesce(rows.map(_.selectionStatusCode)),
+      occurrence = rows.head.occurrence, // Part of notional key
+      academicYear = rows.head.academicYear, // Part of notional key
+      actualMark = rows.flatMap(_.actualMark).headOption,
+      actualGrade = coalesce(rows.map(_.actualGrade)),
+      agreedMark = rows.flatMap(_.agreedMark).headOption,
+      agreedGrade = coalesce(rows.map(_.agreedGrade)),
+      passFail = rows.exists(_.passFail),
+      moduleResult = coalesce(rows.map(_.moduleResult))
+    )
   }
 }

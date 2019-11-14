@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
-import org.junit.{After, Before}
-import org.mockito.Matchers
-import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, DoubleWorkflow, MarkingWorkflowStage}
+import org.junit.Before
+import org.mockito.ArgumentMatchers
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, StudentMember}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleWorkflow, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Allocations
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class ReleaseToMarkerNotificationHelperTest extends TestBase with Mockito {
@@ -47,30 +47,30 @@ class ReleaseToMarkerNotificationHelperTest extends TestBase with Mockito {
 
     )
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFirstMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], ArgumentMatchers.refEq(DblFirstMarker)) answers { _: Any =>
       allocations(DblFirstMarker)
-    })
+    }
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblSecondMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], ArgumentMatchers.refEq(DblSecondMarker)) answers { _: Any =>
       allocations(DblSecondMarker)
-    })
+    }
 
-    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], Matchers.refEq(DblFinalMarker)) answers (_ => {
+    cm2MarkingWorkflowService.getMarkerAllocations(any[Assignment], ArgumentMatchers.refEq(DblFinalMarker)) answers { _: Any =>
       allocations(DblFirstMarker)
-    })
+    }
 
 
     val workflow = DoubleWorkflow("test", dept, allocations(DblFirstMarker).keys.toSeq, allocations(DblSecondMarker).keys.toSeq)
     assignment.cm2MarkingWorkflow = workflow
 
 
-    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker1)) answers (_ => {
+    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], ArgumentMatchers.refEq(marker1)) answers { _: Any =>
       Seq(stu1, stu2, stu3)
-    })
+    }
 
-    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], Matchers.refEq(marker2)) answers (_ => {
+    cm2MarkingWorkflowService.getAllStudentsForMarker(any[Assignment], ArgumentMatchers.refEq(marker2)) answers { _: Any =>
       Seq(stu3)
-    })
+    }
 
     val marker1Helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, marker1, cm2MarkingWorkflowService)
 

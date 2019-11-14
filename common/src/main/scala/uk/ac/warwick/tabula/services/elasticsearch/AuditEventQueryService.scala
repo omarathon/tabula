@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 trait AuditEventQueryService
@@ -366,12 +366,12 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
   private def batchedUsersByUserId(userIds: Seq[String]): Map[String, User] = {
     if (userIds.isEmpty) Map.empty[String, User]
-    else userIds.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+    else userIds.grouped(100).map(userLookup.usersByUserIds).reduce(_ ++ _)
   }.withDefault { userId => new AnonymousUser(userId) }
 
   private def batchedUsersByWarwickId(warwickIds: Seq[String]): Map[String, User] = {
     if (warwickIds.isEmpty) Map.empty[String, User]
-    else warwickIds.grouped(100).map(userLookup.getUsersByWarwickUniIds).reduce(_ ++ _)
+    else warwickIds.grouped(100).map(userLookup.usersByWarwickUniIds).reduce(_ ++ _)
   }.withDefault { warwickId =>
     val u = new AnonymousUser(s"u$warwickId")
     u.setWarwickId(warwickId)
@@ -425,7 +425,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
     parsedEventsOfType(
       "PublishFeedback",
       boolQuery().should(queries),
-      afterFeedbackPublishedRestriction(assignment, assignment.feedbacks.asScala)
+      afterFeedbackPublishedRestriction(assignment, assignment.feedbacks.asScala.toSeq)
     ).map { events =>
       events.sortBy(_.eventDate).reverse
     }

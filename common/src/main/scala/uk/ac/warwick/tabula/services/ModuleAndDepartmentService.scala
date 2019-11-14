@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

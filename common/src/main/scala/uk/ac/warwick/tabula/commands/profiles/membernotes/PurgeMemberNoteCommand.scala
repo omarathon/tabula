@@ -18,7 +18,7 @@ object PurgeMemberNoteCommand {
 
       override lazy val eventName = "PurgeMemberNote"
 
-      override def describe(d: Description) {
+      override def describe(d: Description): Unit = {
         d.memberNote(memberNote)
       }
     }
@@ -42,7 +42,7 @@ trait PurgeMemberNoteValidation extends SelfValidating {
 
   self: DeleteMemberNoteCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!abstractMemberNote.deleted) {
       errors.reject("profiles.memberNote.delete.notDeleted")
     }

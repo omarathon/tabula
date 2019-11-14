@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ModifySmallGroupEventCommand {
   type Command = Appliable[SmallGroupEvent] with SelfValidating with BindListener with ModifySmallGroupEventCommandState
@@ -214,7 +214,7 @@ abstract class ModifySmallGroupEventCommandInternal
 trait ModifySmallGroupEventBinding extends BindListener {
   self: ModifySmallGroupEventCommandState =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // Find all empty textboxes for tutors and remove them - otherwise we end up with a never ending list of empties
     val indexesToRemove = tutors.asScala.zipWithIndex.flatMap { case (tutor, index) =>
       if (!tutor.hasText) Some(index)
@@ -231,7 +231,7 @@ trait ModifySmallGroupEventBinding extends BindListener {
 trait ModifySmallGroupEventValidation extends SelfValidating {
   self: ModifySmallGroupEventCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (tutors.isEmpty) { // TAB-1278 Allow unscheduled events
       if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
 
@@ -276,7 +276,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 trait CreateSmallGroupEventPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateSmallGroupEventCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(group))
   }
 }
@@ -284,7 +284,7 @@ trait CreateSmallGroupEventPermissions extends RequiresPermissionsChecking with 
 trait CreateSmallGroupEventDescription extends Describable[SmallGroupEvent] {
   self: CreateSmallGroupEventCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroup(group)
   }
 
@@ -295,7 +295,7 @@ trait CreateSmallGroupEventDescription extends Describable[SmallGroupEvent] {
 trait EditSmallGroupEventPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupEventCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     mustBeLinked(group, set)
     mustBeLinked(event, group)
@@ -306,7 +306,7 @@ trait EditSmallGroupEventPermissions extends RequiresPermissionsChecking with Pe
 trait EditSmallGroupEventDescription extends Describable[SmallGroupEvent] {
   self: EditSmallGroupEventCommandState =>
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.smallGroupEvent(event)
   }
 

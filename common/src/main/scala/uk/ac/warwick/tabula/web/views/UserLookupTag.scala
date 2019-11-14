@@ -1,17 +1,13 @@
 package uk.ac.warwick.tabula.web.views
 
-import freemarker.template.TemplateDirectiveModel
-import freemarker.template.TemplateDirectiveBody
-import freemarker.template.TemplateModel
 import freemarker.core.Environment
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.UserLookupService
+import freemarker.template.{TemplateDirectiveBody, TemplateDirectiveModel, TemplateException, TemplateModel}
 import freemarker.template.utility.DeepUnwrap
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.TemplateException
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.UserLookupService
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Accepts either id="abc" or ids=["abc","def"] as attributes.
@@ -53,8 +49,8 @@ class UserLookupTag extends TemplateDirectiveModel {
       val userIds = users.get
 
       val returnedUsers =
-        if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala)
-        else userLookup.getUsersByUserIds(userIds).asScala
+        if (lookupByUniversityId) userLookup.usersByWarwickUniIds(userIds.asScala.toSeq)
+        else userLookup.usersByUserIds(userIds.asScala.toSeq)
 
       val missingUserIds =
         returnedUsers.values

@@ -13,7 +13,7 @@ abstract class BaseTemplateMethodModelEx extends TemplateMethodModelEx {
 
   def execMethod(args: Seq[_]): Object
 
-  override def exec(args: JList[_]): Object = execMethod(unwrapArgs(args))
+  override final def exec(args: JList[_]): Object = execMethod(unwrapArgs(args))
 
   protected def unwrapArgs(list: JList[_]): Seq[AnyRef] =
     list.asScala.toSeq.map { model =>

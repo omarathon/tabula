@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permission
 import freemarker.ext.beans.SimpleMethodModel
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MyObject extends PermissionsTarget {
   var name = "text"
@@ -44,7 +44,7 @@ class MyObject extends PermissionsTarget {
 
   override def id = ""
 
-  override def permissionsParents: Stream[Nothing] = Stream.empty
+  override def permissionsParents: LazyList[Nothing] = LazyList.empty
 
 
   var restrictAccess: Boolean = false

@@ -93,7 +93,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 trait UpdateAttendanceMonitoringSchemeMembershipPermissions extends RequiresPermissionsChecking {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.UpdateMembership)
   }
 
@@ -103,7 +103,7 @@ trait UpdateAttendanceMonitoringSchemeMembershipDescription extends Describable[
 
   override lazy val eventName = "UpdateAttendanceMonitoringSchemeMembership"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 }
@@ -114,6 +114,7 @@ trait UpdateAttendanceMonitoringSchemeMembershipCommandState extends FiltersStud
   var sortOrder: JList[Order] = JArrayList() // Never used
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

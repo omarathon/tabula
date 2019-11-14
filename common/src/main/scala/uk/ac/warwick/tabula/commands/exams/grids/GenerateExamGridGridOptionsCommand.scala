@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridGridOptionsCommand {
   def apply(department: Department) =
@@ -49,7 +49,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
   override def applyInternal(): (Seq[ExamGridColumnOption], Seq[String]) = {
     department.examGridOptions = ExamGridOptions(
       predefinedColumnIdentifiers.asScala.toSet,
-      customColumnTitles.asScala,
+      customColumnTitles.asScala.toSeq,
       nameToShow,
       marksToShow,
       componentsToShow,
@@ -63,7 +63,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 
     saveDepartment()
 
-    (predefinedColumnOptions, customColumnTitles.asScala)
+    (predefinedColumnOptions, customColumnTitles.asScala.toSeq)
   }
 
 }
@@ -115,7 +115,7 @@ trait GenerateExamGridGridOptionsValidation extends SelfValidating {
 
   self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val allIdentifiers = allExamGridsColumns.map(_.identifier).toSet
     val invalidColumns = predefinedColumnIdentifiers.asScala.diff(allIdentifiers)
     if (invalidColumns.nonEmpty) {
@@ -129,7 +129,7 @@ trait GenerateExamGridGridOptionsPermissions extends RequiresPermissionsChecking
 
   self: GenerateExamGridGridOptionsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -141,7 +141,7 @@ trait GenerateExamGridGridOptionsDescription extends Describable[(Seq[ExamGridCo
 
   override lazy val eventName = "GenerateExamGridGridOptions"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 

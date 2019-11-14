@@ -28,7 +28,7 @@ class ManualMembershipSummaryCommandInternal(val department: Department) extends
 trait ManualMembershipSummaryPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ManualMembershipSummaryState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ViewManualMembershipSummary, department)
   }
 }

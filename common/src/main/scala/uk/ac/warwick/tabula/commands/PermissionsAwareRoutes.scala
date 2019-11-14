@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait PermissionsAwareRoutes {
   def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route]

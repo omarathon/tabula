@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/share/{submission}"))

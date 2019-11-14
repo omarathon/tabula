@@ -18,23 +18,23 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
     Wire[AssessmentService]
   }
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
-    def getRoles(assessmentsForMarker: Stream[Assessment]) = assessmentsForMarker.map { assessment =>
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
+    def getRoles(assessmentsForMarker: LazyList[Assessment]) = assessmentsForMarker.map { assessment =>
       customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
     }
 
     scope match {
       case assignment: Assignment if assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).exists(_.allMarkers.contains(user.apparentUser)) =>
-        getRoles(Stream(assignment))
+        getRoles(LazyList(assignment))
 
       case assignment: Assignment if !assignment.cm2Assignment && assignment.isMarker(user.apparentUser) =>
-        getRoles(Stream(assignment))
+        getRoles(LazyList(assignment))
 
       case exam: Exam if exam.isMarker(user.apparentUser) =>
-        getRoles(Stream(exam))
+        getRoles(LazyList(exam))
 
       // We don't need to check for the marker role on any other scopes
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 

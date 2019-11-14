@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import org.slf4j.LoggerFactory
 import ch.qos.logback
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object TestLoggerFactory {
 
@@ -29,7 +29,7 @@ object TestLoggerFactory {
 
   def retrieveEvents(logger: logback.classic.Logger): Seq[ILoggingEvent] = {
     val appender: Appender = logger.iteratorForAppenders().next.asInstanceOf[Appender]
-    appender.list.asScala
+    appender.list.asScala.toSeq
   }
 
   def tearDown(): Unit = {

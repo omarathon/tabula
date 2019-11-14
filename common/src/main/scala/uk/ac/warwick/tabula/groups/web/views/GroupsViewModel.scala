@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 /**

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ProfileExportSingleCommand {
   type CommandType = Appliable[Seq[FileAttachment]]
@@ -176,7 +176,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
           title = memberNote.title,
           note = memberNote.note,
           noteHTML = memberNote.escapedNote,
-          attachments = memberNote.attachments.asScala
+          attachments = memberNote.attachments.asScala.toSeq
         ))
       else Nil
 
@@ -243,7 +243,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
           meeting.title,
           meeting.format.description,
           meeting.escapedDescription,
-          meeting.attachments.asScala
+          meeting.attachments.asScala.toSeq
         ))
     }
 
@@ -422,7 +422,7 @@ trait ProfileExportSinglePermissions extends RequiresPermissionsChecking with Pe
 
   self: ProfileExportSingleCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(Seq(
       CheckablePermission(Permissions.Department.Reports, student),
       CheckablePermission(Permissions.Profiles.Read.Core, student)
@@ -437,7 +437,7 @@ trait ProfileExportSingleDescription extends Describable[Seq[FileAttachment]] {
 
   override lazy val eventName = "ProfileExportSingle"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.studentIds(Seq(student.universityId))
   }
 }
