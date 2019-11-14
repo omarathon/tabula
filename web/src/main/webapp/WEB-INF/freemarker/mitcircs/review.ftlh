@@ -37,7 +37,7 @@
           ${submission.state.description}
           <#if submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair" >
             <#if submission.outcomesLastRecordedBy??>
-              by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+              <#if submission.state.entryName != "Approved By Chair">by </#if>${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
             </#if>
             <#if submission.outcomesLastRecordedOn??>
               at <@fmt.date date=submission.outcomesLastRecordedOn />
