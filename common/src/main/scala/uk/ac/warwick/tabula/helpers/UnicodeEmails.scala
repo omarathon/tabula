@@ -12,7 +12,7 @@ trait UnicodeEmails {
 
   def prepareMessage(message: MimeMessage)(fn: => MimeMessageHelper => Unit): MimeMessage = {
     val preparator = new FunctionalMimeMessagePreparator({ message =>
-      val helper = new MimeMessageHelper(message, false, "UTF-8")
+      val helper = new MimeMessageHelper(message, true, "UTF-8")
       fn(helper)
     })
 

@@ -10,7 +10,7 @@
 </#if>
 
 <head>
-  <style type="text/css" nonce="${nonce()}">
+  <style type="text/css">
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }

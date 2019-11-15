@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+
+import javax.activation.DataSource
 import javax.persistence._
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -348,7 +351,17 @@ trait SingleRecipientNotification {
 }
 
 trait HasNotificationAttachment {
-  def generateAttachments(helper: MimeMessageHelper): Unit
+  protected case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {
+    override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
+
+    override def getName: String = fileName
+
+    override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
+
+    override def getContentType: String = contentType
+  }
+
+  def generateAttachments(message: MimeMessageHelper): Unit
 }
 
 trait NotificationSettings extends NestedSettings {
