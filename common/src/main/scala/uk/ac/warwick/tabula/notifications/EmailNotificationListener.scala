@@ -39,7 +39,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
       val notification = recipientInfo.notification
       val recipient = recipientInfo.recipient
 
-      Some(createMessage(mailSender) { message =>
+      Some(createMessage(mailSender, multipart = true) { message =>
         message.setFrom(fromAddress)
         message.setReplyTo(replyAddress)
         message.setTo(recipient.getEmail)

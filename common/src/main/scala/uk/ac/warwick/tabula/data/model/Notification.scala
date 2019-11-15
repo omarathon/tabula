@@ -351,16 +351,6 @@ trait SingleRecipientNotification {
 }
 
 trait HasNotificationAttachment {
-  protected case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {
-    override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
-
-    override def getName: String = fileName
-
-    override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
-
-    override def getContentType: String = contentType
-  }
-
   def generateAttachments(message: MimeMessageHelper): Unit
 }
 

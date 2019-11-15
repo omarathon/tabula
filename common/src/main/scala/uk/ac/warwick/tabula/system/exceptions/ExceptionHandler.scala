@@ -81,7 +81,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
       }
   }
 
-  private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
+  private def makeEmail(context: ExceptionContext) = createMessage(mailSender, multipart = false) { message =>
     val info = RequestInfo.fromThread
 
     val env = if (production) "PROD" else "TEST"

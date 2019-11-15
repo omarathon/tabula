@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import java.io.ByteArrayOutputStream
 
 import javax.activation.DataHandler
-import javax.mail.Part
 import javax.mail.internet.MimeBodyPart
 import net.fortuna.ical4j.data.CalendarOutputter
 import net.fortuna.ical4j.model.Calendar
@@ -14,6 +13,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.HasSettings._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
@@ -91,11 +91,11 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 
     // iCal part for Outlook/Office 365
     val icalPart = new MimeBodyPart
-    icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, s"text/calendar; method=${cal.getMethod.getValue}", "meeting.ics")))
+    icalPart.setDataHandler(new DataHandler(UnicodeEmails.ByteArrayDataSource(iCal, s"text/calendar; method=${cal.getMethod.getValue}", "meeting.ics")))
     message.getRootMimeMultipart.addBodyPart(icalPart)
 
     // Attachment for everyone else
-    message.addAttachment("meeting.ics", ByteArrayDataSource(iCal, "text/calendar", "meeting.ics"))
+    message.addAttachment("meeting.ics", UnicodeEmails.ByteArrayDataSource(iCal, "text/calendar", "meeting.ics"))
   }
 
 }

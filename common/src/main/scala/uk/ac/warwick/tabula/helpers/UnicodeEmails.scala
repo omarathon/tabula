@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.springframework.mail.javamail.MimeMessagePreparator
-import javax.mail.internet.MimeMessage
+import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+
+import javax.activation.DataSource
+import javax.mail.internet.{MimeMessage, MimeUtility}
+import org.springframework.mail.javamail.{MimeMessageHelper, MimeMessagePreparator}
 import uk.ac.warwick.util.mail.WarwickMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
-import javax.mail.internet.MimeUtility
 
 trait UnicodeEmails {
 
-  def createMessage(sender: WarwickMailSender)(fn: => MimeMessageHelper => Unit): MimeMessage = prepareMessage(sender.createMimeMessage)(fn)
+  def createMessage(sender: WarwickMailSender, multipart: Boolean)(fn: => MimeMessageHelper => Unit): MimeMessage = prepareMessage(sender.createMimeMessage, multipart)(fn)
 
-  def prepareMessage(message: MimeMessage)(fn: => MimeMessageHelper => Unit): MimeMessage = {
+  def prepareMessage(message: MimeMessage, multipart: Boolean)(fn: => MimeMessageHelper => Unit): MimeMessage = {
     val preparator = new FunctionalMimeMessagePreparator({ message =>
-      val helper = new MimeMessageHelper(message, true, "UTF-8")
+      val helper = new MimeMessageHelper(message, multipart, "UTF-8")
       fn(helper)
     })
 
@@ -24,6 +25,18 @@ trait UnicodeEmails {
 
   def encodeSubject(subject: String): String = MimeUtility.encodeText(subject, "UTF-8", null)
 
+}
+
+object UnicodeEmails extends UnicodeEmails {
+  case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {
+    override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
+
+    override def getName: String = fileName
+
+    override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
+
+    override def getContentType: String = contentType
+  }
 }
 
 class FunctionalMimeMessagePreparator(fn: => MimeMessage => Unit) extends MimeMessagePreparator {
