@@ -19,6 +19,7 @@
       <!-- Public APIs -->
       <excluded-url-pattern>/v1/turnitin/*</excluded-url-pattern>
       <excluded-url-pattern>/v1/studentTargetGroups</excluded-url-pattern>
+      <excluded-url-pattern>/v1/studyLevels</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates.*</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates/*</excluded-url-pattern>
