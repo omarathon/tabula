@@ -7,6 +7,7 @@ import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, HasNotificationAttachment, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -14,7 +15,6 @@ import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
 import uk.ac.warwick.tabula.services.{NotificationService, RecipientNotificationListener}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 @Component
@@ -28,24 +28,6 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
   // email constants
   var replyAddress: String = Wire.property("${mail.noreply.to}")
   var fromAddress: String = Wire.property("${mail.admin.to}")
-  val mailHeader = "Dear %s,\n\n"
-  val mailFooter = "\n\nThank you,\nTabula"
-  val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
-
-  def link(n: Notification[_, _], recipient: User): String = {
-    val urlFromNotification = n.urlFor(recipient)
-    val url = if (urlFromNotification.toLowerCase.startsWith("https://")) {
-      urlFromNotification
-    } else {
-      topLevelUrl + urlFromNotification
-    }
-
-    if (n.isInstanceOf[ActionRequiredNotification]) {
-      s"\n\nYou need to ${n.urlTitle}. Please visit $url"
-    } else {
-      s"\n\nTo ${n.urlTitle}, please visit $url"
-    }
-  }
 
   // add an isEmail property for the model for emails
   def render(model: FreemarkerModel): String = {
@@ -57,7 +39,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
       val notification = recipientInfo.notification
       val recipient = recipientInfo.recipient
 
-      Some(createMessage(mailSender) { message =>
+      Some(createMessage(mailSender, multipart = true) { message =>
         message.setFrom(fromAddress)
         message.setReplyTo(replyAddress)
         message.setTo(recipient.getEmail)
@@ -76,16 +58,34 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
           }
         }
 
-        val body = new StringBuilder("")
-        body.append(mailHeader.format(recipient.getFirstName))
-        body.append(content)
-        body.append(link(notification, recipient))
-        body.append(mailFooter)
-        body.append(replyWarning)
-        message.setText(body.toString())
+        val url = notification.urlFor(recipient) match {
+          case absolute if absolute.startsWith("https://") => absolute
+          case relative => s"$topLevelUrl$relative"
+        }
+
+        val plainText = textRenderer.renderTemplate("/WEB-INF/freemarker/emails/layout_plain.ftl", Map(
+          "content" -> content,
+          "recipient" -> recipient,
+          "actionRequired" -> notification.isInstanceOf[ActionRequiredNotification],
+          "url" -> url,
+          "urlTitle" -> notification.urlTitle
+        ))
+
+        val htmlText = textRenderer.renderTemplate("/WEB-INF/freemarker/emails/layout_html.ftlh", Map(
+          "content" -> FormattedHtml(content),
+          "recipient" -> recipient,
+          "actionRequired" -> notification.isInstanceOf[ActionRequiredNotification],
+          "url" -> url,
+          "urlTitle" -> notification.urlTitle,
+          "title" -> notification.titleFor(recipient),
+          "priority" -> notification.priority.toNumericalValue
+        ))
+
+        message.setText(plainText, htmlText)
+
         notification match {
           case n: HasNotificationAttachment => n.generateAttachments(message)
-          case _ => () // do nothing
+          case _ => // do nothing
         }
       })
     } catch {
