@@ -683,15 +683,7 @@
     </bean>
   </beans>
 
-  <beans profile="production &amp; !dev">
-    <bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
-          p:ssosUrl="${ssoclient.ssos.url}"
-          p:groupServiceLocation="${ssoclient.webgroups.url}"
-          p:httpConnectionTimeout="${ssoclient.net.connection-timeout.millis}"
-          p:httpDataTimeout="${ssoclient.net.data-timeout.millis}"/>
-  </beans>
-
-  <beans profile="dev">
+  <beans profile="dev,production">
     <bean id="userLookupDelegate" class="uk.ac.warwick.tabula.services.DatabaseAwareUserLookupService" autowire-candidate="false">
       <constructor-arg>
         <bean class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
