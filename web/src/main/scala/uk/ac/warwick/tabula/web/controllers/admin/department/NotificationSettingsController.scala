@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.commands.admin.department.NotificationSettingsCommand
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.{Mav, Routes}
-import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
-import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
+import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/notification"))
@@ -44,12 +44,12 @@ class NotificationSettingsController extends AdminController
     @Valid @ModelAttribute("command") cmd: NotificationSettingsCommand,
     errors: Errors,
     @PathVariable department: Department
-  ): Mav = {
+  )(implicit redirectAttributes: RedirectAttributes): Object = {
     if (errors.hasErrors) {
       form(department, cmd)
     } else {
       cmd.apply()
-      Redirect(Routes.admin.department(department))
+      RedirectFlashing(Routes.admin.department(department), "flash__success" -> "flash.notificationSettings.saved")
     }
   }
 }

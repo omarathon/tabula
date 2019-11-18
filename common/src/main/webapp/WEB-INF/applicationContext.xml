@@ -629,6 +629,9 @@
   <bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener"/>
   <bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService"/>
 
+  <!-- Custom implementation of FlashMapManager -->
+  <bean id="flashMapManager" class="uk.ac.warwick.tabula.system.CookieFlashMapManager" />
+
   <!-- Expose local properties as system properties -->
   <bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

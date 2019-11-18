@@ -216,6 +216,16 @@
     </header>
 
     <div class="id7-main-content" data-popout="false">
+      <#if flash__success?has_content && flash__success?is_string>
+        <div class="alert alert-success"><@spring.message code=flash__success /></div>
+      </#if>
+      <#if flash__warning?has_content && flash__warning?is_string>
+        <div class="alert alert-warning"><@spring.message code=flash__warning /></div>
+      </#if>
+      <#if flash__error?has_content && flash__error?is_string>
+        <div class="alert alert-danger"><@spring.message code=flash__error /></div>
+      </#if>
+
       <@tiles.insertAttribute name="body" />
     </div>
   </main>
