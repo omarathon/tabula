@@ -130,6 +130,7 @@ object Logging {
     case lmap: scala.collection.immutable.ListMap[_, _] => JLinkedHashMap(lmap.view.mapValues(convertForStructuredArguments).toSeq: _*)
     case lmap: scala.collection.mutable.ListMap[_, _] => JLinkedHashMap(lmap.view.mapValues(convertForStructuredArguments).toSeq: _*)
     case smap: scala.collection.Map[_, _] => smap.view.mapValues(convertForStructuredArguments).toMap.asJava
+    case smapview: scala.collection.MapView[_, _] => smapview.view.mapValues(convertForStructuredArguments).toMap
     case sseq: scala.Seq[_] => sseq.map(convertForStructuredArguments).asJava
     case scol: scala.Iterable[_] => scol.map(convertForStructuredArguments).asJavaCollection
     case other: AnyRef => other
