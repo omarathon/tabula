@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification}
 import uk.ac.warwick.userlookup.User
 
 @Entity
@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 class ScheduledMeetingRecordBehalfNotification
   extends ScheduledMeetingRecordNotification
     with AddsIcalAttachmentToScheduledMeetingNotification
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def this(theVerb: String) {
     this()

@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.io.{ByteArrayInputStream, InputStream, OutputStream}
-
-import javax.activation.DataSource
 import javax.persistence._
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -28,7 +25,7 @@ object Notification {
   /**
     * By default, the priority that a notification must be at or above in order to generate an email.
     */
-  val PriorityEmailThreshold = NotificationPriority.Info
+  val PriorityEmailThreshold: NotificationPriority = NotificationPriority.Info
 
   /**
     * A little explanation...
@@ -460,10 +457,17 @@ sealed trait MyWarwickDiscriminator {
   self: Notification[_, _] =>
 }
 
+/**
+ * This will generate an Alert in the My Warwick app, with a push notification (etc.)
+ */
 trait MyWarwickNotification extends MyWarwickDiscriminator {
   self: Notification[_, _] =>
 }
 
+/**
+ * This will generate a My Warwick Activity, so it's _only_ suitable where it's a confirmation
+ * for an action performed by the user themselves.
+ */
 trait MyWarwickActivity extends MyWarwickDiscriminator {
   self: Notification[_, _] =>
 }

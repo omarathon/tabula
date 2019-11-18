@@ -14,7 +14,7 @@ class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
   with SingleRecipientNotification
   with UserIdRecipientNotification
   with AutowiringUserLookupComponent
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   @transient
   final lazy val exam: Exam = item.entity

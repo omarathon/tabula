@@ -6,8 +6,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, RoleOverride}
+import uk.ac.warwick.tabula.data.model.{MyWarwickNotification, UserSettings}
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{SecurityService, UserSettingsService}
@@ -19,7 +19,7 @@ import scala.reflect.ClassTag
 @Entity
 @Proxy
 @DiscriminatorValue("SubmissionReceived")
-class SubmissionReceivedNotification extends SubmissionNotification {
+class SubmissionReceivedNotification extends SubmissionNotification with MyWarwickNotification {
 
   override def onPreSave(isNew: Boolean) {
     // if this submission was noteworthy then the priority is higher

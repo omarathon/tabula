@@ -29,7 +29,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 @Entity
 @Proxy
 @DiscriminatorValue("ExtensionChanged")
-class ExtensionChangedNotification extends ExtensionStudentNotification with MyWarwickActivity {
+class ExtensionChangedNotification extends ExtensionStudentNotification with MyWarwickNotification {
   def verb = "updated"
 
   def title: String = titlePrefix + "Your extended deadline for \"%s\" has changed".format(assignment.name)
@@ -42,7 +42,7 @@ class ExtensionChangedNotification extends ExtensionStudentNotification with MyW
 @Entity
 @Proxy
 @DiscriminatorValue("ExtensionGranted")
-class ExtensionGrantedNotification extends ExtensionStudentNotification with MyWarwickActivity {
+class ExtensionGrantedNotification extends ExtensionStudentNotification with MyWarwickNotification {
   def verb = "grant"
 
   def title: String = titlePrefix + "Your deadline for \"%s\" has been extended".format(assignment.name)
@@ -55,7 +55,7 @@ class ExtensionGrantedNotification extends ExtensionStudentNotification with MyW
 @Entity
 @Proxy
 @DiscriminatorValue("ExtensionRequestApproved")
-class ExtensionRequestApprovedNotification extends ExtensionStudentNotification with MyWarwickActivity {
+class ExtensionRequestApprovedNotification extends ExtensionStudentNotification with MyWarwickNotification {
   def verb = "approve"
 
   def title: String = {

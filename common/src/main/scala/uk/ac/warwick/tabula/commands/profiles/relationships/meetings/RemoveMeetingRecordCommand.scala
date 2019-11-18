@@ -81,7 +81,7 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 
   self: RemoveMeetingRecordState =>
 
-  def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+  def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification] = {
     meeting match {
       case m: ScheduledMeetingRecord =>
         val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m)
@@ -124,7 +124,7 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 
   self: RemoveMeetingRecordState =>
 
-  def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+  def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification] = {
     meeting match {
       case m: ScheduledMeetingRecord =>
         val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m)

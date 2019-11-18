@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
@@ -126,7 +126,7 @@ trait EditScheduledMeetingRecordNotification
   extends AbstractScheduledMeetingRecordNotifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
   self: EditScheduledMeetingRecordState =>
 
-  def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+  def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification] = {
     super.emit(
       meeting = result.meetingRecord,
       user = editor.asSsoUser,

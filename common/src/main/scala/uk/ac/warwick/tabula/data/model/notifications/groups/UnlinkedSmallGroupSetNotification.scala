@@ -5,19 +5,18 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickActivity, NotificationWithTarget}
+import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickNotification, NotificationWithTarget}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 @Entity
 @Proxy
 @DiscriminatorValue(value = "UnlinkedSmallGroupSet")
 class UnlinkedSmallGroupSetNotification extends NotificationWithTarget[SmallGroupSet, Department]
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   @transient
   lazy val department: Department = target.entity

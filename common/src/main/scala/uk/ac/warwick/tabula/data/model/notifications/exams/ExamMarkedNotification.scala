@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 @DiscriminatorValue(value = "ExamMarked")
 class ExamMarkedNotification extends Notification[Exam, Unit]
   with SingleItemNotification[Exam]
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   @transient
   final lazy val exam: Exam = item.entity

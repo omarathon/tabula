@@ -19,7 +19,7 @@ class Cm2FeedbackAdjustmentNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]
     with SingleItemNotification[AssignmentFeedback]
     with AutowiringUserLookupComponent
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def verb = "adjusted"
 

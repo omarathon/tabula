@@ -15,7 +15,7 @@ import scala.annotation.meta.getter
 import scala.util.Try
 
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit]
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   @(transient@getter) val templateLocation: String
 

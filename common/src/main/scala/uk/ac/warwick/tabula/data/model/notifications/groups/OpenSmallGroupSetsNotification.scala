@@ -15,7 +15,7 @@ abstract class AbstractOpenSmallGroupSetsNotification
   extends Notification[SmallGroupSet, Unit]
     with UserIdRecipientNotification
     with AutowiringUserLookupComponent
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def verb = "Opened"
 

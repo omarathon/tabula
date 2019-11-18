@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 @DiscriminatorValue(value = "Cm2MarkedPlagiarised")
 class Cm2MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
   with SingleItemNotification[Submission] with AutowiringUserLookupComponent
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   def submission: Submission = item.entity
 

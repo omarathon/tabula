@@ -20,7 +20,7 @@ class StudentFeedbackAdjustmentNotification
     with SingleItemNotification[AssignmentFeedback]
     with SingleRecipientNotification
     with AutowiringUserLookupComponent
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def verb = "adjusted"
 

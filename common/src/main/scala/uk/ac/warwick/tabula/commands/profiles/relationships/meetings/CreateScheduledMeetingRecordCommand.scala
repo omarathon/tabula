@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -94,7 +94,7 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 }
 
 trait CreateScheduledMeetingRecordNotification extends AbstractScheduledMeetingRecordNotifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
-  def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+  def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification] = {
     emit(meeting, meeting.creator.asSsoUser, "created")
   }
 }

@@ -85,11 +85,12 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
 
   private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
     notification match {
-      case a: MyWarwickNotification => toMyWarwickActivities(notification).map(n => {
+      // Dampen alerts that are of such a low priority that they wouldn't be interesting by sending them as activities instead
+      case n: MyWarwickNotification if n.priority >= Notification.PriorityEmailThreshold => toMyWarwickActivities(notification).map(n => {
         logger.info(s"Sending MyWarwick notification - ${n.getTitle} to ${n.getRecipients.getUsers.asScala.mkString(", ")}")
         myWarwickService.sendAsNotification(n)
       })
-      case a => toMyWarwickActivities(notification).map(a => {
+      case _ => toMyWarwickActivities(notification).map(a => {
         logger.info(s"Sending MyWarwick activity - ${a.getTitle} to ${a.getRecipients.getUsers.asScala.mkString(", ")}")
         myWarwickService.sendAsActivity(a)
       })

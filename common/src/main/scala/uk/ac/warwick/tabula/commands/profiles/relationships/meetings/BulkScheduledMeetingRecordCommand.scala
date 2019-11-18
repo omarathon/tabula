@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -65,7 +65,7 @@ trait BulkScheduledMeetingRecordCommandNotifications extends SchedulesNotificati
   with AbstractScheduledMeetingRecordNotificationProcess {
   self: BulkScheduledMeetingRecordCommandState =>
 
-  override def emit(scheduledMeetingRecords: Seq[ScheduledMeetingRecord]): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+  override def emit(scheduledMeetingRecords: Seq[ScheduledMeetingRecord]): Seq[ScheduledMeetingRecordNotification] = {
     scheduledMeetingRecords.flatMap { meeting =>
       super.emit(
         meeting = meeting,

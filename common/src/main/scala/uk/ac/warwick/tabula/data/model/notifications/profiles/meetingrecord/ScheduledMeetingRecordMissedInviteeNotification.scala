@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification}
 import uk.ac.warwick.userlookup.User
 
 @Entity
@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 @DiscriminatorValue(value = "ScheduledMeetingRecordMissedInvitee")
 class ScheduledMeetingRecordMissedInviteeNotification
   extends ScheduledMeetingRecordNotification
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   verbSetting.value = "missed"
   priority = Warning

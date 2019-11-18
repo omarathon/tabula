@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 abstract class MissedAttendanceMonitoringCheckpointsNotification
   extends Notification[AttendanceMonitoringCheckpointTotal, Unit]
     with SingleItemNotification[AttendanceMonitoringCheckpointTotal]
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   @transient
   def level: Int

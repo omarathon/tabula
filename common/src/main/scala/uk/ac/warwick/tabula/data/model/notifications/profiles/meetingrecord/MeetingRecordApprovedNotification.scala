@@ -12,7 +12,7 @@ class MeetingRecordApprovedNotification
   extends Notification[MeetingRecordApproval, Unit]
     with MeetingRecordNotificationTrait
     with SingleItemNotification[MeetingRecordApproval]
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def approval: MeetingRecordApproval = item.entity
 

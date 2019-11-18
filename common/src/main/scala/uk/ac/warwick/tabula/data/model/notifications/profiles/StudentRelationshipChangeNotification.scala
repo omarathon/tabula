@@ -14,7 +14,7 @@ import scala.util.Try
 
 abstract class StudentRelationshipChangeNotification
   extends Notification[StudentRelationship, Unit] with SingleItemNotification[StudentRelationship]
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   var profileService: ProfileService = Wire[ProfileService]
 

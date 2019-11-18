@@ -16,7 +16,7 @@ import scala.util.Try
 @DiscriminatorValue("CancelledBulkStudentRelationshipChangeToAgent")
 class CancelledBulkStudentRelationshipChangeToAgentNotification extends Notification[StudentRelationship, Unit]
   with SingleRecipientNotification with UniversityIdRecipientNotification with AutowiringUserLookupComponent
-  with MyWarwickActivity {
+  with MyWarwickNotification {
 
   @transient var profileService: ProfileService = Wire[ProfileService]
   @transient var relationshipService: RelationshipService = Wire[RelationshipService]

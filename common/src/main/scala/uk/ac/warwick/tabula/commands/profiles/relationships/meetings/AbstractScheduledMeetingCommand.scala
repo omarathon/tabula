@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.JavaImports.{JList, _}
 import uk.ac.warwick.tabula.commands.{Notifies, SchedulesNotifications, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -85,7 +85,7 @@ trait AbstractScheduledMeetingRecordCommandState {
 }
 
 trait AbstractScheduledMeetingRecordNotifies[T, B] extends Notifies[T, B] {
-  def emit(meeting: ScheduledMeetingRecord, user: User, verb: String): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification with MyWarwickActivity] = {
+  def emit(meeting: ScheduledMeetingRecord, user: User, verb: String): Seq[ScheduledMeetingRecordNotification] = {
     val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting)
     if (!meeting.universityIdInRelationship(user.getWarwickId)) {
       val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting)

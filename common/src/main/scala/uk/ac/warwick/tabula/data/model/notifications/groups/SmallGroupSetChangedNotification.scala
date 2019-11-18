@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.groups
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity, NotificationWithTarget, UserIdRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification, NotificationWithTarget, UserIdRecipientNotification}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.web.Routes
 
@@ -15,7 +15,7 @@ trait SmallGroupSetChangedUserIdRecipientNotification
   extends NotificationWithTarget[SmallGroup, SmallGroupSet]
     with UserIdRecipientNotification
     with AutowiringUserLookupComponent
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   def verb = "Modify"
 

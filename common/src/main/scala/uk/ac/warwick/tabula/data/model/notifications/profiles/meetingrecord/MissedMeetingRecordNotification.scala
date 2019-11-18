@@ -53,7 +53,7 @@ class MissedMeetingRecordStudentNotification
 @DiscriminatorValue("missedMeetingRecordAgent")
 class MissedMeetingRecordAgentNotification
   extends MissedMeetingRecordNotification
-    with MyWarwickActivity {
+    with MyWarwickNotification {
 
   priority = NotificationPriority.Info
 
