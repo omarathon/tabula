@@ -53,7 +53,7 @@ class CookiesTest extends TestBase {
     val cookie1 = new Cookie("name", "something")
     cookie1.cookie.getName should be("name")
     cookie1.cookie.getValue should be("something")
-    cookie1.cookie.getPath should be(null)
+    cookie1.cookie.getPath should be("/") // Don't let this stay as null as that sets an empty string, which is the worst possible
 
     val cookie2 = new Cookie("name", "something", path = "/yes")
     cookie2.cookie.getName should be("name")
