@@ -49,6 +49,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
       case lmap: scala.collection.immutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
       case lmap: scala.collection.mutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
       case smap: scala.collection.Map[_, _] => superWrap(smap.asJava)
+      case smapview: scala.collection.MapView[_, _] => superWrap((smapview.toMap.asJava))
       case sseq: scala.Seq[_] => superWrap(sseq.asJava)
       case scol: scala.Iterable[_] => superWrap(scol.asJavaCollection)
       case directive: TemplateDirectiveModel => superWrap(directive)
