@@ -698,17 +698,20 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
           .createAlias("studentCourseDetails", "studentCourseDetails")
           .createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
           .createAlias("studentCourseDetails.currentRoute", "route")
-          .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN)
-            .add(Restrictions.or(
-              Restrictions.isNull("currentRelationships.endDate"),
-              Restrictions.ge("currentRelationships.endDate", DateTime.now)
-            ))
-            .add(Restrictions.or(
-              Restrictions.isNull("currentRelationships.startDate"),
-              Restrictions.le("currentRelationships.startDate", DateTime.now)
-            ))
-          .createAlias("currentRelationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN, Option(is("relationshipType.id", "personalTutor")))
+          .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN, Some(
+            Restrictions.and(
+              or(
+                isNull("currentRelationships.endDate"),
+                ge("currentRelationships.endDate", DateTime.now)
+              ),
+              or(
+                isNull("currentRelationships.startDate"),
+                le("currentRelationships.startDate", DateTime.now)
+              )
+            )
+          ))
+          .createAlias("currentRelationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN, Some(is("relationshipType.id", "personalTutor")))
+          .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN)
           .add(isNull("studentCourseDetails.missingFromImportSince"))
           .add(is("studentCourseYearDetails.academicYear", academicYear))
 

@@ -303,9 +303,7 @@ class SmallGroupSet
 
   def studentsNotInMembershipCount: Int = {
     Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembershipCount).getOrElse {
-      if (groups.asScala.forall {
-        _.students.universityIds
-      } && members.universityIds) {
+      if (groups.asScala.forall(_.students.universityIds) && members.universityIds) {
         // Efficiency
         val allocatedStudentIds = groups.asScala.flatMap(_.students.knownType.members)
 
