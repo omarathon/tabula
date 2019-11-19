@@ -43,6 +43,7 @@ case class SmallGroupEventWeek(
 
 case class AllSmallGroupsReportCommandResult(
   attendance: Map[User, Map[SmallGroupEventWeek, AttendanceState]],
+  relevantEvents: Map[User, Set[SmallGroupEventWeek]],
   studentDatas: Seq[AttendanceMonitoringStudentData],
   eventWeeks: Seq[SmallGroupEventWeek]
 )
@@ -128,7 +129,13 @@ class AllSmallGroupsReportCommandInternal(
       }).filter { case (_, state) => state != null }.toMap).toMap
     }
 
-    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, studentDatas, eventWeeks))
+    val relevantEvents: Map[User, Set[SmallGroupEventWeek]] =
+      studentAttendanceMap
+        .view
+        .mapValues(_.keySet)
+        .toMap
+
+    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks))
   }
 }
 

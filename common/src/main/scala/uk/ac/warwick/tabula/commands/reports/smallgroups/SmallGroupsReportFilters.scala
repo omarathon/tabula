@@ -30,6 +30,7 @@ object SmallGroupsReportFilters {
 
     AllSmallGroupsReportCommandResult(
       unrecordedMap,
+      result.relevantEvents,
       result.studentDatas.filter { d => unrecordedMap.keySet.exists(_.getWarwickId == d.universityId) },
       unrecordedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
     )
@@ -42,6 +43,7 @@ object SmallGroupsReportFilters {
 
     AllSmallGroupsReportCommandResult(
       missedMap,
+      result.relevantEvents,
       result.studentDatas.filter { d => missedMap.keySet.exists(_.getWarwickId == d.universityId) },
       missedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
     )
