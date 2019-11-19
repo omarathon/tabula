@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportComman
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
@@ -68,11 +68,22 @@ class AllSmallGroupsReportCommandInternal(
     def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
       weeksForYear(weekNumber).firstDay.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
+    def hasScheduledEventMatchingFilter(set: SmallGroupSet): Boolean =
+      set.groups.asScala.exists { group =>
+        group.events.filterNot(_.isUnscheduled).exists { event =>
+          event.allWeeks.exists { week =>
+            val eventDate = weekNumberToDate(week, event.day)
+            !eventDate.isBefore(startDate) && !eventDate.isAfter(endDate)
+          }
+        }
+      }
+
     val sets = benchmarkTask("sets") {
       smallGroupService.getAllSmallGroupSets(department).filter(_.academicYear == academicYear).filter(_.collectAttendance)
+        .filter(hasScheduledEventMatchingFilter)
     }
 
-    val students: Seq[User] = sets.flatMap(_.allStudents).distinct.sortBy(s => (s.getLastName, s.getFirstName))
+    val students: Seq[User] = sets.flatMap(s => s.allStudents ++ s.studentsNotInMembership).distinct.sortBy(s => (s.getLastName, s.getFirstName))
 
     val studentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), academicYear)
 
@@ -81,7 +92,7 @@ class AllSmallGroupsReportCommandInternal(
     }
 
     // Can't guarantee that all the occurrences will exist for each event,
-    // so generate case classes to repesent each occurrence (a combination of event and week)
+    // so generate case classes to represent each occurrence (a combination of event and week)
     val eventWeeks: Seq[SmallGroupEventWeek] = benchmarkTask("eventWeeks") {
       sets.flatMap(_.groups.asScala.flatMap(_.events).filter(!_.isUnscheduled).flatMap(sge => {
         sge.allWeeks.map(week => SmallGroupEventWeek(s"${sge.id}-$week", sge, week, {

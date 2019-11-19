@@ -33,7 +33,7 @@
 </#if>
 <#list adjustments as adjustment>
   <#if adjustment??>
-    <div class="alert">
+    <div class="alert alert-info">
       <p>
         <strong>${adjustment.reason}</strong> - An adjustment has been made to your final mark.
         <#if feedback.assignment.summative>

@@ -26,7 +26,7 @@
       <#assign releasedFeedback = markingCompletedCommand.releasedFeedback />
 
       <#if releasedFeedback?has_content>
-        <div class="alert">
+        <div class="alert alert-info">
           <a href="" class="released-feedback"><@fmt.p (releasedFeedback?size ) "submission" /></a>
           <#if markingCompletedCommand.releasedFeedback?size == 1>
             has already been marked as completed. This will be ignored.
@@ -60,7 +60,7 @@
           <ul><#list noMarks as markerFeedback>
               <li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
         </#assign>
-        <div class="alert">
+        <div class="alert alert-info">
           ${count} not have a mark. You will not be able to ${cantDo}.
           <a class="use-popover" id="popover-marks" data-html="true"
              tabindex="0" role="button" data-trigger="click focus"
@@ -84,7 +84,7 @@
           <ul><#list noFeedback as markerFeedback>
               <li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
         </#assign>
-        <div class="alert">
+        <div class="alert alert-info">
           ${count} not have any feedback files attached. ${cantDo}.
           <a class="use-popover" id="popover-files" data-html="true"
              tabindex="0" role="button" data-trigger="click focus"

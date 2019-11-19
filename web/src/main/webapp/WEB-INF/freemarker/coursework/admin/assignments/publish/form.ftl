@@ -18,11 +18,11 @@
       updateCheckbox();
 
       $('#feedback-check-recipient-results')
-        .html('<div class="alert"><p>Checking for potential problems with students\' email addresses&hellip;</p></div>')
+        .html('<div class="alert alert-info"><p>Checking for potential problems with students\' email addresses&hellip;</p></div>')
         .load('<@url context=cm1Context page="/admin/module/${module.code}/assignments/${assignment.id}/check-recipients" />');
 
       $('#submissions-report-results')
-        .html('<div class="alert"><p>Comparing feedback list against submission list&hellip;</p></div>')
+        .html('<div class="alert alert-info"><p>Comparing feedback list against submission list&hellip;</p></div>')
         .load('<@url context=cm1Context page="/admin/module/${module.code}/assignments/${assignment.id}/submissions-report" />');
     });
   </script>
