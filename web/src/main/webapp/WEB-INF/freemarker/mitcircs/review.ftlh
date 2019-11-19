@@ -244,7 +244,7 @@
       <@components.section "Outcomes">
         <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
           <@components.detail label="Mitigation grade" condensed=true>
-            ${submission.outcomeGrading.description}
+            ${submission.gradingCode} &mdash; ${submission.outcomeGrading.description} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
             <#if submission.outcomeGrading.entryName == "Rejected" && submission.rejectionReasons?has_content>
               &ndash;
               <@components.enumListWithOther submission.rejectionReasons submission.rejectionReasonsOther!"" />
