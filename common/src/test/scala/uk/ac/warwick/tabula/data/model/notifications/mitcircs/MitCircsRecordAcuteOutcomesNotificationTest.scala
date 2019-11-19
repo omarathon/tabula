@@ -108,20 +108,13 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
     notificationContent should be(
       """Outcomes last recorded by John Admin at 13 June 2019 at 15:20:00:
         |
-        |MIT-1,000: 13 June 2019 - (ongoing)
-        |
-        |Affected assessments:
-        |- IN304 Module in304 (18/19) - Essay (2000 words)
-        |- IN305 Module in305 (18/19) - Dissertation
-        |""".stripMargin
+        |MIT-1,000: 13 June 2019 - (ongoing)""".stripMargin
     )
 
     // Make sure the Markdown -> HTML is sane
     renderMarkdown(notificationContent) should be (
       """<p>Outcomes last recorded by John Admin at 13 June 2019 at 15:20:00:</p>
         |<p>MIT-1,000: 13 June 2019 - (ongoing)</p>
-        |<p>Affected assessments:</p>
-        |<ul><li>IN304 Module in304 (18/19) - Essay (2000 words)</li><li>IN305 Module in305 (18/19) - Dissertation</li></ul>
         |""".stripMargin
     )
   }}

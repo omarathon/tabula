@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntity
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions._
@@ -429,7 +430,7 @@ class StudentMember extends Member with StudentProperties {
 
   def isUG: Boolean = groupName == "Undergraduate - full-time" || groupName == "Undergraduate - part-time"
 
-  def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false): ExamGridEntity =
+  def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false, mitCircs: Seq[MitigatingCircumstancesSubmission] = Nil): ExamGridEntity =
     RequestLevelCache.cachedBy("StudentMember.toExamGridEntity", s"$universityId-${baseSCYD.id}-$basedOnLevel") {
       val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
         .flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
@@ -477,7 +478,8 @@ class StudentMember extends Member with StudentProperties {
         universityId = universityId,
         lastImportDate = Option(lastImportDate),
         years = years,
-        yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
+        yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear), // year weightings based on the GRID course that we are generating
+        mitigatingCircumstances = mitCircs
       )
     }
 }
