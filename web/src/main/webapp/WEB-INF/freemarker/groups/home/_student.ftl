@@ -65,6 +65,8 @@
           }
         });
       });
+
+      $('.use-tooltip').tooltip();
     });
   </script>
 </#escape>
