@@ -45,19 +45,16 @@ class UserLookupServiceImpl(d: UserLookupInterface)
 }
 
 /**
- * Only Autowired in if the <code>dev</code> Spring profile is enabled; this checks the MEMBER database
- * table as a <strong>last</strong> resort if a lookup returns an AnonymousUser; this is primarily to support the functional
- * tests and overrides in <code>membership.usercode_overrides</code>.
- *
- * This is used in production mode too but the <code>inDevelopmentMode</code> flag disables the behaviour.
+ * This checks the MEMBER database table as a <strong>last</strong> resort if a lookup returns an AnonymousUser;
+ * this is primarily to support the functional tests and overrides in <code>membership.usercode_overrides</code>,
+ * but is also necessary to show correct data for previous years where users age out of SSO entirely and would normally
+ * return an AnonymousUser, but we still have their data in Tabula.
  */
 class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupAdapter(d) with AutowiringProfileServiceComponent {
   @Autowired var env: Environment = _
-  lazy val inDevelopmentMode: Boolean = env.acceptsProfiles(Profiles.of("dev", "sandbox"))
 
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
-    if (!inDevelopmentMode) super.getUsersByUserIds(ids)
-    else super.getUsersByUserIds(ids).asScala.map { case (userId, userFromSSO) =>
+    super.getUsersByUserIds(ids).asScala.map { case (userId, userFromSSO) =>
       if (userFromSSO.isFoundUser) userId -> userFromSSO
       else profileService.getAllMembersWithUserId(userId, disableFilter = true).headOption match {
         case Some(member) => userId -> member.asSsoUser
@@ -66,8 +63,7 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
     }.asJava
 
   override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] =
-    if (!inDevelopmentMode) super.getUsersByWarwickUniIds(warwickUniIds)
-    else super.getUsersByWarwickUniIds(warwickUniIds).asScala.map { case (uniId, userFromSSO) =>
+    super.getUsersByWarwickUniIds(warwickUniIds).asScala.map { case (uniId, userFromSSO) =>
       if (userFromSSO.isFoundUser) uniId -> userFromSSO
       else profileService.getMemberByUniversityId(uniId) match {
         case Some(member) => uniId -> member.asSsoUser
@@ -76,12 +72,10 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
     }.asJava
 
   override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId], ignored: Boolean): JMap[UniversityId, User] =
-    if (!inDevelopmentMode) super.getUsersByWarwickUniIds(warwickUniIds, ignored)
-    else getUsersByWarwickUniIds(warwickUniIds)
+    getUsersByWarwickUniIds(warwickUniIds)
 
   override def getUserByUserId(id: String): User =
-    if (!inDevelopmentMode) super.getUserByUserId(id)
-    else RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByUserId", id) {
+    RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByUserId", id) {
       super.getUserByUserId(id) match {
         case FoundUser(u) => u
         case u =>
@@ -92,8 +86,7 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
     }
 
   override def getUserByWarwickUniId(id: String): User =
-    if (!inDevelopmentMode) super.getUserByWarwickUniId(id)
-    else RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByWarwickUniId", id) {
+    RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByWarwickUniId", id) {
       super.getUserByWarwickUniId(id) match {
         case FoundUser(u) => u
         case u =>
@@ -104,8 +97,7 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
     }
 
   override def getUserByWarwickUniId(id: String, ignored: Boolean): User =
-    if (!inDevelopmentMode) super.getUserByWarwickUniId(id, ignored)
-    else getUserByWarwickUniId(id)
+    getUserByWarwickUniId(id)
 }
 
 /**
