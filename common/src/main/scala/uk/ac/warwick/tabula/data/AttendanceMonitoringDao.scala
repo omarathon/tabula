@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
+import org.hibernate.criterion.ProjectionList
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{ProjectionList, Restrictions}
 import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.stereotype.Repository
@@ -699,7 +699,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
           .createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
           .createAlias("studentCourseDetails.currentRoute", "route")
           .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN, Some(
-            Restrictions.and(
+            and(
               or(
                 isNull("currentRelationships.endDate"),
                 ge("currentRelationships.endDate", DateTime.now)
