@@ -87,6 +87,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = true)
   var outcomesApprovedOn: DateTime = _
 
+  def outcomesFinalisedOn: DateTime = if(isAcute) outcomesLastRecordedOn else outcomesApprovedOn
+
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
@@ -156,9 +158,14 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
-    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
+    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r }
       .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
+      .filter{ case (_, a) => a.nonEmpty }
       .toMap
+
+  def globalRecommendations: Seq[MitCircsExamBoardRecommendation] = Option(boardRecommendations).map(_.diff(
+    boardRecommendations.collect{ case r: AssessmentSpecificRecommendation => r }
+  )).getOrElse(Nil)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "pendingEvidence", nullable = false)
@@ -300,6 +307,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
+  // get's the list of assessments which the actue outcome apples to (may be a subset of the assessments that the student indicated were affected)
+  def assessmentsWithAcuteOutcome: Seq[MitigatingCircumstancesAffectedAssessment] = affectedAssessments.asScala.toSeq
+    .filter(a => a.acuteOutcome != null && a.acuteOutcome == acuteOutcome)
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")

@@ -245,10 +245,8 @@
                 <#if submission.affectedAssessments?has_content>
                   <@components.detail "Affected assessments">
                   <ul class="list-unstyled">
-                    <#list submission.affectedAssessments as assessment>
-                      <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                        <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
-                      </#if>
+                    <#list submission.assessmentsWithAcuteOutcome as assessment>
+                      <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                     </#list>
                   </ul>
                   </@components.detail>
