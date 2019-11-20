@@ -8,14 +8,14 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerState, FlexiPickerResult, FlexiPickerCommand}
+import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerCommand, FlexiPickerResult, FlexiPickerState}
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{Group, User}
 
@@ -112,6 +112,18 @@ object FlexiPickerController {
       *
       */
     private def doSearchUsers(terms: Array[String]): List[User] = {
+      def findUsersWithFilter(filters: (String, String)*): Seq[User] =
+        userLookup.findUsersWithFilter(
+          filters.filter { case (_, v) => v.hasText }
+            .map { case (k, v) => k -> s"$v*" }
+            .toMap[String, AnyRef]
+            .asJava
+        ).asScala.map { user =>
+          // findUsersWithFilter doesn't set this, but we rely on it
+          user.setUserSource("WarwickADS")
+          user
+        }.toSeq
+
       var users: List[User] = List[User]()
       if (exact) {
         if (terms.length == 1) {
@@ -134,19 +146,19 @@ object FlexiPickerController {
         if (user.isFoundUser) {
           users = users :+ user
         } else {
-          users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava).asScala
+          users = users ++ findUsersWithFilter("sn" -> terms(0))
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava).asScala
+            users ++= findUsersWithFilter("givenName" -> terms(0))
           }
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava).asScala
+            users ++= findUsersWithFilter("cn" -> terms(0))
           }
         }
       }
       else if (terms.length >= 2) {
-        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1))).asJava).asScala
+        users ++= findUsersWithFilter("givenName" -> terms(0), "sn" -> terms(1))
         if (users.size < EnoughResults) {
-          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1))).asJava).asScala
+          users ++= findUsersWithFilter("sn" -> terms(0), "givenName" -> terms(1))
         }
       }
 
@@ -161,6 +173,7 @@ object FlexiPickerController {
           if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
+
         val isStaffIfNecessary = !staffOnly || user.getUserSource != "WarwickADS" || user.isStaff
         val isStudentOrPGRIfNecessary = !studentsOnly || user.getUserSource != "WarwickADS" || user.isStudent || user.getExtraProperty("warwickitsclass") == "PG(R)"
         hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary && isStudentOrPGRIfNecessary
@@ -213,11 +226,6 @@ object FlexiPickerController {
 
     private def createItemFor(group: Group): Map[String, String] = {
       Map("type" -> "group", "title" -> group.getTitle, "groupType" -> group.getType, "value" -> group.getName)
-    }
-
-    private def item(name: String, value: String): Map[String, AnyRef] = value match {
-      case s: String if s.hasText => Map(name -> (value + "*"))
-      case _ => Map.empty
     }
   }
 
