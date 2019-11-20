@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.permissions
 import javax.persistence._
 import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Proxy, Type}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
@@ -93,19 +94,21 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
     * In almost all cases, Department will be one of the permissionsParents of the scope (maybe multiple
     * levels up), but providing a direct link here means we don't have to iterate up the tree.
     */
-  def scopeDepartment: Option[Department] = scope match {
-    case null => None
-    case department: Department => Some(department)
-    case module: Module => Some(module.adminDepartment)
-    case route: Route => Some(route.adminDepartment)
-    case student: StudentMember =>
-      student.mostSignificantCourseDetails.flatMap(_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption).orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
-    case member: Member => Option(member.homeDepartment)
-    case assignment: Assignment => Some(assignment.module.adminDepartment)
-    case smallGroup: SmallGroup => Some(smallGroup.groupSet.module.adminDepartment)
-    case smallGroupSet: SmallGroupSet => Some(smallGroupSet.module.adminDepartment)
-    case smallGroupEvent: SmallGroupEvent => Some(smallGroupEvent.group.groupSet.module.adminDepartment)
-    case _ => None
+  def scopeDepartment: Option[Department] = transactional(readOnly = true) {
+    scope match {
+      case null => None
+      case department: Department => Some(department)
+      case module: Module => Some(module.adminDepartment)
+      case route: Route => Some(route.adminDepartment)
+      case student: StudentMember =>
+        student.mostSignificantCourseDetails.flatMap(_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption).orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
+      case member: Member => Option(member.homeDepartment)
+      case assignment: Assignment => Some(assignment.module.adminDepartment)
+      case smallGroup: SmallGroup => Some(smallGroup.groupSet.module.adminDepartment)
+      case smallGroupSet: SmallGroupSet => Some(smallGroupSet.module.adminDepartment)
+      case smallGroupEvent: SmallGroupEvent => Some(smallGroupEvent.group.groupSet.module.adminDepartment)
+      case _ => None
+    }
   }
 
   def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap(_.replacedRoleDefinitionFor(roleDefinition)).getOrElse(roleDefinition)
