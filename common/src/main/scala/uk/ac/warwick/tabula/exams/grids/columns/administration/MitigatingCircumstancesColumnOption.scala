@@ -25,7 +25,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
     override val category: String = "Administration"
 
-    override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
+    override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.VeryLongString
 
     override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 
