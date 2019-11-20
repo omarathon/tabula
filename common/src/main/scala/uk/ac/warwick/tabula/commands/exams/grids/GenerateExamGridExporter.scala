@@ -444,6 +444,11 @@ object ExamGridExportStyles {
 
     val wrappedText = {
       val cs = workbook.createCellStyle()
+      val font = workbook.createFont().asInstanceOf[XSSFFont]
+      font.setFontHeightInPoints(10)
+      cs.setRotation(0)
+      cs.setFont(font)
+      cs.setAlignment(HorizontalAlignment.LEFT)
       cs.setWrapText(true)
       cs
     }

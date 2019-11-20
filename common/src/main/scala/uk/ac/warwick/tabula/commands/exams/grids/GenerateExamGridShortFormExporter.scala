@@ -261,13 +261,11 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             if (mergedCells) {
               val lastRow = if (showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
               mergedRegions += new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex)
-
             } else {
               valueRows.values.foreach(row => {
                 val entityCell = row.createCell(currentColumnIndex)
                 chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
               })
-
             }
           }
         })
