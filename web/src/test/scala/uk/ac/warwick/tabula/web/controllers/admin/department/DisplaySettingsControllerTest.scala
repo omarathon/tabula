@@ -14,14 +14,6 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
   val controller = new DisplaySettingsController
   controller.relationshipService = mock[RelationshipService]
 
-  @Test def createsCommand(): Unit = {
-    val department = Fixtures.department("in")
-
-    val command = controller.displaySettingsCommand(department)
-
-    command should be(anInstanceOf[Appliable[Department]])
-  }
-
   @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment(): Unit = {
     controller.displaySettingsCommand(null)
   }
