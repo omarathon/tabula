@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import java.io.Serializable
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.{Environment, Profiles}
+import org.springframework.core.env.Environment
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
