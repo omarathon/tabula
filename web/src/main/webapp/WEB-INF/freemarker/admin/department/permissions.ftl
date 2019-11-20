@@ -22,7 +22,14 @@
       </div>
     </#if>
 
-    <@pm.alerts "addCommand" department.name users role />
+    <@pm.validation_alerts "addCommand" />
+    <@pm.validation_alerts "removeCommand" />
+
+    <#if (action!"") == "add">
+      <@pm.alerts department.name users role />
+    <#elseif (action!"") == "remove">
+      <@pm.alerts department.name users role />
+    </#if>
 
     <div class="row" id="tutors-supervisors-row">
       <div class="col-md-6">
