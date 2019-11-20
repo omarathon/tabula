@@ -161,8 +161,8 @@ object FlexiPickerController {
           if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
-        val isStaffIfNecessary = !staffOnly || user.isStaff
-        val isStudentOrPGRIfNecessary = !studentsOnly || user.isStudent || user.getExtraProperty("warwickitsclass") == "PG(R)"
+        val isStaffIfNecessary = !staffOnly || user.getUserSource != "WarwickADS" || user.isStaff
+        val isStudentOrPGRIfNecessary = !studentsOnly || user.getUserSource != "WarwickADS" || user.isStudent || user.getExtraProperty("warwickitsclass") == "PG(R)"
         hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary && isStudentOrPGRIfNecessary
       }
 
