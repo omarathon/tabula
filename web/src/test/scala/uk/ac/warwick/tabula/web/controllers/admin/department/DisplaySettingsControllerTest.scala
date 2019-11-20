@@ -1,111 +1,83 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
+import org.springframework.validation.{BindException, Errors}
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap
+import uk.ac.warwick.tabula.commands.admin.department.{DisplaySettingsCommand, DisplaySettingsCommandRequest, DisplaySettingsCommandState}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
-import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 
 class DisplaySettingsControllerTest extends TestBase with Mockito {
 
   val controller = new DisplaySettingsController
   controller.relationshipService = mock[RelationshipService]
 
-  @Test def createsCommand {
+  @Test def createsCommand(): Unit = {
     val department = Fixtures.department("in")
 
     val command = controller.displaySettingsCommand(department)
 
     command should be(anInstanceOf[Appliable[Department]])
-    command should be(anInstanceOf[PopulateOnForm])
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment(): Unit = {
     controller.displaySettingsCommand(null)
   }
 
-  @Test def form {
-    val department = Fixtures.department("in")
+  private abstract class TestDisplaySettingsCommandInternal(val department: Department) extends Appliable[Department] with DisplaySettingsCommandState
 
-    var populateCalledCount = 0
-    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-      val permissionsService = null
-
-      def populate(): Unit = {
-        populateCalledCount += 1
-      }
-
-      def apply(): Null = {
-        fail("Should not be called")
-        null
-      }
-    }
-
-    val mav = controller.initialView(department, command)
-    mav.viewName should be("admin/display-settings")
-    mav.toModel("department") should be(department)
-    mav.toModel("returnTo") should be("")
-
-    populateCalledCount should be(1)
+  @Test def form(): Unit = {
+    controller.formView should be("admin/display-settings")
+    controller.returnTo should be ("")
   }
 
-  @Test def submit {
+  @Test def submit(): Unit = {
     val department = Fixtures.department("in")
 
-    var populateCalledCount = 0
     var applyCalledCount = 0
-    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-      val permissionsService = null
-
-      def populate(): Unit = {
-        populateCalledCount += 1
-      }
-
-      def apply(): Department = {
+    val command: DisplaySettingsCommand.Command = new TestDisplaySettingsCommandInternal(department) with DisplaySettingsCommandRequest with SelfValidating {
+      override def apply(): Department = {
         applyCalledCount += 1
         department
       }
+
+      override def validate(errors: Errors): Unit = fail("Should not be called")
     }
 
     val errors = new BindException(command, "command")
+    val redirectAttributes = new RedirectAttributesModelMap
 
-    val mav = controller.saveSettings(command, errors, department)
-    mav.viewName should be(s"redirect:${Routes.admin.department(department)}")
-    mav.toModel should be('empty)
+    controller.saveSettings(command, errors, department)(redirectAttributes) should be(s"redirect:${Routes.admin.department(department)}")
+    redirectAttributes.getFlashAttributes.get("flash__success") should be ("flash.departmentSettings.saved")
 
-    populateCalledCount should be(0)
     applyCalledCount should be(1)
   }
 
-  @Test def submitValidationErrors {
+  @Test def submitValidationErrors(): Unit = {
     val department = Fixtures.department("in")
 
-    var populateCalledCount = 0
     var applyCalledCount = 0
-    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-      val permissionsService = null
-
-      def populate(): Unit = {
-        populateCalledCount += 1
-      }
-
-      def apply(): Department = {
+    val command: DisplaySettingsCommand.Command = new TestDisplaySettingsCommandInternal(department) with DisplaySettingsCommandRequest with SelfValidating {
+      override def apply(): Department = {
         applyCalledCount += 1
         department
+      }
+
+      override def validate(errors: Errors): Unit = {
+        errors.reject("fail")
       }
     }
 
     val errors = new BindException(command, "command")
-    errors.reject("fail")
+    val redirectAttributes = new RedirectAttributesModelMap
 
-    val mav = controller.saveSettings(command, errors, department)
-    mav.viewName should be("admin/display-settings")
-    mav.toModel("department") should be(department)
-    mav.toModel("returnTo") should be("")
+    command.validate(errors) // simulates @Valid on controller
+    controller.saveSettings(command, errors, department)(redirectAttributes) should be("admin/display-settings")
+    controller.returnTo should be ("")
+    redirectAttributes.getFlashAttributes.isEmpty should be (true)
 
-    populateCalledCount should be(0)
     applyCalledCount should be(0)
   }
 

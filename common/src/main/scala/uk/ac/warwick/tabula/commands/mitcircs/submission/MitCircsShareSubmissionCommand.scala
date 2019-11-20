@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissio
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesViewerRoleDefinition, RoleDefinition}
+import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -59,7 +60,8 @@ object MitCircsShareSubmissionCommand {
       with MitCircsShareSubmissionRemoveNotifications
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
-      with AutowiringUserLookupComponent {
+      with AutowiringUserLookupComponent
+      with AutowiringMitCircsSubmissionServiceComponent {
       override val allowUnassignableRoles: Boolean = true
       override val roleDefinition: RoleDefinition = MitCircsShareSubmissionCommand.this.roleDefinition
       override val currentUser: User = creator

@@ -3,15 +3,17 @@
 <#escape x as x?html>
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
-  <#macro alerts commandName scope users="" role="">
+  <#macro validation_alerts commandName>
     <#local bindingError><@f.errors path="${commandName}.*" /></#local>
     <#if bindingError?has_content>
       <p class="alert alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <#noescape>${bindingError}</#noescape>
+          <#noescape>${bindingError}</#noescape>
       </p>
     </#if>
+  </#macro>
 
+  <#macro alerts scope users="" role="">
     <#if users?has_content && role?has_content>
       <div id="permissionsMessage" class="alert alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>

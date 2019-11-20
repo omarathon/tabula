@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.commands.admin.department
 
 import uk.ac.warwick.tabula.commands.{Appliable, Description}
 import uk.ac.warwick.tabula.data.model.Assignment.Settings.InfoViewType._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod._
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.NumberingSystem._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -22,7 +21,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
     testDepartment.weekNumberingSystem = Academic
     testDepartment.autoGroupDeregistration = true
 
-    val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
+    val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with DisplaySettingsCommandRequest with PopulateDisplaySettingsCommandRequest with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
       var moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
       var relationshipService: RelationshipService = mock[RelationshipService]
     }
@@ -88,7 +87,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDescriptionDescribedDepartment() {
+  def commandDescriptionDescribedDepartment(): Unit = {
     new Fixture {
       val describable = new DisplaySettingsCommandDescription with DisplaySettingsCommandState {
         val eventName: String = "test"
@@ -102,7 +101,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireManageDisplaySettingsOnDepartment {
+  def permissionsRequireManageDisplaySettingsOnDepartment(): Unit = {
     new Fixture {
       val perms = new DisplaySettingsCommandPermissions() with DisplaySettingsCommandState {
         val department: Department = testDepartment
