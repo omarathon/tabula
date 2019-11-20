@@ -117,7 +117,9 @@ object FlexiPickerController {
           filters.filter { case (_, v) => v.hasText }
             .map { case (k, v) => k -> s"$v*" }
             .toMap[String, AnyRef]
-            .asJava
+            .asJava,
+          false,
+          100 // TODO SSO-2441
         ).asScala.map { user =>
           // findUsersWithFilter doesn't set this, but we rely on it
           user.setUserSource("WarwickADS")
