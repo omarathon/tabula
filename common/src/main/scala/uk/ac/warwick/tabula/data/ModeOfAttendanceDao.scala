@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.data
 
-import scala.jdk.CollectionConverters._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 
 trait ModeOfAttendanceDaoComponent {
   val modeOfAttendanceDao: ModeOfAttendanceDao
@@ -21,6 +19,8 @@ trait ModeOfAttendanceDao {
 
   def getAllStatusCodes: Seq[String]
 
+  def getAll: Seq[ModeOfAttendance]
+
   def getFullName(code: String): Option[String]
 }
 
@@ -34,6 +34,9 @@ class ModeOfAttendanceDaoImpl extends ModeOfAttendanceDao with Daoisms {
 
   def getAllStatusCodes: Seq[String] =
     session.newQuery[String]("select distinct code from ModeOfAttendance").seq
+
+  def getAll: Seq[ModeOfAttendance] =
+    session.newCriteria[ModeOfAttendance].seq
 
   def getFullName(code: String): Option[String] =
     session.newQuery[String]("select fullName from ModeOfAttendance where code = :code").setString("code", code).uniqueResult
