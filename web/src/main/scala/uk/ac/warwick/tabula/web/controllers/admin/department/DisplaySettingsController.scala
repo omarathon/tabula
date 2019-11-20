@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.admin.department
 
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
+import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
@@ -52,9 +53,11 @@ class DisplaySettingsController extends AdminController
   def saveSettings(
     @Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand.Command,
     errors: Errors,
-    @PathVariable department: Department
+    @PathVariable department: Department,
+    model: ModelMap
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
+      model.addAttribute("flash__error", "flash.hasErrors")
       formView
     } else {
       cmd.apply()

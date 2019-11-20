@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
+import org.springframework.ui.ModelMap
 import org.springframework.validation.{BindException, Errors}
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap
 import uk.ac.warwick.tabula.commands.admin.department.{DisplaySettingsCommand, DisplaySettingsCommandRequest, DisplaySettingsCommandState}
@@ -40,8 +41,10 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
 
     val errors = new BindException(command, "command")
     val redirectAttributes = new RedirectAttributesModelMap
+    val model = new ModelMap
 
-    controller.saveSettings(command, errors, department)(redirectAttributes) should be(s"redirect:${Routes.admin.department(department)}")
+    controller.saveSettings(command, errors, department, model)(redirectAttributes) should be(s"redirect:${Routes.admin.department(department)}")
+    model.isEmpty should be (true)
     redirectAttributes.getFlashAttributes.get("flash__success") should be ("flash.departmentSettings.saved")
 
     applyCalledCount should be(1)
@@ -64,10 +67,12 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
 
     val errors = new BindException(command, "command")
     val redirectAttributes = new RedirectAttributesModelMap
+    val model = new ModelMap
 
     command.validate(errors) // simulates @Valid on controller
-    controller.saveSettings(command, errors, department)(redirectAttributes) should be("admin/display-settings")
+    controller.saveSettings(command, errors, department, model)(redirectAttributes) should be("admin/display-settings")
     controller.returnTo should be ("")
+    model.get("flash__error") should be ("flash.hasErrors")
     redirectAttributes.getFlashAttributes.isEmpty should be (true)
 
     applyCalledCount should be(0)
