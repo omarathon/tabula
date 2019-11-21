@@ -31,6 +31,7 @@ trait UserSearchCommandRequest extends RequiresPermissionsChecking with Permissi
   var hallsOfResidence: JList[String] = JArrayList()
 
   var groupNames: JList[String] = JArrayList()
+  var studyRoutes: JList[Route] = JArrayList()
   var studentsOnly: JBoolean = true
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
@@ -50,5 +51,10 @@ trait UserSearchCommandRequest extends RequiresPermissionsChecking with Permissi
 
   def groupNameRestriction: Option[ScalaRestriction] = inIfNotEmpty(
     "groupName", groupNames.asScala
+  )
+
+  def studyRouteRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+    "studentCourseYearDetails.route.code", studyRoutes.asScala.map(_.code),
+    FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
   )
 }

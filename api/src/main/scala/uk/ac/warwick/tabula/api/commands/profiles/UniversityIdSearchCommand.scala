@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.api.commands.profiles
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 object UniversityIdSearchCommand {
@@ -26,7 +25,7 @@ abstract class UniversityIdSearchCommandInternal(val academicYear: AcademicYear)
     }
 
     val restrictions = if (studentsOnly) {
-      buildRestrictions(academicYear) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+      buildRestrictions(academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
     } else {
       groupNameRestriction ++ homeDepartmentRestriction
     }.toSeq
