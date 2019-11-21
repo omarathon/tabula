@@ -26,7 +26,7 @@ abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear) ext
     }
 
     val restrictions = if (studentsOnly) {
-      buildRestrictions(academicYear) ++ groupNameRestriction ++ enrolmentDepartmentRestriction
+      buildRestrictions(academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
     } else {
       groupNameRestriction ++ homeDepartmentRestriction
     }.toSeq
