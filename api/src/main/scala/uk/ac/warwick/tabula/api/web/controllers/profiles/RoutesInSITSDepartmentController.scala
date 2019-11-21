@@ -20,7 +20,7 @@ class RoutesInSITSDepartmentController extends ApiController {
       Map(
         "success" -> true,
         "status" -> "ok",
-        "modes" -> courseAndRouteService.findActiveRoutesBySITSDepartmentCode(departmentCode).map(r => Map(
+        "routes" -> courseAndRouteService.findActiveRoutesBySITSDepartmentCode(departmentCode).map(r => Map(
           "code" -> r.code,
           "name" -> r.name,
         ))
