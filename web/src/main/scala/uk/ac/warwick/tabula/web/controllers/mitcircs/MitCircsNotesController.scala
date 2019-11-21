@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.commands.mitcircs.{AddMitCircSubmissionNoteCommand, DeleteMitCircSubmissionNoteCommand, ListMitCircSubmissionNotesCommand, RenderMitCircsNoteAttachmentCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
@@ -12,6 +13,8 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
+
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/mitcircs/submission/{submission}/notes"))
@@ -37,11 +40,12 @@ class MitCircsNotesController extends BaseController {
     errors: Errors,
     @ModelAttribute("listCommand") listCommand: ListMitCircSubmissionNotesCommand.Command,
     @PathVariable submission: MitigatingCircumstancesSubmission,
-  ): Mav =
-    if (errors.hasErrors) list(listCommand)
+  )(implicit redirectAttributes: RedirectAttributes): String =
+    if (errors.hasErrors)
+       RedirectFlashing(Routes.Admin.review(submission), "flash__error" -> errors.getAllErrors.asScala.head.getCode)
     else {
       command.apply()
-      RedirectForce(Routes.Admin.review(submission))
+      RedirectFlashing(Routes.Admin.review(submission), "flash__success" -> "flash.mitcircsnote.saved")
     }
 
 }
@@ -61,12 +65,10 @@ class DeleteMitCircsNoteController extends BaseController {
     @Valid @ModelAttribute("deleteCommand") command: DeleteMitCircSubmissionNoteCommand.Command,
     errors: Errors,
     @PathVariable submission: MitigatingCircumstancesSubmission,
-  ): Mav =
-    if (errors.hasErrors) RedirectForce(Routes.Admin.review(submission))
-    else {
-      command.apply()
-      RedirectForce(Routes.Admin.review(submission))
-    }
+  )(implicit redirectAttributes: RedirectAttributes): String = {
+    command.apply()
+    RedirectFlashing(Routes.Admin.review(submission), "flash__success" -> "flash.mitcircsnote.deleted")
+  }
 
 }
 
