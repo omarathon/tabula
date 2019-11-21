@@ -9,9 +9,11 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.MitigatingCircumstancesPanelMemberRoleDefinition
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -528,6 +530,18 @@ object Fixtures extends Mockito {
     s.startDate = LocalDate.now()
     s.endDate = LocalDate.now().plusWeeks(2)
     s.saveAsDraft()
+    s
+  }
+
+  def mitigatingCircumstancesPanel(viewers: User*): MitigatingCircumstancesPanel = {
+    val dept = department("HPS", "Heron Purging Services")
+    val s = new MitigatingCircumstancesPanel(dept, AcademicYear(2019))
+    val mockPermissionsService: PermissionsService = smartMock[PermissionsService]
+    val ug = UserGroup.ofUsercodes
+    viewers.foreach(v => ug.knownType.addUserId(v.getUserId))
+    ug.userLookup = Fixtures.userLookupService(viewers:_*)
+    mockPermissionsService.ensureUserGroupFor(s, MitigatingCircumstancesPanelMemberRoleDefinition) returns ug
+    s.permissionsService = mockPermissionsService
     s
   }
 

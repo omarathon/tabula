@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsPanelCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsAddedToPanelNotification
+import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
@@ -141,4 +143,13 @@ trait ModifyMitCircsPanelRequest {
   var chair: String = _
   var secretary: String = _
   var members: JList[String] = JArrayList()
+}
+
+trait CreateMitCircsPanelNotifications extends Notifies[MitigatingCircumstancesPanel, MitigatingCircumstancesPanel] {
+
+  self: CreateMitCircsPanelRequest with CreateMitCircsPanelState =>
+
+  def emit(panel: MitigatingCircumstancesPanel): Seq[Notification[MitigatingCircumstancesPanel, Unit]] = Seq(
+    Notification.init(new MitCircsAddedToPanelNotification, currentUser, panel).tap(_.modifiedUsers = panel.viewers.toSeq)
+  )
 }
