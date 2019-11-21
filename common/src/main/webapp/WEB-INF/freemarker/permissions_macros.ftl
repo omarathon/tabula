@@ -117,11 +117,6 @@
         </#if>
       </div>
     </@manageRole>
-    <script type="text/javascript" nonce="${nonce()}">
-      (function ($) {
-        $('.use-tooltip').tooltip();
-      })(jQuery);
-    </script>
   </#macro>
 
   <#macro debugPermission permission scope={} showScopes=true>
