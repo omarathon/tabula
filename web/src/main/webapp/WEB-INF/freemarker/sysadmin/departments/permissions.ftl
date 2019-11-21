@@ -28,7 +28,7 @@
 
         <h3 class="permissionTitle">Departmental admins <@fmt.help_popover id="deptadmins" title="Departmental admins" content="${popover}" html=true /></h3>
 
-        <@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "Departmental Administrator" />
+        <@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "Departmental administrator" />
       </div>
       <div class="col-md-6">
         <#assign popover>

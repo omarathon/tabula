@@ -111,12 +111,17 @@
         <#else>
           <div class="row">
             <div class="col-md-12">
-              There are no ${roleName} yet.
+              There is no ${roleName} yet.
             </div>
           </div>
         </#if>
       </div>
     </@manageRole>
+    <script type="text/javascript" nonce="${nonce()}">
+      (function ($) {
+        $('.use-tooltip').tooltip();
+      })(jQuery);
+    </script>
   </#macro>
 
   <#macro debugPermission permission scope={} showScopes=true>
