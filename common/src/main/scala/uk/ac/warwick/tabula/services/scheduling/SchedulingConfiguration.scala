@@ -324,6 +324,14 @@ class TestSchedulingConfiguration {
   }
 }
 
+trait SchedulerComponent {
+  def scheduler: Scheduler
+}
+
+trait AutowiringSchedulerComponent extends SchedulerComponent {
+  var scheduler: Scheduler = Wire[Scheduler]
+}
+
 @Component
 @Profile(Array("scheduling"))
 class SchedulingMaintenanceModeObserver extends InitializingBean {
