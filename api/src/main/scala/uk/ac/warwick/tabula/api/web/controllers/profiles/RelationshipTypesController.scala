@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.data.RelationshipDao
+import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(Array("/v1/relationships"))
 class RelationshipTypesController extends ApiController {
 
-  @Autowired var relationshipDao: RelationshipDao = _
+  @Autowired var relationshipsService: RelationshipService = _
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def index(): Mav = {
@@ -20,7 +20,7 @@ class RelationshipTypesController extends ApiController {
       Map(
         "success" -> true,
         "status" -> "ok",
-        "relationships" -> relationshipDao.allStudentRelationshipTypes.map(r => Map(
+        "relationships" -> relationshipsService.allStudentRelationshipTypes.map(r => Map(
           "id" -> r.id,
           "description" -> r.description,
           "agentRole" -> r.agentRole,
