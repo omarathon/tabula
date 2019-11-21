@@ -3,11 +3,14 @@ package uk.ac.warwick.tabula.commands.permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.MitigatingCircumstancesSubmissionFilter
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesOfficerRoleDefinition, RoleDefinition}
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -19,27 +22,28 @@ object RevokeRoleCommand {
   type Result[A <: PermissionsTarget] = Option[GrantedRole[A]]
   type Command[A <: PermissionsTarget] = Appliable[Result[A]] with RoleCommandRequest with RoleCommandState[A] with SelfValidating
 
-  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with RoleCommandRequestMutableRoleDefinition =
-    new RevokeRoleCommandInternal(scope)
-      with ComposableCommand[Option[GrantedRole[A]]]
-      with RoleCommandRequestMutableRoleDefinition
-      with RevokeRoleCommandPermissions
+  private trait SharedAutowiredCommandDependencies[A <: PermissionsTarget]
+    extends RevokeRoleCommandPermissions
       with RevokeRoleCommandValidation
       with RevokeRoleCommandDescription[A]
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
+      with AutowiringMitCircsSubmissionServiceComponent {
+    self: RoleCommandState[A] with RoleCommandRequest =>
+  }
+
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with RoleCommandRequestMutableRoleDefinition =
+    new RevokeRoleCommandInternal(scope)
+      with ComposableCommand[Option[GrantedRole[A]]]
+      with RoleCommandRequestMutableRoleDefinition
+      with SharedAutowiredCommandDependencies[A]
 
   def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Command[A] =
     new RevokeRoleCommandInternal(scope)
       with ComposableCommand[Option[GrantedRole[A]]]
       with RoleCommandRequest
-      with RevokeRoleCommandPermissions
-      with RevokeRoleCommandValidation
-      with RevokeRoleCommandDescription[A]
-      with AutowiringPermissionsServiceComponent
-      with AutowiringSecurityServiceComponent
-      with AutowiringUserLookupComponent {
+      with SharedAutowiredCommandDependencies[A] {
       override val roleDefinition: RoleDefinition = defin
     }
 }
@@ -74,7 +78,8 @@ abstract class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val 
 trait RevokeRoleCommandValidation extends SelfValidating {
   self: RoleCommandRequest
     with RoleCommandState[_ <: PermissionsTarget]
-    with SecurityServiceComponent =>
+    with SecurityServiceComponent
+    with MitCircsSubmissionServiceComponent =>
 
   def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
@@ -105,6 +110,25 @@ trait RevokeRoleCommandValidation extends SelfValidating {
       }
       if (deniedPermissions.nonEmpty && !user.god) {
         errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.map(_.description).mkString("\n"), scope), "")
+      }
+
+      if (
+        // Role is a Mit Circs Officer
+        roleDefinition == MitigatingCircumstancesOfficerRoleDefinition &&
+
+        // Scope is a department
+        scope.isInstanceOf[Department] &&
+
+        // Removing these usercodes would leave the mit circs officer role definition empty
+        grantedRole.toSet
+          .flatMap { role: GrantedRole[_ <: PermissionsTarget] => role.users.knownType.members }
+          .diff(usercodes.asScala.toSet)
+          .isEmpty &&
+
+        // There are existing submissions against this scope
+        mitCircsSubmissionService.submissionsForDepartment(scope.asInstanceOf[Department], Nil, MitigatingCircumstancesSubmissionFilter()).nonEmpty
+      ) {
+        errors.rejectValue("usercodes", "permissions.cantRemoveLastMitCircsOfficer")
       }
     }
   }

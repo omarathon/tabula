@@ -62,7 +62,7 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
           None
       }
     }
-    val mail = createMessage(mailSender) { mail =>
+    val mail = createMessage(mailSender, multipart = false) { mail =>
       if (recipient == AppCommentCommand.Recipients.DeptAdmin && deptAdmin.isDefined) {
         mail.setTo(deptAdmin.get.getEmail)
         mail.setFrom(adminMailAddress)

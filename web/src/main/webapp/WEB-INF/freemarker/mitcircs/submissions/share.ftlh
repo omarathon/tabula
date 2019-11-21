@@ -26,7 +26,15 @@
 
 <#assign perms_url><@routes.mitcircs.shareSubmission submission /></#assign>
 
-<@pm.alerts "addCommand" "MIT-${submission.key}" users role />
+<@pm.validation_alerts "addCommand" />
+<@pm.validation_alerts "removeCommand" />
+
+<#if (action!"") == "add">
+  <@pm.alerts "MIT-${submission.key}" users role />
+<#elseif (action!"") == "remove">
+  <@pm.alerts "MIT-${submission.key}" users role />
+</#if>
+
 <@pm.roleTable perms_url?markup_string "mitcircs-shared-table" submission "MitigatingCircumstancesViewerRoleDefinition" "shared user" true />
 
 <div class="submit-buttons">

@@ -64,7 +64,14 @@
 
     <#-- Alerts -->
 
-    <@pm.alerts "addCommand" display_name users role />
+    <@pm.validation_alerts "addCommand" />
+    <@pm.validation_alerts "removeCommand" />
+
+    <#if (action!"") == "add">
+      <@pm.alerts display_name users role />
+    <#elseif (action!"") == "remove">
+      <@pm.alerts display_name users role />
+    </#if>
 
     <div class="existing-roles">
       <h2>Granted roles</h2>

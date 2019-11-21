@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute}
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import uk.ac.warwick.tabula.data.Daoisms
@@ -71,6 +72,11 @@ trait ControllerViews extends Logging {
   def Redirect(path: String, objects: (String, _)*): Mav = Redirect(path, Map(objects: _*))
 
   def Redirect(path: String, objects: Map[String, _]): Mav = Mav("redirect:" + validRedirectDestination(getReturnToUnescaped(path)), objects)
+
+  def RedirectFlashing(path: String, flash: (String, String)*)(implicit redirectAttributes: RedirectAttributes): String = {
+    flash.foreach { case (k, v) => redirectAttributes.addFlashAttribute(k, v) }
+    s"redirect:${validRedirectDestination(getReturnToUnescaped(path))}"
+  }
 
   // Force the redirect regardless of returnTo
   def RedirectForce(path: String, objects: (String, _)*): Mav = RedirectForce(path, Map(objects: _*))

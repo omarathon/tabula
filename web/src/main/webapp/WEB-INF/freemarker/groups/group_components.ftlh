@@ -796,7 +796,7 @@
           <#if moduleItem.canManageGroups>
             <#local unallocatedSize = groupSet.unallocatedStudentsCount />
             <#if unallocatedSize gt 0>
-              <div class="alert">
+              <div class="alert alert-info">
                 <a href="<@routes.groups.unallocatedstudentslist setItem.set />" class="ajax-modal"
                    data-target="#students-list-modal"><@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group</a>
               </div>

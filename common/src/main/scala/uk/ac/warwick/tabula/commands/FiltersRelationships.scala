@@ -67,6 +67,12 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
     getAliasPaths("studentCourseYearDetails"): _*
   )
 
+  def isNotFinalistRestriction: Option[ScalaRestriction] = isNotPropertyIfTicked(
+    "studentCourseYearDetails.yearOfStudy", "courseYearLength",
+    otherCriteria.contains("Not Finalist"),
+    getAliasPaths("studentCourseYearDetails"): _*
+  )
+
   def allDepartments: Seq[Department]
 
   def allRoutes: Seq[Route]

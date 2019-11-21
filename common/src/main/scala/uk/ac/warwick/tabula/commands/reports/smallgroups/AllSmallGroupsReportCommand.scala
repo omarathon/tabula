@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportComman
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -26,6 +26,7 @@ object AllSmallGroupsReportCommand {
     new AllSmallGroupsReportCommandInternal(department, academicYear, filter)
       with AutowiringSmallGroupServiceComponent
       with AutowiringAttendanceMonitoringServiceComponent
+      with AutowiringUserLookupComponent
       with ComposableCommand[AllSmallGroupsReportCommandResult]
       with ReportPermissions
       with ReportCommandRequest
@@ -43,6 +44,7 @@ case class SmallGroupEventWeek(
 
 case class AllSmallGroupsReportCommandResult(
   attendance: Map[User, Map[SmallGroupEventWeek, AttendanceState]],
+  relevantEvents: Map[User, Set[SmallGroupEventWeek]],
   studentDatas: Seq[AttendanceMonitoringStudentData],
   eventWeeks: Seq[SmallGroupEventWeek]
 )
@@ -53,7 +55,10 @@ class AllSmallGroupsReportCommandInternal(
   val filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
 ) extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
 
-  self: SmallGroupServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
+  self: SmallGroupServiceComponent
+    with AttendanceMonitoringServiceComponent
+    with UserLookupComponent
+    with ReportCommandRequest =>
 
   override def applyInternal(): AllSmallGroupsReportCommandResult = {
     val thisWeek =
@@ -68,20 +73,23 @@ class AllSmallGroupsReportCommandInternal(
     def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
       weeksForYear(weekNumber).firstDay.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
+    def hasScheduledEventMatchingFilter(set: SmallGroupSet): Boolean =
+      set.groups.asScala.exists { group =>
+        group.events.filterNot(_.isUnscheduled).exists { event =>
+          event.allWeeks.exists { week =>
+            val eventDate = weekNumberToDate(week, event.day)
+            !eventDate.isBefore(startDate) && !eventDate.isAfter(endDate)
+          }
+        }
+      }
+
     val sets = benchmarkTask("sets") {
       smallGroupService.getAllSmallGroupSets(department).filter(_.academicYear == academicYear).filter(_.collectAttendance)
-    }
-
-    val students: Seq[User] = sets.flatMap(_.allStudents).distinct.sortBy(s => (s.getLastName, s.getFirstName))
-
-    val studentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), academicYear)
-
-    val studentInGroup: Map[SmallGroup, Map[User, Boolean]] = benchmarkTask("studentInGroup") {
-      sets.flatMap(_.groups.asScala).map(group => group -> students.map(student => student -> group.students.includesUser(student)).toMap).toMap
+        .filter(hasScheduledEventMatchingFilter)
     }
 
     // Can't guarantee that all the occurrences will exist for each event,
-    // so generate case classes to repesent each occurrence (a combination of event and week)
+    // so generate case classes to represent each occurrence (a combination of event and week)
     val eventWeeks: Seq[SmallGroupEventWeek] = benchmarkTask("eventWeeks") {
       sets.flatMap(_.groups.asScala.flatMap(_.events).filter(!_.isUnscheduled).flatMap(sge => {
         sge.allWeeks.map(week => SmallGroupEventWeek(s"${sge.id}-$week", sge, week, {
@@ -98,6 +106,25 @@ class AllSmallGroupsReportCommandInternal(
         // Ignore any occurrences that aren't in the eventWeeks
         eventWeeks.find(sgew => sgew.event == occurrence.event && sgew.week == occurrence.week).map(sgew => sgew -> occurrence.attendance.asScala)
       ).toMap
+    }
+
+    val students: Seq[User] = sets.flatMap { set =>
+      val membersOfSet = set.allStudents
+      val groupMembersNotInSet = set.studentsNotInMembership
+
+      // Get users who have subsequently been removed from groups
+      val otherAttendanceRecordedUniversityIds =
+        sgewAttendanceMap.values.flatten.map(_.universityId)
+          .filterNot { universityId => membersOfSet.exists(_.getWarwickId == universityId) || groupMembersNotInSet.exists(_.getWarwickId == universityId) }
+      val otherAttendanceRecordedUsers = userLookup.usersByWarwickUniIds(otherAttendanceRecordedUniversityIds.toSeq.distinct).values
+
+      membersOfSet ++ groupMembersNotInSet ++ otherAttendanceRecordedUsers
+    }.distinct.sortBy(s => (s.getLastName, s.getFirstName))
+
+    val studentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), academicYear)
+
+    val studentInGroup: Map[SmallGroup, Map[User, Boolean]] = benchmarkTask("studentInGroup") {
+      sets.flatMap(_.groups.asScala).map(group => group -> students.map(student => student -> group.students.includesUser(student)).toMap).toMap
     }
 
     val studentAttendanceMap: Map[User, Map[SmallGroupEventWeek, AttendanceState]] = benchmarkTask("studentAttendanceMap") {
@@ -117,7 +144,13 @@ class AllSmallGroupsReportCommandInternal(
       }).filter { case (_, state) => state != null }.toMap).toMap
     }
 
-    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, studentDatas, eventWeeks))
+    val relevantEvents: Map[User, Set[SmallGroupEventWeek]] =
+      studentAttendanceMap
+        .view
+        .mapValues(_.keySet)
+        .toMap
+
+    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks))
   }
 }
 

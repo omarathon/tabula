@@ -15,7 +15,15 @@
       <h1 class="with-settings">Module permissions</h1>
       <h5 class="with-related"><span class="muted">for</span> <#noescape>${module_name}</#noescape></h5>
     </div>
-    <@pm.alerts "addCommand" module_name users role />
+
+    <@pm.validation_alerts "addCommand" />
+    <@pm.validation_alerts "removeCommand" />
+
+    <#if (action!"") == "add">
+      <@pm.alerts module_name users role />
+    <#elseif (action!"") == "remove">
+      <@pm.alerts module_name users role />
+    </#if>
 
     <#assign scope=module />
     <#include "_roles.ftl" />

@@ -187,6 +187,7 @@ object SchedulingConfiguration {
   def scheduledJobs(implicit properties: PropertyResolver): Seq[JobConfiguration[_ <: AutowiredJobBean]] = Seq(
     // Unscheduled jobs that are triggered explicitly by Sysadmin things
     propertiesConfiguredJob[ImportProfilesSingleDepartmentJob]("scheduling.importProfilesSingleDepartment"),
+    propertiesConfiguredJob[ImportAssignmentsJob]("scheduling.importAssignments"),
     propertiesConfiguredJob[ImportAssignmentsAllYearsJob]("scheduling.importAssignmentsAllYears"),
     propertiesConfiguredJob[ImportSmallGroupEventLocationsJob]("scheduling.importSmallGroupEventLocations"),
     propertiesConfiguredJob[TurnitinTcaRegisterWebhooksJob]("scheduling.turnitinTcaRegisterWebhooks"),

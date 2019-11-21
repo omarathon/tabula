@@ -1,69 +1,66 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{CourseType, Department, StudentRelationshipType}
-import org.springframework.validation.Errors
 import javax.validation.Valid
-
+import org.springframework.stereotype.Controller
+import org.springframework.ui.ModelMap
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.admin.department.DisplaySettingsCommand
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.data.model.{CourseType, Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringRelationshipServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/display"))
 class DisplaySettingsController extends AdminController
-  with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
-
-  var relationshipService: RelationshipService = Wire[RelationshipService]
-
-  type DisplaySettingsCommand = Appliable[Department] with PopulateOnForm
+  with DepartmentScopedController
+  with AutowiringUserSettingsServiceComponent
+  with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent
+  with AutowiringRelationshipServiceComponent {
 
   validatesSelf[SelfValidating]
 
   @ModelAttribute("displaySettingsCommand")
-  def displaySettingsCommand(@PathVariable department: Department): DisplaySettingsCommand =
+  def displaySettingsCommand(@PathVariable department: Department): DisplaySettingsCommand.Command =
     DisplaySettingsCommand(mandatory(department))
 
   @ModelAttribute("allRelationshipTypes") def allRelationshipTypes: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
-  override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
+  override val departmentPermission: Permission = DisplaySettingsCommand.RequiredPermission
 
   @ModelAttribute("activeDepartment")
   override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-  @RequestMapping(method = Array(GET, HEAD))
-  def initialView(@PathVariable department: Department, @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand): Mav = {
-    cmd.populate()
-    viewSettings(department)
-  }
+  @ModelAttribute("expectedCourseTypes")
+  def expectedCourseTypes: Seq[CourseType] = Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional)
 
-  private def viewSettings(department: Department) =
-    Mav("admin/display-settings",
-      "department" -> department,
-      "expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional),
-      "returnTo" -> getReturnTo("")
-    ).crumbs(
-      Breadcrumbs.Department(department)
-    )
+  @ModelAttribute("returnTo")
+  def returnTo: String = getReturnTo("")
 
-  @RequestMapping(method = Array(POST))
+  @ModelAttribute("breadcrumbs")
+  def breadcrumbs(@PathVariable department: Department): Seq[BreadCrumb] = Seq(Breadcrumbs.Department(department))
+
+  @RequestMapping
+  def formView: String = "admin/display-settings"
+
+  @PostMapping
   def saveSettings(
-    @Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand,
+    @Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand.Command,
     errors: Errors,
-    @PathVariable department: Department
-  ): Mav = {
+    @PathVariable department: Department,
+    model: ModelMap
+  )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
-      viewSettings(department)
+      model.addAttribute("flash__error", "flash.hasErrors")
+      formView
     } else {
       cmd.apply()
-      Redirect(Routes.admin.department(department))
+      RedirectFlashing(Routes.admin.department(department), "flash__success" -> "flash.departmentSettings.saved")
     }
-  }
 }

@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 import scala.reflect.ClassTag
-import scala.util.Try
 
 abstract class SchemeMembershipItemType(val value: String)
 
@@ -698,10 +697,21 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
         val criteria = session.newCriteria[StudentMember]
           .createAlias("studentCourseDetails", "studentCourseDetails")
           .createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-          .createAlias("studentCourseDetails.currentRoute", "route")
-          .createAlias("studentCourseDetails.allRelationships", "relationships", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN, Option(is("relationshipType.id", "personalTutor")))
+          .createAlias("studentCourseDetails.currentRoute", "route", JoinType.LEFT_OUTER_JOIN)
+          .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN, Some(
+            and(
+              or(
+                isNull("currentRelationships.endDate"),
+                ge("currentRelationships.endDate", DateTime.now)
+              ),
+              or(
+                isNull("currentRelationships.startDate"),
+                le("currentRelationships.startDate", DateTime.now)
+              )
+            )
+          ))
+          .createAlias("currentRelationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN, Some(is("relationshipType.id", "personalTutor")))
+          .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN)
           .add(isNull("studentCourseDetails.missingFromImportSince"))
           .add(is("studentCourseYearDetails.academicYear", academicYear))
 

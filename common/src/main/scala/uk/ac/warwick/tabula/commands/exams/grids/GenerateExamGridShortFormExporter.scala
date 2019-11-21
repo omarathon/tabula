@@ -280,9 +280,9 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
     categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
     headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)
-    entityRows.values.map { case (header, _) => header }.foreach(entityHeader =>
+    entityRows.values.foreach { case (entityHeader, _) =>
       entityHeader.setHeight(Math.min(4000, entityHeaderRowMaxCellWidth * 0.5).toShort)
-    )
+    }
 
     mergedRegions.foreach(sheet.addMergedRegionUnsafe)
 

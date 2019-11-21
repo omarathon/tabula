@@ -50,7 +50,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
         studentData.tutorEmail.getOrElse("")
       case index if index == unrecordedIndex =>
         attendance.get(studentData).map(eventMap =>
-          eventMap.map { case (event, state) => state }.count(_ == NotRecorded).toString
+          eventMap.count { case (_, state) => state == NotRecorded }.toString
         ).getOrElse("0")
       case index if index == unrecordedLateIndex =>
         attendance.get(studentData).map(eventMap =>
@@ -58,15 +58,15 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
         ).getOrElse("0")
       case index if index == missedIndex =>
         attendance.get(studentData).map(eventMap =>
-          eventMap.map { case (event, state) => state }.count(_ == MissedUnauthorised).toString
+          eventMap.count { case (_, state) => state == MissedUnauthorised }.toString
         ).getOrElse("0")
       case index if index == authorisedIndex =>
         attendance.get(studentData).map(eventMap =>
-          eventMap.map { case (event, state) => state }.count(_ == MissedAuthorised).toString
+          eventMap.count { case (_, state) => state == MissedAuthorised }.toString
         ).getOrElse("0")
       case index if index == attendedIndex =>
         attendance.get(studentData).map(eventMap =>
-          eventMap.map { case (event, state) => state }.count(_ == Attended).toString
+          eventMap.count { case (_, state) => state == Attended }.toString
         ).getOrElse("0")
       case _ =>
         val thisEvent = events(eventIndex - studentInfoHeaders.size)

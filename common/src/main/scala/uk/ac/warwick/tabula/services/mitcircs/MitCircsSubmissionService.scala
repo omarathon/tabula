@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{AssessmentSpecificRecommendation, MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent, MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
@@ -16,7 +16,7 @@ trait MitCircsSubmissionService {
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsWithOutcomes(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
-  def mitigationGradesForStudents(students: Seq[StudentMember]): Map[UniversityId, Seq[MitigationGradeCode]]
+  def submissionsForStudents(students: Seq[StudentMember]): Map[UniversityId, Seq[MitigatingCircumstancesSubmission]]
   def getMessageById(id: String): Option[MitigatingCircumstancesMessage]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
@@ -53,10 +53,10 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
     mitCircsSubmissionDao.submissionsForDepartment(department, studentRestrictions, filter)
   }
 
-  override def mitigationGradesForStudents(students: Seq[StudentMember]): Map[UniversityId, Seq[MitigationGradeCode]] = transactional(readOnly = true) {
+  override def submissionsForStudents(students: Seq[StudentMember]): Map[UniversityId, Seq[MitigatingCircumstancesSubmission]] = transactional(readOnly = true) {
     mitCircsSubmissionDao.submissionsWithOutcomes(students)
       // mitCircsSubmissionDao.submissionsWithOutcomes only returns submission with a grade so the get is fine here
-      .map(s => s.student.universityId -> MitigationGradeCode(s.gradingCode.get, if(s.isAcute) s.outcomesLastRecordedOn else s.outcomesApprovedOn))
+      .map(s => s.student.universityId -> s)
       .groupBy(_._1)
       .view
       .mapValues(_.map(_._2))
@@ -92,7 +92,12 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
   }
 }
 
-case class MitigationGradeCode(code: String, date: DateTime)
+case class MitigationGridInfo (
+  code: String,
+  globalRecommendations: Seq[MitCircsExamBoardRecommendation],
+  assessmentSpecificRecommendations: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]],
+  date: DateTime
+)
 
 @Service("mitCircsSubmissionService")
 class AutowiredMitCircsSubmissionService

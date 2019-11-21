@@ -23,7 +23,7 @@ plugins {
 ext {
   scalaVersion = "2.13.1"
   scalaMajorVersion = "2.13"
-  springVersion = "5.2.0.RELEASE"
+  springVersion = "5.2.1.RELEASE"
   hibernateVersion = "5.4.7.Final"
   jacksonVersion = "2.9.10"
   jacksonDatabindVersion = "2.9.10.1"

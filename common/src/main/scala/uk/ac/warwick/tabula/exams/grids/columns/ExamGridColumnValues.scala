@@ -113,6 +113,8 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
   override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
     if (isActual) {
       cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
+    } else {
+      cell.setCellStyle(cellStyleMap(ExamGridExportStyles.WrappedText))
     }
   }
 

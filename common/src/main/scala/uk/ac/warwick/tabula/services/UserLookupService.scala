@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula.services
 
 import java.io.Serializable
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, _}
-import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
+import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.userlookup._
+import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.util.cache._
 
 import scala.jdk.CollectionConverters._
@@ -43,11 +45,14 @@ class UserLookupServiceImpl(d: UserLookupInterface)
 }
 
 /**
- * Only Autowired in if the <code>dev</code> Spring profile is enabled; this checks the MEMBER database
- * table as a <strong>last</strong> resort if a lookup returns an AnonymousUser; this is primarily to support the functional
- * tests and overrides in <code>membership.usercode_overrides</code>.
+ * This checks the MEMBER database table as a <strong>last</strong> resort if a lookup returns an AnonymousUser;
+ * this is primarily to support the functional tests and overrides in <code>membership.usercode_overrides</code>,
+ * but is also necessary to show correct data for previous years where users age out of SSO entirely and would normally
+ * return an AnonymousUser, but we still have their data in Tabula.
  */
 class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupAdapter(d) with AutowiringProfileServiceComponent {
+  @Autowired var env: Environment = _
+
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
     super.getUsersByUserIds(ids).asScala.map { case (userId, userFromSSO) =>
       if (userFromSSO.isFoundUser) userId -> userFromSSO
@@ -69,27 +74,30 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
   override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId], ignored: Boolean): JMap[UniversityId, User] =
     getUsersByWarwickUniIds(warwickUniIds)
 
-  override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByUserId", id) {
-    super.getUserByUserId(id) match {
-      case FoundUser(u) => u
-      case u =>
-        profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
-          .map(_.asSsoUser)
-          .getOrElse(u)
+  override def getUserByUserId(id: String): User =
+    RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByUserId", id) {
+      super.getUserByUserId(id) match {
+        case FoundUser(u) => u
+        case u =>
+          profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
+            .map(_.asSsoUser)
+            .getOrElse(u)
+      }
     }
-  }
 
-  override def getUserByWarwickUniId(id: String): User = RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByWarwickUniId", id) {
-    super.getUserByWarwickUniId(id) match {
-      case FoundUser(u) => u
-      case u =>
-        profileService.getMemberByUniversityId(id)
-          .map(_.asSsoUser)
-          .getOrElse(u)
+  override def getUserByWarwickUniId(id: String): User =
+    RequestLevelCache.cachedBy("DatabaseAwareUserLookupService.getUserByWarwickUniId", id) {
+      super.getUserByWarwickUniId(id) match {
+        case FoundUser(u) => u
+        case u =>
+          profileService.getMemberByUniversityId(id)
+            .map(_.asSsoUser)
+            .getOrElse(u)
+      }
     }
-  }
 
-  override def getUserByWarwickUniId(id: String, ignored: Boolean): User = getUserByWarwickUniId(id)
+  override def getUserByWarwickUniId(id: String, ignored: Boolean): User =
+    getUserByWarwickUniId(id)
 }
 
 /**

@@ -156,14 +156,11 @@ class SmallGroupsByModuleReportRequest extends Serializable {
     LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
   var students: JList[JMap[String, String]] = JArrayList()
-
   var modules: JList[JMap[String, String]] = JArrayList()
 
   def copyTo(state: SmallGroupsByModuleReportProcessorState) {
     state.counts = counts
-
     state.students = students
-
     state.modules = modules
   }
 }

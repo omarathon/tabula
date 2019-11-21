@@ -147,6 +147,8 @@ dependencies {
 
   compile "com.beachape:enumeratum_${scalaMajorVersion}:1.5.13"
 
+  compile 'io.jsonwebtoken:jjwt:0.9.1'
+
   // Test dependencies
   testCompile "org.springframework:spring-test:${springVersion}"
 

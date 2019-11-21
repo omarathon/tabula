@@ -16,7 +16,14 @@
       <h5 class="with-related"><span class="muted">for</span> <#noescape>${route_name}</#noescape></h5>
     </div>
 
-    <@pm.alerts "addCommand" route_name users role />
+    <@pm.validation_alerts "addCommand" />
+    <@pm.validation_alerts "removeCommand" />
+
+    <#if (action!"") == "add">
+      <@pm.alerts route_name users role />
+    <#elseif (action!"") == "remove">
+      <@pm.alerts route_name users role />
+    </#if>
 
     <#assign scope=route />
     <#include "_roles.ftl" />

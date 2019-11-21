@@ -205,8 +205,8 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
         val coreRequiredModules = state.coreRequiredModuleLookup(entityYear.route).map(_.module)
         val registrations = entityYear.moduleRegistrations.filter(moduleRegistrationFilter(_, coreRequiredModules))
         registrations.map(r => (r, r.moduleList(entityYear.route)))
-      } .groupBy { case (mr, uml) => (mr.module, mr.cats)}
-        .mapValues(_.headOption.flatMap { case (_, m) => m })
+      } .groupBy { case (mr, _) => (mr.module, mr.cats)}
+        .view.mapValues(_.headOption.flatMap { case (_, m) => m })
         .map { case ((module, cats), optionList) => (module, cats, optionList)}
 
       moduleInfo
@@ -243,7 +243,7 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
     override val category: String = "Core Modules"
     override val categoryShortForm: String = "CM"
 
-    override val moduleSelectionStatus = Option(ModuleSelectionStatus.Core)
+    override val moduleSelectionStatus: Option[ModuleSelectionStatus] = Option(ModuleSelectionStatus.Core)
 
   }
 
@@ -297,7 +297,7 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
     override val category: String = "Core Optional Modules"
     override val categoryShortForm: String = "CO"
 
-    override val moduleSelectionStatus = Option(ModuleSelectionStatus.OptionalCore)
+    override val moduleSelectionStatus: Option[ModuleSelectionStatus] = Option(ModuleSelectionStatus.OptionalCore)
 
   }
 
@@ -324,7 +324,7 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
     override val category: String = "Optional Modules"
     override val categoryShortForm: String = "OM"
 
-    override val moduleSelectionStatus = Option(ModuleSelectionStatus.Option)
+    override val moduleSelectionStatus: Option[ModuleSelectionStatus] = Option(ModuleSelectionStatus.Option)
 
   }
 

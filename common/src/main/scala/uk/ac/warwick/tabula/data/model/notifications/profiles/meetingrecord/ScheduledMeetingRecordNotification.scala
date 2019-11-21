@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+import java.io.ByteArrayOutputStream
 
-import javax.activation.{DataHandler, DataSource}
-import javax.mail.Part
-import javax.mail.internet.{MimeBodyPart, MimeMultipart}
+import javax.activation.DataHandler
+import javax.mail.internet.MimeBodyPart
 import net.fortuna.ical4j.data.CalendarOutputter
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.property._
@@ -12,8 +11,9 @@ import org.hibernate.ObjectNotFoundException
 import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.HasSettings._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
@@ -47,16 +47,6 @@ abstract class ScheduledMeetingRecordNotification
   def agentRoles: Seq[String] = meeting.relationshipTypes.map(_.agentRole)
 }
 
-private case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {
-  override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
-
-  override def getName: String = fileName
-
-  override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
-
-  override def getContentType: String = contentType
-}
-
 trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAttachment {
 
   self: ScheduledMeetingRecordNotification =>
@@ -64,14 +54,7 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
   @transient
   lazy val eventOccurrenceService: EventOccurrenceService = Wire[TermBasedEventOccurrenceService]
 
-  override def generateAttachments(helper: MimeMessageHelper): Unit = {
-    val message = helper.getMimeMessage
-    val mp = new MimeMultipart("alternative")
-
-    // Text part of the original message
-    val textPart = new MimeBodyPart
-    textPart.setText(message.getContent.asInstanceOf[String])
-
+  override def generateAttachments(message: MimeMessageHelper): Unit = {
     // Create ical
     val cal = new Calendar
     cal.getProperties.add(Version.VERSION_2_0)
@@ -108,19 +91,11 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 
     // iCal part for Outlook/Office 365
     val icalPart = new MimeBodyPart
-    icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar; method=" + cal.getMethod.getValue, "meeting.ics")))
+    icalPart.setDataHandler(new DataHandler(UnicodeEmails.ByteArrayDataSource(iCal, s"text/calendar; method=${cal.getMethod.getValue}", "meeting.ics")))
+    message.getRootMimeMultipart.addBodyPart(icalPart)
 
     // Attachment for everyone else
-    val attachmentBodyPart = new MimeBodyPart
-    attachmentBodyPart.setDisposition(Part.ATTACHMENT)
-    attachmentBodyPart.setFileName("meeting.ics")
-    attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "meeting.ics")))
-
-    mp.addBodyPart(textPart)
-    mp.addBodyPart(icalPart)
-    mp.addBodyPart(attachmentBodyPart)
-
-    message.setContent(mp)
+    message.addAttachment("meeting.ics", UnicodeEmails.ByteArrayDataSource(iCal, "text/calendar", "meeting.ics"))
   }
 
 }

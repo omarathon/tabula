@@ -23,7 +23,7 @@
 
   <#list feedback.studentViewableAdjustments as viewableFeedback>
     <#if viewableFeedback??>
-      <div class="alert">
+      <div class="alert alert-info">
         <p>
           <strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark.
           <#if feedback.assignment.summative>
