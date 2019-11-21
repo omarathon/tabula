@@ -17,7 +17,6 @@ import uk.ac.warwick.util.mywarwick.model.request.Activity
 
 import scala.jdk.CollectionConverters._
 
-
 class MyWarwickNotificationListenerTest extends TestBase with Mockito {
 
   var listener: MyWarwickNotificationListener with TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent with SchedulerComponent =
@@ -63,7 +62,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       fpn.recipientNotificationInfos.add(rn)
       val n: FeedbackPublishedNotification = Notification.init(fpn, currentUser.apparentUser, Seq(feedback), feedback.assignment)
       listener.listen(n)
-      verify(listener.myWarwickService, times(1)).sendAsNotification(any[Activity])
+      verify(listener.myWarwickService, times(1)).queueNotification(any[Activity], isEq(listener.scheduler))
     }
   }
 
@@ -75,7 +74,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       sfan.recipientNotificationInfos.add(rn)
       val n: Cm2StudentFeedbackAdjustmentNotification = Notification.init(sfan, currentUser.apparentUser, Seq(feedback), feedback.assignment)
       listener.listen(n)
-      verify(listener.myWarwickService, times(1)).sendAsActivity(any[Activity])
+      verify(listener.myWarwickService, times(1)).queueActivity(any[Activity], isEq(listener.scheduler))
     }
   }
 
@@ -100,7 +99,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       recipients.size should be (recipients.toSet.size)
 
       listener.listen(n)
-      verify(listener.myWarwickService, times(3)).sendAsNotification(any[Activity])
+      verify(listener.myWarwickService, times(3)).queueNotification(any[Activity], isEq(listener.scheduler))
     }
   }
 
