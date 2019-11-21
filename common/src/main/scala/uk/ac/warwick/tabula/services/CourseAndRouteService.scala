@@ -63,6 +63,8 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 
   def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
 
+  def findActiveRoutesBySITSDepartmentCode(departmentCode: String): Seq[Route]
+
   def getCourseByCode(code: String): Option[Course]
 
   def findCoursesInDepartment(department: Department): Seq[Course]
@@ -157,6 +159,10 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 
   def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] = {
     if (moduleAndDepartmentService.departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
+  }
+
+  def findActiveRoutesBySITSDepartmentCode(departmentCode: String): Seq[Route] = {
+    routeDao.findActiveBySITSDepartmentCode(departmentCode)
   }
 
   def addRouteManager(route: Route, owner: String): Unit = transactional() {
