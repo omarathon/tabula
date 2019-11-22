@@ -91,6 +91,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     this.name != other.name ||
       this.module != other.module ||
       this.assessmentGroup != other.assessmentGroup ||
+      this.assessmentType != other.assessmentType ||
       this.inUse != other.inUse ||
       this.marksCode != other.marksCode ||
       this.weighting != other.weighting

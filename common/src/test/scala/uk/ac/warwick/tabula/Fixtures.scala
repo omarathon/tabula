@@ -163,7 +163,7 @@ object Fixtures extends Mockito {
     a.moduleCode = "%s-30" format module.code.toUpperCase
     a.assessmentGroup = "A"
     a.sequence = "A%02d" format number
-    a.assessmentType = AssessmentType.Assignment
+    a.assessmentType = AssessmentType.Essay
     a.inUse = true
     a
   }

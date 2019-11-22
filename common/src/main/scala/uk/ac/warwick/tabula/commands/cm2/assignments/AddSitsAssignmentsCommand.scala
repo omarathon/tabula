@@ -144,7 +144,7 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
     * can alter this choice before continuing.
     */
   private def shouldIncludeByDefault(component: AssessmentComponent) =
-    component.assessmentType == AssessmentType.Assignment &&
+    component.assessmentType.subtype == TabulaAssessmentSubtype.Assignment &&
       component.assessmentGroup != "AO"
 
   private def fetchSitsAssignmentItems(): JList[SitsAssignmentItem] = {

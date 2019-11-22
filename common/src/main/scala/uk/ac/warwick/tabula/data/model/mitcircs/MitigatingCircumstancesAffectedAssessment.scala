@@ -6,7 +6,7 @@ import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.commands.mitcircs.submission.AffectedAssessmentItem
-import uk.ac.warwick.tabula.data.model.{AssessmentType, Assignment, GeneratedId, Module}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, Assignment, GeneratedId, Module}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
@@ -32,8 +32,6 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.sequence = item.sequence
     this.module = item.module
     this.academicYear = item.academicYear
-    this.name = item.name
-    this.assessmentType = item.assessmentType
     this.deadline = item.deadline
     this.boardRecommendations = item.boardRecommendations.asScala.toSeq
     this.extensionDeadline = item.extensionDeadline
@@ -60,23 +58,25 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   @JoinColumn(name = "module_id")
   var module: Module = _
 
+  @ManyToOne(fetch = FetchType.EAGER, optional = true)
+  @JoinColumns(value = Array(
+    new JoinColumn(name = "moduleCode", referencedColumnName="moduleCode", insertable = false, updatable = false),
+    new JoinColumn(name = "sequence", referencedColumnName="sequence", insertable = false, updatable = false)
+  ))
+  var assessmentComponent: AssessmentComponent = _
+
   @Basic
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Column(nullable = false)
   var academicYear: AcademicYear = _
 
-  /**
-    * The name of the assessment or exam
-    */
-  var name: String = _
+  @Column(name = "name")
+  private var _name: String = _
+  // use the name of the assessment component if this matches one - use the locally held name otherwise
+  def name: String = Option(assessmentComponent).map(_.name).getOrElse(_name)
+  def name_=(n: String): Unit = _name = n
 
-  /**
-    * The type of component. Typical values are A for assignment,
-    * E for summer exam. Other values exist.
-    */
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
-  @Column(nullable = false)
-  var assessmentType: AssessmentType = _
+  def assessmentType: AssessmentType = Option(assessmentComponent).map(_.assessmentType).getOrElse(AssessmentType.Other)
 
   @Column(nullable = false)
   var deadline: LocalDate = _
