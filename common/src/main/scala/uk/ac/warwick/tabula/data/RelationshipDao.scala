@@ -37,6 +37,8 @@ trait RelationshipDao {
 
   def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 
+  def getAllCurrentRelationships: Seq[Array[Object]]
+
   def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 
   def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
@@ -129,17 +131,9 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
   }
 
   private def currentRelationsipBaseCriteria(student: StudentMember, agentId: Option[String]) = {
-    val c = session.newCriteria[MemberStudentRelationship]
+    val c = currentRelationshipBaseCriteria()
       .createAlias("studentCourseDetails", "scd")
       .add(is("scd.student", student))
-      .add(Restrictions.or(
-        Restrictions.isNull("endDate"),
-        Restrictions.ge("endDate", DateTime.now)
-      ))
-      .add(Restrictions.or(
-        Restrictions.isNull("startDate"),
-        Restrictions.le("startDate", DateTime.now)
-      ))
 
     if (agentId.isDefined) {
       c.add(is("_agentMember.universityId", agentId.get))
@@ -149,16 +143,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
   }
 
   private def currentRelationsipBaseCriteria(scd: StudentCourseDetails, agentId: Option[String]) = {
-    val c = session.newCriteria[MemberStudentRelationship]
+    val c = currentRelationshipBaseCriteria()
       .add(is("studentCourseDetails", scd))
-      .add(Restrictions.or(
-        Restrictions.isNull("endDate"),
-        Restrictions.ge("endDate", DateTime.now)
-      ))
-      .add(Restrictions.or(
-        Restrictions.isNull("startDate"),
-        Restrictions.le("startDate", DateTime.now)
-      ))
 
     if (agentId.isDefined) {
       c.add(is("_agentMember.universityId", agentId.get))
@@ -168,7 +154,13 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
   }
 
   private def currentRelationsipBaseCriteria(agentId: String) = {
-    val c = session.newCriteria[MemberStudentRelationship]
+    val c = currentRelationshipBaseCriteria()
+      .add(is("_agentMember.universityId", agentId))
+    c
+  }
+
+  private def currentRelationshipBaseCriteria() =
+    session.newCriteria[MemberStudentRelationship]
       .add(Restrictions.or(
         Restrictions.isNull("endDate"),
         Restrictions.ge("endDate", DateTime.now)
@@ -177,9 +169,6 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
         Restrictions.isNull("startDate"),
         Restrictions.le("startDate", DateTime.now)
       ))
-      .add(is("_agentMember.universityId", agentId))
-    c
-  }
 
   def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
     currentRelationsipBaseCriteria(student, None).seq
@@ -619,5 +608,12 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
       .seq
 
     memberRelationships ++ externalRelationships
+  }
+
+  override def getAllCurrentRelationships: Seq[Array[Object]] = {
+    currentRelationshipBaseCriteria().createAlias("_agentMember", "_agentMember").project[Array[Object]](Projections.projectionList()
+      .add(property("_agentMember.universityId"))
+      .add(property("_agentMember.firstName"))
+      .add(property("_agentMember.lastName"))).seq
   }
 }
