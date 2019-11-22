@@ -85,7 +85,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
     upstreamAssignment.moduleCode = "XXX01-30"
     upstreamAssignment.module = module1
     upstreamAssignment.name = "Assignment from SITS"
-    upstreamAssignment.assessmentType = AssessmentType.Assignment
+    upstreamAssignment.assessmentType = AssessmentType.Essay
     upstreamAssignment.inUse = true
     session.save(upstreamAssignment)
 

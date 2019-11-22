@@ -13,7 +13,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
   var assessmentGroup = "A"
   var sequence = "A01"
   var departmentCode: String = _
-  var assessmentType = AssessmentType.Assignment
+  var assessmentType = AssessmentType.Essay
   var name: String = _
   var inUse: Boolean = true
 
