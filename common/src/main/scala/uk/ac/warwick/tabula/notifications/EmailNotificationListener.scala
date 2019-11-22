@@ -96,7 +96,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
   def listen(recipientInfo: RecipientNotificationInfo): Unit = {
     if (!recipientInfo.emailSent) {
-      def cancelSendingEmail() {
+      def cancelSendingEmail(): Unit = {
         // TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
         recipientInfo.emailSent = true
         service.save(recipientInfo)
@@ -115,7 +115,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
         logger.warn(s"Couldn't send email for Notification because recipient has no email address: $recipientInfo")
         cancelSendingEmail()
       } else if (recipientInfo.recipient.isLoginDisabled) {
-        logger.warn(s"Couldn't send email for Notification because recipients login is disabed: $recipientInfo")
+        logger.warn(s"Couldn't send email for Notification because recipients login is disabled: $recipientInfo")
         cancelSendingEmail()
       } else {
         generateMessage(recipientInfo) match {
