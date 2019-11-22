@@ -54,6 +54,10 @@ subprojects {
   apply plugin: 'org.zeroturnaround.gradle.jrebel'
   apply plugin: 'war'
 
+  scala {
+    zincVersion = '1.3.1'
+  }
+
   // TAB-5441 - additional jrebel config to include language specific build dirs
   rebel {
     classpath {
@@ -200,6 +204,6 @@ task generateEncryptionKey() {
 }
 
 wrapper {
-  gradleVersion = '6.0-rc-2'
+  gradleVersion = '6.0.1'
   distributionType = 'ALL'
 }
