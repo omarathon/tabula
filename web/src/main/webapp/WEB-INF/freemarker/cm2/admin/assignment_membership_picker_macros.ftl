@@ -2,7 +2,7 @@
 <#escape x as x?html>
 
   <#macro upstream_group ug isLinked isInUse resitOnly>
-    <tr<#if !isInUse> class="text-muted" <#if !isLinked>style="display: none"</#if></#if> data-in-use="${isInUse?string('true','false')}">
+    <tr<#if !isInUse> class="text-muted" <#if !isLinked>style="display: none"</#if></#if> data-in-use="${isInUse?string('true','false')}" data-linked="${isLinked?string('true', 'false')}">
       <td>
         <input
                 type="checkbox"
@@ -77,7 +77,7 @@
 
               $('#toggleNotInUseComponents').on('click', function () {
                 visible = !visible;
-                $('#sits-table [data-in-use=false]').toggle('fast');
+                $('#sits-table [data-in-use=false][data-linked=false]').toggle('fast');
                 $(this).blur().children('span').text(visible ? 'Hide' : 'Show');
                 return false;
               });
