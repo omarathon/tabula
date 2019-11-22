@@ -28,7 +28,7 @@ class RelationshipAgentsController extends ApiController {
       Map(
         "success" -> true,
         "status" -> "ok",
-        "relationships" -> relationshipsService.listCurrentRelationshipsGlobally(cmd.apply()).map(sr => Map(
+        "agents" -> relationshipsService.listCurrentRelationshipsGlobally(cmd.apply()).map(sr => Map(
           "firstName" -> sr(1),
           "lastName" -> sr(2),
           "universityId" -> sr(0)

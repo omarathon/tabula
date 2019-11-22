@@ -506,7 +506,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
   }
 
   def listCurrentRelationshipsGlobally(relationshipType: StudentRelationshipType): Seq[Array[Object]] = {
-    relationshipDao.getAllCurrentRelationships
+    relationshipDao.getAllCurrentRelationshipsOfType(relationshipType)
   }
 }
 

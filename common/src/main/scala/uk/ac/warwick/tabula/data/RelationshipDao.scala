@@ -37,7 +37,7 @@ trait RelationshipDao {
 
   def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 
-  def getAllCurrentRelationships: Seq[Array[Object]]
+  def getAllCurrentRelationshipsOfType(studentRelationshipType: StudentRelationshipType): Seq[Array[Object]]
 
   def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 
@@ -610,9 +610,9 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
     memberRelationships ++ externalRelationships
   }
 
-  override def getAllCurrentRelationships: Seq[Array[Object]] = {
-    currentRelationshipBaseCriteria().createAlias("_agentMember", "_agentMember").project[Array[Object]](Projections.projectionList()
-      .add(property("_agentMember.universityId"))
+  override def getAllCurrentRelationshipsOfType(studentRelationshipType: StudentRelationshipType): Seq[Array[Object]] = {
+    currentRelationshipBaseCriteria().add(is("relationshipType", studentRelationshipType)).createAlias("_agentMember", "_agentMember").project[Array[Object]](Projections.projectionList()
+      .add(groupProperty("_agentMember.universityId"))
       .add(property("_agentMember.firstName"))
       .add(property("_agentMember.lastName"))).seq
   }
