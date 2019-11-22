@@ -62,7 +62,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
       notificationContent should be(
         """Karen Bradbury has created a record of your personal tutor meeting:
 
-End of term progress meeting at 5 December 2013
+End of term progress meeting on 5 December 2013 at 12:00:00
 
 This meeting record is pending approval by 1218503 Student.
 """)
@@ -127,7 +127,7 @@ This meeting record is pending approval by 1218503 Student.
       notificationContent() should be(
         """Tutor Name has created a record of your meeting with Student Name, Supervisor Name and Tutor Name:
 
-End of term progress meeting at 5 December 2013
+End of term progress meeting on 5 December 2013 at 12:00:00
 
 This meeting record is pending approval by Student Name and Supervisor Name.
 """)
