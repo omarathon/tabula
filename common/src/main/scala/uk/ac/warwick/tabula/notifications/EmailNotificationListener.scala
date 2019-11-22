@@ -73,6 +73,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
         val htmlText = textRenderer.renderTemplate("/WEB-INF/freemarker/emails/layout_html.ftlh", Map(
           "content" -> FormattedHtml(content),
+          "preHeader" -> content.linesIterator.filterNot(_.isEmpty).nextOption(),
           "recipient" -> recipient,
           "actionRequired" -> notification.isInstanceOf[ActionRequiredNotification],
           "url" -> url,
