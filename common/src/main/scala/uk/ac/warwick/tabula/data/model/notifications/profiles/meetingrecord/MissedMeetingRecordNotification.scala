@@ -26,7 +26,7 @@ trait MissedMeetingRecordNotification
   def content = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> agent,
     "agentRoles" -> agentRoles,
-    "dateFormatter" -> dateTimeFormatter,
+    "dateTimeFormatter" -> dateTimeFormatter,
     "student" -> meeting.student,
     "actorIsRecipient" -> recipients.contains(agent),
     "studentIsActor" -> (meeting.student.asSsoUser == agent),

@@ -26,7 +26,7 @@ class MeetingRecordRejectedNotification
   def content = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> agent,
     "agentRoles" -> agentRoles,
-    "dateFormatter" -> dateOnlyFormatter,
+    "dateTimeFormatter" -> dateTimeFormatter,
     "meetingRecord" -> approval.meetingRecord,
     "verbed" -> "returned",
     "reason" -> approval.comments
