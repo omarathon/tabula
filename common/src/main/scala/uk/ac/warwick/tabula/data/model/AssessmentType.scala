@@ -15,21 +15,6 @@ object TabulaAssessmentSubtype extends Enum[TabulaAssessmentSubtype] {
   override val values: immutable.IndexedSeq[TabulaAssessmentSubtype] = findValues
 }
 
-sealed abstract class AssessmentType(val astCode: String, val subtype: TabulaAssessmentSubtype) extends EnumEntry with Convertible[String] {
-  val code:String = subtype.code
-  override val value: String = astCode
-import scala.collection.immutable
-
-sealed abstract class TabulaAssessmentSubtype(val code: String) extends EnumEntry
-object TabulaAssessmentSubtype extends Enum[TabulaAssessmentSubtype] {
-
-  case object Assignment extends TabulaAssessmentSubtype("A")
-  case object Exam extends TabulaAssessmentSubtype("E")
-  case object Other extends TabulaAssessmentSubtype("O")
-
-  override val values: immutable.IndexedSeq[TabulaAssessmentSubtype] = findValues
-}
-
 // full list of types taken from here - https://repo.elab.warwick.ac.uk/projects/MAPP/repos/app/browse/app/sits/AssessmentHelper.scala#92-156
 // TODO - fetch the list via an API call to module approval rather than maintaining it twice
 sealed abstract class AssessmentType(val astCode: String, val subtype: TabulaAssessmentSubtype) extends EnumEntry with Convertible[String] {
