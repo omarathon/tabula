@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.mitcircs
 
-import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.DeleteMitCircSubmissionNoteCommand._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -11,14 +10,13 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object DeleteMitCircSubmissionNoteCommand {
   type Result = MitigatingCircumstancesNote
-  type Command = Appliable[Result] with DeleteMitCircsSubmissionNoteState with DeleteMitCircsSubmissionNoteRequest with SelfValidating
+  type Command = Appliable[Result] with DeleteMitCircsSubmissionNoteState with DeleteMitCircsSubmissionNoteRequest
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Manage
 
   def apply(submission: MitigatingCircumstancesSubmission, note: MitigatingCircumstancesNote): Command =
     new DeleteMitCircSubmissionNoteCommandInternal(submission, note)
       with ComposableCommand[Result]
       with DeleteMitCircsSubmissionNoteRequest
-      with DeleteMitCircsSubmissionNoteValidation
       with DeleteMitCircsSubmissionNotePermissions
       with DeleteMitCircsSubmissionNoteDescription
       with AutowiringMitCircsSubmissionServiceComponent
@@ -34,12 +32,6 @@ abstract class DeleteMitCircSubmissionNoteCommandInternal(val submission: Mitiga
     mitCircsSubmissionService.delete(note)
   }
 
-}
-
-trait DeleteMitCircsSubmissionNoteValidation extends SelfValidating {
-  self: DeleteMitCircsSubmissionNoteRequest =>
-
-  override def validate(errors: Errors): Unit = {}
 }
 
 trait DeleteMitCircsSubmissionNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
