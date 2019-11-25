@@ -32,7 +32,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     upstream.moduleCode = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.moduleCode
     upstream.sequence = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.sequence
     upstream.assessmentGroup = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.assessmentGroup
-    upstream.assessmentType = AssessmentType.Assignment
+    upstream.assessmentType = AssessmentType.Essay
     upstream.name = "Egg plants"
     upstream.inUse = true
 

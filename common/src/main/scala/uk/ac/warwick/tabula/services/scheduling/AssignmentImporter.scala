@@ -150,7 +150,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
     for {
       (moduleCode, ranges) <- moduleCodesToIds
-      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
       range <- ranges
       uniId <- range
@@ -165,13 +165,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
             seatNumber = assessmentType match {
-              case AssessmentType.Assignment => null
-              case AssessmentType.Exam => ((uniId % 300) + 1).toString
+              case AssessmentType.Essay => null
+              case AssessmentType.SummerExam => ((uniId % 300) + 1).toString
             },
             occurrence = "A",
             sequence = assessmentType match {
-              case AssessmentType.Assignment => "A01"
-              case AssessmentType.Exam => "E01"
+              case AssessmentType.Essay => "A01"
+              case AssessmentType.SummerExam => "E01"
             },
             moduleCode = "%s-15".format(moduleCode.toUpperCase),
             assessmentGroup = "A",
@@ -196,7 +196,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
-      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
     } yield {
       val ag = new UpstreamAssessmentGroup()
@@ -205,8 +205,8 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
       ag.sequence = assessmentType match {
-        case AssessmentType.Assignment => "A01"
-        case AssessmentType.Exam => "E01"
+        case AssessmentType.Essay => "A01"
+        case AssessmentType.SummerExam => "E01"
       }
       ag
     }
@@ -216,27 +216,27 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
-      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
     } yield assessmentType match {
-      case AssessmentType.Assignment =>
+      case AssessmentType.Essay =>
         val a = new AssessmentComponent
         a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
         a.sequence = "A01"
         a.name = "Report (2,000 words)"
         a.assessmentGroup = "A"
-        a.assessmentType = AssessmentType.Assignment
+        a.assessmentType = AssessmentType.Essay
         a.inUse = true
         a.weighting = 30
         a.marksCode = "TABULA-UG"
         a
 
-      case AssessmentType.Exam =>
+      case AssessmentType.SummerExam =>
         val e = new AssessmentComponent
         e.moduleCode = "%s-15".format(moduleCode.toUpperCase)
         e.sequence = "E01"
         e.name = "2 hour examination (Summer)"
         e.assessmentGroup = "A"
-        e.assessmentType = AssessmentType.Exam
+        e.assessmentType = AssessmentType.SummerExam
         e.inUse = true
         e.weighting = 70
         e.marksCode = "TABULA-UG"
@@ -310,7 +310,7 @@ object AssignmentImporter {
       ${castToString("mab.mab_seq")} as seq,
       ${castToString("mab.mab_name")} as name,
       ${castToString("mab.mab_agrp")} as assessment_group,
-      case when mab.mab_apac is not null then 'E' else 'A' end as assessment_code, -- infer that this is an exam if a paper code is defined
+      ${castToString("mab.ast_code")} as assessment_code,
       ${castToString("mab.mab_udf1")} as in_use,
       ${castToString("mab.mks_code")} as marks_code,
       mab_perc as weight
@@ -522,7 +522,7 @@ object AssignmentImporter {
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
   /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
-  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean) = {
+  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean): String = {
     val sprClause = if (multipleUniIds)  {
       s" and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)"
     } else {
@@ -562,7 +562,7 @@ object AssignmentImporter {
       a.sequence = rs.getString("seq")
       a.name = rs.getString("name")
       a.assessmentGroup = rs.getString("assessment_group")
-      a.assessmentType = AssessmentType(rs.getString("assessment_code"))
+      a.assessmentType = AssessmentType.factory(rs.getString("assessment_code"))
       a.inUse = rs.getString("in_use") match {
         case "Y" | "y" => true
         case _ => false

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.R
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded}
 import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsRecordAcuteOutcomesNotification
-import uk.ac.warwick.tabula.data.model.{AssessmentType, Notification}
+import uk.ac.warwick.tabula.data.model.{AssignmentType, Notification, TabulaAssessmentSubtype}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
@@ -63,7 +63,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.affectedAssessments.clear()
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
-      if(item.acuteOutcomeApplies && item.assessmentType == AssessmentType.Assignment) affected.acuteOutcome = acuteOutcome
+      if(item.acuteOutcomeApplies && item.assessmentType.subtype == TabulaAssessmentSubtype.Assignment) affected.acuteOutcome = acuteOutcome
       submission.affectedAssessments.add(affected)
     }
 
