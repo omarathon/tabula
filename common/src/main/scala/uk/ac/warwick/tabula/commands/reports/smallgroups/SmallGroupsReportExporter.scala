@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.reports.smallgroups
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
@@ -93,7 +94,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
   }
 
   private def generateNewSheet(workbook: SXSSFWorkbook) = {
-    val sheet = workbook.createSheet(department.name)
+    val sheet = workbook.createSheet(WorkbookUtil.createSafeSheetName(department.name))
     sheet.trackAllColumnsForAutoSizing()
 
     // add header row
