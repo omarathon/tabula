@@ -2,7 +2,7 @@ Dear ${recipient.firstName},
 
 ${content?trim}
 
-<#if actionRequired>You need to ${urlTitle!"visit the page for futher info"}. Please visit ${url}<#else>To ${urlTitle!"see futher info"}, please visit ${url}</#if>
+<#if actionRequired!false>You need to ${urlTitle!"visit the page for futher info"}. Please visit ${url}<#else>To ${urlTitle!"see futher info"}, please visit ${url}</#if>
 
 Thank you,
 Tabula
