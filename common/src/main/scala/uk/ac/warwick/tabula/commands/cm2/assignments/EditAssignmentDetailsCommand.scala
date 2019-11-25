@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersis
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.WorkflowCategory.NoneUse
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{ModeratedMarking, SelectedModeratedMarking}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, ModeratedWorkflow}
-import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
 
@@ -34,13 +34,40 @@ object EditAssignmentDetailsCommand {
       with AutowiringFeaturesComponent
       with HibernateExtensionPersistenceComponent
       with ModifyAssignmentsDetailsTriggers
-      with PopulateOnForm
 }
 
-class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
-  with EditAssignmentDetailsValidation with SharedAssignmentDetailProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
+class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment]
+  with EditAssignmentDetailsCommandState
+  with SharedAssignmentDetailProperties
+  with AssignmentDetailsCopy
+  with CreatesMarkingWorkflow {
+  self: AssessmentServiceComponent
+    with UserLookupComponent
+    with CM2MarkingWorkflowServiceComponent
+    with FeaturesComponent
+    with ExtensionPersistenceComponent =>
 
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with FeaturesComponent with ExtensionPersistenceComponent =>
+  name = assignment.name
+  openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
+  openEnded = assignment.openEnded
+  resitAssessment = assignment.resitAssessment
+  openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
+  closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+  workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
+  reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
+  anonymity = assignment._anonymity
+  workflow.foreach(w =>
+    if (w.workflowType == SelectedModeratedMarking) workflowType = ModeratedMarking // we don't show admin moderation as a separate option in the UI
+    else workflowType = w.workflowType
+  )
+  workflow.map(HibernateHelpers.initialiseAndUnproxy).collect { case w: ModeratedWorkflow => w }.foreach(w =>
+    sampler = w.moderationSampler
+  )
+  extractMarkers match {
+    case (a, b) =>
+      markersA = JArrayList(a)
+      markersB = JArrayList(b)
+  }
 
   override def applyInternal(): Assignment = {
 
@@ -90,30 +117,6 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 
     assessmentService.save(assignment)
     assignment
-  }
-
-  override def populate(): Unit = {
-    name = assignment.name
-    openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
-    openEnded = assignment.openEnded
-    resitAssessment = assignment.resitAssessment
-    openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
-    closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
-    workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
-    reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
-    anonymity = assignment._anonymity
-    workflow.foreach(w =>
-      if (w.workflowType == SelectedModeratedMarking) workflowType = ModeratedMarking // we don't show admin moderation as a separate option in the UI
-      else workflowType = w.workflowType
-    )
-    workflow.map(HibernateHelpers.initialiseAndUnproxy).collect { case w: ModeratedWorkflow => w }.foreach(w =>
-      sampler = w.moderationSampler
-    )
-    extractMarkers match {
-      case (a, b) =>
-        markersA = JArrayList(a)
-        markersB = JArrayList(b)
-    }
   }
 
 }
