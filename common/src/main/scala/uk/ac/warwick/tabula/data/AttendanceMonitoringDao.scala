@@ -707,10 +707,10 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
               or(
                 isNull("currentRelationships.startDate"),
                 le("currentRelationships.startDate", DateTime.now)
-              )
+              ),
+              is("currentRelationships.relationshipType.id", "personalTutor")
             )
           ))
-          .createAlias("currentRelationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN, Some(is("relationshipType.id", "personalTutor")))
           .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN)
           .add(isNull("studentCourseDetails.missingFromImportSince"))
           .add(is("studentCourseYearDetails.academicYear", academicYear))
