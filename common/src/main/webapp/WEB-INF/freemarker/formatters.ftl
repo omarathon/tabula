@@ -509,7 +509,7 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro format_list_of_members members><#compress>
 	<#list members as item><#--
--->		${item.fullName}<#--
+-->		<#noescape>${(item.fullName!item.universityId)}</#noescape><#--
 -->		<#if item_has_next><#--
 -->			<#if item_index == members?size -2>and<#else>,</#if><#--
 -->		</#if><#--

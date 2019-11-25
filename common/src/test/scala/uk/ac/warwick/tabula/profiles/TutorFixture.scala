@@ -21,6 +21,8 @@ trait TutorFixture extends Mockito {
   student.universityId = "student"
   student.firstName = "Test"
   student.lastName = "Student"
+  student.email = "student@warwick.ac.uk"
+  student.inUseFlag = "Active"
 
   val studentCourseDetails = new StudentCourseDetails
   studentCourseDetails.student = student
@@ -31,6 +33,8 @@ trait TutorFixture extends Mockito {
   student.mostSignificantCourse = studentCourseDetails
 
   val newTutor = new StaffMember
+  newTutor.firstName = "Peter"
+  newTutor.lastName = "O'Hanraha-Hanrahan"
   newTutor.universityId = "0000001"
 
   val oldTutor = new StaffMember
