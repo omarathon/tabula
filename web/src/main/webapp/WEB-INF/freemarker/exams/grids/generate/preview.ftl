@@ -129,7 +129,7 @@
           </#if>
 
         <div class="key clearfix">
-          <table class="table table-condensed">
+          <table class="table table-condensed report-table">
             <thead>
             <tr>
               <th colspan="2">Report</th>
@@ -235,7 +235,7 @@
             </tbody>
           </table>
 
-          <table class="table table-condensed">
+          <table class="table table-condensed key-table">
             <thead>
             <tr>
               <th colspan="2">Key</th>
@@ -276,6 +276,28 @@
             </tr>
             </tbody>
           </table>
+
+          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("mitigating")>
+            <table class="table table-condensed mitcircs-key-table">
+              <thead>
+                <tr>
+                  <th colspan="2">Mitigating circumstances key</th>
+                </tr>
+              </thead>
+              <tbody>
+                <#list mitigatingCircumstancesGradings as grading>
+                  <tr>
+                    <td><span class="exam-grid-mitcircs-grading">${grading.code}</span></td>
+                    <td>${grading.description}</td>
+                  </tr>
+                </#list>
+                <tr>
+                  <td><span class="exam-grid-mitcircs-grading">+0</span></td>
+                  <td>Acute mitigation - mitigation has already been taken into account</td>
+                </tr>
+              </tbody>
+            </table>
+          </#if>
         </div>
 
           <#if gridOptionsCommand.showFullLayout>
