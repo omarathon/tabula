@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import java.lang.{Integer => JInteger, Boolean => JBoolean}
+import java.lang.{Boolean => JBoolean, Integer => JInteger}
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.{Bean, Configuration, Profile}
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
 import org.springframework.core.env.{Environment, Profiles, PropertyResolver, PropertySourcesPropertyResolver}
 import org.springframework.core.io.ClassPathResource
-import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.quartz.{JobDetailFactoryBean, QuartzJobBean, SchedulerFactoryBean, SpringBeanJobFactory}
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -177,13 +176,12 @@ object SchedulingConfiguration {
       .getOrElse(Seq(SimpleUnscheduledJob[J](properties.getProperty(s"$configKey.name", defaultJobName[J]))))
 
   /**
-    * Be very careful about changing the names of jobs here. If a job with a name is no longer referenced,
-    * we will clear out ALL Quartz data the next time that the application starts, which may have unintended
-    * side-effects (but will probably be fine). Adding new jobs is fine, it's just dereferencing or renaming
-    * that's awkward.
-    *
-    * @see http://codrspace.com/Khovansa/spring-quartz-with-a-database/
-    */
+   * DANGER WILL ROBINSON
+   *
+   * Are you removing an existing job here or making a breaking change to the job configuration in Quartz?
+   * Adding a new job is fine but existing ones will probably need to be managed with a Flyway migration to
+   * be picked up (to avoid nasty race conditions with multiple servers trying to clear out and create jobs)
+   */
   def scheduledJobs(implicit properties: PropertyResolver): Seq[JobConfiguration[_ <: AutowiredJobBean]] = Seq(
     // Unscheduled jobs that are triggered explicitly by Sysadmin things
     propertiesConfiguredJob[ImportProfilesSingleDepartmentJob]("scheduling.importProfilesSingleDepartment"),
@@ -251,46 +249,22 @@ class SchedulingConfiguration {
   @Value("${toplevel.url}") var toplevelUrl: String = _
 
   private def scheduler(jobs: Seq[JobConfiguration[_ <: AutowiredJobBean]]): FactoryBean[Scheduler] = {
-    // If we're deploying a change that means an existing trigger is no longer referenced, clear the scheduler
-    val triggerNames: Seq[String] =
-      new JdbcTemplate(dataSource).queryAndMap("select trigger_name from qrtz_triggers") {
-        case (rs, _) => rs.getString("trigger_name")
-      }
-
-    val jobNames = jobs.map(_.name)
-
-    // Clear the scheduler if there is a trigger that we no longer want to run
-    val clearScheduler = !triggerNames.forall(jobNames.contains)
-
-    val factory = new SchedulerFactoryBean() {
-      override def createScheduler(schedulerFactory: SchedulerFactory, schedulerName: String): Scheduler = {
-        val scheduler = super.createScheduler(schedulerFactory, schedulerName)
-
-        if (clearScheduler) {
-          scheduler.clear()
-        }
-
-        scheduler
-      }
-    }
-
+    val factory = new SchedulerFactoryBean
     factory.setConfigLocation(new ClassPathResource("/quartz.properties"))
     factory.setStartupDelay(10)
     factory.setDataSource(dataSource)
     factory.setTransactionManager(transactionManager)
     factory.setSchedulerName(Uri.parse(toplevelUrl).getAuthority)
-    factory.setOverwriteExistingJobs(true)
+    factory.setOverwriteExistingJobs(false)
 
     // We only auto-startup on the scheduler, and only if we're not in maintenance mode. This allows us
     // to wire a scheduler on nodes that wouldn't normally get one and use it to schedule jobs. Neat!
     factory.setAutoStartup(env.acceptsProfiles(Profiles.of("scheduling")) && !maintenanceModeService.enabled)
 
     if (!env.acceptsProfiles(Profiles.of("scheduling"))) {
-      factory.setQuartzProperties(new Properties() {
-        {
-          setProperty("org.quartz.jobStore.isClustered", "false")
-        }
-      })
+      factory.setQuartzProperties(new Properties() {{
+        setProperty("org.quartz.jobStore.isClustered", "false")
+      }})
     }
 
     factory.setApplicationContextSchedulerContextKey("applicationContext")
