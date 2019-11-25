@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.profiles.{ViewMemberRelationshipsCommand}
+import uk.ac.warwick.tabula.commands.profiles.ViewMemberRelationshipsCommand
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
@@ -21,8 +21,13 @@ trait GetMemberRelationshipsApi {
   self: ApiController with RelationshipServiceComponent =>
 
   @ModelAttribute("viewStudentRelationshipsCommand")
-  def getCommand(@PathVariable member: Member): ViewMemberRelationshipsCommand.CommandType =
-    ViewMemberRelationshipsCommand(member)
+  def getCommand(@PathVariable member: Member, @RequestParam(defaultValue = "") typeConstraint: String): ViewMemberRelationshipsCommand.CommandType = {
+    val tc = typeConstraint match {
+      case "" => None
+      case other: String => Some(other)
+    }
+    ViewMemberRelationshipsCommand(member, tc)
+  }
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def getMember(@PathVariable member: Member, @ModelAttribute("viewStudentRelationshipsCommand") command: Appliable[ViewMemberRelationshipsCommand.Result]): Mav = {
