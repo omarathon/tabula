@@ -42,10 +42,10 @@ class MitCircsNotesController extends BaseController {
     @PathVariable submission: MitigatingCircumstancesSubmission,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors)
-       RedirectFlashing(Routes.Admin.review(submission), "flash__error" -> errors.getAllErrors.asScala.head.getCode)
+      RedirectForceFlashing(Routes.Admin.review(submission), "flash__error" -> errors.getAllErrors.asScala.head.getCode)
     else {
       command.apply()
-      RedirectFlashing(Routes.Admin.review(submission), "flash__success" -> "flash.mitcircsnote.saved")
+      RedirectForceFlashing(Routes.Admin.review(submission), "flash__success" -> "flash.mitcircsnote.saved")
     }
 
 }
