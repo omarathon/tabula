@@ -16,7 +16,7 @@ object ViewMemberRelationshipsCommand {
     entities: Map[StudentRelationshipType, Seq[StudentCourseDetails]]
   )
 
-  def apply(currentMember: Member, typeConstraint: Option[String] = None): Command[Result] = {
+  def apply(currentMember: Member, typeConstraint: Option[StudentRelationshipType] = None): Command[Result] = {
     new ViewMemberRelationshipsCommandInternal(currentMember, typeConstraint)
       with ComposableCommand[Result]
       with AutowiringProfileServiceComponent
@@ -28,12 +28,12 @@ object ViewMemberRelationshipsCommand {
 }
 
 
-abstract class ViewMemberRelationshipsCommandInternal(val currentMember: Member, val typeConstraint: Option[String])
+abstract class ViewMemberRelationshipsCommandInternal(val currentMember: Member, val typeConstraint: Option[StudentRelationshipType])
   extends CommandInternal[Result] with TaskBenchmarking with ViewMemberRelationshipsCommandState {
   self: ProfileServiceComponent with RelationshipServiceComponent =>
 
   def applyInternal(): Result = {
-    val rslt = relationshipTypes.filter(t => t.id == typeConstraint.getOrElse(t.id)).map { r =>
+    val rslt = relationshipTypes.filter(t => t == typeConstraint.getOrElse(t)).map { r =>
       r -> profileService.getSCDsByAgentRelationshipAndRestrictions(r, currentMember, Nil)
     }.filter { case (_, stuDetails) => stuDetails.nonEmpty }
     Result(rslt.toMap)
