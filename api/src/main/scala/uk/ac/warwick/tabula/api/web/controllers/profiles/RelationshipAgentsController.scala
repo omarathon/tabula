@@ -18,17 +18,17 @@ class RelationshipAgentsController extends ApiController {
   @Autowired var relationshipsService: RelationshipService = _
 
   @ModelAttribute("getCommand")
-  def getCommand(@PathVariable studentRelationshipType: StudentRelationshipType): ViewRelationshipAgentsCommand[StudentRelationshipType] =
+  def getCommand(@PathVariable studentRelationshipType: StudentRelationshipType): ViewRelationshipAgentsCommand =
     new ViewRelationshipAgentsCommand(Permissions.Profiles.StudentRelationship.Read(studentRelationshipType), PermissionsTarget.Global, mandatory(studentRelationshipType))
 
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def index(@ModelAttribute("getCommand") cmd: ViewRelationshipAgentsCommand[StudentRelationshipType]): Mav = {
+  def index(@ModelAttribute("getCommand") cmd: ViewRelationshipAgentsCommand): Mav = {
     Mav(new JSONView(
       Map(
         "success" -> true,
         "status" -> "ok",
-        "agents" -> relationshipsService.listCurrentRelationshipsGlobally(cmd.apply()).map(sr => Map(
+        "agents" -> cmd.apply().map(sr => Map(
           "firstName" -> sr(1),
           "lastName" -> sr(2),
           "universityId" -> sr(0)
@@ -37,10 +37,10 @@ class RelationshipAgentsController extends ApiController {
     ))
   }
 
-  class ViewRelationshipAgentsCommand[A <: PermissionsTarget](val permission: Permission, val target: PermissionsTarget, val value: A) extends Command[A] with ReadOnly with Unaudited {
-    PermissionCheck(permission, target)
+  class ViewRelationshipAgentsCommand(val permission: Permission, val permissionsTarget: PermissionsTarget, val relationshipType: StudentRelationshipType) extends Command[Seq[Array[Object]]] with ReadOnly with Unaudited {
+    PermissionCheck(permission, permissionsTarget)
 
-    override def applyInternal(): A = value
+    override def applyInternal(): Seq[Array[Object]] = relationshipsService.listCurrentRelationshipsGlobally(relationshipType)
   }
 
 }
