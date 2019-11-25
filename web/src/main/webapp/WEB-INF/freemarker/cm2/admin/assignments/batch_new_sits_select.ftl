@@ -277,7 +277,7 @@ first page of the form to setup a bunch of assignments from SITS.
                   <p>Assignments open at 9am on the open date, which must also be a University working day.
                     This makes it more likely that the first submission attempts will be made while staff members are available to deal with any issues.</p>
 
-                  <p>Read <a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/forum?topic=8a1785d86dde8017016e26acf3e75bab" target="_blank">this Tabula noticeboard post</a> for more information</p>
+                  <p>Read <a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/forum?topic=8a1785d86dde8017016e26acf3e75bab" target="_blank">this Tabula noticeboard post</a> for more information.</p>
                 </#assign>
                 <a href="#"
                    id="assignment-openclose-date-restrictions"
