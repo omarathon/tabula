@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, ModuleReportsColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueType, _}
 import uk.ac.warwick.tabula.exams.grids.data.{GeneratesExamGridData, GridData}
@@ -137,6 +138,9 @@ class GenerateExamGridController extends ExamsController
   def examGridColumnValueType = benchmarkTask("ExamGridColumnValueType") {
     ExamGridColumnValueType
   }
+
+  @ModelAttribute("mitigatingCircumstancesGradings")
+  def mitigatingCircumstancesGradings: IndexedSeq[MitigatingCircumstancesGrading] = MitigatingCircumstancesGrading.values
 
   @GetMapping
   def selectCourseRender(
