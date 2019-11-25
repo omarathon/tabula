@@ -30,7 +30,7 @@ ext {
   jacksonScalaModuleVersion = "2.9.10"
   elasticsearchVersion = "6.7.2"
   elastic4sVersion = "6.7.3"
-  poiVersion = "4.1.1"
+  poiVersion = "4.1.1-warwick"
   tilesVersion = "3.0.8"
   jcloudsVersion = "2.2.0"
   warwickUtilsVersion = "20191122"
