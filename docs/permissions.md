@@ -51,7 +51,7 @@ are the `DatabaseBackedRoleProvider`, which return `GrantedRole`s, and `UserType
 DatabaseBackedRoleProvider
 --------------------------
 
-Explicitly granted are stored in the `GrantedPermission` table
+Explicitly granted individual permissions are stored in the `GrantedPermission` table
 (see `uk.ac.warwick.tabula.data.model.permissions.GrantedPermission`).
 
 Tabula has its own concept of `UserGroup`s with which granted permissions are associated. Group members can either be
