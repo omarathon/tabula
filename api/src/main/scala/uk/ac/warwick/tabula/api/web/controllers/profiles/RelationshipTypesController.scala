@@ -22,6 +22,7 @@ class RelationshipTypesController extends ApiController {
         "status" -> "ok",
         "relationships" -> relationshipsService.allStudentRelationshipTypes.map(r => Map(
           "id" -> r.id,
+          "urlPart" -> r.urlPart,
           "description" -> r.description,
           "agentRole" -> r.agentRole,
           "studentRole" -> r.studentRole
