@@ -68,12 +68,15 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
       .toSet
   }
 
+
+
+
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember): Mav = {
     Mav("mitcircs/submissions/form", Map(
       "issueTypes" -> IssueType.validIssueTypes(student),
       "possibleContacts" -> MitCircsContact.values,
-      "department" -> student.mostSignificantCourse.department.subDepartmentsContaining(student).find(_.enableMitCircs),
+      "department" -> Option(student.mostSignificantCourse).flatMap(c => Option(c.department)).flatMap(_.subDepartmentsContaining(student).find(_.enableMitCircs)),
     )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
 

@@ -89,7 +89,7 @@ abstract class AbstractViewProfileController extends ProfilesController
             case Nil => Nil
             case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
           }) ++
-          (if (scd.student.mostSignificantCourse.department.subDepartmentsContaining(scd.student).exists(_.enableMitCircs))
+          (if (Option(scd.student.mostSignificantCourse).flatMap(c => Option(c.department)).exists(_.subDepartmentsContaining(scd.student).exists(_.enableMitCircs)))
             Seq(ProfileBreadcrumbs.Profile.PersonalCircumstances(scd.student).setActive(activeIdentifier))
           else
             Nil

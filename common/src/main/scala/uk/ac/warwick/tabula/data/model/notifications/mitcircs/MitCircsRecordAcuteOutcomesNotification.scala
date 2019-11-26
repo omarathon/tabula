@@ -49,7 +49,7 @@ class MitCircsRecordAcuteOutcomesNotification
 
   @transient
   final lazy val configuringDepartment: Department =
-    student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).head
+    Option(student.mostSignificantCourse).flatMap(c => Option(c.department)).flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs)).head
 
   override def allRecipients: Seq[User] = {
     if (submission.state != MitigatingCircumstancesSubmissionState.OutcomesRecorded || !submission.isAcute || (Option(submission.acuteOutcome).isEmpty && submission.affectedAssessments.asScala.forall(a => Option(a.acuteOutcome).isEmpty))) {
