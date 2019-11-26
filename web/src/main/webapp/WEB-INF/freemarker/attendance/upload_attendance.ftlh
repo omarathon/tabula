@@ -17,6 +17,10 @@
           <#if errors.hasErrors()>
             <div class="alert alert-danger">
               <#-- show global errors (problems with extracting the spreadsheet) -->
+              <h3>Some problems need fixing</h3>
+
+              <p>Your spreadsheet hasn't been processed because of the following issues. Fix the problems and try again.</p>
+
               <@f.errors cssClass="error" />
               <#list command.checkpointMap?keys as student>
                   <#list mapGet(command.checkpointMap, student)?keys as point>
