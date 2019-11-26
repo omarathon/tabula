@@ -65,7 +65,7 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 
       case mitCircsStudent: MitigatingCircumstancesStudent =>
         val student = mitCircsStudent.student
-        if (user.apparentId == student.userId && student.homeDepartment.subDepartmentsContaining(student).exists(_.enableMitCircs))
+        if (user.apparentId == student.userId && student.mostSignificantCourse.department.subDepartmentsContaining(student).exists(_.enableMitCircs))
           LazyList(MitigatingCircumstancesSubmitter(mitCircsStudent))
         else
           LazyList.empty
