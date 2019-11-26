@@ -37,7 +37,8 @@ trait GetMemberRelationshipsApi {
           "relationshipType" -> Map(
             "id" -> relationshipType.id,
             "agentRole" -> relationshipType.agentRole,
-            "studentRole" -> relationshipType.studentRole
+            "studentRole" -> relationshipType.studentRole,
+            "description" -> relationshipType.description
           ),
           "students" -> result.map(scd => Map(
             "userId" -> scd.student.userId,
