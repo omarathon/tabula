@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -18,10 +17,6 @@ import scala.jdk.CollectionConverters._
 object AllSmallGroupsReportCommand {
   type ResultType = AllSmallGroupsReportCommandResult
   type CommandType = Appliable[AllSmallGroupsReportCommandResult] with ReportCommandRequestValidation
-
-  final val ReportDatePattern = "dd/MM/yyyy"
-  val DateFormat: DateTimeFormatter = DateTimeFormat.forPattern(ReportDatePattern)
-  final val ReportDate: DateTimeFormatter = DateTimeFormat.forPattern(ReportDatePattern)
 
   def apply(
     department: Department,

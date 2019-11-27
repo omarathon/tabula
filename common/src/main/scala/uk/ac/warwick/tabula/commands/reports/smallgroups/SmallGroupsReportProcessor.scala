@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions, ReportsDateFormats}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -16,8 +15,6 @@ import uk.ac.warwick.tabula.services._
 import scala.jdk.CollectionConverters._
 
 object SmallGroupsReportProcessor {
-
-  val DateFormat: DateTimeFormatter = DateTimeFormat.forPattern("ddMMyy")
 
   def apply(department: Department, academicYear: AcademicYear) =
     new SmallGroupsReportProcessorInternal(department, academicYear)
@@ -104,7 +101,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
         }.toMap)
     }.toMap
     SmallGroupsReportProcessorResult(processedAttendance, processedStudents, processedEvents,
-      SmallGroupsReportProcessor.DateFormat.print(reportRangeStartDate), SmallGroupsReportProcessor.DateFormat.print(reportRangeEndDate))
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.CSVDate.print(reportRangeEndDate))
   }
 
 }

@@ -4,7 +4,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions, ReportsDateFormats}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -75,7 +75,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
         }.toMap)
     }.toMap
     SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules,
-      SmallGroupsReportProcessor.DateFormat.print(reportRangeStartDate), SmallGroupsReportProcessor.DateFormat.print(reportRangeEndDate))
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.ReportDate.print(reportRangeEndDate))
   }
 
 }

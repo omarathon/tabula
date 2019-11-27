@@ -7,8 +7,8 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.reports.ReportsDateFormats
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
-import uk.ac.warwick.tabula.commands.reports.smallgroups.AllSmallGroupsReportCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
@@ -106,8 +106,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
         },
         "students" -> allStudents,
         "points" -> allPoints,
-        "reportRangeStartDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeStartDate),
-        "reportRangeEndDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeEndDate)
+        "reportRangeStartDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeStartDate),
+        "reportRangeEndDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeEndDate)
       )))
     }
   }
@@ -186,7 +186,7 @@ class AttendanceReportRequest extends Serializable {
 
     state.points = points
 
-    state.reportRangeStartDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
-    state.reportRangeEndDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
+    state.reportRangeStartDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
+    state.reportRangeEndDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
   }
 }

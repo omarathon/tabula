@@ -6,6 +6,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.reports.ReportsDateFormats
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentDataFetcher
@@ -110,8 +111,8 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
         },
         "students" -> allStudents,
         "events" -> allEvents,
-        "reportRangeStartDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeStartDate),
-        "reportRangeEndDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeEndDate),
+        "reportRangeStartDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeStartDate),
+        "reportRangeEndDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeEndDate),
       )))
     }
   }
@@ -189,7 +190,7 @@ class SmallGroupsReportRequest extends Serializable {
     state.students = students
 
     state.events = events
-    state.reportRangeStartDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
-    state.reportRangeEndDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
+    state.reportRangeStartDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
+    state.reportRangeEndDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
   }
 }

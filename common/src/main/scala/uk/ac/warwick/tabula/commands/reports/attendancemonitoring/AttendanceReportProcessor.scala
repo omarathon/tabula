@@ -4,8 +4,7 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.smallgroups.SmallGroupsReportProcessor
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions, ReportsDateFormats}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -82,7 +81,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
         }.toMap)
     }.toMap
     AttendanceReportProcessorResult(processedAttendance, processedStudents, processedPoints,
-      SmallGroupsReportProcessor.DateFormat.print(reportRangeStartDate), SmallGroupsReportProcessor.DateFormat.print(reportRangeEndDate))
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.CSVDate.print(reportRangeEndDate))
   }
 
 }

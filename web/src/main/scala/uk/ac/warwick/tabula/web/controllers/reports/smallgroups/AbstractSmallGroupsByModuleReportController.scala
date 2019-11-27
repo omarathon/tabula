@@ -6,6 +6,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.reports.ReportsDateFormats
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
@@ -91,8 +92,8 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
         },
         "students" -> allStudents,
         "modules" -> allModules,
-        "reportRangeStartDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeStartDate),
-        "reportRangeEndDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeEndDate),
+        "reportRangeStartDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeStartDate),
+        "reportRangeEndDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeEndDate),
       )))
     }
   }
@@ -167,7 +168,7 @@ class SmallGroupsByModuleReportRequest extends Serializable {
     state.counts = counts
     state.students = students
     state.modules = modules
-    state.reportRangeStartDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
-    state.reportRangeEndDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
+    state.reportRangeStartDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
+    state.reportRangeEndDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
   }
 }
