@@ -75,7 +75,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
         }.toMap)
     }.toMap
     SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules,
-      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.ReportDate.print(reportRangeEndDate))
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.CSVDate.print(reportRangeEndDate))
   }
 
 }
