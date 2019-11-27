@@ -11,8 +11,7 @@
       <@f.checkbox path="automaticallySubmitToTurnitin" id="automaticallySubmitToTurnitin" /> Automatically check submissions for plagiarism
     </@bs3form.checkbox>
     <span class="help-block">
-      Select this option to check all submissions for plagiarism when the assignment closes.
-      Late submissions, or submissions within an extension, are checked for plagiarism when the submission is received.
+      Select this option to check for plagiarism when a submission is received.
 	  </span>
     <@f.hidden path="displayPlagiarismNotice" value="true" />
   </@bs3form.labelled_form_group>

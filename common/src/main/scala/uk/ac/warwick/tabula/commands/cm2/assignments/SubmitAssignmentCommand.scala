@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
+import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, SubmissionBeforeCloseDateTrigger, Trigger}
 import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
@@ -299,7 +299,7 @@ trait SubmitAssignmentTriggers extends GeneratesTriggers[Submission] {
     if (commandResult.isLate || commandResult.isAuthorisedLate) {
       Seq(SubmissionAfterCloseDateTrigger(DateTime.now, commandResult))
     } else {
-      Seq()
+      Seq(SubmissionBeforeCloseDateTrigger(DateTime.now, commandResult))
     }
   }
 }
