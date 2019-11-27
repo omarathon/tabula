@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -32,7 +33,9 @@ case class ModuleData(
 case class SmallGroupsByModuleReportProcessorResult(
   counts: Map[AttendanceMonitoringStudentData, Map[ModuleData, Int]],
   students: Seq[AttendanceMonitoringStudentData],
-  modules: Seq[ModuleData]
+  modules: Seq[ModuleData],
+  reportRangeStartDate: String,
+  reportRangeEndDate: String
 )
 
 class SmallGroupsByModuleReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
@@ -71,16 +74,20 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
           processedModules.find(_.id == id).map(module => module -> countString.toInt)
         }.toMap)
     }.toMap
-    SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules)
+    SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules,
+      SmallGroupsReportProcessor.DateFormat.print(reportRangeStartDate), SmallGroupsReportProcessor.DateFormat.print(reportRangeEndDate))
   }
 
 }
 
-trait SmallGroupsByModuleReportProcessorState extends ReportCommandState {
+trait SmallGroupsByModuleReportProcessorState extends ReportCommandState with ReportCommandRequest {
   var counts: JMap[String, JMap[String, String]] =
     LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
   var students: JList[JMap[String, String]] = JArrayList()
 
   var modules: JList[JMap[String, String]] = JArrayList()
+
+  var reportRangeStartDate: LocalDate = _
+  var reportRangeEndDate: LocalDate = _
 }

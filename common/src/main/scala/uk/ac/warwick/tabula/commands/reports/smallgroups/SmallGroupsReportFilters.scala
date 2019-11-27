@@ -32,7 +32,9 @@ object SmallGroupsReportFilters {
       unrecordedMap,
       result.relevantEvents,
       result.studentDatas.filter { d => unrecordedMap.keySet.exists(_.getWarwickId == d.universityId) },
-      unrecordedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+      unrecordedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt)),
+      result.reportRangeStartDate,
+      result.reportRangeEndDate
     )
   }
 
@@ -45,7 +47,9 @@ object SmallGroupsReportFilters {
       missedMap,
       result.relevantEvents,
       result.studentDatas.filter { d => missedMap.keySet.exists(_.getWarwickId == d.universityId) },
-      missedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+      missedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt)),
+      result.reportRangeStartDate,
+      result.reportRangeEndDate
     )
   }
 }

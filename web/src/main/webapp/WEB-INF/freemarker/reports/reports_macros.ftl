@@ -87,6 +87,12 @@
             });
 
             var showReport = function () {
+
+              if (data.reportRangeStartDate != undefined) {
+                var reportDateRange = $('<h5/>').text('Report generated for dates ' + data.reportRangeStartDate + ' - ' + data.reportRangeEndDate);
+                $('.report-target').append(reportDateRange);
+              }
+
               var table = $('<table/>')
                 .addClass('table table-condensed table-striped table-sortable')
                 .css({

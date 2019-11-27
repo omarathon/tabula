@@ -4,12 +4,12 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.smallgroups.SmallGroupsReportProcessor
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 import scala.jdk.CollectionConverters._
@@ -37,7 +37,9 @@ case class PointData(
 case class AttendanceReportProcessorResult(
   attendance: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]],
   students: Seq[AttendanceMonitoringStudentData],
-  points: Seq[PointData]
+  points: Seq[PointData],
+  reportRangeStartDate: String,
+  reportRangeEndDate: String
 )
 
 class AttendanceReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
@@ -79,16 +81,20 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
           processedPoints.find(_.id == id).map(point => point -> AttendanceState.fromCode(stateString))
         }.toMap)
     }.toMap
-    AttendanceReportProcessorResult(processedAttendance, processedStudents, processedPoints)
+    AttendanceReportProcessorResult(processedAttendance, processedStudents, processedPoints,
+      SmallGroupsReportProcessor.DateFormat.print(reportRangeStartDate), SmallGroupsReportProcessor.DateFormat.print(reportRangeEndDate))
   }
 
 }
 
-trait AttendanceReportProcessorState extends ReportCommandState {
+trait AttendanceReportProcessorState extends ReportCommandState with ReportCommandRequest {
   var attendance: JMap[String, JMap[String, String]] =
     LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
   var students: JList[JMap[String, String]] = JArrayList()
 
   var points: JList[JMap[String, String]] = JArrayList()
+
+  var reportRangeStartDate: LocalDate = _
+  var reportRangeEndDate: LocalDate = _
 }

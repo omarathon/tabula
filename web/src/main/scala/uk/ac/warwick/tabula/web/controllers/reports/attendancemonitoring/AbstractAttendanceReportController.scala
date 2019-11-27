@@ -8,6 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
+import uk.ac.warwick.tabula.commands.reports.smallgroups.AllSmallGroupsReportCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
@@ -72,7 +73,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
     if (errors.hasErrors) Mav(new JSONErrorView(errors))
     else {
       val result = cmd.apply()
-      val allStudents: Seq[Map[String, String]] = result.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
+      val allStudents: Seq[Map[String, String]] = result.studentDataMap.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
         Map(
           "firstName" -> studentData.firstName,
           "lastName" -> studentData.lastName,
@@ -87,7 +88,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
       val intervalFormatter = new IntervalFormatter
       val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28)
       import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-      val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
+      val allPoints: Seq[Map[String, String]] = result.studentDataMap.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
         Map(
           "id" -> point.id,
           "name" -> point.name,
@@ -98,13 +99,15 @@ abstract class AbstractAttendanceReportController extends ReportsController
         )
       )
       Mav(new JSONView(Map(
-        "attendance" -> result.map { case (studentData, pointMap) =>
+        "attendance" -> result.studentDataMap.map { case (studentData, pointMap) =>
           studentData.universityId -> pointMap.map { case (point, state) =>
             point.id -> Option(state).map(_.dbValue).orNull
           }
         },
         "students" -> allStudents,
-        "points" -> allPoints
+        "points" -> allPoints,
+        "reportRangeStartDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeStartDate),
+        "reportRangeEndDate" -> AllSmallGroupsReportCommand.DateFormat.print(result.reportRangeEndDate)
       )))
     }
   }
@@ -127,7 +130,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
     processorResult.attendance.keys.foreach(item => doc.addLine(item))
     doc.write(writer)
 
-    new CSVView(s"$filePrefix-${department.code}.csv", writer.toString)
+    new CSVView(s"$filePrefix-${department.code}-${processorResult.reportRangeStartDate}-${processorResult.reportRangeEndDate}.csv", writer.toString)
   }
 
   @RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
@@ -141,7 +144,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
     val workbook = new AttendanceReportExporter(processorResult, department).toXLSX
 
-    new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
+    new ExcelView(s"$filePrefix-${department.code}-${processorResult.reportRangeStartDate}-${processorResult.reportRangeEndDate}.xlsx", workbook)
   }
 
   @RequestMapping(method = Array(POST), value = Array("/download.xml"))
@@ -173,11 +176,17 @@ class AttendanceReportRequest extends Serializable {
 
   var points: JList[JMap[String, String]] = JArrayList()
 
+  var reportRangeStartDate: String = _
+  var reportRangeEndDate: String = _
+
   def copyTo(state: AttendanceReportProcessorState) {
     state.attendance = attendance
 
     state.students = students
 
     state.points = points
+
+    state.reportRangeStartDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
+    state.reportRangeEndDate = AllSmallGroupsReportCommand.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
   }
 }

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -17,6 +18,10 @@ import scala.jdk.CollectionConverters._
 object AllSmallGroupsReportCommand {
   type ResultType = AllSmallGroupsReportCommandResult
   type CommandType = Appliable[AllSmallGroupsReportCommandResult] with ReportCommandRequestValidation
+
+  final val ReportDatePattern = "dd/MM/yyyy"
+  val DateFormat: DateTimeFormatter = DateTimeFormat.forPattern(ReportDatePattern)
+  final val ReportDate: DateTimeFormatter = DateTimeFormat.forPattern(ReportDatePattern)
 
   def apply(
     department: Department,
@@ -46,7 +51,9 @@ case class AllSmallGroupsReportCommandResult(
   attendance: Map[User, Map[SmallGroupEventWeek, AttendanceState]],
   relevantEvents: Map[User, Set[SmallGroupEventWeek]],
   studentDatas: Seq[AttendanceMonitoringStudentData],
-  eventWeeks: Seq[SmallGroupEventWeek]
+  eventWeeks: Seq[SmallGroupEventWeek],
+  reportRangeStartDate: LocalDate,
+  reportRangeEndDate: LocalDate
 )
 
 class AllSmallGroupsReportCommandInternal(
@@ -150,9 +157,10 @@ class AllSmallGroupsReportCommandInternal(
         .mapValues(_.keySet)
         .toMap
 
-    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks))
+    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks,
+      startDate, endDate))
   }
 }
 
-trait AllSmallGroupsReportCommandState extends ReportCommandState {
+trait AllSmallGroupsReportCommandState extends ReportCommandState with ReportCommandRequest {
 }
