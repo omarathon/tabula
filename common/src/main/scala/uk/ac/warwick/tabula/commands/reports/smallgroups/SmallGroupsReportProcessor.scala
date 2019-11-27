@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.services._
 import scala.jdk.CollectionConverters._
 
 object SmallGroupsReportProcessor {
-
   def apply(department: Department, academicYear: AcademicYear) =
     new SmallGroupsReportProcessorInternal(department, academicYear)
       with AutowiringProfileServiceComponent
