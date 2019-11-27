@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
-import javax.validation.Valid
 
+import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.reports.ReportsDateFormats
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
@@ -90,7 +91,9 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
           }
         },
         "students" -> allStudents,
-        "modules" -> allModules
+        "modules" -> allModules,
+        "reportRangeStartDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeStartDate),
+        "reportRangeEndDate" -> ReportsDateFormats.ReportDate.print(result.reportRangeEndDate),
       )))
     }
   }
@@ -113,7 +116,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
     processorResult.students.foreach(item => doc.addLine(item))
     doc.write(writer)
 
-    new CSVView(s"$filePrefix-${department.code}.csv", writer.toString)
+    new CSVView(s"$filePrefix-${department.code}-${processorResult.reportRangeStartDate}-${processorResult.reportRangeEndDate}.csv", writer.toString)
   }
 
   @RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
@@ -127,7 +130,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 
     val workbook = new SmallGroupsByModuleReportExporter(processorResult, department).toXLSX
 
-    new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
+    new ExcelView(s"$filePrefix-${department.code}-${processorResult.reportRangeStartDate}-${processorResult.reportRangeEndDate}.xlsx", workbook)
   }
 
   @RequestMapping(method = Array(POST), value = Array("/download.xml"))
@@ -158,9 +161,14 @@ class SmallGroupsByModuleReportRequest extends Serializable {
   var students: JList[JMap[String, String]] = JArrayList()
   var modules: JList[JMap[String, String]] = JArrayList()
 
+  var reportRangeStartDate: String = _
+  var reportRangeEndDate: String = _
+
   def copyTo(state: SmallGroupsByModuleReportProcessorState) {
     state.counts = counts
     state.students = students
     state.modules = modules
+    state.reportRangeStartDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeStartDate).toLocalDate
+    state.reportRangeEndDate = ReportsDateFormats.ReportDate.parseDateTime(reportRangeEndDate).toLocalDate
   }
 }
