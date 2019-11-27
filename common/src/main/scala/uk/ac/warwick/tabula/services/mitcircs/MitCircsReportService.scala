@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.roles.MitigatingCircumstancesOfficerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
 
+import scala.annotation.tailrec
 import scala.collection.immutable.TreeMap
 
 trait MitCircsReportService {
@@ -22,7 +23,14 @@ abstract class AbstractMitCircsReportService extends MitCircsReportService with 
   val noRoute: Route = new Route("none", null) { name = "No route" }
 
   def canSubmitMitCircs(d: Department): Boolean = RequestLevelCache.cachedBy("MitCircsReportService.canSubmitMitCircs", d) {
-    d.enableMitCircs && permissionsService.ensureUserGroupFor(d, MitigatingCircumstancesOfficerRoleDefinition).size > 0
+
+    @tailrec
+    def hasMco(d: Department): Boolean = {
+      if (d.parent == null) !permissionsService.ensureUserGroupFor(d, MitigatingCircumstancesOfficerRoleDefinition).isEmpty
+      else !permissionsService.ensureUserGroupFor(d, MitigatingCircumstancesOfficerRoleDefinition).isEmpty || hasMco(d.parent)
+    }
+
+    d.enableMitCircs && hasMco(d)
   }
 
   def studentsUnableToSubmit: Seq[StudentsUnableToSubmitForDepartment] = benchmark("studentsUnableToSubmitMitcircs"){

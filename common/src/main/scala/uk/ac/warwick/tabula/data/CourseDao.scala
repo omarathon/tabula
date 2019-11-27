@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections.{distinct, projectionList, property}
 import org.hibernate.criterion.Restrictions.disjunction
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Course, CourseYearWeighting, Department}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.data.model.{Course, CourseYearWeighting, Department, StudentCourseYearDetails}
 
 trait CourseDaoComponent {
   val courseDao: CourseDao
@@ -35,6 +36,8 @@ trait CourseDao {
   def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
 
   def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
+
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String]
 }
 
 @Repository
@@ -83,5 +86,18 @@ class CourseDaoImpl extends CourseDao with Daoisms {
       "course",
       courses
     )
+
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String] = {
+    safeInSeqWithProjection[StudentCourseYearDetails, String](
+      () => {
+        session.newCriteria[StudentCourseYearDetails]
+          .createAlias("studentCourseDetails", "scd")
+      },
+      projectionList()
+        .add(distinct(property("blockOccurrence"))),
+      "scd.course",
+      courses
+    ).filterNot(_ == null)
+  }
 
 }
