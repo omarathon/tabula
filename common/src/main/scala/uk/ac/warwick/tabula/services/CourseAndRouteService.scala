@@ -81,6 +81,8 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 
   def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
 
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String]
+
 }
 
 abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
@@ -192,6 +194,8 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 
   def delete(courseYearWeighting: CourseYearWeighting): Unit =
     courseDao.delete(courseYearWeighting)
+
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String] = courseDao.getOccurrencesForCourses(courses)
 
 }
 

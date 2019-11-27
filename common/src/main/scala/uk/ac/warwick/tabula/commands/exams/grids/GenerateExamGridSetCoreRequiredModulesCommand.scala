@@ -117,7 +117,7 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
   private lazy val routesForDisplay: Seq[Route] = {
     if (routes.isEmpty) {
-      studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, studyYearByLevelOrBlock, includeTempWithdrawn, resitOnly = false, eagerLoad = true, disableFreshFilter = true)
+      studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, courseOccurrences.asScala.toSeq, routes.asScala.toSeq, studyYearByLevelOrBlock, includeTempWithdrawn, resitOnly = false, eagerLoad = true, disableFreshFilter = true)
         .filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
         .map(scyd => scyd.studentCourseDetails.currentRoute).distinct
     } else {

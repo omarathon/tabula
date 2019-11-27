@@ -164,6 +164,28 @@
                 </#if>
             </tr>
             <tr>
+                <#if !selectCourseCommand.courseOccurrences?has_content>
+                  <th>Course occurrences:</th>
+                  <td>All occurrences</td>
+                <#elseif selectCourseCommand.courseOccurrences?size == 1>
+                  <th>Course occurrence:</th>
+                  <td>${selectCourseCommand.courseOccurrences?first}</td>
+                <#else>
+                  <th>Course occurrences:</th>
+                    <#assign popover>
+                      <ul><#list selectCourseCommand.courseOccurrences?sort as courseOccurrence>
+                          <li>${courseOccurrence}</li>
+                          </#list></ul>
+                    </#assign>
+                  <td>
+                    <a class="use-popover hidden-print" data-trigger="click focus" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courseOccurrences?size} occurrences</a>
+                    <div class="visible-print">
+                        <#noescape>${popover}</#noescape>
+                    </div>
+                  </td>
+                </#if>
+            </tr>
+            <tr>
                 <#if !selectCourseCommand.routes?has_content>
                   <th>Routes:</th>
                   <td>All routes</td>

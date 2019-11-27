@@ -27,6 +27,7 @@ object ExamGridStudentCheckCommand {
 case class StudentCheckInfo(
   hasEnrolmentForYear: Boolean,
   courseMatches: Boolean,
+  courseOccurrencesMatches: Boolean,
   isTemporarilyWithdrawn: Boolean,
   routeMatches: Boolean,
   isResitStudent: Boolean,
@@ -46,6 +47,7 @@ class ExamGridStudentCheckCommandInternal(val department: Department, val academ
     StudentCheckInfo(
       scyds.exists(_.enrolledOrCompleted),
       scyds.exists(scyd => courses.asScala.contains(scyd.studentCourseDetails.course)),
+      scyds.exists(scyd => courseOccurrences.asScala.contains(scyd.blockOccurrence)),
       !scyds.exists(_.enrolmentStatus.code.startsWith("T")),
       scyds.exists(scyd => routes.contains(scyd.studentCourseDetails.currentRoute)),
       assessmentMembershipService.getUpstreamAssessmentGroups(student, academicYear, resitOnly = true).nonEmpty,

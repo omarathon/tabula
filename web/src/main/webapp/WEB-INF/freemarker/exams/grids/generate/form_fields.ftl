@@ -7,6 +7,9 @@
     <#list selectCourseCommand.courses as course>
       <input type="hidden" name="courses" value="${course.code}" />
     </#list>
+    <#list selectCourseCommand.courseOccurrences as courseOccurrence>
+      <input type="hidden" name="courseOccurrences" value="${courseOccurrence}" />
+    </#list>
     <#list selectCourseCommand.routes as route>
       <input type="hidden" name="routes" value="${route.code}" />
     </#list>
