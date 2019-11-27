@@ -48,6 +48,20 @@ evaluated once as their results don't change based on the scope that's passed in
 are the `DatabaseBackedRoleProvider`, which return `GrantedRole`s, and `UserTypeAndDepartmentRoleProvider` which returns
 `StaffRole` if you're a member of staff, for example.
 
+DatabaseBackedRoleProvider
+--------------------------
+
+Explicitly granted individual permissions are stored in the `GrantedPermission` table
+(see `uk.ac.warwick.tabula.data.model.permissions.GrantedPermission`).
+
+Tabula has its own concept of `UserGroup`s with which granted permissions are associated. Group members can either be
+inherited from a base WebGroup (in which case they will update) or defined within Tabula's database (via `UserGroupInclude`/`UserGroupExclude`).
+
+Explicit permissions are normally manually maintained via the DB for e.g. external users used by other web applications. Some of these external users
+require wide-ranging (i.e. `PermissionsTarget.Global` target) permissions to perform their function.
+
+Granted roles work in much the same way as described, but they are most commonly assigned via the Tabula UI.
+
 Permissions helper
 ------------------
 
