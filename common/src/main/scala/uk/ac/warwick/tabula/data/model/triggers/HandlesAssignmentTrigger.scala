@@ -43,6 +43,10 @@ trait HandlesAssignmentTrigger extends Logging {
       }
     }
 
+    handleTurnitinSubmission()
+  }
+
+  def handleTurnitinSubmission(): Unit = {
     if (assignment.automaticallySubmitToTurnitin && features.turnitinSubmissions) {
       // TAB-4718
       val freshAssignment = assessmentService.getAssignmentById(assignment.id).get
@@ -53,5 +57,4 @@ trait HandlesAssignmentTrigger extends Logging {
       }
     }
   }
-
 }
