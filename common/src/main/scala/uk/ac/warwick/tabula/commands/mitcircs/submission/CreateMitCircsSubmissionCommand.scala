@@ -253,7 +253,7 @@ trait MitCircsSubmissionState {
     .flatMap(c => Option(c.department))
     .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
     .getOrElse(
-      throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
+      throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have mit circs enabled")
     )
 }
 
