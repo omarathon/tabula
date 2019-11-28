@@ -277,12 +277,13 @@ trait ImportModules {
             case _ => false
           }
 
-          // HFC-354 Update module name if it changes.
-          if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType) {
-            logger.info("Updating module info for %s, Name- %s, Shortname- %s, Degreetype- %s".format(mod.code, mod.name, mod.shortName, mod.degreeType))
+          // HFC-354 Update module details if they have changed.
+          if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType || dept.code != module.sitsDepartmentCode) {
+            logger.info("Updating module info for %s, Name - %s, Shortname - %s, Degreetype - %s, SITS department - %s".format(mod.code, mod.name, mod.shortName, mod.degreeType, dept.code))
             module.name = mod.name
             module.shortName = mod.shortName
             module.degreeType = mod.degreeType
+            module.sitsDepartmentCode = dept.code
             module.missingFromImportSince = null
             moduleAndDepartmentService.saveOrUpdate(module)
             ImportResult(changed = 1)
