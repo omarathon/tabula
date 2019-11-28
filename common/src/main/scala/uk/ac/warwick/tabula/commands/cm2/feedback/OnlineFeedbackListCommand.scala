@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Submission}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class EnhancedFeedback(
   student: User,
@@ -48,7 +48,7 @@ class OnlineFeedbackListCommandInternal(val assignment: Assignment) extends Comm
 trait OnlineFeedbackListPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: OnlineFeedbackListState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }

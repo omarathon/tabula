@@ -80,21 +80,21 @@ class ComposableOrderingTest extends TestBase with Mockito {
 
     val lastNameOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.lastName)
     val mockLastNameOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
-    mockLastNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+    mockLastNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any: Any =>
       val students = toStudentMembers(any)
       lastNameOrdering.compare(students(0), students(1))
     }
 
     val firstNameOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.firstName)
     val mockFirstNameOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
-    mockFirstNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+    mockFirstNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any: Any =>
       val students = toStudentMembers(any)
       firstNameOrdering.compare(students(0), students(1))
     }
 
     val universityIdOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.universityId)
     val mockUniversityIdOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
-    mockUniversityIdOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+    mockUniversityIdOrdering.compare(any[StudentMember], any[StudentMember]) answers { any: Any =>
       val students = toStudentMembers(any)
       universityIdOrdering.compare(students(0), students(1))
     }

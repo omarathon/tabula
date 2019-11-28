@@ -21,7 +21,7 @@ class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsT
 
   var overrideType: OverrideType = _
 
-  def permissionsParents: Stream[CustomRoleDefinition] = Option(customRoleDefinition).toStream
+  def permissionsParents: LazyList[CustomRoleDefinition] = Option(customRoleDefinition).to(LazyList)
 
 }
 

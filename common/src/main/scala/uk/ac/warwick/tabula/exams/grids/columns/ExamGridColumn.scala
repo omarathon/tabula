@@ -60,6 +60,7 @@ object ExamGridColumnOption {
     val Decimal = 1200
     val ShortString = 1700
     val LongString = 4000
+    val VeryLongString = 8000
   }
 
 }

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object OldReleaseForMarkingCommand {
@@ -38,20 +38,20 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
   self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
 
   // we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
-  def studentsWithKnownMarkers: Seq[String] = students.asScala.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
+  def studentsWithKnownMarkers: Seq[String] = students.asScala.toSeq.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
 
   def unreleasableSubmissions: Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
-  def studentsWithoutKnownMarkers: Seq[String] = students.asScala -- studentsWithKnownMarkers
+  def studentsWithoutKnownMarkers: Seq[String] = students.asScala.toSeq diff studentsWithKnownMarkers
 
-  def studentsAlreadyReleased: mutable.Buffer[String] = invalidFeedback.asScala.map(f => f.usercode)
+  def studentsAlreadyReleased: Seq[String] = invalidFeedback.asScala.toSeq.map(f => f.usercode)
 
   override def applyInternal(): List[AssignmentFeedback] = {
 
-    val studentUsers = userLookup.getUsersByUserIds(students.asScala)
+    val studentUsers = userLookup.usersByUserIds(students.asScala.toSeq)
 
     // get the parent feedback or create one if none exist
-    val feedbacks = studentsWithKnownMarkers.toBuffer.map { usercode: String =>
+    val feedbacks = studentsWithKnownMarkers.map { usercode: String =>
       val student = studentUsers(usercode)
       val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == usercode).getOrElse({
         val newFeedback = new AssignmentFeedback
@@ -68,7 +68,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
       parentFeedback
     }
 
-    val feedbackToUpdate: Seq[AssignmentFeedback] = feedbacks -- invalidFeedback.asScala
+    val feedbackToUpdate: Seq[AssignmentFeedback] = feedbacks diff invalidFeedback.asScala
 
     newReleasedFeedback.clear()
     newReleasedFeedback.addAll(feedbackToUpdate.map(f => {
@@ -83,7 +83,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
     feedbackToUpdate.toList
   }
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     invalidFeedback.addAll((for {
       usercode <- students.asScala
       parentFeedback <- assignment.feedbacks.asScala.find(_.usercode == usercode)
@@ -91,7 +91,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
     } yield parentFeedback).asJava)
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
   }
 
@@ -113,7 +113,7 @@ trait ReleaseForMarkingState {
 
 trait ReleaseForMarkingCommandPermissions extends RequiresPermissionsChecking {
   self: ReleaseForMarkingState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
   }
 }
@@ -124,7 +124,7 @@ trait ReleaseForMarkingCommandDescription extends Describable[List[Feedback]] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.assignment(assignment)

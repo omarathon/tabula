@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.CM2MarkingWorkflowDao
 import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, SingleMarker, _}
@@ -24,7 +24,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   val dept = Fixtures.department("in")
   val assignment = Fixtures.assignment("test")
   assignment.feedbackService = smartMock[FeedbackService]
-  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+  assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
   val service = new CM2MarkingWorkflowServiceImpl {
     feedbackService = fs

@@ -108,7 +108,6 @@ abstract class Features {
   @Value("${features.celcatTimetablesWBS:true}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
   @Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
   @Value("${features.notificationListeners.mywarwick:true}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
-  @Value("${features.urkund.submissions:false}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
 
   @Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport: Boolean = defaults.schedulingAcademicInformationImport
   @Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport: Boolean = defaults.schedulingProfilesImport
@@ -134,6 +133,8 @@ abstract class Features {
   @Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration: Boolean = defaults.schedulingMonitoringPointMigration
   @Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets: Boolean = defaults.schedulingGroupsUpdateDepartmentSets
   @Value("${features.scheduling.groups.removeAgedApplicantsJob:true}") var schedulingRemoveAgedApplicantsJob: Boolean = defaults.schedulingRemoveAgedApplicantsJob
+  @Value("${features.scheduling.bulkModuleRegistrationsImport:true}") var schedulingBulkModuleRegistrationsImport: Boolean = defaults.schedulingBulkModuleRegistrationsImport
+  @Value("${features.scheduling.combinedModuleMembershipDataImport:true}") var schedulingCombinedModuleMembershipDataImport: Boolean = defaults.schedulingCombinedModuleMembershipDataImport
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
@@ -207,7 +208,6 @@ class FeaturesMessage {
   @BeanProperty var disabilityOnSubmission = true
   @BeanProperty var newSeenSecondMarkingWorkflows = true
   @BeanProperty var queueFeedbackForSits = true
-  @BeanProperty var urkundSubmissions = false
 
   @BeanProperty var profiles = true
   @BeanProperty var meetingRecordApproval = true
@@ -272,6 +272,8 @@ class FeaturesMessage {
   @BeanProperty var schedulingMonitoringPointMigration = false
   @BeanProperty var schedulingGroupsUpdateDepartmentSets = true
   @BeanProperty var schedulingRemoveAgedApplicantsJob = true
+  @BeanProperty var schedulingBulkModuleRegistrationsImport = true
+  @BeanProperty var schedulingCombinedModuleMembershipDataImport = true
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
@@ -298,7 +300,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     logger.info("Synchronising item " + item + " for " + context)
     item match {
       case copy: FeaturesMessage => features.update(copy)
@@ -306,7 +308,7 @@ class FeatureFlagListener extends QueueListener with InitializingBean with Loggi
     }
   }
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     logger.info("Registering listener for " + classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
     queue.addListener(classOf[FeaturesMessage].getAnnotation(classOf[ItemType]).value, this)
   }

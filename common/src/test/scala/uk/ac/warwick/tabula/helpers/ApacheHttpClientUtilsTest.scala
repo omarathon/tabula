@@ -45,8 +45,8 @@ class ApacheHttpClientUtilsTest extends TestBase with Mockito {
     )
 
     // Handle each request
-    httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
-      val (_, handler) = args.asInstanceOf[Array[_]].toList match {
+    httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args: Array[AnyRef] =>
+      val (_, handler) = args.toList match {
         case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
         case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
       }

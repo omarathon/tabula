@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assessment, Module}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -39,7 +39,7 @@ class OldSmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
     val validStudents = assessmentMembershipService.determineMembershipUsers(assessment)
 
     val setAllocations = sets.map(set => {
-      def getGroupAllocations(markers: Seq[User]) = set.groups.asScala.map(group => {
+      def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = set.groups.asScala.toSeq.map(group => {
         val validMarkers = group.events
           .flatMap(_.tutors.users)
           .filter(markers.contains)
@@ -71,7 +71,7 @@ trait OldSmallGroupsMarkerAllocationCommandState {
 
 trait OldSmallGroupsMarkerAllocationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: OldSmallGroupsMarkerAllocationCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assessment))
   }
 }

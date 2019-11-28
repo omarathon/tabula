@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ApproveMeetingRecordCommand {
   def apply(meeting: MeetingRecord, user: CurrentUser) =
@@ -74,7 +74,7 @@ class ApproveMeetingRecordCommand(val meeting: MeetingRecord, val user: CurrentU
 trait ApproveMeetingRecordValidation extends SelfValidating {
   self: ApproveMeetingRecordState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (meeting.deleted) {
       errors.reject("meetingRecordApproval.meetingRecord.deleted")
     }
@@ -92,7 +92,7 @@ trait ApproveMeetingRecordValidation extends SelfValidating {
 trait ApproveMeetingRecordPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ApproveMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(meeting.approvals.asScala.map(approval =>
       CheckablePermission(Permissions.Profiles.MeetingRecord.Approve, approval)
     ))
@@ -103,7 +103,7 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
 
   self: ApproveMeetingRecordState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.meeting(meeting)
      .property("approved" -> approved)
 
@@ -152,10 +152,10 @@ trait ApproveMeetingRecordState {
   var rejectionComments: String = _
 
   lazy val approvals: Seq[MeetingRecordApproval] =
-    meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
+    meeting.approvals.asScala.toSeq.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
 
   lazy val notRequiredApprovals: Seq[MeetingRecordApproval] = meeting.approvalType match {
     case AllApprovals => Nil
-    case OneApproval => meeting.approvals.asScala -- approvals
+    case OneApproval => meeting.approvals.asScala.toSeq diff approvals
   }
 }

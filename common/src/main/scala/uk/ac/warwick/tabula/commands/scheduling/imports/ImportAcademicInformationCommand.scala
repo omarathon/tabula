@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.system.permissions._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 
 object ImportAcademicInformationCommand {
@@ -277,12 +277,13 @@ trait ImportModules {
             case _ => false
           }
 
-          // HFC-354 Update module name if it changes.
-          if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType) {
-            logger.info("Updating module info for %s, Name- %s, Shortname- %s, Degreetype- %s".format(mod.code, mod.name, mod.shortName, mod.degreeType))
+          // HFC-354 Update module details if they have changed.
+          if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType || dept.code != module.sitsDepartmentCode) {
+            logger.info("Updating module info for %s, Name - %s, Shortname - %s, Degreetype - %s, SITS department - %s".format(mod.code, mod.name, mod.shortName, mod.degreeType, dept.code))
             module.name = mod.name
             module.shortName = mod.shortName
             module.degreeType = mod.degreeType
+            module.sitsDepartmentCode = dept.code
             module.missingFromImportSince = null
             moduleAndDepartmentService.saveOrUpdate(module)
             ImportResult(changed = 1)
@@ -388,7 +389,13 @@ trait ImportRoutes {
             route.active = rot.active
           }
 
-          if (nameChanged || activeChanged) {
+          val sitsDepartmentChanged = dept.code != route.sitsDepartmentCode
+          if (sitsDepartmentChanged) {
+            logger.info("Updating SITS department of %s to %s".format(rot.code, dept.code))
+            route.sitsDepartmentCode = dept.code
+          }
+
+          if (nameChanged || activeChanged || sitsDepartmentChanged) {
             courseAndRouteService.save(route)
             ImportResult(changed = 1)
           } else {
@@ -524,7 +531,7 @@ trait ImportLevels {
 }
 
 trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 }
@@ -532,7 +539,7 @@ trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
 trait ImportAcademicInformationDescription extends Describable[ImportAcademicInformationResults] {
   override lazy val eventName = "ImportAcademicInformation"
 
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: ImportAcademicInformationResults) {
     def importProperties(d: Description, name: String, result: ImportResult): Description = {

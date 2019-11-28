@@ -22,7 +22,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 object MarkingSummaryCommand {
@@ -370,7 +370,7 @@ trait MarkerWorkflowCache {
     }
 
     override def create(ids: JList[AssignmentId]): JMap[AssignmentId, Json] =
-      JMap(ids.asScala.map(id => (id, create(id))): _*)
+      JMap(ids.asScala.toSeq.map(id => (id, create(id))): _*)
 
     override def isSupportsMultiLookups: Boolean = true
 
@@ -378,12 +378,12 @@ trait MarkerWorkflowCache {
   }
 
   private def toJson(markerInformation: Map[Usercode, WorkflowProgressInformation]): Json =
-    JsonHelper.toJson(markerInformation.mapValues { progressInfo =>
+    JsonHelper.toJson(markerInformation.view.mapValues { progressInfo =>
       Map(
         "stages" -> progressInfo.stages,
         "nextStage" -> progressInfo.nextStage.map(_.toString)
       )
-    })
+    }.toMap)
 
   lazy val markerWorkflowCache: Cache[AssignmentId, Json] =
     Caches.builder(CacheName, markerWorkflowCacheEntryFactory, cacheStrategy)
@@ -418,7 +418,7 @@ trait CachedMarkerWorkflowInformation extends MarkerWorkflowInformation with Mar
   import MarkerWorkflowInformation._
 
   private def fromJson(json: Json): Map[Usercode, WorkflowProgressInformation] =
-    JsonHelper.toMap[Map[String, Any]](json).mapValues { progressInfo =>
+    JsonHelper.toMap[Map[String, Any]](json).view.mapValues { progressInfo =>
       WorkflowProgressInformation(
         stages = progressInfo("stages").asInstanceOf[Map[StageName, Map[String, Any]]].map { case (stageName, progress) =>
           stageName -> StageProgress(
@@ -437,7 +437,7 @@ trait CachedMarkerWorkflowInformation extends MarkerWorkflowInformation with Mar
           case _ => None
         }
       )
-    }
+    }.toMap
 
   def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation] =
     fromJson(markerWorkflowCache.get(assignment.id))

@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+
+import javax.activation.DataSource
 import javax.persistence._
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -18,7 +21,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object Notification {
 
@@ -114,7 +117,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   @transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
   @transient final val dateTimeFormatter = DateFormats.NotificationDateTime
 
-  def permissionsParents: Stream[Nothing] = Stream.empty
+  def permissionsParents: LazyList[Nothing] = LazyList.empty
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -124,7 +127,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   @BatchSize(size = 1)
   var items: JList[EntityReference[A]] = JArrayList()
 
-  def entities: Seq[A] = items.asScala.map(_.entity)
+  def entities: Seq[A] = items.asScala.toSeq.map(_.entity)
 
   var created: DateTime = _
 
@@ -348,7 +351,7 @@ trait SingleRecipientNotification {
 }
 
 trait HasNotificationAttachment {
-  def generateAttachments(helper: MimeMessageHelper): Unit
+  def generateAttachments(message: MimeMessageHelper): Unit
 }
 
 trait NotificationSettings extends NestedSettings {

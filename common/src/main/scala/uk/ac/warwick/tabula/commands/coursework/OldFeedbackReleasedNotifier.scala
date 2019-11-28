@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Notification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.UserLookupComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait OldFeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
@@ -17,7 +17,7 @@ trait OldFeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
   def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
     // emit notifications to each second marker that has new feedback
-    val markerMap: Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(mf => {
+    val markerMap: Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.toSeq.groupBy(mf => {
       val marker = mf.getMarkerUsercode
       marker.getOrElse("unassigned")
     })

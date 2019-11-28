@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable
 
@@ -80,7 +80,7 @@ object ViewSmallGroupAttendanceCommand {
     }
   }
 
-  def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]): mutable.Buffer[((SmallGroupEvent, Week), Option[SmallGroupEventOccurrence])] =
+  def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]): Seq[((SmallGroupEvent, Week), Option[SmallGroupEventOccurrence])] =
     group.events.filter {
       !_.isUnscheduled
     }.flatMap { event =>
@@ -147,7 +147,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     // Build the list of all users who are in the group, or have attended one or more occurrences of the group
     val allStudents = benchmarkTask("Get a list of all registered or attended users") {
       (group.students.users ++
-        userLookup.getUsersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
+        userLookup.usersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
         .toSeq
     }
 
@@ -160,7 +160,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     val existingAttendanceNotes = benchmarkTask("Get attendance notes") {
       smallGroupService.findAttendanceNotes(allStudents.map(_.getWarwickId), occurrences).groupBy(_.student).map {
         case (student, notes) =>
-          MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
+          MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).view.mapValues(_.head).toMap
       }.withDefaultValue(Map())
     }
     val attendanceNotes = allStudents.map { student => student -> existingAttendanceNotes.getOrElse(student, Map()) }.toMap
@@ -185,7 +185,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 trait ViewSmallGroupAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewSmallGroupAttendanceState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, group)
   }
 }

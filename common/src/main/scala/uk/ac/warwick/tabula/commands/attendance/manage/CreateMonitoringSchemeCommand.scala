@@ -45,7 +45,7 @@ trait CreateMonitoringSchemeValidation extends SelfValidating {
 
   self: CreateMonitoringSchemeCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (pointStyle == null) {
       errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.null")
     }
@@ -57,7 +57,7 @@ trait CreateMonitoringSchemePermissions extends RequiresPermissionsChecking with
 
   self: CreateMonitoringSchemeCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(department))
   }
 

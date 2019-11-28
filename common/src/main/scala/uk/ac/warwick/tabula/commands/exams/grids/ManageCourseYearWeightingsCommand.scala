@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, CourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ManageCourseYearWeightingsCommand {
 
@@ -85,7 +85,7 @@ trait ManageCourseYearWeightingsValidation extends SelfValidating {
 
   self: ManageCourseYearWeightingsCommandRequest with ManageCourseYearWeightingsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     yearWeightings.asScala.foreach { case (course, yearOfStudyMap) =>
       if (!allCourses.contains(course)) {
         errors.reject("examGrids.yearWeighting.course.invalid", Array(course.code.toUpperCase), "")
@@ -106,7 +106,7 @@ trait ManageCourseYearWeightingsPermissions extends RequiresPermissionsChecking 
 
   self: ManageCourseYearWeightingsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(ManageCourseYearWeightingsCommand.RequiredPermission, department)
   }
 
@@ -118,7 +118,7 @@ trait ManageCourseYearWeightingsDescription extends Describable[ManageCourseYear
 
   override lazy val eventName = "ManageCourseYearWeightings"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 
@@ -159,8 +159,9 @@ trait ManageCourseYearWeightingsCommandState {
   }
 
   lazy val originalWeightings: Map[Course, Map[YearOfStudy, CourseYearWeighting]] = {
-    getWeightings(startAcademicYear).mapValues(_.filter { case (_, weightingOption) => weightingOption.isDefined }.mapValues(_.get))
+    getWeightings(startAcademicYear).view.mapValues(_.filter { case (_, weightingOption) => weightingOption.isDefined }.view.mapValues(_.get).toMap)
       .filter { case (_, yearMap) => yearMap.nonEmpty }
+      .toMap
   }
 }
 

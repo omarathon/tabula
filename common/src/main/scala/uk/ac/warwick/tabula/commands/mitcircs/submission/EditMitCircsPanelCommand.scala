@@ -1,18 +1,22 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import uk.ac.warwick.tabula.commands.mitcircs.submission.EditMitCircsPanelCommand._
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.submission.EditMitCircsPanelCommand._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
-import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation, NamedLocation}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsAddedToPanelNotification, MitCircsPanelUpdatedNotification, MitCircsRemovedFromPanelNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.classTag
 
 object EditMitCircsPanelCommand {
@@ -20,20 +24,21 @@ object EditMitCircsPanelCommand {
   type Command = Appliable[Result] with EditMitCircsPanelState with EditMitCircsPanelRequest with SelfValidating with PopulateOnForm
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Modify
 
-  def apply(panel: MitigatingCircumstancesPanel): Command =
-    new EditMitCircsPanelCommandInternal(panel)
+  def apply(panel: MitigatingCircumstancesPanel, user: User): Command =
+    new EditMitCircsPanelCommandInternal(panel, user)
       with ComposableCommand[Result]
       with EditMitCircsPanelRequest
       with ModifyMitCircsPanelValidation
       with EditMitCircsPanelPermissions
       with EditMitCircsPanelDescription
       with EditMitCircsPanelPopulate
+      with EditMitCircsPanelNotifications
       with AutowiringMitCircsPanelServiceComponent
       with AutowiringUserLookupComponent
       with AutowiringPermissionsServiceComponent
 }
 
-abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstancesPanel)
+abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstancesPanel, val user: User)
   extends CommandInternal[Result] with EditMitCircsPanelState {
   self: EditMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent with PermissionsServiceComponent =>
 
@@ -97,11 +102,21 @@ trait EditMitCircsPanelPopulate extends PopulateOnForm {
 }
 
 trait EditMitCircsPanelState {
-  def panel: MitigatingCircumstancesPanel
+  val user: User
+  val panel: MitigatingCircumstancesPanel
 }
 
 trait EditMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
   self: EditMitCircsPanelState =>
+
+  val originalName: String = panel.name
+
+  val originalDate: DateTime = panel.date
+  val originalEndDate: DateTime = panel.endDate
+  val originalLocation: Location = panel.location
+
+  val originalSubmissions: Set[MitigatingCircumstancesSubmission] = panel.submissions
+  val originalViewers: Set[User] = panel.viewers
 
   name = panel.name
 
@@ -129,8 +144,37 @@ trait EditMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
 
   Option(panel.chair).foreach(u => chair = u.getUserId)
   Option(panel.secretary).foreach(u => secretary = u.getUserId)
-  Option(panel.chair).foreach(u => chair = u.getUserId)
 
   members.clear()
   members.addAll(panel.members.map(_.getUserId).asJavaCollection)
+}
+
+trait EditMitCircsPanelNotifications extends Notifies[MitigatingCircumstancesPanel, MitigatingCircumstancesPanel] {
+
+  self: EditMitCircsPanelRequest with EditMitCircsPanelState =>
+
+  def emit(panel: MitigatingCircumstancesPanel): Seq[Notification[MitigatingCircumstancesPanel, Unit]] = {
+
+    val nameChanged = panel.name != originalName
+    val dateChanged = panel.date != originalDate || panel.endDate != originalEndDate
+    val locationChanged = panel.location != originalLocation
+    val submissionsAdded = panel.submissions.size > originalSubmissions.size
+    val submissionsRemoved = panel.submissions.size < originalSubmissions.size
+
+    val updateNotification = if(nameChanged || dateChanged || locationChanged || submissionsAdded || submissionsRemoved) {
+      Seq(Notification.init(new MitCircsPanelUpdatedNotification, user, panel).tap(n => {
+        n.existingViewers = (panel.viewers & originalViewers).toSeq
+        n.nameChangedSetting.value = nameChanged
+        n.dateChangedSetting.value = dateChanged
+        n.locationChangedSetting.value = locationChanged
+        n.submissionsAddedSetting.value = submissionsAdded
+        n.submissionsRemovedSetting.value = submissionsRemoved
+      }))
+    } else Nil
+
+    Seq(
+      Notification.init(new MitCircsAddedToPanelNotification, user, panel).tap(_.modifiedUsers = (panel.viewers -- originalViewers).toSeq),
+      Notification.init(new MitCircsRemovedFromPanelNotification, user, panel).tap(_.modifiedUsers = (originalViewers -- panel.viewers).toSeq),
+    ) ++ updateNotification
+  }
 }

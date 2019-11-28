@@ -25,6 +25,7 @@
   <!-- fire up annotation driven everything -->
   <context:annotation-config/>
   <context:component-scan base-package="uk.ac.warwick.tabula.web.controllers.common"/>
+  <context:component-scan base-package="uk.ac.warwick.util.service.spring"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.services"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.data"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.jobs"/>
@@ -171,6 +172,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.SpecificCourseTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
@@ -628,6 +630,9 @@
   <bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener"/>
   <bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService"/>
 
+  <!-- Custom implementation of FlashMapManager -->
+  <bean id="flashMapManager" class="uk.ac.warwick.tabula.system.CookieFlashMapManager" />
+
   <!-- Expose local properties as system properties -->
   <bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -675,17 +680,23 @@
       <constructor-arg>
         <bean class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
               p:ssosUrl="${ssoclient.ssos.url}"
-              p:groupServiceLocation="${ssoclient.webgroups.url}"/>
+              p:groupServiceLocation="${ssoclient.webgroups.url}"
+              p:httpConnectionTimeout="${ssoclient.net.connection-timeout.millis}"
+              p:httpDataTimeout="${ssoclient.net.data-timeout.millis}"/>
       </constructor-arg>
     </bean>
   </beans>
 
   <beans profile="dev,production">
-    <bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
-          p:ssosUrl="${ssoclient.ssos.url}"
-          p:groupServiceLocation="${ssoclient.webgroups.url}"
-          p:httpConnectionTimeout="${ssoclient.net.connection-timeout.millis}"
-          p:httpDataTimeout="${ssoclient.net.data-timeout.millis}"/>
+    <bean id="userLookupDelegate" class="uk.ac.warwick.tabula.services.DatabaseAwareUserLookupService" autowire-candidate="false">
+      <constructor-arg>
+        <bean class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
+              p:ssosUrl="${ssoclient.ssos.url}"
+              p:groupServiceLocation="${ssoclient.webgroups.url}"
+              p:httpConnectionTimeout="${ssoclient.net.connection-timeout.millis}"
+              p:httpDataTimeout="${ssoclient.net.data-timeout.millis}"/>
+      </constructor-arg>
+    </bean>
   </beans>
 
   <beans profile="dev,sandbox,production">

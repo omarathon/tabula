@@ -1,19 +1,14 @@
 package uk.ac.warwick.tabula.events
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.InitializingBean
-import uk.ac.warwick.tabula.services.AuditEventService
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import org.springframework.beans.factory.annotation.Value
-import java.io.File
-import java.io.FilenameFilter
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Closeables._
-import java.io.ObjectInputStream
-import java.io.FileInputStream
+import java.io._
 import java.util.UUID
-import java.io.ObjectOutputStream
-import java.io.FileOutputStream
+
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.{Autowired, Value}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.{AuditEventService, MaintenanceModeService}
+
+import scala.util.Using
 
 class DatabaseEventListener extends EventListener with InitializingBean with Logging {
 
@@ -25,7 +20,7 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
   def save(event: Event, stage: String) {
     if (maintenanceModeService.enabled) {
       val file = new File(auditDirectory, UUID.randomUUID() + "logentry")
-      closeThis(new ObjectOutputStream(new FileOutputStream(file))) { stream =>
+      Using.resource(new ObjectOutputStream(new FileOutputStream(file))) { stream =>
         stream.writeObject(EventAndStage(event, stage))
       }
     } else {
@@ -47,7 +42,7 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
     // persist files back to database
     logger.info("Writing file based events to database...")
     for (file <- auditDirectory.listFiles(withSuffix("logentry"))) {
-      closeThis(new ObjectInputStream(new FileInputStream(file))) { stream =>
+      Using.resource(new ObjectInputStream(new FileInputStream(file))) { stream =>
         stream.readObject match {
           case event: EventAndStage => auditEventService.save(event.event, event.stage)
         }

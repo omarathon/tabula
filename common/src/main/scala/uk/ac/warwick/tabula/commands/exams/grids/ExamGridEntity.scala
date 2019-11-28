@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 
 case class ExamGridEntity(
   firstName: String,
@@ -10,9 +11,10 @@ case class ExamGridEntity(
   universityId: String,
   lastImportDate: Option[DateTime],
   years: Map[YearOfStudy, Option[ExamGridEntityYear]], // Int = year of study
-  yearWeightings: Seq[CourseYearWeighting]
+  yearWeightings: Seq[CourseYearWeighting],
+  mitigatingCircumstances: Seq[MitigatingCircumstancesSubmission] = Nil
 ) {
-  def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
+  def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.view.mapValues(_.get).toMap
 }
 
 case class ExamGridEntityYear(

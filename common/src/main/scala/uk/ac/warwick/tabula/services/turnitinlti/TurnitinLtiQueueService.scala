@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object TurnitinLtiQueueService {
 
@@ -88,7 +87,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
   }
 
   def createEmptyOriginalityReports(assignment: Assignment): Seq[OriginalityReport] = {
-    val reports = assignment.submissions.asScala.flatMap(_.allAttachments).filter(attachment =>
+    val reports = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(attachment =>
       attachment.originalityReport == null &&
         TurnitinLtiService.validFileType(attachment) &&
         TurnitinLtiService.validFileSize(attachment)
@@ -102,16 +101,6 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
       originalityReportService.saveOrUpdate(report)
       report
     })
-
-    if (features.urkundSubmissions) {
-      reports.filter(report =>
-        UrkundService.validFileType(report.attachment)
-          && UrkundService.validFileSize(report.attachment)
-      ).foreach(report => {
-        report.nextSubmitAttempt = DateTime.now
-        originalityReportService.saveOrUpdate(report)
-      })
-    }
 
     reports
   }

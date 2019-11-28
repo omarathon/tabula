@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -26,6 +26,6 @@ class DownloadAllSubmissionsCommand(
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .submissions(assignment.submissions.asScala)
+     .submissions(assignment.submissions.asScala.toSeq)
 
 }

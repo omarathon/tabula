@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.xml.NodeSeq
 
 case class DepartmentWithManualUsers(department: String, assignments: Int, smallGroupSets: Int)
@@ -38,8 +38,7 @@ class Department extends GeneratedId
   with PermissionsTarget
   with Serializable
   with ToEntityReference
-  with Logging
-  with FormattedHtml {
+  with Logging {
 
   import Department._
 
@@ -299,7 +298,7 @@ class Department extends GeneratedId
   def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
 
   def mitCircsGuidance: String = getStringSetting(Settings.MitCircsGuidance).orNull
-  def formattedMitCircsGuidance: TemplateHTMLOutputModel = formattedHtml(mitCircsGuidance.maybeText)
+  def formattedMitCircsGuidance: TemplateHTMLOutputModel = FormattedHtml(mitCircsGuidance.maybeText)
   def mitCircsGuidance_=(guidelines: String): Unit = settings += (Settings.MitCircsGuidance -> guidelines)
 
   def nameToShow: ExamGridStudentIdentificationColumnValue =
@@ -393,11 +392,11 @@ class Department extends GeneratedId
     case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
   }
 
-  def subDepartmentsContaining(member: Member): Stream[Department] = {
+  def subDepartmentsContaining(member: Member): LazyList[Department] = {
     if (!includesMember(member, Option(this))) {
-      Stream.empty // no point looking further down the tree if this level doesn't contain the required member
+      LazyList.empty // no point looking further down the tree if this level doesn't contain the required member
     } else {
-      this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
+      this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).to(LazyList)
     }
   }
 
@@ -422,7 +421,7 @@ class Department extends GeneratedId
     }
   }
 
-  def permissionsParents: Stream[Department] = Option(parent).toStream
+  def permissionsParents: LazyList[Department] = Option(parent).to(LazyList)
 
   override def humanReadableId: String = name
 
@@ -452,13 +451,13 @@ object Department {
     // Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
     implicit val factory: String => FilterRule = { name: String => withName(name) }
 
-    val allFilterRules: Seq[FilterRule] = {
+    val subDepartmentFilterRules: Seq[FilterRule] = {
       val inYearRules = (1 until 9).map(InYearFilterRule)
-      Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
+      Seq(UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
     }
 
     def withName(name: String): FilterRule = {
-      allFilterRules.find(_.name == name).get
+      (AllMembersFilterRule +: subDepartmentFilterRules).find(_.name == name).get
     }
   }
 

@@ -336,6 +336,7 @@
 
 <#macro submissionSummary submission consise=false>
   <@detail label="Issue type" condensed=true bigLabel=consise><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@detail>
+  <@detail label="Submission date" condensed=true bigLabel=consise><#if submission.approvedOn??><@fmt.date date=submission.approvedOn includeTime=false shortMonth=consise /><#else><span class="very-subtle">TBC</span></#if></@detail>
   <@detail label="Start date" condensed=true bigLabel=consise><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false shortMonth=consise /><#else><span class="very-subtle">TBC</span></#if></@detail>
   <@detail label="End date" condensed=true bigLabel=consise>
     <#if submission.endDate??><@fmt.date date=submission.endDate shortMonth=consise includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>

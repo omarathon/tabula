@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, Perm
 import uk.ac.warwick.tabula.permissions.Permissions
 import ListCustomRoleOverridesCommand._
 import uk.ac.warwick.tabula.roles.{Role, RoleBuilder}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ListCustomRoleOverridesCommand {
 
@@ -30,7 +30,7 @@ class ListCustomRoleOverridesCommandInternal(val department: Department, val cus
   override def applyInternal(): CustomRoleOverridesInfo = {
     // Use Some(null) instead of None so we show scoped permissions too
     val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
-    val overrides = customRoleDefinition.overrides.asScala
+    val overrides = customRoleDefinition.overrides.asScala.toSeq
 
     CustomRoleOverridesInfo(role, overrides)
   }
@@ -39,7 +39,7 @@ class ListCustomRoleOverridesCommandInternal(val department: Department, val cus
 trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ListCustomRoleOverridesCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
   }

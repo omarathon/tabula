@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Autowi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 object GrantRoleCommand {
@@ -76,11 +76,11 @@ trait GrantRoleCommandValidation extends SelfValidating {
     with SecurityServiceComponent
     with UserLookupComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+      val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes", staffOnlyForADS = true) {
         override def alreadyHasCode: Boolean = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
       }
       usercodeValidator.userLookup = userLookup
@@ -127,7 +127,7 @@ trait RoleCommandRequest {
 trait GrantRoleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RoleCommandState[_ <: PermissionsTarget] =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
   }
 }

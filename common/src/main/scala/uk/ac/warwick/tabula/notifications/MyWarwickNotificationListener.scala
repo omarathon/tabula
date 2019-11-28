@@ -8,19 +8,24 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.NotificationListener
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringSchedulerComponent, SchedulerComponent}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.existentials
 
 trait MyWarwickNotificationListener extends NotificationListener with Logging {
-  self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
+  self: TextRendererComponent
+    with FeaturesComponent
+    with MyWarwickServiceComponent
+    with TopLevelUrlComponent
+    with SchedulerComponent =>
 
   def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
-    val recipients = notification.recipientNotificationInfos.asScala
+    val recipients = notification.recipientNotificationInfos.asScala.toSeq
       .filterNot(_.dismissed) // Not if the user has dismissed the notification already
       .map(_.recipient)
       .filter(_.isFoundUser) // Only users found in SSO
@@ -34,7 +39,7 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
 
       val permissionsTargets = allEntities.filter(_ != null).map(_.entity).collect { case pt: PermissionsTarget => pt }
 
-      def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+      def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
       val tags = permissionsTargets.flatMap(withParents).distinct.map { target =>
         val tag = new Tag()
@@ -83,24 +88,22 @@ trait MyWarwickNotificationListener extends NotificationListener with Logging {
     case _: ObjectNotFoundException => Seq()
   }
 
-  private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
+  private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit =
     notification match {
-      case a: MyWarwickNotification => toMyWarwickActivities(notification).map(n => {
+      case _: MyWarwickNotification => toMyWarwickActivities(notification).foreach(n => {
         logger.info(s"Sending MyWarwick notification - ${n.getTitle} to ${n.getRecipients.getUsers.asScala.mkString(", ")}")
-        myWarwickService.sendAsNotification(n)
+        myWarwickService.queueNotification(n, scheduler)
       })
-      case a => toMyWarwickActivities(notification).map(a => {
+      case _ => toMyWarwickActivities(notification).foreach(a => {
         logger.info(s"Sending MyWarwick activity - ${a.getTitle} to ${a.getRecipients.getUsers.asScala.mkString(", ")}")
-        myWarwickService.sendAsActivity(a)
+        myWarwickService.queueActivity(a, scheduler)
       })
     }
-  }
 
-  override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
+  override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit =
     if (features.myWarwickNotificationListener) {
       postActivity(notification)
     }
-  }
 
 }
 
@@ -110,6 +113,7 @@ class AutowiringMyWarwickNotificationListener extends MyWarwickNotificationListe
   with AutowiringFeaturesComponent
   with AutowiringMyWarwickServiceComponent
   with AutowiringTopLevelUrlComponent
+  with AutowiringSchedulerComponent
 
 trait AutowiringMyWarwickServiceComponent extends MyWarwickServiceComponent {
   var myWarwickService: MyWarwickService = Wire[MyWarwickService]

@@ -20,7 +20,7 @@ object DeleteMemberNoteCommand {
 
       override lazy val eventName = "DeleteMemberNote"
 
-      override def describe(d: Description) {
+      override def describe(d: Description): Unit = {
         d.memberNote(memberNote)
       }
     }
@@ -46,7 +46,7 @@ trait DeleteMemberNoteValidation extends SelfValidating {
 
   self: DeleteMemberNoteCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (abstractMemberNote.deleted) {
       errors.reject("profiles.memberNote.delete.notDeleted")
     }
@@ -58,7 +58,7 @@ trait DeleteMemberNotePermissions extends RequiresPermissionsChecking with Permi
 
   self: DeleteMemberNoteCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(abstractMemberNote, member)
     p.PermissionCheck(Permissions.MemberNotes.Delete, abstractMemberNote)
   }

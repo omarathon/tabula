@@ -37,7 +37,7 @@
           ${submission.state.description}
           <#if submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair" >
             <#if submission.outcomesLastRecordedBy??>
-              by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+              <#if submission.state.entryName != "Approved By Chair">by </#if>${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
             </#if>
             <#if submission.outcomesLastRecordedOn??>
               at <@fmt.date date=submission.outcomesLastRecordedOn />
@@ -244,7 +244,7 @@
       <@components.section "Outcomes">
         <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
           <@components.detail label="Mitigation grade" condensed=true>
-            ${submission.outcomeGrading.description}
+            ${submission.gradingCode} &mdash; ${submission.outcomeGrading.description} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
             <#if submission.outcomeGrading.entryName == "Rejected" && submission.rejectionReasons?has_content>
               &ndash;
               <@components.enumListWithOther submission.rejectionReasons submission.rejectionReasonsOther!"" />
@@ -271,10 +271,8 @@
             <#if submission.affectedAssessments?has_content>
               <@components.detail "Affected assessments">
                 <ul class="list-unstyled">
-                  <#list submission.affectedAssessments as assessment>
-                    <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                      <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
-                    </#if>
+                  <#list submission.assessmentsWithAcuteOutcome as assessment>
+                    <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                   </#list>
                 </ul>
               </@components.detail>

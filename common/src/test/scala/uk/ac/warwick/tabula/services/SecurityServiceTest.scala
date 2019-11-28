@@ -38,13 +38,13 @@ class SecurityServiceTest extends TestBase with Mockito {
     val currentUser = new CurrentUser(user, user)
 
     val roleService = mock[RoleService]
-    roleService.getRolesFor(currentUser, null) returns Stream.empty
-    roleService.getRolesFor(currentUser, department) returns Stream.empty
-    roleService.getExplicitPermissionsFor(currentUser, null) returns Stream(
+    roleService.getRolesFor(currentUser, null) returns LazyList.empty
+    roleService.getRolesFor(currentUser, department) returns LazyList.empty
+    roleService.getExplicitPermissionsFor(currentUser, null) returns LazyList(
       PermissionDefinition(Permissions.UserPicker, None, permissionType = GrantedPermission.Allow),
       PermissionDefinition(Permissions.ImportSystemData, None, permissionType = GrantedPermission.Allow)
     )
-    roleService.getExplicitPermissionsFor(currentUser, department) returns Stream(
+    roleService.getExplicitPermissionsFor(currentUser, department) returns LazyList(
       PermissionDefinition(Permissions.Department.ManageDisplaySettings, Some(department), permissionType = GrantedPermission.Allow)
     )
 
@@ -63,10 +63,10 @@ class SecurityServiceTest extends TestBase with Mockito {
     val currentUser = new CurrentUser(user, user)
 
     val roleService = mock[RoleService]
-    roleService.getRolesFor(currentUser, null) returns Stream(
+    roleService.getRolesFor(currentUser, null) returns LazyList(
       Sysadmin()
     )
-    roleService.getRolesFor(currentUser, department) returns Stream(
+    roleService.getRolesFor(currentUser, department) returns LazyList(
       Sysadmin(),
       DepartmentalAdministrator(department)
     )
@@ -286,12 +286,12 @@ class SecurityServiceTest extends TestBase with Mockito {
      * - manage type2 over the whole department
      */
 
-    val deptPerms = Stream(
+    val deptPerms = LazyList(
       PermissionDefinition(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), Some(department), permissionType = GrantedPermission.Allow),
       PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type2), Some(department), permissionType = GrantedPermission.Allow)
     )
 
-    val student1Perms = Stream(
+    val student1Perms = LazyList(
       PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type1), Some(student1), permissionType = GrantedPermission.Allow)
     ) #::: deptPerms
 
@@ -300,13 +300,13 @@ class SecurityServiceTest extends TestBase with Mockito {
     val scdPerms = student1Perms
 
     val roleService = mock[RoleService]
-    roleService.getRolesFor(currentUser, null) returns Stream.empty
-    roleService.getRolesFor(currentUser, department) returns Stream.empty
-    roleService.getRolesFor(currentUser, studentCourseDetails) returns Stream.empty
-    roleService.getRolesFor(currentUser, student1) returns Stream.empty
-    roleService.getRolesFor(currentUser, student2) returns Stream.empty
+    roleService.getRolesFor(currentUser, null) returns LazyList.empty
+    roleService.getRolesFor(currentUser, department) returns LazyList.empty
+    roleService.getRolesFor(currentUser, studentCourseDetails) returns LazyList.empty
+    roleService.getRolesFor(currentUser, student1) returns LazyList.empty
+    roleService.getRolesFor(currentUser, student2) returns LazyList.empty
 
-    roleService.getExplicitPermissionsFor(currentUser, null) returns Stream.empty
+    roleService.getExplicitPermissionsFor(currentUser, null) returns LazyList.empty
     roleService.getExplicitPermissionsFor(currentUser, studentCourseDetails) returns scdPerms
     roleService.getExplicitPermissionsFor(currentUser, student1) returns student1Perms
     roleService.getExplicitPermissionsFor(currentUser, student2) returns student2Perms
@@ -373,7 +373,7 @@ class SecurityServiceTest extends TestBase with Mockito {
    * name equal to each other in future. Sigh
    */
   @Test def equality() {
-    (Permissions.Module.Create == Permissions.AssignmentFeedback.Manage) should be (false)
+    (Permissions.Module.Create == Permissions.RolesAndPermissions.Create) should be (false)
     (Permissions.Module.Create == Permissions.Module.Create) should be (true)
   }
 
@@ -401,7 +401,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val currentUser = new CurrentUser(user, user)
     val module = new Module("xxx01")
     securityService.roleService = mock[RoleService]
-    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).toStream
+    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).to(LazyList)
     securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (false)
   }
 
@@ -411,7 +411,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val currentUser = new CurrentUser(user, user)
     val module = new Module("xxx01")
     securityService.roleService = mock[RoleService]
-    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestDelegatableRoleDef, Some(module)) {}).toStream
+    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestDelegatableRoleDef, Some(module)) {}).to(LazyList)
     securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (true)
   }
 
@@ -422,7 +422,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val module = new Module("xxx01")
     securityService.roleService = mock[RoleService]
     // use a role without delegation, to prove godliness works.
-    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).toStream
+    securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).to(LazyList)
     securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (true)
   }
 

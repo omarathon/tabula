@@ -9,7 +9,7 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.xml.{Elem, MinimizeMode, Utility}
 
 class XmlErrorView(errors: Errors, filename: Option[String] = None) extends View {

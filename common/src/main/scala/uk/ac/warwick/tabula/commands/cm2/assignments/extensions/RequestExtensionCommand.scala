@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object RequestExtensionCommand {
@@ -89,7 +89,7 @@ class RequestExtensionCommandInternal(val assignment: Assignment, val submitter:
 trait RequestExtensionCommandValidation extends SelfValidating {
   self: RequestExtensionCommandState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!submitter.apparentUser.getUserId.hasText) {
       errors.reject("extension.noValidUserId")
     }
@@ -124,7 +124,7 @@ trait RequestExtensionCommandValidation extends SelfValidating {
 trait RequestExtensionCommandPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RequestExtensionCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Extension.MakeRequest, assignment)
   }
 }

@@ -11,13 +11,13 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUserLookupComponent}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
   self: Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
-  def deadline: DateTime
+  def deadline: Option[DateTime]
 
   def assignment: Assignment
 
@@ -27,11 +27,10 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
   def referenceDate: DateTime = created
 
-  def daysLeft: Int = {
+  def daysLeft: Int = deadline.map(_.withTimeAtStartOfDay()).map { closeDate =>
     val now = referenceDate.withTimeAtStartOfDay()
-    val closeDate = deadline.withTimeAtStartOfDay()
     Days.daysBetween(now, closeDate).getDays
-  }
+  }.getOrElse(0)
 
   override final def onPreSave(newRecord: Boolean): Unit =
     priority = Try {
@@ -64,13 +63,13 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
   def be: String = if (daysLeft >= 0) "is" else "was"
 
-  def deadlineDate: String = be + " " + dateTimeFormatter.print(deadline)
+  def deadlineDate: String = be + " " + deadline.map(dateTimeFormatter.print).getOrElse("[unknown]")
 
   def content = FreemarkerModel("/WEB-INF/freemarker/emails/submission_reminder.ftl", Map(
     "assignment" -> assignment,
     "module" -> module,
     "timeStatement" -> timeStatement,
-    "cantSubmit" -> (!assignment.allowLateSubmissions && DateTime.now.isAfter(deadline)),
+    "cantSubmit" -> (!assignment.allowLateSubmissions && deadline.exists(DateTime.now.isAfter)),
     "deadlineDate" -> deadlineDate
   ))
 
@@ -88,11 +87,11 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
-  def deadline: DateTime = assignment.closeDate
+  def deadline: Option[DateTime] = Option(assignment.closeDate)
 
   def assignment: Assignment = item.entity
 
-  def recipients: Seq[User] = {
+  def recipients: Seq[User] =
     if (!shouldSend)
       Nil
     else {
@@ -104,7 +103,6 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
       // finally filter students that have an approved extension
       withoutSubmission.filterNot(user => extensions.contains(user.getUserId))
     }
-  }
 }
 
 @Entity
@@ -115,25 +113,26 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 
   def extension: Extension = item.entity
 
-  def deadline: DateTime = extension.expiryDate.getOrElse(
-    throw new IllegalArgumentException(s"Can't send an SubmissionDueWithExtensionNotification without a deadline - extension ${extension.id}")
-  )
+  def deadline: Option[DateTime] = extension.expiryDate
 
   def assignment: Assignment = extension.assignment
 
-  def recipients: Seq[User] = {
-    val hasSubmitted = assignment.submissions.asScala.exists(_.usercode == extension.usercode)
-
-    // Get the latest extended deadline if a student has multiple.
-    val isTheLatestApprovedExtension = assignment.approvedExtensions.get(extension.usercode).contains(extension)
-
-    // Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
-    // or if there is an extension with a later extended deadline for this user or if the extension deadline is earlier than the assignment's close date
-    if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || !isTheLatestApprovedExtension || !extension.relevant) {
+  def recipients: Seq[User] =
+    if (!shouldSend)
       Nil
-    } else {
-      Seq(userLookup.getUserByUserId(extension.usercode))
+    else {
+      val hasSubmitted = assignment.submissions.asScala.exists(_.usercode == extension.usercode)
+
+      // Get the latest extended deadline if a student has multiple.
+      val isTheLatestApprovedExtension = assignment.approvedExtensions.get(extension.usercode).contains(extension)
+
+      // Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
+      // or if there is an extension with a later extended deadline for this user or if the extension deadline is earlier than the assignment's close date
+      if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || !isTheLatestApprovedExtension || !extension.relevant) {
+        Nil
+      } else {
+        Seq(userLookup.getUserByUserId(extension.usercode))
+      }
     }
-  }
 
 }

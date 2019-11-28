@@ -6,7 +6,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ExamGridTranscriptExporter extends TaskBenchmarking with AddConfidentialWatermarkToDocument {
 

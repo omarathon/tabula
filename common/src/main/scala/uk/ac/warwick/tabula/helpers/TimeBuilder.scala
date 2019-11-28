@@ -1,16 +1,8 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-
 import org.joda.time.ReadablePartial
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
-
-import freemarker.template.TemplateMethodModelEx
-import freemarker.template.TemplateModel
-import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 object TimeBuilder {
 
@@ -41,14 +33,12 @@ object TimeBuilder {
 
 }
 
-class TimeBuilder extends TemplateMethodModelEx {
+class TimeBuilder extends BaseTemplateMethodModelEx {
 
   import TimeBuilder.format
 
   /** For Freemarker */
-  override def exec(list: JList[_]): String = {
-    val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-
+  override def execMethod(args: Seq[_]): String = {
     val time = args.head match {
       case partial: ReadablePartial => partial
       case _ => throw new IllegalArgumentException("Bad time argument")

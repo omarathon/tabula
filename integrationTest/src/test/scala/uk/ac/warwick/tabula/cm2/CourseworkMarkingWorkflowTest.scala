@@ -4,7 +4,7 @@ import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 

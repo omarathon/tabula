@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.AutowiringMarkingDescriptorServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 
 @Controller

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object UploadFeedbackToSitsCommand {
   def apply(module: Module, assessment: Assessment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -40,7 +40,7 @@ trait UploadFeedbackToSitsPermissions extends RequiresPermissionsChecking with P
 
   self: UploadFeedbackToSitsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(assessment), mandatory(module))
     p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assessment)
   }
@@ -53,7 +53,7 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "UploadFeedbackToSits"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assessment(assessment)
   }
 

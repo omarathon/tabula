@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ConvertScheduledMeetingRecordCommand {
   def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
@@ -41,7 +41,7 @@ class ConvertScheduledMeetingRecordCommand(override val creator: Member, val mee
 
 trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
   self: ConvertScheduledMeetingRecordState =>
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (meetingRecord.missed)
       errors.reject("meetingRecord.confirm.missed")
   }
@@ -50,7 +50,7 @@ trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
 trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ConvertScheduledMeetingRecordState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(
       Permissions.Profiles.ScheduledMeetingRecord.Confirm,
       mandatory(meetingRecord)

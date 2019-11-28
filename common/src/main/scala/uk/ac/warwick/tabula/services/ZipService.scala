@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
-import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
@@ -20,8 +19,9 @@ import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AutowiringTopLevelUrlComponent}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
+import scala.util.Using
 
 @Service
 class ZipService
@@ -142,7 +142,7 @@ class ZipService
     */
   def getAllSubmissionsZip(assignment: Assignment): Future[RenderableFile] =
     getZip(resolvePathForSubmission(assignment),
-      assignment.submissions.asScala.flatMap(getSubmissionZipItems))
+      assignment.submissions.asScala.toSeq.flatMap(getSubmissionZipItems))
 
   /**
     * A zip of feedback templates for each student registered on the assignment
@@ -173,7 +173,7 @@ class ZipService
     createUnnamedZip(getMeetingRecordZipItems(meetingRecord)).map(_.withSuggestedFilename("meeting.zip"))
 
   private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
-    meetingRecord.attachments.asScala.map { attachment =>
+    meetingRecord.attachments.asScala.toSeq.map { attachment =>
       ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
 
@@ -181,7 +181,7 @@ class ZipService
     createUnnamedZip(getMemberNoteZipItems(memberNote)).map(_.withSuggestedFilename("note.zip"))
 
   private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
-    memberNote.attachments.asScala.map { attachment =>
+    memberNote.attachments.asScala.toSeq.map { attachment =>
       ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
 
@@ -211,24 +211,22 @@ object Zips {
     * Provides an iterator for ZipEntry items which will be closed when you're done with them.
     * The object returned from the function is converted to a list to guarantee that it's evaluated before closing.
     */
-  def iterator[A](zip: ZipArchiveInputStream)(fn: Iterator[ZipArchiveEntry] => Iterator[A]): List[A] = ensureClose(zip) {
-    fn(Iterator.continually {
-      zip.getNextZipEntry
-    }.takeWhile {
-      _ != null
-    }).toList
+  def iterator[A](zis: ZipArchiveInputStream)(fn: Iterator[ZipArchiveEntry] => Iterator[A]): List[A] = Using.resource(zis) { zip =>
+    fn {
+      Iterator.continually(zip.getNextZipEntry)
+        .takeWhile(_ != null)
+    }.toList
   }
 
-  def map[A](zip: ZipInputStream)(fn: ZipEntry => A): Seq[A] = ensureClose(zip) {
-    Iterator.continually {
-      zip.getNextEntry
-    }.takeWhile {
-      _ != null
-    }.map { item =>
-      val t = fn(item)
-      zip.closeEntry()
-      t
-    }.toList // use toList to evaluate items now, before we actually close the stream
+  def map[A](zis: ZipInputStream)(fn: ZipEntry => A): Seq[A] = Using.resource(zis) { zip =>
+    Iterator.continually(zip.getNextEntry)
+      .takeWhile(_ != null)
+      .map { item =>
+        val t = fn(item)
+        zip.closeEntry()
+        t
+      }
+      .toList // use toList to evaluate items now, before we actually close the stream
   }
 
 }

@@ -133,7 +133,7 @@ trait OldMarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
 
   override lazy val eventName = "MarkerAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assessment)
   }
 }
@@ -142,7 +142,7 @@ trait OldMarkerAddMarksPermissions extends RequiresPermissionsChecking with Perm
 
   self: OldMarkerAddMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assessment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
     if (submitter.apparentUser != marker) {

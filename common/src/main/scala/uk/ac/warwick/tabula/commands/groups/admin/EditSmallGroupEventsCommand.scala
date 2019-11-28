@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import EditSmallGroupEventsCommand._
 
 object EditSmallGroupEventsCommand {
@@ -60,7 +60,7 @@ trait EditSmallGroupEventsCommandState {
 trait PopulateEditSmallGroupEventsSubCommands {
   self: EditSmallGroupEventsCommandState with SmallGroupServiceComponent =>
 
-  def populate() {
+  def populate(): Unit = {
     groups.clear()
     set.groups.asScala.sorted.foreach { group =>
       groups.put(group, new GroupProperties(module, set, group, smallGroupService))
@@ -97,7 +97,7 @@ trait DeletesSmallGroupEventsWithCommand extends DeletesSmallGroupEvents {
 trait EditSmallGroupEventsValidation extends SelfValidating {
   self: EditSmallGroupEventsCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     groups.asScala.foreach { case (group, props) =>
       errors.pushNestedPath(s"groups[${group.id}]")
 
@@ -119,7 +119,7 @@ trait EditSmallGroupEventsValidation extends SelfValidating {
 trait EditSmallGroupEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditSmallGroupEventsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }

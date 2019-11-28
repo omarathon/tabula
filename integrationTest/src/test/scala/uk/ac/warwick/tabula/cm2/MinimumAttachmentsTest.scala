@@ -64,8 +64,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
     click on submitLink
 
     When("I upload a file for submission")
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource("/file1.txt").getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/file1.txt").getFile)
 
     And("press submit")
     click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
@@ -77,8 +76,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
     }
 
     When("I upload another file")
-    click on find(cssSelector("input[type=file]")).get
-    pressKeys(getClass.getResource("/file2.txt").getFile)
+    find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/file2.txt").getFile)
 
     And("press submit")
     click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)

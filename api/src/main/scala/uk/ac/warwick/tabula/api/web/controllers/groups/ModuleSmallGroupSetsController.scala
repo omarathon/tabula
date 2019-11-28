@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object ModuleSmallGroupSetsController {
@@ -94,7 +94,7 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
       response.setStatus(HttpStatus.CREATED.value())
       response.addHeader("Location", toplevelUrl + Routes.api.groupSet(smallGroupSet))
 
-      val viewSet = new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.sorted), GroupsViewModel.Tutor)
+      val viewSet = new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.toSeq.sorted), GroupsViewModel.Tutor)
       Mav(new JSONView(Map(
         "success" -> true,
         "status" -> "ok",

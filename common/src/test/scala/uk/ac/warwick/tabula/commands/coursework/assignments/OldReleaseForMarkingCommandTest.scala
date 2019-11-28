@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OldReleaseForMarkingCommandTest extends TestBase with Mockito {
 

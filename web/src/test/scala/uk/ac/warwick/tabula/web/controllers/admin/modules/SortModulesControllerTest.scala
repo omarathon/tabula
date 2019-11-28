@@ -29,7 +29,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
     var sortCount = 0
     var applyCount = 0
 
-    def populate() {
+    def populate(): Unit = {
       populateCount += 1
     }
 

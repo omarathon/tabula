@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNo
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
   extends FreemarkerXHTMLPDFGeneratorComponent
@@ -129,7 +129,7 @@ trait DownloadAdminSubmissionsForPrintingPermissions extends RequiresPermissions
 
   self: DownloadSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, assignment)
   }
 
@@ -139,7 +139,7 @@ trait DownloadMarkerSubmissionsForPrintingPermissions extends RequiresPermission
 
   self: DownloadMarkerSubmissionsForPrintingCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -173,8 +173,8 @@ trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmiss
 
   override def submissions: Seq[Submission] = {
     val selectedStudents =
-      if (markerFeedback.isEmpty) students.asScala
-      else markerFeedback.asScala.map(_.student.getUserId)
+      if (markerFeedback.isEmpty) students.asScala.toSeq
+      else markerFeedback.asScala.toSeq.map(_.student.getUserId)
 
     val allMarkerSubmissions =
       if (assignment.cm2Assignment)

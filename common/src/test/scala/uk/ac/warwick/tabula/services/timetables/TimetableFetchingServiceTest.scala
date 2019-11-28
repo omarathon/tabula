@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.http.impl.client.CloseableHttpClient
 import org.joda.time.LocalTime
-import org.mockito.Matchers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.data.model.{MapLocation, Module, SyllabusPlusLocation}
@@ -47,11 +46,11 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
       val httpClient: CloseableHttpClient = mock[CloseableHttpClient]
     }
 
-    service.moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers { codes =>
+    service.moduleAndDepartmentService.getModulesByCodes(any[Seq[String]]) answers { codes: Any =>
       codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
     }
 
-    service.syllabusPlusLocationService.getByUpstreamName(Matchers.any[String]) returns None
+    service.syllabusPlusLocationService.getByUpstreamName(any[String]) returns None
     service.syllabusPlusLocationService.getByUpstreamName("L5") returns Some(SyllabusPlusLocation("L5", "Lecture Theatre 5", "31389"))
     service.syllabusPlusLocationService.getByUpstreamName("MS.02") returns Some(SyllabusPlusLocation("MS.02", "MS.02", "40879"))
 

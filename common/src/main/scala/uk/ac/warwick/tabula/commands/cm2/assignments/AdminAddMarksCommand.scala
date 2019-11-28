@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AdminAddMarksCommand {
   def apply(assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -64,14 +64,14 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
     }
 
     // persist valid marks
-    marks.asScala.filter(_.isValid).flatMap(saveFeedback)
+    marks.asScala.toSeq.filter(_.isValid).flatMap(saveFeedback)
   }
 }
 
 trait AdminAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AdminAddMarksState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
   }
 }
@@ -81,7 +81,7 @@ trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "AdminAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 
@@ -107,5 +107,5 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
 trait AdminAddMarksState extends AddMarksState with FeedbackServiceComponent {
   self: AssessmentMembershipServiceComponent =>
-  def updatedReleasedFeedback: Seq[Feedback] = marks.asScala.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
+  def updatedReleasedFeedback: Seq[Feedback] = marks.asScala.toSeq.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
 }

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object FilterStudentsAttendanceCommand {
@@ -41,14 +41,14 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
     val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.countStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear)
+        restrictions = buildRestrictions(academicYear, additionalRestrictions)
       )
     }
 
     val (offset, students) = benchmarkTask("profileService.findStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.findStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear),
+        restrictions = buildRestrictions(academicYear, additionalRestrictions),
         orders = buildOrders(),
         maxResults = studentsPerPage,
         startResult = studentsPerPage * (page - 1)
@@ -80,7 +80,7 @@ trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking wi
 
   self: FilterStudentsAttendanceCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, department)
   }
 
@@ -98,6 +98,7 @@ trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
   var hasBeenFiltered = false
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
@@ -127,8 +128,8 @@ trait AttendanceFilterExtras extends FiltersStudents {
   // TAB-6907 but only active ones
   override lazy val allRoutes: Seq[Route] = {
     if (department.routes.isEmpty) {
-      department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
-    } else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+      department.rootDepartment.routes.asScala.toSeq.sorted(Route.DegreeTypeOrdering)
+    } else department.routes.asScala.toSeq.sorted(Route.DegreeTypeOrdering)
   }.filter(_.active)
 
   override lazy val allOtherCriteria: Seq[String] = Seq(
@@ -157,8 +158,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
     )) (table)
   }
 
-  override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] =
-    super.buildRestrictions(year) ++ ScalaRestriction.anyOf(Seq(
+  protected def additionalRestrictions: Seq[ScalaRestriction] = ScalaRestriction.anyOf(Seq(
       unrecordedAttendanceRestriction,
       authorisedAttendanceRestriction,
       unauthorisedAttendanceRestriction,

@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
-
-import scala.collection.JavaConverters._
-
 import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, AssessmentService}
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.services.{AssessmentService, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent}
+
+import scala.jdk.CollectionConverters._
 
 
 /**
@@ -37,9 +35,9 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
   @NotEmpty(message = "{NotEmpty.assignmentName}")
   var name: String = _
 
-  var openDate: DateTime = DateTime.now.withTime(0, 0, 0, 0)
+  var openDate: DateTime = DateTime.now.withTime(Assignment.openTime)
 
-  var closeDate: DateTime = openDate.plusWeeks(2).withTime(12, 0, 0, 0)
+  var closeDate: DateTime = openDate.plusWeeks(2).withTime(Assignment.closeTime)
 
   // can be set to false if that's not what you want.
   var prefillFromRecent = true
@@ -63,7 +61,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
   // can be overridden in concrete implementations to provide additional validation
   def contextSpecificValidation(errors: Errors)
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     contextSpecificValidation(errors)
 
     // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
@@ -201,7 +199,7 @@ trait SharedAssignmentCommandNotifications {
     if (!assignment.collectSubmissions || assignment.openEnded) {
       Seq()
     } else {
-      val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
+      val dayOfDeadline = Assignment.onTheDayReminderDateTime(assignment.closeDate)
 
       val submissionNotifications = {
         // skip the week late notification if late submission isn't possible

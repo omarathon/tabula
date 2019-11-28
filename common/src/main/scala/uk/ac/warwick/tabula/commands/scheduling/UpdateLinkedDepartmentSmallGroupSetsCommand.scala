@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object UpdateLinkedDepartmentSmallGroupSetsCommand {
   def apply() =
@@ -66,7 +66,7 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 
 trait UpdateLinkedDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.SmallGroups.UpdateMembership)
   }
 
@@ -76,7 +76,7 @@ trait UpdateLinkedDepartmentSmallGroupSetsDescription extends Describable[Seq[De
 
   override lazy val eventName = "UpdateLinkedDepartmentSmallGroupSets"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
 
   }
 }

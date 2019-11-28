@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object OldAssignMarkersCommand {
@@ -130,7 +130,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
     }
   }
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     validateUploadedFile(result)
 
     if (!result.hasErrors) {
@@ -152,7 +152,7 @@ trait AssignMarkersPermission extends RequiresPermissionsChecking with Permissio
 
   self: AssignMarkersCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.Update, module)
   }
 
@@ -164,7 +164,7 @@ trait OldAssignMarkersDescription extends Describable[Assessment] {
 
   override lazy val eventName = "AssignMarkers"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assessment(assessment)
   }
 

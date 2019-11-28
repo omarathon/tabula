@@ -5,7 +5,7 @@ import org.hibernate.`type`.{BooleanType, IntegerType, LongType, StringType}
 import org.hibernate.transform.DistinctRootEntityResultTransformer
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Nice wrapper for a Query object. You usually won't create
@@ -60,7 +60,7 @@ class ScalaQuery[A](c: org.hibernate.query.Query[A]) {
   }
 
   /** Returns a typed Seq of the results. */
-  def seq: Seq[A] = list.asScala
+  def seq: Seq[A] = list.asScala.toSeq
 
   /** Returns a typed list of the results. */
   def list: JList[A] = c.list()

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AgentPointRecordCommand {
   def apply(
@@ -79,12 +79,12 @@ trait AgentPointRecordValidation extends SelfValidating with GroupedPointRecordV
 
   self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     validateGroupedPoint(
       errors,
       templatePoint,
-      checkpointMap.asScala.mapValues(_.asScala.toMap).toMap,
-      studentPointCheckpointMap.mapValues(_.mapValues(_.state)),
+      checkpointMap.asScala.view.mapValues(_.asScala.toMap).toMap,
+      studentPointCheckpointMap.view.mapValues(_.view.mapValues(_.state).toMap).toMap,
       user
     )
   }
@@ -95,7 +95,7 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 
   self: AgentPointRecordCommandState with RelationshipServiceComponent =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), member)
     p.PermissionCheckAny(
       relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member)
@@ -114,7 +114,7 @@ trait AgentPointRecordDescription extends Describable[(Seq[AttendanceMonitoringC
   override lazy val eventName = "AgentPointRecord"
 
   override def describe(d: Description): Unit =
-    d.attendanceMonitoringCheckpoints(checkpointMap.asScala.toMap.mapValues(_.asScala.toMap), verbose = true)
+    d.attendanceMonitoringCheckpoints(checkpointMap.asScala.toMap.view.mapValues(_.asScala.toMap).toMap, verbose = true)
 }
 
 trait AgentPointRecordCommandState extends GroupsPoints {
@@ -136,7 +136,7 @@ trait AgentPointRecordCommandState extends GroupsPoints {
   lazy val studentPointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = {
     students.map { student =>
       student -> attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
-    }.toMap.mapValues(points => points.filter(p => {
+    }.toMap.view.mapValues(points => points.filter(p => {
       p.name.toLowerCase == templatePoint.name.toLowerCase &&
         templatePoint.scheme.pointStyle == p.scheme.pointStyle && {
         templatePoint.scheme.pointStyle match {
@@ -146,7 +146,7 @@ trait AgentPointRecordCommandState extends GroupsPoints {
             p.startDate == templatePoint.startDate && p.endDate == templatePoint.endDate
         }
       }
-    })).filter(_._2.nonEmpty)
+    })).filter(_._2.nonEmpty).toMap
   }
 
   lazy val studentPointCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] =

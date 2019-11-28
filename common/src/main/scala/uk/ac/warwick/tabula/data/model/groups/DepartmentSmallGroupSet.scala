@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupSer
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object DepartmentSmallGroupSet {
@@ -118,8 +118,8 @@ class DepartmentSmallGroupSet
     unallocatedStudents.size
   }
 
-  def studentsNotInMembership: mutable.Buffer[User] = {
-    val allocatedStudents = groups.asScala.flatMap(_.students.users)
+  def studentsNotInMembership: Seq[User] = {
+    val allocatedStudents = groups.asScala.toSeq.flatMap(_.students.users)
 
     allocatedStudents diff allStudents
   }
@@ -133,7 +133,7 @@ class DepartmentSmallGroupSet
     !_.students.isEmpty
   }
 
-  def permissionsParents: Stream[GeneratedId with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour with ToEntityReference with Logging] = Option(department).toStream ++ linkedSets.asScala.toStream
+  def permissionsParents: LazyList[PermissionsTarget] = Option(department).to(LazyList) #::: linkedSets.asScala.to(LazyList)
 
   def toStringProps = Seq(
     "id" -> id,

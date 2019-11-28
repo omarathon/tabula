@@ -29,7 +29,7 @@ class SendSubmissionReceiptCommand(val assignment: Assignment, val submission: S
     }
   }
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment)
   }
 

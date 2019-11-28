@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class FeedbackTemplateCommand(val department: Department)
   extends Command[Seq[FeedbackTemplate]] with Daoisms with BindListener {
 
   var file: UploadedFile = new UploadedFile
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     transactional() {
       result.pushNestedPath("file")
       file.onBind(result)
@@ -27,7 +27,7 @@ abstract class FeedbackTemplateCommand(val department: Department)
   }
 
   // describe the thing that's happening.
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 
@@ -45,7 +45,7 @@ class BulkFeedbackTemplateCommand(department: Department) extends FeedbackTempla
   override def applyInternal(): Seq[FeedbackTemplate] = {
     transactional() {
       val feedbackTemplates = if (!file.attached.isEmpty) {
-        for (attachment <- file.attached.asScala) yield {
+        for (attachment <- file.attached.asScala.toSeq) yield {
           val feedbackForm = new FeedbackTemplate
           feedbackForm.name = attachment.name
           feedbackForm.department = department

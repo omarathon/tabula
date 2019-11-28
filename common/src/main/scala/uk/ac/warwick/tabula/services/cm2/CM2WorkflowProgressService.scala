@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.IncludeType
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * This isn't code for marking workflows. It drives the progress bar and next action on various coursework pages.

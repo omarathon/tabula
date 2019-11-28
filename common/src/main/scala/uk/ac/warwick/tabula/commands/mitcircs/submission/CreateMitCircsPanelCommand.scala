@@ -1,23 +1,26 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.{LocalDate, LocalTime}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation}
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
-import CreateMitCircsPanelCommand._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsPanelCommand._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsAddedToPanelNotification
+import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation, Notification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.Tap._
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
+import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.classTag
 
 object CreateMitCircsPanelCommand {
@@ -32,6 +35,7 @@ object CreateMitCircsPanelCommand {
     with ModifyMitCircsPanelValidation
     with CreateMitCircsPanelPermissions
     with CreateMitCircsPanelDescription
+    with CreateMitCircsPanelNotifications
     with AutowiringMitCircsPanelServiceComponent
     with AutowiringUserLookupComponent
     with AutowiringPermissionsServiceComponent
@@ -70,16 +74,38 @@ abstract class CreateMitCircsPanelCommandInternal(val department: Department, va
 trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateMitCircsPanelState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, department)
   }
 }
 
 trait ModifyMitCircsPanelValidation extends SelfValidating {
-  self: ModifyMitCircsPanelRequest =>
+  self: ModifyMitCircsPanelRequest
+    with UserLookupComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if(!name.hasText) errors.rejectValue("name", "mitigatingCircumstances.panel.name.required")
+
+    if (chair.hasText) {
+      val usercodeValidator = new UsercodeListValidator(JArrayList(chair), "chair", staffOnlyForADS = true)
+      usercodeValidator.userLookup = userLookup
+
+      usercodeValidator.validate(errors)
+    }
+
+    if (secretary.hasText) {
+      val usercodeValidator = new UsercodeListValidator(JArrayList(secretary), "secretary", staffOnlyForADS = true)
+      usercodeValidator.userLookup = userLookup
+
+      usercodeValidator.validate(errors)
+    }
+
+    if (!members.isEmpty) {
+      val usercodeValidator = new UsercodeListValidator(members, "members", staffOnlyForADS = true)
+      usercodeValidator.userLookup = userLookup
+
+      usercodeValidator.validate(errors)
+    }
   }
 }
 
@@ -118,4 +144,13 @@ trait ModifyMitCircsPanelRequest {
   var chair: String = _
   var secretary: String = _
   var members: JList[String] = JArrayList()
+}
+
+trait CreateMitCircsPanelNotifications extends Notifies[MitigatingCircumstancesPanel, MitigatingCircumstancesPanel] {
+
+  self: CreateMitCircsPanelRequest with CreateMitCircsPanelState =>
+
+  def emit(panel: MitigatingCircumstancesPanel): Seq[Notification[MitigatingCircumstancesPanel, Unit]] = Seq(
+    Notification.init(new MitCircsAddedToPanelNotification, currentUser, panel).tap(_.modifiedUsers = panel.viewers.toSeq)
+  )
 }

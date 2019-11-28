@@ -92,7 +92,7 @@ class DownloadSubmissionReceiptAsPdfCommandInternal(val assignment: Assignment, 
 trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DownloadSubmissionReceiptAsPdfState with SubmissionServiceComponent with ProfileServiceComponent =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     // We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
     if (!viewer.loggedIn) {
       throw PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 /**
@@ -63,6 +63,8 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 
   def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
 
+  def findActiveRoutesBySITSDepartmentCode(departmentCode: String): Seq[Route]
+
   def getCourseByCode(code: String): Option[Course]
 
   def findCoursesInDepartment(department: Department): Seq[Course]
@@ -78,6 +80,8 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
   def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
 
   def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
+
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String]
 
 }
 
@@ -159,6 +163,10 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
     if (moduleAndDepartmentService.departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
   }
 
+  def findActiveRoutesBySITSDepartmentCode(departmentCode: String): Seq[Route] = {
+    routeDao.findActiveBySITSDepartmentCode(departmentCode)
+  }
+
   def addRouteManager(route: Route, owner: String): Unit = transactional() {
     val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
     role.users.knownType.addUserId(owner)
@@ -186,6 +194,8 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 
   def delete(courseYearWeighting: CourseYearWeighting): Unit =
     courseDao.delete(courseYearWeighting)
+
+  def getOccurrencesForCourses(courses: Seq[Course]): Seq[String] = courseDao.getOccurrencesForCourses(courses)
 
 }
 

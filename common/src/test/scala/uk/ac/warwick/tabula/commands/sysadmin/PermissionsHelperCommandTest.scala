@@ -41,14 +41,14 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
     val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (LazyList(
       pd1, pd2
     ))
 
     val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
     val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (LazyList(
       r1, r2
     ))
 
@@ -73,14 +73,14 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
     val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (LazyList(
       pd1, pd2
     ))
 
     val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
     val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (LazyList(
       r1, r2
     ))
 
@@ -107,14 +107,14 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
     val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (LazyList(
       pd1, pd2
     ))
 
     val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
     val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (LazyList(
       r1, r2
     ))
 
@@ -146,14 +146,14 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
     val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-    roleService.getExplicitPermissionsFor(isA[CurrentUser], isEq(dept)) returns (Stream(
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isEq(dept)) returns (LazyList(
       pd1, pd2
     ))
 
     val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
     val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-    roleService.getRolesFor(isA[CurrentUser], isEq(dept), isEq(false)) returns (Stream(
+    roleService.getRolesFor(isA[CurrentUser], isEq(dept), isEq(false)) returns (LazyList(
       r1, r2
     ))
 
@@ -184,14 +184,14 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
     val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (LazyList(
       pd1, pd2
     ))
 
     val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
     val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (LazyList(
       r1, r2
     ))
 

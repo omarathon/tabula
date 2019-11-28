@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services.{ExtensionServiceComponent, SubmissionServi
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 trait SubmissionInfoToJsonConverter {

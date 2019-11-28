@@ -101,7 +101,7 @@ trait BulkAdjustmentTemplatePermissions extends RequiresPermissionsChecking with
 
   self: BulkAdjustmentTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
         p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)

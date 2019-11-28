@@ -1,6 +1,10 @@
 dependencies {
-  compile "org.scala-lang.modules:scala-parser-combinators_${scalaMajorVersion}:1.1.1"
+  compile "org.scala-lang.modules:scala-parser-combinators_${scalaMajorVersion}:1.1.2"
   compile "org.scala-lang.modules:scala-java8-compat_${scalaMajorVersion}:0.9.0"
+  compile "org.scala-lang.modules:scala-xml_${scalaMajorVersion}:1.2.0"
+
+  // TODO Remove this and uses of .par and .seq
+  compile "org.scala-lang.modules:scala-parallel-collections_${scalaMajorVersion}:0.2.0"
 
   compile "org.springframework:spring-aop:${springVersion}"
   compile "org.springframework:spring-beans:${springVersion}"
@@ -29,15 +33,16 @@ dependencies {
   compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-virusscan:${warwickUtilsVersion}"
+  compile "uk.ac.warwick.util:warwickutils-service:${warwickUtilsVersion}"
 
-  compile 'uk.ac.warwick.sso:sso-client:2.76'
+  compile 'uk.ac.warwick.sso:sso-client:2.77'
 
   compile 'org.apache.httpcomponents:httpclient:4.5.9'
   compile 'org.apache.httpcomponents:httpcore:4.4.11'
   compile 'org.apache.httpcomponents:httpmime:4.5.9'
   compile 'org.apache.httpcomponents:httpasyncclient:4.1.4'
 
-  compile "uk.ac.warwick:spring-scala-glue_${scalaMajorVersion}:1.7"
+  compile "uk.ac.warwick:spring-scala-glue_${scalaMajorVersion}:1.8"
 
   compile 'org.apache.tika:tika-core:1.22'
   compile "org.apache.poi:poi:${poiVersion}"
@@ -90,7 +95,6 @@ dependencies {
   compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
   compile 'commons-codec:commons-codec:1.11'
   compile 'commons-configuration:commons-configuration:1.10'
-  compile 'commons-logging:commons-logging:1.2'
   compile 'commons-beanutils:commons-beanutils:1.9.4'
 
   compile "org.apache.tiles:tiles-api:${tilesVersion}"
@@ -111,7 +115,7 @@ dependencies {
   compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.1.18'
   compile 'com.itextpdf:itextpdf:5.5.13.1' // Upgrade from above to fix https://snyk.io/vuln/SNYK-JAVA-COMITEXTPDF-32005
 
-  compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.3-warwick"
+  compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.4-warwick"
 
   // libphonenumber, for formatting phone numbers
   compile 'com.googlecode.libphonenumber:libphonenumber:8.10.17'
@@ -124,7 +128,6 @@ dependencies {
 
   compile 'org.mnode.ical4j:ical4j:3.0.9'
 
-  compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
   compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
   compile "com.sksamuel.elastic4s:elastic4s-http_${scalaMajorVersion}:${elastic4sVersion}"
 
@@ -145,6 +148,8 @@ dependencies {
 
   compile "com.beachape:enumeratum_${scalaMajorVersion}:1.5.13"
 
+  compile 'io.jsonwebtoken:jjwt:0.9.1'
+
   // Test dependencies
   testCompile "org.springframework:spring-test:${springVersion}"
 
@@ -155,7 +160,8 @@ dependencies {
 
   testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}"
   testCompile "com.sksamuel.elastic4s:elastic4s-embedded_${scalaMajorVersion}:${elastic4sVersion}"
-  testCompile "org.apache.logging.log4j:log4j-core:2.12.1" // Thanks, Elasticsearch
+  testCompile "org.codelibs.elasticsearch.module:analysis-common:${elasticsearchVersion}" // Wrong version in elastic4s-embedded
+  testCompile 'org.apache.logging.log4j:log4j-core:2.11.1' // Thanks, Elasticsearch
 }
 
 jar.dependsOn(generateRebel)

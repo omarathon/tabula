@@ -55,7 +55,7 @@ object TurnitinLtiService {
     * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
     */
   val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
-  val maxFileSizeInMegabytes = 40
+  val maxFileSizeInMegabytes = 100
   val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024 // 40M
 
   def validFileType(file: FileAttachment): Boolean =
@@ -99,11 +99,11 @@ object TurnitinLtiService {
     ).flatten.filter(Option(_).nonEmpty).max.plusMonths(1)
   }
 
-  // this is for converting string like orčpžsíáýd to orcpzsiayd
-  def removeAccent(input: String): String = Normalizer
+  def sanitiseForLti(input: String): String = Normalizer
     .normalize(input, Normalizer.Form.NFD)
     .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
     .replaceAll("\\s+", " ")
+    .replaceAll("[^\\x00-\\x7F]", " ")
 }
 
 /**
@@ -157,10 +157,10 @@ class TurnitinLtiService extends Logging with DisposableBean
         "roles" -> "Instructor",
         "resource_link_id" -> assignmentIdFor(assignment).value,
         // turnitin does not handle accented unicode like á, until they fix it, we are specially handling these with `removeAccent`
-        "resource_link_title" -> removeAccent(StringUtils.safeSubstring(assignmentNameFor(assignment).value, 0, turnitinAssignmentNameMaxCharacters)),
-        "resource_link_description" -> removeAccent(assignmentNameFor(assignment).value),
+        "resource_link_title" -> sanitiseForLti(StringUtils.safeSubstring(assignmentNameFor(assignment).value, 0, turnitinAssignmentNameMaxCharacters)),
+        "resource_link_description" -> sanitiseForLti(assignmentNameFor(assignment).value),
         "context_id" -> classIdFor(assignment, classPrefix).value,
-        "context_title" -> removeAccent(classNameFor(assignment).value),
+        "context_title" -> sanitiseForLti(classNameFor(assignment).value),
         "custom_duedate" -> isoFormatter.print(customDueDate),
         "custom_late_accept_flag" -> "1",
         "custom_submit_papers_to" -> (if (assignment.turnitinStoreInRepository) "1" else "0"),
@@ -192,7 +192,7 @@ class TurnitinLtiService extends Logging with DisposableBean
       Map(
         "resource_link_id" -> assignmentIdFor(assignment).value,
         "context_id" -> classIdFor(assignment, classPrefix).value,
-        "context_title" -> removeAccent(classNameFor(assignment).value),
+        "context_title" -> sanitiseForLti(classNameFor(assignment).value),
         "custom_xmlresponse" -> "1",
         // or Instructor, but must supply an author user id, whatever the parameter for that is!!!
         "roles" -> "Learner",
@@ -225,7 +225,7 @@ class TurnitinLtiService extends Logging with DisposableBean
         "resource_link_id" -> assignmentIdFor(assignment).value,
         "roles" -> "Instructor",
         "context_id" -> classIdFor(assignment, classPrefix).value,
-        "context_title" -> removeAccent(classNameFor(assignment).value)
+        "context_title" -> sanitiseForLti(classNameFor(assignment).value)
       ) ++ userParams(userId, email, firstName, lastName), getOriginalityReportEndpoint(attachment))
   }
 
@@ -260,10 +260,10 @@ class TurnitinLtiService extends Logging with DisposableBean
         "roles" -> role,
         "role_scope_mentor" -> mentee,
         // turnitin does not handle accented unicode like á, until they fix it, we are specially handling these with `removeAccent`
-        "context_title" -> removeAccent(assignment.module.name),
+        "context_title" -> sanitiseForLti(assignment.module.name),
         "context_id" -> assignment.module.code,
         "context_label" -> "A label for this context",
-        "resource_link_title" -> removeAccent(assignment.name),
+        "resource_link_title" -> sanitiseForLti(assignment.name),
         "resource_link_description" -> "A description for this resource link",
         "tool_consumer_info_version" -> tool_consumer_info_version,
 

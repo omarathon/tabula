@@ -31,7 +31,7 @@ class FeedbackReportCommand(val department: Department, val user: CurrentUser) e
 
   override def describe(d: Description): Unit = d.department(department)
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "feedback.report.emptyDate")
     ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "feedback.report.emptyDate")
     if (endDate.isBefore(startDate)) {

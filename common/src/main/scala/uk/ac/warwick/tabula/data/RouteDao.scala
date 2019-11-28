@@ -40,6 +40,8 @@ trait RouteDao {
   def delete(teachingInfo: RouteTeachingInformation)
 
   def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
+
+  def findActiveBySITSDepartmentCode(departmentCode: String): Seq[Route]
 }
 
 @Repository
@@ -112,5 +114,11 @@ class RouteDaoImpl extends RouteDao with Daoisms {
       .add(is("route.code", routeCode.toLowerCase()))
       .add(is("department.code", departmentCode.toLowerCase()))
       .uniqueResult
+
+  def findActiveBySITSDepartmentCode(departmentCode: String): Seq[Route] =
+    session.newCriteria[Route]
+      .add(is("sitsDepartmentCode", departmentCode))
+      .add(is("active", true))
+      .seq
 
 }

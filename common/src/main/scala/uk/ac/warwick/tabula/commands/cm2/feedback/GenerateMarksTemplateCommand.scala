@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateOwnMarksTemplateCommand {
   def apply(assignment: Assignment, marker: User) =
@@ -219,7 +219,7 @@ trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking wi
 
   self: GenerateMarksTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.DownloadMarksTemplate, assignment)
   }
 
@@ -229,7 +229,7 @@ trait GenerateMarksTemplatePermissions extends RequiresPermissionsChecking with 
 
   self: GenerateMarksTemplateCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentFeedback.DownloadMarksTemplate, assignment)
   }
 

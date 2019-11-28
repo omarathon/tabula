@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait RoutePermissionControllerMethods extends AdminController {
 
@@ -63,7 +63,7 @@ class RouteAddPermissionController extends AdminController with RoutePermissionC
       form(route)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(route, userCodes, role, "add")
     }
   }
@@ -83,7 +83,7 @@ class RouteRemovePermissionController extends AdminController with RoutePermissi
       form(route)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(route, userCodes, role, "remove")
     }
   }

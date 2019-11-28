@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.cm2
 import org.openqa.selenium.{By, WebElement}
 import uk.ac.warwick.tabula.BrowserTest
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
@@ -36,8 +36,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
         if (id("feedback-template-list").findElement.isEmpty) 0
         else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
 
-      click on id("file.upload")
-      pressKeys(getClass.getResource(file).getFile)
+      find(id("file.upload")).get.underlying.sendKeys(getClass.getResource(file).getFile)
 
       click on cssSelector(".btn-primary")
 
@@ -114,9 +113,15 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
       // Set a name and description TODO check update
       textField("name").value = "extension template"
       textArea("description").value = "my extension template"
-      submit
 
       switch to defaultContent
+
+      click on cssSelector("#feedback-template-model .btn-primary")
+
+      // Wait for the modal to go away
+      eventually {
+        find("feedback-template-model").map(_.isDisplayed) should be(Some(false))
+      }
     }
 
     Then("I should be able to edit the first template")
@@ -124,9 +129,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
     And("Values should have been updated")
     var tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-    var row = tbody.findElements(By.tagName("tr")).asScala.find({
-      _.findElement(By.tagName("td")).getText == "extension template"
-    })
+    var row = tbody.findElements(By.tagName("tr")).asScala.find(_.findElement(By.tagName("td")).getText == "extension template")
     val file1names = row.map(_.findElements(By.tagName("td")).asScala).getOrElse(Seq()).map(_.getText).toSet
     file1names should be(Set("extension template", "my extension template", "None", "Download Edit Delete"))
 
@@ -172,12 +175,14 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
     switch to iframe
     eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be (true))
 
-    executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
-
     switch to defaultContent
 
-    // This works, but it doesn't reload the page automatically properly. Do it manually
-    reloadPage
+    click on cssSelector("#feedback-template-model .btn-primary")
+
+    // Wait for the modal to go away
+    eventually {
+      find("feedback-template-model").map(_.isDisplayed) should be(Some(false))
+    }
 
     And("File should have been deleted so count should be 1 less")
     eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(currCnt - 1))

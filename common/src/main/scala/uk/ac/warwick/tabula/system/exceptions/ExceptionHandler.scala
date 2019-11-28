@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ExceptionContext(token: String, exception: Throwable, request: Option[HttpServletRequest] = None)
 
@@ -81,7 +81,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
       }
   }
 
-  private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
+  private def makeEmail(context: ExceptionContext) = createMessage(mailSender, multipart = false) { message =>
     val info = RequestInfo.fromThread
 
     val env = if (production) "PROD" else "TEST"

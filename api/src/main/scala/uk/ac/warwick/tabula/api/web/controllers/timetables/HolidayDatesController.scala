@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/v1/holidaydates", "/v1/holidaydates.*"))

@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions, ReportsDateFormats}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SmallGroupsByModuleReportProcessor {
   def apply(department: Department, academicYear: AcademicYear) =
@@ -32,7 +33,9 @@ case class ModuleData(
 case class SmallGroupsByModuleReportProcessorResult(
   counts: Map[AttendanceMonitoringStudentData, Map[ModuleData, Int]],
   students: Seq[AttendanceMonitoringStudentData],
-  modules: Seq[ModuleData]
+  modules: Seq[ModuleData],
+  reportRangeStartDate: String,
+  reportRangeEndDate: String
 )
 
 class SmallGroupsByModuleReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
@@ -41,7 +44,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
   self: SmallGroupsByModuleReportProcessorState with ProfileServiceComponent =>
 
   override def applyInternal(): SmallGroupsByModuleReportProcessorResult = {
-    val processedStudents = students.asScala.map { properties =>
+    val processedStudents = students.asScala.toSeq.map { properties =>
       AttendanceMonitoringStudentData(
         properties.get("firstName"),
         properties.get("lastName"),
@@ -58,7 +61,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
         Option(properties.get("tutorEmail"))
       )
     }.sortBy(s => (s.lastName, s.firstName))
-    val processedModules = modules.asScala.map { properties =>
+    val processedModules = modules.asScala.toSeq.map { properties =>
       ModuleData(
         properties.get("id"),
         properties.get("code"),
@@ -71,16 +74,20 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
           processedModules.find(_.id == id).map(module => module -> countString.toInt)
         }.toMap)
     }.toMap
-    SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules)
+    SmallGroupsByModuleReportProcessorResult(processedCounts, processedStudents, processedModules,
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.CSVDate.print(reportRangeEndDate))
   }
 
 }
 
-trait SmallGroupsByModuleReportProcessorState extends ReportCommandState {
+trait SmallGroupsByModuleReportProcessorState extends ReportCommandState with ReportCommandRequest {
   var counts: JMap[String, JMap[String, String]] =
     LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
   var students: JList[JMap[String, String]] = JArrayList()
 
   var modules: JList[JMap[String, String]] = JArrayList()
+
+  var reportRangeStartDate: LocalDate = _
+  var reportRangeEndDate: LocalDate = _
 }

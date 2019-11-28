@@ -112,6 +112,6 @@ object CachedEventOccurrence {
       datas += DateRange(monthStart, monthStart.plusMonths(1).minusDays(1))
       monthStart = monthStart.plusMonths(1)
     } while (monthStart.equals(end) || monthStart.isBefore(end))
-    datas
+    datas.toSeq
   }
 }

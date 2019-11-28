@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.util.core.ExceptionUtils
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Implements the Spring HandlerExceptionResolver SPI to catch all errors.

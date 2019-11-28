@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, MarkdownRendererImpl
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito with FreemarkerRendering with MarkdownRendererImpl {
 
@@ -41,7 +41,7 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
         sequence = "A01"
         academicYear = AcademicYear.starting(2018)
         name = "Essay (2000 words)"
-        assessmentType = AssessmentType.Assignment
+        assessmentType = AssessmentType.Essay
         deadline = new LocalDate(2019, DateTimeConstants.JUNE, 20)
       }})
     )
@@ -52,7 +52,7 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
         sequence = "A01"
         academicYear = AcademicYear.starting(2018)
         name = "Dissertation"
-        assessmentType = AssessmentType.Assignment
+        assessmentType = AssessmentType.Essay
         deadline = new LocalDate(2019, DateTimeConstants.JUNE, 30)
       }})
     )
@@ -108,20 +108,13 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
     notificationContent should be(
       """Outcomes last recorded by John Admin at 13 June 2019 at 15:20:00:
         |
-        |MIT-1,000: 13 June 2019 - (ongoing)
-        |
-        |Affected assessments:
-        |- IN304 Module in304 (18/19) - Essay (2000 words)
-        |- IN305 Module in305 (18/19) - Dissertation
-        |""".stripMargin
+        |MIT-1,000: 13 June 2019 - (ongoing)""".stripMargin
     )
 
     // Make sure the Markdown -> HTML is sane
     renderMarkdown(notificationContent) should be (
       """<p>Outcomes last recorded by John Admin at 13 June 2019 at 15:20:00:</p>
         |<p>MIT-1,000: 13 June 2019 - (ongoing)</p>
-        |<p>Affected assessments:</p>
-        |<ul><li>IN304 Module in304 (18/19) - Essay (2000 words)</li><li>IN305 Module in305 (18/19) - Dissertation</li></ul>
         |""".stripMargin
     )
   }}

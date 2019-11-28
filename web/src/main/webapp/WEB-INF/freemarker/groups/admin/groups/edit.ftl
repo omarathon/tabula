@@ -7,7 +7,7 @@
   </div>
 
   <#if smallGroupSet?? && smallGroupSet.allocationMethod.dbValue == 'StudentSignUp'>
-    <div class="alert">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+    <div class="alert alert-info">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div>
   </#if>
 
   <#if saved!false>

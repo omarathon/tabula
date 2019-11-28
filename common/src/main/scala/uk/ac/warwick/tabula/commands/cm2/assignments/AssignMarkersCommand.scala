@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocati
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object AssignMarkersCommand {
@@ -152,7 +152,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 trait AssignMarkersPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssignMarkersState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     notDeleted(assignment)
     p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
   }
@@ -256,7 +256,7 @@ trait ValidateMarkerChanges extends FetchMarkerAllocations {
         (stageAllocationName, priorAllocations) <- fetchAllocations(assignment).allocations
         (workflowStage, newAllocations) <- workflowStageAllocations(stageAllocationName)
         (oldMarker, students) <- priorAllocations
-        student <- students
+        student <- students.toSeq
         if isMarkerFeedbackFinalised(student, workflowStage) && isMarkerUnallocated(student, newAllocations)
       } yield {
         (workflowStage, oldMarker, student)
@@ -303,7 +303,7 @@ trait AssignMarkersDescription extends Describable[Assignment] {
     s"${marker.getUserId} -> ${students.map(_.getUserId).toSeq.sorted.mkString(",")}"
   }.mkString("\n")
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .properties("allocations" -> allocationMap.map {
         case (stage, allocation) => s"${stage.roleName}:\n${printAllocation(allocation)}"

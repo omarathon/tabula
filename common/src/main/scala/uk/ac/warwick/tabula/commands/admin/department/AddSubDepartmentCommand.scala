@@ -51,7 +51,7 @@ class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInt
 trait AddSubDepartmentCommandValidation extends SelfValidating {
   self: AddSubDepartmentCommandState with ModuleAndDepartmentServiceComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     // Code must be non-empty and start with parent code
     if (!code.hasText) {
       errors.rejectValue("code", "department.code.empty")
@@ -119,13 +119,13 @@ trait AddSubDepartmentCommandState {
 
   var code: String = parent.code + "-"
   var name: String = parent.name + " "
-  var filterRule: FilterRule = Option(parent.filterRule).getOrElse(AllMembersFilterRule)
+  var filterRule: FilterRule = Option(parent.filterRule).orNull
 }
 
 trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddSubDepartmentCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Manage, mandatory(parent))
   }
 }
@@ -133,7 +133,7 @@ trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking wit
 trait AddSubDepartmentCommandDescription extends Describable[Department] {
   self: AddSubDepartmentCommandState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(parent)
   }
 }

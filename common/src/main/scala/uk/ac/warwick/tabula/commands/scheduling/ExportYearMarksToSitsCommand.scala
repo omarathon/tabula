@@ -54,7 +54,7 @@ class ExportYearMarksToSitsCommandInternal extends CommandInternal[Seq[StudentCo
 
 trait ExportYearMarksToSitsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Marks.UploadToSits)
   }
 
@@ -64,7 +64,7 @@ trait ExportYearMarksToSitsDescription extends Describable[Seq[StudentCourseYear
 
   override lazy val eventName = "ExportYearMarksToSits"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Seq[StudentCourseYearDetails]) {
     d.property("marksCount", result.size)

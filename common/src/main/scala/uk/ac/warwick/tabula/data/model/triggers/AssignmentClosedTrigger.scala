@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, ToEntityReference}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AssignmentClosedTrigger {
   def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): AssignmentClosedTrigger = {
@@ -28,10 +28,10 @@ class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssi
   override def apply(): Unit = transactional() {
     if (assignment.isClosed) {
       if (assignment.cm2Assignment) {
-        handleAssignment(assignment.feedbacks.asScala.map(_.usercode))
+        handleAssignment(assignment.feedbacks.asScala.toSeq.map(_.usercode))
       } else {
         //behaviour for cm1 same as before (no changes)
-        handleAssignment(assignment.submissions.asScala.map(_.usercode))
+        handleAssignment(assignment.submissions.asScala.toSeq.map(_.usercode))
       }
     }
   }

@@ -25,7 +25,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.{WorkingDaysHelper, WorkingDaysHelperImpl}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 import scala.util.{Random => SRandom}
 
 object MitCircsDataGenerationCommand {
@@ -184,7 +185,7 @@ abstract class MitCircsDataGenerationCommandInternal(val department: Department)
           item.moduleCode = randomSeq(moduleRegistrations.toSeq).module.code
           item.academicYear = AcademicYear.now()
           item.name = dummyWords(random.nextInt(5) + 3)
-          item.assessmentType = randomSeq(Seq(AssessmentType.Assignment, AssessmentType.Exam))
+          item.assessmentType = randomSeq(Seq(AssessmentType.Essay, AssessmentType.SummerExam))
           item.deadline = randomFutureDateTime(maximumDaysInFuture = maximumDaysInPast, base = command.startDate.toDateTimeAtCurrentTime).toLocalDate
           item
         }.asJavaCollection

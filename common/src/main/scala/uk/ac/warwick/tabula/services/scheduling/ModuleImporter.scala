@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.AutowiringApacheHttpClientComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.parsing.json.JSON
 
 case class DepartmentInfo(fullName: String, shortName: String, code: String, faculty: String, parentCode: Option[String] = None, filterName: Option[String] = None)
@@ -89,17 +89,17 @@ class ModuleImporterImpl extends ModuleImporter with Logging with AutowiringApac
 
   def getModules(deptCode: String): Seq[ModuleInfo] = moduleInfoMappingQuery.executeByNamedParam(JMap(
     "department_code" -> deptCode.toUpperCase
-  )).asScala
+  )).asScala.toSeq
 
   def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo] = moduleTeachingDepartmentMappingQuery.executeByNamedParam(JMap(
     "module_code" -> moduleCode.toUpperCase
-  )).asScala
+  )).asScala.toSeq
 
-  def getRoutes(deptCode: String): Seq[RouteInfo] = routeInfoMappingQuery.execute(deptCode.toUpperCase).asScala
+  def getRoutes(deptCode: String): Seq[RouteInfo] = routeInfoMappingQuery.execute(deptCode.toUpperCase).asScala.toSeq
 
   def getRouteTeachingDepartments(routeCode: String): Seq[RouteTeachingDepartmentInfo] = routeTeachingDepartmentMappingQuery.executeByNamedParam(JMap(
     "route_code" -> routeCode.toUpperCase
-  )).asScala
+  )).asScala.toSeq
 }
 
 @Profile(Array("sandbox"))

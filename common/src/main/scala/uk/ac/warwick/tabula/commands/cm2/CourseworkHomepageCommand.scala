@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions.Module
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CourseworkHomepageCommand {
 

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridAuditCommand {
 
@@ -20,6 +20,7 @@ object GenerateExamGridAuditCommand {
       with GenerateExamGridAuditPermissions
       with ReadOnly {
       courses = cmd.courses
+      courseOccurrences = cmd.courseOccurrences
       routes = cmd.routes
       yearOfStudy = cmd.yearOfStudy
     }
@@ -36,7 +37,7 @@ trait GenerateExamGridAuditPermissions extends RequiresPermissionsChecking with 
 
   self: GenerateExamGridAuditState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -47,10 +48,11 @@ trait GenerateExamGridAuditDescription extends Describable[Unit] {
 
   override lazy val eventName = "GenerateExamGrid"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
       .property("academicYear", academicYear.toString)
       .property("courses", courses.asScala.map(_.code))
+      .property("courseOccurrences", courseOccurrences.asScala)
       .property("routes", routes.asScala.map(_.code))
       .property("yearOfStudy", yearOfStudy)
   }

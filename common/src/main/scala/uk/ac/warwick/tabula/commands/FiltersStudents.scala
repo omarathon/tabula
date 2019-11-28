@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, HibernateHelpers, ScalaRestriction}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FiltersStudents {
   val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
@@ -85,6 +85,12 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
   def isFinalistRestriction: Option[ScalaRestriction] = isPropertyIfTicked(
     "studentCourseYearDetails.yearOfStudy", "mostSignificantCourse.courseYearLength",
     otherCriteria.contains("Finalist"),
+    getAliasPaths("studentCourseYearDetails") ++ getAliasPaths("mostSignificantCourse"): _*
+  )
+
+  def isNotFinalistRestriction: Option[ScalaRestriction] = isNotPropertyIfTicked(
+    "studentCourseYearDetails.yearOfStudy", "mostSignificantCourse.courseYearLength",
+    otherCriteria.contains("Not Finalist"),
     getAliasPaths("studentCourseYearDetails") ++ getAliasPaths("mostSignificantCourse"): _*
   )
 

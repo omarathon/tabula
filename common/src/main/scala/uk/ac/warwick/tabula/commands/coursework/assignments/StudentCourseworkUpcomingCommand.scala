@@ -60,7 +60,7 @@ trait StudentCourseworkUpcomingCommandState {
 
 trait StudentCourseworkUpcomingCommandPermissions extends RequiresPermissionsChecking {
   self: StudentCourseworkUpcomingCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     memberOrUser.asMember.foreach { member =>
       p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
       p.PermissionCheck(Permissions.Submission.Read, member)

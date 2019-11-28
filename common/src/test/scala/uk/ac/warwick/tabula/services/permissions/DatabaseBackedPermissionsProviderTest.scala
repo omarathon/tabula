@@ -18,7 +18,7 @@ class DatabaseBackedPermissionsProviderTest extends TestBase with Mockito {
     val gp1 = GrantedPermission(dept, Permissions.Department.ManageDisplaySettings, GrantedPermission.Allow)
     val gp2 = GrantedPermission(dept, Permissions.Module.Create, GrantedPermission.Deny)
 
-    service.getGrantedPermissionsFor[PermissionsTarget](currentUser) returns (Stream(gp1, gp2).asInstanceOf[Stream[GrantedPermission[PermissionsTarget]]])
+    service.getGrantedPermissionsFor[PermissionsTarget](currentUser) returns (LazyList(gp1, gp2).asInstanceOf[LazyList[GrantedPermission[PermissionsTarget]]])
 
     val permissions = provider.getPermissionsFor(currentUser, dept)
     permissions.size should be(2)
@@ -31,8 +31,8 @@ class DatabaseBackedPermissionsProviderTest extends TestBase with Mockito {
   }
 
   @Test def noPermissions = withUser("cuscav") {
-    service.getGrantedPermissionsFor[PermissionsTarget](currentUser) returns (Stream.empty)
-    provider.getPermissionsFor(currentUser) should be(Stream.empty)
+    service.getGrantedPermissionsFor[PermissionsTarget](currentUser) returns (LazyList.empty)
+    provider.getPermissionsFor(currentUser) should be(LazyList.empty)
   }
 
 }

@@ -20,8 +20,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionD
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
-import scala.collection.convert.Wrappers.MapWrapper
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object AddSitsAssignmentsCommand {
@@ -84,8 +83,8 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 
   self: AddSitsAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-  override def applyInternal(): mutable.Buffer[Assignment] = {
-    sitsAssignmentItems.asScala.filter(_.include).map(item => {
+  override def applyInternal(): Seq[Assignment] = {
+    sitsAssignmentItems.asScala.toSeq.filter(_.include).map(item => {
       val assignment = new Assignment()
       assignment.assignmentService = assessmentService
       assignment.addDefaultFields()
@@ -95,7 +94,9 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
       assignment.module = findModule(item.upstreamAssignment).get
 
       assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
-      assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+      if(!item.openEnded) {
+        assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+      }
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
       assignment.cm2Assignment = true
 
@@ -143,7 +144,7 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
     * can alter this choice before continuing.
     */
   private def shouldIncludeByDefault(component: AssessmentComponent) =
-    component.assessmentType == AssessmentType.Assignment &&
+    component.assessmentType.subtype == TabulaAssessmentSubtype.Assignment &&
       component.assessmentGroup != "AO"
 
   private def fetchSitsAssignmentItems(): JList[SitsAssignmentItem] = {
@@ -183,7 +184,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
 
   self: AddSitsAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
 
     // just get the items we're actually going to import
@@ -271,7 +272,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     // check that all the selected items are part of this department. Otherwise you could post the IDs of
     // unrelated assignments and do stuff with them.
     // Use .exists() to see if there is at least one with a matching department code OR parent department code
-    def modules(d: Department): Seq[Module] = d.modules.asScala
+    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
 
     def modulesIncludingSubDepartments(d: Department): Seq[Module] =
       modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
@@ -296,7 +297,7 @@ trait AddSitsAssignmentsPermissions extends RequiresPermissionsChecking with Per
 
   self: AddSitsAssignmentsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
   }
 
@@ -308,7 +309,7 @@ trait AddSitsAssignmentsDescription extends Describable[Seq[Assignment]] {
 
   override lazy val eventName = "AddSitsAssignments"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.department(department)
   }
 }
@@ -325,13 +326,13 @@ trait AddSitsAssignmentsCommandState {
   // All the possible assignments, prepopulated from SITS.
   var sitsAssignmentItems: JList[SitsAssignmentItem] = LazyLists.create[SitsAssignmentItem]()
 
-  def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter(_.include)
+  def includedItems: Seq[SitsAssignmentItem] = sitsAssignmentItems.asScala.toSeq.filter(_.include)
 
   /**
     * options which are referenced by key by SitsAssignmentItem.optionsId
     */
   var optionsMap: JMap[String, SharedAssignmentPropertiesForm] =
-    new MapWrapper(LazyMaps.create { key: String => new SharedAssignmentPropertiesForm })
+    LazyMaps.create { key: String => new SharedAssignmentPropertiesForm }.asJava
 
   val DEFAULT_OPEN_HOUR = 12
   val DEFAULT_WEEKS_LENGTH = 4

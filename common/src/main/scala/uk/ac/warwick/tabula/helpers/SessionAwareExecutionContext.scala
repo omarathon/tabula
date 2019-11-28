@@ -8,7 +8,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.EarlyRequestInfo
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 
 /**

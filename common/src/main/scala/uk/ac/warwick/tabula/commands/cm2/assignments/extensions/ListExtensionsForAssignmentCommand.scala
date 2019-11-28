@@ -43,7 +43,7 @@ class ListExtensionsForAssignmentCommandInternal(val assignment: Assignment, val
 
     // all the users that aren't members of this assignment, but have submitted work to it
     val extensionsFromNonMembers: Seq[Extension] = assignment.allExtensions.values.toSeq.flatten.filterNot(x => assignmentMembership.contains(x.usercode))
-    val nonMembers = userLookup.getUsersByUserIds(extensionsFromNonMembers.map(_.usercode))
+    val nonMembers = userLookup.usersByUserIds(extensionsFromNonMembers.map(_.usercode))
 
     // build lookup of names from non members of the assignment that have submitted work plus members
     val students = nonMembers ++ assignmentMembership

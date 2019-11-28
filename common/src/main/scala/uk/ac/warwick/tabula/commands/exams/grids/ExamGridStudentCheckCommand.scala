@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object ExamGridStudentCheckCommand {
@@ -27,6 +27,7 @@ object ExamGridStudentCheckCommand {
 case class StudentCheckInfo(
   hasEnrolmentForYear: Boolean,
   courseMatches: Boolean,
+  courseOccurrencesMatches: Boolean,
   isTemporarilyWithdrawn: Boolean,
   routeMatches: Boolean,
   isResitStudent: Boolean,
@@ -46,6 +47,7 @@ class ExamGridStudentCheckCommandInternal(val department: Department, val academ
     StudentCheckInfo(
       scyds.exists(_.enrolledOrCompleted),
       scyds.exists(scyd => courses.asScala.contains(scyd.studentCourseDetails.course)),
+      scyds.exists(scyd => courseOccurrences.asScala.contains(scyd.blockOccurrence)),
       !scyds.exists(_.enrolmentStatus.code.startsWith("T")),
       scyds.exists(scyd => routes.contains(scyd.studentCourseDetails.currentRoute)),
       assessmentMembershipService.getUpstreamAssessmentGroups(student, academicYear, resitOnly = true).nonEmpty,
@@ -61,7 +63,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 
   self: ExamGridStudentCheckState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (member == null) {
       errors.reject("examGrid.studentcheck.missingstudentmember")
     } else if (!member.isInstanceOf[StudentMember]) {
@@ -74,7 +76,7 @@ trait ExamGridStudentCheckValidation extends SelfValidating {
 trait ExamGridStudentCheckPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ExamGridStudentCheckState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 }

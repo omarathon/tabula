@@ -57,8 +57,12 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
     service.attendanceMonitoringService.listStudentsPointsForDate(student, None, meeting.meetingDate) returns Seq(meetingPoint)
     service.attendanceMonitoringService.getCheckpoints(Seq(meetingPoint), Seq(student)) returns Map()
     service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, meetingPoint) returns false
-    service.attendanceMonitoringService.setAttendance(student, Map(meetingPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
-      ((Seq(Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
+
+    val setAttendanceResult: (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = (
+      Seq(Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.Attended)),
+      Seq[AttendanceMonitoringCheckpointTotal]()
+    )
+    service.attendanceMonitoringService.setAttendance(student, Map(meetingPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns setAttendanceResult
 
   }
 
@@ -110,8 +114,13 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   @Test
   def existingCheckpoint() {
     new Fixture {
-      service.attendanceMonitoringService.getCheckpoints(Seq(meetingPoint), Seq(student)) returns
-        Map(student -> Map(meetingPoint -> Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.MissedAuthorised)))
+      val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
+        student -> Map(
+          meetingPoint -> Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.MissedAuthorised)
+        )
+      )
+      service.attendanceMonitoringService.getCheckpoints(Seq(meetingPoint), Seq(student)) returns checkpoints
+
       service.getCheckpoints(meeting).size should be(0)
     }
   }

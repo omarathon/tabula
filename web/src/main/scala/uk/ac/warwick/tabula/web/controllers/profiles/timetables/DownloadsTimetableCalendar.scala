@@ -45,7 +45,9 @@ trait DownloadsTimetableCalendar {
   ): PDFView = {
     val groupedEvents: Map[LocalDate, Map[Int, Seq[FullCalendarEvent]]] = fullCalendarEvents
       .groupBy(e => new DateTime(e.start * 1000).toLocalDate)
+      .view
       .mapValues(_.groupBy(e => new DateTime(e.start * 1000).getHourOfDay))
+      .toMap
 
     val title = {
       if (thisCalendarView == "agendaWeek") {
@@ -95,7 +97,9 @@ trait DownloadsTimetableCalendar {
 
     val groupedEvents: Map[Int, Map[LocalDate, Seq[FullCalendarEvent]]] = fullCalendarEvents
       .groupBy(e => formattedWeekNumber(new DateTime(e.start * 1000).toLocalDate))
+      .view
       .mapValues(_.groupBy(e => new DateTime(e.start * 1000).toLocalDate))
+      .toMap
     val firstDayOfMonth = thisRenderDate.minusDays(thisRenderDate.getDayOfMonth - 1)
     val lastDayOfMonth = firstDayOfMonth.plusDays(thisRenderDate.dayOfMonth.getMaximumValue - 1)
     createPdfView(fileNameSuffix, Map(

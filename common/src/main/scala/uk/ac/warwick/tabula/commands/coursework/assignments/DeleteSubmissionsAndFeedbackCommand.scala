@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.HibernateHelpers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -47,7 +47,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   def applyInternal(): (Seq[Submission], Seq[AssignmentFeedback]) = {
     val submissions = if (shouldDeleteSubmissions) {
-      val submissions = for (usercode <- students.asScala; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) yield {
+      val submissions = for (usercode <- students.asScala.toSeq; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) yield {
         HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
         submissionService.delete(mandatory(submission))
         submission
@@ -57,7 +57,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     } else Nil
 
     val feedbacks = if (shouldDeleteFeedback) {
-      val feedbacks = for (usercode <- students.asScala; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) yield {
+      val feedbacks = for (usercode <- students.asScala.toSeq; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) yield {
         HibernateHelpers.initialiseAndUnproxy(feedback.attachments)
         feedbackService.delete(mandatory(feedback))
         zipService.invalidateIndividualFeedbackZip(feedback)
@@ -69,7 +69,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     (submissions, feedbacks)
   }
 
-  def prevalidate(errors: Errors) {
+  def prevalidate(errors: Errors): Unit = {
     for (usercode <- students.asScala; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) {
       if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
     }
@@ -83,7 +83,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     }
   }
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     prevalidate(errors)
     if (!confirm) errors.rejectValue("confirm", "submissionOrFeedback.delete.confirm")
   }
@@ -93,7 +93,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .studentUsercodes(students.asScala)
+     .studentUsercodes(students.asScala.toSeq)
 
   override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])): Unit = {
     val (submissions, feedbacks) = result

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FilterStudentsOrRelationships {
 
@@ -24,7 +24,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   def getAliasPaths(sitsTable: String): Seq[(String, AliasAndJoinType)]
 
   protected def buildOrders(): Seq[ScalaOrder] =
-    (sortOrder.asScala ++ defaultOrder).map { underlying =>
+    (sortOrder.asScala.toSeq ++ defaultOrder).map { underlying =>
       underlying.getPropertyName match {
         case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying.nulls(NullPrecedence.LAST), getAliasPaths(aliasPath): _*)
         case _ => ScalaOrder(underlying.nulls(NullPrecedence.LAST))
@@ -38,6 +38,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
   def courseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
     "course.code", courseTypes.asScala.flatMap(_.courseCodeChars.map(_.toString)),
+    getAliasPaths("course"): _*
+  )
+
+  def specificCourseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
+    "course.code", specificCourseTypes.asScala.map(_.code.toString),
     getAliasPaths("course"): _*
   )
 
@@ -94,14 +99,17 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
   def isFinalistRestriction: Option[ScalaRestriction]
 
+  def isNotFinalistRestriction: Option[ScalaRestriction]
+
   def hallOfResidenceRestriction: Option[ScalaRestriction] = inIfNotEmpty(
     "termtimeAddress.line2", hallsOfResidence.asScala,
     getAliasPaths("termtimeAddress"): _*
   )
 
-  protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
+  protected def buildRestrictions(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction] = Seq.empty): Seq[ScalaRestriction] = {
     val restrictions = Seq(
       courseTypeRestriction,
+      specificCourseTypeRestriction,
       routeRestriction,
       courseRestriction,
       attendanceRestriction,
@@ -115,8 +123,9 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       visitingRestriction,
       enrolledOrCompletedRestriction,
       isFinalistRestriction,
+      isNotFinalistRestriction,
       hallOfResidenceRestriction
-    ).flatten
+    ).flatten ++ additionalRestrictions
 
     if (restrictions.exists(_.aliases.keys.exists(key => key.contains("studentCourseYearDetails")))) {
       // We need to restrict the studentCourseYearDetails to the latest one by year

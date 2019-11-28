@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import org.junit.After
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{ItemNotFoundException, TestBase, TestLoggerFactory}
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import ch.qos.logback.classic.{Level, Logger}

@@ -88,7 +88,7 @@ trait StudentAssignmentsSummaryPermissions extends RequiresPermissionsChecking w
 
   self: StudentAssignmentsSummaryCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     val member = mandatory(student.asMember)
     p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
     p.PermissionCheck(Permissions.Submission.Read, member)

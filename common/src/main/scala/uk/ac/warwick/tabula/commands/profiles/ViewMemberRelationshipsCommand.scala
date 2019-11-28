@@ -16,8 +16,8 @@ object ViewMemberRelationshipsCommand {
     entities: Map[StudentRelationshipType, Seq[StudentCourseDetails]]
   )
 
-  def apply(currentMember: Member): Command[Result] = {
-    new ViewMemberRelationshipsCommandInternal(currentMember)
+  def apply(currentMember: Member, typeConstraint: Option[StudentRelationshipType] = None): Command[Result] = {
+    new ViewMemberRelationshipsCommandInternal(currentMember, typeConstraint)
       with ComposableCommand[Result]
       with AutowiringProfileServiceComponent
       with AutowiringRelationshipServiceComponent
@@ -28,12 +28,12 @@ object ViewMemberRelationshipsCommand {
 }
 
 
-abstract class ViewMemberRelationshipsCommandInternal(val currentMember: Member)
+abstract class ViewMemberRelationshipsCommandInternal(val currentMember: Member, val typeConstraint: Option[StudentRelationshipType])
   extends CommandInternal[Result] with TaskBenchmarking with ViewMemberRelationshipsCommandState {
   self: ProfileServiceComponent with RelationshipServiceComponent =>
 
   def applyInternal(): Result = {
-    val rslt = relationshipTypes.map { r =>
+    val rslt = relationshipTypes.filter(t => t == typeConstraint.getOrElse(t)).map { r =>
       r -> profileService.getSCDsByAgentRelationshipAndRestrictions(r, currentMember, Nil)
     }.filter { case (_, stuDetails) => stuDetails.nonEmpty }
     Result(rslt.toMap)
@@ -53,7 +53,7 @@ trait ViewMemberRelationshipsCommandState {
 trait ViewMemberRelationshipsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: ViewMemberRelationshipsCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), currentMember)
   }
 }

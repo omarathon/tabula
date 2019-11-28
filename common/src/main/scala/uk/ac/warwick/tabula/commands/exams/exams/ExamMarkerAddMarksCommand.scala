@@ -33,7 +33,7 @@ trait MarkerAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "MarkerAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     assessment match {
       case assignment: Assignment => d.assignment(assignment)
       case exam: Exam => d.exam(exam)
@@ -60,7 +60,7 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
 
   self: OldAdminAddMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assessment, module)
     p.PermissionCheck(Permissions.ExamMarkerFeedback.Manage, assessment)
   }

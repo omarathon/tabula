@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.groups.{AutowiringSmallGroupSetWorkflowServ
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class AdminSmallGroupsHomeInformation(
   canAdminDepartment: Boolean,
@@ -106,7 +106,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 
       benchmarkTask("Permissions checks") {
         sortedSets
-          .toStream
+          .to(LazyList)
           .filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
       }
     }
@@ -117,7 +117,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
           if (set.archived) {
             ViewSet(
               set = set,
-              groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+              groups = ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted),
               viewerRole = Tutor
             )
           } else {
@@ -125,7 +125,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 
             ViewSetWithProgress(
               set = set,
-              groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+              groups = ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted),
               viewerRole = Tutor,
               progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
               nextStage = progress.nextStage,
@@ -137,7 +137,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
         sets.map { set =>
           ViewSet(
             set = set,
-            groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+            groups = ViewGroup.fromGroups(set.groups.asScala.toSeq.sorted),
             viewerRole = Tutor
           )
         }
@@ -155,7 +155,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 trait AdminSmallGroupsHomeCommandPermissions extends RequiresPermissionsChecking {
   self: AdminSmallGroupsHomeCommandState with SecurityServiceComponent with AdminSmallGroupsHomePermissionsRestrictedState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     if (canManageDepartment) {
       // This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
       p.PermissionCheck(RequiredPermission, department)

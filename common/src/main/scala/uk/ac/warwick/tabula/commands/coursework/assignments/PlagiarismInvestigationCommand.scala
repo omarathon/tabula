@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.notifications.coursework.MarkedPlagiarisedNotification
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -32,7 +32,7 @@ class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
   self: SubmissionServiceComponent =>
 
   def applyInternal(): Unit = {
-    submissions = students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
+    submissions = students.asScala.toSeq.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
     submissions.foreach { submission =>
       submission.plagiarismInvestigation =
         if (markPlagiarised) SuspectPlagiarised
@@ -44,7 +44,7 @@ class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
 
 trait PlagiarismInvestigationCommandValidation extends SelfValidating {
   self: PlagiarismInvestigationCommandState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "submission.mark.plagiarised.confirm")
   }
 }
@@ -61,7 +61,7 @@ trait PlagiarismInvestigationCommandState {
 
 trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: PlagiarismInvestigationCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.ManagePlagiarismStatus, mandatory(assignment))
   }
 }
@@ -69,7 +69,7 @@ trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsCheck
 trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
   self: PlagiarismInvestigationCommandState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
       .submissions(submissions)
       .property("markedPlagiarised" -> markPlagiarised)

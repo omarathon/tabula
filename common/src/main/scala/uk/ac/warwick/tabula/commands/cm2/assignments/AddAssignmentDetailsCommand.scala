@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object CreateAssignmentDetailsCommand {
   def apply(module: Module, academicYear: AcademicYear) =
@@ -104,12 +104,12 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
 
     assignment.academicYear = academicYear
     if (openEnded) {
-      assignment.openEndedReminderDate = openEndedReminderDate.toDateTime(Assignment.openTime)
+      assignment.openEndedReminderDate = Option(openEndedReminderDate).map(_.toDateTime(Assignment.openTime)).orNull
       assignment.closeDate = null
     } else {
       assignment.openEndedReminderDate = null
 
-      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate)) {
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate)) {
         assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
       }
     }
@@ -252,7 +252,7 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
 
   override lazy val eventName = "AddAssignmentDetails"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.module(module).properties(
       "name" -> name,
       "openDate" -> Option(openDate).map(_.toString()).orNull,
@@ -272,7 +272,7 @@ trait GeneratesNotificationsForAssignment {
     if (!assignment.collectSubmissions || assignment.openEnded) {
       Seq()
     } else {
-      val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
+      val dayOfDeadline = Assignment.onTheDayReminderDateTime(assignment.closeDate)
 
       val submissionNotifications = {
         // skip the week late notification if late submission isn't possible

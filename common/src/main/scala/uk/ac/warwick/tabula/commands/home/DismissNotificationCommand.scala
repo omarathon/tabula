@@ -34,7 +34,7 @@ abstract class DismissNotificationCommandInternal(val notifications: Seq[Notific
 
 trait DismissNotificationCommandValidation extends SelfValidating {
   self: DismissNotificationCommandState =>
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
 
   }
 }
@@ -47,7 +47,7 @@ trait DismissNotificationCommandState {
 
 trait DismissNotificationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DismissNotificationCommandState =>
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAll(Permissions.Notification.Dismiss, notifications)
   }
 }

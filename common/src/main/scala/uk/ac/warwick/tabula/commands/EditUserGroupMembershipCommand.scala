@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class AddUsersToEditUserGroupMembershipCommandResult(
   missingUsers: Seq[String]
@@ -63,8 +63,8 @@ class EditUserGroupMembershipCommandInternal(val adapter: MemberQueryMembershipA
     }
 
     val membershipItems: Seq[UserGroupMembershipItem] = {
-      val excludedMemberItems = excludedStudentIds.asScala.map(toMembershipItem(_, Exclude))
-      val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
+      val excludedMemberItems = excludedStudentIds.asScala.toSeq.map(toMembershipItem(_, Exclude))
+      val includedMemberItems = includedStudentIds.asScala.toSeq.map(toMembershipItem(_, Include))
       (excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
     }
 
@@ -157,7 +157,7 @@ trait EditDepartmentSmallGroupSetMembershipPermissions extends RequiresPermissio
 
   def department: Department
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }
@@ -169,7 +169,7 @@ trait EditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking
 
   def module: Module
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
   }

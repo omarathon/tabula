@@ -22,7 +22,8 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 
 @Entity
 @Proxy
@@ -38,8 +39,8 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   @transient
   var profileService: ProfileService = Wire[ProfileService]
 
-  def permissionsParents: Stream[PermissionsTarget] =
-    Option(assignment).toStream #::: profileService.getAllMembersWithUserId(usercode).toStream
+  def permissionsParents: LazyList[PermissionsTarget] =
+    Option(assignment).to(LazyList) #::: profileService.getAllMembersWithUserId(usercode).to(LazyList)
 
   @ManyToOne(optional = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "universityid", insertable = false, updatable = false)

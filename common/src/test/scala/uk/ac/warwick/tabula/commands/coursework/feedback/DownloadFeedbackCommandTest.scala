@@ -19,12 +19,12 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
     var userDatabase = Seq(new User())
     var userLookup: UserLookupService = smartMock[UserLookupService]
-    userLookup.getUserByUserId(any[String]) answers { id =>
+    userLookup.getUserByUserId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getUserId == id
       } getOrElse new AnonymousUser()
     }
-    userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+    userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
       userDatabase find {
         _.getWarwickId == id
       } getOrElse new AnonymousUser()
@@ -49,14 +49,14 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
     feedback.attachments.add(attachment)
 
     val mockPdfGenerator: PdfGeneratorWithFileStorage = smartMock[PdfGeneratorWithFileStorage]
-    mockPdfGenerator.renderTemplateAndStore(any[String], any[String], any[Any]) answers (_ => {
+    mockPdfGenerator.renderTemplateAndStore(any[String], any[String], any[Any]) answers  { _: Any =>
       val attachment = new FileAttachment
       attachment.id = "234"
       attachment.objectStorageService = mockObjectStorageService
       attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))))
       attachment.name = "feedback.pdf"
       attachment
-    })
+    }
   }
 
   @Test def applyCommand() {

@@ -26,23 +26,23 @@ class SandboxMemberDataRoleProvider extends ScopelessRoleProvider with TaskBench
     Wire[ModuleAndDepartmentService]
   }
 
-  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for SandboxMemberDataRoleProvider") {
+  def getRolesFor(user: CurrentUser): LazyList[Role] = benchmarkTask("Get roles for SandboxMemberDataRoleProvider") {
     if (user.realUser.isLoggedIn) {
-      val allDepartments = departmentService.get.allDepartments.toStream
+      val allDepartments = departmentService.get.allDepartments.to(LazyList)
 
       val member = new RuntimeMember(user) {
         allDepartments.headOption.foreach(this.homeDepartment = _)
 
-        override def affiliatedDepartments: Stream[Department] = allDepartments
+        override def affiliatedDepartments: LazyList[Department] = allDepartments
 
-        override def touchedDepartments: Stream[Department] = allDepartments
+        override def touchedDepartments: LazyList[Department] = allDepartments
       }
 
       UniversityMemberRole(member) #:: (member.userType match {
         case Staff | Emeritus => allDepartments map StaffRole
-        case _ => Stream.empty[Role]
+        case _ => LazyList.empty[Role]
       })
-    } else Stream.empty
+    } else LazyList.empty
   }
 
   def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off public.methods.have.type
 // scalastyle:off public.property.type.annotation
@@ -39,7 +39,7 @@ class ReplaceMarkerCommandTest extends TestBase with Mockito with ValidatorHelpe
     f1.released = true
     a1.feedbacks = JArrayList(f1)
     a1.feedbackService = smartMock[FeedbackService]
-    a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
+    a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
     val f2 = Fixtures.assignmentFeedback()
     val mf2 = Fixtures.markerFeedback(f2)
@@ -47,7 +47,7 @@ class ReplaceMarkerCommandTest extends TestBase with Mockito with ValidatorHelpe
     mf2.marker = marker2
     a2.feedbacks = JArrayList(f2)
     a2.feedbackService = smartMock[FeedbackService]
-    a2.feedbackService.loadFeedbackForAssignment(a2) returns a2.feedbacks.asScala
+    a2.feedbackService.loadFeedbackForAssignment(a2) returns a2.feedbacks.asScala.toSeq
 
     val validator = new ReplaceMarkerValidation with ReplaceMarkerState with UserLookupComponent {
       val userLookup = userlookupService

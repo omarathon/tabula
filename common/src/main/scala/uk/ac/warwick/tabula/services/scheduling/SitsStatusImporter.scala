@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.helpers.Logging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait SitsStatusImporter extends Logging {
   var sitsStatusDao: SitsStatusDao = Wire.auto[SitsStatusDao]

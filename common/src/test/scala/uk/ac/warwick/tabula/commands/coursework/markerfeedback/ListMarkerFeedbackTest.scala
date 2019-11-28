@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {

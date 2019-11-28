@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, ProfileServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 trait ValidatesMarkItem {
@@ -116,7 +116,7 @@ trait AddMarksCommandBindListener extends BindListener {
 
   self: AddMarksCommandState with MarksExtractorComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     val fileNames = file.fileNames map (_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
@@ -132,7 +132,7 @@ trait AddMarksCommandBindListener extends BindListener {
         result.popNestedPath()
 
         if (!file.attached.isEmpty) {
-          processFiles(file.attached.asScala)
+          processFiles(file.attached.asScala.toSeq)
         }
 
         def processFiles(files: Seq[FileAttachment]) {
@@ -173,7 +173,7 @@ trait FetchDisabilities {
   def fetchDisabilities: Map[String, Disability] = {
     assessment match {
       case assignment: Assignment =>
-        marks.asScala.map { markItem =>
+        marks.asScala.toSeq.map { markItem =>
           markItem.universityId -> {
             if (submissionService.getSubmissionByUsercode(assignment, markItem.user.getUserId).exists(_.useDisability)) {
               profileService.getMemberByUniversityId(markItem.universityId).flatMap {
@@ -184,7 +184,7 @@ trait FetchDisabilities {
               None
             }
           }
-        }.toMap.filterNot { case (_, option) => option.isEmpty }.mapValues(_.get)
+        }.toMap.filterNot { case (_, option) => option.isEmpty }.view.mapValues(_.get).toMap
       case _ => Map()
     }
   }

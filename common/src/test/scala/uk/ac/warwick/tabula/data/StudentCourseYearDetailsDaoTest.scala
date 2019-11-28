@@ -12,13 +12,13 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
   val memDao = new AutowiringMemberDaoImpl
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     scydDao.sessionFactory = sessionFactory
     scdDao.sessionFactory = sessionFactory
     memDao.sessionFactory = sessionFactory
   }
 
-  @Test def testGetBySceKey() {
+  @Test def testGetBySceKey(): Unit = {
     transactional { tx =>
       val stuMem = new StudentMember("0123456")
       stuMem.userId = "abcde"
@@ -47,7 +47,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
     }
   }
 
-  @Test def testGetFreshKeys() {
+  @Test def testGetFreshKeys(): Unit = {
     transactional { tx =>
       val dept1 = Fixtures.department("hm", "History of Music")
       val dept2 = Fixtures.department("ar", "Architecture")
@@ -273,45 +273,50 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
       AcademicYear.now(),
       Seq(course1),
       Seq(),
+      Seq(),
       1,
-      false,
-      false
+      includeTempWithdrawn = false,
+      resitOnly = false
     ).length should be(2)
 
     scydDao.findByCourseRoutesYear(
       AcademicYear.now(),
       Seq(course2),
       Seq(),
+      Seq(),
       1,
-      false,
-      false
+      includeTempWithdrawn = false,
+      resitOnly = false
     ).length should be(1)
 
     scydDao.findByCourseRoutesLevel(
       AcademicYear.now(),
       Seq(course2),
       Seq(),
+      Seq(),
       "1",
-      true,
-      false
+      includeTempWithdrawn = true,
+      resitOnly = false
     ).length should be(2)
 
     scydDao.findByCourseRoutesLevel(
       AcademicYear.now(),
       Seq(course1, course2),
+      Seq(),
       Seq(route1),
       "1",
-      true,
-      false
+      includeTempWithdrawn = true,
+      resitOnly = false
     ).length should be(1)
 
     scydDao.findByCourseRoutesYear(
       AcademicYear.now(),
       Seq(course1, course2),
       Seq(),
+      Seq(),
       1,
-      true,
-      true
+      includeTempWithdrawn = true,
+      resitOnly = true
     ).length should be(1)
 
   }

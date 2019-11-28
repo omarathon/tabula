@@ -6,36 +6,33 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 
 
 object UserCodeSearchCommand {
-  def apply() =
-    new UserCodeSearchCommandInternal
+  def apply(academicYear: AcademicYear) =
+    new UserCodeSearchCommandInternal(academicYear)
       with ComposableCommand[Seq[String]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with UserSearchCommandRequest
+      with UserSearchCommandState
       with ReadOnly with Unaudited
 }
 
-abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Seq[String]] with FiltersStudents {
 
-  self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+  self: UserSearchCommandRequest with UserSearchCommandState with ModuleAndDepartmentServiceComponent =>
 
   override def applyInternal(): Seq[String] = {
     if (Option(department).isEmpty && serializeFilter.isEmpty) {
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(AcademicYear.now())
+    val restrictions = if (studentsOnly) {
+      buildRestrictions(academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
+    } else {
+      groupNameRestriction ++ homeDepartmentRestriction
+    }.toSeq
 
-    Option(department) match {
-      case Some(d) =>
-        Seq(d).flatMap(department =>
-          profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
-            department,
-            restrictions
-          )
-        ).distinct
-      case _ =>
-        profileService.findAllUserIdsByRestrictions(restrictions).distinct
-    }
+    profileService.findAllUserIdsByRestrictions(
+      restrictions
+    ).distinct
   }
 }

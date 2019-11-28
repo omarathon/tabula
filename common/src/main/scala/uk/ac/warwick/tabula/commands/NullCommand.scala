@@ -19,7 +19,7 @@ class NullCommand extends Command[Unit] {
 
   private var dfn = (d: Description) => {}
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     dfn(d)
   }
 

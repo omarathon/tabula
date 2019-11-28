@@ -9,7 +9,14 @@
       <h5 class="with-related">for ${department.name}</h5>
     </div>
 
-    <@pm.alerts "addCommand" department.name users role />
+    <@pm.validation_alerts "addCommand" />
+    <@pm.validation_alerts "removeCommand" />
+
+    <#if (action!"") == "add">
+      <@pm.alerts department.name users role />
+    <#elseif (action!"") == "remove">
+      <@pm.alerts department.name users role />
+    </#if>
 
     <div class="row">
       <div class="col-md-6">
@@ -21,7 +28,7 @@
 
         <h3 class="permissionTitle">Departmental admins <@fmt.help_popover id="deptadmins" title="Departmental admins" content="${popover}" html=true /></h3>
 
-        <@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "Departmental Administrator" />
+        <@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "Departmental administrator" />
       </div>
       <div class="col-md-6">
         <#assign popover>

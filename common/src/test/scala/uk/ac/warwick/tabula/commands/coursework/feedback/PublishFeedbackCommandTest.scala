@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class PublishFeedbackCommandTest extends TestBase with Mockito {
@@ -58,7 +58,7 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
     assignment.feedbacks = JArrayList(feedback)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
   }
 
 }

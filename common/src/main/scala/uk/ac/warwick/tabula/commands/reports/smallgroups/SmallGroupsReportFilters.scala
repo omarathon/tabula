@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
 import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.userlookup.User
 
 object SmallGroupsReportFilters {
-
-  val attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
   def identity(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = result
 
@@ -27,24 +24,32 @@ object SmallGroupsReportFilters {
       )
     }
 
-    val unrecordedMap = result.attendance.map { case (studentData, eventMap) =>
+    val unrecordedMap: Map[User, Map[SmallGroupEventWeek, AttendanceState]] = result.attendance.map { case (studentData, eventMap) =>
       studentData -> eventMap.filter { case (event, state) => isUnrecorded(event, state) }
     }.filter { case (_, eventMap) => eventMap.nonEmpty }
+
     AllSmallGroupsReportCommandResult(
       unrecordedMap,
-      attendanceMonitoringService.getAttendanceMonitoringDataForStudents(unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
-      unrecordedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+      result.relevantEvents,
+      result.studentDatas.filter { d => unrecordedMap.keySet.exists(_.getWarwickId == d.universityId) },
+      unrecordedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt)),
+      result.reportRangeStartDate,
+      result.reportRangeEndDate
     )
   }
 
   def missed(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
-    val missedMap = result.attendance.map { case (studentData, eventMap) =>
+    val missedMap: Map[User, Map[SmallGroupEventWeek, AttendanceState]] = result.attendance.map { case (studentData, eventMap) =>
       studentData -> eventMap.filter { case (_, state) => state == AttendanceState.MissedUnauthorised || state == AttendanceState.MissedAuthorised }
-    }.filter { case (studentData, eventMap) => eventMap.nonEmpty }
+    }.filter { case (_, eventMap) => eventMap.nonEmpty }
+
     AllSmallGroupsReportCommandResult(
       missedMap,
-      attendanceMonitoringService.getAttendanceMonitoringDataForStudents(missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
-      missedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+      result.relevantEvents,
+      result.studentDatas.filter { d => missedMap.keySet.exists(_.getWarwickId == d.universityId) },
+      missedMap.flatMap { case (_, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt)),
+      result.reportRangeStartDate,
+      result.reportRangeEndDate
     )
   }
 }

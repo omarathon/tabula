@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal}
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryService, AuditEventQueryServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.{DateTime, DateTimeConstants, DateTimeZone}
 import org.mockito.Mockito.when

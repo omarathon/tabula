@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ProfilesHomeInformation(
   currentSmallGroups: Seq[SmallGroup] = Nil,

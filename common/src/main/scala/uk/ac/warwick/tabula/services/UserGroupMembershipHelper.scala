@@ -23,7 +23,7 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
@@ -119,16 +119,18 @@ trait UserGroupMembershipHelperLookup {
   // To override in tests
   protected def getUser(usercode: String): User = userLookup.getUserByUserId(usercode)
 
-  protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map {
-    usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala
+  protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode =>
+    userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala.toSeq
   }.getOrElse(Nil)
 
   protected def findByInternal(user: User): Seq[String] = {
-    val groupsByUser = session.createQuery(groupsByUserHql, classOf[String])
-      .setString("universityId", user.getWarwickId)
-      .setString("userId", user.getUserId)
-      .list
-      .asScala
+    val groupsByUser =
+      session.createQuery(groupsByUserHql, classOf[String])
+        .setString("universityId", user.getWarwickId)
+        .setString("userId", user.getUserId)
+        .list
+        .asScala
+        .toSeq
 
     val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
     val groupsByWebgroup =

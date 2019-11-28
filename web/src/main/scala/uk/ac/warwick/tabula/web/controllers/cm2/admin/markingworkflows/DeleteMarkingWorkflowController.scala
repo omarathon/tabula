@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{DeleteMarkingWorkflowCommand, DeleteMarkingWorkflowState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}

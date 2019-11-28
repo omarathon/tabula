@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.reports
 
 import org.joda.time.LocalDate
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.SelfValidating
@@ -12,7 +13,7 @@ trait ReportPermissions extends RequiresPermissionsChecking with PermissionsChec
 
   self: ReportCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.Reports, department)
   }
 
@@ -63,4 +64,9 @@ trait ReportCommandRequestValidation extends SelfValidating {
       else if (endDate.isAfter(academicYear.lastDay)) errors.rejectValue("endDate", "reports.dates.max")
     }
   }
+}
+
+object ReportsDateFormats {
+  final val ReportDate: DateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+  final val CSVDate: DateTimeFormatter = DateTimeFormat.forPattern("ddMMyy")
 }

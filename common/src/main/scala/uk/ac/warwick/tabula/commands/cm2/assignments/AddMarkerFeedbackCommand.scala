@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 //FIXME - Ideally should use cake pattern  for this and UploadFeedbackCommand - currently used migrated cm1 commands
 class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitter: CurrentUser)
@@ -111,16 +111,16 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
     item.duplicateFileNames = attachedFiles & feedbackFiles
   }
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+      .studentIds(items.asScala.toSeq.map(_.uniNumber))
+      .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
   }
 
   override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
     d.assignment(assignment)
-      .studentIds(items.asScala.map(_.uniNumber))
-      .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+      .studentIds(items.asScala.toSeq.map(_.uniNumber))
+      .studentUsercodes(items.asScala.toSeq.flatMap(_.student.map(_.getUserId)))
       .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
       .markerFeedbacks(feedbacks)
   }

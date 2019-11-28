@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.permissions.Permissions
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 

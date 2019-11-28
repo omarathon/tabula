@@ -1,25 +1,27 @@
 package uk.ac.warwick.tabula.services.scheduling
 
+import java.lang.{Boolean => JBoolean, Integer => JInteger}
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 import javax.sql.DataSource
 import org.quartz._
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
 import org.springframework.beans.factory.{FactoryBean, InitializingBean}
 import org.springframework.context.annotation.{Bean, Configuration, Profile}
-import org.springframework.core.env.Environment
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+import org.springframework.core.env.{Environment, Profiles, PropertyResolver, PropertySourcesPropertyResolver}
 import org.springframework.core.io.ClassPathResource
-import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.quartz.{JobDetailFactoryBean, QuartzJobBean, SchedulerFactoryBean, SpringBeanJobFactory}
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.ScheduledJob
-import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
+import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.{JobConfiguration, ScheduledJob}
+import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
 import uk.ac.warwick.util.web.Uri
@@ -30,7 +32,7 @@ import scala.reflect._
 
 object SchedulingConfiguration {
 
-  abstract class UnscheduledJob[J <: AutowiredJobBean : ClassTag] {
+  sealed abstract class JobConfiguration[J <: AutowiredJobBean : ClassTag] {
     def name: String
 
     lazy val jobDetail: JobDetail = {
@@ -44,21 +46,17 @@ object SchedulingConfiguration {
     }
   }
 
-  case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](jobName: Option[String] = None) extends UnscheduledJob[J] {
-    lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
-  }
+  case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](name: String) extends JobConfiguration[J]
 
-  abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] extends UnscheduledJob[J] {
+  sealed abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] extends JobConfiguration[J] {
     def trigger: T
   }
 
   case class SimpleTriggerJob[J <: AutowiredJobBean : ClassTag](
     repeatInterval: Duration,
-    jobName: Option[String] = None,
+    name: String,
     misfireInstruction: Int = SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
   ) extends ScheduledJob[J, SimpleTrigger] {
-    lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
-
     lazy val trigger: SimpleTrigger = {
       val trigger = new PersistableSimpleTriggerFactoryBean
       trigger.setName(name)
@@ -77,11 +75,9 @@ object SchedulingConfiguration {
 
   case class CronTriggerJob[J <: AutowiredJobBean : ClassTag](
     cronExpression: String,
-    jobName: Option[String] = None,
+    name: String,
     misfireInstruction: Int = CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING
   ) extends ScheduledJob[J, CronTrigger] {
-    lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
-
     lazy val trigger: CronTrigger = {
       val trigger = new PersistableCronTriggerFactoryBean
       trigger.setName(name)
@@ -93,63 +89,142 @@ object SchedulingConfiguration {
     }
   }
 
-  val unscheduledJobs: Seq[UnscheduledJob[_]] = Seq(
-    SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob](),
-    SimpleUnscheduledJob[ImportAssignmentsAllYearsJob](),
-    SimpleUnscheduledJob[ImportSmallGroupEventLocationsJob](),
-    SimpleUnscheduledJob[TurnitinTcaRegisterWebhooksJob](),
-    SimpleUnscheduledJob[BulkImportModuleRegistrationsJob]()
-  )
+  /**
+   * Parses a duration string. If no units are specified in the string, it is
+   * assumed to be in milliseconds. The returned duration is in nanoseconds.
+   * The purpose of this function is to implement the duration-related methods
+   * in the ConfigObject interface.
+   *
+   * From Typesafe SimpleConfig
+   *
+   * @param input
+   *              the string to parse
+   * @return duration as a Scala FiniteDuration
+   */
+  private def parseDuration(input: String): FiniteDuration = {
+    val unitStringRaw: String = input.reverse.takeWhile(Character.isLetter).reverse
+    val numberString: String = input.substring(0, input.length - (unitStringRaw.length + 1))
+
+    require(numberString.length > 0, s"No number in period value '$input'")
+
+    val unitString =
+      if (unitStringRaw.length > 2 && !unitStringRaw.endsWith("s")) s"${unitStringRaw}s"
+      else unitStringRaw
+
+    // Note that this is deliberately case-sensitive
+    val unit: TimeUnit = unitString match {
+      case "" | "ms" | "millis" | "milliseconds" => TimeUnit.MILLISECONDS
+      case "us" | "micros" | "microseconds" => TimeUnit.MICROSECONDS
+      case "ns" | "nanos" | "nanoseconds" => TimeUnit.NANOSECONDS
+      case "d" | "days" => TimeUnit.DAYS
+      case "h" | "hours" => TimeUnit.HOURS
+      case "s" | "seconds" => TimeUnit.SECONDS
+      case "m" | "minutes" => TimeUnit.MINUTES
+      case _ => throw new IllegalArgumentException(s"Could not parse time unit '$unitStringRaw' (try ns, us, ms, s, m, h, d)")
+    }
+
+    Duration(numberString.toLong, unit)
+  }
+
+  private def defaultJobName[J <: AutowiredJobBean : ClassTag]: String = classTag[J].runtimeClass.getSimpleName
+
+  private def propertiesConfiguredScheduledJob[J <: AutowiredJobBean : ClassTag](configKey: String)(implicit properties: PropertyResolver): Option[ScheduledJob[J, _ <: Trigger]] =
+    if (properties.getProperty[JBoolean](s"$configKey.unscheduled", classOf[JBoolean], false)) {
+      None
+    } else if (properties.containsProperty(s"$configKey.cron")) {
+      Some(CronTriggerJob[J](
+        cronExpression = properties.getRequiredProperty(s"$configKey.cron"),
+        name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
+        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING)
+      ))
+    } else if (properties.containsProperty(s"$configKey.repeat")) {
+      Some(SimpleTriggerJob[J](
+        repeatInterval = parseDuration(properties.getRequiredProperty(s"$configKey.repeat")),
+        name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
+        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT)
+      ))
+    } else {
+      None
+    }
 
   /**
-    * Be very careful about changing the names of jobs here. If a job with a name is no longer referenced,
-    * we will clear out ALL Quartz data the next time that the application starts, which may have unintended
-    * side-effects (but will probably be fine). Adding new jobs is fine, it's just dereferencing or renaming
-    * that's awkward.
-    *
-    * @see http://codrspace.com/Khovansa/spring-quartz-with-a-database/
-    */
-  val scheduledJobs: Seq[ScheduledJob[_, _ <: Trigger]] = Seq(
+   * Configure one or more `JobConfiguration`s from a Spring `Environment` with the specified base `configKey`.
+   *
+   * This will first try to configure a single scheduled job at the specified key, and if no config exists
+   * then it will then try and configure multiple scheduled jobs from an array of config keys under this one,
+   * starting at 0. If that fails, it will return a single unscheduled job with no trigger information.
+   *
+   * @param configKey
+   *         The config key to resolve for job configuration parameters
+   * @param properties
+   *         The property resolver to resolve parameters against
+   * @tparam J
+   *         The type of AutowiredJobBean to configure
+   * @return
+   *         A sequence of at least one JobConfiguration
+   */
+  def propertiesConfiguredJob[J <: AutowiredJobBean : ClassTag](configKey: String)(implicit properties: PropertyResolver): Seq[JobConfiguration[J]] =
+    propertiesConfiguredScheduledJob[J](configKey).map(j => Seq(j))
+      .orElse {
+        Option {
+          LazyList.from(0)
+            .map(i => propertiesConfiguredScheduledJob[J](s"$configKey.$i"))
+            .takeWhile(_.nonEmpty)
+            .collect { case Some(j) => j }
+        }.filterNot(_.isEmpty)
+      }
+      .getOrElse(Seq(SimpleUnscheduledJob[J](properties.getProperty(s"$configKey.name", defaultJobName[J]))))
+
+  /**
+   * DANGER WILL ROBINSON
+   *
+   * Are you removing an existing job here or making a breaking change to the job configuration in Quartz?
+   * Adding a new job is fine but existing ones will probably need to be managed with a Flyway migration to
+   * be picked up (to avoid nasty race conditions with multiple servers trying to clear out and create jobs)
+   */
+  def scheduledJobs(implicit properties: PropertyResolver): Seq[JobConfiguration[_ <: AutowiredJobBean]] = Seq(
+    // Unscheduled jobs that are triggered explicitly by Sysadmin things
+    propertiesConfiguredJob[ImportProfilesSingleDepartmentJob]("scheduling.importProfilesSingleDepartment"),
+    propertiesConfiguredJob[ImportAssignmentsJob]("scheduling.importAssignments"),
+    propertiesConfiguredJob[ImportAssignmentsAllYearsJob]("scheduling.importAssignmentsAllYears"),
+    propertiesConfiguredJob[ImportSmallGroupEventLocationsJob]("scheduling.importSmallGroupEventLocations"),
+    propertiesConfiguredJob[TurnitinTcaRegisterWebhooksJob]("scheduling.turnitinTcaRegisterWebhooks"),
+    propertiesConfiguredJob[BulkImportModuleRegistrationsJob]("scheduling.bulkImportModuleRegistrations"),
+
     // Imports
-    CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
-    CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
-    CronTriggerJob[StampMissingRowsJob](cronExpression = "0 0 23 * * ?"), // 11:00pm
-    CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
-    CronTriggerJob[ManualMembershipWarningJob](cronExpression = "0 0 9 ? 1/1 MON#1 *"), // first Monday of the month at 9am
-    CronTriggerJob[ManualMembershipWarningJob](cronExpression = "0 0 9 ? 1/1 MON#3 *"), // third Monday of the month at 9am
-    CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
+    propertiesConfiguredJob[ImportAcademicDataJob]("scheduling.importAcademicData"),
+    propertiesConfiguredJob[ImportProfilesJob]("scheduling.importProfiles"),
+    propertiesConfiguredJob[StampMissingRowsJob]("scheduling.stampMissingRows"),
+    propertiesConfiguredJob[ImportModuleMembershipDataJob]("scheduling.importModuleMembershipData"),
+    propertiesConfiguredJob[ManualMembershipWarningJob]("scheduling.manualMembershipWarning"),
+    propertiesConfiguredJob[ImportModuleListsJob]("scheduling.importModuleLists"),
 
-    CronTriggerJob[RemoveAgedApplicantsJob](cronExpression = "0 0 3 * * ?"), // 3am everyday
+    propertiesConfiguredJob[RemoveAgedApplicantsJob]("scheduling.removeAgedApplicants"),
 
-    CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 10 ? * SUN *"), // 10am every Sunday
+    propertiesConfiguredJob[CleanupTemporaryFilesJob]("scheduling.cleanupTemporaryFiles"),
 
-    CronTriggerJob[UpdateMonitoringPointSchemeMembershipJob](cronExpression = "0 0 4 * * ?"), // 4am
-    CronTriggerJob[UpdateLinkedDepartmentSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
-    CronTriggerJob[UpdateLinkedSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
+    propertiesConfiguredJob[ProcessScheduledNotificationsJob]("scheduling.processScheduledNotifications"),
+    propertiesConfiguredJob[ProcessTriggersJob]("scheduling.processTriggers"),
 
-    SimpleTriggerJob[ProcessScheduledNotificationsJob](repeatInterval = 20.seconds),
-    SimpleTriggerJob[ProcessTriggersJob](repeatInterval = 10.seconds),
+    propertiesConfiguredJob[ProcessEmailQueueJob]("scheduling.processEmailQueue"),
+    propertiesConfiguredJob[ProcessNotificationListenersJob]("scheduling.processNotificationListeners"),
 
-    SimpleTriggerJob[ProcessEmailQueueJob](repeatInterval = 5.seconds),
-    SimpleTriggerJob[ProcessNotificationListenersJob](repeatInterval = 5.seconds),
+    propertiesConfiguredJob[ProcessJobQueueJob]("scheduling.processJobQueue"),
 
-    SimpleTriggerJob[ProcessJobQueueJob](repeatInterval = 10.seconds),
+    propertiesConfiguredJob[UpdateCheckpointTotalsJob]("scheduling.updateCheckpointTotals"),
 
-    SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 1.minute),
-
-    SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds),
-    SimpleTriggerJob[ProcessUrkundQueueJob](repeatInterval = 10.seconds)
+    propertiesConfiguredJob[ProcessTurnitinLtiQueueJob]("scheduling.processTurnitinLtiQueue"),
 
     // Migration now complete, don't need this any more
-    // SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)
-  )
+    // propertiesConfiguredJob[ObjectStorageMigrationJob]("scheduling.objectStorageMigration"),
+  ).flatten
 
-  val scheduledSitsJobs: Seq[ScheduledJob[_, _ <: Trigger]] = Seq(
+  def scheduledSitsJobs(implicit properties: PropertyResolver): Seq[JobConfiguration[_ <: AutowiredJobBean]] = Seq(
     // SITS exports
-    SimpleTriggerJob[ExportAttendanceToSitsJob](repeatInterval = 5.minutes),
-    SimpleTriggerJob[ExportFeedbackToSitsJob](repeatInterval = 5.minutes),
-    SimpleTriggerJob[ExportYearMarksToSitsJob](repeatInterval = 5.minutes)
-  )
+    propertiesConfiguredJob[ExportAttendanceToSitsJob]("scheduling.exportAttendanceToSits"),
+    propertiesConfiguredJob[ExportFeedbackToSitsJob]("scheduling.exportFeedbackToSits"),
+    propertiesConfiguredJob[ExportYearMarksToSitsJob]("scheduling.exportYearMarksToSits")
+  ).flatten
 }
 
 @Configuration
@@ -167,59 +242,36 @@ class SchedulingConfiguration {
   @Autowired var jobFactory: SpringBeanJobFactory = _
 
   @Autowired var env: Environment = _
+  @Autowired var propertiesPlaceholderConfigurer: PropertySourcesPlaceholderConfigurer = _
+  lazy val properties: PropertySourcesPropertyResolver = new PropertySourcesPropertyResolver(propertiesPlaceholderConfigurer.getAppliedPropertySources)
   @Autowired var maintenanceModeService: MaintenanceModeService = _
 
   @Value("${toplevel.url}") var toplevelUrl: String = _
 
-  private def scheduler(scheduledJobs: Seq[ScheduledJob[_, _ <: Trigger]]): FactoryBean[Scheduler] = {
-    // If we're deploying a change that means an existing trigger is no longer referenced, clear the scheduler
-    val triggerNames: Seq[String] =
-      new JdbcTemplate(dataSource).queryAndMap("select trigger_name from qrtz_triggers") {
-        case (rs, _) => rs.getString("trigger_name")
-      }
-
-    val jobs = Seq(scheduledJobs, SchedulingConfiguration.unscheduledJobs).flatten
-    val jobNames = jobs.map(_.name)
-
-    // Clear the scheduler if there is a trigger that we no longer want to run
-    val clearScheduler = !triggerNames.forall(jobNames.contains)
-
-    val factory = new SchedulerFactoryBean() {
-      override def createScheduler(schedulerFactory: SchedulerFactory, schedulerName: String): Scheduler = {
-        val scheduler = super.createScheduler(schedulerFactory, schedulerName)
-
-        if (clearScheduler) {
-          scheduler.clear()
-        }
-
-        scheduler
-      }
-    }
-
+  private def scheduler(jobs: Seq[JobConfiguration[_ <: AutowiredJobBean]]): FactoryBean[Scheduler] = {
+    val factory = new SchedulerFactoryBean
     factory.setConfigLocation(new ClassPathResource("/quartz.properties"))
     factory.setStartupDelay(10)
     factory.setDataSource(dataSource)
     factory.setTransactionManager(transactionManager)
     factory.setSchedulerName(Uri.parse(toplevelUrl).getAuthority)
-    factory.setOverwriteExistingJobs(true)
+    factory.setOverwriteExistingJobs(false)
 
     // We only auto-startup on the scheduler, and only if we're not in maintenance mode. This allows us
     // to wire a scheduler on nodes that wouldn't normally get one and use it to schedule jobs. Neat!
-    factory.setAutoStartup(env.acceptsProfiles("scheduling") && !maintenanceModeService.enabled)
+    factory.setAutoStartup(env.acceptsProfiles(Profiles.of("scheduling")) && !maintenanceModeService.enabled)
 
-    if (!env.acceptsProfiles("scheduling")) {
-      factory.setQuartzProperties(new Properties() {
-        {
-          setProperty("org.quartz.jobStore.isClustered", "false")
-        }
-      })
+    if (!env.acceptsProfiles(Profiles.of("scheduling"))) {
+      factory.setQuartzProperties(new Properties() {{
+        setProperty("org.quartz.jobStore.isClustered", "false")
+      }})
     }
 
     factory.setApplicationContextSchedulerContextKey("applicationContext")
     factory.setJobFactory(jobFactory)
 
-    factory.setJobDetails(jobs.map(_.jobDetail): _*)
-    factory.setTriggers(scheduledJobs.map(_.trigger): _*)
+    factory.setJobDetails(jobs.map(_.jobDetail).distinct: _*)
+    factory.setTriggers(jobs.collect { case j: ScheduledJob[_, _] => j.trigger }: _*)
 
     factory
   }
@@ -227,13 +279,13 @@ class SchedulingConfiguration {
   @Bean
   @Profile(Array("dev", "production"))
   def schedulerWithSitsExports(): FactoryBean[Scheduler] = {
-    scheduler(SchedulingConfiguration.scheduledJobs ++ SchedulingConfiguration.scheduledSitsJobs)
+    scheduler(SchedulingConfiguration.scheduledJobs(properties) ++ SchedulingConfiguration.scheduledSitsJobs(properties))
   }
 
   @Bean
   @Profile(Array("sandbox"))
   def schedulerNoSitsExports(): FactoryBean[Scheduler] = {
-    scheduler(SchedulingConfiguration.scheduledJobs)
+    scheduler(SchedulingConfiguration.scheduledJobs(properties))
   }
 
 }
@@ -244,6 +296,14 @@ class TestSchedulingConfiguration {
   @Bean def scheduler(): FactoryBean[Scheduler] = {
     new SchedulerFactoryBean
   }
+}
+
+trait SchedulerComponent {
+  def scheduler: Scheduler
+}
+
+trait AutowiringSchedulerComponent extends SchedulerComponent {
+  var scheduler: Scheduler = Wire[Scheduler]
 }
 
 @Component

@@ -5,40 +5,34 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 object UniversityIdSearchCommand {
-  def apply() =
-    new UniversityIdSearchCommandInternal
+  def apply(academicYear: AcademicYear) =
+    new UniversityIdSearchCommandInternal(academicYear)
       with ComposableCommand[Seq[String]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with UserSearchCommandRequest
+      with UserSearchCommandState
       with ReadOnly with Unaudited
 }
 
-abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UniversityIdSearchCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Seq[String]] with FiltersStudents {
 
-  self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+  self: UserSearchCommandRequest with UserSearchCommandState with ModuleAndDepartmentServiceComponent =>
 
   override def applyInternal(): Seq[String] = {
     if (Option(department).isEmpty && serializeFilter.isEmpty) {
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(AcademicYear.now())
+    val restrictions = if (studentsOnly) {
+      buildRestrictions(academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
+    } else {
+      groupNameRestriction ++ homeDepartmentRestriction
+    }.toSeq
 
-    Option(department) match {
-      case Some(d) =>
-        Seq(d).flatMap(dept =>
-          profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-            dept,
-            restrictions,
-            buildOrders()
-          )
-        ).distinct
-      case _ =>
-        profileService.findAllUniversityIdsByRestrictions(
-          restrictions,
-          buildOrders()
-        ).distinct
-    }
+    profileService.findAllUniversityIdsByRestrictions(
+      restrictions,
+      buildOrders()
+    ).distinct
   }
 }

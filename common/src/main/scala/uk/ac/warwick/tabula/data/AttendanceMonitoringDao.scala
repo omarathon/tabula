@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 import scala.reflect.ClassTag
-import scala.util.Try
 
 abstract class SchemeMembershipItemType(val value: String)
 
@@ -284,10 +283,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       // the safeInSeq does multiple queries which will mess up the group-by, returning e.g. (Autumn,1) and (Autumn,3)
       // separately. This will merge it back into (Autumn,4)
       val mergedTermCounts = termCounts.groupBy(_._1)
+        .view
         .mapValues { value => value.map(_._2).sum } // christ.
 
       val reportedTerms = mergedTermCounts.toSeq
-        .filter { case (term, count) => count.intValue() == students.size }
+        .filter { case (_, count) => count.intValue() == students.size }
         .map(_._1)
       AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
     }
@@ -323,7 +323,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
           .add(property("userId")),
         "universityId",
         universityIds
-      ).seq.map { objArray =>
+      ).map { objArray =>
         SchemeMembershipItem(
           itemType,
           objArray(0).asInstanceOf[String],
@@ -415,7 +415,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
         .add(safeIn("point", points))
         .seq
 
-      checkpoints.groupBy(_.student).mapValues(_.groupBy(_.point).mapValues(_.head))
+      checkpoints.groupBy(_.student).view.mapValues(_.groupBy(_.point).view.mapValues(_.head).toMap).toMap
     }
   }
 
@@ -697,10 +697,21 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
         val criteria = session.newCriteria[StudentMember]
           .createAlias("studentCourseDetails", "studentCourseDetails")
           .createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-          .createAlias("studentCourseDetails.currentRoute", "route")
-          .createAlias("studentCourseDetails.allRelationships", "relationships", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships.relationshipType", "relationshipType", JoinType.LEFT_OUTER_JOIN)
-          .createAlias("relationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN, Option(is("relationshipType.id", "personalTutor")))
+          .createAlias("studentCourseDetails.currentRoute", "route", JoinType.LEFT_OUTER_JOIN)
+          .createAlias("studentCourseDetails.allRelationships", "currentRelationships", JoinType.LEFT_OUTER_JOIN, Some(
+            and(
+              or(
+                isNull("currentRelationships.endDate"),
+                ge("currentRelationships.endDate", DateTime.now)
+              ),
+              or(
+                isNull("currentRelationships.startDate"),
+                le("currentRelationships.startDate", DateTime.now)
+              ),
+              is("currentRelationships.relationshipType.id", "personalTutor")
+            )
+          ))
+          .createAlias("currentRelationships._agentMember", "agent", JoinType.LEFT_OUTER_JOIN)
           .add(isNull("studentCourseDetails.missingFromImportSince"))
           .add(is("studentCourseYearDetails.academicYear", academicYear))
 

@@ -2,9 +2,8 @@
 
 <#assign universityDescriptorPopoverContent>
   <p>
-    These are the generic descriptors for the 20-point undergraduate marking scale provided by <a target="_blank"
-                                                                                                  href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Teaching
-      Quality</a> for reference. Departments should create their own descriptors to explain the discipline-specific skills and knowledge that a student is
+    These are the generic descriptors for the 20-point undergraduate marking scale provided by <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">
+      Education Policy and Quality</a> for reference. Departments should create their own descriptors to explain the discipline-specific skills and knowledge that a student is
     required to demonstrate to achieve the respective points on the scale.
   </p>
 </#assign>
@@ -13,7 +12,7 @@
   <p>
     Enter your department's descriptors for the 20-point undergraduate marking scale. The descriptors should explain the discipline-specific skills and
     knowledge that a student is required to demonstrate to achieve the respective points on the scale. For guidance on when and how to use the marking scale,
-    visit the <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Teaching Quality</a> website.
+    visit the <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Education Policy and Quality</a> website.
   </p>
 </#assign>
 

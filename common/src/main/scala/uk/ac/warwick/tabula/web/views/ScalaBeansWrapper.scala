@@ -12,13 +12,13 @@ import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
+import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
@@ -48,9 +48,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
       case smap: scala.collection.SortedMap[_, _] => superWrap(JLinkedHashMap(smap.toSeq: _*))
       case lmap: scala.collection.immutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
       case lmap: scala.collection.mutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
-      case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
-      case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
-      case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
+      case smap: scala.collection.Map[_, _] => superWrap(smap.asJava)
+      case smapview: scala.collection.MapView[_, _] => superWrap(smapview.toMap.asJava)
+      case sseq: scala.Seq[_] => superWrap(sseq.asJava)
+      case scol: scala.Iterable[_] => superWrap(scol.asJavaCollection)
       case directive: TemplateDirectiveModel => superWrap(directive)
       case method: TemplateMethodModelEx => superWrap(method)
       case model: TemplateModel => superWrap(model)

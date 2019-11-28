@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, Description, Notifies, UserAware}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetSelfSignUpState}
 import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsOtherSignUpNotification
@@ -9,6 +10,8 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCach
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
+import scala.jdk.CollectionConverters._
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
@@ -116,27 +119,25 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
     student3.setUserId("student3")
     val students = Seq(student1, student2, student3)
 
-    val userLookup: UserLookupService = mock[UserLookupService]
+    val userLookup: UserLookupService = smartMock[UserLookupService]
 
     def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
       case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
       case ug: UserGroup => ug.userLookup = userLookup
     }
 
-    userLookup.getUserByUserId(any[String]) answers { id =>
+    userLookup.getUserByUserId(any[String]) answers { id: Any =>
       students.find(_.getUserId == id).getOrElse(new AnonymousUser)
     }
 
-    userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+    userLookup.getUserByWarwickUniId(any[String]) answers { id: Any =>
       students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
     }
 
-    userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers {
-      _ match {
+    userLookup.usersByWarwickUniIds(any[Seq[String]]) answers { arg: Any =>
+      arg match {
         case ids: Seq[String@unchecked] =>
-          ids.map(id => (id, students.find {
-            _.getWarwickId == id
-          }.getOrElse(new AnonymousUser()))).toMap
+          ids.map(id => (id, students.find(_.getWarwickId == id).getOrElse(new AnonymousUser()))).toMap
       }
     }
   }
@@ -155,9 +156,8 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
       wireUserLookup(set1.members)
 
       set1.membershipService = membershipService
-      membershipService.determineMembershipUsers(set1.upstreamAssessmentGroupInfos, Some(set1.members), resitOnly = false) returns (set1.members.users.toSeq)
-
       val s1: Seq[User] = set1.members.users.toSeq
+      membershipService.determineMembershipUsers(set1.upstreamAssessmentGroupInfos, Some(set1.members), resitOnly = false) returns s1
 
       val set2 = new SmallGroupSet()
       set2.smallGroupService = None
@@ -166,9 +166,8 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
       wireUserLookup(set2.members)
 
       set2.membershipService = membershipService
-      membershipService.determineMembershipUsers(set2.upstreamAssessmentGroupInfos, Some(set2.members), resitOnly = false) returns (set2.members.users.toSeq)
-
       val s2: Seq[User] = set2.members.users.toSeq
+      membershipService.determineMembershipUsers(set2.upstreamAssessmentGroupInfos, Some(set2.members), resitOnly = false) returns s2
 
       val notifier = new OpenSmallGroupSetNotifier with OpenSmallGroupSetState with UserAware {
         val department: Department = dept

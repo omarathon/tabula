@@ -6,7 +6,7 @@ case class TeachingQualityUser() extends BuiltInRole(TeachingQualityRoleDefiniti
 
 case object TeachingQualityRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-  override def description = "Teaching quality user"
+  override def description = "Education Policy and Quality user"
 
   GrantsGlobalPermission(
     MitigatingCircumstancesSubmission.Read,

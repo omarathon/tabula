@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Interface for a Job to update its status in the database.
@@ -29,7 +29,7 @@ trait JobInstance {
 
   def getStrings(name: String): Seq[String] = propsMap(name) match {
     case seq: Seq[String]@unchecked => seq
-    case jList => jList.asInstanceOf[JList[String]].asScala
+    case jList => jList.asInstanceOf[JList[String]].asScala.toSeq
   }
 
   def setStrings(name: String, value: Seq[String]): Unit = propsMap = propsMap + (name -> value.asJava)

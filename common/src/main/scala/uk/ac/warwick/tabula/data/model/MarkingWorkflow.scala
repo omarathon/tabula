@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** A MarkingWorkflow defines how an assessment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -45,7 +45,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
   // Not all marking workflows are suitable for exams
   def validForExams: Boolean = false
 
-  def permissionsParents: Stream[Department] = Option(department).toStream
+  def permissionsParents: LazyList[Department] = Option(department).to(LazyList)
 
   def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String): String =
     Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
@@ -212,7 +212,7 @@ trait AssessmentMarkerMap {
         assignment.firstMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty) ++
           assignment.secondMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty)
 
-      assignment.submissions.asScala.filter(s => studentIds.contains(s.usercode))
+      assignment.submissions.asScala.toSeq.filter(s => studentIds.contains(s.usercode))
     }
 
     val allSubmissionsForMarker = getSubmissionsFromMap(assignment, marker)

@@ -47,7 +47,7 @@ trait StudentCourseworkFullScreenCommandState {
 
 trait StudentCourseworkFullScreenCommandPermissions extends RequiresPermissionsChecking {
   self: StudentCourseworkFullScreenCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     memberOrUser.asMember.foreach { member =>
       p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
       p.PermissionCheck(Permissions.Submission.Read, member)

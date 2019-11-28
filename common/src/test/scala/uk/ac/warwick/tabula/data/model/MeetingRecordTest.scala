@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, Pending}
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class MeetingRecordTest extends PersistenceTestBase {

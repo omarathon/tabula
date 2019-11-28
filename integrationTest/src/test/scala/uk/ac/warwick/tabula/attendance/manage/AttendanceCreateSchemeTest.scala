@@ -29,15 +29,11 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
     When("I choose a route")
     click on cssSelector(".find-students .section-title a.collapse-trigger")
     eventually {
-      findAll(cssSelector(".find-students div.student-filter")).forall {
-        _.isDisplayed
-      } should be (true)
+      findAll(cssSelector(".find-students div.student-filter")).forall(_.isDisplayed) should be (true)
     }
     click on cssSelector("span[data-placeholder='All routes']")
     eventually {
-      findAll(cssSelector("input[name=routes]")).forall {
-        _.isDisplayed
-      } should be (true)
+      findAll(cssSelector("input[name=routes]")).forall(_.isDisplayed) should be (true)
     }
     click on cssSelector("input[name=routes]")
 

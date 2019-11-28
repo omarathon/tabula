@@ -14,7 +14,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 

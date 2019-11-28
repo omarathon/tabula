@@ -1,22 +1,36 @@
 package uk.ac.warwick.tabula.services.healthchecks
 
 import java.sql.ResultSet
-import javax.sql.DataSource
+import java.time.LocalDateTime
 
+import javax.sql.DataSource
 import org.joda.time.DateTime
+import org.quartz.Scheduler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc._
+import uk.ac.warwick.util.core.DateTimeUtils
+import uk.ac.warwick.util.core.scheduling.QuartzDAO
+import uk.ac.warwick.util.service.healthchecks.scheduling.{AbstractQuartzJobQueueHealthcheck, AbstractQuartzSchedulerHealthcheck}
+import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 import uk.ac.warwick.util.web.Uri
 
-import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
+
+object QuartzSchedulerTriggersHealthcheck {
+  val name = "quartz-triggers"
+  val initialState = new ServiceHealthcheck(name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
+}
 
 @Component
 @Profile(Array("scheduling"))
-class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
+class QuartzSchedulerTriggersHealthcheck
+  extends ServiceHealthcheckProvider(QuartzSchedulerTriggersHealthcheck.initialState) {
 
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   override def run(): Unit = {
@@ -51,22 +65,22 @@ class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
         }
       }.mkString(", ")
 
-    val perfData = TriggerState.members.flatMap {
-      case state@(TriggerState.Error | TriggerState.Blocked) =>
+    val perfData: Seq[ServiceHealthcheck.PerformanceData[_]] = TriggerState.members.flatMap {
+      case state @ (TriggerState.Error | TriggerState.Blocked) =>
         triggers.get(state).map { triggers =>
-          ServiceHealthcheck.PerformanceData(state.dbValue.toLowerCase, triggers.length, 0, 1)
+          new ServiceHealthcheck.PerformanceData(state.dbValue.toLowerCase, triggers.length, 0, 1)
         }
       case state => triggers.get(state).map { triggers =>
-        ServiceHealthcheck.PerformanceData(state.dbValue.toLowerCase, triggers.length)
+        new ServiceHealthcheck.PerformanceData(state.dbValue.toLowerCase, triggers.length)
       }
     }
 
-    update(ServiceHealthcheck(
-      name = "quartz-triggers",
-      status = status,
-      testedAt = DateTime.now,
-      message = statusString,
-      performanceData = perfData
+    update(new ServiceHealthcheck(
+      QuartzSchedulerTriggersHealthcheck.name,
+      status,
+      LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
+      statusString,
+      perfData.asJava
     ))
   }
 
@@ -74,54 +88,30 @@ class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
 
 @Component
 @Profile(Array("scheduling"))
-class QuartzSchedulerClusterHealthcheck extends ServiceHealthcheckProvider {
+@Autowired
+class QuartzSchedulerClusterHealthcheck(dao: QuartzDAO, scheduler: Scheduler)
+  extends AbstractQuartzSchedulerHealthcheck(
+    "quartz-cluster",
+    dao,
+    () => scheduler.getSchedulerName
+  ) {
 
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
-  override def run(): Unit = {
-    val jdbcTemplate = new JdbcTemplate(Wire.named[DataSource]("dataSource"))
-    val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
+  override def run(): Unit = transactional(readOnly = true) { update(status()) }
+}
 
-    val schedulers =
-      jdbcTemplate.queryAndMap("select * from qrtz_scheduler_state") {
-        case (resultSet, _) => QuartzJdbc.Scheduler(resultSet)
-      }.filter(_.clusterName == clusterName)
+@Component
+@Profile(Array("scheduling"))
+@Autowired
+class QuartzJobQueueHealthcheck(dao: QuartzDAO, scheduler: Scheduler)
+  extends AbstractQuartzJobQueueHealthcheck(
+    "quartz-job-queue",
+    dao,
+    () => scheduler.getSchedulerName
+  ) {
 
-    // A scheduler is out of contact if it hasn't contacted the database for 5 minutes
-    def stale(s: QuartzJdbc.Scheduler) =
-      s.lastCheckin.plusMinutes(5).isBeforeNow
-
-    /**
-      * Critical if there are fewer than 2 schedulers in the cluster or all schedulers are out of contact.
-      * Warning if there is one active scheduler in the cluster
-      */
-    val status =
-      if (schedulers.length < 2) ServiceHealthcheck.Status.Error
-      else if (schedulers.forall(stale)) ServiceHealthcheck.Status.Error
-      else if (schedulers.filterNot(stale).length < 2) ServiceHealthcheck.Status.Warning
-      else ServiceHealthcheck.Status.Okay
-
-    val statusString =
-      if (schedulers.exists(stale)) {
-        val staleSchedulers = schedulers.filter(stale)
-        s"${schedulers.length} schedulers in cluster (${schedulers.map(_.instance).mkString(", ")}), ${staleSchedulers.length} stale (${staleSchedulers.map(_.instance).mkString(", ")})"
-      } else {
-        s"${schedulers.length} schedulers in cluster (${schedulers.map(_.instance).mkString(", ")})"
-      }
-
-    val perfData = Seq(
-      ServiceHealthcheck.PerformanceData("scheduler_count", schedulers.length, 1, 1),
-      ServiceHealthcheck.PerformanceData("active_scheduler_count", schedulers.filterNot(stale).length, 1, 0)
-    )
-
-    update(ServiceHealthcheck(
-      name = "quartz-cluster",
-      status = status,
-      testedAt = DateTime.now,
-      message = statusString,
-      performanceData = perfData
-    ))
-  }
-
+  @Scheduled(fixedRate = 60 * 1000) // 1 minute
+  override def run(): Unit = transactional(readOnly = true) { update(status()) }
 }
 
 object QuartzJdbc {
@@ -192,17 +182,6 @@ object QuartzJdbc {
       jobName = rs.getString("job_name"),
       nonConcurrent = rs.getBoolean("is_nonconcurrent"),
       requestsRecovery = rs.getBoolean("requests_recovery")
-    )
-  }
-
-  case class Scheduler(clusterName: String, instance: String, lastCheckin: DateTime, checkinInterval: Duration)
-
-  object Scheduler {
-    def apply(rs: ResultSet): Scheduler = Scheduler(
-      clusterName = rs.getString("sched_name"),
-      instance = rs.getString("instance_name"),
-      lastCheckin = new DateTime(rs.getLong("last_checkin_time")),
-      checkinInterval = rs.getLong("checkin_interval").millis
     )
   }
 

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
@@ -69,7 +69,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def populate() {
+  @Test def populate(): Unit = {
     new Fixture {
       val (d, s) = (department, set)
       val command = new PopulateFindStudentsForUserGroupCommand with FindStudentsForUserGroupCommandState with FiltersStudents with DeserializesFilterImpl {

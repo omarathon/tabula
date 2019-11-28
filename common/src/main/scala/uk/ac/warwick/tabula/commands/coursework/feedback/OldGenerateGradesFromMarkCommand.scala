@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, AssessmentMember
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OldGenerateGradesFromMarkCommand {
   def apply(module: Module, assessment: Assessment) =
@@ -64,7 +64,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
   }
 
   override def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]] = {
-    studentMarks = marks.mapValues(m => m.toString).asJava
+    studentMarks = marks.view.mapValues(m => m.toString).toMap.asJava
     applyInternal()
   }
 
@@ -74,7 +74,7 @@ trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with
 
   self: GenerateGradesFromMarkCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assessment, module)
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
   }

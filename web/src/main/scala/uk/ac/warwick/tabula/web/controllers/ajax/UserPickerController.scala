@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.controllers.ajax.UserPickerController.UserPickerCommand
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 class UserPickerController extends BaseController {
@@ -58,10 +58,8 @@ object UserPickerController {
     var lastName: String = ""
 
     def applyInternal(): Seq[User] = {
-      var users = userLookup.findUsersWithFilter(filter.asJava).asScala
-      if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards.asJava).asScala.filter {
-        !users.contains(_)
-      }
+      var users = userLookup.findUsersWithFilter(filter.asJava, 20).asScala.toSeq
+      if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards.asJava, 20).asScala.filter(!users.contains(_))
 
       users
     }

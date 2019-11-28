@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.scheduling.{AssignmentImporterComponent, Au
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object ImportAssignmentsCommand {
@@ -87,7 +87,7 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
 
 trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent
   with AssignmentImporterComponent with ImportAssignmentsMembersToImport with RemovesMissingAssessmentComponentsCommand with RemovesMissingUpstreamAssessmentGroupsCommand {
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 
@@ -128,10 +128,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
           .groupBy(_.code).mapValues(_.head)
       }
-      for (assignments <- assessmentComponents.grouped(ImportGroupSize)) {
+      assessmentComponents.grouped(ImportGroupSize).foreach(assignments => {
         benchmark("Save assessment component related assignments") {
           transactional() {
-            for (assignment <- assignments) {
+            assignments.foreach(assignment => {
               if (assignment.name == null) {
                 // Some SITS data is bad, but try to carry on.
                 assignment.name = "Assessment Component"
@@ -139,10 +139,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
               modules.get(assignment.moduleCodeBasic.toLowerCase).foreach(module => assignment.module = module)
               assessmentMembershipService.save(assignment)
-            }
+            })
           }
         }
-      }
+      })
 
       // find any existing AssessmentComponents that no longer appear in SITS
         existingAssessmentComponents.foreach { existing =>
@@ -401,7 +401,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 
 trait ImportAssignmentsDescription extends Describable[Unit] {
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 }
 
 trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {

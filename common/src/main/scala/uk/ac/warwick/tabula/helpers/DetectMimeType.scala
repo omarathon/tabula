@@ -6,13 +6,14 @@ import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.{HttpHeaders, Metadata, TikaMetadataKeys}
 import org.apache.tika.mime.{MediaType, MimeTypes}
-import uk.ac.warwick.tabula.helpers.Closeables._
+
+import scala.util.Using
 
 object DetectMimeType {
   private val detector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
 
   private def detectMimeType(in: InputStream, metadata: Metadata): MediaType =
-    closeThis(TikaInputStream.get(in)) { tikaIS =>
+    Using.resource(TikaInputStream.get(in)) { tikaIS =>
       detector.detect(tikaIS, metadata)
     }
 

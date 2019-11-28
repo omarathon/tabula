@@ -64,12 +64,18 @@ class TurnitinLtiServiceTest extends TestBase {
 
   @Test def removeAccent(): Unit = {
     val badString = "orčpžsíáýd"
-    TurnitinLtiService.removeAccent(badString) should be("orcpzsiayd")
+    TurnitinLtiService.sanitiseForLti(badString) should be("orcpzsiayd")
 
     val goodString = "kailan"
-    TurnitinLtiService.removeAccent(goodString) should be("kailan")
+    TurnitinLtiService.sanitiseForLti(goodString) should be("kailan")
 
     val halfGoodString = "kái\tlán"
-    TurnitinLtiService.removeAccent(halfGoodString) should be("kai lan")
+    TurnitinLtiService.sanitiseForLti(halfGoodString) should be("kai lan")
+  }
+
+  @Test def removeNonAscii(): Unit = {
+    TurnitinLtiService.sanitiseForLti("kái，lán") should be("kai lan")
+    TurnitinLtiService.sanitiseForLti("kái·lán") should be("kai lan")
+    TurnitinLtiService.sanitiseForLti("kái、lán") should be("kai lan")
   }
 }

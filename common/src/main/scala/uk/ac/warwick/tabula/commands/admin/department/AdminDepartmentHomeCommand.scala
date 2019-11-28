@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.model.{Route, Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited, ReadOnly}
@@ -25,14 +25,14 @@ class AdminDepartmentHomeCommandInternal(val department: Department, val user: C
 
   lazy val modules: Seq[Module] =
     if (securityService.can(user, Permissions.Module.Administer, department)) {
-      department.modules.asScala
+      department.modules.asScala.toSeq
     } else {
       modulesWithPermission.toList
     }
 
   lazy val routes: Seq[Route] =
     if (securityService.can(user, Permissions.Route.Administer, department)) {
-      department.routes.asScala
+      department.routes.asScala.toSeq
     } else {
       routesWithPermission.toList
     }
@@ -54,7 +54,7 @@ trait AdminDepartmentHomeCommandState {
 trait AdminDepartmentHomeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     val allDeptPermission = Seq(Permissions.Module.Administer, Permissions.Route.Administer).find { requiredPermission =>
       securityService.can(user, requiredPermission, mandatory(department))
     }

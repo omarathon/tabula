@@ -46,7 +46,7 @@ trait ListStudentsGroupsCommandState {
 
 trait ListStudentsGroupsCommandPermissions extends RequiresPermissionsChecking {
   self: ListStudentsGroupsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Read.SmallGroups, member)
   }
 }

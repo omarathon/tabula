@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatus.{Complete, Created, Processing}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.language.postfixOps
@@ -180,10 +180,6 @@ class FileAttachment extends GeneratedId {
 
   def turnitinCheckInProgress: Boolean = {
     Option(originalityReport).exists(or => Seq(Created, Processing, Complete).contains(or.tcaSubmissionStatus))
-  }
-
-  def urkundResponseReceived: Boolean = {
-    originalityReport != null && originalityReport.reportUrl != null
   }
 
   def generateToken(): FileAttachmentToken = {

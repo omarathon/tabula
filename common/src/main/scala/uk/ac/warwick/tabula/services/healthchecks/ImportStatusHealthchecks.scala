@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.healthchecks
 
+import java.time.LocalDateTime
+
 import humanize.Humanize._
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
@@ -10,17 +12,19 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{AuditEvent, Department}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
+import uk.ac.warwick.util.core.DateTimeUtils
+import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
-abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvider {
+abstract class AbstractImportStatusHealthcheck(name: String)
+  extends ServiceHealthcheckProvider(new ServiceHealthcheck(name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
 
   def WarningThreshold: Duration
 
   def ErrorThreshold: Duration
-
-  def HealthcheckName: String
 
   /**
     * Fetch a list of audit events, most recent first, relating to this import
@@ -42,7 +46,7 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
     val isError = lastFailed.isDefined && lastSuccessful.isDefined && lastFailed.get.eventDate.isAfter(lastSuccessful.get.eventDate)
 
     // if all are failed events among the lot for this specific dept (TAB-6681) - classified as warning
-    val isWarning = lastFailed.isDefined && !lastSuccessful.isDefined
+    val isWarning = lastFailed.isDefined && lastSuccessful.isEmpty
 
     //TAB-5698 - ensure we have some audit
     val status =
@@ -74,14 +78,14 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
         d.toStandardSeconds.getSeconds / 3600.0
       }.getOrElse(0)
 
-    ServiceHealthcheck(
-      name = HealthcheckName,
-      status = status,
-      testedAt = DateTime.now,
-      message = message,
-      performanceData = Seq(
-        ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo, WarningThreshold.toHours, ErrorThreshold.toHours)
-      )
+    new ServiceHealthcheck(
+      name,
+      status,
+      LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
+      message,
+      Seq[ServiceHealthcheck.PerformanceData[_]](
+        new ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo, WarningThreshold.toHours, ErrorThreshold.toHours)
+      ).asJava
     )
   }
 
@@ -96,12 +100,11 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 
 @Component
 @Profile(Array("scheduling"))
-class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck("import-academic") {
 
   // Warn if no successful import for 2 days, critical if no import for 3 days
   override val WarningThreshold: FiniteDuration = 2.days
   override val ErrorThreshold: FiniteDuration = 3.days
-  override val HealthcheckName = "import-academic"
 
   override protected def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]
@@ -112,12 +115,11 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 
 @Component
 @Profile(Array("scheduling"))
-class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck("import-profiles") {
 
   // Warn if no successful import for 3 days, critical for 4 days
   override val WarningThreshold: FiniteDuration = 3.days
   override val ErrorThreshold: FiniteDuration = 4.days
-  override val HealthcheckName = "import-profiles"
 
   lazy val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
@@ -143,17 +145,17 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
     val healthchecks = allRootDepartments.map(department => checkDepartment(imports, department))
 
     val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
-      val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
-      val warnings = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Warning }
+      val errors = healthchecks.filter { case (_, check) => check.getStatus == ServiceHealthcheck.Status.Error }
+      val warnings = healthchecks.filter { case (_, check) => check.getStatus == ServiceHealthcheck.Status.Warning }
 
       // Show oldest import
-      def sorted(departmentAndChecks: Seq[(Department, ServiceHealthcheck)]): (Department, ServiceHealthcheck) = {
-        departmentAndChecks.sortBy { case (_, check) => check.performanceData.head.value match {
-          case lastSuccessfulHoursAgo: Double => lastSuccessfulHoursAgo
-          case _ => 0
+      def sorted(departmentAndChecks: Seq[(Department, ServiceHealthcheck)]): (Department, ServiceHealthcheck) =
+        departmentAndChecks.maxBy { case (_, check) =>
+          check.getPerformanceData.asScala.head.getValue match {
+            case lastSuccessfulHoursAgo: Double => lastSuccessfulHoursAgo
+            case _ => 0
+          }
         }
-        }.last
-      }
 
       if (errors.nonEmpty) {
         sorted(errors)
@@ -164,12 +166,12 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
       }
     }
 
-    update(ServiceHealthcheck(
-      name = healthcheckToUpdate.name,
-      status = healthcheckToUpdate.status,
-      testedAt = healthcheckToUpdate.testedAt,
-      message = Seq(healthcheckToUpdate.message, s"oldest department ${department.code}").mkString(", "),
-      performanceData = healthcheckToUpdate.performanceData
+    update(new ServiceHealthcheck(
+      healthcheckToUpdate.getName,
+      healthcheckToUpdate.getStatus,
+      healthcheckToUpdate.getTestedAt,
+      Seq(healthcheckToUpdate.getMessage, s"oldest department ${department.code}").mkString(", "),
+      healthcheckToUpdate.getPerformanceData
     ))
   }
 
@@ -177,12 +179,11 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 @Component
 @Profile(Array("scheduling"))
-class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck("import-assignments") {
 
   // Warn if no successful import for 3 days, critical for 4 days
   override val WarningThreshold: FiniteDuration = 3.days
   override val ErrorThreshold: FiniteDuration = 4.days
-  override val HealthcheckName = "import-assignments"
 
   override protected def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]
@@ -193,12 +194,11 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 
 @Component
 @Profile(Array("scheduling"))
-class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck("import-module-lists") {
 
   // Warn if no successful import for 3 days, critical for 4 days
   override val WarningThreshold: FiniteDuration = 3.days
   override val ErrorThreshold: FiniteDuration = 4.days
-  override val HealthcheckName = "import-module-lists"
 
   override protected def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]
@@ -209,12 +209,11 @@ class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 
 @Component
 @Profile(Array("scheduling"))
-class RouteRuleImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+class RouteRuleImportStatusHealthcheck extends AbstractImportStatusHealthcheck("import-route-rules") {
 
   // Warn if no successful import for 3 days, critical for 4 days
   override val WarningThreshold: FiniteDuration = 3.days
   override val ErrorThreshold: FiniteDuration = 4.days
-  override val HealthcheckName = "import-route-rules"
 
   override protected def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]

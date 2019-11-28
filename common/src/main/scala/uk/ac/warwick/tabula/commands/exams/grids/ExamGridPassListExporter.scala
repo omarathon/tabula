@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{ProgressionResult, ProgressionService}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWatermarkToDocument {
 
@@ -53,7 +53,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 
     val passedEntites = {
       entities.filter(entity => {
-        val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
+        val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey.route, ey.level)).toMap
         entity.years(yearOfStudy).exists { year =>
           progressionService.suggestedResult(
             year,

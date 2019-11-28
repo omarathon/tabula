@@ -333,6 +333,8 @@ object ExamGridExportStyles {
 
   case object ActualMark extends Style
 
+  case object WrappedText extends Style
+
   case object FailAndActualMark extends Style
 
   case object OvercatAndActualMark extends Style
@@ -405,6 +407,7 @@ object ExamGridExportStyles {
       blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
       blueFont.setItalic(true)
       cs.setFont(blueFont)
+      cs.setWrapText(true)
       cs
     }
 
@@ -439,6 +442,17 @@ object ExamGridExportStyles {
       cs
     }
 
+    val wrappedText = {
+      val cs = workbook.createCellStyle()
+      val font = workbook.createFont().asInstanceOf[XSSFFont]
+      font.setFontHeightInPoints(10)
+      cs.setRotation(0)
+      cs.setFont(font)
+      cs.setAlignment(HorizontalAlignment.LEFT)
+      cs.setWrapText(true)
+      cs
+    }
+
 
     Map(
       Header -> headerStyle,
@@ -450,7 +464,8 @@ object ExamGridExportStyles {
       ActualMark -> actualMarkStyle,
       FailAndActualMark -> failAndActualMarkStyle,
       OvercatAndActualMark -> overcatAndActualMarkStyle,
-      BoldText -> boldText
+      BoldText -> boldText,
+      WrappedText -> wrappedText
     )
   }
 }

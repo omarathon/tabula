@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait GeneratesAttendanceMonitoringSchemeNotifications extends Logging {
 

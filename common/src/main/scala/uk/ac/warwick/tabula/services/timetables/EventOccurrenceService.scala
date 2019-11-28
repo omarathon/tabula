@@ -60,7 +60,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
       val localDateTime: Option[LocalDateTime] =
         event.year.weeks.get(week).map(_.firstDay.withDayOfWeek(event.day.jodaDayOfWeek).toLocalDateTime(localTime))
 
-      // Considered just returning None here, but if we ever encounter an event who's week/day/time
+      // Considered just returning None here, but if we ever encounter an event whose week/day/time
       // specifications can't be converted into calendar dates, we have big problems with
       // data quality and we need to fix them.
       localDateTime.getOrElse(throw new RuntimeException("Unable to obtain a date for " + event))

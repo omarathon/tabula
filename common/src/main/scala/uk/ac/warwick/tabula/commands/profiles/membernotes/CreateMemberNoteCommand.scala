@@ -46,7 +46,7 @@ trait CreateMemberNoteValidation extends SelfValidating {
 
   self: ModifyMemberNoteCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!note.hasText && !file.hasAttachments) {
       errors.rejectValue("note", "profiles.memberNote.empty")
     }
@@ -58,7 +58,7 @@ trait CreateMemberNotePermissions extends RequiresPermissionsChecking with Permi
 
   self: CreateMemberNoteCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MemberNotes.Create, member)
   }
 
@@ -70,7 +70,7 @@ trait CreateMemberNoteDescription extends Describable[AbstractMemberNote] {
 
   override lazy val eventName = "CreateMemberNote"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.member(member)
   }
 }

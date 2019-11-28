@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 import uk.ac.warwick.tabula.data.model.{Assignment, MeetingFormat, Module, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AttendancePointCommandState {
 

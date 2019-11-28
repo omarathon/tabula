@@ -4,7 +4,7 @@ import java.sql.ResultSet
 
 import javax.sql.DataSource
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
@@ -31,7 +31,7 @@ class StudentCourseDetailsNoteImporterImpl extends StudentCourseDetailsNoteImpor
   override def getStudentCourseDetailsNotes: Seq[ImportCourseDetailsNoteCommand] = {
     benchmarkTask("Fetch student course detail notes") {
       val allNotes = studentCourseDetailNoteDao.getAllNotes
-      val foundNotes = studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r))
+      val foundNotes = studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r)).toSeq
       val foundCodes = foundNotes.map(_.code)
       val deletedNotes = allNotes.filterNot(note => foundCodes.contains(note.code))
       deletedNotes.foreach(note => {

@@ -34,6 +34,9 @@ trait ModuleDao {
   def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
 
   def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module]
+
+  def findBySITSDepartmentCode(departmentCode: String): Seq[Module]
+
 }
 
 @Repository
@@ -203,5 +206,10 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
       .setParameter("academicYear", academicYear)
       .seq
   }
+
+  def findBySITSDepartmentCode(departmentCode: String): Seq[Module] =
+    session.newCriteria[Module]
+      .add(is("sitsDepartmentCode", departmentCode))
+      .seq
 
 }

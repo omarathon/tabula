@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{ItemNotFoundException, UniversityId}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object FetchDepartmentRelationshipInformationCommand {
 
@@ -245,7 +245,7 @@ trait FetchDepartmentRelationshipInformationPermissions extends RequiresPermissi
 
   self: FetchDepartmentRelationshipInformationCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     // throw this request out if this relationship can't be edited in Tabula for this department
     if (relationshipType.readOnly(department)) {
       logger.info("Denying access to FetchDepartmentRelationshipInformationCommand since relationshipType %s is read-only".format(relationshipType))
@@ -268,7 +268,7 @@ trait FetchDepartmentRelationshipInformationCommandState {
   var dbAllocated: Seq[StudentAssociationEntityData] = Seq()
 
   def updateDbAllocated(): Unit = {
-    dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala).getOrElse(Seq()))
+    dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala.toSeq).getOrElse(Seq()))
   }
 }
 
@@ -302,7 +302,7 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
     LazyMaps.create { entityId: String => JArrayList(): JList[String] }.asJava
 
   private def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-    (department.routes.asScala ++ department.children.asScala.flatMap {
+    (department.routes.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       routesForDepartmentAndSubDepartments
     }).sorted
 

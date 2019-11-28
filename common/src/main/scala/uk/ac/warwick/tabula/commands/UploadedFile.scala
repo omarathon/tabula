@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, Maintenan
 import uk.ac.warwick.tabula.system.{BindListener, NoBind}
 import uk.ac.warwick.util.virusscan.{VirusScanResult, VirusScanService}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -53,9 +53,9 @@ class UploadedFile extends BindListener with Logging {
   // files that have been persisted - can be represented in forms by ID
   var attached: JList[FileAttachment] = JArrayList()
 
-  def uploadedFileNames: Seq[String] = upload.asScala.map(_.getOriginalFilename).filterNot(_ == "")
+  def uploadedFileNames: Seq[String] = upload.asScala.toSeq.map(_.getOriginalFilename).filterNot(_ == "")
 
-  def attachedFileNames: Seq[String] = attached.asScala.map(_.getName)
+  def attachedFileNames: Seq[String] = attached.asScala.toSeq.map(_.getName)
 
   def fileNames: Seq[String] = uploadedFileNames ++ attachedFileNames
 
@@ -88,7 +88,7 @@ class UploadedFile extends BindListener with Logging {
   def isUploaded: Boolean = hasUploads
 
   def individualFileSizes: Seq[(String, Long)] =
-    upload.asScala.map(u => (u.getOriginalFilename, u.getSize)) ++
+    upload.asScala.toSeq.map(u => (u.getOriginalFilename, u.getSize)) ++
       attached.asScala.map(a => (a.getName, a.length.getOrElse(0L)))
 
   /**

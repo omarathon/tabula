@@ -12,7 +12,6 @@ trait FreemarkerTextRenderer extends TextRenderer with FreemarkerRendering {
   implicit var freemarker: Configuration = Wire[Configuration]
 
   def renderTemplate(templateId: String, model: Any): String = renderToString(templateId, model)
-
 }
 
 trait TextRendererComponent {

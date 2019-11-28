@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 //
 // Stateless functions to munge groupsets and groups
@@ -21,7 +21,7 @@ object GroupsDisplayHelper {
   // isTutor = true when viewing groups for another user
 
   def getGroupsToDisplay(set: SmallGroupSet, user: User, isTutor: Boolean = false): (Seq[SmallGroup], ViewerRole) = {
-    val allGroupsInSet = set.groups.asScala
+    val allGroupsInSet = set.groups.asScala.toSeq
     val groupsStudentHasJoined = allGroupsInSet.filter(_.students.includesUser(user))
 
     def viewerRoleOrTutor(role: ViewerRole) =

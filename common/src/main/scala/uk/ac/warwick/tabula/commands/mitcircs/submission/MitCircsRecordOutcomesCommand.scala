@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsRecordOutcomesCommand {
 
@@ -54,7 +54,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
 
     submission.outcomeGrading = outcomeGrading
     submission.outcomeReasons = outcomeReasons
-    submission.boardRecommendations = boardRecommendations.asScala
+    submission.boardRecommendations = boardRecommendations.asScala.toSeq
     if (boardRecommendations.asScala.contains(MitCircsExamBoardRecommendation.Other) && boardRecommendationOther.hasText) {
       submission.boardRecommendationOther = boardRecommendationOther
     } else {
@@ -63,7 +63,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
     submission.boardRecommendationComments = boardRecommendationComments
 
     if(outcomeGrading == Rejected) {
-      submission.rejectionReasons = rejectionReasons.asScala
+      submission.rejectionReasons = rejectionReasons.asScala.toSeq
       if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
         submission.rejectionReasonsOther = rejectionReasonsOther
       } else {
@@ -97,7 +97,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
 trait MitCircsRecordOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsRecordOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -136,7 +136,7 @@ trait MitCircsRecordOutcomesValidation extends SelfValidating {
 trait MitCircsRecordOutcomesDescription extends Describable[Result] {
   self: MitCircsRecordOutcomesState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

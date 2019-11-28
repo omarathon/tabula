@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object SmallGroupSet {
@@ -225,7 +225,7 @@ class SmallGroupSet
 
   // converts the assessmentGroups to UpstreamAssessmentGroupInfo
   def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("SmallGroupSet.upstreamAssessmentGroupInfos", id) {
-    membershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
+    membershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala.toSeq, academicYear)
   }
 
   // Gets a breakdown of the membership for this small group set.
@@ -293,9 +293,9 @@ class SmallGroupSet
     }
   }
 
-  def studentsNotInMembership: mutable.Buffer[User] = {
+  def studentsNotInMembership: Seq[User] = {
     Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembership).getOrElse {
-      val allocatedStudents = groups.asScala.flatMap(_.students.users)
+      val allocatedStudents = groups.asScala.toSeq.flatMap(_.students.users)
 
       allocatedStudents diff allStudents
     }
@@ -303,9 +303,7 @@ class SmallGroupSet
 
   def studentsNotInMembershipCount: Int = {
     Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembershipCount).getOrElse {
-      if (groups.asScala.forall {
-        _.students.universityIds
-      } && members.universityIds) {
+      if (groups.asScala.forall(_.students.universityIds) && members.universityIds) {
         // Efficiency
         val allocatedStudentIds = groups.asScala.flatMap(_.students.knownType.members)
 
@@ -330,7 +328,7 @@ class SmallGroupSet
     !_.students.isEmpty
   }
 
-  def permissionsParents: Stream[Module] = Option(module).toStream
+  def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   override def humanReadableId: String = name
 

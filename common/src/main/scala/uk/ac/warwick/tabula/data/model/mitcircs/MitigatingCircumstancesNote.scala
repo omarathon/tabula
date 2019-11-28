@@ -14,15 +14,14 @@ import uk.ac.warwick.tabula.data.model.{FileAttachment, GeneratedId}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesNote extends GeneratedId
   with ToString
-  with Serializable
-  with FormattedHtml {
+  with Serializable {
 
   def this(submission: MitigatingCircumstancesSubmission, creator: User) {
     this()
@@ -41,7 +40,7 @@ class MitigatingCircumstancesNote extends GeneratedId
   def text: String = Option(encryptedText).map(_.toString).orNull
   def text_=(text: String): Unit = encryptedText = text
 
-  def formattedText: TemplateHTMLOutputModel = formattedHtml(text)
+  def formattedText: TemplateHTMLOutputModel = FormattedHtml(text)
 
   @Column(name = "creator", nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 case class ExtractRelationshipsFromFileCommandRow(
@@ -86,7 +86,7 @@ class ExtractRelationshipsFromFileCommandInternal(val department: Department, va
       }
     }
     }.toSeq
-    additions.putAll(result.filter(r => !r.error.hasText).groupBy(_.agentId).mapValues(_.map(_.studentId).asJava).asJava)
+    additions.putAll(result.filter(r => !r.error.hasText).groupBy(_.agentId).view.mapValues(_.map(_.studentId).asJava).toMap.asJava)
     additionalEntities.addAll(additions.keySet().asScala.filterNot(id => dbAllocated.exists(_.entityId == id)).asJava)
     result
   }
@@ -136,7 +136,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
           row(ExtractRelationshipsFromFileCommand.EntityColumnHeader).hasText
       ).map(row =>
         (row(ExtractRelationshipsFromFileCommand.StudentColumnHeader), row(ExtractRelationshipsFromFileCommand.EntityColumnHeader))
-      ).groupBy(_._1).mapValues(_.map(_._2))
+      ).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
     }
   }
 }
@@ -145,7 +145,7 @@ trait ExtractRelationshipsFromFilePermissions extends RequiresPermissionsCheckin
 
   self: ExtractRelationshipsFromFileCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     // throw this request out if this relationship can't be edited in Tabula for this department
     if (relationshipType.readOnly(department)) {
       logger.info("Denying access to ExtractRelationshipsFromFileCommand since relationshipType %s is read-only".format(relationshipType))

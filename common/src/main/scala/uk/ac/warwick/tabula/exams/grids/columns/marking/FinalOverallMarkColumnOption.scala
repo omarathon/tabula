@@ -29,7 +29,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
           progressionService.suggestedFinalYearGrade(
             entityYear,
             state.normalLoadLookup(entityYear.route),
-            entity.validYears.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)),
+            entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
             state.calculateYearMarks,
             state.isLevelGrid,
             entity.yearWeightings

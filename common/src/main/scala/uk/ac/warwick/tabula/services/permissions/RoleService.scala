@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.Department
   * the parents of the scope.
   */
 trait RoleProvider {
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role]
 
   def rolesProvided: Set[Class[_ <: Role]]
 
@@ -62,12 +62,12 @@ trait RoleProvider {
   * A specialisation of RoleProvider that doesn't care about scope. This allows us to cache it per-request
   * because it's unaffected by scope, and do other optimisations.
   */
-trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
-  final def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = cachedBy(user) {
+trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, LazyList[Role]] {
+  final def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = cachedBy(user) {
     getRolesFor(user)
   }
 
-  def getRolesFor(user: CurrentUser): Stream[Role]
+  def getRolesFor(user: CurrentUser): LazyList[Role]
 }
 
 case class PermissionDefinition(permission: Permission, scope: Option[PermissionsTarget], permissionType: GrantedPermission.OverrideType)
@@ -79,7 +79,7 @@ case class PermissionDefinition(permission: Permission, scope: Option[Permission
   * the parents of the scope.
   */
 trait PermissionsProvider {
-  def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
+  def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): LazyList[PermissionDefinition]
 
   /**
     * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
@@ -91,18 +91,18 @@ trait PermissionsProvider {
   * Specialisation of PermissionsProvider that ignores scope. Use this if possible as it has
   * performance enhancements.
   */
-trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
-  final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = cachedBy(user) {
+trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, LazyList[PermissionDefinition]] {
+  final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): LazyList[PermissionDefinition] = cachedBy(user) {
     getPermissionsFor(user)
   }
 
-  def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition]
+  def getPermissionsFor(user: CurrentUser): LazyList[PermissionDefinition]
 }
 
 trait RoleService {
-  def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
+  def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): LazyList[PermissionDefinition]
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): Stream[Role]
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): LazyList[Role]
 
   def hasRole(user: CurrentUser, role: Role): Boolean
 }
@@ -121,8 +121,8 @@ class RoleServiceImpl extends RoleService with Logging {
     * parents of the scope, collecting a stream of all the explicitly granted permissions
     * for the user and the scope.
     */
-  def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = {
-    def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {
+  def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): LazyList[PermissionDefinition] = {
+    def streamScoped(providers: LazyList[PermissionsProvider], scope: PermissionsTarget): LazyList[PermissionDefinition] = {
       val results = providers map { provider => (provider, provider.getPermissionsFor(user, scope)) }
       val (hasResults, noResults) = results.partition {
         _._2.nonEmpty
@@ -138,53 +138,49 @@ class RoleServiceImpl extends RoleService with Logging {
       stream #::: next
     }
 
-    def streamUnscoped(providers: Stream[PermissionsProvider]): Stream[PermissionDefinition] = {
+    def streamUnscoped(providers: LazyList[PermissionsProvider]): LazyList[PermissionDefinition] = {
       providers.flatMap(_.getPermissionsFor(user, null)).filter(_.scope.isEmpty)
     }
 
     if (scope == null) {
-      streamUnscoped(permissionsProviders.toStream)
+      streamUnscoped(permissionsProviders.to(LazyList))
     } else {
-      streamScoped(permissionsProviders.toStream, scope)
+      streamScoped(permissionsProviders.to(LazyList), scope)
     }
   }
 
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): Stream[Role] = {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): LazyList[Role] = {
     // Split providers into Scopeless and scoped
-    val (scopeless, allScoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
+    val (scopeless, allScoped) = roleProviders.to(LazyList).partition(_.isInstanceOf[ScopelessRoleProvider])
 
     // if we are getting roles for an assistant then don't use the StaffMemberAssistantRoleProvider again (avoids assistant relationships chaining)
     val scoped = if (isAssistant) allScoped.filterNot(_.isInstanceOf[StaffMemberAssistantRoleProvider]) else allScoped
 
     // We only need to do scopeless once
     // (we call the (User, Target) method signature otherwise it bypasses the request level caching)
-    val scopelessStream = scopeless.toStream flatMap {
-      _.asInstanceOf[ScopelessRoleProvider].getRolesFor(user, null)
-    }
+    val scopelessLazyList = scopeless.flatMap(_.asInstanceOf[ScopelessRoleProvider].getRolesFor(user, null))
 
     /* We don't want to needlessly continue to interrogate scoped providers even after they
      * have returned something that isn't an empty Seq. Anything that isn't an empty Seq
      * can be treated as the final action of this provider EXCEPT in the case of the custom
      * role provider, so we special-case that */
-    def streamScoped(providers: Stream[RoleProvider], scope: PermissionsTarget): Stream[Role] = {
-      if (scope == null) Stream.empty
+    def lazyListScoped(providers: LazyList[RoleProvider], scope: PermissionsTarget): LazyList[Role] = {
+      if (scope == null) LazyList.empty
       else {
         val results = providers map { provider => (provider, provider.getRolesFor(user, scope)) }
-        val (hasResults, noResults) = results.partition {
-          _._2.nonEmpty
-        }
+        val (hasResults, noResults) = results.partition(_._2.nonEmpty)
 
-        val stream = hasResults.flatMap(_._2)
+        val lazyList = hasResults.flatMap(_._2)
         val next = scope.permissionsParents flatMap {
-          streamScoped((noResults #::: (hasResults.filter(_._1.isExhaustive))).map(_._1), _)
+          lazyListScoped((noResults #::: (hasResults.filter(_._1.isExhaustive))).map(_._1), _)
         }
 
-        stream #::: next
+        lazyList #::: next
       }
     }
 
-    scopelessStream #::: streamScoped(scoped.toStream, scope)
+    scopelessLazyList #::: lazyListScoped(scoped, scope)
   }
 
   def hasRole(user: CurrentUser, role: Role): Boolean = {

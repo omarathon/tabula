@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import freemarker.core.Environment
+import freemarker.core.{Environment, TemplateHTMLOutputModel}
 import freemarker.template._
 import freemarker.template.utility.DeepUnwrap
 import org.joda.time.DateTime
@@ -11,12 +11,14 @@ import uk.ac.warwick.tabula.attendance.web.{Routes => AttendanceRoutes}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType.{AssignmentSubmission, Meeting, SmallGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.Attended
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceState}
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 case class AttendanceMonitoringCheckpointFormatterResult(
@@ -26,22 +28,19 @@ case class AttendanceMonitoringCheckpointFormatterResult(
   status: String,
   metadata: String,
   noteType: String,
-  noteText: String,
+  noteText: TemplateHTMLOutputModel,
   noteUrl: String
 )
 
 /**
   * Freemarker helper to build the necessary fields to display a checkpoint
   */
-class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
+class AttendanceMonitoringCheckpointFormatter extends BaseTemplateMethodModelEx {
 
   @Autowired var userLookup: UserLookupService = _
   @Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
-  override def exec(list: JList[_]): AttendanceMonitoringCheckpointFormatterResult = {
-    val args = list.asScala.map {
-      model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
-    }
+  override def execMethod(args: Seq[_]): AttendanceMonitoringCheckpointFormatterResult =
     args match {
       case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, urlProfile: JBoolean, _*) =>
         result(department, checkpoint, None, urlProfile)
@@ -53,7 +52,6 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         result(department, point, student, Option(note), urlProfile)
       case _ => throw new IllegalArgumentException("Bad args")
     }
-  }
 
   private def describeCheckpoint(checkpoint: AttendanceMonitoringCheckpoint) = {
     val isStudent = RequestInfo.fromThread.map(_.user.apparentUser.getUserId).contains(checkpoint.student.userId)
@@ -139,7 +137,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Attended: ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       case AttendanceState.MissedAuthorised =>
@@ -150,7 +148,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Missed (authorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       // Monitoring point still use Id6 -label-important can be removed when we later migrate that
@@ -162,11 +160,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           s"Missed (unauthorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
-          noteText,
+          FormattedHtml(noteText),
           noteUrl
         )
       // Should never be the case, but stops a compile warning
-      case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", "", "")
+      case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", FormattedHtml(""), "")
     }
   }
 
@@ -195,7 +193,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
-        noteText,
+        FormattedHtml(noteText),
         noteUrl
       )
     } else {
@@ -206,7 +204,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
-        noteText,
+        FormattedHtml(noteText),
         noteUrl
       )
     }

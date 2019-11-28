@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal

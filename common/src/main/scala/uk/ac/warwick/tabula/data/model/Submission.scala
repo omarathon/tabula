@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object Submission {
@@ -40,7 +40,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
   @JoinColumn(name = "assignment_id")
   var assignment: Assignment = _
 
-  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  def permissionsParents: LazyList[Assignment] = Option(assignment).to(LazyList)
 
   var submitted: Boolean = false
 

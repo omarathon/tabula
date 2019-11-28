@@ -56,7 +56,7 @@
   </#macro><#-- end of "header" -->
 
   <#macro upstream_group ug isLinked isInUse>
-    <tr<#if !isInUse> class="text-muted" style="display: none"</#if> data-in-use="${isInUse?string('true','false')}">
+    <tr<#if !isInUse> class="text-muted" style="display: none"</#if> data-in-use="${isInUse?string('true','false')}" data-linked="${isLinked?string('true', 'false')}">
       <td>
         <input
                 type="checkbox"
@@ -360,7 +360,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
                 $('#toggleNotInUseComponents').on('click', function () {
                   visible = !visible;
-                  $('#sits-table [data-in-use=false]').toggle('fast');
+                  $('#sits-table [data-in-use=false][data-linked=false]').toggle('fast');
                   $(this).blur().children('span').text(visible ? 'Hide' : 'Show');
                   return false;
                 });

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.ScalaRestriction.is
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.TreeMap
 
 trait RelationshipServiceComponent {
@@ -132,6 +132,8 @@ trait RelationshipService {
   def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 
   def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]]
+
+  def listCurrentRelationshipsGlobally(relationshipType: StudentRelationshipType): Seq[Array[Object]]
 }
 
 abstract class AbstractRelationshipService extends RelationshipService with Logging with TaskBenchmarking {
@@ -501,6 +503,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
     // alpha sort by constructing a TreeMap
     TreeMap(groupedAgentRelationships.toSeq: _*)(SortableAgentIdentifier.KeyOrdering)
+  }
+
+  def listCurrentRelationshipsGlobally(relationshipType: StudentRelationshipType): Seq[Array[Object]] = {
+    relationshipDao.getAllCurrentRelationshipsOfType(relationshipType)
   }
 }
 

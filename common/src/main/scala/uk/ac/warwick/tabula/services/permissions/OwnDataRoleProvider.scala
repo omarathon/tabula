@@ -27,7 +27,7 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
     Wire[ModuleAndDepartmentService]
   }
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for OwnDataRoleProvider") {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for OwnDataRoleProvider") {
     lazy val department =
       user.departmentCode.maybeText.flatMap { code => departmentService.get.getDepartmentByCode(code.toLowerCase) }
 
@@ -35,42 +35,42 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
       // You can view your own submission
       case submission: Submission =>
         if (submission.usercode == user.userId)
-          Stream(customRoleFor(department)(SubmitterRoleDefinition, submission).getOrElse(Submitter(submission)))
-        else Stream.empty
+          LazyList(customRoleFor(department)(SubmitterRoleDefinition, submission).getOrElse(Submitter(submission)))
+        else LazyList.empty
 
       // You can view feedback to your work, but only if it's released
       case feedback: Feedback =>
         if (feedback.usercode == user.userId && feedback.released)
-          Stream(customRoleFor(department)(FeedbackRecipientRoleDefinition, feedback).getOrElse(FeedbackRecipient(feedback)))
-        else Stream.empty
+          LazyList(customRoleFor(department)(FeedbackRecipientRoleDefinition, feedback).getOrElse(FeedbackRecipient(feedback)))
+        else LazyList.empty
 
       // You can change your own user settings
       case settings: UserSettings =>
         if (user.apparentId.hasText && settings.userId == user.apparentId)
-          Stream(customRoleFor(department)(SettingsOwnerRoleDefinition, settings).getOrElse(SettingsOwner(settings)))
-        else Stream.empty
+          LazyList(customRoleFor(department)(SettingsOwnerRoleDefinition, settings).getOrElse(SettingsOwner(settings)))
+        else LazyList.empty
 
       // You can view small groups that you are a member of as long as it's visible to students
       case smallGroup: SmallGroup =>
         val studentId = user.apparentUser.getWarwickId
         if (studentId.hasText && smallGroup.groupSet.visibleToStudents && smallGroup.students.includesUser(user.apparentUser))
-          Stream(customRoleFor(smallGroup.groupSet.module.adminDepartment)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
-        else Stream.empty
+          LazyList(customRoleFor(smallGroup.groupSet.module.adminDepartment)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
+        else LazyList.empty
 
       // TAB-2122
       case note: AbstractMemberNote =>
         if (user.apparentId.hasText && note.creator.getUserId == user.apparentId)
-          Stream(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
-        else Stream.empty
+          LazyList(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
+        else LazyList.empty
 
       case mitCircsStudent: MitigatingCircumstancesStudent =>
         val student = mitCircsStudent.student
-        if (user.apparentId == student.userId && student.homeDepartment.subDepartmentsContaining(student).exists(_.enableMitCircs))
-          Stream(MitigatingCircumstancesSubmitter(mitCircsStudent))
+        if (user.apparentId == student.userId && Option(student.homeDepartment).exists(_.subDepartmentsContaining(student).exists(_.enableMitCircs)))
+          LazyList(MitigatingCircumstancesSubmitter(mitCircsStudent))
         else
-          Stream.empty
+          LazyList.empty
 
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 

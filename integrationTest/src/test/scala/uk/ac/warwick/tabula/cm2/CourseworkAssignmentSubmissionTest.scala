@@ -24,19 +24,16 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 
         currentUrl should endWith(assignmentId)
 
-        click on find(cssSelector("input[type=file]")).get
-        pressKeys(getClass.getResource("/file1.txt").getFile)
+        find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/file1.txt").getFile)
         // Don't upload the second file yet
-        submit()
+        click on cssSelector(".btn-primary")
 
         eventually {
           pageSource contains "Thanks, we've received your submission." should be(false)
           pageSource contains "You need to at least submit 2 files" should be (true)
 
-          click on find(cssSelector("input[type=file]")).get
-          pressKeys(getClass.getResource("/file2.txt").getFile)
-
-          submit()
+          find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/file2.txt").getFile)
+          click on cssSelector(".btn-primary")
 
           eventually {
             pageSource contains "Thanks, we've received your submission." should be(true)

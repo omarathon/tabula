@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class HomeInformation(
   hasProfile: Boolean,

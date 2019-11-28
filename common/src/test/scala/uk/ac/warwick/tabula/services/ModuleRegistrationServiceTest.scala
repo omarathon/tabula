@@ -34,7 +34,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map(), allowEmpty = false)
       result.isRight should be (true)
       result.right.get.scale should be(1)
-      result.right.get.doubleValue() should be(64.6)
+      result.right.get.doubleValue should be(64.6)
 
       val moduleRegistrationsWithMissingAgreedMark = Seq(
         Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
@@ -58,7 +58,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0), allowEmpty = false)
       overriddenResult.isRight should be (true)
       overriddenResult.right.get.scale should be(1)
-      overriddenResult.right.get.doubleValue() should be(64.6)
+      overriddenResult.right.get.doubleValue should be(64.6)
     }
   }
 

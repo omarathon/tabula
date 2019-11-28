@@ -7,15 +7,13 @@ MIT-${submission.key}: ${startDate} - <#if endDate??>${endDate}<#else>(ongoing)<
 
 **${submission.acuteOutcome.description}**</#if><#--
 
---><#if submission.affectedAssessments?has_content>
+--><#if submission.assessmentsWithAcuteOutcome?has_content>
 
 
 Affected assessments:
-<#list submission.affectedAssessments as assessment><#--
---><#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+<#list submission.assessmentsWithAcuteOutcome as assessment>
 - ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) - ${assessment.name}
-</#if><#--
---></#list></#if><#else>
+</#list></#if><#else>
 
 
 The submission was rejected - <#list submission.rejectionReasons as rejectionReason><#if rejectionReason.entryName == "Other">${submission.rejectionReasonsOther}<#else>${rejectionReason.description}</#if><#if rejectionReason_has_next>, </#if></#list>.

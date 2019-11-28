@@ -46,7 +46,7 @@ trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with 
 
   self: ModifyMarkingWorkflowState with UserLookupComponent =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
 
     if (department.cm2MarkingWorkflows.exists(w => w.academicYear == academicYear && w.name == workflowName)) {
       errors.rejectValue("workflowName", "name.duplicate.markingWorkflow", Array(workflowName), null)
@@ -66,7 +66,7 @@ trait AddMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 
   override lazy val eventName: String = "AddMarkingWorkflow"
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.department(department)
   }
 }

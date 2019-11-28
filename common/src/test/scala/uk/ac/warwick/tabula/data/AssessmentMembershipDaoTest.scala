@@ -75,7 +75,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     assignment2AC.assessmentGroup = "A"
     assignment2AC.sequence = "A02"
     assignment2AC.module = module1
-    assignment2AC.assessmentType = AssessmentType.Assignment
+    assignment2AC.assessmentType = AssessmentType.Essay
     assignment2AC.name = "Cool Essay"
     assignment2AC.inUse = true
 
@@ -108,7 +108,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     assignment3AC.assessmentGroup = "A"
     assignment3AC.sequence = "A01"
     assignment3AC.module = module2
-    assignment3AC.assessmentType = AssessmentType.Assignment
+    assignment3AC.assessmentType = AssessmentType.Essay
     assignment3AC.name = "Cool Stuff"
     assignment3AC.inUse = true
 
@@ -200,7 +200,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         resitAssignment1AC.assessmentGroup = "A1"
         resitAssignment1AC.sequence = "A03"
         resitAssignment1AC.module = module1
-        resitAssignment1AC.assessmentType = AssessmentType.Assignment
+        resitAssignment1AC.assessmentType = AssessmentType.Essay
         resitAssignment1AC.name = "Resit Essay"
         resitAssignment1AC.inUse = true
 
@@ -255,7 +255,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         resitAssignment2AC.assessmentGroup = "A1"
         resitAssignment2AC.sequence = "A04"
         resitAssignment2AC.module = module1
-        resitAssignment2AC.assessmentType = AssessmentType.Assignment
+        resitAssignment2AC.assessmentType = AssessmentType.Essay
         resitAssignment2AC.name = "Resit Essay-01"
         resitAssignment2AC.inUse = true
 

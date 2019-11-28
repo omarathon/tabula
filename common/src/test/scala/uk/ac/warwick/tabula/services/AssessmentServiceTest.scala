@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormField
 import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
@@ -189,7 +189,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     assignment.foreach { assmt =>
       assmt.feedbackService = smartMock[FeedbackService]
-      assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _ => assmt.feedbacks.asScala }
+      assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _: Any => assmt.feedbacks.asScala.toSeq }
 
       // create a feedback for the assignment, not yet released
       val feedback = new AssignmentFeedback
@@ -257,7 +257,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstream.moduleCode = "ch101"
     upstream.sequence = "A01"
     upstream.assessmentGroup = "A"
-    upstream.assessmentType = AssessmentType.Assignment
+    upstream.assessmentType = AssessmentType.Essay
     upstream.name = "Egg plants"
     upstream.inUse = true
 
@@ -268,7 +268,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstream2.moduleCode = "ch101"
     upstream2.sequence = "A01"
     upstream2.assessmentGroup = "A"
-    upstream2.assessmentType = AssessmentType.Assignment
+    upstream2.assessmentType = AssessmentType.Essay
     upstream2.name = "Greg's plants"
     upstream2.inUse = true
 
@@ -404,7 +404,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     ua.moduleCode = "LA155-10"
     ua.sequence = "A01"
     ua.assessmentGroup = "A"
-    ua.assessmentType = AssessmentType.Assignment
+    ua.assessmentType = AssessmentType.Essay
     ua.name = "Egg plants"
     ua.inUse = true
 
@@ -453,7 +453,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     ua1.moduleCode = "CH101-10"
     ua1.sequence = "A01"
     ua1.assessmentGroup = "A"
-    ua1.assessmentType = AssessmentType.Assignment
+    ua1.assessmentType = AssessmentType.Essay
     ua1.name = "Egg plants"
     ua1.inUse = true
 
@@ -462,7 +462,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     ua2.moduleCode = "CH101-20"
     ua2.sequence = "A02"
     ua2.assessmentGroup = "A"
-    ua2.assessmentType = AssessmentType.Assignment
+    ua2.assessmentType = AssessmentType.Essay
     ua2.name = "Egg plants"
     ua2.inUse = true
 
@@ -471,7 +471,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     ua3.moduleCode = "LA101-10"
     ua3.sequence = "A01"
     ua3.assessmentGroup = "A"
-    ua3.assessmentType = AssessmentType.Assignment
+    ua3.assessmentType = AssessmentType.Essay
     ua3.name = "Egg plants"
     ua3.inUse = true
 
@@ -480,7 +480,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     ua4.moduleCode = "LA101-10"
     ua4.sequence = "A02"
     ua4.assessmentGroup = "B"
-    ua4.assessmentType = AssessmentType.Assignment
+    ua4.assessmentType = AssessmentType.Essay
     ua4.name = "Egg plants NOT IN USE"
     ua4.inUse = false
 
@@ -548,7 +548,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamAssignment.moduleCode = "ch101-10"
     upstreamAssignment.sequence = "A01"
     upstreamAssignment.assessmentGroup = "A"
-    upstreamAssignment.assessmentType = AssessmentType.Assignment
+    upstreamAssignment.assessmentType = AssessmentType.Essay
     upstreamAssignment.name = "Egg plants"
     upstreamAssignment.inUse = true
 
@@ -712,7 +712,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     up1.moduleCode = "ch101"
     up1.sequence = "A01"
     up1.assessmentGroup = "A"
-    up1.assessmentType = AssessmentType.Assignment
+    up1.assessmentType = AssessmentType.Essay
     up1.name = "Egg plants"
     up1.inUse = true
 
@@ -723,7 +723,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     up2.moduleCode = "ch101"
     up2.sequence = "A02"
     up2.assessmentGroup = "B"
-    up2.assessmentType = AssessmentType.Assignment
+    up2.assessmentType = AssessmentType.Essay
     up2.name = "Greg's plants"
     up2.inUse = true
 
@@ -734,7 +734,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     up3.moduleCode = "ch101"
     up3.sequence = "A03"
     up3.assessmentGroup = "C"
-    up3.assessmentType = AssessmentType.Assignment
+    up3.assessmentType = AssessmentType.Essay
     up3.name = "Steg's plants"
     up3.inUse = true
 
@@ -786,9 +786,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentMembershipService.save(upstreamAg2)
     assignmentMembershipService.save(upstreamAg3)
 
-    val uagInfo1 = UpstreamAssessmentGroupInfo(upstreamAg1, upstreamAg1.members.asScala)
-    val uagInfo2 = UpstreamAssessmentGroupInfo(upstreamAg2, upstreamAg2.members.asScala)
-    val uagInfo3 = UpstreamAssessmentGroupInfo(upstreamAg3, upstreamAg3.members.asScala.filter(_.universityId != "1000006"))
+    val uagInfo1 = UpstreamAssessmentGroupInfo(upstreamAg1, upstreamAg1.members.asScala.toSeq)
+    val uagInfo2 = UpstreamAssessmentGroupInfo(upstreamAg2, upstreamAg2.members.asScala.toSeq)
+    val uagInfo3 = UpstreamAssessmentGroupInfo(upstreamAg3, upstreamAg3.members.asScala.toSeq.filter(_.universityId != "1000006"))
 
 
     assignment1.members.knownType.addUserId("manual1")

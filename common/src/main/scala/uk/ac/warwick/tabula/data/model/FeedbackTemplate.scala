@@ -6,7 +6,7 @@ import org.hibernate.annotations.{BatchSize, Proxy}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
@@ -29,10 +29,10 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
   var assignments: JList[Assignment] = JArrayList()
 
   /* For permission parents, we include both the department and any assignments linked to this template */
-  def permissionsParents: Stream[PermissionsTarget] =
-    Option[PermissionsTarget](department).toStream.append(Option(assignments) match {
-      case Some(assignments) => assignments.asScala.toStream
-      case _ => Stream.empty
+  def permissionsParents: LazyList[PermissionsTarget] =
+    Option[PermissionsTarget](department).to(LazyList) #::: (Option(assignments) match {
+      case Some(assignments) => assignments.asScala.to(LazyList)
+      case _ => LazyList.empty
     })
 
   def countLinkedAssignments: Int = Option(assignments) match {

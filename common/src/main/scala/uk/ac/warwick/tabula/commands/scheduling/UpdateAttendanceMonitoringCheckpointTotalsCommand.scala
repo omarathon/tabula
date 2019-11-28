@@ -36,7 +36,7 @@ trait UpdateAttendanceMonitoringCheckpointTotalsCommandValidation extends SelfVa
 
   self: UpdateAttendanceMonitoringCheckpointTotalsState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (totalsToUpdate.isEmpty) {
       errors.reject("", "No totals to update")
     }
@@ -45,7 +45,7 @@ trait UpdateAttendanceMonitoringCheckpointTotalsCommandValidation extends SelfVa
 
 trait UpdateAttendanceMonitoringCheckpointTotalsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.UpdateMembership)
   }
 
@@ -55,7 +55,7 @@ trait UpdateAttendanceMonitoringCheckpointTotalsDescription extends Describable[
 
   override lazy val eventName = "UpdateAttendanceMonitoringCheckpointTotals"
 
-  override def describe(d: Description) {}
+  override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Seq[AttendanceMonitoringCheckpointTotal]): Unit = {
     d.property("totals", result.map(total => Map(

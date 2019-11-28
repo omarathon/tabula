@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringMarksEx
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object OldAdminAddMarksCommand {
   def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -130,7 +130,7 @@ trait OldAdminAddMarksDescription extends Describable[Seq[Feedback]] {
 
   override lazy val eventName = "AdminAddMarks"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     assessment match {
       case assignment: Assignment => d.assignment(assignment)
       case exam: Exam => d.exam(exam)
@@ -157,7 +157,7 @@ trait OldAdminAddMarksPermissions extends RequiresPermissionsChecking with Permi
 
   self: OldAdminAddMarksCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(assessment, module)
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
@@ -24,7 +24,7 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     assignment.fields.remove(assignment.feedbackFields.last)
 
     assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val module = new Module
     module.adminDepartment = new Department

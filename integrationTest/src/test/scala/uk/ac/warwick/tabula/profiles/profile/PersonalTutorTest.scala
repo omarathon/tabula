@@ -6,7 +6,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
 
@@ -59,8 +59,16 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
     Then("They create a new record")
 
     click on linkText("Record meeting")
-    eventually(find(cssSelector(".modal-body iframe")) should be('defined))
-    switch to frame(find(cssSelector(".modal-body iframe")).get)
+
+    eventually {
+      find("meeting-modal").map(_.isDisplayed) should be(Some(true))
+
+      val ifr = find(cssSelector(".modal-body iframe"))
+      ifr.map(_.isDisplayed) should be(Some(true))
+    }
+
+    val iframe = frame(find(cssSelector(".modal-body iframe")).get)
+    switch to iframe
     eventually(textField(name("title")).isDisplayed should be(true))
 
     textField("title").value = "Created meeting"

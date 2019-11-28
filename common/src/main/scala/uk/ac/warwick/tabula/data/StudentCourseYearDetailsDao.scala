@@ -13,9 +13,9 @@ import uk.ac.warwick.tabula.data.model._
 import scala.reflect.classTag
 
 trait StudentCourseYearDetailsDao {
-  def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
+  def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails): Unit
 
-  def delete(studentCourseYearDetails: StudentCourseYearDetails)
+  def delete(studentCourseYearDetails: StudentCourseYearDetails): Unit
 
   def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 
@@ -33,13 +33,14 @@ trait StudentCourseYearDetailsDao {
 
   def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
 
-  def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
+  def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime): Unit
 
-  def unstampPresentInImport(notStaleScjCodes: Seq[String])
+  def unstampPresentInImport(notStaleScjCodes: Seq[String]): Unit
 
   def findByCourseRoutesYear(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     yearOfStudy: Int,
     includeTempWithdrawn: Boolean,
@@ -52,6 +53,7 @@ trait StudentCourseYearDetailsDao {
   def findByCourseRoutesLevel(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     levelCode: String,
     includeTempWithdrawn: Boolean,
@@ -173,22 +175,26 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
   private def findByCourseRoutesCriteria(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     includeTempWithdrawn: Boolean,
     resitOnly: Boolean,
     disableFreshFilter: Boolean,
-    enrolledOrCompleted: Boolean = true,
     extraCriteria: Seq[Criterion] = Nil
   ): ScalaCriteria[StudentCourseYearDetails] = {
     val c = sessionDisablingFilters(disableFreshFilter).newCriteria[StudentCourseYearDetails]
       .createAlias("studentCourseDetails", "scd")
       .add(isNull("missingFromImportSince"))
       .add(is("academicYear", academicYear))
-      .add(is("enrolledOrCompleted", enrolledOrCompleted))
+      .add(is("enrolledOrCompleted", true))
       .add(safeIn("scd.course", courses))
 
     if (!includeTempWithdrawn) {
       c.add(not(like("scd.statusOnRoute.code", "T%")))
+    }
+
+    if (courseOccurrences.nonEmpty) {
+      c.add(safeIn("blockOccurrence", courseOccurrences))
     }
 
     if (routes.nonEmpty) {
@@ -221,6 +227,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
   private def findByCourseRoutesWithPermWithdrawnOption(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     includeTempWithdrawn: Boolean,
     resitOnly: Boolean,
@@ -229,7 +236,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
     includePermWithdrawn: Boolean = true,
     extraCriteria: Seq[Criterion] = Nil
   ): Seq[StudentCourseYearDetails] = {
-    val criteria = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, disableFreshFilter, enrolledOrCompleted = true, extraCriteria)
+    val criteria = findByCourseRoutesCriteria(academicYear, courses, courseOccurrences, routes, includeTempWithdrawn, resitOnly, disableFreshFilter, extraCriteria)
 
     val result: Seq[StudentCourseYearDetails] =
       if (eagerLoad) {
@@ -278,6 +285,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
   def findByCourseRoutesYear(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     yearOfStudy: Int,
     includeTempWithdrawn: Boolean,
@@ -286,12 +294,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
     disableFreshFilter: Boolean = false,
     includePermWithdrawn: Boolean = true
   ): Seq[StudentCourseYearDetails] = {
-    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
+    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, courseOccurrences, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
   }
 
   def findByCourseRoutesLevel(
     academicYear: AcademicYear,
     courses: Seq[Course],
+    courseOccurrences: Seq[String],
     routes: Seq[Route],
     levelCode: String,
     includeTempWithdrawn: Boolean,
@@ -300,7 +309,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
     disableFreshFilter: Boolean = false,
     includePermWithdrawn: Boolean = true
   ): Seq[StudentCourseYearDetails] = {
-    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
+    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, courseOccurrences, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
   }
 
   def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
@@ -312,11 +321,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
     }, "scd.scjCode", items.map(_._1))
     // Group by SCJ code-academic year pairs
     scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
+      .view
       // Only use the pairs that were passed in
       .filterKeys(items.contains)
       // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
       .mapValues(_.sorted.lastOption)
       .filter(_._2.isDefined).mapValues(_.get)
+      .toMap
   }
 
   def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
@@ -329,12 +340,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
         .setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
     }, "student.universityId", items.map(_._1))
     // Group by Uni ID-academic year pairs
-    scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
+    scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear)).view
       // Only use the pairs that were passed in
       .filterKeys(items.contains)
       // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
       .mapValues(_.sorted.lastOption)
-      .filter(_._2.isDefined).mapValues(_.get)
+      .filter(_._2.isDefined).mapValues(_.get).toMap
   }
 
   def listForYearMarkExport: Seq[StudentCourseYearDetails] = {

@@ -26,7 +26,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
   // submissions exist then the markingWorkflow cannot be updated
   def canUpdateMarkingWorkflow: Boolean = assignment.submissions.size() == 0
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     super.validate(errors)
 
     if (academicYear != assignment.academicYear) {
@@ -68,7 +68,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
     assignment
   }
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     val desc = d.assignment(assignment)
     desc.properties(
       "name" -> name,

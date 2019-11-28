@@ -127,7 +127,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
     val data = reader.getSheetsData.asInstanceOf[XSSFReader.SheetIterator]
 
     // can't asScala the SheetIterator as is lubs back to a Seq[InputStream] losing the sheet metadata
-    val sheets: mutable.Buffer[ParsedSheet] = mutable.Buffer()
+    val sheets: mutable.ListBuffer[ParsedSheet] = mutable.ListBuffer()
     while (data.hasNext) {
       val sheet = data.next
       val sheetName = data.getSheetName
@@ -136,9 +136,9 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
       val sheetSource = new InputSource(sheet)
       parser.parse(sheetSource)
       sheet.close()
-      sheets.append(ParsedSheet(sheetName, handler.rows))
+      sheets.append(ParsedSheet(sheetName, handler.rows.toSeq))
     }
-    sheets
+    sheets.toSeq
   }
 
   class CommentHelper(sheet: SXSSFSheet) {
@@ -179,7 +179,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
   var columnMap: mutable.Map[Short, String] = scala.collection.mutable.Map[Short, String]()
   val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
-  var rows: scala.collection.mutable.MutableList[ParsedRow] = scala.collection.mutable.MutableList()
+  var rows: scala.collection.mutable.ListBuffer[ParsedRow] = scala.collection.mutable.ListBuffer()
   var currentRow: mutable.Map[String, String] = scala.collection.mutable.Map[String, String]()
 
   def fetchSheetParser: XMLReader = {

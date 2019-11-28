@@ -34,7 +34,7 @@ class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRe
 trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   this: HasExistingStudentRelationshipType =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     mandatory(relationshipType)
     p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
   }

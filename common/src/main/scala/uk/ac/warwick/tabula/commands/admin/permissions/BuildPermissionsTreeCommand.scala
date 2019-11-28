@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.permissions.{PermissionsServiceComponent, A
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 object BuildPermissionsTreeCommand {
@@ -95,7 +95,7 @@ abstract class BuildPermissionsTreeCommandInternal[A <: PermissionsTarget : Clas
 trait BuildPermissionsTreeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: BuildPermissionsTreeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Read, mandatory(target))
   }
 }

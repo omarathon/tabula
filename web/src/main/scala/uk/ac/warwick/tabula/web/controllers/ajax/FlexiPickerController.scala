@@ -8,18 +8,18 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerState, FlexiPickerResult, FlexiPickerCommand}
+import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerCommand, FlexiPickerResult, FlexiPickerState}
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{Group, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 class FlexiPickerController extends BaseController {
@@ -112,6 +112,20 @@ object FlexiPickerController {
       *
       */
     private def doSearchUsers(terms: Array[String]): List[User] = {
+      def findUsersWithFilter(filters: (String, String)*): Seq[User] =
+        userLookup.findUsersWithFilter(
+          filters.filter { case (_, v) => v.hasText }
+            .map { case (k, v) => k -> s"$v*" }
+            .toMap[String, AnyRef]
+            .asJava,
+          false,
+          100 // TODO SSO-2441
+        ).asScala.map { user =>
+          // findUsersWithFilter doesn't set this, but we rely on it
+          user.setUserSource("WarwickADS")
+          user
+        }.toSeq
+
       var users: List[User] = List[User]()
       if (exact) {
         if (terms.length == 1) {
@@ -134,19 +148,19 @@ object FlexiPickerController {
         if (user.isFoundUser) {
           users = users :+ user
         } else {
-          users = users ++ userLookup.findUsersWithFilter((item("sn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+          users = users ++ findUsersWithFilter("sn" -> terms(0))
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+            users ++= findUsersWithFilter("givenName" -> terms(0))
           }
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter((item("cn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+            users ++= findUsersWithFilter("cn" -> terms(0))
           }
         }
       }
       else if (terms.length >= 2) {
-        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+        users ++= findUsersWithFilter("givenName" -> terms(0), "sn" -> terms(1))
         if (users.size < EnoughResults) {
-          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
+          users ++= findUsersWithFilter("sn" -> terms(0), "givenName" -> terms(1))
         }
       }
 
@@ -162,7 +176,9 @@ object FlexiPickerController {
           else profileService.getMemberByUser(user, disableFilter = true).isDefined
         })
 
-        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
+        val isStaffIfNecessary = !staffOnly || user.getUserSource != "WarwickADS" || user.isStaff
+        val isStudentOrPGRIfNecessary = !studentsOnly || user.getUserSource != "WarwickADS" || user.isStudent || user.getExtraProperty("warwickitsclass") == "PG(R)"
+        hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter && isStaffIfNecessary && isStudentOrPGRIfNecessary
       }
 
     private def searchGroups: FlexiPickerResult = {
@@ -213,17 +229,6 @@ object FlexiPickerController {
     private def createItemFor(group: Group): Map[String, String] = {
       Map("type" -> "group", "title" -> group.getTitle, "groupType" -> group.getType, "value" -> group.getName)
     }
-
-    private def item(name: String, value: String): Map[String, AnyRef] = value match {
-      case s: String if s.hasText => Map(name -> (value + "*"))
-      case _ => Map.empty
-    }
-
-    private def staffOrStudentOnlyOptionFilter: Map [String, AnyRef] = {
-      if (staffOnly) Map("warwickitsclass" -> "Staff") // this doesn't include PG(R)
-      else if (studentsOnly) Map("warwickukfedgroup" -> "Student") // this includes PG(R)
-      else Map.empty
-    }
   }
 
   trait FlexiPickerState {
@@ -242,7 +247,7 @@ object FlexiPickerController {
   }
 
   trait FlexiPickerPermissions extends RequiresPermissionsChecking {
-    override def permissionsCheck(p: PermissionsChecking) {
+    override def permissionsCheck(p: PermissionsChecking): Unit = {
       p.PermissionCheck(Permissions.UserPicker)
     }
   }

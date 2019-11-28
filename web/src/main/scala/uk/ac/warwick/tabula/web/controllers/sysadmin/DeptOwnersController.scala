@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.web.Mav
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments"))
@@ -77,7 +77,7 @@ class SysadminDepartmentAddPermissionController extends BaseSysadminController w
       form(department)
     } else {
       val role = Some(command.apply().roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "add")
     }
   }
@@ -96,7 +96,7 @@ class SysadminDepartmentRemovePermissionController extends BaseSysadminControlle
       form(department)
     } else {
       val role = command.apply().map(_.roleDefinition)
-      val userCodes = command.usercodes.asScala
+      val userCodes = command.usercodes.asScala.toSeq
       form(department, userCodes, role, "remove")
     }
   }

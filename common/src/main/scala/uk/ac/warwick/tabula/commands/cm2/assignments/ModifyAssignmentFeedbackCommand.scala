@@ -52,7 +52,7 @@ trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
 
   override lazy val eventName: String = "ModifyAssignmentFeedback"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.assignment(assignment).properties(
       if (feedbackTemplate != null) {
         "feedbackTemplate" -> feedbackTemplate.name

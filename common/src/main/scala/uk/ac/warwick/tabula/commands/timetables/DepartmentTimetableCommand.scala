@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 object DepartmentTimetableCommand {
@@ -85,7 +85,7 @@ class DepartmentTimetableCommandInternal(
     with DepartmentTimetableEventsState =>
 
   override def applyInternal(): (EventList, Seq[String]) = {
-    val errors: mutable.Buffer[String] = mutable.Buffer()
+    val errors: mutable.ListBuffer[String] = mutable.ListBuffer()
 
     val moduleEvents = getModuleEvents(
       academicYear,
@@ -127,8 +127,7 @@ class DepartmentTimetableCommandInternal(
       if (eventTypes.asScala.isEmpty) allEvents
       else allEvents.filter { o => eventTypes.contains(o.eventType) }
 
-    import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-    (filtered, errors)
+    (filtered, errors.toSeq)
   }
 
 }

@@ -46,7 +46,7 @@ class AddCustomRoleDefinitionCommandInternal(val department: Department) extends
 trait AddCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AddCustomRoleDefinitionCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
   }
 }
@@ -54,7 +54,7 @@ trait AddCustomRoleDefinitionCommandPermissions extends RequiresPermissionsCheck
 trait AddCustomRoleDefinitionCommandValidation extends SelfValidating {
   self: AddCustomRoleDefinitionCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     // name must be non-empty
     if (!name.hasText) {
       errors.rejectValue("name", "customRoleDefinition.name.empty")

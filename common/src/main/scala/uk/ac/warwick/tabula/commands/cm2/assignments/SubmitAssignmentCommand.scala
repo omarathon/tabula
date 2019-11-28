@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
+import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, SubmissionBeforeCloseDateTrigger, Trigger}
 import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SubmitAssignmentCommand {
   type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
@@ -181,7 +181,7 @@ trait SubmitAssignmentBinding extends BindListener {
 trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Create, mandatory(assignment))
   }
 }
@@ -189,7 +189,7 @@ trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with
 trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(assignment))
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
   }
@@ -199,7 +199,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
   self: SubmitAssignmentRequest
     with FeaturesComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!assignment.isOpened) {
       errors.reject("assignment.submit.notopen")
     }
@@ -299,7 +299,7 @@ trait SubmitAssignmentTriggers extends GeneratesTriggers[Submission] {
     if (commandResult.isLate || commandResult.isAuthorisedLate) {
       Seq(SubmissionAfterCloseDateTrigger(DateTime.now, commandResult))
     } else {
-      Seq()
+      Seq(SubmissionBeforeCloseDateTrigger(DateTime.now, commandResult))
     }
   }
 }

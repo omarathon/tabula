@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class RequestAssignmentAccessCommandTest extends TestBase with FunctionalContextTesting with Mockito with AssignmentFixture {
@@ -73,7 +73,7 @@ trait AssignmentFixture extends Mockito {
   val admin1: User = newTestUser("admin1")
   val admin2: User = newTestUser("admin2")
 
-  userLookup.getUsersByUserIds(ownersGroup.includedUserIds.toSeq.asJava) returns JMap("admin1" -> admin1, "admin2" -> admin2)
+  userLookup.usersByUserIds(ownersGroup.includedUserIds.toSeq) returns Map("admin1" -> admin1, "admin2" -> admin2)
 
   val department = new Department
   val permissionsService: PermissionsService = mock[PermissionsService]

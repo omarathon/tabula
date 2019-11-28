@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
 
 case class MitigatingCircumstancesWorkflowProgress(percentage: Int, t: String, messageCode: String)
@@ -53,7 +53,10 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
     AdminHomeInformation(
       submissions = mitCircsSubmissionService.submissionsForDepartment(
         department,
-        buildRestrictions(year),
+        buildRestrictions(year, ScalaRestriction.is(
+          "studentCourseYearDetails.academicYear", year,
+          FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
+        ).toSeq),
         MitigatingCircumstancesSubmissionFilter(
           affectedAssessmentModules = affectedAssessmentModules.asScala.toSet,
           includesStartDate = Option(includesStartDate),
@@ -79,7 +82,7 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
 trait AdminHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AdminHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(AdminHomeCommand.RequiredPermission, mandatory(department))
   }
 }
@@ -95,6 +98,7 @@ trait AdminHomeCommandState {
 trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState {
   // This is for filtering the student who has made the submission
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
@@ -116,10 +120,4 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   override val sortOrder: JList[Order] = JArrayList() // Not used
   override val modules: JList[Module] = JArrayList() // Not used
   override val hallsOfResidence: JList[String] = JArrayList() // Not used
-
-  override protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] =
-    ScalaRestriction.is(
-      "studentCourseYearDetails.academicYear", year,
-      FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
-    ).toSeq ++ super.buildRestrictions(year)
 }

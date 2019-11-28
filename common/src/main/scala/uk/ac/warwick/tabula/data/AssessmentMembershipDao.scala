@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ManualMembershipInfo
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AssessmentMembershipDaoComponent {
   val membershipDao: AssessmentMembershipDao
@@ -215,11 +215,10 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   def save(assignment: AssessmentComponent): AssessmentComponent =
     find(assignment)
       .map { existing =>
-        if (existing needsUpdatingFrom assignment) {
+        if (existing.needsUpdatingFrom(assignment)) {
           existing.copyFrom(assignment)
           session.update(existing)
         }
-
         existing
       }
       .getOrElse {
@@ -312,7 +311,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   /** Just gets components of type Assignment for modules in this department, not all components. */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
     // TAB-2676 Include modules in sub-departments optionally
-    def modules(d: Department): Seq[Module] = d.modules.asScala
+    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
 
     def modulesIncludingSubDepartments(d: Department): Seq[Module] =
       modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
@@ -388,7 +387,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .setString("moduleCode", component.moduleCode)
       .setString("assessmentGroup", component.assessmentGroup)
       .setString("sequence", component.sequence)
-      .list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+      .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember] = {
@@ -401,7 +400,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			""")
       .addEntity(classOf[UpstreamAssessmentGroupMember])
       .setString("uagid", uagid)
-      .list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+      .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
   def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
@@ -524,7 +523,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .addEntity(classOf[Assignment])
       .setInteger("academicYear", academicYear.startYear)
       .setString("departmentCode", department.code)
-      .list.asScala.asInstanceOf[Seq[Assignment]]
+      .list.asScala.toSeq.asInstanceOf[Seq[Assignment]]
 
     val smallGroupSets = session.createSQLQuery(
       s"""
@@ -536,7 +535,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .addEntity(classOf[SmallGroupSet])
       .setInteger("academicYear", academicYear.startYear)
       .setString("departmentCode", department.code)
-      .list.asScala.asInstanceOf[Seq[SmallGroupSet]]
+      .list.asScala.toSeq.asInstanceOf[Seq[SmallGroupSet]]
 
     ManualMembershipInfo(department, assignments, smallGroupSets)
   }
@@ -566,7 +565,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .addScalar("assignments", StandardBasicTypes.INTEGER)
       .addScalar("smallGroupSets", StandardBasicTypes.INTEGER)
       .setInteger("academicYear", academicYear.startYear)
-      .list.asScala.asInstanceOf[Seq[Array[Object]]]
+      .list.asScala.toSeq.asInstanceOf[Seq[Array[Object]]]
 
     results.map(columns => DepartmentWithManualUsers(
       columns(0).asInstanceOf[String],

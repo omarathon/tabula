@@ -8,11 +8,12 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringLevelServiceComponent, CourseAndRouteServiceComponent, LevelServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
 import scala.collection.immutable.Range.Inclusive
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridSelectCourseCommand {
   def apply(department: Department, academicYear: AcademicYear, permitRoutesFromRootDepartment: Boolean = false) =
@@ -20,6 +21,7 @@ object GenerateExamGridSelectCourseCommand {
       with AutowiringCourseAndRouteServiceComponent
       with AutowiringStudentCourseYearDetailsDaoComponent
       with AutowiringLevelServiceComponent
+      with AutowiringMitCircsSubmissionServiceComponent
       with ComposableCommand[Seq[ExamGridEntity]]
       with GenerateExamGridSelectCourseValidation
       with GenerateExamGridSelectCoursePermissions
@@ -31,21 +33,30 @@ object GenerateExamGridSelectCourseCommand {
 class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear, val permitRoutesFromRootDepartment: Boolean)
   extends CommandInternal[Seq[ExamGridEntity]] with TaskBenchmarking {
 
-  self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
+  self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest with MitCircsSubmissionServiceComponent =>
 
   override def applyInternal(): Seq[ExamGridEntity] = {
     val scyds = benchmarkTask("findByCourseRoutesYear") {
       if (yearOfStudy != null) {
-        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, courseOccurrences.asScala.toSeq, routes.asScala.toSeq, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       } else {
-        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala, routes.asScala, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala.toSeq, courseOccurrences.asScala.toSeq, routes.asScala.toSeq, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       }.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
     }
     val sorted = benchmarkTask("sorting") {
       scyds.sortBy(_.studentCourseDetails.scjCode)
     }
+
+    val mitCircsSubmissions = benchmarkTask("mitCircsSubmissions") {
+      mitCircsSubmissionService.submissionsForStudents(sorted.map(_.studentCourseDetails.student))
+    }
+
     benchmarkTask("toExamGridEntities") {
-      sorted.map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(scyd, basedOnLevel = levelCode != null))
+      sorted.map(scyd => {
+        val student = scyd.studentCourseDetails.student
+        val mitCircs = mitCircsSubmissions.getOrElse(student.universityId, Nil)
+        student.toExamGridEntity(scyd, basedOnLevel = levelCode != null, mitCircs)
+      })
     }
   }
 
@@ -76,7 +87,7 @@ trait GenerateExamGridSelectCoursePermissions extends RequiresPermissionsCheckin
 
   self: GenerateExamGridSelectCourseCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 
@@ -105,10 +116,13 @@ trait GenerateExamGridSelectCourseCommandState {
   }
   lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
   lazy val allLevels: List[Level] = levelService.getAllLevels.toList.sortBy(_.code)(StringUtils.AlphaNumericStringOrdering)
+
+  lazy val allCourseOccurrences: List[String] = courseAndRouteService.getOccurrencesForCourses(allCourses).sorted.toList
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {
   var courses: JList[Course] = JArrayList()
+  var courseOccurrences: JList[String] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var yearOfStudy: JInteger = _
   var levelCode: String = _
@@ -117,7 +131,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
   var resitOnly: Boolean = false
   var includePermWithdrawn: Boolean = true
 
-  def isLevelGrid = levelCode != null
+  def isLevelGrid: Boolean = levelCode != null
 
   // parses undergrad level codes into year of study as if the degree was being taken full time - otherwise returns 1 as other courses don't have multiple levels
   def studyYearByLevelOrBlock: JInteger = {
@@ -126,6 +140,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
 
   def toMap: Map[String, Any] = Map(
     "courses" -> courses.asScala.map(_.code),
+    "courseOccurrences" -> courseOccurrences.asScala,
     "routes" -> routes.asScala.map(_.code),
     "yearOfStudy" -> yearOfStudy,
     "levelCode" -> levelCode,

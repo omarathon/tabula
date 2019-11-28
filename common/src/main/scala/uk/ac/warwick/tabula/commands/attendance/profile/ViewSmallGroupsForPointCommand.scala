@@ -197,7 +197,7 @@ trait ViewSmallGroupsForPointPermissions extends RequiresPermissionsChecking wit
 
   self: ViewSmallGroupsForPointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, student)
   }
 

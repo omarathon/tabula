@@ -28,7 +28,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 
   override def send(message: MimeMessage, logBody: Boolean): Future[JBoolean] = {
     val messageToSend = if (!features.emailStudents) {
-      prepareMessage(message) { helper =>
+      prepareMessage(message, multipart = false) { helper =>
         val oldTo = message.getRecipients(RecipientType.TO).map({
           _.toString
         }).mkString(", ")
@@ -56,7 +56,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
     def orEmpty: Array[A] = Option(a).getOrElse(Array.empty)
   }
 
-  override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
+  override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate, multipart = false) { message =>
     Option(simpleMessage.getFrom).foreach(message.setFrom)
     Option(simpleMessage.getReplyTo).foreach(message.setReplyTo)
 

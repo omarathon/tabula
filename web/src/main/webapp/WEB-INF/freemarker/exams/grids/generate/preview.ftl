@@ -66,7 +66,7 @@
               <strong>
                 Please note that all Examination Boards are required to be conducted anonymously and student names should be
                 removed from/hidden in electronic or hard-copy versions of the grid used at the Exam Board meeting.
-                If you wish to query this requirement, please contact Teaching Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
+                If you wish to query this requirement, please contact Education Policy and Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
               </strong>
             </p>
           </div>
@@ -129,7 +129,7 @@
           </#if>
 
         <div class="key clearfix">
-          <table class="table table-condensed">
+          <table class="table table-condensed report-table">
             <thead>
             <tr>
               <th colspan="2">Report</th>
@@ -157,6 +157,28 @@
                     </#assign>
                   <td>
                     <a class="use-popover hidden-print" data-trigger="click focus" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
+                    <div class="visible-print">
+                        <#noescape>${popover}</#noescape>
+                    </div>
+                  </td>
+                </#if>
+            </tr>
+            <tr>
+                <#if !selectCourseCommand.courseOccurrences?has_content>
+                  <th>Course occurrences:</th>
+                  <td>All occurrences</td>
+                <#elseif selectCourseCommand.courseOccurrences?size == 1>
+                  <th>Course occurrence:</th>
+                  <td>${selectCourseCommand.courseOccurrences?first}</td>
+                <#else>
+                  <th>Course occurrences:</th>
+                    <#assign popover>
+                      <ul><#list selectCourseCommand.courseOccurrences?sort as courseOccurrence>
+                          <li>${courseOccurrence}</li>
+                          </#list></ul>
+                    </#assign>
+                  <td>
+                    <a class="use-popover hidden-print" data-trigger="click focus" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courseOccurrences?size} occurrences</a>
                     <div class="visible-print">
                         <#noescape>${popover}</#noescape>
                     </div>
@@ -235,7 +257,7 @@
             </tbody>
           </table>
 
-          <table class="table table-condensed">
+          <table class="table table-condensed key-table">
             <thead>
             <tr>
               <th colspan="2">Key</th>
@@ -276,6 +298,28 @@
             </tr>
             </tbody>
           </table>
+
+          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("mitigating")>
+            <table class="table table-condensed mitcircs-key-table">
+              <thead>
+                <tr>
+                  <th colspan="2">Mitigating circumstances key</th>
+                </tr>
+              </thead>
+              <tbody>
+                <#list mitigatingCircumstancesGradings as grading>
+                  <tr>
+                    <td><span class="exam-grid-mitcircs-grading">${grading.code}</span></td>
+                    <td>${grading.description}</td>
+                  </tr>
+                </#list>
+                <tr>
+                  <td><span class="exam-grid-mitcircs-grading">+0</span></td>
+                  <td>Acute mitigation - mitigation has already been taken into account</td>
+                </tr>
+              </tbody>
+            </table>
+          </#if>
         </div>
 
           <#if gridOptionsCommand.showFullLayout>

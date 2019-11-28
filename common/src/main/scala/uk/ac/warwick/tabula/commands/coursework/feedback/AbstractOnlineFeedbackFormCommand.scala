@@ -17,7 +17,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 
   def submission: Option[Submission] = assignment.findSubmission(student.getUserId)
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     if (fields != null) {
       for ((key, field) <- fields.asScala) {
         result.pushNestedPath(s"fields[$key]")
@@ -31,7 +31,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
     result.popNestedPath()
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!hasContent) {
       errors.reject("feedback.empty")
     }

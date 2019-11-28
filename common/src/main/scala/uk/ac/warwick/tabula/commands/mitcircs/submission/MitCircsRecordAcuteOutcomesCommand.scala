@@ -10,14 +10,14 @@ import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.R
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded}
 import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsRecordAcuteOutcomesNotification
-import uk.ac.warwick.tabula.data.model.{AssessmentType, Notification}
+import uk.ac.warwick.tabula.data.model.{AssignmentType, Notification, TabulaAssessmentSubtype}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsRecordAcuteOutcomesCommand {
   type Result = MitigatingCircumstancesSubmission
@@ -48,7 +48,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.acuteOutcome = acuteOutcome
 
     if(outcomeGrading == Rejected) {
-      submission.rejectionReasons = rejectionReasons.asScala
+      submission.rejectionReasons = rejectionReasons.asScala.toSeq
       if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
         submission.rejectionReasonsOther = rejectionReasonsOther
       } else {
@@ -63,7 +63,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.affectedAssessments.clear()
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
-      if(item.acuteOutcomeApplies && item.assessmentType == AssessmentType.Assignment) affected.acuteOutcome = acuteOutcome
+      if(item.acuteOutcomeApplies && item.assessmentType.subtype == TabulaAssessmentSubtype.Assignment) affected.acuteOutcome = acuteOutcome
       submission.affectedAssessments.add(affected)
     }
 
@@ -83,7 +83,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
 trait MitCircsRecordAcuteOutcomesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, submission)
   }
 }
@@ -120,7 +120,7 @@ trait MitCircsRecordAcuteOutcomesValidation extends SelfValidating {
 trait MitCircsRecordAcuteOutcomesDescription extends Describable[Result] {
   self: MitCircsRecordAcuteOutcomesState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.mitigatingCircumstancesSubmission(submission)
   }
 }

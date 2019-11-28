@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditAttendancePointCommand {
   def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint) =
@@ -80,7 +80,7 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 
   self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     val points = pointsToEdit
     val schemes = schemesToEdit
     validateSchemePointStyles(errors, pointStyle, schemes)
@@ -180,7 +180,7 @@ trait EditAttendancePointPermissions extends RequiresPermissionsChecking with Pe
 
   self: EditAttendancePointCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
   }
 
@@ -192,7 +192,7 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
 
   override lazy val eventName = "EditAttendancePoint"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.attendanceMonitoringSchemes(schemesToEdit)
   }
 

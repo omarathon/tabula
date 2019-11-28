@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{MaintenanceModeServiceComponent, ModuleAndDepartmentServiceComponent, UserSettingsServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permission), Seq[Department]] with TaskBenchmarking {
 

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.timetables.TimetableEventType
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success}
 
@@ -29,7 +29,7 @@ trait DepartmentTimetableEventsState {
 trait DepartmentTimetableEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DepartmentTimetableEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(DepartmentTimetableEventsHelper.RequiredPermission, mandatory(department))
   }
 }
@@ -37,7 +37,7 @@ trait DepartmentTimetableEventsPermissions extends RequiresPermissionsChecking w
 trait DraftDepartmentTimetableEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: DepartmentTimetableEventsState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(DepartmentTimetableEventsHelper.DraftPermission, mandatory(department))
   }
 }
@@ -50,19 +50,19 @@ trait DepartmentTimetableEventsRequest extends PermissionsCheckingMethods with T
   var routes: JList[Route] = JArrayList()
   var yearsOfStudy: JList[JInteger] = JArrayList()
   var students: JList[String] = JArrayList()
-  lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala).flatMap {
+  lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala.toSeq).flatMap {
     case student: StudentMember => Option(student)
     case _ => None
   }
   var staff: JList[String] = JArrayList()
-  lazy val staffMembers: Seq[StaffMember] = profileService.getAllMembersWithUniversityIds(staff.asScala).flatMap {
+  lazy val staffMembers: Seq[StaffMember] = profileService.getAllMembersWithUniversityIds(staff.asScala.toSeq).flatMap {
     case staffMember: StaffMember => Option(staffMember)
     case _ => None
   }
   var eventTypes: JList[TimetableEventType] = JArrayList()
 
   private def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
-    (department.modules.asScala ++ department.children.asScala.flatMap {
+    (department.modules.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       modulesForDepartmentAndSubDepartments
     }).sorted
 
@@ -72,7 +72,7 @@ trait DepartmentTimetableEventsRequest extends PermissionsCheckingMethods with T
   }) ++ modules.asScala).distinct.sorted
 
   private def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-    (department.routes.asScala ++ department.children.asScala.flatMap {
+    (department.routes.asScala.toSeq ++ department.children.asScala.toSeq.flatMap {
       routesForDepartmentAndSubDepartments
     }).sorted
 
@@ -119,13 +119,13 @@ trait GetsModuleEvents {
   def getModuleEvents(
     academicYear: AcademicYear,
     moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
-    errors: mutable.Buffer[String]
+    errors: mutable.ListBuffer[String]
   ): TimetableFetchingService.EventList = {
-    val routesModules = moduleAndDepartmentService.findModulesByRoutes(routes.asScala, academicYear)
-    val yearOfStudyModules = moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala, academicYear)
+    val routesModules = moduleAndDepartmentService.findModulesByRoutes(routes.asScala.toSeq, academicYear)
+    val yearOfStudyModules = moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala.toSeq, academicYear)
 
     val queryModules = (
-      modules.asScala ++ routesModules ++ yearOfStudyModules
+      modules.asScala.toSeq ++ routesModules ++ yearOfStudyModules
       ).distinct.filter { module =>
       (modules.isEmpty || modules.contains(module)) &&
         (routes.isEmpty || routesModules.contains(module)) &&

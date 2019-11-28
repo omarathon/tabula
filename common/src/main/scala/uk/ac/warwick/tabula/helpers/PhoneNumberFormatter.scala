@@ -1,13 +1,8 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.collection.JavaConverters._
-import freemarker.template.TemplateMethodModelEx
-import freemarker.template.utility.DeepUnwrap
-import freemarker.template.TemplateModel
-import uk.ac.warwick.tabula.JavaImports._
-import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.google.i18n.phonenumbers.NumberParseException
+import com.google.i18n.phonenumbers.{NumberParseException, PhoneNumberUtil}
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat._
+import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 /**
   * Formats a phone number into a local format (for GB) or international format (for non-GB)
@@ -45,16 +40,14 @@ object PhoneNumberFormatter {
 /**
   * Companion class for FreeMarker
   */
-class PhoneNumberFormatter extends TemplateMethodModelEx {
+class PhoneNumberFormatter extends BaseTemplateMethodModelEx {
 
   import PhoneNumberFormatter.format
 
   /** Single argument method */
-  override def exec(list: JList[_]): String = {
-    val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+  override def execMethod(args: Seq[_]): String =
     args match {
       case Seq(unformatted: String) => format(unformatted)
       case _ => throw new IllegalArgumentException("Bad args")
     }
-  }
 }

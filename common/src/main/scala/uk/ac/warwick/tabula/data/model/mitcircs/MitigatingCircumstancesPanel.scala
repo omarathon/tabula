@@ -8,7 +8,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.MitigatingCircumstancesPanelMemberRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -17,7 +16,7 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
@@ -25,8 +24,7 @@ import scala.collection.JavaConverters._
 class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serializable
   with ToString
   with PermissionsTarget
-  with ToEntityReference
-  with FormattedHtml {
+  with ToEntityReference {
 
   override type Entity = MitigatingCircumstancesPanel
 
@@ -125,6 +123,6 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
     "id" -> id
   )
 
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(department)
+  override def permissionsParents: LazyList[PermissionsTarget] = LazyList(department)
 
 }

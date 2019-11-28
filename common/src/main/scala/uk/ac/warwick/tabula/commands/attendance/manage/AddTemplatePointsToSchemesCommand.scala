@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object AddTemplatePointsToSchemesCommand {
@@ -38,7 +38,7 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 
     val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
-    val newPoints = schemes.asScala.flatMap { scheme =>
+    val newPoints = schemes.asScala.toSeq.flatMap { scheme =>
       attendanceMonitoringPoints.map { point =>
         val newPoint = point.cloneTo(Option(scheme))
         newPoint.pointType = AttendanceMonitoringPointType.Standard
@@ -49,8 +49,8 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
       }
     }
 
-    generateNotifications(schemes.asScala)
-    updateCheckpointTotals(schemes.asScala)
+    generateNotifications(schemes.asScala.toSeq)
+    updateCheckpointTotals(schemes.asScala.toSeq)
 
     newPoints
   }
@@ -82,7 +82,7 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 
   override lazy val eventName = "AddTemplatePointsToScheme"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     schemes.asScala.foreach(d.attendanceMonitoringScheme)
   }
 
@@ -95,18 +95,18 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 trait AddTemplatePointsToSchemesValidation extends AttendanceMonitoringPointValidation with SelfValidating {
   self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (templateScheme == null) {
       errors.reject("attendanceMonitoringPoints.templateScheme.Empty")
     } else {
-      validateSchemePointStyles(errors, templateScheme.pointStyle, schemes.asScala)
+      validateSchemePointStyles(errors, templateScheme.pointStyle, schemes.asScala.toSeq)
 
       attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear).foreach { point =>
         templateScheme.pointStyle match {
           case AttendanceMonitoringPointStyle.Date =>
-            validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes.asScala, global = true)
+            validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes.asScala.toSeq, global = true)
           case AttendanceMonitoringPointStyle.Week =>
-            validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes.asScala, global = true)
+            validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes.asScala.toSeq, global = true)
         }
       }
 

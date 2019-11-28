@@ -15,8 +15,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object OldMarkingCompletedCommand {
   def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
@@ -37,33 +36,33 @@ abstract class OldMarkingCompletedCommand(val module: Module, val assignment: As
 
   self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 
-  override def onBind(result: BindingResult) {
+  override def onBind(result: BindingResult): Unit = {
     // filter out any feedbacks where the current user is not the marker
     markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser.exists {
       _ == user
     }).asJava
 
     // Pre-submit validation
-    noMarks = markerFeedback.asScala.filter(!_.hasMark)
-    noFeedback = markerFeedback.asScala.filter(!_.hasFeedback)
-    releasedFeedback = markerFeedback.asScala.filter(_.state == MarkingState.MarkingCompleted)
+    noMarks = markerFeedback.asScala.toSeq.filter(!_.hasMark)
+    noFeedback = markerFeedback.asScala.toSeq.filter(!_.hasFeedback)
+    releasedFeedback = markerFeedback.asScala.toSeq.filter(_.state == MarkingState.MarkingCompleted)
   }
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
     if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
   }
 
   override def applyInternal() {
     // do not update previously released feedback
-    val feedbackForRelease = markerFeedback.asScala -- releasedFeedback
+    val feedbackForRelease = markerFeedback.asScala.toSeq diff releasedFeedback
 
     feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
 
     releaseNextMarkerFeedbackOrFinalise(feedbackForRelease)
   }
 
-  private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
+  private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: Seq[MarkerFeedback]) {
     newReleasedFeedback = feedbackForRelease.flatMap(createNextMarkerFeedback).map { nextMarkerFeedback =>
       stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
       feedbackService.save(nextMarkerFeedback)
@@ -100,7 +99,7 @@ trait CreatesNextMarkerFeedback {
 
 trait MarkingCompletedCommandPermissions extends RequiresPermissionsChecking {
   self: MarkingCompletedState =>
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -114,7 +113,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
   override def describe(d: Description): Unit =
     d.assignment(assignment)
-     .markerFeedbacks(markerFeedback.asScala)
+     .markerFeedbacks(markerFeedback.asScala.toSeq)
 
   override def describeResult(d: Description): Unit =
     d.assignment(assignment)
@@ -151,7 +150,7 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
   self: MarkingCompletedState with NotificationHandling with FeedbackServiceComponent =>
 
   def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
-    val notificationsToComplete = markerFeedback.asScala
+    val notificationsToComplete = markerFeedback.asScala.toSeq
       .filter(_.state == MarkingState.MarkingCompleted)
       .flatMap(mf =>
         // TAB-4328-  ModeratorRejectedNotification is orphaned at this stage.

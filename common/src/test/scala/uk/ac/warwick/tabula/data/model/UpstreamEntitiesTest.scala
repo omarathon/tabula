@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, Ass
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -36,7 +36,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
       law.moduleCode = "la155-10"
       law.assessmentGroup = "A"
       law.sequence = "A02"
-      law.assessmentType = AssessmentType.Assignment
+      law.assessmentType = AssessmentType.Essay
       law.name = "Cool Essay"
       law.inUse = true
 

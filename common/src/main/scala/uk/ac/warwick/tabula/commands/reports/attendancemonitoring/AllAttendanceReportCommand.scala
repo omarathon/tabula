@@ -1,24 +1,24 @@
 package uk.ac.warwick.tabula.commands.reports.attendancemonitoring
 
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
-import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
 import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandRequestValidation, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 object AllAttendanceReportCommand {
-  type AllAttendanceReportCommandResult = Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]]
+  type ResultType = AllAttendanceReportCommandResult
   type CommandType = Appliable[AllAttendanceReportCommandResult] with ReportCommandRequestValidation
 
   def apply(
     department: Department,
     academicYear: AcademicYear,
     filter: AllAttendanceReportCommandResult => AllAttendanceReportCommandResult
-  ) =
+  ): CommandType =
     new AllAttendanceReportCommandInternal(department, academicYear, filter)
       with AutowiringProfileServiceComponent
       with AutowiringAttendanceMonitoringServiceComponent
@@ -29,6 +29,12 @@ object AllAttendanceReportCommand {
       with ReportCommandRequestValidation
       with ReadOnly with Unaudited
 }
+
+case class AllAttendanceReportCommandResult(
+  studentDataMap: Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]],
+  reportRangeStartDate: LocalDate,
+  reportRangeEndDate: LocalDate
+)
 
 class AllAttendanceReportCommandInternal(
   val department: Department,
@@ -53,14 +59,14 @@ class AllAttendanceReportCommandInternal(
       attendanceMonitoringService.getAllCheckpointData(studentPointMap.values.flatten.toSeq.distinct).groupBy(_.point)
     }
 
-    val result = benchmarkTask("result") {
+    val result: Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]] = benchmarkTask("result") {
       studentPointMap.map { case (studentData, points) =>
         studentData -> points.map(point => point -> checkpointMap.get(point).flatMap(
           checkpoints => checkpoints.find(_.universityId == studentData.universityId).map(_.state)).getOrElse(AttendanceState.NotRecorded)
         ).toMap
       }
     }
-    filter(result)
+    filter(AllAttendanceReportCommandResult(result, startDate, endDate))
   }
 
 }

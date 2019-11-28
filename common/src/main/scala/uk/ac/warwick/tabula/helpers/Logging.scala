@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.slf4j.{Logger, LoggerFactory}
-import Stopwatches._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Stopwatches._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 trait Logging {
@@ -125,13 +125,14 @@ object Logging {
     case Some(null) => null
     case None => null
     case jcol: java.util.Collection[_] => jcol.asScala.map(convertForStructuredArguments).asJavaCollection
-    case jmap: JMap[_, _] => jmap.asScala.mapValues(convertForStructuredArguments).asJava
-    case smap: scala.collection.SortedMap[_, _] => JLinkedHashMap(smap.mapValues(convertForStructuredArguments).toSeq: _*)
-    case lmap: scala.collection.immutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(convertForStructuredArguments).toSeq: _*)
-    case lmap: scala.collection.mutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(convertForStructuredArguments).toSeq: _*)
-    case smap: scala.collection.Map[_, _] => mapAsJavaMapConverter(smap.mapValues(convertForStructuredArguments)).asJava
-    case sseq: scala.Seq[_] => seqAsJavaListConverter(sseq.map(convertForStructuredArguments)).asJava
-    case scol: scala.Iterable[_] => asJavaCollectionConverter(scol.map(convertForStructuredArguments)).asJavaCollection
+    case jmap: JMap[_, _] => jmap.asScala.view.mapValues(convertForStructuredArguments).toMap.asJava
+    case smap: scala.collection.SortedMap[_, _] => JLinkedHashMap(smap.view.mapValues(convertForStructuredArguments).toSeq: _*)
+    case lmap: scala.collection.immutable.ListMap[_, _] => JLinkedHashMap(lmap.view.mapValues(convertForStructuredArguments).toSeq: _*)
+    case lmap: scala.collection.mutable.ListMap[_, _] => JLinkedHashMap(lmap.view.mapValues(convertForStructuredArguments).toSeq: _*)
+    case smap: scala.collection.Map[_, _] => smap.view.mapValues(convertForStructuredArguments).toMap.asJava
+    case smapview: scala.collection.MapView[_, _] => smapview.view.mapValues(convertForStructuredArguments).toMap.asJava
+    case sseq: scala.Seq[_] => sseq.map(convertForStructuredArguments).asJava
+    case scol: scala.Iterable[_] => scol.map(convertForStructuredArguments).asJavaCollection
     case other: AnyRef => other
     case _ => null
   }) match {

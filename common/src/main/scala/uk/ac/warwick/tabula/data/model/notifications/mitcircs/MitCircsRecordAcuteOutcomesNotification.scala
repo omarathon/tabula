@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MitCircsRecordAcuteOutcomesNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/mit_circs_acute_outcomes.ftl"
@@ -49,7 +49,7 @@ class MitCircsRecordAcuteOutcomesNotification
 
   @transient
   final lazy val configuringDepartment: Department =
-    student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).head
+    student.homeDepartment.subDepartmentsContaining(student).filter(_.enableMitCircs).head
 
   override def allRecipients: Seq[User] = {
     if (submission.state != MitigatingCircumstancesSubmissionState.OutcomesRecorded || !submission.isAcute || (Option(submission.acuteOutcome).isEmpty && submission.affectedAssessments.asScala.forall(a => Option(a.acuteOutcome).isEmpty))) {
@@ -78,7 +78,8 @@ class MitCircsRecordAcuteOutcomesNotification
       if (settings.notifyDepartmentAdministrators.value && (users.isEmpty || notifyAllGroups)) {
         users ++= submission.affectedAssessments.asScala
           .filter(a => Option(a.acuteOutcome).isDefined)
-          .map(_.module.adminDepartment)
+          .flatMap(a => Option(a.module))
+          .map(_.adminDepartment)
           .distinct
           .flatMap(_.owners.users)
           .distinct

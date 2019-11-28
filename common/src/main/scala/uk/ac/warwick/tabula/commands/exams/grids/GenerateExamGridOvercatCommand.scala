@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceCompone
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object GenerateExamGridOvercatCommand {
   def overcatIdentifier(seq: Seq[_]): String = seq.map {
@@ -87,7 +87,7 @@ trait GenerateExamGridOvercatValidation extends SelfValidating {
 
   self: GenerateExamGridOvercatCommandRequest =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (chosenModuleSubset.isEmpty) {
       errors.reject("examGrid.overcatting.overcatChoice.invalid")
     }
@@ -99,7 +99,7 @@ trait GenerateExamGridOvercatPermissions extends RequiresPermissionsChecking wit
 
   self: GenerateExamGridOvercatCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Department.ExamGrids, department)
   }
 

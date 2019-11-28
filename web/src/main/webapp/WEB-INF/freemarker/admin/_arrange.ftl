@@ -14,7 +14,7 @@
 <@fmt.id7_deptheader "Arrange ${objectName}s" route_function "for" />
 
 <noscript>
-  <div class="alert">This page requires Javascript.</div>
+  <div class="alert alert-info">This page requires Javascript.</div>
 </noscript>
 
 <p>Drag ${objectName}s by their <i class="fa fa-bars"></i> handles to move them between departments. To select multiple departments,

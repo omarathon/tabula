@@ -3,15 +3,17 @@
 <#escape x as x?html>
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
-  <#macro alerts commandName scope users="" role="">
+  <#macro validation_alerts commandName>
     <#local bindingError><@f.errors path="${commandName}.*" /></#local>
     <#if bindingError?has_content>
       <p class="alert alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <#noescape>${bindingError}</#noescape>
+          <#noescape>${bindingError}</#noescape>
       </p>
     </#if>
+  </#macro>
 
+  <#macro alerts scope users="" role="">
     <#if users?has_content && role?has_content>
       <div id="permissionsMessage" class="alert alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -45,7 +47,7 @@
               <input type="hidden" name="_command" value="add">
               <input type="hidden" name="roleDefinition" value="${roleDefinition}">
 
-              <@bs3form.flexipicker cssClass="pickedUser" name="usercodes" placeholder="Enter name or ID">
+              <@bs3form.flexipicker cssClass="pickedUser" name="usercodes" staffOnly="true" placeholder="Enter name or ID">
                 <span class="input-group-btn">
 								<#if can_delegate>
                   <button class="btn btn-default" type="submit">Add</button>
@@ -109,7 +111,7 @@
         <#else>
           <div class="row">
             <div class="col-md-12">
-              There are no ${roleName} yet.
+              There is no ${roleName} yet.
             </div>
           </div>
         </#if>

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 @Entity
 @Proxy
@@ -26,8 +26,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
   with PermissionsTarget
   with Serializable
-  with ToEntityReference
-  with FormattedHtml {
+  with ToEntityReference {
     type Entity = MitigatingCircumstancesSubmission
 
   def this(student: StudentMember, creator: User, department: Department) {
@@ -87,6 +86,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Column(nullable = true)
   var outcomesApprovedOn: DateTime = _
+
+  def outcomesFinalisedOn: DateTime = if(isAcute) outcomesLastRecordedOn else outcomesApprovedOn
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
@@ -148,7 +149,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def reason: String = Option(encryptedReason).map(_.toString).orNull
   def reason_=(reason: String): Unit = encryptedReason = reason
 
-  def formattedReason: TemplateHTMLOutputModel = formattedHtml(reason)
+  def formattedReason: TemplateHTMLOutputModel = FormattedHtml(reason)
 
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
   @JoinColumn(name = "submission_id")
@@ -157,9 +158,14 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
-    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
-      .map(r => r -> affectedAssessments.asScala.filter(_.boardRecommendations.contains(r)))
+    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r }
+      .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
+      .filter{ case (_, a) => a.nonEmpty }
       .toMap
+
+  def globalRecommendations: Seq[MitCircsExamBoardRecommendation] = Option(boardRecommendations).map(_.diff(
+    boardRecommendations.collect{ case r: AssessmentSpecificRecommendation => r }
+  )).getOrElse(Nil)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "pendingEvidence", nullable = false)
@@ -167,7 +173,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def pendingEvidence: String = Option(encryptedPendingEvidence).map(_.toString).orNull
   def pendingEvidence_=(pendingEvidence: String): Unit = encryptedPendingEvidence = pendingEvidence
 
-  def formattedPendingEvidence: TemplateHTMLOutputModel = formattedHtml(pendingEvidence)
+  def formattedPendingEvidence: TemplateHTMLOutputModel = FormattedHtml(pendingEvidence)
 
   var pendingEvidenceDue: LocalDate = _
 
@@ -184,8 +190,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   private var encryptedSensitiveEvidenceComments: CharSequence = _
   def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
   def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
-  def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = formattedHtml(sensitiveEvidenceComments)
+  def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = FormattedHtml(sensitiveEvidenceComments)
 
+  // Date the student approved (finally submits) the submission - (may have been raised on their behalf)
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
 
@@ -267,7 +274,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def outcomeReasons: String = Option(encryptedOutcomeReasons).map(_.toString).orNull
   def outcomeReasons_=(outcomeReasons: String): Unit = encryptedOutcomeReasons = outcomeReasons
 
-  def formattedOutcomeReasons: TemplateHTMLOutputModel = formattedHtml(outcomeReasons)
+  def formattedOutcomeReasons: TemplateHTMLOutputModel = FormattedHtml(outcomeReasons)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
   var boardRecommendations: Seq[MitCircsExamBoardRecommendation] = _
@@ -286,7 +293,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 
-  def formattedBoardRecommendationComments: TemplateHTMLOutputModel = formattedHtml(boardRecommendationComments)
+  def formattedBoardRecommendationComments: TemplateHTMLOutputModel = FormattedHtml(boardRecommendationComments)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonUserType")
   var rejectionReasons: Seq[MitigatingCircumstancesRejectionReason] = _
@@ -300,6 +307,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
+  // get's the list of assessments which the actue outcome apples to (may be a subset of the assessments that the student indicated were affected)
+  def assessmentsWithAcuteOutcome: Seq[MitigatingCircumstancesAffectedAssessment] = affectedAssessments.asScala.toSeq
+    .filter(a => a.acuteOutcome != null && a.acuteOutcome == acuteOutcome)
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
@@ -409,7 +420,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   )
 
   // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = panel.toStream :+ MitigatingCircumstancesStudent(student)
+  override def permissionsParents: LazyList[PermissionsTarget] = panel.to(LazyList) #::: LazyList(MitigatingCircumstancesStudent(student))
 }
 
 

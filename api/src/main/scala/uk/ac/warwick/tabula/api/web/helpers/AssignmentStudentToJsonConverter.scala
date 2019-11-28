@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.AssignmentFeedback
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
   self: AssignmentStudentMessageResolver with ApiController =>

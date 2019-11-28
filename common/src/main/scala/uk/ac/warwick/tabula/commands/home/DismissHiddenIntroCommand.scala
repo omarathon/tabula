@@ -26,7 +26,7 @@ class DismissHiddenIntroCommand(user: CurrentUser, settings: UserSettings, setti
   override def describe(d: Description): Unit =
     d.users(Seq(user.apparentUser)).property("hash" -> settingHash)
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!user.exists) {
       errors.reject("user.mustBeLoggedIn")
     }

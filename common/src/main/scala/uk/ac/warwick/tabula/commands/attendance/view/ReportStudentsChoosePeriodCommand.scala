@@ -55,7 +55,7 @@ trait ReportStudentsChoosePeriodValidation extends SelfValidating {
 
   self: ReportStudentsChoosePeriodCommandState =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!availablePeriods.filter(_._2).map(_._1).contains(period)) {
       errors.rejectValue("period", "attendanceMonitoringReport.invalidPeriod")
     }
@@ -67,7 +67,7 @@ trait ReportStudentsChoosePeriodPermissions extends RequiresPermissionsChecking 
 
   self: ReportStudentsChoosePeriodCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.Report, department)
   }
 
@@ -81,7 +81,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
   lazy val allStudents: Seq[StudentMember] = benchmarkTask("profileService.findAllStudentsByRestrictions") {
     profileService.findAllStudentsByRestrictions(
       department = department,
-      restrictions = buildRestrictions(academicYear)
+      restrictions = buildRestrictions(academicYear, additionalRestrictions)
     ).sortBy(s => (s.lastName, s.firstName))
   }
 
@@ -92,7 +92,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
   lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
     studentPointMap.values.flatten.toSeq.groupBy { point =>
       academicYear.termOrVacationForDate(point.startDate).periodType.toString
-    }.mapValues(_.distinct)
+    }.view.mapValues(_.distinct).toMap
   }
 
   lazy val availablePeriods: Seq[(String, Boolean)] = benchmarkTask("availablePeriods") {

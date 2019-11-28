@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
@@ -281,7 +281,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
     val students = {
       if (usercodes.isEmpty) Map.empty[String, User]
-      else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+      else usercodes.toSeq.grouped(100).map(userLookup.usersByUserIds).reduce(_ ++ _)
     }.withDefault(new AnonymousUser(_))
 
     feedback.map { case (marker, markerFeedbacks) =>
@@ -303,7 +303,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
     val usercodes = getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.feedback.usercode).toSet
     val students: Map[String, User] = {
       if (usercodes.isEmpty) Map.empty[String, User]
-      else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+      else usercodes.toSeq.grouped(100).map(userLookup.usersByUserIds).reduce(_ ++ _)
     }.withDefault(new AnonymousUser(_))
 
     usercodes.map(students).toSeq

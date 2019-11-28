@@ -35,8 +35,8 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
   /**
     * Not guaranteed to be distinct (unless you call distinct on it) but shouldn't be used anyway.
     */
-  override def listKeys(): Future[Stream[String]] =
-    Future.sequence(services.toStream.map(_.listKeys())).map(_.flatten)
+  override def listKeys(): Future[LazyList[String]] =
+    Future.sequence(services.to(LazyList).map(_.listKeys())).map(_.flatten)
 
   override def afterPropertiesSet(): Unit = services.foreach(_.afterPropertiesSet())
 }

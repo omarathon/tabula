@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.services.permissions
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType, StudentMember}
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles._
-import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, AutowiringRelationshipServiceComponent}
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
 @Component
 class StudentRelationshipAgentRoleProvider extends RoleProvider
@@ -15,13 +15,13 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider
   with TaskBenchmarking {
 
 
-  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StudentRelationshipAgentRoleProvider ") {
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for StudentRelationshipAgentRoleProvider ") {
     scope match {
       case student: StudentMember =>
         relationshipService
           // lists all of the tutors current relationships to this student (expired relationships and withdrawn students ignored)
           .getCurrentRelationships(student, user.apparentUser.getWarwickId)
-          .toStream
+          .to(LazyList)
           .filterNot(_.explicitlyTerminated)
           // gather all of the distinct relationship types
           .map { rel => rel.relationshipType }
@@ -34,7 +34,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider
           }
 
       // We don't need to check for the StudentRelationshipAgent role on any other scopes
-      case _ => Stream.empty
+      case _ => LazyList.empty
     }
   }
 
@@ -47,11 +47,11 @@ class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
   with AutowiringRelationshipServiceComponent
   with CustomRolesForAdminDepartments {
 
-  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = scope match {
+  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = scope match {
     case student: StudentMember =>
       relationshipService
         .getAllPastAndPresentRelationships(student)
-        .toStream
+        .to(LazyList)
         .filterNot(_.explicitlyTerminated)
         .filter(_.agent == user.apparentUser.getWarwickId)
         .map(_.relationshipType).distinct
@@ -62,7 +62,7 @@ class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
         })
 
     // Member is the only valid scope for this Role
-    case _ => Stream.empty
+    case _ => LazyList.empty
   }
 
   override def rolesProvided = Set(classOf[HistoricStudentRelationshipAgent])

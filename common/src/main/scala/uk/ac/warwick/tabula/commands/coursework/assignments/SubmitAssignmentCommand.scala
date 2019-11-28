@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object SubmitAssignmentCommand {
   type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
@@ -173,7 +173,7 @@ trait SubmitAssignmentBinding extends BindListener {
 trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(assignment), mandatory(module))
     p.PermissionCheck(Permissions.Submission.Create, assignment)
   }
@@ -182,7 +182,7 @@ trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with
 trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: SubmitAssignmentState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(mandatory(assignment), mandatory(module))
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, assignment)
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
@@ -193,7 +193,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
   self: SubmitAssignmentRequest
     with FeaturesComponent =>
 
-  override def validate(errors: Errors) {
+  override def validate(errors: Errors): Unit = {
     if (!assignment.isOpened) {
       errors.reject("assignment.submit.notopen")
     }

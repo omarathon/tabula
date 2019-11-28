@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, RelationshipServiceComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ApplyScheduledStudentRelationshipChangesCommand {
   def apply(relationshipType: StudentRelationshipType, department: Department, user: CurrentUser) =
@@ -30,7 +30,7 @@ class ApplyScheduledStudentRelationshipChangesCommandInternal(val relationshipTy
 
   override def applyInternal(): Seq[StudentRelationship] = {
     val applyDate = DateTime.now
-    relationships.asScala.map { relationship =>
+    relationships.asScala.toSeq.map { relationship =>
       if (!relationship.isCurrent) {
         // Future add or replace
         relationshipService.endStudentRelationships(relationship.replacesRelationships.asScala.toSeq, applyDate)
@@ -59,7 +59,7 @@ trait ApplyScheduledStudentRelationshipChangesDescription extends Describable[Se
 
   override def describe(d: Description): Unit =
     d.studentRelationshipType(relationshipType)
-     .studentRelationships(relationships.asScala)
+     .studentRelationships(relationships.asScala.toSeq)
 }
 
 trait ApplyScheduledStudentRelationshipChangesNotifications extends BulkRelationshipChangeNotifier[Seq[StudentRelationship], Seq[StudentRelationship]] {

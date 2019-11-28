@@ -21,7 +21,7 @@ object ImportRouteRulesCommand {
 trait ImportRouteRulesCommand extends CommandInternal[Unit]
   with RequiresPermissionsChecking with Logging with SessionComponent {
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 
@@ -53,5 +53,5 @@ trait ImportRouteRulesCommand extends CommandInternal[Unit]
 
 
 trait ImportRouteRulesDescription extends Describable[Unit] {
-  def describe(d: Description) {}
+  def describe(d: Description): Unit = {}
 }

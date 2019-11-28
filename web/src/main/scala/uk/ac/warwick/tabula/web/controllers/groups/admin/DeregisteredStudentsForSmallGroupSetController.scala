@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 @Controller
@@ -25,7 +25,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
   @ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
     DeregisteredStudentsForSmallGroupSetCommand(module, set)
 
-  @ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[StudentNotInMembership] =
+  @ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[StudentNotInMembership] =
     set.studentsNotInMembership.map { user =>
       val member = profileService.getMemberByUser(user, disableFilter = true)
 

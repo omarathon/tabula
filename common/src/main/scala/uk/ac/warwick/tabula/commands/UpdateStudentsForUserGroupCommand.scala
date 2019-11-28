@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object UpdateStudentsForUserGroupCommand {
   def apply(theDepartment: Department, theSet: DepartmentSmallGroupSet) =
@@ -88,10 +88,10 @@ trait UpdateStudentsForUserGroupCommandState extends UpdateEntityMembershipByMem
     }
 
     val staticMemberItems =
-      ((staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala)
+      ((staticStudentIds.asScala.toSeq diff excludedStudentIds.asScala.toSeq) diff includedStudentIds.asScala.toSeq)
         .map(toMembershipItem(_, Static))
 
-    val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
+    val includedMemberItems = includedStudentIds.asScala.toSeq.map(toMembershipItem(_, Include))
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }
@@ -104,7 +104,7 @@ trait UpdateStudentsForSmallGroupSetPermissions extends RequiresPermissionsCheck
 
   def module: Module
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, module)
     p.PermissionCheck(Permissions.SmallGroups.Update, set)
   }
@@ -117,7 +117,7 @@ trait UpdateStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermis
 
   def department: Department
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     mustBeLinked(set, department)
     p.PermissionCheck(Permissions.SmallGroups.Update, set)
   }
@@ -130,7 +130,7 @@ trait UpdateStudentsForDepartmentSmallGroupSetDescription extends Describable[De
 
   override lazy val eventName = "UpdateStudentsForDepartmentSmallGroupSet"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit = {
     d.departmentSmallGroupSet(set)
   }
 }

@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-import scala.collection.mutable
+import org.hibernate.`type`.StandardBasicTypes
 
 /**
   * For storing comma-separated strings in Hibernate.
@@ -21,7 +20,7 @@ class StringListUserType extends AbstractBasicUserType[Seq[String], String] {
   val nullValue = null
   val nullObject = Nil
 
-  override def convertToObject(string: String): mutable.WrappedArray[String] = string.split(separator)
+  override def convertToObject(string: String): Seq[String] = string.split(separator).toSeq
 
   override def convertToValue(list: Seq[String]): String = if (list.isEmpty) null else list.mkString(separator)
 

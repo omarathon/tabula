@@ -45,7 +45,7 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
       val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
         profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
           department = department,
-          restrictions = buildRestrictions(academicYear),
+          restrictions = buildRestrictions(academicYear, additionalRestrictions),
           academicYear = academicYear
         )
       }
@@ -86,7 +86,7 @@ trait FilterMonitoringPointsPermissions extends RequiresPermissionsChecking with
 
   self: FilterMonitoringPointsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking) {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.MonitoringPoints.View, department)
   }
 
@@ -100,6 +100,7 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
   var sortOrder: JList[Order] = null // No sorting in this command
 
   var courseTypes: JList[CourseType] = JArrayList()
+  var specificCourseTypes: JList[SpecificCourseType] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var courses: JList[Course] = JArrayList()
   var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

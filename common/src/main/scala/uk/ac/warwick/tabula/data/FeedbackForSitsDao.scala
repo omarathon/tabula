@@ -51,6 +51,6 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
       () => session.newCriteria[FeedbackForSits],
       "feedback",
       feedbacks
-    ).groupBy(_.feedback).mapValues(_.head)
+    ).groupBy(_.feedback).view.mapValues(_.head).toMap
   }
 }

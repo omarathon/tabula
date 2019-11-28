@@ -26,6 +26,10 @@
         <td>${studentCourseDetails.course.code?upper_case} ${studentCourseDetails.course.name}</td>
       </tr>
       <tr>
+        <th>Course occurrence:</th>
+        <td>${command.studentCourseYearDetails.blockOccurrence!""?upper_case}</td>
+      </tr>
+      <tr>
         <th>Route:</th>
         <td>${studentCourseDetails.currentRoute.code?upper_case} ${studentCourseDetails.currentRoute.name}</td>
       </tr>
@@ -245,10 +249,8 @@
                 <#if submission.affectedAssessments?has_content>
                   <@components.detail "Affected assessments">
                   <ul class="list-unstyled">
-                    <#list submission.affectedAssessments as assessment>
-                      <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                        <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
-                      </#if>
+                    <#list submission.assessmentsWithAcuteOutcome as assessment>
+                      <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                     </#list>
                   </ul>
                   </@components.detail>

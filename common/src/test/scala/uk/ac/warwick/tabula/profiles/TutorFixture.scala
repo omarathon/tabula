@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.profiles
 
 import org.joda.time.DateTime
-import org.mockito.Matchers
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model._
+import org.mockito.ArgumentMatchers
 import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.userlookup.User
 
 trait TutorFixture extends Mockito {
 
@@ -21,6 +21,8 @@ trait TutorFixture extends Mockito {
   student.universityId = "student"
   student.firstName = "Test"
   student.lastName = "Student"
+  student.email = "student@warwick.ac.uk"
+  student.inUseFlag = "Active"
 
   val studentCourseDetails = new StudentCourseDetails
   studentCourseDetails.student = student
@@ -31,6 +33,8 @@ trait TutorFixture extends Mockito {
   student.mostSignificantCourse = studentCourseDetails
 
   val newTutor = new StaffMember
+  newTutor.firstName = "Peter"
+  newTutor.lastName = "O'Hanraha-Hanrahan"
   newTutor.universityId = "0000001"
 
   val oldTutor = new StaffMember
@@ -54,10 +58,10 @@ trait TutorFixture extends Mockito {
 
   val mockRelationshipService: RelationshipService = smartMock[RelationshipService]
   mockRelationshipService.saveStudentRelationship(
-    Matchers.eq(tutorRelationshipType),
-    Matchers.eq(studentCourseDetails),
-    Matchers.eq(Left(newTutor)),
-    Matchers.eq(DateTime.now),
+    ArgumentMatchers.eq(tutorRelationshipType),
+    ArgumentMatchers.eq(studentCourseDetails),
+    ArgumentMatchers.eq(Left(newTutor)),
+    ArgumentMatchers.eq(DateTime.now),
     any[Seq[StudentRelationship]]
   ) returns StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails, DateTime.now)
   mockRelationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)

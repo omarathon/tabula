@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.View

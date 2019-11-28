@@ -29,7 +29,7 @@ abstract class MeetingRecordApprovalNotification(@transient val verb: String)
   def content = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> meeting.creator.asSsoUser,
     "agentRoles" -> agentRoles,
-    "dateFormatter" -> dateOnlyFormatter,
+    "dateTimeFormatter" -> dateTimeFormatter,
     "verbed" -> (if (verb == "create") "created" else "edited"),
     "meetingRecord" -> meeting,
   ))

@@ -1,35 +1,45 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.admin.department.DisplaySettingsCommand._
+import uk.ac.warwick.tabula.data.MitigatingCircumstancesSubmissionFilter
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula.data.model.{CourseType, Department, MeetingRecordApprovalType, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringRelationshipServiceComponent, ModuleAndDepartmentServiceComponent, RelationshipServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DisplaySettingsCommand {
-  def apply(department: Department) =
+  type Result = Department
+  type Command = Appliable[Result] with DisplaySettingsCommandState with DisplaySettingsCommandRequest with SelfValidating
+  val RequiredPermission: Permission = Permissions.Department.ManageDisplaySettings
+
+  def apply(department: Department): Command =
     new DisplaySettingsCommandInternal(department)
-      with ComposableCommand[Department]
+      with ComposableCommand[Result]
+      with DisplaySettingsCommandRequest
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringRelationshipServiceComponent
+      with AutowiringMitCircsSubmissionServiceComponent
       with DisplaySettingsCommandDescription
       with DisplaySettingsCommandPermissions
+      with DisplaySettingsCommandValidation
+      with PopulateDisplaySettingsCommandRequest
 }
 
 trait DisplaySettingsCommandState {
   val department: Department
 }
 
-class DisplaySettingsCommandInternal(val department: Department) extends CommandInternal[Department] with PopulateOnForm
-  with DisplaySettingsCommandState {
-
-  this: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
+trait DisplaySettingsCommandRequest {
+  self: DisplaySettingsCommandState =>
 
   var showStudentName: Boolean = department.showStudentName
   var plagiarismDetection: Boolean = department.plagiarismDetectionEnabled
@@ -50,21 +60,31 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   var meetingRecordApprovalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
   var enableMitCircs: Boolean = department.enableMitCircs
   var mitCircsGuidance: String = department.mitCircsGuidance
+}
 
-  def populate() {
-    relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
-      if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
-        studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
+trait PopulateDisplaySettingsCommandRequest {
+  self: DisplaySettingsCommandState
+    with DisplaySettingsCommandRequest
+    with RelationshipServiceComponent =>
 
-      studentRelationshipExpected.put(relationshipType, JHashMap(
-        Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional).map(courseType =>
-          courseType -> JBoolean(Option(department.getStudentRelationshipExpected(relationshipType, courseType)
-            .getOrElse(relationshipType.isDefaultExpected(courseType))))
-        ): _*
-      ))
-    }
-    }
+  relationshipService.allStudentRelationshipTypes.foreach { relationshipType =>
+    if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
+      studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
+
+    studentRelationshipExpected.put(relationshipType, JHashMap(
+      Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional).map(courseType =>
+        courseType -> JBoolean(Option(department.getStudentRelationshipExpected(relationshipType, courseType)
+          .getOrElse(relationshipType.isDefaultExpected(courseType))))
+      ): _*
+    ))
   }
+}
+
+class DisplaySettingsCommandInternal(val department: Department) extends CommandInternal[Result]
+  with DisplaySettingsCommandState {
+
+  self: DisplaySettingsCommandRequest
+    with ModuleAndDepartmentServiceComponent =>
 
   override def applyInternal(): Department = transactional() {
     department.showStudentName = showStudentName
@@ -94,17 +114,28 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   }
 }
 
-trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking {
-  this: DisplaySettingsCommandState =>
-  def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
-  }
+trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  self: DisplaySettingsCommandState =>
+  def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(RequiredPermission, mandatory(department))
 }
 
-trait DisplaySettingsCommandDescription extends Describable[Department] {
+trait DisplaySettingsCommandDescription extends Describable[Result] {
   this: DisplaySettingsCommandState =>
   // describe the thing that's happening.
   override def describe(d: Description): Unit =
     d.department(department)
 }
 
+trait DisplaySettingsCommandValidation extends SelfValidating {
+  self: DisplaySettingsCommandState
+    with DisplaySettingsCommandRequest
+    with MitCircsSubmissionServiceComponent =>
+
+  override def validate(errors: Errors): Unit = {
+    // TAB-7797 Don't allow mitigating circumstances claims to be orphaned
+    if (department.enableMitCircs && !enableMitCircs && mitCircsSubmissionService.submissionsForDepartment(department, Nil, MitigatingCircumstancesSubmissionFilter()).nonEmpty) {
+      errors.rejectValue("enableMitCircs", "departmentSettings.enableMitCircs.wouldOrphan")
+    }
+  }
+}

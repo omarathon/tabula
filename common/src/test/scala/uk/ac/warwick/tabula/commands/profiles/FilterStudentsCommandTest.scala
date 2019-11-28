@@ -1,11 +1,8 @@
 package uk.ac.warwick.tabula.commands.profiles
 
-import org.hamcrest.Description
-import org.hamcrest.Matchers._
+import org.hamcrest.{BaseMatcher, Description}
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.{Order, Restrictions}
-import org.joda.time.DateTime
-import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
@@ -13,7 +10,7 @@ import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaOrder, ScalaRestriction
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 class FilterStudentsCommandTest extends TestBase with Mockito {
@@ -22,7 +19,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
     val profileService: ProfileService = mock[ProfileService]
 
     // this seems to need the 'anArgThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
-    profileService.findStudentsByRestrictions(anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything)) returns ((0, Seq(new StudentMember)))
+    profileService.findStudentsByRestrictions(any[Department], any[AcademicYear], any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]], anyInt, anyInt) returns ((0, Seq(new StudentMember)))
   }
 
   trait Fixture {
@@ -192,7 +189,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
     }
   }
 
-  def seqToStringMatches[A](o: Seq[A]) = new ArgumentMatcher[Seq[A]] {
+  def seqToStringMatches[A](o: Seq[A]) = new BaseMatcher[Seq[A]] {
     def matches(that: Any): Boolean = that match {
       case s: Seq[_] => s.length == o.length && (o, s).zipped.forall { case (l, r) => l.toString == r.toString }
       case _ => false

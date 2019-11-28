@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AutowiringAttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EditMeetingRecordCommand {
   def apply(meetingRecord: MeetingRecord) =
@@ -39,7 +39,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
     with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
   override def applyInternal(): MeetingRecord = {
-    meetingRecord.relationships = relationships.asScala
+    meetingRecord.relationships = relationships.asScala.toSeq
     applyCommon(meetingRecord)
   }
 
@@ -78,7 +78,7 @@ trait EditMeetingRecordCommandNotifications extends Notifies[MeetingRecord, Meet
 
   override def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
     CompletesNotificationsResult(
-      commandResult.approvals.asScala.flatMap(approval =>
+      commandResult.approvals.asScala.toSeq.flatMap(approval =>
         notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
       ),
       creator.asSsoUser
