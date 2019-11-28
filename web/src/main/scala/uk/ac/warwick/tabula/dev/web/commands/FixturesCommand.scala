@@ -167,6 +167,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
                 session.delete(feedbackForSits)
               }
             }
+            assignment.submissions.forEach(triggerService.removeExistingTriggers(_))
             triggerService.removeExistingTriggers(assignment)
             assignment.feedbacks.clear()
           }
@@ -236,6 +237,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 						where scheduledtrigger.trigger_type = 'AssignmentClosed'
 						and entityreference.entity_id not in (select id from assignment)
 						and scheduledtrigger.completed_date is null
+					""").list.size() == 0)
+        assert(sessionWithoutFreshFilters.createSQLQuery(
+          """
+            select scheduledtrigger.id from scheduledtrigger
+            join entityreference on target_id = entityreference.id
+            where scheduledtrigger.trigger_type = 'SubmissionBeforeCloseDate'
+            and entityreference.entity_id not in (select id from submission)
+            and scheduledtrigger.completed_date is null
 					""").list.size() == 0)
       }
     }
