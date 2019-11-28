@@ -8,7 +8,7 @@
 
   <#if hasSchemes>
     <ul>
-      <li><h3><a href="<@routes.attendance.viewStudents department academicYear />">View by student and report to SITS e:Vision</a></h3></li>
+      <li><h3><a href="<@routes.attendance.viewStudents department academicYear />">View by student<#if features.attendanceMonitoringReport && !features.attendanceMonitoringRealTimeReport && can.do("MonitoringPoints.Report", department)> and report to SITS e:Vision</#if></a></h3></li>
       <li><h3><a href="<@routes.attendance.viewPoints department academicYear />">View by point</a></h3></li>
       <#if can.do("MonitoringPoints.View", department)>
         <#list department.displayedStudentRelationshipTypes as relationshipType>

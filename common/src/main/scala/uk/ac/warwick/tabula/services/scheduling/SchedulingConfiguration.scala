@@ -222,6 +222,7 @@ object SchedulingConfiguration {
   def scheduledSitsJobs(implicit properties: PropertyResolver): Seq[JobConfiguration[_ <: AutowiredJobBean]] = Seq(
     // SITS exports
     propertiesConfiguredJob[ExportAttendanceToSitsJob]("scheduling.exportAttendanceToSits"),
+    propertiesConfiguredJob[SynchroniseAttendanceToSitsJob]("scheduling.synchroniseAttendanceToSits"),
     propertiesConfiguredJob[ExportFeedbackToSitsJob]("scheduling.exportFeedbackToSits"),
     propertiesConfiguredJob[ExportYearMarksToSitsJob]("scheduling.exportYearMarksToSits")
   ).flatten

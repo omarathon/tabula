@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
+import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
 import uk.ac.warwick.tabula.services.{UserGroupMembershipHelper, UserLookupComponent}
-import uk.ac.warwick.tabula._
-import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 
 class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
   trait ServiceTestSupport extends AttendanceMonitoringDaoComponent
-    with UserLookupComponent with AttendanceMonitoringMembershipHelpers {
+    with UserLookupComponent with AttendanceMonitoringMembershipHelpers with FeaturesComponent {
     val attendanceMonitoringDao: AttendanceMonitoringDao = smartMock[AttendanceMonitoringDao]
     val userLookup = new MockUserLookup
     val membersHelper: UserGroupMembershipHelper[AttendanceMonitoringScheme] = smartMock[UserGroupMembershipHelper[AttendanceMonitoringScheme]]
+    val features = new FeaturesImpl
   }
 
   trait CheckpointFixture {
