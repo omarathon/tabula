@@ -76,7 +76,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
     Mav("mitcircs/submissions/form", Map(
       "issueTypes" -> IssueType.validIssueTypes(student),
       "possibleContacts" -> MitCircsContact.values,
-      "department" -> Option(student.mostSignificantCourse).flatMap(c => Option(c.department)).flatMap(_.subDepartmentsContaining(student).find(_.enableMitCircs)),
+      "department" -> Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).find(_.enableMitCircs)),
     )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
 
