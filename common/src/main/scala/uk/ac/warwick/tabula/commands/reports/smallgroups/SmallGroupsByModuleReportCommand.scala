@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.userlookup.User
@@ -20,7 +21,9 @@ object SmallGroupsByModuleReportCommand {
 case class SmallGroupsByModuleReportCommandResult(
   counts: Map[User, Map[Module, Int]],
   studentDatas: Seq[AttendanceMonitoringStudentData],
-  modules: Seq[Module]
+  modules: Seq[Module],
+  reportRangeStartDate: LocalDate,
+  reportRangeEndDate: LocalDate
 )
 
 class SmallGroupsByModuleReportCommandInternal(val department: Department, val academicYear: AcademicYear)
@@ -41,7 +44,8 @@ class SmallGroupsByModuleReportCommandInternal(val department: Department, val a
     SmallGroupsByModuleReportCommandResult(
       byModule,
       filteredAttendance.studentDatas,
-      byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted
+      byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted,
+      startDate, endDate
     )
   }
 }
@@ -55,6 +59,6 @@ trait SetsFilteredAttendance {
   }
 }
 
-trait SmallGroupsByModuleReportCommandState extends ReportCommandState {
+trait SmallGroupsByModuleReportCommandState extends ReportCommandState with ReportCommandRequest {
   var filteredAttendance: AllSmallGroupsReportCommandResult = _
 }

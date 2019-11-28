@@ -78,6 +78,11 @@ trait ControllerViews extends Logging {
     s"redirect:${validRedirectDestination(getReturnToUnescaped(path))}"
   }
 
+  def RedirectForceFlashing(path: String, flash: (String, String)*)(implicit redirectAttributes: RedirectAttributes): String = {
+    flash.foreach { case (k, v) => redirectAttributes.addFlashAttribute(k, v) }
+    s"redirect:${validRedirectDestination(path)}"
+  }
+
   // Force the redirect regardless of returnTo
   def RedirectForce(path: String, objects: (String, _)*): Mav = RedirectForce(path, Map(objects: _*))
 

@@ -23,17 +23,17 @@
 
     <p>
       Select the items to include in your grid for
-      <#if selectCourseCommand.courses?size == 1>
-      course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
+      <#compress><#if selectCourseCommand.courses?size == 1>
+        course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
       <#else>
-      courses:
-      <#assign popover>
-    <ul><#list selectCourseCommand.courses?sort_by('code') as course>
-        <li>${course.code?upper_case} ${course.name}</li>
-      </#list></ul>
-    </#assign>
-    <a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body" data-trigger="click focus">${selectCourseCommand.courses?size} courses</a>
-    </#if>,
+        courses:
+        <#assign popover>
+          <ul><#list selectCourseCommand.courses?sort_by('code') as course>
+            <li>${course.code?upper_case} ${course.name}</li>
+          </#list></ul>
+        </#assign>
+        <a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body" data-trigger="click focus">${selectCourseCommand.courses?size} courses</a>
+      </#if></#compress>,
     <#if selectCourseCommand.yearOfStudy??>year of study: ${selectCourseCommand.yearOfStudy},</#if>
     <#if selectCourseCommand.levelCode??>study level: ${selectCourseCommand.levelCode},</#if>
     <#if !selectCourseCommand.routes?has_content>

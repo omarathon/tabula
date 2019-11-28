@@ -41,7 +41,7 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
         sequence = "A01"
         academicYear = AcademicYear.starting(2018)
         name = "Essay (2000 words)"
-        assessmentType = AssessmentType.Assignment
+        assessmentType = AssessmentType.Essay
         deadline = new LocalDate(2019, DateTimeConstants.JUNE, 20)
       }})
     )
@@ -52,7 +52,7 @@ class MitCircsRecordAcuteOutcomesNotificationTest extends TestBase with Mockito 
         sequence = "A01"
         academicYear = AcademicYear.starting(2018)
         name = "Dissertation"
-        assessmentType = AssessmentType.Assignment
+        assessmentType = AssessmentType.Essay
         deadline = new LocalDate(2019, DateTimeConstants.JUNE, 30)
       }})
     )

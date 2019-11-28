@@ -26,6 +26,10 @@
         <td>${studentCourseDetails.course.code?upper_case} ${studentCourseDetails.course.name}</td>
       </tr>
       <tr>
+        <th>Course occurrence:</th>
+        <td>${command.studentCourseYearDetails.blockOccurrence!""?upper_case}</td>
+      </tr>
+      <tr>
         <th>Route:</th>
         <td>${studentCourseDetails.currentRoute.code?upper_case} ${studentCourseDetails.currentRoute.name}</td>
       </tr>

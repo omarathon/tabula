@@ -20,6 +20,7 @@ object GenerateExamGridAuditCommand {
       with GenerateExamGridAuditPermissions
       with ReadOnly {
       courses = cmd.courses
+      courseOccurrences = cmd.courseOccurrences
       routes = cmd.routes
       yearOfStudy = cmd.yearOfStudy
     }
@@ -51,6 +52,7 @@ trait GenerateExamGridAuditDescription extends Describable[Unit] {
     d.department(department)
       .property("academicYear", academicYear.toString)
       .property("courses", courses.asScala.map(_.code))
+      .property("courseOccurrences", courseOccurrences.asScala)
       .property("routes", routes.asScala.map(_.code))
       .property("yearOfStudy", yearOfStudy)
   }

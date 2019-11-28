@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.mitcircs.submission.EditMitCircsPanelCommand
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
@@ -20,8 +21,8 @@ class MitCircsEditPanelController extends BaseController {
   validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
-  def command(@PathVariable panel: MitigatingCircumstancesPanel): EditMitCircsPanelCommand.Command =
-    EditMitCircsPanelCommand(mandatory(panel))
+  def command(@PathVariable panel: MitigatingCircumstancesPanel, currentUser: CurrentUser): EditMitCircsPanelCommand.Command =
+    EditMitCircsPanelCommand(mandatory(panel), currentUser.apparentUser)
 
   @RequestMapping(params = Array("!submit"))
   def form(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, @PathVariable panel: MitigatingCircumstancesPanel): Mav = {

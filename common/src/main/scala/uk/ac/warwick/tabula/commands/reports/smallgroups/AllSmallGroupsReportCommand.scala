@@ -46,7 +46,9 @@ case class AllSmallGroupsReportCommandResult(
   attendance: Map[User, Map[SmallGroupEventWeek, AttendanceState]],
   relevantEvents: Map[User, Set[SmallGroupEventWeek]],
   studentDatas: Seq[AttendanceMonitoringStudentData],
-  eventWeeks: Seq[SmallGroupEventWeek]
+  eventWeeks: Seq[SmallGroupEventWeek],
+  reportRangeStartDate: LocalDate,
+  reportRangeEndDate: LocalDate
 )
 
 class AllSmallGroupsReportCommandInternal(
@@ -150,9 +152,10 @@ class AllSmallGroupsReportCommandInternal(
         .mapValues(_.keySet)
         .toMap
 
-    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks))
+    filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, relevantEvents, studentDatas, eventWeeks,
+      startDate, endDate))
   }
 }
 
-trait AllSmallGroupsReportCommandState extends ReportCommandState {
+trait AllSmallGroupsReportCommandState extends ReportCommandState with ReportCommandRequest {
 }

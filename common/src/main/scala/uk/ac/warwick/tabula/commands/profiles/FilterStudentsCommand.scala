@@ -32,7 +32,7 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
   self: ProfileServiceComponent =>
 
   def applyInternal(): FilterStudentsResults = {
-    val restrictions = buildRestrictions(year)
+    val restrictions = buildRestrictions(year, Seq(hasAdminNoteRestriction).flatten)
 
     val totalResults = benchmarkTask("countStudentsByRestrictions") {
       profileService.countStudentsByRestrictions(
@@ -117,10 +117,6 @@ trait ProfileFilterExtras extends FiltersStudents {
         "memberNotes" -> AliasAndJoinType("memberNotes")
       )
     )) (table)
-  }
-
-  override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
-    super.buildRestrictions(year) ++ Seq(hasAdminNoteRestriction).flatten
   }
 
   def hasAdminNoteRestriction: Option[ScalaRestriction] = otherCriteria.contains(HAS_ADMIN_NOTE) match {

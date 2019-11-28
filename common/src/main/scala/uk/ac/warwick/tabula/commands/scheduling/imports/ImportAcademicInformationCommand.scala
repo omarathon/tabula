@@ -388,7 +388,13 @@ trait ImportRoutes {
             route.active = rot.active
           }
 
-          if (nameChanged || activeChanged) {
+          val sitsDepartmentChanged = dept.code != route.sitsDepartmentCode
+          if (sitsDepartmentChanged) {
+            logger.info("Updating SITS department of %s to %s".format(rot.code, dept.code))
+            route.sitsDepartmentCode = dept.code
+          }
+
+          if (nameChanged || activeChanged || sitsDepartmentChanged) {
             courseAndRouteService.save(route)
             ImportResult(changed = 1)
           } else {

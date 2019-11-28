@@ -249,9 +249,11 @@ trait MitCircsSubmissionState {
   val student: StudentMember
   val currentUser: User
   lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
-  lazy val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
-    throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
-  )
+  lazy val department: Department = Option(student.homeDepartment)
+    .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
+    .getOrElse(
+      throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have mit circs enabled")
+    )
 }
 
 class AffectedAssessmentItem {

@@ -106,7 +106,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
     getAliasPaths("termtimeAddress"): _*
   )
 
-  protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
+  protected def buildRestrictions(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction] = Seq.empty): Seq[ScalaRestriction] = {
     val restrictions = Seq(
       courseTypeRestriction,
       specificCourseTypeRestriction,
@@ -125,7 +125,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       isFinalistRestriction,
       isNotFinalistRestriction,
       hallOfResidenceRestriction
-    ).flatten
+    ).flatten ++ additionalRestrictions
 
     if (restrictions.exists(_.aliases.keys.exists(key => key.contains("studentCourseYearDetails")))) {
       // We need to restrict the studentCourseYearDetails to the latest one by year

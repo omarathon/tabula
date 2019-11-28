@@ -215,11 +215,10 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   def save(assignment: AssessmentComponent): AssessmentComponent =
     find(assignment)
       .map { existing =>
-        if (existing needsUpdatingFrom assignment) {
+        if (existing.needsUpdatingFrom(assignment)) {
           existing.copyFrom(assignment)
           session.update(existing)
         }
-
         existing
       }
       .getOrElse {

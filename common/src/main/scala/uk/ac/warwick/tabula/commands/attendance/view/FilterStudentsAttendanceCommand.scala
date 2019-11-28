@@ -41,14 +41,14 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
     val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.countStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear)
+        restrictions = buildRestrictions(academicYear, additionalRestrictions)
       )
     }
 
     val (offset, students) = benchmarkTask("profileService.findStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.findStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear),
+        restrictions = buildRestrictions(academicYear, additionalRestrictions),
         orders = buildOrders(),
         maxResults = studentsPerPage,
         startResult = studentsPerPage * (page - 1)
@@ -158,8 +158,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
     )) (table)
   }
 
-  override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] =
-    super.buildRestrictions(year) ++ ScalaRestriction.anyOf(Seq(
+  protected def additionalRestrictions: Seq[ScalaRestriction] = ScalaRestriction.anyOf(Seq(
       unrecordedAttendanceRestriction,
       authorisedAttendanceRestriction,
       unauthorisedAttendanceRestriction,

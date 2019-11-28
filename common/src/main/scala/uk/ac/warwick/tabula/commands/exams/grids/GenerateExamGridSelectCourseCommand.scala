@@ -38,9 +38,9 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
   override def applyInternal(): Seq[ExamGridEntity] = {
     val scyds = benchmarkTask("findByCourseRoutesYear") {
       if (yearOfStudy != null) {
-        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala.toSeq, courseOccurrences.asScala.toSeq, routes.asScala.toSeq, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       } else {
-        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala.toSeq, routes.asScala.toSeq, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
+        studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala.toSeq, courseOccurrences.asScala.toSeq, routes.asScala.toSeq, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true, includePermWithdrawn = includePermWithdrawn)
       }.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
     }
     val sorted = benchmarkTask("sorting") {
@@ -116,10 +116,13 @@ trait GenerateExamGridSelectCourseCommandState {
   }
   lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
   lazy val allLevels: List[Level] = levelService.getAllLevels.toList.sortBy(_.code)(StringUtils.AlphaNumericStringOrdering)
+
+  lazy val allCourseOccurrences: List[String] = courseAndRouteService.getOccurrencesForCourses(allCourses).sorted.toList
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {
   var courses: JList[Course] = JArrayList()
+  var courseOccurrences: JList[String] = JArrayList()
   var routes: JList[Route] = JArrayList()
   var yearOfStudy: JInteger = _
   var levelCode: String = _
@@ -137,6 +140,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
 
   def toMap: Map[String, Any] = Map(
     "courses" -> courses.asScala.map(_.code),
+    "courseOccurrences" -> courseOccurrences.asScala,
     "routes" -> routes.asScala.map(_.code),
     "yearOfStudy" -> yearOfStudy,
     "levelCode" -> levelCode,

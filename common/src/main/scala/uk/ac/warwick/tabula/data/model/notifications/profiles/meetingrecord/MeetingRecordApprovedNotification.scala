@@ -25,7 +25,7 @@ class MeetingRecordApprovedNotification
   def content = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> agent,
     "agentRoles" -> agentRoles,
-    "dateFormatter" -> dateOnlyFormatter,
+    "dateTimeFormatter" -> dateTimeFormatter,
     "meetingRecord" -> approval.meetingRecord,
     "verbed" -> "approved"
   ))

@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions, ReportsDateFormats}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -43,7 +43,9 @@ case class EventData(
 case class SmallGroupsReportProcessorResult(
   attendance: Map[AttendanceMonitoringStudentData, Map[EventData, AttendanceState]],
   students: Seq[AttendanceMonitoringStudentData],
-  events: Seq[EventData]
+  events: Seq[EventData],
+  reportRangeStartDate: String,
+  reportRangeEndDate: String
 )
 
 class SmallGroupsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
@@ -97,16 +99,20 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
           processedEvents.find(_.id == id).map(event => event -> AttendanceState.fromCode(stateString))
         }.toMap)
     }.toMap
-    SmallGroupsReportProcessorResult(processedAttendance, processedStudents, processedEvents)
+    SmallGroupsReportProcessorResult(processedAttendance, processedStudents, processedEvents,
+      ReportsDateFormats.CSVDate.print(reportRangeStartDate), ReportsDateFormats.CSVDate.print(reportRangeEndDate))
   }
 
 }
 
-trait SmallGroupsReportProcessorState extends ReportCommandState {
+trait SmallGroupsReportProcessorState extends ReportCommandState with ReportCommandRequest {
   var attendance: JMap[String, JMap[String, String]] =
     LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
   var students: JList[JMap[String, String]] = JArrayList()
 
   var events: JList[JMap[String, String]] = JArrayList()
+
+  var reportRangeStartDate: LocalDate = _
+  var reportRangeEndDate: LocalDate = _
 }

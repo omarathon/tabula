@@ -58,6 +58,9 @@
 
   <bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.system.PostgreSQL10Dialect"/>
 
+  <bean id="quartzDAO" class="uk.ac.warwick.util.hibernate4.spring.HibernateQuartzDAO"
+        p:sessionFactory-ref="sessionFactory" />
+
   <beans profile="console">
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
       <property name="driverClassName" value="org.postgresql.Driver"/>

@@ -6,7 +6,7 @@ import freemarker.template.utility.DeepUnwrap
 import freemarker.template.{DefaultMapAdapter, SimpleHash, TemplateMethodModelEx, TemplateModel}
 
 /**
-  * Freemarker can't cope with maps who's keys are not strings
+  * Freemarker can't cope with maps whose keys are not strings
   *
   * Here's a helper to try and fix it.
   */

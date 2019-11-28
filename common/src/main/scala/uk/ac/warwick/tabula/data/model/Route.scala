@@ -77,6 +77,8 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
   var teachingDepartmentsActive: Boolean = false
 
+  var sitsDepartmentCode: String = _
+
 }
 
 trait HasRoute {

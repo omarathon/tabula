@@ -38,7 +38,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
     student.moduleRegistrationsByYear(None)
       .filter { mr => Option(mr.agreedMark).isEmpty && Option(mr.agreedGrade).isEmpty }
       .groupBy(_.academicYear)
-      .mapValues(_.map(_.module).toSeq.sorted)
+      .view.mapValues(_.map(_.module).toSeq.sorted)
       .toSeq
       .sortBy { case (year, _) => -year.startYear }
       .foreach { case (year, modules) => builder += year -> modules }
@@ -68,12 +68,15 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
       .toSet
   }
 
+
+
+
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember): Mav = {
     Mav("mitcircs/submissions/form", Map(
       "issueTypes" -> IssueType.validIssueTypes(student),
       "possibleContacts" -> MitCircsContact.values,
-      "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
+      "department" -> Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).find(_.enableMitCircs)),
     )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
 

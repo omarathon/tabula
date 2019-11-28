@@ -124,12 +124,22 @@ div.assessment_details {
       border: 1px solid @table-border-color;
       float: left;
       width: auto;
-      max-width: 60%;
-      margin-right: 32px;
+      margin-right: 20px;
 
       &:last-child {
-        max-width: 40%;
         margin-right: 0;
+      }
+
+      &.report-table {
+        max-width: 40%;
+      }
+
+      &.key-table {
+        max-width: 35%;
+      }
+
+      &.mitcircs-key-table {
+        max-width: 25%;
       }
     }
 

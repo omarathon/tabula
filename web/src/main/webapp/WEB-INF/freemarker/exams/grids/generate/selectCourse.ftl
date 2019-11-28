@@ -113,6 +113,26 @@
         </label>
       </@filter>
 
+      <#assign placeholder = "All occurrences" />
+      <#assign currentfilter><#compress><@current_filter_value "selectCourseCommand.courseOccurrences" placeholder; courseOccurrence>
+        <#if courseOccurrence?is_sequence>
+          <#list courseOccurrence as c>${c?upper_case}<#if c_has_next>, </#if></#list>
+        <#else>
+          ${courseOccurrence?upper_case}
+        </#if>
+      </@current_filter_value></#compress></#assign>
+
+      <@filter "selectCourseCommand.courseOccurrences" placeholder currentfilter selectCourseCommand.allCourseOccurrences; courseOccurrence>
+         <#if courseOccurrence??>
+           <label class="checkbox">
+             <input type="checkbox" name="${status.expression}" value="${courseOccurrence}" data-short-value="${courseOccurrence}"
+                     ${selectCourseCommand.courseOccurrences?seq_contains(courseOccurrence)?string('checked','')}
+             >
+               ${courseOccurrence}
+           </label>
+         </#if>
+      </@filter>
+
       <#assign placeholder = "All routes" />
 
       <#assign currentfilter><#compress><@current_filter_value "selectCourseCommand.routes" placeholder; route>

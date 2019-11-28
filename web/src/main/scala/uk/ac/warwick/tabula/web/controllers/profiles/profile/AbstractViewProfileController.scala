@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
-import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.convert.ConversionService
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
@@ -89,7 +89,7 @@ abstract class AbstractViewProfileController extends ProfilesController
             case Nil => Nil
             case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
           }) ++
-          (if (scd.student.homeDepartment.subDepartmentsContaining(scd.student).exists(_.enableMitCircs))
+          (if (Option(scd.student.homeDepartment).exists(_.subDepartmentsContaining(scd.student).exists(_.enableMitCircs)))
             Seq(ProfileBreadcrumbs.Profile.PersonalCircumstances(scd.student).setActive(activeIdentifier))
           else
             Nil

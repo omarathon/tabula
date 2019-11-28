@@ -101,8 +101,9 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
   override lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
     val allAssessmentComponents = assessmentMembershipService.getAssessmentComponents(module)
     val examAssessmentComponents = {
-      if (allAssessmentComponents.exists(_.assessmentType == AssessmentType.Exam)) {
-        allAssessmentComponents.filter(_.assessmentType == AssessmentType.Exam)
+      val exams = allAssessmentComponents.filter(_.assessmentType.isInstanceOf[ExamType])
+      if (exams.nonEmpty) {
+        exams
       } else {
         allAssessmentComponents
       }

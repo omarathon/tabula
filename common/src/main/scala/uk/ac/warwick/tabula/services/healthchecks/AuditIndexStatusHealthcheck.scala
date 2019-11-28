@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.healthchecks
 
+import java.time.LocalDateTime
+
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
@@ -8,16 +10,25 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
+import uk.ac.warwick.tabula.services.healthchecks.AuditIndexStatusHealthcheck._
+import uk.ac.warwick.util.core.DateTimeUtils
+import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
-@Component
-@Profile(Array("scheduling"))
-class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider {
+object AuditIndexStatusHealthcheck {
+  val Name = "audit-indexing"
+  val InitialState = new ServiceHealthcheck(Name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
 
   val WarningThreshold = 10 // minutes
   val ErrorThreshold = 15 // minutes
+}
+
+@Component
+@Profile(Array("scheduling"))
+class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider(InitialState) {
 
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   def run(): Unit = transactional(readOnly = true) {
@@ -30,14 +41,14 @@ class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider {
       else if (latestIndexMinutesAgo >= WarningThreshold) ServiceHealthcheck.Status.Warning
       else ServiceHealthcheck.Status.Okay
 
-    update(ServiceHealthcheck(
-      name = "audit-indexing",
-      status = status,
-      testedAt = DateTime.now,
-      message = s"Last index $latestIndexMinutesAgo minute${if (latestIndexMinutesAgo == 1) "" else "s"} before last database (warning: $WarningThreshold, critical: $ErrorThreshold)",
-      performanceData = Seq(
-        ServiceHealthcheck.PerformanceData("index_lag", latestIndexMinutesAgo, WarningThreshold, ErrorThreshold)
-      )
+    update(new ServiceHealthcheck(
+      Name,
+      status,
+      LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
+      s"Last index $latestIndexMinutesAgo minute${if (latestIndexMinutesAgo == 1) "" else "s"} before last database (warning: $WarningThreshold, critical: $ErrorThreshold)",
+      Seq[ServiceHealthcheck.PerformanceData[_]](
+        new ServiceHealthcheck.PerformanceData("index_lag", latestIndexMinutesAgo, WarningThreshold, ErrorThreshold)
+      ).asJava
     ))
   }
 

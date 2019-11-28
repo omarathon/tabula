@@ -53,7 +53,10 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
     AdminHomeInformation(
       submissions = mitCircsSubmissionService.submissionsForDepartment(
         department,
-        buildRestrictions(year),
+        buildRestrictions(year, ScalaRestriction.is(
+          "studentCourseYearDetails.academicYear", year,
+          FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
+        ).toSeq),
         MitigatingCircumstancesSubmissionFilter(
           affectedAssessmentModules = affectedAssessmentModules.asScala.toSet,
           includesStartDate = Option(includesStartDate),
@@ -117,10 +120,4 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   override val sortOrder: JList[Order] = JArrayList() // Not used
   override val modules: JList[Module] = JArrayList() // Not used
   override val hallsOfResidence: JList[String] = JArrayList() // Not used
-
-  override protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] =
-    ScalaRestriction.is(
-      "studentCourseYearDetails.academicYear", year,
-      FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
-    ).toSeq ++ super.buildRestrictions(year)
 }

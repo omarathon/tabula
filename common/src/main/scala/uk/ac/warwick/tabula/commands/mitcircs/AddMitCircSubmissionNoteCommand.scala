@@ -51,8 +51,7 @@ trait AddMitCircsSubmissionNoteValidation extends SelfValidating {
   self: AddMitCircsSubmissionNoteRequest =>
 
   override def validate(errors: Errors): Unit = {
-    if (!text.hasText)
-      errors.rejectValue("text", "mitigatingCircumstances.note.text.required")
+    if (!text.hasText && file.isMissing) errors.reject("mitigatingCircumstances.note.nonEmpty")
   }
 }
 
