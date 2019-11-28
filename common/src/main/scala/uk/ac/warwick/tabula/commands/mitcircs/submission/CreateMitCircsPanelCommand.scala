@@ -35,6 +35,7 @@ object CreateMitCircsPanelCommand {
     with ModifyMitCircsPanelValidation
     with CreateMitCircsPanelPermissions
     with CreateMitCircsPanelDescription
+    with CreateMitCircsPanelNotifications
     with AutowiringMitCircsPanelServiceComponent
     with AutowiringUserLookupComponent
     with AutowiringPermissionsServiceComponent
