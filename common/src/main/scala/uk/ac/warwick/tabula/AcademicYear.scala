@@ -100,6 +100,17 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
     case _: JExtendedAcademicYear => this
     case _ => AcademicYear(JExtendedAcademicYear.starting(startYear))
   }
+
+  // SITS week 1 is the week starting on or after 1st August
+  def dateFromSITSWeek(week: Int): LocalDate = {
+    val firstOfAugust = LocalDate.now().withYear(underlying.getStartYear).withMonthOfYear(DateTimeConstants.AUGUST).withDayOfMonth(1)
+    val startOfWeekOne = if (firstOfAugust.getDayOfWeek == DateTimeConstants.MONDAY) {
+      firstOfAugust
+    } else {
+      firstOfAugust.plusDays(8 - firstOfAugust.getDayOfWeek)
+    }
+    startOfWeekOne.plusWeeks(week - 1)
+  }
 }
 
 object AcademicYear {
