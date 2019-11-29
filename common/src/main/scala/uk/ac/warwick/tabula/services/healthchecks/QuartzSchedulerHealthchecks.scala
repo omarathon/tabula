@@ -110,6 +110,10 @@ class QuartzJobQueueHealthcheck(dao: QuartzDAO, scheduler: Scheduler)
     () => scheduler.getSchedulerName
   ) {
 
+  // My Warwick jobs bump this up massively
+  setSizeWarningThreshold(1000)
+  setSizeCriticalThreshold(10000)
+
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   override def run(): Unit = transactional(readOnly = true) { update(status()) }
 }
