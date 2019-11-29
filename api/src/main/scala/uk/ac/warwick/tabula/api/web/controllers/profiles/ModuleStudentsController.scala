@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
@@ -30,20 +30,22 @@ trait GetModuleStudentsApi {
   def currentSITSAcademicYear(@ModelAttribute("getCommand") cmd: ViewViewableCommand[Module]): Mav = {
     getMav(
       cmd.apply(),
-      AcademicYear.now()
+      AcademicYear.now(),
+      None
     )
   }
 
   @RequestMapping(path = Array("/{academicYear}"), method = Array(GET), produces = Array("application/json"))
   def specificAcademicYear(
     @ModelAttribute("getCommand") cmd: ViewViewableCommand[Module],
-    @PathVariable academicYear: AcademicYear
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam(required = false) endDate: LocalDate
   ): Mav = {
-    getMav(cmd.apply(), academicYear)
+    getMav(cmd.apply(), academicYear, Option(endDate))
   }
 
-  def getMav(module: Module, academicYear: AcademicYear): Mav = {
-    val usercodes = moduleRegistrationService.findRegisteredUsercodes(module, academicYear)
+  def getMav(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Mav = {
+    val usercodes = moduleRegistrationService.findRegisteredUsercodes(module, academicYear, endDate)
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",

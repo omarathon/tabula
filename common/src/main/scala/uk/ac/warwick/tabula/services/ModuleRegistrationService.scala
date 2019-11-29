@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -58,7 +59,7 @@ trait ModuleRegistrationService {
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String]
 
 }
 
@@ -168,8 +169,8 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] =
     moduleRegistrationDao.findCoreRequiredModules(route, academicYear, yearOfStudy)
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String] =
-    moduleRegistrationDao.findRegisteredUsercodes(module, academicYear)
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String] =
+    moduleRegistrationDao.findRegisteredUsercodes(module, academicYear, endDate)
 
 }
 
