@@ -13,7 +13,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleRegistrationsCommand
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, ImportModuleRegistrationsCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -144,7 +144,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         agreedMark = mark,
         agreedGrade = grade,
         markScheme = markScheme,
-        moduleResult = result
+        moduleResult = result,
+        endWeek = None
       )
     }).toSeq
   }
@@ -175,7 +176,8 @@ object ModuleRegistrationImporter {
       smr_agrm, -- agreed overall module mark
       smr_agrg, -- agreed overall module grade
       smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-      smr_rslt  -- result of module
+      smr_rslt, -- result of module
+      mav_endw  -- end week of occurrence
 
       from $sitsSchema.cam_sms sms
 
@@ -192,6 +194,11 @@ object ModuleRegistrationImporter {
         and sms.ayr_code = smr.ayr_code
         and sms.mod_code = smr.mod_code
         and sms.sms_occl = smr.mav_occur
+
+      left join $sitsSchema.cam_mav mav
+        on mav.ayr_code = sms.ayr_code
+        and mav.mod_code = sms.mod_code
+        and mav.mav_occur = sms.sms_occl
 
        where sms.ayr_code = :academicYear"""
 
@@ -210,7 +217,9 @@ object ModuleRegistrationImporter {
       smr_agrm, -- agreed overall module mark
       smr_agrg, -- agreed overall module grade
       smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-      smr_rslt  -- result of module
+      smr_rslt, -- result of module
+      mav_endw  -- end week of occurrence
+
 
       from $sitsSchema.cam_smo smo
 
@@ -227,6 +236,11 @@ object ModuleRegistrationImporter {
         and smo.ayr_code = smr.ayr_code
         and smo.mod_code = smr.mod_code
         and smo.mav_occur = smr.mav_occur
+
+      left join $sitsSchema.cam_mav mav
+        on mav.ayr_code = smo.ayr_code
+        and mav.mod_code = smo.mod_code
+        and mav.mav_occur = smo.mav_occur
 
        where
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
@@ -247,7 +261,8 @@ object ModuleRegistrationImporter {
       smr_agrm, -- agreed overall module mark
       smr_agrg, -- agreed overall module grade
       smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-      smr_rslt  -- result of module
+      smr_rslt, -- result of module
+      mav_endw  -- end week of occurrence
 
       from $sitsSchema.cam_sms sms
 
@@ -264,6 +279,11 @@ object ModuleRegistrationImporter {
         and sms.ayr_code = smr.ayr_code
         and sms.mod_code = smr.mod_code
         and sms.sms_occl = smr.mav_occur
+
+      left join $sitsSchema.cam_mav mav
+        on mav.ayr_code = sms.ayr_code
+        and mav.mod_code = sms.mod_code
+        and mav.mav_occur = sms.sms_occl
 
        where spr.spr_stuc in (:universityIds)"""
 
@@ -282,7 +302,9 @@ object ModuleRegistrationImporter {
       smr_agrm, -- agreed overall module mark
       smr_agrg, -- agreed overall module grade
       smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
-      smr_rslt  -- result of module
+      smr_rslt, -- result of module
+      mav_endw  -- end week of occurrence
+
 
       from $sitsSchema.cam_smo smo
 
@@ -299,6 +321,11 @@ object ModuleRegistrationImporter {
         and smo.ayr_code = smr.ayr_code
         and smo.mod_code = smr.mod_code
         and smo.mav_occur = smr.mav_occur
+
+      left join $sitsSchema.cam_mav mav
+        on mav.ayr_code = smo.ayr_code
+        and mav.mod_code = smo.mod_code
+        and mav.mav_occur = smo.mav_occur
 
        where
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
@@ -318,7 +345,8 @@ object ModuleRegistrationImporter {
       Option(resultSet.getBigDecimal("smr_agrm")),
       resultSet.getString("smr_agrg"),
       resultSet.getString("smr_mksc"),
-      resultSet.getString("smr_rslt")
+      resultSet.getString("smr_rslt"),
+      ImportMemberHelpers.getInteger(resultSet, "mav_endw")
     )
   }
 
@@ -359,7 +387,8 @@ trait CopyModuleRegistrationProperties {
       copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
       copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
       copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
-      copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
+      copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+      copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
   }
 
   private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
@@ -382,6 +411,17 @@ trait CopyModuleRegistrationProperties {
   private def copyModuleResult(destinationBean: BeanWrapper, moduleResultCode: String): Boolean =
     copyCustomProperty("moduleResult", destinationBean, moduleResultCode, ModuleResult.fromCode)
 
+  private def copyEndDate(destinationBean: BeanWrapper, endWeek: Option[Int], academicYear: AcademicYear): Boolean = {
+    val oldValue = destinationBean.getPropertyValue("endDate")
+    val newValue = endWeek.map(academicYear.dateFromSITSWeek).orNull
+
+    if (oldValue != newValue) {
+      destinationBean.setPropertyValue("endDate", newValue)
+      true
+    }
+    else false
+  }
+
   private val properties = Set(
     "assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"
   )
@@ -401,7 +441,8 @@ class ModuleRegistrationRow(
   var agreedMark: Option[JBigDecimal],
   var agreedGrade: String,
   var passFail: Boolean,
-  var moduleResult: String
+  var moduleResult: String,
+  var endWeek: Option[Int]
 ) {
 
   def this(
@@ -417,9 +458,10 @@ class ModuleRegistrationRow(
     agreedMark: Option[JBigDecimal],
     agreedGrade: String,
     markScheme: String,
-    moduleResult: String
+    moduleResult: String,
+    endWeek: Option[Int]
   ) {
-    this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult)
+    this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult, endWeek)
   }
 
   def moduleCode: Option[String] = Module.stripCats(sitsModuleCode).map(_.toLowerCase)
@@ -493,6 +535,7 @@ class ModuleRegistrationRow(
         .append(agreedMark, that.agreedMark)
         .append(agreedGrade, that.agreedGrade)
         .append(passFail, that.passFail)
+        .append(endWeek, that.endWeek)
         .build()
     case _ => false
   }
@@ -519,7 +562,8 @@ object ModuleRegistrationRow {
       agreedMark = rows.flatMap(_.agreedMark).headOption,
       agreedGrade = coalesce(rows.map(_.agreedGrade)),
       passFail = rows.exists(_.passFail),
-      moduleResult = coalesce(rows.map(_.moduleResult))
+      moduleResult = coalesce(rows.map(_.moduleResult)),
+      endWeek = coalesce(rows.map(_.endWeek))
     )
   }
 }
