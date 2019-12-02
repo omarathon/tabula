@@ -50,10 +50,9 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
   private def deleteAssignment(title: String): Unit = {
     val path = "//*[contains(text(),'" ++ title ++ "')]"
 
-    eventually {
-      val assignmentRowLink = id("main").webElement.findElement(By.partialLinkText(title))
-      click on assignmentRowLink
-    }
+    eventually(id("main").webElement.findElement(By.partialLinkText(title)).isDisplayed shouldBe true)
+    val assignmentRowLink = id("main").webElement.findElement(By.partialLinkText(title))
+    click on assignmentRowLink
     eventually(currentUrl should endWith("/summary"))
     When("I click on the edit button")
     click on partialLinkText("Edit assignment")
