@@ -18,9 +18,9 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
   // guessing the current year instead of reading it from the event
   val year: AcademicYear = AcademicYear(2016)
   val week1Start: LocalDate = year.weeks(1).firstDay
-  val week1end: LocalDate = week1Start.plusDays(7)
+  val week1end: LocalDate = year.weeks(1).lastDay
   val week2Start: LocalDate = year.weeks(2).firstDay
-  val week2End: LocalDate = week2Start.plusDays(7)
+  val week2End: LocalDate = year.weeks(2).lastDay
   val tenAm = new LocalTime(10, 0, 0)
   val tenThirty = new LocalTime(10, 30, 0)
 

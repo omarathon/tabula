@@ -248,7 +248,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
           IntervalFormatter.formatDateRange(week.dateRange, includeDays = false)
         }
 
-        (week.dateRange.lowerEndpoint().toDateTimeAtStartOfDay.getMillis, week.dateRange.upperEndpoint().toDateTimeAtStartOfDay.getMillis, description, shortDescription)
+        (week.dateRange.lowerEndpoint().toDateTimeAtStartOfDay.getMillis, week.dateRange.upperEndpoint().plusDays(1).toDateTimeAtStartOfDay.getMillis, description, shortDescription)
     }
 
     // could use Jackson to map these objects but it doesn't seem worth it

@@ -77,7 +77,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
       weeks
         .filter { week =>
           event.year.weeks.get(week).exists { week =>
-            !dateRange.intersection(week.dateRange).isEmpty
+            dateRange.isConnected(week.dateRange) && !dateRange.intersection(week.dateRange).isEmpty
           }
         }
         .map { week =>
