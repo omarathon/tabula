@@ -54,5 +54,5 @@ trait AutowiringStudentTimetableEventSourceComponent extends StudentTimetableEve
     with AutowiringExamTimetableConfigurationComponent
     with AutowiringSecurityServiceComponent
     with SystemClockComponent
-    ).studentTimetableEventSource
+  ).studentTimetableEventSource
 }

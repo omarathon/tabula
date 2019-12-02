@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import com.google.common.collect.{Range => GRange}
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.{Cn, Value}
 import net.fortuna.ical4j.model.property._
@@ -9,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.AliasedMapLocation
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
@@ -29,7 +31,7 @@ trait AutowiringTermBasedEventOccurrenceServiceComponent extends TermBasedEventO
   * Resolves TimetableEvents into multiple EventOccurrences
   */
 trait EventOccurrenceService {
-  def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
+  def fromTimetableEvent(event: TimetableEvent, dateRange: GRange[LocalDate]): Seq[EventOccurrence]
 
   def toVEvent(eventOccurrence: EventOccurrence): VEvent
 }
@@ -37,7 +39,7 @@ trait EventOccurrenceService {
 abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
   self: ProfileServiceComponent =>
 
-  def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
+  def fromTimetableEvent(event: TimetableEvent, dateRange: GRange[LocalDate]): Seq[EventOccurrence] = {
     def buildEventOccurrence(week: WeekRange.Week, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
       EventOccurrence(
         uid,
@@ -75,7 +77,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
       weeks
         .filter { week =>
           event.year.weeks.get(week).exists { week =>
-            dateRange.overlap(week.interval) != null
+            !dateRange.intersection(week.dateRange).isEmpty
           }
         }
         .map { week =>
@@ -91,8 +93,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
     // should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
     import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
     eventsInIntersectingWeeks
-      .filterNot(_.end.toDateTime.isBefore(dateRange.getStart))
-      .filterNot(_.start.toDateTime.isAfter(dateRange.getEnd))
+      .filter(DateRange.inRange(dateRange))
       .sortBy(_.start)
   }
 

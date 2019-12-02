@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.Interval
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.DepartmentEventsCommand._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object DepartmentEventsCommand {
   val FilterStudentPermission = ViewMemberEventsCommand.RequiredPermission
@@ -135,7 +135,7 @@ class DepartmentEventsCommandInternal(
   }
 
   private def eventsToOccurrences(events: EventList) = EventOccurrenceList(
-    events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))),
+    events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, DateRange(start, end))),
     events.lastUpdated
   )
 

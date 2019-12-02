@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.commands.timetables
 
+import com.google.common.collect.{Range => GRange}
 import org.joda.time._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
@@ -48,7 +50,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
     command.to = end.toDateTimeAtStartOfDay.getMillis
     command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(timetableEvents))
     command.eventOccurrenceSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student, start, end) returns Future.successful(EventOccurrenceList.fresh(meetingOccurrences))
-    command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
+    command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[GRange[LocalDate]]) returns eventOccurences
   }
 
   @Test
@@ -63,7 +65,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   def transformsEventsIntoOccurrences() {
     new Fixture {
       command.applyInternal()
-      verify(command.eventOccurrenceService, times(1)).fromTimetableEvent(event, new Interval(command.start.toDateTimeAtStartOfDay, command.end.toDateTimeAtStartOfDay))
+      verify(command.eventOccurrenceService, times(1)).fromTimetableEvent(event, DateRange(command.start, command.end))
     }
   }
 

@@ -4,6 +4,7 @@ import org.joda.time._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
@@ -26,13 +27,13 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
   val singleWeek = Seq(WeekRange(week1))
   val twoWeeks = Seq(WeekRange(week1, week2))
 
-  val intervalIncludingOccurrence = new Interval(week1Start.toDateTimeAtStartOfDay, week1end.toDateTimeAtStartOfDay)
-  val intervalIncludingTwoOccurrences = new Interval(week1Start.toDateTimeAtStartOfDay, week2End.toDateTimeAtStartOfDay)
+  val intervalIncludingOccurrence = DateRange(week1Start, week1end)
+  val intervalIncludingTwoOccurrences = DateRange(week1Start, week2End)
 
   val singleOccurrence = TimetableEvent("test", "test", "test", "test", TimetableEventType.Lecture, singleWeek, DayOfWeek.Monday, tenAm, tenThirty, None, TimetableEvent.Parent(Some(module)), None, Nil, Nil, year, None, Map())
   val doubleOccurrenence = TimetableEvent("test", "test", "test", "test", TimetableEventType.Lecture, twoWeeks, DayOfWeek.Monday, tenAm, tenThirty, None, TimetableEvent.Parent(Some(module)), None, Nil, Nil, year, None, Map())
 
-  val intervalOutsideOccurrence = new Interval(1, 2)
+  val intervalOutsideOccurrence = DateRange(new LocalDate(1970, DateTimeConstants.JANUARY, 1), new LocalDate(1970, DateTimeConstants.JANUARY, 2))
 
   val occurrenceService = new TermBasedEventOccurrenceService with ProfileServiceComponent with UserLookupComponent {
     val profileService: ProfileService = mock[ProfileService]

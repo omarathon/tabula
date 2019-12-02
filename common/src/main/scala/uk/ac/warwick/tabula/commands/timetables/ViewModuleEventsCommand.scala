@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.commands.timetables
 
 import java.util.concurrent.TimeoutException
 
-import org.joda.time.{Interval, LocalDate}
+import com.google.common.collect.{Range => GRange}
+import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleEventsCommand.{CommandType, ReturnType}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
@@ -83,7 +85,7 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
       import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
       EventOccurrenceList(events.events.flatMap { event =>
-        eventOccurrenceService.fromTimetableEvent(event, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
+        eventOccurrenceService.fromTimetableEvent(event, DateRange(start, end))
       }.sortBy(_.start), events.lastUpdated)
     }, ViewModuleEventsCommand.Timeout)).recover {
       case _: TimeoutException | _: TimetableEmptyException => EventOccurrenceList(Nil, None)
