@@ -59,7 +59,7 @@ trait ModuleRegistrationService {
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String]
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String]
 
 }
 
@@ -169,8 +169,8 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] =
     moduleRegistrationDao.findCoreRequiredModules(route, academicYear, yearOfStudy)
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String] =
-    moduleRegistrationDao.findRegisteredUsercodes(module, academicYear, endDate)
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String] =
+    moduleRegistrationDao.findRegisteredUsercodes(module, academicYear, endDate, occurrence)
 
 }
 

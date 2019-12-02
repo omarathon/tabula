@@ -42,7 +42,7 @@ trait ModuleRegistrationDao {
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String]
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String]
 }
 
 @Repository
@@ -116,12 +116,15 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .seq
   }
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate]): Seq[String] = {
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String] = {
     def applyAndSeq(extraCriteria: ScalaCriteria[ModuleRegistration] => Unit): Seq[String] = {
       val c = session.newCriteria[ModuleRegistration]
         .createAlias("studentCourseDetails", "studentCourseDetails")
         .createAlias("studentCourseDetails.student", "student")
         .add(is("module", module))
+      occurrence.map(o =>
+        c.add(is("occurrence", o))
+      )
       extraCriteria(c)
       c.project[String](Projections.property("student.userId")).seq
     }
