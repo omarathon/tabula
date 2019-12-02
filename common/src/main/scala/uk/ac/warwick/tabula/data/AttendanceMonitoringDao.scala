@@ -169,6 +169,12 @@ trait AttendanceMonitoringDao {
   def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 
   def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
+
+  def listUnsynchronisedCheckpoints(limit: Int): Seq[AttendanceMonitoringCheckpoint]
+
+  def countUnsynchronisedCheckpoints: Int
+
+  def mostRecentlySynchronisedCheckpointDate: Option[DateTime]
 }
 
 @Repository
@@ -617,6 +623,31 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       .setFetchMode("student", FetchMode.JOIN)
       .seq
   }
+
+  override def listUnsynchronisedCheckpoints(limit: Int): Seq[AttendanceMonitoringCheckpoint] =
+    session.newCriteria[AttendanceMonitoringCheckpoint]
+      .add(is("needsSynchronisingToSits", true))
+      .addOrder(asc("updatedDate"))
+      .setMaxResults(limit)
+      // We join to point & scheme to get the academic year and monitoring period
+      .setFetchMode("point", FetchMode.JOIN)
+      .setFetchMode("point.scheme", FetchMode.JOIN)
+      // We join to student to get course & enrolment department
+      .setFetchMode("student", FetchMode.JOIN)
+      .setFetchMode("student.mostSignificantCourse", FetchMode.JOIN)
+      .setFetchMode("student.mostSignificantCourse.studentCourseYearDetails", FetchMode.JOIN)
+      .distinct.seq
+
+  override def countUnsynchronisedCheckpoints: Int =
+    session.newCriteria[AttendanceMonitoringCheckpoint]
+      .add(is("needsSynchronisingToSits", true))
+      .count.intValue()
+
+  override def mostRecentlySynchronisedCheckpointDate: Option[DateTime] =
+    session.newCriteria[AttendanceMonitoringCheckpoint]
+      .add(isNotNull("lastSynchronisedToSits"))
+      .project[DateTime](max("lastSynchronisedToSits"))
+      .uniqueResult
 }
 
 case class AttendanceMonitoringStudentData(

@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula
 
 import java.math.BigInteger
+import java.nio.charset.StandardCharsets
+
 import scala.util.matching.Regex
 import org.apache.commons.codec.binary.Base64
 
@@ -37,8 +39,22 @@ object CompactUuid {
       case e: NumberFormatException => None
     }
 
-  private def encode64(bigint: BigInteger) =
+  def compactHighByte(uuid: String): String =
+    try {
+      new String(new BigInteger(uuid.replace("-", ""), BASE).toByteArray, StandardCharsets.UTF_16BE)
+    } catch {
+      case e: NumberFormatException => throw new IllegalArgumentException(e)
+    }
+
+  def uncompactHighByte(compactUuid: String): String =
+    new BigInteger(compactUuid.getBytes(StandardCharsets.UTF_16BE)).toString(BASE) match {
+      case UuidSplit(a, b, c, d, e) => "%s-%s-%s-%s-%s".format(a, b, c, d, e)
+      case _ => throw new IllegalArgumentException
+    }
+
+  private def encode64(bigint: BigInteger) = {
     new String(Base64.encodeBase64(bigint.toByteArray)).replace("=", "")
+  }
 
   private def decode64(string: String) =
     new BigInteger(Base64.decodeBase64(string))

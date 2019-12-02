@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
+import javax.annotation.PostConstruct
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
@@ -94,6 +95,7 @@ abstract class Features {
   @Value("${features.attendanceMonitoring:true}") var attendanceMonitoring: Boolean = defaults.attendanceMonitoring
   @Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType: Boolean = defaults.attendanceMonitoringMeetingPointType
   @Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport: Boolean = defaults.attendanceMonitoringReport
+  @Value("${features.attendanceMonitoring.report.realTime:false}") var attendanceMonitoringRealTimeReport: Boolean = defaults.attendanceMonitoringRealTimeReport
   @Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote: Boolean = defaults.attendanceMonitoringNote
   @Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
   @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
@@ -123,6 +125,7 @@ abstract class Features {
   @Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles: Boolean = defaults.schedulingCleanupUnreferencedFiles
   @Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem: Boolean = defaults.schedulingSanityCheckFilesystem
   @Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits: Boolean = defaults.schedulingExportAttendanceToSits
+  @Value("${features.scheduling.synchroniseAttendanceToSits:true}") var schedulingSynchroniseAttendanceToSits: Boolean = defaults.schedulingSynchroniseAttendanceToSits
   @Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes: Boolean = defaults.schedulingAttendanceUpdateSchemes
   @Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals: Boolean = defaults.schedulingAttendanceUpdateTotals
   @Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits: Boolean = defaults.schedulingExportFeedbackToSits
@@ -157,6 +160,10 @@ abstract class Features {
     for (pd <- values.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
       bean.setPropertyValue(pd.getName, values.getPropertyValue(pd.getName))
     this
+  }
+
+  @PostConstruct def validate(): Unit = {
+    require(attendanceMonitoringReport || !attendanceMonitoringRealTimeReport, "attendanceMonitoringReport must be enabled for attendanceMonitoringRealTimeReport")
   }
 }
 
@@ -242,6 +249,7 @@ class FeaturesMessage {
   @BeanProperty var attendanceMonitoring = true
   @BeanProperty var attendanceMonitoringMeetingPointType = true
   @BeanProperty var attendanceMonitoringReport = true
+  @BeanProperty var attendanceMonitoringRealTimeReport = false
   @BeanProperty var attendanceMonitoringNote = true
   @BeanProperty var attendanceMonitoringSmallGroupPointType = true
   @BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
@@ -262,6 +270,7 @@ class FeaturesMessage {
   @BeanProperty var schedulingCleanupUnreferencedFiles = true
   @BeanProperty var schedulingSanityCheckFilesystem = true
   @BeanProperty var schedulingExportAttendanceToSits = true
+  @BeanProperty var schedulingSynchroniseAttendanceToSits = true
   @BeanProperty var schedulingExportFeedbackToSits = true
   @BeanProperty var schedulingAttendanceUpdateSchemes = true
   @BeanProperty var schedulingAttendanceUpdateTotals = true
