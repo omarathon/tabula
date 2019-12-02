@@ -438,7 +438,7 @@
 
       <div class="item-info row group-${group.id}">
         <div class="col-md-2">
-          <h4 class="name">
+          <h4 class="group-name">
             ${group.name!""}
           </h4>
         </div>
@@ -719,7 +719,7 @@
                 <#else>
                 <div>
                   </#if>
-                  <h4 class="name">
+                  <h4 class="group-name">
                     ${group.name!""}
                     <#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers >
                       <a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
@@ -1162,7 +1162,7 @@
       <div class="striped-section-contents">
         <#list groups?keys as group>
           <div class="item-info clearfix">
-            <h4 class="name">
+            <h4 class="group-name">
               ${group.name}
               <#if can.do("SmallGroups.ReadMembership", group)>
                 <a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
@@ -1191,7 +1191,7 @@
 
     <div class="item-info row clearfix">
       <div class="col-md-2">
-        <h3 class="name">
+        <h3 class="groupset-name">
           <small>
             ${set.name}
             <#if set.archived>
@@ -1207,7 +1207,7 @@
 
       <div class="col-md-10">
         <#list groups?keys as group>
-          <h4 class="name">
+          <h4 class="group-name">
             ${group.name}
             <#if can.do("SmallGroups.ReadMembership", group)>
               <a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">

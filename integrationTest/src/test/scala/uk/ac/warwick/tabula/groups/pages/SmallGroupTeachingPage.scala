@@ -176,7 +176,7 @@ trait GroupSetList {
 
     val setInfoElements = findAll(className("set-info")).filter { el =>
       el.underlying.findElement(By.className("mod-code")).getText.trim == moduleCode.toUpperCase &&
-        el.underlying.findElement(By.className("group-name")).getText.trim == groupsetName
+        el.underlying.findElement(By.className("groupset-name")).getText.trim == groupsetName
     }
 
     if (setInfoElements.isEmpty) {
