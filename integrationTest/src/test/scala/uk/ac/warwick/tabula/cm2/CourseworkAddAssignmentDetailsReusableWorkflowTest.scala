@@ -212,7 +212,6 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
   private def submitAndContinueClick(): Unit = {
     Then("I click submit button")
-
     val submitAndContinueButton = cssSelector(s"input[value='Save and continue']").webElement
     eventually(submitAndContinueButton.isDisplayed shouldBe true)
     eventually(submitAndContinueButton.isEnabled shouldBe true)
