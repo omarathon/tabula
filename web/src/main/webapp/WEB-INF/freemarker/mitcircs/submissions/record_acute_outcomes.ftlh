@@ -51,7 +51,7 @@
           <#assign hasAssignments = false />
           <#list command.affectedAssessments as assessment>
             <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-              <#if assessment.assessmentType.code == "A">
+              <#if assessment.assessmentType.code != "E">
                 <#if !hasAssignments>
                   <div class="checkbox row grant-extensions collapse">
                     <div class="col-md-7"><strong>Assessment</strong></div>
