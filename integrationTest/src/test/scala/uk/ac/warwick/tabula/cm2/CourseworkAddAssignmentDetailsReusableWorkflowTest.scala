@@ -153,8 +153,8 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     singleSel("fileAttachmentLimit").value = "3"
 
     And("I enter data in file extension field")
-    val fielExt = webDriver.findElement(By.id("fileExtensionList")).findElement(By.cssSelector("input.text"))
-    click on fielExt
+    val fileExt = webDriver.findElement(By.id("fileExtensionList")).findElement(By.cssSelector("input.text"))
+    click on fileExt
     enter("pdf txt")
 
     And("Enter some more data")
@@ -212,9 +212,10 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
   private def submitAndContinueClick(): Unit = {
     Then("I click submit button")
-    eventually {
-      cssSelector(s"input[value='Save and continue']").webElement.click()
-    }
+    val submitAndContinueButton = cssSelector(s"input[value='Save and continue']").webElement
+    eventually(submitAndContinueButton.isDisplayed shouldBe true)
+    eventually(submitAndContinueButton.isEnabled shouldBe true)
+    submitAndContinueButton.click()
   }
 
 

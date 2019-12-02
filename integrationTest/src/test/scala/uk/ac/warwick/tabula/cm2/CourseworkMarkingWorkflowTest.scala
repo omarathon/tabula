@@ -74,8 +74,9 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     eventually {
       currentUrl should endWith("/delete")
     }
-    And("I  click delete button")
-    click on cssSelector("input[value=Delete]")
+    And("I click delete button")
+    eventually(cssSelector("input[value=Delete]").webElement.isDisplayed shouldBe true)
+    cssSelector("input[value=Delete]").webElement.click()
   }
 
   private def listMarkingWorkflow(workflowsize: Int): Unit = {

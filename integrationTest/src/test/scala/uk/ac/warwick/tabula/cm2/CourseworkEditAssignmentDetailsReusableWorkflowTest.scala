@@ -198,9 +198,10 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   private def submitAndContinueClick(): Unit = {
     Then("I click submit button")
-    eventually {
-      cssSelector(s"input[value='Save and continue']").webElement.click()
-    }
+    val submitAndContinueButton = cssSelector(s"input[value='Save and continue']").webElement
+    eventually(submitAndContinueButton.isDisplayed shouldBe true)
+    eventually(submitAndContinueButton.isEnabled shouldBe true)
+    submitAndContinueButton.click()
   }
 
   def amendAssignmentDetails(newTitle: String, newWorkflowId: String, confirmModal: Boolean = true): Unit = {
@@ -263,7 +264,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
   }
 
   def assignmentSubmissionDetails(checkboxFieldDetails: Seq[(String, Boolean)], radioButtonFieldDetails: Seq[(String, String)]): Unit = {
-    When("I go to assignment submissions assignemnt page")
+    When("I go to assignment submissions page")
     eventually(currentUrl should include("/submissions"))
     checkboxFieldDetails.foreach { case (fieldName, checked) =>
       And(s"I amend checkbox $fieldName on submission details form to $checked")
