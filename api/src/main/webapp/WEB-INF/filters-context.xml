@@ -23,6 +23,7 @@
       <excluded-url-pattern>/v1/modesOfAttendance</excluded-url-pattern>
       <excluded-url-pattern>/v1/department/*/routes</excluded-url-pattern>
       <excluded-url-pattern>/v1/department/*/modules</excluded-url-pattern>
+      <excluded-url-pattern>/v1/module/*/occurrences/*</excluded-url-pattern>
       <excluded-url-pattern>/v1/relationships</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates.*</excluded-url-pattern>
