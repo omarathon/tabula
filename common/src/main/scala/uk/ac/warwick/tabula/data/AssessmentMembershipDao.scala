@@ -90,6 +90,8 @@ trait AssessmentMembershipDao {
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
+  def getUpstreamAssessmentGroups(academicYear: AcademicYear, moduleCode: String): Seq[UpstreamAssessmentGroup]
+
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
@@ -422,6 +424,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     val criteria = session.newCriteria[UpstreamAssessmentGroup]
       .add(safeIn("academicYear", academicYears))
     criteria.seq
+  }
+
+  def getUpstreamAssessmentGroups(academicYear: AcademicYear, moduleCode: String): Seq[UpstreamAssessmentGroup] = {
+    session.newCriteria[UpstreamAssessmentGroup]
+      .add(is("academicYear", academicYear))
+      .add(like("moduleCode", moduleCode.toUpperCase + "%"))
+      .seq
   }
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =

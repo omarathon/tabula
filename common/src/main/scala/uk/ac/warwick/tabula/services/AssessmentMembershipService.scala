@@ -79,6 +79,8 @@ trait AssessmentMembershipService {
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
+  def getUpstreamAssessmentGroups(academicYear: AcademicYear, moduleCode: String): Seq[UpstreamAssessmentGroup]
+
   def save(assignment: AssessmentComponent): AssessmentComponent
 
   def save(group: UpstreamAssessmentGroup): Unit
@@ -281,6 +283,9 @@ class AssessmentMembershipServiceImpl
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     dao.getUpstreamAssessmentGroups(academicYears)
+
+  def getUpstreamAssessmentGroups(academicYear: AcademicYear, moduleCode: String): Seq[UpstreamAssessmentGroup] =
+    dao.getUpstreamAssessmentGroups(academicYear, moduleCode)
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
     dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
