@@ -152,7 +152,7 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro groupset_name groupset withFormatting=true><#compress>
 	<#if withFormatting>
-	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="group-name">${groupset.nameWithoutModulePrefix}</span>
+	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="groupset-name">${groupset.nameWithoutModulePrefix}</span>
 	<#else>
 	${groupset.module.code?upper_case} ${groupset.nameWithoutModulePrefix}
 	</#if>
