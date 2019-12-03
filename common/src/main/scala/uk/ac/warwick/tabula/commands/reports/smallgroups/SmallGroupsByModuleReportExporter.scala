@@ -38,7 +38,7 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
       case 6 =>
         studentData.tutorEmail.getOrElse("")
       case _ =>
-        val thisModule = modules(moduleIndex - 7)
+        val thisModule = modules(moduleIndex - (headers.size - 1))
         counts.get(studentData).flatMap(_.get(thisModule).map(_.toString)).getOrElse("n/a")
     }
   }
