@@ -21,13 +21,11 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 
     eventually {
       val cm2Assignment = id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
+      cm2Assignment.isDisplayed shouldBe true
+      cm2Assignment.isEnabled shouldBe true
       click on cm2Assignment
-    }
-
-    eventually {
       currentUrl.contains("/summary") should be(true)
     }
-
   }
 
   private def downloadAsPdf(): Unit = {
