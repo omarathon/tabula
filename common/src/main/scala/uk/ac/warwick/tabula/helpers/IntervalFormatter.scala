@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import java.util.Date
 
+import com.google.common.collect.{Range => GRange}
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter._
@@ -23,6 +24,9 @@ object IntervalFormatter {
 
   def formatDate(start: LocalDate, end: LocalDate, includeDays: Boolean = true): String =
     format(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay, includeTime = false, includeDays = includeDays)
+
+  def formatDateRange(range: GRange[LocalDate], includeDays: Boolean = true): String =
+    format(range.lowerEndpoint().toDateTimeAtStartOfDay, range.upperEndpoint().toDateTimeAtStartOfDay, includeTime = false, includeDays = includeDays)
 
   /** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
   def format(start: DateTime): String = doFormat(start, includeYear = true)
@@ -57,6 +61,7 @@ class IntervalFormatter extends BaseTemplateMethodModelEx {
       case Seq(start: DateTime, end: DateTime) => format(start, end)
       case Seq(start: LocalDate, end: LocalDate) => format(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay, includeTime = false)
       case Seq(start: Date, end: Date) => format(new LocalDate(start).toDateTimeAtStartOfDay, new LocalDate(end).toDateTimeAtStartOfDay, includeTime = false)
+      case Seq(range: GRange[LocalDate @unchecked]) => format(range.lowerEndpoint().toDateTimeAtStartOfDay, range.upperEndpoint().toDateTimeAtStartOfDay, includeTime = false)
       case _ => throw new IllegalArgumentException("Bad args")
     }
 }

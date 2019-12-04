@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.By
 import uk.ac.warwick.tabula.BrowserTest
 
 import scala.jdk.CollectionConverters._
@@ -116,6 +116,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
       switch to defaultContent
 
+      eventually(cssSelector("#feedback-template-model .btn-primary").webElement.isDisplayed shouldBe true)
       click on cssSelector("#feedback-template-model .btn-primary")
 
       // Wait for the modal to go away

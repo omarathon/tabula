@@ -30,15 +30,15 @@ final class FeaturesController extends BaseSysadminController with InitializingB
   private var wrapper: BeanWrapper = _
   private var properties: List[PropertyDescriptor] = _
 
-  override def afterPropertiesSet {
+  override def afterPropertiesSet(): Unit = {
     wrapper = new BeanWrapperImpl(features)
     properties = new BeanWrapperImpl(new FeaturesMessage).getPropertyDescriptors.toList
       .filter(_.getWriteMethod != null)
       .sortBy(_.getDisplayName)
   }
 
-  def currentValues: List[FeatureItem] = properties.map { (property) =>
-    new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[JBoolean])
+  def currentValues: List[FeatureItem] = properties.map { property =>
+    FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[JBoolean])
   }
 
   @RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
@@ -48,11 +48,10 @@ final class FeaturesController extends BaseSysadminController with InitializingB
 
   @RequestMapping(method = Array(RequestMethod.POST))
   def update(@RequestParam("name") name: String, @RequestParam("value") value: Boolean): Mav = {
-    properties.find {
-      _.getName == name
-    } match {
+    properties.find(_.getName == name) match {
       case Some(property) =>
         wrapper.setPropertyValue(property.getName, value)
+        features.validate()
       case None => throw new IllegalArgumentException
     }
 

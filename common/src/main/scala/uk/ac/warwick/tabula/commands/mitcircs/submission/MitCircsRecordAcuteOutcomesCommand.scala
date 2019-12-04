@@ -63,7 +63,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.affectedAssessments.clear()
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
-      if(item.acuteOutcomeApplies && item.assessmentType.subtype == TabulaAssessmentSubtype.Assignment) affected.acuteOutcome = acuteOutcome
+      if(item.acuteOutcomeApplies && item.assessmentType.subtype != TabulaAssessmentSubtype.Exam) affected.acuteOutcome = acuteOutcome
       submission.affectedAssessments.add(affected)
     }
 

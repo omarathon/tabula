@@ -13,7 +13,7 @@
       <#assign events = pair._2()>
       <h4>
         <span class="mod-code">${module.code?upper_case}</span>
-        <span class="group-name">
+        <span class="groupset-name">
 					<a href="<@routes.groups.editset set/>">${set.name}</a>
 				</span>
       </h4>

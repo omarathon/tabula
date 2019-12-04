@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula.services
 
-import scala.jdk.CollectionConverters._
-import scala.reflect._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.data.DepartmentDao
-import uk.ac.warwick.tabula.data.ModuleDao
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.{DepartmentDao, ModuleDao}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
+import scala.jdk.CollectionConverters._
+import scala.reflect._
 
 /**
   * Handles data about modules and departments
@@ -162,6 +161,10 @@ class ModuleAndDepartmentService extends Logging {
 
   def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] =
     moduleDao.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
+
+  def findModulesBySITSDepartmentCode(departmentCode: String): Seq[Module] =
+    moduleDao.findBySITSDepartmentCode(departmentCode)
+
 }
 
 trait ModuleAndDepartmentServiceComponent {

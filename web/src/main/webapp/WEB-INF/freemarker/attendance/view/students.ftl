@@ -3,7 +3,7 @@
 
   <#assign filterQuery = filterCommand.serializeFilter />
 
-  <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department) >
+  <#if features.attendanceMonitoringReport && !features.attendanceMonitoringRealTimeReport && can.do("MonitoringPoints.Report", department)>
     <div class="pull-right send-to-sits">
       <a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS e:Vision</a>
     </div>

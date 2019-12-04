@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
-import org.hibernate.criterion.Projections
+import org.hibernate.criterion.{Projections, Restrictions}
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -42,7 +42,7 @@ trait ModuleRegistrationDao {
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String]
 }
 
 @Repository
@@ -116,13 +116,34 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .seq
   }
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String] = {
-    session.newCriteria[ModuleRegistration]
-      .createAlias("studentCourseDetails", "studentCourseDetails")
-      .createAlias("studentCourseDetails.student", "student")
-      .add(is("module", module))
-      .add(is("academicYear", academicYear))
-      .project[String](Projections.property("student.userId"))
-      .seq
+  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String] = {
+    def applyAndSeq(extraCriteria: ScalaCriteria[ModuleRegistration] => Unit): Seq[String] = {
+      val c = session.newCriteria[ModuleRegistration]
+        .createAlias("studentCourseDetails", "studentCourseDetails")
+        .createAlias("studentCourseDetails.student", "student")
+        .add(is("module", module))
+      occurrence.map(o =>
+        c.add(is("occurrence", o))
+      )
+      extraCriteria(c)
+      c.project[String](Projections.property("student.userId")).seq
+    }
+
+    if (endDate.isEmpty) {
+      applyAndSeq { c =>
+        c.add(is("academicYear", academicYear))
+      }
+    } else {
+      val mrWithNoEndDate = applyAndSeq { c =>
+        c.add(is("academicYear", academicYear))
+          .add(is("endDate", null))
+      }
+
+      val mrWithEndDate = applyAndSeq { c =>
+        c.add(Restrictions.ge("endDate", endDate.get))
+      }
+
+      (mrWithNoEndDate ++ mrWithEndDate).distinct
+    }
   }
 }

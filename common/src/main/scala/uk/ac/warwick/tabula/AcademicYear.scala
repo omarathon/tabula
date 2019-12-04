@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
-import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
+import com.google.common.collect.{Range => GRange}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.AcademicPeriod._
 import uk.ac.warwick.tabula.AcademicWeek._
 import uk.ac.warwick.tabula.AcademicYear._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Convertible
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.helpers.DateRange
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, ExtendedAcademicYear => JExtendedAcademicYear, Term => JTerm, Vacation => JVacation}
 
@@ -100,6 +102,17 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
     case _: JExtendedAcademicYear => this
     case _ => AcademicYear(JExtendedAcademicYear.starting(startYear))
   }
+
+  // SITS week 1 is the week starting on or after 1st August
+  def dateFromSITSWeek(week: Int): LocalDate = {
+    val firstOfAugust = LocalDate.now().withYear(underlying.getStartYear).withMonthOfYear(DateTimeConstants.AUGUST).withDayOfMonth(1)
+    val startOfWeekOne = if (firstOfAugust.getDayOfWeek == DateTimeConstants.MONDAY) {
+      firstOfAugust
+    } else {
+      firstOfAugust.plusDays(8 - firstOfAugust.getDayOfWeek)
+    }
+    startOfWeekOne.plusWeeks(week - 1)
+  }
 }
 
 object AcademicYear {
@@ -150,8 +163,7 @@ case class AcademicWeek(underlying: JAcademicWeek) extends Ordered[AcademicWeek]
 
   def lastDay: LocalDate = underlying.getDateRange.getEndInclusive.asJoda
 
-  @deprecated("Intervals are between two date-times, but weeks are date-based", since = "206")
-  def interval: Interval = new Interval(firstDay.toDateTimeAtStartOfDay, lastDay.plusDays(1).toDateTimeAtStartOfDay)
+  def dateRange: GRange[LocalDate] = DateRange(firstDay, lastDay)
 
   override def compare(that: AcademicWeek): Int = this.underlying.compareTo(that.underlying)
 }
@@ -188,8 +200,7 @@ sealed trait AcademicPeriod extends Ordered[AcademicPeriod] {
 
   def isVacation: Boolean = underlying.isVacation
 
-  @deprecated("Intervals are between two date-times, but periods are date-based", since = "206")
-  def interval: Interval = new Interval(firstDay.toDateTimeAtStartOfDay, lastDay.plusDays(1).toDateTimeAtStartOfDay)
+  def dateRange: GRange[LocalDate] = DateRange(firstDay, lastDay)
 
   override def compare(that: AcademicPeriod): Int = this.underlying.compareTo(that.underlying)
 }

@@ -163,8 +163,9 @@ class AttendanceMonitoringCheckpointFormatter extends BaseTemplateMethodModelEx 
           FormattedHtml(noteText),
           noteUrl
         )
-      // Should never be the case, but stops a compile warning
-      case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", FormattedHtml(""), "")
+
+      // Corner cases (e.g. where we store not-recorded temporarily while it gets synchronised to SITS); fall back to basing on point
+      case _ => result(department, point, checkpoint.student, noteOption, urlProfile)
     }
   }
 

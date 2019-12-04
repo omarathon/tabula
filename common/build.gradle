@@ -61,7 +61,7 @@ dependencies {
   providedCompile 'org.postgresql:postgresql:42.2.5'
 
   // Database migrations
-  compile "org.flywaydb:flyway-core:6.0.0"
+  compile "org.flywaydb:flyway-core:6.1.0"
 
   compile "org.hibernate:hibernate-validator:6.0.17.Final"
   annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:6.0.17.Final"

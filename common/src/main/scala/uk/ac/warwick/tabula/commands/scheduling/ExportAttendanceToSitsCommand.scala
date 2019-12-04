@@ -33,7 +33,7 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
       val unreportedReports = attendanceMonitoringService.listUnreportedReports
 
       // for each student
-      unreportedReports.groupBy(_.student).flatMap { case (student, reportList) =>
+      unreportedReports.groupBy(_.student).flatMap { case (_, reportList) =>
         // group reports by academic year
         val reportsByAcademicYear = reportList.groupBy(_.academicYear)
         // for each academic year in order
@@ -47,15 +47,7 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
                 val result = exportAttendanceToSitsService.exportToSits(report)
                 if (result) {
                   attendanceMonitoringService.markReportAsPushed(report)
-                  logger.info(s"Reported ${
-                    report.missed
-                  } missed points for ${
-                    report.student.universityId
-                  } for ${
-                    report.monitoringPeriod
-                  } ${
-                    report.academicYear.toString
-                  }")
+                  logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod} ${report.academicYear.toString}")
                   Option(report)
                 }
                 else {

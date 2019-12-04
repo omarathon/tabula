@@ -74,7 +74,8 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
           "yearOfStudy" -> studentData.yearOfStudy,
           "sprCode" -> studentData.sprCode,
           "route" -> studentData.routeCode,
-          "tier4Requirements" -> studentData.tier4Requirements.toString
+          "tier4Requirements" -> studentData.tier4Requirements.toString,
+          "tutorEmail" -> studentData.tutorEmail.getOrElse("")
         )
       )
       val allModules: Seq[Map[String, String]] = result.modules.map(module =>

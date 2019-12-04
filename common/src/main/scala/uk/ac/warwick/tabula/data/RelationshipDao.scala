@@ -611,9 +611,17 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
   }
 
   override def getAllCurrentRelationshipsOfType(studentRelationshipType: StudentRelationshipType): Seq[Array[Object]] = {
-    currentRelationshipBaseCriteria().add(is("relationshipType", studentRelationshipType)).createAlias("_agentMember", "_agentMember").project[Array[Object]](Projections.projectionList()
+    currentRelationshipBaseCriteria()
+      .add(is("relationshipType", studentRelationshipType))
+      .createAlias("_agentMember", "_agentMember")
+      .add(disjunction(
+        is("_agentMember.inUseFlag", "Active"),
+        like("_agentMember.inUseFlag", "Inactive - Starts %")
+      ))
+      .project[Array[Object]](Projections.projectionList()
       .add(groupProperty("_agentMember.universityId"))
       .add(property("_agentMember.firstName"))
-      .add(property("_agentMember.lastName"))).seq
+      .add(property("_agentMember.lastName")))
+      .seq
   }
 }

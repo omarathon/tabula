@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.{Interval, LocalDate}
+import com.google.common.collect.{Range => GRange}
+import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
-import uk.ac.warwick.tabula.helpers.{Futures, Logging}
+import uk.ac.warwick.tabula.helpers.{DateRange, Futures, Logging}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
@@ -106,14 +107,14 @@ trait MemberTimetableCommand {
     }
   }
 
-  private def createDateRange(): Interval = {
+  private def createDateRange(): GRange[LocalDate] = {
     val startDate: LocalDate =
       Option(start).getOrElse(academicYear.firstDay)
 
     val endDate: LocalDate =
       Option(end).getOrElse(academicYear.lastDay)
 
-    new Interval(startDate.toDateTimeAtStartOfDay, endDate.toDateTimeAtStartOfDay)
+    DateRange(startDate, endDate)
   }
 
   protected def sorted(result: EventOccurrenceList): EventOccurrenceList = {

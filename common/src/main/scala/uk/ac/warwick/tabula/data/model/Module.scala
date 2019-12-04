@@ -100,6 +100,8 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
     val allGroupSets = groupSets.asScala.filter(_.academicYear == academicYear)
     allGroupSets.exists(!_.fullyReleased)
   }
+
+  var sitsDepartmentCode: String = _
 }
 
 object Module extends Logging {

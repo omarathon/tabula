@@ -4,15 +4,15 @@ import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{AbsenceType, Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.queue.Queue
 
 import scala.jdk.CollectionConverters._
 
@@ -160,13 +160,21 @@ trait AttendanceMonitoringService {
   def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
 
   def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
+
+  def listUnsynchronisedCheckpoints(limit: Int): Seq[AttendanceMonitoringCheckpoint]
+
+  def countUnsynchronisedCheckpoints: Int
+
+  def mostRecentlySynchronisedCheckpointDate: Option[DateTime]
+
+  def markCheckpointAsSynchronised(checkpoint: AttendanceMonitoringCheckpoint): Unit
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
-
-  self: AttendanceMonitoringDaoComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
-
-  var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
+  self: AttendanceMonitoringDaoComponent
+    with AttendanceMonitoringMembershipHelpers
+    with UserLookupComponent
+    with FeaturesComponent =>
 
   def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
     attendanceMonitoringDao.getSchemeById(id)
@@ -433,6 +441,23 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
   ): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
     val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
     val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).keys.flatMap(existingCheckpoints.get).toSeq
+
+    if (features.attendanceMonitoringRealTimeReport) {
+      val (toSave, toDelete) = checkpointsToDelete.partition { checkpoint =>
+        AttendanceMonitoringCheckpoint.transitionNeedsSynchronisingToSits(checkpoint.state -> AttendanceState.NotRecorded)
+      }
+
+      attendanceMonitoringDao.saveOrUpdateCheckpoints(toSave.map { checkpoint =>
+        checkpoint.state = AttendanceState.NotRecorded
+        checkpoint.updatedBy = usercode
+        checkpoint.updatedDate = DateTime.now
+        checkpoint
+      })
+      attendanceMonitoringDao.removeCheckpoints(toDelete)
+    } else {
+      attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
+    }
+
     val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap { case (point, state) =>
       val checkpoint = existingCheckpoints.getOrElse(point, {
         val checkpoint = new AttendanceMonitoringCheckpoint
@@ -445,12 +470,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
         checkpoint.state = state
         checkpoint.updatedBy = usercode
         checkpoint.updatedDate = DateTime.now
-        Option(checkpoint)
-      } else {
-        None
-      }
+        Some(checkpoint)
+      } else None
     }.toSeq
-    attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
+
     attendanceMonitoringDao.saveOrUpdateCheckpoints(checkpointsToUpdate)
 
     val totals = attendanceMap.keys.toSeq.map(point => (point.scheme.department, point.scheme.academicYear)).distinct.map { case (department, academicYear) =>
@@ -477,7 +500,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
     if (points.nonEmpty) {
       val checkpointMap = getCheckpoints(points, student, withFlush = true)
-      val allCheckpoints = checkpointMap.values
+      val allCheckpoints = checkpointMap.values.filterNot(_.state == AttendanceState.NotRecorded)
 
       val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.endDate.isBefore(DateTime.now.toLocalDate))
       val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
@@ -633,6 +656,27 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
     attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(universityIds, academicYear)
   }
 
+  override def listUnsynchronisedCheckpoints(limit: Int): Seq[AttendanceMonitoringCheckpoint] = transactional(readOnly = true) {
+    attendanceMonitoringDao.listUnsynchronisedCheckpoints(limit)
+  }
+
+  override def countUnsynchronisedCheckpoints: Int = transactional(readOnly = true) {
+    attendanceMonitoringDao.countUnsynchronisedCheckpoints
+  }
+
+  override def mostRecentlySynchronisedCheckpointDate: Option[DateTime] = transactional(readOnly = true) {
+    attendanceMonitoringDao.mostRecentlySynchronisedCheckpointDate
+  }
+
+  override def markCheckpointAsSynchronised(checkpoint: AttendanceMonitoringCheckpoint): Unit = transactional() {
+    if (checkpoint.state == AttendanceState.NotRecorded) {
+      deleteCheckpointDangerously(checkpoint)
+    } else {
+      checkpoint.needsSynchronisingToSits = false
+      checkpoint.lastSynchronisedToSits = DateTime.now
+      saveOrUpdateDangerously(checkpoint)
+    }
+  }
 }
 
 trait AttendanceMonitoringMembershipHelpers {
@@ -650,3 +694,4 @@ class AttendanceMonitoringServiceImpl
     with AttendanceMonitoringMembershipHelpersImpl
     with AutowiringAttendanceMonitoringDaoComponent
     with AutowiringUserLookupComponent
+    with AutowiringFeaturesComponent

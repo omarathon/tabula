@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
 import org.hibernate.annotations.{Proxy, Type}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
@@ -94,6 +94,9 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
   @Column(name = "moduleresult")
   var moduleResult: ModuleResult = _
+
+  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+  var endDate: LocalDate = _
 
   def passedCats: Option[Boolean] = moduleResult match {
     case _: ModuleResult.Pass.type if hasAgreedMarkOrGrade => Some(true)

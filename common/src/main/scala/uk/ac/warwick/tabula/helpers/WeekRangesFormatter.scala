@@ -224,19 +224,18 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
       case (year, week) =>
         val longDescription = formatWeekName(year, week.weekNumber, system)
 
-        val baseDate = week.firstDay.withDayOfWeek(DayOfWeek.Thursday.jodaDayOfWeek)
         val shortDescription = system match {
           case WeekRange.NumberingSystem.Academic => week.weekNumber.toString
           case WeekRange.NumberingSystem.None => ""
           case WeekRange.NumberingSystem.Term =>
             week.period match {
-              case vac: Vacation => ""
-              case t: Term => week.termWeekNumber
+              case _: Vacation => ""
+              case _: Term => week.termWeekNumber
             }
           case WeekRange.NumberingSystem.Cumulative =>
             week.period match {
-              case vac: Vacation => ""
-              case t: Term => week.cumulativeWeekNumber
+              case _: Vacation => ""
+              case _: Term => week.cumulativeWeekNumber
             }
         }
 
@@ -246,10 +245,10 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
         val description = if (system == WeekRange.NumberingSystem.Academic || longDescription.startsWith("Term")) {
           longDescription
         } else {
-          IntervalFormatter.formatDate(week.firstDay, week.lastDay, includeDays = false)
+          IntervalFormatter.formatDateRange(week.dateRange, includeDays = false)
         }
 
-        (week.interval.getStart.getMillis, week.interval.getEnd.getMillis, description, shortDescription)
+        (week.dateRange.lowerEndpoint().toDateTimeAtStartOfDay.getMillis, week.dateRange.upperEndpoint().plusDays(1).toDateTimeAtStartOfDay.getMillis, description, shortDescription)
     }
 
     // could use Jackson to map these objects but it doesn't seem worth it

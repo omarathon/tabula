@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data
 
+import java.io.Closeable
+
 import org.hibernate.criterion._
 import org.hibernate.sql.JoinType
-
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.transform.DistinctRootEntityResultTransformer
-
-import collection.mutable
-import org.hibernate.transform.ResultTransformer
+import org.hibernate.transform.{DistinctRootEntityResultTransformer, ResultTransformer}
 import org.hibernate.{FetchMode, ScrollableResults}
+import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 /**
   * Nice wrapper for a Criteria object. You usually won't create
