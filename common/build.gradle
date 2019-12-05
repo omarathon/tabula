@@ -147,6 +147,7 @@ dependencies {
   compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
 
   compile "com.beachape:enumeratum_${scalaMajorVersion}:1.5.13"
+  compile "com.beachape:enumeratum-play-json_${scalaMajorVersion}:1.5.16"
 
   compile 'io.jsonwebtoken:jjwt:0.9.1'
 
