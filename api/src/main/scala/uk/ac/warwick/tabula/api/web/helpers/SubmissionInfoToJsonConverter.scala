@@ -43,6 +43,7 @@ trait SubmissionInfoToJsonConverter {
         "resitAssessment" -> assignment.resitAssessment,
         "name" -> assignment.name,
         "collectMarks" -> assignment.collectMarks,
+        "useMarkPoints" -> assignment.useMarkPoints,
         "markingWorkflow" -> {
           if (assignment.cm2Assignment)
             Option(assignment.cm2MarkingWorkflow).map { mw =>
