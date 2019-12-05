@@ -8,7 +8,7 @@ import scala.jdk.CollectionConverters._
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
   //check to see how many template files are currently showing on screen
-  def currentCount() = {
+  def currentCount(): Int = {
     if (id("feedback-template-list").findElement.isEmpty) 0
     else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
   }
@@ -16,14 +16,14 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
   "Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
     click on linkText("Test Services")
 
-    def openFeedbackTemplates() = {
-      click on (partialLinkText("Feedback"))
+    def openFeedbackTemplates(): Unit = {
+      click on partialLinkText("Feedback")
 
       val feedbackTemplatesLink = id("main").webElement.findElement(By.linkText("Feedback templates"))
       eventually {
         feedbackTemplatesLink.isDisplayed should be(true)
       }
-      click on (feedbackTemplatesLink)
+      click on feedbackTemplatesLink
     }
 
     Then("I should be able to open feedback templates page")
@@ -99,7 +99,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
         _.findElement(By.tagName("td")).getText == file
       })
 
-      click on (row.get.findElement(By.partialLinkText("Edit")))
+      click on row.get.findElement(By.partialLinkText("Edit"))
 
       eventually {
         find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
@@ -108,7 +108,13 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
         ifr.map(_.isDisplayed) should be(Some(true))
       }
 
-      switch to frame(find(cssSelector(".modal-body iframe")).get)
+      val iframe = frame(find(cssSelector(".modal-body iframe")).get)
+      switch to iframe
+
+      eventually{
+        textField(name("name")).isDisplayed should be(true)
+        textField(name("name")).isEnabled should be(true)
+      }
 
       // Set a name and description TODO check update
       textField("name").value = "extension template"
@@ -160,9 +166,9 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
       val row = tbody.findElements(By.tagName("tr")).asScala.find({
         _.findElement(By.tagName("td")).getText == file
       })
-      row should be('defined)
+      row should be(Symbol("defined"))
 
-      click on (row.get.findElement(By.partialLinkText("Delete")))
+      click on row.get.findElement(By.partialLinkText("Delete"))
     }
 
     Then("I should be able to delete the second file")
