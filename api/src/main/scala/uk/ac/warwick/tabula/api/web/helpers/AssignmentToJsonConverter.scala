@@ -24,6 +24,7 @@ trait AssignmentToJsonConverter {
       "name" -> assignment.name,
       "studentUrl" -> (toplevelUrl + Routes.cm2.assignment(assignment)),
       "collectMarks" -> assignment.collectMarks,
+      "useMarkPoints" -> assignment.useMarkPoints,
       "markingWorkflow" -> {
         if (assignment.cm2Assignment)
           Option(assignment.cm2MarkingWorkflow).map { mw =>
