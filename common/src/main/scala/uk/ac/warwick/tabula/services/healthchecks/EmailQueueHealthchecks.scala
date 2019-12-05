@@ -22,8 +22,8 @@ object EmailUnsentEmailCountHealthcheck {
   val Name = "email-queue"
   val InitialState = new ServiceHealthcheck(Name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
 
-  val WarningThreshold = 1000
-  val ErrorThreshold = 10000
+  val WarningThreshold = 10000
+  val ErrorThreshold = 25000
 }
 
 @Component
