@@ -116,8 +116,11 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
       switch to defaultContent
 
-      eventually(cssSelector("#feedback-template-model .btn-primary").webElement.isDisplayed shouldBe true)
-      click on cssSelector("#feedback-template-model .btn-primary")
+      eventually {
+        cssSelector("#feedback-template-model .btn-primary").webElement.isDisplayed shouldBe true
+        cssSelector("#feedback-template-model .btn-primary").webElement.isEnabled shouldBe true
+        click on cssSelector("#feedback-template-model .btn-primary")
+      }
 
       // Wait for the modal to go away
       eventually {

@@ -29,7 +29,11 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen {
     }
 
     When("I choose to record the first point")
-    click on id("filter-results").webElement.findElement(By.cssSelector(".monitoring-points .item-info.point a.btn-primary"))
+    eventually {
+      id("filter-results").webElement.findElement(By.cssSelector(".monitoring-points .item-info.point a.btn-primary")).isDisplayed shouldBe true
+      id("filter-results").webElement.findElement(By.cssSelector(".monitoring-points .item-info.point a.btn-primary")).isEnabled shouldBe true
+      click on id("filter-results").webElement.findElement(By.cssSelector(".monitoring-points .item-info.point a.btn-primary"))
+    }
 
     Then("I am redirected to record the grouped point")
     eventually(currentUrl should (include("/attendance/view/xxx/") and include("/points/") and include("/record")))
