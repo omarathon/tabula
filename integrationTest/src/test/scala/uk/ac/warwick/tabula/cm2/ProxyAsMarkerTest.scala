@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.cm2
 
 import org.openqa.selenium.By
+import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
-import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
@@ -43,8 +43,8 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
     //xxx01 module related assignment
     withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { assignmentId =>
 
-      submitAssignment(P.Student1, "Single marking - single use", assignmentId, "/file1.txt", false)
-      submitAssignment(P.Student2, "Single marking - single use", assignmentId, "/file2.txt", false)
+      submitAssignment(P.Student1, "Single marking - single use", assignmentId, "/file1.txt", mustBeEnrolled = false)
+      submitAssignment(P.Student2, "Single marking - single use", assignmentId, "/file2.txt", mustBeEnrolled = false)
 
       as(P.Admin1) {
         click on linkText("Coursework Management")
@@ -56,7 +56,12 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
         currentUrl.contains("/department/xxx") should be(true)
 
-        eventually(click on id("main").webElement.findElement(By.partialLinkText("XXX01")))
+        eventually {
+          val moduleRowLink = id("main").webElement.findElement(By.partialLinkText("XXX01"))
+          moduleRowLink.isDisplayed shouldBe true
+          moduleRowLink.isEnabled shouldBe true
+          click on moduleRowLink
+        }
 
         eventually(releaseForMarking(assignmentId))
 
