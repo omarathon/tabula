@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearQuery, ModuleRegistrationsByUniversityIdsQuery}
+import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearsQuery, ModuleRegistrationsByUniversityIdsQuery}
 
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
@@ -31,7 +31,7 @@ import scala.util.Try
   *
   */
 trait ModuleRegistrationImporter {
-  def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow]
+  def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow]
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow]
 }
 
@@ -66,12 +66,12 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
 @Profile(Array("dev", "test", "production"))
 @Service
 class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking {
-  lazy val moduleRegistrationsByAcademicYearQuery: ModuleRegistrationsByAcademicYearQuery = new ModuleRegistrationsByAcademicYearQuery(sitsDataSource)
+  lazy val moduleRegistrationsByAcademicYearsQuery: ModuleRegistrationsByAcademicYearsQuery = new ModuleRegistrationsByAcademicYearsQuery(sitsDataSource)
   lazy val moduleRegistrationsByUniversityIdsQuery: ModuleRegistrationsByUniversityIdsQuery = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
 
-  def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow] =
+  def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
-      moduleRegistrationsByAcademicYearQuery.executeByNamedParam(Map("academicYear" -> academicYear).asJava).asScala.distinct.toSeq
+      moduleRegistrationsByAcademicYearsQuery.executeByNamedParam(Map("academicYears" -> academicYears.asJava).asJava).asScala.distinct.toSeq
     }
 
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
@@ -85,7 +85,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 @Profile(Array("sandbox"))
 @Service
 class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
-  override def getModuleRegistrationRowsForAcademicYear(academicYear: AcademicYear): Seq[ModuleRegistrationRow] =
+  override def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
     SandboxData.Departments.values
       .flatMap(_.routes.values)
       .flatMap(route => route.studentsStartId to route.studentsEndId)
@@ -200,7 +200,7 @@ object ModuleRegistrationImporter {
         and mav.mod_code = sms.mod_code
         and mav.mav_occur = sms.sms_occl
 
-       where sms.ayr_code = :academicYear"""
+       where sms.ayr_code in (:academicYears)"""
 
   def ConfirmedModuleRegistrationsForAcademicYear =
     s"""
@@ -244,7 +244,7 @@ object ModuleRegistrationImporter {
 
        where
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
-       and smo.ayr_code = :academicYear"""
+       and smo.ayr_code in (:academicYears)"""
 
   def UnconfirmedModuleRegistrationsForUniversityIds =
     s"""
@@ -350,9 +350,9 @@ object ModuleRegistrationImporter {
     )
   }
 
-  class ModuleRegistrationsByAcademicYearQuery(ds: DataSource)
+  class ModuleRegistrationsByAcademicYearsQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
-    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
+    declareParameter(new SqlParameter("academicYears", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
