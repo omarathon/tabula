@@ -67,8 +67,8 @@ abstract class BulkImportModuleRegistrationsCommandInternal extends CommandInter
     }
 
     // key the existing registrations by scj code and module to make finding them faster
-    val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by scj and module code") {
-      existingRegistrations.groupBy(mr => (mr._scjCode, mr.module.code))
+    val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by scj, module code and academic year") {
+      existingRegistrations.groupBy(mr => (mr._scjCode, mr.module.code, mr.academicYear.toString))
     }
 
     var created: Int = 0
@@ -76,7 +76,7 @@ abstract class BulkImportModuleRegistrationsCommandInternal extends CommandInter
 
     // registrations that we found in SITS that already existed in Tabula (don't delete these)
     val foundRegistrations = benchmarkTask("Updating registrations") { rows.flatMap(row => {
-      val existing = existingRegistrationsGrouped.getOrElse((row.scjCode, row.moduleCode.orNull), Nil).find(row.matches)
+      val existing = existingRegistrationsGrouped.getOrElse((row.scjCode, row.moduleCode.orNull, row.academicYear), Nil).find(row.matches)
       val registration = existing.orElse(modulesBySitsCode.get(row.sitsModuleCode).map(row.toModuleRegistration))
 
       registration match {
@@ -126,10 +126,12 @@ trait BulkImportModuleRegistrationsForAcademicYearRequest extends BulkImportModu
 
   def academicYear: AcademicYear
 
-  lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForAcademicYear(academicYear)
+  def yearsToImport: Seq[AcademicYear] = Seq(academicYear, academicYear.previous)
+
+  lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForAcademicYears(yearsToImport)
 
   lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
-    moduleRegistrationService.getByYear(academicYear)
+    moduleRegistrationService.getByYears(yearsToImport)
   }
 }
 
@@ -161,7 +163,7 @@ trait BulkImportModuleRegistrationsForAcademicYearDescription extends BulkImport
   override lazy val eventName: String = "BulkImportModuleRegistrationsForAcademicYear"
 
   override def describe(d: Description): Unit =
-    d.property("academicYear" -> academicYear.toString)
+    d.property("academicYears" -> yearsToImport.map(_.toString))
 }
 
 trait BulkImportModuleRegistrationsForUniversityIdsDescription extends BulkImportModuleRegistrationsDescription {
