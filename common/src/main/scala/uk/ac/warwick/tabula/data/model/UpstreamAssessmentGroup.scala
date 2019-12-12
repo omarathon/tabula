@@ -146,5 +146,5 @@ trait UpstreamAssessmentGroupMemberProperties {
 /** currentMembers are all members excluding PWD)  **/
 case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, currentMembers: Seq[UpstreamAssessmentGroupMember]) {
   lazy val allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala.toSeq
-  lazy val resitMembers: Seq[UpstreamAssessmentGroupMember] = allMembers.filter(_.resitExpected.exists(identity))
+  lazy val resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.resitExpected.exists(identity))
 }
