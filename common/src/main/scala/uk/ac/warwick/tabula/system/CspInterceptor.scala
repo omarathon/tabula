@@ -50,8 +50,8 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // My Warwick or web sign-on account popover, or campus map
       "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
 
-      // AJAX request for My Warwick alert unread count and campus-cms (per CLogS reports)
-      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk"),
+      // AJAX request for My Warwick alert unread count and campus-cms for map embeds, and status.warwick.ac.uk for StatusPage summary
+      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk https://status.warwick.ac.uk"),
 
       "form-action" -> Some("'self'"),
 
@@ -89,8 +89,8 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // I checked on CLogS, the only violations I can see are from malware and Chinese browsers
       "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
 
-      // AJAX request for My Warwick alert unread count, https://campus-cms.warwick.ac.uk via CLogS
-      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk"),
+      // AJAX request for My Warwick alert unread count and campus-cms for map embeds, and status.warwick.ac.uk for StatusPage summary
+      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk https://status.warwick.ac.uk"),
 
       // No CLogS reports for violations of this directive
       "frame-ancestors" -> Some("'self'"),
