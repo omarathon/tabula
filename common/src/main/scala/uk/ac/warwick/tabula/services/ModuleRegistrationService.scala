@@ -30,7 +30,7 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration]
+  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
 
@@ -88,8 +88,8 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-  def getByYear(academicYear: AcademicYear): Seq[ModuleRegistration] =
-    moduleRegistrationDao.getByYear(academicYear)
+  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByYears(academicYears)
 
   def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds)

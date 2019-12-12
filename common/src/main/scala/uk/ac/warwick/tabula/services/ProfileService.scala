@@ -37,6 +37,8 @@ trait ProfileService {
 
   def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
 
+  def getAllMembersWithUserIds(userIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
+
   def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 
   def getAllMembersByUsers(users: Seq[User], disableFilter: Boolean = false, eagerLoad: Boolean = false): Map[User, Member]

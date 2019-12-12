@@ -2,7 +2,6 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/modal_macros.ftlh" as modal />
 
-<#escape x as x?html>
 <@modal.wrapper cssClass="modal-lg">
   <@modal.header>
     <#if command.group??>
@@ -10,7 +9,11 @@
     <#else>
       <h3 class="modal-title">Students <#if unallocated!false>not </#if>in ${command.smallGroupSet.name}</h3>
     </#if>
-
+    <#assign submitUrl><@routes.profiles.department_timetables command.group.groupSet.department /></#assign>
+    <@f.form method="GET" action="${submitUrl?markup_string}">
+      <#list students as student><input type="hidden" name="students" value="${student.universityId}"/></#list>
+      <button type="submit" class="btn btn-link" >See a timetable for these students</button>
+    </@f.form>
   </@modal.header>
 
   <@modal.body>
@@ -92,4 +95,3 @@
 
   </@modal.body>
 </@modal.wrapper>
-</#escape>

@@ -3,9 +3,28 @@
 
   <#assign filterQuery = filterCommand.serializeFilter />
 
-  <#if features.attendanceMonitoringReport && !features.attendanceMonitoringRealTimeReport && can.do("MonitoringPoints.Report", department)>
+  <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department)>
     <div class="pull-right send-to-sits">
-      <a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS e:Vision</a>
+      <#if features.attendanceMonitoringRealTimeReport>
+        <#assign introText>
+          <p>When a monitoring point is recorded as ‘Missed (unathorised)’, this is immediately uploaded to SITS e:Vision.
+            Only unauthorised missed points are uploaded; authorised missed points are not.</p>
+
+          <p>If the attendance/fulfilment of the point is subsequently changed to anything other than ‘Missed (unauthorised)’,
+            the missed point is removed from SITS e:Vision.</p>
+        </#assign>
+        <a href="#"
+           id="attendance-monitoring-realtime"
+           class="use-introductory<#if showIntro("attendance-monitoring-realtime", "anywhere")> auto</#if>"
+           data-hash="${introHash("attendance-monitoring-realtime", "anywhere")}"
+           data-title="Automatic upload of monitoring points to SITS e:Vision"
+           data-placement="left"
+           data-html="true"
+           aria-label="Help"
+           data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+      <#else>
+        <a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS e:Vision</a>
+      </#if>
     </div>
   </#if>
 
