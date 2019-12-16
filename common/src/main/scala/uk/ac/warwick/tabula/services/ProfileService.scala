@@ -445,8 +445,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
       department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
 
     val moduleRestrictions = inIfNotEmptyMultipleProperties(
-      Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
-      Seq(modules.toSeq, Seq(year)),
+      Seq("moduleRegistration.module", "moduleRegistration.academicYear", "moduleRegistration.deleted"),
+      Seq(modules.toSeq, Seq(year), Seq(false)),
       FiltersStudents.AliasPaths("moduleRegistration"): _*
     ).toSeq ++ restrictions
 

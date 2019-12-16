@@ -130,8 +130,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
       // no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
       val modRestriction: ScalaRestriction = inIfNotEmptyMultipleProperties(
-        Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
-        Seq(Seq(mod2, mod3), Seq(AcademicYear.now()))
+        Seq("moduleRegistration.module", "moduleRegistration.academicYear", "moduleRegistration.deleted"),
+        Seq(Seq(mod2, mod3), Seq(AcademicYear.now()), Seq(false))
       ).get
 
       modRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
