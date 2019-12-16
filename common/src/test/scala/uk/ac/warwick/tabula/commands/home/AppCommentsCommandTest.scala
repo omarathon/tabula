@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.commands.home
 
 import java.util.Properties
+
 import javax.mail.Message.RecipientType
 import javax.mail.Session
 import javax.mail.internet.{MimeMessage, MimeMultipart}
-
 import freemarker.template.Template
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data.model.{Department, UserGroup, UserSettings}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, UserSettingsService}
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -18,7 +18,13 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
   val mockMailSender: WarwickMailSender = smartMock[WarwickMailSender]
   val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+  val mockSettingsService: UserSettingsService = smartMock[UserSettingsService]
   val mockUserLookup = new MockUserLookup()
+
+  val settings = new UserSettings
+  settings.deptAdminReceiveStudentComments = true
+
+  mockSettingsService.getByUserId("owner") returns Some(settings)
 
   val session: Session = Session.getDefaultInstance(new Properties)
   val mimeMessage = new MimeMessage(session)
@@ -43,6 +49,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
       with AppCommentCommandState with ModuleAndDepartmentServiceComponent {
 
       override val mailSender: WarwickMailSender = mockMailSender
+      override val settingsService: UserSettingsService = mockSettingsService
       override val freemarker: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
       override val moduleAndDepartmentService: ModuleAndDepartmentService = mockModuleAndDepartmentService
       override val adminMailAddress: String = adminEmail
