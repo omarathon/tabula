@@ -66,7 +66,7 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
         val filteredUserEmails = userEmails
           .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
 
-        val recipients = if (filteredUserEmails.nonEmpty) filteredUserEmails  else userEmails
+        val recipients = if (filteredUserEmails.nonEmpty) filteredUserEmails else userEmails
 
         mail.setTo(recipients.map(_.getEmail).toArray)
         mail.setFrom(adminMailAddress)
