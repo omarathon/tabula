@@ -54,17 +54,18 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
   }
 
   override def applyInternal(): Future[JBoolean] = {
-    val deptAdmin: Option[User] = {
+    val deptAdmins: Option[Set[User]] = {
       Option(user) match {
         case Some(loggedInUser) if loggedInUser.loggedIn =>
-          moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption)
+          moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).map(_.owners.users)
         case _ =>
           None
       }
     }
     val mail = createMessage(mailSender, multipart = false) { mail =>
-      if (recipient == AppCommentCommand.Recipients.DeptAdmin && deptAdmin.isDefined) {
-        mail.setTo(deptAdmin.get.getEmail)
+      if (recipient == AppCommentCommand.Recipients.DeptAdmin && deptAdmins.isDefined) {
+        val userEmails = deptAdmins.get.map(da => da.getEmail)
+        mail.setTo(userEmails.toArray)
         mail.setFrom(adminMailAddress)
         mail.setSubject(encodeSubject("Tabula help"))
         mail.setText(renderToString(deptAdminTemplate, Map(
