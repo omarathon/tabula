@@ -142,11 +142,13 @@ object UserSettings {
     val StringForcedTrue = "t"
     val StringForcedFalse = "f"
 
+    @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def forceBooleanString(value: Boolean): String = value match {
       case true => StringForcedTrue
       case false => StringForcedFalse
     }
 
+    @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def fromForceBooleanString(value: String): Boolean = value match {
       case StringForcedTrue => true
       case StringForcedFalse => false
