@@ -78,9 +78,9 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def courseworkShowEmptyModules_=(showEmptyModules: Boolean): Unit = settings += (Settings.CourseworkShowEmptyModules -> showEmptyModules)
 
-  def deptAdminReceiveStudentComments: Boolean = getStringSetting(Settings.ReceiveStudentComments).forall(Settings.fromForceBooleanString)
+  def deptAdminReceiveStudentComments: Boolean = getBooleanSetting(Settings.ReceiveStudentComments).getOrElse(DefaultReceiveStudentComments)
 
-  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> Settings.forceBooleanString(receiveStudentComments))
+  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> receiveStudentComments)
 
   def string(key: String): String = getStringSetting(key).orNull
 
@@ -109,6 +109,7 @@ object UserSettings {
   val DefaultProfilesDefaultView = "gadget"
 
   val DefaultCourseworkShowEmptyModules = true
+  val DefaultReceiveStudentComments = true
 
   object Settings {
     val AlertsSubmission = "alertsSubmission"
