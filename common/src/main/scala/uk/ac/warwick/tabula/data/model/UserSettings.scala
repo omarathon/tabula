@@ -80,7 +80,7 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def deptAdminReceiveStudentComments: Boolean = getStringSetting(Settings.ReceiveStudentComments).forall(Settings.fromForceBooleanString)
 
-  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.RegisterPdf.ShowPhotos -> Settings.forceBooleanString(receiveStudentComments))
+  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> Settings.forceBooleanString(receiveStudentComments))
 
   def string(key: String): String = getStringSetting(key).orNull
 
