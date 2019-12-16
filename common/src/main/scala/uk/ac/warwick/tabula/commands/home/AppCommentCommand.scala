@@ -64,11 +64,11 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
           .getOrElse(throw new IllegalArgumentException)
 
         val filteredUserEmails = userEmails
-          .filter(da => settingsService.getByUserId(da.getUserId).exists(s => s.deptAdminReceiveStudentComments))
+          .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
 
         val recipients = if (filteredUserEmails.nonEmpty) filteredUserEmails  else userEmails
 
-        mail.setTo(recipients.map(r => r.getEmail).toArray)
+        mail.setTo(recipients.map(_.getEmail).toArray)
         mail.setFrom(adminMailAddress)
         mail.setSubject(encodeSubject("Tabula help"))
         mail.setText(renderToString(deptAdminTemplate, Map(
