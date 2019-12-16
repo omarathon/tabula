@@ -56,7 +56,7 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
     super.getUsersByUserIds(ids).asScala.map { case (userId, userFromSSO) =>
       if (userFromSSO.isFoundUser) userId -> userFromSSO
-      else profileService.getAllMembersWithUserId(userId, disableFilter = true).headOption match {
+      else profileService.getAllMembersWithUserId(userId, disableFilter = true, activeOnly = false).headOption match {
         case Some(member) => userId -> member.asSsoUser
         case _ => userId -> userFromSSO
       }
@@ -79,7 +79,7 @@ class DatabaseAwareUserLookupService(d: UserLookupInterface) extends UserLookupA
       super.getUserByUserId(id) match {
         case FoundUser(u) => u
         case u =>
-          profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
+          profileService.getAllMembersWithUserId(id, disableFilter = true, activeOnly = false).headOption
             .map(_.asSsoUser)
             .getOrElse(u)
       }
@@ -132,7 +132,7 @@ class SandboxUserLookup(d: UserLookupInterface) extends DatabaseAwareUserLookupS
 
   // Flip these around on the Sandbox to be database-first
   override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByUserId", id) {
-    profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
+    profileService.getAllMembersWithUserId(id, disableFilter = true, activeOnly = false).headOption
       .map(_.asSsoUser)
       .getOrElse(super.getUserByUserId(id))
   }
