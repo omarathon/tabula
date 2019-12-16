@@ -78,6 +78,10 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def courseworkShowEmptyModules_=(showEmptyModules: Boolean): Unit = settings += (Settings.CourseworkShowEmptyModules -> showEmptyModules)
 
+  def deptAdminReceiveStudentComments: Boolean = getStringSetting(Settings.ReceiveStudentComments).forall(Settings.fromForceBooleanString)
+
+  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.RegisterPdf.ShowPhotos -> Settings.forceBooleanString(receiveStudentComments))
+
   def string(key: String): String = getStringSetting(key).orNull
 
   def this(userId: String) = {
@@ -116,6 +120,7 @@ object UserSettings {
     val ActiveDepartment = "activeDepartment"
     val ActiveAcademicYear = "activeAcademicYear"
     val CourseworkShowEmptyModules = "courseworkShowEmptyModules"
+    val ReceiveStudentComments = "receiveStudentComments"
 
     object RegisterPdf {
       val ShowPhotos = "registerPdfShowPhotos"

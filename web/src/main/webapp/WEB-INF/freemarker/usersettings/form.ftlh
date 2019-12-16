@@ -80,6 +80,13 @@
       Coursework submissions which have been marked
     </@bs3form.checkbox>
 
+    <#if isDepartmentalAdmin>
+        <@bs3form.checkbox>
+            <@f.checkbox path="deptAdminReceiveStudentComments" />
+            Students who have requested assistance from a departmental admin
+        </@bs3form.checkbox>
+    </#if>
+
   </@bs3form.labelled_form_group>
 
   <@bs3form.labelled_form_group>
