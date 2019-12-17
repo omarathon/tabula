@@ -371,7 +371,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       }
 
       if (hasChanged) {
-        logger.info(s"Gotta make a change for once in my... liiiayyyfffffffffffff ${assessmentComponents.flatMap(_.linkedAssignments)}")
         modifiedAssignments = modifiedAssignments ++ assessmentComponents.flatMap(_.linkedAssignments)
       }
 
