@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, RedirectingMailSender}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, RedirectingMailSender, UserSettingsService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
@@ -34,6 +34,7 @@ object AppCommentCommand {
       with ReadOnly with Public {
 
       var mailSender: RedirectingMailSender = Wire[RedirectingMailSender]("studentMailSender")
+      var settingsService: UserSettingsService = Wire.auto[UserSettingsService]
       var adminMailAddress: String = Wire.property("${mail.admin.to}")
       var freemarker: Configuration = Wire.auto[Configuration]
       var deptAdminTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
@@ -54,17 +55,19 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
   }
 
   override def applyInternal(): Future[JBoolean] = {
-    val deptAdmin: Option[User] = {
-      Option(user) match {
-        case Some(loggedInUser) if loggedInUser.loggedIn =>
-          moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption)
-        case _ =>
-          None
-      }
-    }
     val mail = createMessage(mailSender, multipart = false) { mail =>
-      if (recipient == AppCommentCommand.Recipients.DeptAdmin && deptAdmin.isDefined) {
-        mail.setTo(deptAdmin.get.getEmail)
+      if (recipient == AppCommentCommand.Recipients.DeptAdmin) {
+        val userEmails = Option(user)
+          .filter(_.loggedIn)
+          .flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode))
+          .map(_.owners.users)
+          .getOrElse(throw new IllegalArgumentException)
+          .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
+          .map(_.getEmail)
+
+        require(userEmails.nonEmpty) // User should not have submitted form if no dept. admins approve
+
+        mail.setTo(userEmails.toArray)
         mail.setFrom(adminMailAddress)
         mail.setSubject(encodeSubject("Tabula help"))
         mail.setText(renderToString(deptAdminTemplate, Map(
@@ -131,6 +134,8 @@ trait AppCommentCommandState {
   def deptAdminTemplate: Template
 
   def webTeamTemplate: Template
+
+  def settingsService: UserSettingsService
 }
 
 trait AppCommentCommandRequest {

@@ -91,26 +91,41 @@
         <h2>Contact your administrator</h2>
         <p>If you're having problems with Tabula, use the form below to contact your department's Tabula administrator.</p>
 
-        <@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
-          <@bs3form.labelled_form_group path="name" labelText="Your name">
-            <@f.input path="name" cssClass="form-control"/>
-          </@bs3form.labelled_form_group>
+        <#if !atLeastOneEmailableDeptAdmin>
+          <div class="panel panel-danger">
+            <div class="panel-heading">
+              <h3 class="panel-title">No departmental contacts available</h3>
+            </div>
+            <div class="panel-body">
+              <p>
+                Sorry, all department administrators in <strong>${homeDept}</strong> have explicitly chosen not to receive
+                requests for help via Tabula from members of the department.
+              </p>
+              <p>If you have queries about this, please contact your department directly.</p>
+            </div>
+          </div>
+        <#else>
+            <@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
+                <@bs3form.labelled_form_group path="name" labelText="Your name">
+                    <@f.input path="name" cssClass="form-control"/>
+                </@bs3form.labelled_form_group>
 
-          <@bs3form.labelled_form_group path="email" labelText="Your email">
-            <@f.input path="email" cssClass="form-control"/>
-          </@bs3form.labelled_form_group>
+                <@bs3form.labelled_form_group path="email" labelText="Your email">
+                    <@f.input path="email" cssClass="form-control"/>
+                </@bs3form.labelled_form_group>
 
-          <@bs3form.labelled_form_group path="usercode" labelText="Usercode">
-            <@f.input path="usercode" cssClass="form-control"/>
-          </@bs3form.labelled_form_group>
+                <@bs3form.labelled_form_group path="usercode" labelText="Usercode">
+                    <@f.input path="usercode" cssClass="form-control"/>
+                </@bs3form.labelled_form_group>
 
-          <@bs3form.labelled_form_group path="message" labelText="Your message">
-            <@f.textarea path="message" cssClass="form-control"/>
-          </@bs3form.labelled_form_group>
+                <@bs3form.labelled_form_group path="message" labelText="Your message">
+                    <@f.textarea path="message" cssClass="form-control"/>
+                </@bs3form.labelled_form_group>
 
-          <input type="hidden" name="url" value="" />
-          <button type="submit" class="btn btn-primary" name="recipient" value="${Recipients.DeptAdmin}">Send</button>
-        </@f.form>
+              <input type="hidden" name="url" value="" />
+              <button type="submit" class="btn btn-primary" name="recipient" value="${Recipients.DeptAdmin}">Send</button>
+            </@f.form>
+        </#if>
 
         <h2>Technical support</h2>
         <p>If you're experiencing technical issues with Tabula, please <a href="#comment-modal" data-toggle="modal">contact the IT Services Web Team</a>.</p>

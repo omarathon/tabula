@@ -32,6 +32,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
   var weekNumberingSystem: String = settings.weekNumberingSystem
   var bulkEmailSeparator: String = settings.bulkEmailSeparator
   var profilesDefaultView: String = settings.profilesDefaultView
+  var deptAdminReceiveStudentComments: Boolean = settings.deptAdminReceiveStudentComments
 
   lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
   var smallGroupEventAttendanceReminderEnabled: Boolean = smallGroupEventAttendanceReminderSettings.enabled.value
@@ -45,6 +46,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
     settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
     settings.bulkEmailSeparator = bulkEmailSeparator
     settings.profilesDefaultView = profilesDefaultView
+    settings.deptAdminReceiveStudentComments = deptAdminReceiveStudentComments
     smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
     finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
 
