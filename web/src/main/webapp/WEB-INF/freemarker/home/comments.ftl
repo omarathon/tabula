@@ -98,10 +98,10 @@
             </div>
             <div class="panel-body">
               <p>
-                Sorry, all department administrators in <strong>${homeDept}</strong> have explicitly chosen not to receive
-                requests for help via Tabula from members of the department.
+                Sorry, no department administrators in <strong>${homeDept}</strong> are able to accept
+                requests for assistance made within Tabula.
               </p>
-              <p>If you have queries about this, please contact your department directly.</p>
+              <p>Please contact your department directly.</p>
             </div>
           </div>
         <#else>
