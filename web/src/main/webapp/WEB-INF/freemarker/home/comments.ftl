@@ -97,9 +97,9 @@
               <h3 class="panel-title">No departmental contacts available</h3>
             </div>
             <div class="panel-body">
+              <!-- No dept. admins *OR* every dept. admin has opted out of receiving student comms -->
               <p>
-                Sorry, no department administrators in <strong>${homeDept}</strong> are able to accept
-                requests for assistance made within Tabula.
+                Sorry, the <strong>${homeDept}</strong> does not accept feedback about Tabula via this page.
               </p>
               <p>Please contact your department directly.</p>
             </div>
