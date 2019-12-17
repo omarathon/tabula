@@ -97,11 +97,11 @@
               <h3 class="panel-title">No departmental contacts available</h3>
             </div>
             <div class="panel-body">
+              <!-- No dept. admins *OR* every dept. admin has opted out of receiving student comms -->
               <p>
-                Sorry, all department administrators in <strong>${homeDept}</strong> have explicitly chosen not to receive
-                requests for help via Tabula from members of the department.
+                Sorry, the <strong>${homeDept}</strong> does not accept feedback about Tabula via this page.
               </p>
-              <p>If you have queries about this, please contact your department directly.</p>
+              <p>Please contact your department directly.</p>
             </div>
           </div>
         <#else>
