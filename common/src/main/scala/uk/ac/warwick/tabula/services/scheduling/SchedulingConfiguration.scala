@@ -32,7 +32,7 @@ import scala.reflect._
 
 object SchedulingConfiguration {
 
-  sealed abstract class JobConfiguration[J <: AutowiredJobBean : ClassTag] {
+  sealed abstract class JobConfiguration[J <: AutowiredJobBean : ClassTag](requestsRecovery: Boolean) {
     def name: String
 
     lazy val jobDetail: JobDetail = {
@@ -40,23 +40,24 @@ object SchedulingConfiguration {
       jobDetail.setName(name)
       jobDetail.setJobClass(classTag[J].runtimeClass.asInstanceOf[Class[J]])
       jobDetail.setDurability(true)
-      jobDetail.setRequestsRecovery(true)
+      jobDetail.setRequestsRecovery(requestsRecovery)
       jobDetail.afterPropertiesSet()
       jobDetail.getObject
     }
   }
 
-  case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](name: String) extends JobConfiguration[J]
+  case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](name: String, requestsRecovery: Boolean) extends JobConfiguration[J](requestsRecovery)
 
-  sealed abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] extends JobConfiguration[J] {
+  sealed abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger](requestsRecovery: Boolean) extends JobConfiguration[J](requestsRecovery) {
     def trigger: T
   }
 
   case class SimpleTriggerJob[J <: AutowiredJobBean : ClassTag](
     repeatInterval: Duration,
     name: String,
-    misfireInstruction: Int = SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
-  ) extends ScheduledJob[J, SimpleTrigger] {
+    misfireInstruction: Int,
+    requestsRecovery: Boolean
+  ) extends ScheduledJob[J, SimpleTrigger](requestsRecovery) {
     lazy val trigger: SimpleTrigger = {
       val trigger = new PersistableSimpleTriggerFactoryBean
       trigger.setName(name)
@@ -76,14 +77,15 @@ object SchedulingConfiguration {
   case class CronTriggerJob[J <: AutowiredJobBean : ClassTag](
     cronExpression: String,
     name: String,
-    misfireInstruction: Int = CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING
-  ) extends ScheduledJob[J, CronTrigger] {
+    misfireInstruction: Int,
+    requestsRecovery: Boolean
+  ) extends ScheduledJob[J, CronTrigger](requestsRecovery) {
     lazy val trigger: CronTrigger = {
       val trigger = new PersistableCronTriggerFactoryBean
       trigger.setName(name)
       trigger.setJobDetail(jobDetail)
       trigger.setCronExpression(cronExpression)
-      trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING)
+      trigger.setMisfireInstruction(misfireInstruction)
       trigger.afterPropertiesSet()
       trigger.getObject
     }
@@ -135,13 +137,15 @@ object SchedulingConfiguration {
       Some(CronTriggerJob[J](
         cronExpression = properties.getRequiredProperty(s"$configKey.cron"),
         name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
-        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING)
+        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING),
+        requestsRecovery = properties.getProperty[JBoolean](s"$configKey.requestsRecovery", classOf[JBoolean], false)
       ))
     } else if (properties.containsProperty(s"$configKey.repeat")) {
       Some(SimpleTriggerJob[J](
         repeatInterval = parseDuration(properties.getRequiredProperty(s"$configKey.repeat")),
         name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
-        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT)
+        misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT),
+        requestsRecovery = properties.getProperty[JBoolean](s"$configKey.requestsRecovery", classOf[JBoolean], false)
       ))
     } else {
       None
@@ -173,7 +177,13 @@ object SchedulingConfiguration {
             .collect { case Some(j) => j }
         }.filterNot(_.isEmpty)
       }
-      .getOrElse(Seq(SimpleUnscheduledJob[J](properties.getProperty(s"$configKey.name", defaultJobName[J]))))
+      .getOrElse(Seq(
+        // Default requestsRecovery to true for unscheduled jobs
+        SimpleUnscheduledJob[J](
+          name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
+          requestsRecovery = properties.getProperty[JBoolean](s"$configKey.requestsRecovery", classOf[JBoolean], true)
+        )
+      ))
 
   /**
    * DANGER WILL ROBINSON
