@@ -41,7 +41,7 @@ trait GetMemberRelationshipsApi {
             "studentRole" -> relationshipType.studentRole,
             "description" -> relationshipType.description
           ),
-          "students" -> result.map(scd => Map(
+          "students" -> result.distinctBy(_.student).map(scd => Map(
             "userId" -> scd.student.userId,
             "universityId" -> scd.student.universityId
           ))
