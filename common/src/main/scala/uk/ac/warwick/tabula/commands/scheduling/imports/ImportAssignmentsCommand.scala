@@ -244,21 +244,33 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     * This sequence of ModuleRegistrations represents the members of an assessment
     * group, so save them (and reconcile it with any existing members we have in the
     * database).
-    * The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups.
+    * The students in a group does NOT vary by sequence, so the membership should be set on ALL the groups.
     * Then set the properties of members of each group by sequence.
     */
   def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
     registrations.headOption.map { head =>
+      var hasChanged: Boolean = false
+
       // Get all the Assessment Components we have in the DB, even if marked as not in use, as we might have previous years groups to populate
       val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode, inUseOnly = false)
         .filter(_.assessmentGroup == head.assessmentGroup)
       val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
         .map { assessmentGroup =>
-          if (importEverything) {
-            assessmentMembershipService.replaceMembers(assessmentGroup, registrations)
-          } else {
-            assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup).getOrElse(assessmentGroup)
-          }
+          assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup)
+            .map { group =>
+              if (importEverything) {
+                val existingUniversityIds: Set[String] = group.members.asScala.map(_.universityId).toSet
+                val newUniversityIds: Set[String] = registrations.map(_.universityId).toSet
+
+                if (existingUniversityIds != newUniversityIds) {
+                  group.replaceMembers(newUniversityIds.toSeq)
+                  hasChanged = true
+                }
+              }
+
+              group
+            }
+            .getOrElse(assessmentGroup)
         }
 
       // Now sort out properties
@@ -325,23 +337,43 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
           propertiesMap.foreach { case (sprCode, properties) =>
             group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
-              member.position = properties.position
-              member.actualMark = properties.actualMark
-              member.actualGrade = properties.actualGrade
-              member.agreedMark = properties.agreedMark
-              member.agreedGrade = properties.agreedGrade
-              member.resitActualMark = properties.resitActualMark
-              member.resitActualGrade = properties.resitActualGrade
-              member.resitAgreedMark = properties.resitAgreedMark
-              member.resitAgreedGrade = properties.resitAgreedGrade
-              member.resitExpected = properties.resitExpected
-              assessmentMembershipService.save(member)
+              val memberHasChanged = (
+                member.position != properties.position ||
+                member.actualMark != properties.actualMark ||
+                member.actualGrade != properties.actualGrade ||
+                member.agreedMark != properties.agreedMark ||
+                member.agreedGrade != properties.agreedGrade ||
+                member.resitActualMark != properties.resitActualMark ||
+                member.resitActualGrade != properties.resitActualGrade ||
+                member.resitAgreedMark != properties.resitAgreedMark ||
+                member.resitAgreedGrade != properties.resitAgreedGrade ||
+                member.resitExpected != properties.resitExpected
+              )
+
+              if (memberHasChanged) {
+                hasChanged = true
+
+                member.position = properties.position
+                member.actualMark = properties.actualMark
+                member.actualGrade = properties.actualGrade
+                member.agreedMark = properties.agreedMark
+                member.agreedGrade = properties.agreedGrade
+                member.resitActualMark = properties.resitActualMark
+                member.resitActualGrade = properties.resitActualGrade
+                member.resitAgreedMark = properties.resitAgreedMark
+                member.resitAgreedGrade = properties.resitAgreedGrade
+                member.resitExpected = properties.resitExpected
+                assessmentMembershipService.save(member)
+              }
             }
           }
         }
       }
 
-      modifiedAssignments = modifiedAssignments ++ assessmentComponents.flatMap(_.linkedAssignments)
+      if (hasChanged) {
+        logger.info(s"Gotta make a change for once in my... liiiayyyfffffffffffff ${assessmentComponents.flatMap(_.linkedAssignments)}")
+        modifiedAssignments = modifiedAssignments ++ assessmentComponents.flatMap(_.linkedAssignments)
+      }
 
       assessmentGroups
     }.getOrElse(Seq())
