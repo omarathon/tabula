@@ -2,19 +2,21 @@ package uk.ac.warwick.tabula.commands.home
 
 import java.util.Properties
 
+import freemarker.template.Template
 import javax.mail.Message.RecipientType
 import javax.mail.Session
 import javax.mail.internet.{MimeMessage, MimeMultipart}
-import freemarker.template.Template
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports.JHashMap
 import uk.ac.warwick.tabula.data.model.{Department, UserGroup, UserSettings}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, UserSettingsService}
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.{FreemarkerTestHelpers, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
-class AppCommentsCommandTest extends TestBase with Mockito {
+
+class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHelpers {
 
   val mockMailSender: WarwickMailSender = smartMock[WarwickMailSender]
   val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
@@ -44,13 +46,21 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
   mockModuleAndDepartmentService.getDepartmentByCode(dept.code) returns Option(dept)
 
+  val weekRangeFormatter = new StubFreemarkerMethodModel
+  val urlModel = new StubFreemarkerDirectiveModel
+  val timeBuilder = new StubFreemarkerMethodModel
+
+  implicit val config: ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap(
+    "url" -> urlModel
+  ))
+
   trait Fixture {
     val cmd = new AppCommentCommandInternal(currentUser) with AppCommentCommandRequest
       with AppCommentCommandState with ModuleAndDepartmentServiceComponent {
 
       override val mailSender: WarwickMailSender = mockMailSender
       override val settingsService: UserSettingsService = mockSettingsService
-      override val freemarker: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+      override val freemarker: ScalaFreemarkerConfiguration = config
       override val moduleAndDepartmentService: ModuleAndDepartmentService = mockModuleAndDepartmentService
       override val adminMailAddress: String = adminEmail
       override val deptAdminTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
