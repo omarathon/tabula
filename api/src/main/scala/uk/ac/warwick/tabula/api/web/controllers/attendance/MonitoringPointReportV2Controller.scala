@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Features, SprCode}
 
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
@@ -58,11 +58,16 @@ trait MonitoringPointReportV2CreateApi {
 @JsonAutoDetect
 class CreateMonitoringPointReportV2Request extends JsonApiRequest[SynchroniseAttendanceToSitsBySequenceRequest] {
   @transient var profileService: ProfileService = Wire[ProfileService]
+  @transient var features: Features = Wire[Features]
 
   @BeanProperty var academicYear: AcademicYear = _
   @BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
 
   override def copyTo(state: SynchroniseAttendanceToSitsBySequenceRequest, errors: Errors) {
+    if (!features.attendanceMonitoringRealTimeReport) {
+      errors.reject("attendanceMonitoringReport.realTimeNotEnabled")
+    }
+
     state.academicYear = academicYear
     state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
       profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {
