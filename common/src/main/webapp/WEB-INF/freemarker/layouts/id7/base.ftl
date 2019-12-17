@@ -65,6 +65,7 @@
     <div class="id7-utility-masthead">
       <nav class="id7-utility-bar">
         <ul>
+          <li><a href="https://status.warwick.ac.uk/" target="_blank">System status</a></li>
           <#if IS_SSO_PROTECTED!true>
             <#if user?? && user.loggedIn>
               <li><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
