@@ -13,4 +13,6 @@ ${info.message}
 You received this email because you hold a departmental administrator role in the user's department.
 
 You can opt out of receiving these emails by changing your Tabula user settings and unchecking the
-"Students who have requested assistance from a departmental admin" checkbox.
+"Students who have requested assistance from a departmental admin" checkbox:
+
+<@url page='/settings' />

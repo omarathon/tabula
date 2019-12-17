@@ -62,13 +62,12 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
           .flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode))
           .map(_.owners.users)
           .getOrElse(throw new IllegalArgumentException)
-
-        val filteredUserEmails = userEmails
           .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
+          .map(_.getEmail)
 
-        val recipients = if (filteredUserEmails.nonEmpty) filteredUserEmails else userEmails
+        require(userEmails.nonEmpty) // User should not have submitted form if no dept. admins approve
 
-        mail.setTo(recipients.map(_.getEmail).toArray)
+        mail.setTo(userEmails.toArray)
         mail.setFrom(adminMailAddress)
         mail.setSubject(encodeSubject("Tabula help"))
         mail.setText(renderToString(deptAdminTemplate, Map(
