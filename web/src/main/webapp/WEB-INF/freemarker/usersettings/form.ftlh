@@ -79,12 +79,19 @@
       <@f.checkbox path="finaliseFeedbackNotificationEnabled" />
       Coursework submissions which have been marked
     </@bs3form.checkbox>
-
     <#if isDepartmentalAdmin>
+        <p></p>
         <@bs3form.checkbox>
             <@f.checkbox path="deptAdminReceiveStudentComments" />
             Students who have requested assistance from a departmental admin
         </@bs3form.checkbox>
+
+        <#list deptsWithNoOtherContacts as item>
+          <div class="alert alert-warning" role="alert">
+            <strong>Important:</strong> You're the last departmental contact in ${item}.
+            If you opt out, students will be unable to request department assistance from within Tabula.
+          </div>
+        </#list>
     </#if>
 
   </@bs3form.labelled_form_group>
