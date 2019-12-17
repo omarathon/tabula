@@ -13,12 +13,11 @@ It is not sufficient to manually call `apply()` on the command object.
 CSRF
 ----
 
-Primarily mitigated via the `SameSite` flag. Some mitigation from the use of UUID identifiers for most objects.
+Tabula requires form-based CSRF tokens, along with `SameSite` session cookies as a defence in depth strategy.
 
-Tabula is transitioning to support form-based CSRF tokens as a defence in depth strategy. During the transition period,
-CSRF enforcement will be enabled on non-prod instances. Production instances will log/report CSRF failures.
+Enforcement mode for form-based protection can be toggled from the sysadmin section of the application.
 
-Enforcement mode can be toggled from the sysadmin section of the application.
+We also get some mitigation for free from the use of UUID identifiers for most entities.
 
 Many forms originally used Spring `FormTag`s - we have a `CsrfEnrichedFormTag` configured to transparently provide a CSRF token
 hidden input field.
