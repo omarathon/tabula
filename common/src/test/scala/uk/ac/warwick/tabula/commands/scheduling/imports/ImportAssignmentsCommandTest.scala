@@ -31,6 +31,13 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
     command.moduleAndDepartmentService = moduleService
 
     moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work
+
+    membershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) answers { args: Array[AnyRef] =>
+      val uag = args(0).asInstanceOf[UpstreamAssessmentGroup]
+      uag.id = "seenGroupId"
+      Some(uag)
+    }
+
     membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args: Array[AnyRef] =>
       val uag = args(0).asInstanceOf[UpstreamAssessmentGroup]
       uag.id = "seenGroupId"
