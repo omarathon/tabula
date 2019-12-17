@@ -263,12 +263,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 val newUniversityIds: Set[String] = registrations.map(_.universityId).toSet
 
                 if (existingUniversityIds != newUniversityIds) {
-                  assessmentMembershipService.replaceMembers(group, registrations)
                   hasChanged = true
-                }
-              }
-
-              group
+                  assessmentMembershipService.replaceMembers(group, registrations)
+                } else group
+              } else group
             }
             .getOrElse(assessmentGroup)
         }
