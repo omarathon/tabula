@@ -48,15 +48,15 @@ class UserSettingsController extends BaseController {
 
     val deptsWithNoOtherContacts = deptsUserIsAdminOn.map(d => {
       (d.name, d.owners.users.filter(mustNotBeCurrentUser))
-    }).map(tuple => {
-      (
-        tuple._1,
-        tuple._2.map(u => userSettingsService
+    }).map { case (departmentName, otherAdmins) =>
+    (
+        departmentName,
+        otherAdmins.map(u => userSettingsService
           .getByUserId(u.getUserId)
           .map(_.deptAdminReceiveStudentComments))
           .map(_.getOrElse(true)).exists(identity[Boolean])
       )
-    }).filter(!_._2).map(_._1)
+    }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
 
     Mav("usersettings/form",
       "isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
