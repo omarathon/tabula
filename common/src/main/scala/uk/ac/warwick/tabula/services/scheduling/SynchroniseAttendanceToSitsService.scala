@@ -11,12 +11,15 @@ import org.springframework.jdbc.`object`.{MappingSqlQuery, SqlUpdate}
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JHashMap
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceState}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.SynchroniseAttendanceToSitsService.{SynchroniseAttendanceToSitsDeleteQuery, _}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
@@ -30,6 +33,7 @@ trait AutowiringSynchroniseAttendanceToSitsServiceComponent extends SynchroniseA
 
 trait SynchroniseAttendanceToSitsService {
   def synchroniseToSits(checkpoint: AttendanceMonitoringCheckpoint): Boolean
+  def synchroniseToSits(student: StudentMember, academicYear: AcademicYear, missedPoints: Int, updatedBy: User): Boolean
 }
 
 abstract class AbstractSynchroniseAttendanceToSitsService extends SynchroniseAttendanceToSitsService with InitializingBean {
@@ -42,15 +46,23 @@ abstract class AbstractSynchroniseAttendanceToSitsService extends SynchroniseAtt
   private[this] var insertQuery: SynchroniseAttendanceToSitsInsertQuery = _
   private[this] var deleteQuery: SynchroniseAttendanceToSitsDeleteQuery = _
 
+  private[this] var getRowsQuery: SynchroniseAttendanceToSitsGetRowsQuery = _
+  private[this] var updateNotMissedBySequenceQuery: SynchroniseAttendanceToSitsUpdateNotMissedBySequenceQuery = _
+  private[this] var deleteBySequenceQuery: SynchroniseAttendanceToSitsDeleteBySequenceQuery = _
+
   override def afterPropertiesSet(): Unit = {
     existingRowQuery = new SynchroniseAttendanceToSitsExistingRowQuery(sitsDataSource)
     updateNotMissedQuery = new SynchroniseAttendanceToSitsUpdateNotMissedQuery(sitsDataSource)
     sequenceQuery = new SynchroniseAttendanceToSitsCountQuery(sitsDataSource)
     insertQuery = new SynchroniseAttendanceToSitsInsertQuery(sitsDataSource)
     deleteQuery = new SynchroniseAttendanceToSitsDeleteQuery(sitsDataSource)
+
+    getRowsQuery = new SynchroniseAttendanceToSitsGetRowsQuery(sitsDataSource)
+    updateNotMissedBySequenceQuery = new SynchroniseAttendanceToSitsUpdateNotMissedBySequenceQuery(sitsDataSource)
+    deleteBySequenceQuery = new SynchroniseAttendanceToSitsDeleteBySequenceQuery(sitsDataSource)
   }
 
-  def synchroniseToSits(checkpoint: AttendanceMonitoringCheckpoint): Boolean = {
+  override def synchroniseToSits(checkpoint: AttendanceMonitoringCheckpoint): Boolean = {
     val hasExistingMissedPoint: Option[Boolean] = existingRowQuery.executeByNamedParam(JHashMap(
       "universityId" -> checkpoint.student.universityId,
       "checkpointId" -> checkpoint.id,
@@ -119,6 +131,63 @@ abstract class AbstractSynchroniseAttendanceToSitsService extends SynchroniseAtt
       case _ => true
     }
   }
+
+  override def synchroniseToSits(student: StudentMember, academicYear: AcademicYear, missedPoints: Int, updatedBy: User): Boolean = {
+    val existingRows: Seq[StudentAbsenceRow] = getRowsQuery.executeByNamedParam(JHashMap(
+      "universityId" -> student.universityId,
+      "academicYear" -> academicYear.toString,
+    )).asScala.toSeq
+
+    val existingMissedPoints: Int = existingRows.map(_.absences).sum
+
+    if (missedPoints == existingMissedPoints) true // Matching values
+    else if (missedPoints > existingMissedPoints) {
+      // Need to add more rows
+      val expectedInsertedRows = missedPoints - existingMissedPoints
+
+      val departmentCode =
+          Option(student.mostSignificantCourse)
+            .flatMap(_.freshStudentCourseYearDetailsForYear(academicYear))
+            .flatMap(scyd => Option(scyd.enrolmentDepartment))
+            .fold("")(_.code.toUpperCase)
+
+        val courseCode =
+          Option(student.mostSignificantCourse)
+            .flatMap(scd => Option(scd.course))
+            .fold("")(_.code.toUpperCase)
+
+        val updatedByPrsCode =
+          updatedBy match {
+            case FoundUser(u) if u.getDepartmentCode.hasText && u.getWarwickId.hasText => s"${u.getDepartmentCode.toUpperCase}${u.getWarwickId}"
+            case _ => updatedBy.getUserId
+          }
+
+      (existingMissedPoints until missedPoints).map { _ =>
+        val nextSequence = sequenceQuery.executeByNamedParam(JHashMap("universityId" -> student.universityId)).get(0) + 1
+
+        insertQuery.updateByNamedParam(JHashMap(
+          "universityId" -> student.universityId,
+          "sequence" -> f"$nextSequence%03d",
+          "updatedDate" -> new java.sql.Timestamp(DateTime.now.getMillis),
+          "academicYear" -> academicYear.toString,
+          "departmentCode" -> departmentCode,
+          "courseCode" -> courseCode,
+          "updatedBy" -> updatedByPrsCode.take(SynchroniseAttendanceToSitsService.recorderMaxColumnSize),
+          "uploadedDateTime" -> DateTime.now.toString(SynchroniseAttendanceToSitsService.uploadedDateTimeFormat),
+          "checkpointId" -> null,
+        ))
+      }.sum == expectedInsertedRows
+    } else {
+      // Need to update some rows
+      val expectedUpdatedRows = existingMissedPoints - missedPoints
+      existingRows.filter(_.absences == 1).takeRight(expectedUpdatedRows).map { row =>
+        updateNotMissedBySequenceQuery.updateByNamedParam(JHashMap(
+          "universityId" -> row.universityId,
+          "sequence" -> row.sequence,
+        ))
+      }.sum == expectedUpdatedRows
+    }
+  }
 }
 
 /**
@@ -143,13 +212,13 @@ object SynchroniseAttendanceToSitsService {
   val uploadedDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmss")
 
   // find the latest row in the Student Absence (SAB) table in SITS for the student - PK is SAB_STUC, SAB_SEQ2
-  final def GetHighestExistingSequence =
+  final def GetHighestExistingSequenceSql =
     s"""
       select max(SAB_SEQ2) as max_sequence from $sitsSchema.srs_sab
       where SAB_STUC = :universityId
     """
 
-  final def GetExistingRow =
+  final def GetExistingRowSql =
     s"""
       select SAB_UDF5 as missed_point_count from $sitsSchema.srs_sab
       where SAB_STUC = :universityId and SAB_UDFK = :checkpointId
@@ -178,14 +247,14 @@ object SynchroniseAttendanceToSitsService {
       where SAB_STUC = :universityId and SAB_UDFK = :checkpointId
     """
 
-  class SynchroniseAttendanceToSitsCountQuery(ds: DataSource) extends MappingSqlQuery[Int](ds, GetHighestExistingSequence) {
+  class SynchroniseAttendanceToSitsCountQuery(ds: DataSource) extends MappingSqlQuery[Int](ds, GetHighestExistingSequenceSql) {
     declareParameter(new SqlParameter("universityId", Types.VARCHAR))
     compile()
 
     override def mapRow(rs: ResultSet, rowNumber: Int): Int = rs.getInt("max_sequence")
   }
 
-  class SynchroniseAttendanceToSitsExistingRowQuery(ds: DataSource) extends MappingSqlQuery[Boolean](ds, GetExistingRow) {
+  class SynchroniseAttendanceToSitsExistingRowQuery(ds: DataSource) extends MappingSqlQuery[Boolean](ds, GetExistingRowSql) {
     declareParameter(new SqlParameter("universityId", Types.VARCHAR))
     declareParameter(new SqlParameter("checkpointId", Types.VARCHAR))
     compile()
@@ -217,6 +286,59 @@ object SynchroniseAttendanceToSitsService {
     declareParameter(new SqlParameter("checkpointId", Types.VARCHAR))
     compile()
   }
+
+  case class StudentAbsenceRow(universityId: String, sequence: String, absences: Int)
+
+  final def GetRowsQuerySql =
+    s"""
+      select
+        SAB_STUC as university_id,
+        SAB_SEQ2 as sequence_no,
+        SAB_UDF5 as missed_point_count
+      from $sitsSchema.srs_sab
+      where SAB_STUC = :universityId and SAB_AYRC = :academicYear and SAB_UDFK is null
+      order by SAB_STUC, SAB_SEQ2
+    """
+
+  class SynchroniseAttendanceToSitsGetRowsQuery(ds: DataSource) extends MappingSqlQuery[StudentAbsenceRow](ds, GetRowsQuerySql) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): StudentAbsenceRow =
+      StudentAbsenceRow(
+        rs.getString("university_id"),
+        rs.getString("sequence_no"),
+        rs.getInt("missed_point_count")
+      )
+  }
+
+  // update the existing row in the Student Absence (SAB) table
+  final def UpdateSITSSetNotMissedBySequenceSql =
+    s"""
+      update $sitsSchema.srs_sab
+      set SAB_UDF5 = 0
+      where SAB_STUC = :universityId and SAB_SEQ2 = :sequence
+    """
+
+  class SynchroniseAttendanceToSitsUpdateNotMissedBySequenceQuery(ds: DataSource) extends SqlUpdate(ds, UpdateSITSSetNotMissedBySequenceSql) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    declareParameter(new SqlParameter("sequence", Types.VARCHAR))
+    compile()
+  }
+
+  // delete the existing row in the Student Absence (SAB) table
+  final def DeleteFromSITSBySequenceSql =
+    s"""
+      delete from $sitsSchema.srs_sab
+      where SAB_STUC = :universityId and SAB_UDFK = :checkpointId
+    """
+
+  class SynchroniseAttendanceToSitsDeleteBySequenceQuery(ds: DataSource) extends SqlUpdate(ds, DeleteFromSITSBySequenceSql) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    declareParameter(new SqlParameter("sequence", Types.VARCHAR))
+    compile()
+  }
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -229,5 +351,6 @@ class SynchroniseAttendanceToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class SynchroniseAttendanceToSitsSandboxService extends SynchroniseAttendanceToSitsService {
-  def synchroniseToSits(checkpoint: AttendanceMonitoringCheckpoint) = false
+  override def synchroniseToSits(checkpoint: AttendanceMonitoringCheckpoint) = false
+  override def synchroniseToSits(student: StudentMember, academicYear: AcademicYear, missedPoints: Int, updatedBy: User): Boolean = false
 }
