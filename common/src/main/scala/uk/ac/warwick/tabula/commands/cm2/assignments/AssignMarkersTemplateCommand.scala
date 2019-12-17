@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedSet
+import scala.jdk.CollectionConverters._
 
 object AssignMarkersTemplateCommand {
   def apply(assignment: Assignment) = new AssignMarkersTemplateCommandInternal(assignment)
@@ -103,12 +103,15 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
         val row = sheet.createRow(sheet.getLastRowNum + 1)
         row.createCell(0).setCellValue(student.getUserId)
         row.createCell(1).setCellValue(student.getFullName)
+
         val marker = getStudentsMarker(student)
         row.createCell(2).setCellValue(marker.map(_.getFullName).getOrElse(""))
-        row.createCell(3).setCellFormula(
+
+        val markerLookupCell = row.createCell(3)
+        markerLookupCell.setCellFormula(
           "IF(TRIM($C" + (row.getRowNum + 1) + ")<>\"\", VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
         )
-        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
+        markerLookupCell.setCellValue(marker.map(_.getUserId).getOrElse(" "))
 
         if (assignment.showSeatNumbers) {
           assignment.getSeatNumber(student).foreach(row.createCell(4).setCellValue(_))
