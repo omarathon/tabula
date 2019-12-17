@@ -58,6 +58,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
 
     // Introspect the database to ensure that there's a single row with the right info
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
+    jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(1))
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row should be (Map(
@@ -74,7 +75,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
       "SAB_UDF2" -> "CS",
       "SAB_UDF3" -> "UCAS-R500",
       "SAB_UDF4" -> "IN0672089",
-      "SAB_UDF5" -> null,
+      "SAB_UDF5" -> "1",
       "SAB_UDF6" -> null,
       "SAB_UDF7" -> "20180919T153911",
       "SAB_UDF8" -> null,
@@ -122,6 +123,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
     service.synchroniseToSits(checkpoint2) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(2))
+    jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(2))
     jdbcTemplate.queryForObject[String]("select max(sab_seq2) from srs_sab") should be (Some("002"))
   }
 
@@ -134,6 +136,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
     service.synchroniseToSits(checkpoint) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
+    jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(1))
 
     checkpoint.state = AttendanceState.MissedAuthorised
     checkpoint.updatedDate = DateTime.now
@@ -141,7 +144,8 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
 
     service.synchroniseToSits(checkpoint) should be (true)
 
-    jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(0))
+    jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
+    jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(0))
   }
 
   // Because we delete rows as the first thing, calling synchronise multiple times should still end up with a single row
@@ -158,6 +162,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
     service.synchroniseToSits(checkpoint) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
+    jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(1))
 
     // Shouldn't increment the sequence unnecessarily
     jdbcTemplate.queryForObject[String]("select max(sab_seq2) from srs_sab") should be (Some("001"))
