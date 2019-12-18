@@ -1451,9 +1451,9 @@
     <#elseif r.tcaSubmissionProcessing>
         Turnitin submission created <@fmt.date date=r.createdDate /> is being processed by Turnitin.
     <#elseif r.tcaUploadComplete>
-      Turnitin submission created <@fmt.date date=r.createdDate /> has been sent to Turnitin, and we are awaiting the report.
+      Turnitin submission created <@fmt.date date=r.createdDate /> has been sent to Turnitin and is awaiting a report.
     <#elseif r.tcaSubmissionCreated>
-      Turnitin submission created <@fmt.date date=r.createdDate /> is awaiting file upload to Turnitin.
+      Turnitin submission created <@fmt.date date=r.createdDate />. Awaiting file upload to Turnitin.
         <#if user.sysadmin>
           <#assign submitUrl><@routes.cm2.turnitinTcaResubmit assignment attachment /></#assign>
           <@f.form id="turnitinTcaResubmit" method="post" action=submitUrl>

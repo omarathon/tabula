@@ -221,9 +221,9 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
 
   override def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Future[Unit] = {
 
-    val originalityReport = persistMetadataToOriginalityReport(tcaSubmission, fileAttachment)
+    val originalityReportRefreshed = persistMetadataToOriginalityReport(tcaSubmission, fileAttachment)
 
-    (for (tca <- Option(tcaSubmission).filterNot(_.status == TcaSubmissionStatus.Error); or <- originalityReport) yield {
+    (for (tca <- Option(tcaSubmission).filterNot(_.status == TcaSubmissionStatus.Error); or <- originalityReportRefreshed) yield {
       Future {
         val submission = or.attachment.submissionValue.submission
         val assignment = submission.assignment
