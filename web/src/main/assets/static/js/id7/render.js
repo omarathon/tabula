@@ -1,5 +1,6 @@
 /* eslint-env browser */
 require('@universityofwarwick/id7/dist/js/id7-bundle');
+require('@universityofwarwick/statuspage-widget/dist/main');
 
 import moment from 'moment-timezone'; // eslint-disable-line import/first,import/newline-after-import
 window.moment = moment;

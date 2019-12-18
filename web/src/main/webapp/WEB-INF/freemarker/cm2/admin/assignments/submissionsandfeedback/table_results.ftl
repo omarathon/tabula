@@ -319,34 +319,35 @@
                     <#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
                     <#else><span class="label label-info">Published</span>
                     </#if>
-                    <#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
-                    <#if queueSitsUploadEnabled>
+                  </#if>
+
+                  <#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
+                  <#if queueSitsUploadEnabled>
                       <#if enhancedFeedback.feedbackForSits??>
-                        <#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
-                        <#assign sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
-                        (feedbackSitsStatus.actualMarkLastUploaded!0) != (student.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.enhancedFeedback.feedback.latestGrade!"")
-                        ) />
-                        <#if feedbackSitsStatus.code == "failed">
-                          <a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
-														<span tabindex="0" style="cursor: pointer;" class="label label-danger use-tooltip"
-                                  title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
-														${feedbackSitsStatus.description}
-														</span><#--
-													--></a>
-                        <#elseif sitsWarning>
-                          <span tabindex="0" class="label label-danger use-tooltip"
-                                title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
-												${feedbackSitsStatus.description}
-													</span>
-                        <#elseif feedbackSitsStatus.code == "successful">
-                          <span class="label label-success">${feedbackSitsStatus.description}</span>
-                        <#else>
-                          <span class="label label-info">${feedbackSitsStatus.description}</span>
-                        </#if>
+                          <#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
+                          <#assign sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
+                          (feedbackSitsStatus.actualMarkLastUploaded!0) != (student.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.enhancedFeedback.feedback.latestGrade!"")
+                          ) />
+                          <#if feedbackSitsStatus.code == "failed">
+                            <a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
+                          <span tabindex="0" style="cursor: pointer;" class="label label-danger use-tooltip"
+                                title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
+                          ${feedbackSitsStatus.description}
+                          </span><#--
+                        --></a>
+                          <#elseif sitsWarning>
+                            <span tabindex="0" class="label label-danger use-tooltip"
+                                  title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
+                      ${feedbackSitsStatus.description}
+                        </span>
+                          <#elseif feedbackSitsStatus.code == "successful">
+                            <span class="label label-success">${feedbackSitsStatus.description}</span>
+                          <#else>
+                            <span class="label label-info">${feedbackSitsStatus.description}</span>
+                          </#if>
                       <#else>
                         <span class="label label-info">Not queued for SITS upload</span>
                       </#if>
-                    </#if>
                   </#if>
                 </#if>
               </td>

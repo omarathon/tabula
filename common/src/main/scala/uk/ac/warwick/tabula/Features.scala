@@ -95,7 +95,7 @@ abstract class Features {
   @Value("${features.attendanceMonitoring:true}") var attendanceMonitoring: Boolean = defaults.attendanceMonitoring
   @Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType: Boolean = defaults.attendanceMonitoringMeetingPointType
   @Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport: Boolean = defaults.attendanceMonitoringReport
-  @Value("${features.attendanceMonitoring.report.realTime:false}") var attendanceMonitoringRealTimeReport: Boolean = defaults.attendanceMonitoringRealTimeReport
+  @Value("${features.attendanceMonitoring.report.realTime:true}") var attendanceMonitoringRealTimeReport: Boolean = defaults.attendanceMonitoringRealTimeReport
   @Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote: Boolean = defaults.attendanceMonitoringNote
   @Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
   @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
@@ -249,7 +249,7 @@ class FeaturesMessage {
   @BeanProperty var attendanceMonitoring = true
   @BeanProperty var attendanceMonitoringMeetingPointType = true
   @BeanProperty var attendanceMonitoringReport = true
-  @BeanProperty var attendanceMonitoringRealTimeReport = false
+  @BeanProperty var attendanceMonitoringRealTimeReport = true
   @BeanProperty var attendanceMonitoringNote = true
   @BeanProperty var attendanceMonitoringSmallGroupPointType = true
   @BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true

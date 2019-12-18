@@ -7,7 +7,7 @@
   <#include "_head.ftl" />
 </head>
 <#assign errorToken=generateUUID()>
-<body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}" data-error-token=${errorToken}>
+<body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}" data-error-token="${errorToken}">
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">
   <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -65,6 +65,7 @@
     <div class="id7-utility-masthead">
       <nav class="id7-utility-bar">
         <ul>
+          <li><a href="https://status.warwick.ac.uk/" target="_blank">System status</a></li>
           <#if IS_SSO_PROTECTED!true>
             <#if user?? && user.loggedIn>
               <li><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
@@ -347,6 +348,12 @@
         </@modal.footer>
     </@modal.wrapper>
 </@modal.modal>
+
+<#-- StatusPage embed -->
+<div class="statuspage-embed-container"
+     data-api-base="https://status.warwick.ac.uk/api"
+     data-components='["g8s8knp0fqrs","6ykwbzp90vfy","86rpl0x9kzxz","lvy1tzdrjqfd","ztf99mv1s1s2","xgs4ymtpsnmr","yqs43pmx88jf","yrj3mfjy3nz8","nf4ymvwshxj1"]'
+></div>
 </body>
 </html>
 </#escape>

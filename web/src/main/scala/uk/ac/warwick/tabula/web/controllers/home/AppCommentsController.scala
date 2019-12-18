@@ -6,12 +6,13 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.home.{AppCommentCommand, AppCommentCommandRequest}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, UserSettingsService}
 
 import scala.concurrent.Future
 
@@ -21,6 +22,8 @@ class AppCommentsController extends BaseController with AutowiringModuleAndDepar
 
   validatesSelf[SelfValidating]
 
+  var settingsService: UserSettingsService = Wire.auto[UserSettingsService]
+
   @ModelAttribute("command")
   def command = AppCommentCommand(user)
 
@@ -29,10 +32,15 @@ class AppCommentsController extends BaseController with AutowiringModuleAndDepar
 
   @RequestMapping(method = Array(GET, HEAD))
   def form(@ModelAttribute("command") cmd: Appliable[Future[JBoolean]]): Mav = {
-    val hasDeptAdmin = Option(user).exists(_.loggedIn) &&
-      moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption).isDefined
+    val maybeUser = Option(user).toSeq.filter(_.loggedIn)
+    val deptAdmins = maybeUser.flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode).toSeq.flatMap(_.owners.users))
+    val atLeastOneEmailableDeptAdmin = deptAdmins.exists(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
+    val homeDept = maybeUser.flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode).toSeq.map(d => d.name)).headOption
+
     Mav("home/comments",
-      "hasDeptAdmin" -> hasDeptAdmin
+      "hasDeptAdmin" -> deptAdmins.nonEmpty,
+      "atLeastOneEmailableDeptAdmin" -> atLeastOneEmailableDeptAdmin,
+      "homeDept" -> homeDept.getOrElse("unknown")
     )
   }
 

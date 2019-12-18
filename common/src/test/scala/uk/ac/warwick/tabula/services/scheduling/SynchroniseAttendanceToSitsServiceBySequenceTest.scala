@@ -5,11 +5,11 @@ import org.junit.After
 import org.springframework.jdbc.core.{JdbcTemplate => JavaJdbcTemplate}
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import org.springframework.scala.jdbc.core.JdbcTemplate
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.userlookup.User
 
-class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
+class SynchroniseAttendanceToSitsServiceBySequenceTest extends TestBase with Mockito {
 
   val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-student-absence.sql").build()
   val jdbcTemplate: JdbcTemplate = new JdbcTemplate(new JavaJdbcTemplate(sits))
@@ -22,15 +22,11 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   SynchroniseAttendanceToSitsService.sitsSchema = "public"
   service.afterPropertiesSet()
 
-  val scheme = new AttendanceMonitoringScheme
-  scheme.academicYear = AcademicYear.starting(2018)
-  scheme.department = Fixtures.department("its")
-
-  val point: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme)
+  val academicYear: AcademicYear = AcademicYear.starting(2018)
 
   val student: StudentMember = Fixtures.student("1324597", courseDepartment = Fixtures.department("cs"))
   student.mostSignificantCourse.course = Fixtures.course("UCAS-R500")
-  student.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = scheme.academicYear
+  student.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
   val now: DateTime = new DateTime(2018, DateTimeConstants.SEPTEMBER, 19, 15, 39, 11, 293)
 
@@ -49,12 +45,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
     }
 
   @Test def unauthorised(): Unit = inFixture {
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     // Introspect the database to ensure that there's a single row with the right info
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
@@ -90,7 +81,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
       "SAB_UDFH" -> null,
       "SAB_UDFI" -> null,
       "SAB_UDFJ" -> null,
-      "SAB_UDFK" -> "id1",
+      "SAB_UDFK" -> null,
       "SAB_NOTE" -> null
     ))
   }
@@ -98,29 +89,14 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def noOpDelete(): Unit = inFixture {
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(0))
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.Attended)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 0, currentUser.apparentUser) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(0))
   }
 
   @Test def sequenceIsIncremented(): Unit = inFixture {
-    val checkpoint1 = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint1.id = "id1"
-    checkpoint1.updatedDate = DateTime.now.minusDays(1)
-    checkpoint1.updatedBy = currentUser.userId
-
-    val checkpoint2 = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint2.id = "id2"
-    checkpoint2.updatedDate = DateTime.now
-    checkpoint2.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint1) should be (true)
-    service.synchroniseToSits(checkpoint2) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
+    service.synchroniseToSits(student, academicYear, 2, currentUser.apparentUser) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(2))
     jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(2))
@@ -128,21 +104,12 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   }
 
   @Test def authorisedAfterUnauthorised(): Unit = inFixture {
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now.minusDays(1)
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
     jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(1))
 
-    checkpoint.state = AttendanceState.MissedAuthorised
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 0, currentUser.apparentUser) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
     jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(0))
@@ -150,16 +117,11 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
 
   // Because we delete rows as the first thing, calling synchronise multiple times should still end up with a single row
   @Test def duplicateCallsDontCauseDuplicateRows(): Unit = inFixture {
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now.minusDays(1)
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
-    service.synchroniseToSits(checkpoint) should be (true)
-    service.synchroniseToSits(checkpoint) should be (true)
-    service.synchroniseToSits(checkpoint) should be (true)
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     jdbcTemplate.queryForObject[Int]("select count(*) from srs_sab") should be (Some(1))
     jdbcTemplate.queryForObject[Int]("select sum(cast(sab_udf5 as int)) from srs_sab") should be (Some(1))
@@ -169,12 +131,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   }
 
   @Test def handlesNotFoundUsercode(): Unit = inFixture {
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = "my-long-ass-extuser-name-that-will-get-truncated"
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, new User("my-long-ass-extuser-name-that-will-get-truncated")) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF4") should be ("my-long-ass-ext")
@@ -183,12 +140,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesUsercodeWithNoUniversityId(): Unit = inFixture {
     currentUser.apparentUser.setWarwickId(null)
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF4") should be ("cuscav")
@@ -197,12 +149,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesUsercodeWithNoDepartmentCode(): Unit = inFixture {
     currentUser.apparentUser.setDepartmentCode(null)
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF4") should be ("cuscav")
@@ -211,12 +158,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesMissingCourse(): Unit = inFixture {
     student.mostSignificantCourse.course = null
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF2") should be ("CS")
@@ -226,12 +168,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesMissingMostSignificantSCD(): Unit = inFixture {
     student.mostSignificantCourse = null
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF2") should be ("")
@@ -241,12 +178,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesMissingEnrolmentDepartment(): Unit = inFixture {
     student.mostSignificantCourse.latestStudentCourseYearDetails.enrolmentDepartment = null
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF2") should be ("")
@@ -256,12 +188,7 @@ class SynchroniseAttendanceToSitsServiceTest extends TestBase with Mockito {
   @Test def handlesMissingSCYD(): Unit = inFixture {
     student.mostSignificantCourse.removeStudentCourseYearDetails(student.mostSignificantCourse.latestStudentCourseYearDetails)
 
-    val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point, student, AttendanceState.MissedUnauthorised)
-    checkpoint.id = "id1"
-    checkpoint.updatedDate = DateTime.now
-    checkpoint.updatedBy = currentUser.userId
-
-    service.synchroniseToSits(checkpoint) should be (true)
+    service.synchroniseToSits(student, academicYear, 1, currentUser.apparentUser) should be (true)
 
     val row = jdbcTemplate.queryForMap("select * from srs_sab where sab_stuc = ? and sab_seq2 = ?", "1324597", "001")
     row("SAB_UDF2") should be ("")

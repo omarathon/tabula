@@ -192,28 +192,16 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
     }
 
     val submitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get submitted users") {
-      val disabilityLookup: Map[User, Disability] = benchmarkTask("Lookup disabilities for submissions") {
-        val users =
-          usercodesWithSubmissionOrFeedback
-            .flatMap { usercode =>
-              val user = moduleMembers.find(u => u.getUserId == usercode).getOrElse(userLookup.getUserByUserId(usercode))
-              val submission = enhancedSubmissions.find(_.submission.usercode == usercode)
+      val disabilityLookup: Map[String, Disability] = benchmarkTask("Lookup disabilities for submissions") {
 
-              if (!user.isFoundUser && submission.nonEmpty)
-                user.setWarwickId(submission.head.submission._universityId)
+        val users = usercodesWithSubmissionOrFeedback.filter { usercode =>
+          enhancedSubmissions.exists(s => s.submission.usercode == usercode && s.submission.useDisability)
+        }
 
-              if (submission.exists(_.submission.useDisability))
-                Some(user)
-              else
-                None
-            }
-
-        profileService.getAllMembersByUsers(users)
-          .flatMap { case (user, member) => member match {
-            case student: StudentMember => student.disability.map(user -> _)
-            case _ => None
-          }
-          }
+        profileService.getAllMembersWithUserIds(users, activeOnly = false)
+          .collect{ case student: StudentMember => student.disability.map(d => student.universityId -> d)  }
+          .flatten
+          .toMap
       }
 
       for (usercode <- usercodesWithSubmissionOrFeedback) yield {
@@ -260,7 +248,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           stages = progress.stages,
           coursework = coursework,
           assignment = assignment,
-          disability = disabilityLookup.get(user)
+          disability = disabilityLookup.get(user.getWarwickId)
         )
       }
     }

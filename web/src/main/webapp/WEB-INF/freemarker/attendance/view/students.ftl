@@ -7,7 +7,7 @@
     <div class="pull-right send-to-sits">
       <#if features.attendanceMonitoringRealTimeReport>
         <#assign introText>
-          <p>When a monitoring point is recorded as ‘Missed (unathorised)’, this is immediately uploaded to SITS e:Vision.
+          <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS e:Vision.
             Only unauthorised missed points are uploaded; authorised missed points are not.</p>
 
           <p>If the attendance/fulfilment of the point is subsequently changed to anything other than ‘Missed (unauthorised)’,

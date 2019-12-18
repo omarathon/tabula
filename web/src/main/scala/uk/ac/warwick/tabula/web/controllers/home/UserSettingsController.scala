@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -15,6 +14,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserSettingsSe
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.userlookup.User
 
 @Controller
 class UserSettingsController extends BaseController {
@@ -43,9 +43,25 @@ class UserSettingsController extends BaseController {
 
   @RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
   def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors: Errors, success: Boolean = false): Mav = {
+    val deptsUserIsAdminOn = moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+    val mustNotBeCurrentUser: User => Boolean = u => u.getUserId != user.userId
+
+    val deptsWithNoOtherContacts = deptsUserIsAdminOn.map(d => {
+      (d.name, d.owners.users.filter(mustNotBeCurrentUser))
+    }).map { case (departmentName, otherAdmins) =>
+    (
+        departmentName,
+        otherAdmins.map(u => userSettingsService
+          .getByUserId(u.getUserId)
+          .map(_.deptAdminReceiveStudentComments))
+          .map(_.getOrElse(true)).exists(identity[Boolean])
+      )
+    }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
+
     Mav("usersettings/form",
       "isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
-      "isDepartmentalAdmin" -> moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+      "isDepartmentalAdmin" -> deptsUserIsAdminOn.nonEmpty,
+      "deptsWithNoOtherContacts" -> deptsWithNoOtherContacts,
       "success" -> success
     )
   }

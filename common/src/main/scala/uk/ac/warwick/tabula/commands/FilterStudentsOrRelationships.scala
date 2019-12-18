@@ -66,8 +66,8 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   )
 
   def registeredModulesRestriction(year: AcademicYear): Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
-    Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
-    Seq(modules.asScala, Seq(year)),
+    Seq("moduleRegistration.module", "moduleRegistration.academicYear", "moduleRegistration.deleted"),
+    Seq(modules.asScala, Seq(year), Seq(false)),
     getAliasPaths("moduleRegistration"): _*
   )
 

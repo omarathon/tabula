@@ -78,6 +78,10 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def courseworkShowEmptyModules_=(showEmptyModules: Boolean): Unit = settings += (Settings.CourseworkShowEmptyModules -> showEmptyModules)
 
+  def deptAdminReceiveStudentComments: Boolean = getBooleanSetting(Settings.ReceiveStudentComments).getOrElse(DefaultReceiveStudentComments)
+
+  def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> receiveStudentComments)
+
   def string(key: String): String = getStringSetting(key).orNull
 
   def this(userId: String) = {
@@ -105,6 +109,7 @@ object UserSettings {
   val DefaultProfilesDefaultView = "gadget"
 
   val DefaultCourseworkShowEmptyModules = true
+  val DefaultReceiveStudentComments = true
 
   object Settings {
     val AlertsSubmission = "alertsSubmission"
@@ -116,6 +121,7 @@ object UserSettings {
     val ActiveDepartment = "activeDepartment"
     val ActiveAcademicYear = "activeAcademicYear"
     val CourseworkShowEmptyModules = "courseworkShowEmptyModules"
+    val ReceiveStudentComments = "receiveStudentComments"
 
     object RegisterPdf {
       val ShowPhotos = "registerPdfShowPhotos"
@@ -136,11 +142,13 @@ object UserSettings {
     val StringForcedTrue = "t"
     val StringForcedFalse = "f"
 
+    @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def forceBooleanString(value: Boolean): String = value match {
       case true => StringForcedTrue
       case false => StringForcedFalse
     }
 
+    @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def fromForceBooleanString(value: String): Boolean = value match {
       case StringForcedTrue => true
       case StringForcedFalse => false

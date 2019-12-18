@@ -47,9 +47,10 @@
     "webpack-stream": "5.2.1"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.8.2",
-    "@universityofwarwick/id7": "2.4.4",
-    "@universityofwarwick/serverpipe": "1.2.0",
+    "@fortawesome/fontawesome-free": "5.12.0",
+    "@universityofwarwick/id7": "2.5.5",
+    "@universityofwarwick/serverpipe": "1.2.1",
+    "@universityofwarwick/statuspage-widget": "0.0.2",
     "core-js": "3.1.4",
     "fixed-header-table": "1.3.0",
     "jquery": "3.4.1",
@@ -63,7 +64,7 @@
     "whatwg-fetch": "3.0.0"
   },
   "optionalDependencies": {
-    "@fortawesome/fontawesome-pro": "5.8.2"
+    "@fortawesome/fontawesome-pro": "5.12.0"
   },
   "scripts": {
     "watch": "NODE_ENV=development webpack --mode development --watch",

@@ -98,15 +98,17 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
         val agentNameCell = createUnprotectedCell(workbook, row, 3) // unprotect cell for the dropdown agent name
         agentNameCell.setCellValue(agent.displayName)
 
-        row.createCell(4).setCellFormula(
+        val agentUsercodeCell = row.createCell(4)
+        agentUsercodeCell.setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
         )
-        formulaEvaluator.evaluateFormulaCell(row.getCell(4))
+        agentUsercodeCell.setCellValue(usercodes.getOrElse(agent.entityId, " "))
 
-        row.createCell(5).setCellFormula(
+        val agentEntityIdCell = row.createCell(5)
+        agentEntityIdCell.setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
         )
-        formulaEvaluator.evaluateFormulaCell(row.getCell(5))
+        agentEntityIdCell.setCellValue(agent.entityId)
       }
     }
 
@@ -119,15 +121,17 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
       createUnprotectedCell(workbook, row, 3) // unprotect cell for the dropdown agent name
 
-      row.createCell(4).setCellFormula(
+      val agentUsercodeCell = row.createCell(4)
+      agentUsercodeCell.setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
       )
-      formulaEvaluator.evaluateFormulaCell(row.getCell(4))
+      agentUsercodeCell.setCellValue(" ")
 
-      row.createCell(5).setCellFormula(
+      val agentEntityIdCell = row.createCell(5)
+      agentEntityIdCell.setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
       )
-      formulaEvaluator.evaluateFormulaCell(row.getCell(5))
+      agentEntityIdCell.setCellValue(" ")
     }
 
     formatWorkbook(workbook)
