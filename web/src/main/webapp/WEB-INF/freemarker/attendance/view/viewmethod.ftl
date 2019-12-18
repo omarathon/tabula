@@ -10,7 +10,7 @@
     <ul>
       <li><h3><a href="<@routes.attendance.viewStudents department academicYear />">View by student<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department)><#if features.attendanceMonitoringRealTimeReport></a>
           <#assign introText>
-            <p>When a monitoring point is recorded as ‘Missed (unathorised)’, this is immediately uploaded to SITS e:Vision.
+            <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS e:Vision.
               Only unauthorised missed points are uploaded; authorised missed points are not.</p>
 
             <p>If the attendance/fulfilment of the point is subsequently changed to anything other than ‘Missed (unauthorised)’,

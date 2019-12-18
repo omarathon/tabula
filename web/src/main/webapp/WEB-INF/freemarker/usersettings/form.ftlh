@@ -83,13 +83,13 @@
         <p></p>
         <@bs3form.checkbox>
             <@f.checkbox path="deptAdminReceiveStudentComments" />
-            Students who have requested assistance from a departmental admin
+            Student requests for assistance from a Departmental Administrator
         </@bs3form.checkbox>
 
         <#list deptsWithNoOtherContacts as item>
           <div class="alert alert-warning" role="alert">
             <strong>Important:</strong> You're the last departmental contact in ${item}.
-            If you opt out, students will be unable to request department assistance from within Tabula.
+            If you opt out, students will be unable to request departmental assistance from within Tabula.
           </div>
         </#list>
     </#if>

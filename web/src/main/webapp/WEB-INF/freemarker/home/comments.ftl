@@ -87,9 +87,8 @@
       </div>
 
       <#if hasDeptAdmin>
-
-        <h2>Contact your administrator</h2>
-        <p>If you're having problems with Tabula, use the form below to contact your department's Tabula administrator.</p>
+        <h2>Contact your Tabula Departmental Administrator</h2>
+        <p>If you’re having problems with Tabula, use the form below to contact your Departmental Administrator.</p>
 
         <#if !atLeastOneEmailableDeptAdmin>
           <div class="panel panel-danger">
@@ -99,7 +98,7 @@
             <div class="panel-body">
               <!-- No dept. admins *OR* every dept. admin has opted out of receiving student comms -->
               <p>
-                Sorry, the <strong>${homeDept}</strong> does not accept feedback about Tabula via this page.
+                Sorry, this department does not accept requests for assistance from within Tabula.
               </p>
               <p>Please contact your department directly.</p>
             </div>
