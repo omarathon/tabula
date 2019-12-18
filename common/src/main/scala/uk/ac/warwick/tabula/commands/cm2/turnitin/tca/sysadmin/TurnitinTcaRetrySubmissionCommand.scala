@@ -20,11 +20,11 @@ object TurnitinTcaRetrySubmissionCommand {
 
   def apply(assignment: Assignment, attachment: FileAttachment, user: User) =
     new TurnitinTcaRetrySubmissionCommandInternal(assignment, attachment, user)
-  with ComposableCommand[Result]
-  with TurnitinTcaRetrySubmissionCommandPermissions
-  with TurnitinTcaRetrySubmissionCommandState
-  with TurnitinTcaRetrySubmissionDescription
-  with AutowiringTurnitinTcaServiceComponent
+      with ComposableCommand[Result]
+      with TurnitinTcaRetrySubmissionCommandPermissions
+      with TurnitinTcaRetrySubmissionCommandState
+      with TurnitinTcaRetrySubmissionDescription
+      with AutowiringTurnitinTcaServiceComponent
 
 }
 
