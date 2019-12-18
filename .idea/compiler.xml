@@ -14,6 +14,12 @@
         </processorPath>
         <module name="workspace.tabula.common.main" />
       </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="bamboo-specs" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="bamboo-specs" target="1.8" />
