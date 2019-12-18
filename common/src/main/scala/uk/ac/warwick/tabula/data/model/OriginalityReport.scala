@@ -87,6 +87,10 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   def isTcaReport: Boolean = Option(tcaSubmission).isDefined
 
+  def tcaSubmissionCreated: Boolean = tcaSubmissionStatus == TcaSubmissionStatus.Created
+
+  def tcaSubmissionProcessing: Boolean = tcaSubmissionStatus == TcaSubmissionStatus.Processing
+
   def tcaUploadComplete: Boolean = tcaSubmissionStatus == TcaSubmissionStatus.Complete
 
   def tcaSimilarityCheckComplete: Boolean = Option(similarityLastGenerated).isDefined

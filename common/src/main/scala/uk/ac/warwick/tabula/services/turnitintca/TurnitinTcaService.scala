@@ -45,8 +45,9 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
+  def getSubmissionInfo(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
   def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
-  def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit]
+  def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment] = None): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
   def listWebhooks: Future[Seq[TcaWebhook]]
@@ -147,6 +148,45 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     }
   }
 
+  override def getSubmissionInfo(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]] = {
+    Future {
+
+      require(fileAttachment.originalityReport.tcaSubmission != null)
+
+      val req = tcaRequest(RequestBuilder.get(s"${tcaConfiguration.baseUri}/submissions/${fileAttachment.originalityReport.tcaSubmission}"))
+        .addHeader("Content-Type", s"application/json")
+        .build()
+
+      val handler: ResponseHandler[Either[String, TcaSubmission]]  = ApacheHttpClientUtils.jsonResponseHandler { json =>
+
+        val jsResult = json.validate[TcaSubmission](TcaSubmission.readsTcaSubmission).map(Right.apply).orElse(
+          json.validate[TcaError](TcaError.readsTcaError).map(Left.apply)
+        )
+
+        jsResult.fold[Either[String, TcaSubmission]](
+          invalid => {
+            val message = s"Error parsing response when getting TCA submission info: $invalid\nResponse was: $json"
+            logger.error(message)
+            Left(message)
+          },
+          apiResponse => apiResponse.fold(
+            error => Left(error.message),
+            tcaSubmission => Right(tcaSubmission)
+          )
+        )
+      }
+
+      Try(httpClient.execute(req, handler)).fold(
+        t => {
+          val message = s"Error when attempting to get TCA submission info for: ${fileAttachment.id}"
+          logger.error(message, t)
+          Left(message)
+        },
+        identity
+      )
+    }
+  }
+
   override def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]] = Future {
     require(fileAttachment.originalityReport.tcaSubmission == tcaSubmission.id)
 
@@ -179,20 +219,11 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     )
   }
 
-  override def requestSimilarityReport(tcaSubmission: TcaSubmission): Future[Unit] = {
-    val originalityReport = originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
+  override def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Future[Unit] = {
 
-    // persist metadata
-    originalityReport.foreach(or => {
-      or.tcaSubmissionStatus = tcaSubmission.status
-      or.errorCode = tcaSubmission.errorCode.orNull
-      or.characterCount = tcaSubmission.characterCount
-      or.pageCount = tcaSubmission.pageCount
-      or.wordCount = tcaSubmission.wordCount
-      originalityReportService.saveOrUpdate(or)
-    })
+    val originalityReportRefreshed = persistMetadataToOriginalityReport(tcaSubmission, fileAttachment)
 
-    (for (tca <- Option(tcaSubmission).filterNot(_.status == TcaSubmissionStatus.Error); or <- originalityReport) yield {
+    (for (tca <- Option(tcaSubmission).filterNot(_.status == TcaSubmissionStatus.Error); or <- originalityReportRefreshed) yield {
       Future {
         val submission = or.attachment.submissionValue.submission
         val assignment = submission.assignment
@@ -294,6 +325,25 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
       or.similarityLastGenerated = new DateTime(tcaSimilarityReport.generated.toInstant.toEpochMilli)
       or.reportReceived = true
       originalityReportService.saveOrUpdate(or)
+    })
+
+    originalityReport
+  }
+
+  private def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {
+
+    val originalityReport = fileAttachment.map(_.originalityReport).orElse(
+      originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
+    )
+
+    originalityReport.foreach(or =>  {
+      or.tcaSubmissionStatus = tcaSubmission.status
+      or.errorCode = tcaSubmission.errorCode.orNull
+      or.characterCount = tcaSubmission.characterCount
+      or.pageCount = tcaSubmission.pageCount
+      or.wordCount = tcaSubmission.wordCount
+      originalityReportService.saveOrUpdate(or)
+
     })
 
     originalityReport
