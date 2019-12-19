@@ -56,7 +56,7 @@
                 <label>Seat</label>
               </div>
             </#if>
-            <#assign feedbackFieldColumnWidth=(feedbackColumnsWidth / assignment.feedbackFields?size)?floor />
+            <#assign feedbackFieldColumnWidth=(feedbackColumnsWidth / [1, assignment.feedbackFields?size]?max)?floor />
             <div class="col-md-2">
               <label>Mark</label>
             </div>
