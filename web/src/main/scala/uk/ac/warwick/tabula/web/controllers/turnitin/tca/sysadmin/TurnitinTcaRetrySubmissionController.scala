@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.services.turnitintca.AutowiringTurnitinTcaServiceCom
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
-
   @Profile(Array("turnitinTca"))
   @Controller
   @RequestMapping(Array("/${cm2.prefix}/sysadmin/assignments/{assignment}/turnitin/tca-resubmit/{attachment}"))

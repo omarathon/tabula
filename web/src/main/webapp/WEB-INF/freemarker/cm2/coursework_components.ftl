@@ -1452,6 +1452,12 @@
         Turnitin submission created <@fmt.date date=r.createdDate /> is being processed by Turnitin.
     <#elseif r.tcaUploadComplete>
       Turnitin submission created <@fmt.date date=r.createdDate /> has been sent to Turnitin, and we are awaiting the report.
+      <#if user.sysadmin>
+          <#assign submitUrl><@routes.cm2.turnitinTcaRetryReport assignment attachment /></#assign>
+          <@f.form id="turnitinTcaRetryReport" method="post" action=submitUrl>
+            <input type="submit" value="Re-request similarity report" class="btn btn-primary" data-loading-text="Requesting&hellip;" autocomplete="off">
+          </@f.form>
+      </#if>
     <#elseif r.tcaSubmissionCreated>
       Turnitin submission created <@fmt.date date=r.createdDate /> is awaiting file upload to Turnitin.
         <#if user.sysadmin>
