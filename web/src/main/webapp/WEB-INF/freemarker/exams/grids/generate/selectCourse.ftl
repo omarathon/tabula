@@ -452,6 +452,12 @@
           $('.block').show();
         }
       });
+
+      if ($('.block input:checked').length) {
+        $('input[name=gridScope][value=block]').prop('checked', true).trigger('change');
+      } else if ($('.level input:checked').length) {
+        $('input[name=gridScope][value=level]').prop('checked', true).trigger('change');
+      }
       </#if>
 
     })
