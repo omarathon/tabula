@@ -1,6 +1,6 @@
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
-<#if newRecord || canEditWorkflowType>
+<#if newRecord || canEditWorkflowType || !(workflow??)>
   <@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
     <@f.select path="workflowType" class="form-control workflow-modification" >
       <option value="" disabled selected></option>
