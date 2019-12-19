@@ -1416,12 +1416,14 @@
   <#assign similarityClass><#compress>
     <#if r.hasTcaError>4
     <#elseif r.similarity??>${r.similarity}
-    <#elseif r.tcaUploadComplete>pending
+    <#elseif r.tcaUploadComplete || r.tcaSubmissionProcessing || r.tcaSubmissionCreated>pending
     </#if>
   </#compress></#assign>
 
   <span id="tool-tip-${attachment.id}" class="similarity-${similarityClass} similarity-tooltip">
-    <#if r.overlap??>${r.overlap}% similarity<#elseif r.tcaUploadComplete>Pending results<#elseif r.errorCode??>Unable to check for plagarism</#if>
+    <#if r.overlap??>${r.overlap}% similarity
+    <#elseif r.tcaUploadComplete || r.tcaSubmissionProcessing || r.tcaSubmissionCreated>Pending results
+    <#elseif r.errorCode??>Unable to check for plagarism</#if>
   </span>
   <div id="tip-content-${attachment.id}" class="hide">
     <p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
@@ -1440,10 +1442,24 @@
       <p>
         <#if r.tcaReport>
             <a target="turnitin-viewer" href="<@routes.cm2.turnitinTcaReport assignment attachment />">View full report</a>
-        <#else>
+        <#elseif r.turnitinId?has_content>
             <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+        <#else>
+            Report no longer available.  Please contact the Tabula team if you need any further information <a href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>
         </#if>
       </p>
+    <#elseif r.tcaSubmissionProcessing>
+        Turnitin submission created <@fmt.date date=r.createdDate /> is being processed by Turnitin.
+    <#elseif r.tcaUploadComplete>
+      Turnitin submission created <@fmt.date date=r.createdDate /> has been sent to Turnitin, and we are awaiting the report.
+    <#elseif r.tcaSubmissionCreated>
+      Turnitin submission created <@fmt.date date=r.createdDate /> is awaiting file upload to Turnitin.
+        <#if user.sysadmin>
+          <#assign submitUrl><@routes.cm2.turnitinTcaResubmit assignment attachment /></#assign>
+          <@f.form id="turnitinTcaResubmit" method="post" action=submitUrl>
+            <input type="submit" value="Resubmit" class="btn btn-primary" data-loading-text="Resubmitting&hellip;" autocomplete="off">
+          </@f.form>
+        </#if>
     </#if>
   </div>
   <script type="text/javascript" nonce="${nonce()}">
@@ -1451,6 +1467,7 @@
       $("#tool-tip-${attachment.id}").popover({
         placement: 'right',
         container: 'body',
+        sanitize: false,
         html: true,
         content: function () {
           return $('#tip-content-${attachment.id}').html();
