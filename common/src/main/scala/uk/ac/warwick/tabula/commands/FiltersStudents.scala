@@ -68,7 +68,7 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
   def department: Department
 
   def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-    "mostSignificantCourse.currentRoute.code", routes.asScala.map(_.code),
+    "mostSignificantCourse.currentRoute.code", routes.asScala.map(mandatory(_)).map(_.code),
     getAliasPaths("mostSignificantCourse"): _*
   )
 
