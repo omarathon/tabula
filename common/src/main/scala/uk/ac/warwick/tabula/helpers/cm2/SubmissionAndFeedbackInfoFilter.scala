@@ -260,12 +260,12 @@ object SubmissionAndFeedbackInfoFilters {
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
         if (item.assignment.cm2Assignment) {
-          item.coursework.enhancedFeedback.head.feedback.notReleasedToMarkers
+          item.assignment.hasCM2Workflow && item.coursework.enhancedFeedback.head.feedback.notReleasedToMarkers
         } else {
-          !item.assignment.isReleasedForMarking(item.user.getUserId)
+          item.assignment.hasWorkflow && !item.assignment.isReleasedForMarking(item.user.getUserId)
         }
 
-      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && (assignment.hasWorkflow || assignment.hasCM2Workflow)
     }
 
     case object MarkedByFirst extends SubmissionAndFeedbackInfoFilter {
