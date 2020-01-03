@@ -159,7 +159,7 @@
             <#assign detailUrl><@routes.cm2.markerOnlineFeedback assignment mf.stage marker student /></#assign>
             <tr id="${mf.stage.name}-${studentId}" data-detailurl="${detailUrl}" class="collapse detail-row">
               <td colspan="${colspan}" class="detailrow-container">
-                <i class="fa fa-spinner fa-spin"></i> Loading
+                <i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
               </td>
             </tr>
           </#list>

@@ -199,7 +199,7 @@
       </@f.form>
     </div>
 
-    <div class="placeholder"><i class="fa fa-spinner fa-spin"></i>&nbsp;Loading…</div>
+    <div class="placeholder"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i>&nbsp;Loading…</div>
     <div id="filter-results">
       <#include filterResultsPath />
     </div>

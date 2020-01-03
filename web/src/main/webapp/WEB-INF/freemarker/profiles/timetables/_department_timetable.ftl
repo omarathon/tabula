@@ -188,7 +188,9 @@
 
   <div class="calendar-outer">
     <div class="calendar-loading hidden-print">
-      <i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+      <div><i class="id7-koan-spinner id7-koan-spinner--2x id7-koan-spinner--fast" aria-hidden="true"></i></div>
+      <h3>Loading timetable&hellip;</h3>
+      <p>Please wait &mdash; the timetable is being generated.</p>
     </div>
     <div class="calendar hidden-xs" data-viewname="month" data-calendar-download-button=".calendar-download"
          data-timetable-download-button=".timetable-download"></div>
@@ -197,7 +199,8 @@
   <div class="calendar-smallscreen-outer visible-xs-block">
     <div class="calendar-smallscreen"></div>
     <div class="calendar-smallscreen-loading">
-      <i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+      <h3><i class="id7-koan-spinner id7-koan-spinner--fast id7-koan-spinner--inline" aria-hidden="true"></i> Loading timetable&hellip;</h3>
+      <p>Please wait &mdash; the timetable is being generated.</p>
     </div>
   </div>
 
@@ -223,8 +226,6 @@
     .calendar-loading {
       position: absolute;
       top: 50%;
-      font-size: 4em;
-      line-height: 4em;
       margin-top: -2em;
       left: 50%;
       width: 400px;

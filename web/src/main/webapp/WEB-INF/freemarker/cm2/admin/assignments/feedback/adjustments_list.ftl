@@ -17,7 +17,7 @@
   </tr>
   <tr id="row-${marking.extractId(u)}" data-detailurl="<@routes.cm2.feedbackAdjustmentForm assignment marking.extractId(u) />" class="collapse detail-row">
     <td colspan="3" class="detailrow-container">
-      <span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Loading&hellip;</span>
+      <span class="text-muted"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;</span>
     </td>
   </tr>
 
