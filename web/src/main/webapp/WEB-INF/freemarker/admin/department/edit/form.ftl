@@ -9,7 +9,7 @@
 
       <@f.errors cssClass="error form-errors" />
 
-      <#if department.hasParent>
+      <#if !department.rootDepartment>
         <@bs3form.labelled_form_group path="code" labelText="Department code">
           <@f.input path="code" cssClass="form-control" />
         </@bs3form.labelled_form_group>
@@ -23,7 +23,7 @@
         <@f.input path="shortName" cssClass="form-control" />
       </@bs3form.labelled_form_group>
 
-      <#if department.hasParent>
+      <#if !department.rootDepartment>
         <@bs3form.labelled_form_group path="filterRule" labelText="Filter rule">
           <@f.select path="filterRule" id="filterRule" cssClass="form-control">
             <option></option>

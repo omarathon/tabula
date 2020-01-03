@@ -27,7 +27,7 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
       .distinct
 
   def allRootDepartments: Seq[Department] =
-    allDepartments.filterNot(_.hasParent)
+    allDepartments.filter(_.isRootDepartment)
 
   // Fetches modules eagerly
   def getByCode(code: String): Option[Department] = code.maybeText.flatMap { code =>

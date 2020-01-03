@@ -58,8 +58,7 @@ trait MasqueradeCommandValidation extends SelfValidating {
           val realUser = if (user.masquerading) new CurrentUser(user.realUser, user.realUser) else user
           val masqueradeDepartments = moduleAndDepartmentService.departmentsWithPermission(realUser, Permissions.Masquerade)
           val masqueradeDepartmentsAndRoots = masqueradeDepartments.flatMap { dept =>
-            if (dept.hasParent) Seq(dept, dept.rootDepartment)
-            else Seq(dept)
+            Seq(dept, dept.rootDepartment).distinct
           }
 
           if (!securityService.can(realUser, Permissions.Masquerade, PermissionsTarget.Global)) {

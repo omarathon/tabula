@@ -294,7 +294,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 
   def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition] = {
     def departmentPlusParents(department: Department): Seq[Department] = {
-      if (department.hasParent) departmentPlusParents(department.parent) ++ Seq(department)
+      if (!department.isRootDepartment) departmentPlusParents(department.parent) ++ Seq(department)
       else Seq(department)
     }
 
