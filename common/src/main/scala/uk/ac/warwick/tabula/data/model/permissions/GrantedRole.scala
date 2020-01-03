@@ -83,9 +83,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
     else
       RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
 
-  def mayGrant(target: Permission): Boolean = Option(replaceableRoleDefinition).fold(false) {
-    _.mayGrant(target)
-  }
+  def mayGrant(target: Permission): Boolean = Option(replaceableRoleDefinition).fold(false)(_.mayGrant(target))
 
   /**
     * Provides a route to Department from the scope, so that we can look for custom definitions.

@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data
 
+import java.util.UUID
+
 import org.hibernate.criterion._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
@@ -56,6 +58,14 @@ trait PermissionsDao {
   def getCustomRoleDefinitionsBasedOn(baseDef: RoleDefinition): Seq[CustomRoleDefinition]
 
   def getCustomRoleDefinitionsFor(departments: Seq[Department]): Seq[CustomRoleDefinition]
+
+  def getGlobalGrantedRole(builtIn: BuiltInRoleDefinition): Option[GrantedRole[PermissionsTarget]]
+  def getGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]]
+  def createGlobalGrantedRole(builtIn: BuiltInRoleDefinition): GrantedRole[PermissionsTarget]
+
+  def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]]
+  def getGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]]
+  def createGlobalGrantedPermission(permission: Permission, overrideType: Boolean): GrantedPermission[PermissionsTarget]
 }
 
 @Repository
@@ -269,6 +279,63 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
     }
 
     criteria.seq
+  }
+
+  override def getGlobalGrantedRole(builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[PermissionsTarget]] =
+    session.newCriteria[GrantedRole[PermissionsTarget]]
+      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("builtInRoleDefinition", builtInRoleDefinition))
+      .seq.headOption
+
+  override def getGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]] =
+    session.newCriteria[GrantedRole[PermissionsTarget]]
+      .add(is("scopeType", "___GLOBAL___"))
+      .seq
+
+  override def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]] =
+    session.newCriteria[GrantedPermission[PermissionsTarget]]
+      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("permission", permission))
+      .add(is("overrideType", overrideType))
+      .seq.headOption
+
+  override def getGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]] =
+    session.newCriteria[GrantedPermission[PermissionsTarget]]
+      .add(is("scopeType", "___GLOBAL___"))
+      .seq
+
+  // Hnnnnnnng we can't create these in Hibernate because it doesn't know how to persist scope_type when scope is null
+  override def createGlobalGrantedRole(builtInRoleDefinition: BuiltInRoleDefinition): GrantedRole[PermissionsTarget] = {
+    val id = UUID.randomUUID().toString
+    val userGroupId = session.save(UserGroup.ofUsercodes)
+
+    val query =
+      session.createNativeQuery("insert into GrantedRole (id, usergroup_id, builtinroledefinition, scope_type) values (:id, :usergroup_id, :builtinroledefinition, :scope_type)")
+        .setParameter("id", id)
+        .setParameter("usergroup_id", userGroupId)
+        .setParameter("builtinroledefinition", new BuiltInRoleDefinitionUserType().convertToValue(builtInRoleDefinition))
+        .setParameter("scope_type", "___GLOBAL___")
+
+    require(query.executeUpdate() == 1)
+
+    getGrantedRole[PermissionsTarget](id).get
+  }
+
+  override def createGlobalGrantedPermission(permission: Permission, overrideType: Boolean): GrantedPermission[PermissionsTarget] = {
+    val id = UUID.randomUUID().toString
+    val userGroupId = session.save(UserGroup.ofUsercodes)
+
+    val query =
+      session.createNativeQuery("insert into GrantedPermission (id, usergroup_id, permission, overridetype, scope_type) values (:id, :usergroup_id, :permission, :overridetype, :scope_type)")
+        .setParameter("id", id)
+        .setParameter("usergroup_id", userGroupId)
+        .setParameter("permission", new PermissionUserType().convertToValue(permission))
+        .setParameter("overridetype", overrideType)
+        .setParameter("scope_type", "___GLOBAL___")
+
+    require(query.executeUpdate() == 1)
+
+    getGrantedPermission[PermissionsTarget](id).get
   }
 }
 

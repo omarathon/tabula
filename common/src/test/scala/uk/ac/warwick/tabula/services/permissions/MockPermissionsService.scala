@@ -35,4 +35,10 @@ class MockPermissionsService extends PermissionsService {
   override def getAllPermissionDefinitionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ???
   override def getCustomRoleDefinitionsBasedOn(roleDefinition: RoleDefinition): Seq[CustomRoleDefinition] = ???
   override def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition] = ???
+  override def getGlobalGrantedRole(roleDefinition: RoleDefinition): Option[GrantedRole[PermissionsTarget]] = ???
+  override def getOrCreateGlobalGrantedRole(roleDefinition: RoleDefinition): GrantedRole[PermissionsTarget] = ???
+  override def getAllGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]] = ???
+  override def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]] = ???
+  override def getOrCreateGlobalGrantedPermission(permission: Permission, overrideType: Boolean): GrantedPermission[PermissionsTarget] = ???
+  override def getAllGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]] = ???
 }
