@@ -183,7 +183,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
         mf should not be 'finalised
-        val department = new Department
+        val department = Fixtures.department("in")
         val module = new Module("IN101", department)
         a1.module = module
         a1
@@ -251,7 +251,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 
         mf shouldBe 'finalised
 
-        val department = new Department
+        val department = Fixtures.department("in")
         val module = new Module("IN101", department)
         a1.module = module
         a1

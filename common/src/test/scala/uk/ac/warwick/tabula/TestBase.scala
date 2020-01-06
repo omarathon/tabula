@@ -104,6 +104,7 @@ trait TestFixtures {
    */
   def newDeepAssignment(moduleCode: String = "IN101"): Assignment = {
     val department = new Department
+    department.isRootDepartment = true
     val module = new Module(moduleCode, department)
     val assignment = new Assignment(module)
     assignment.setDefaultBooleanProperties()

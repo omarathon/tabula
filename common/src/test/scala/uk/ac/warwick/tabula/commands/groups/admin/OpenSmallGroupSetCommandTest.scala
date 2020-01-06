@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Department, Notification, UnspecifiedTyp
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.jdk.CollectionConverters._
@@ -19,7 +19,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def marksSelfSignupGroupAsOpen() {
-    val department = new Department
+    val department = Fixtures.department("in")
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
     val cmd = new OpenSmallGroupSet(department, Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
@@ -29,7 +29,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def ignoresSetsThatAreNotSelfSignUp() {
-    val department = new Department
+    val department = Fixtures.department("in")
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.Manual
     val cmd = new OpenSmallGroupSet(department, Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
@@ -40,7 +40,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def processesMultipleSets() {
-    val department = new Department
+    val department = Fixtures.department("in")
     val set1 = new SmallGroupSet()
     set1.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
     val set2 = new SmallGroupSet()
@@ -54,7 +54,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def returnsUpdatedSets() {
-    val department = new Department
+    val department = Fixtures.department("in")
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
@@ -64,7 +64,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def ignoresSetsAlreadyOpened() {
-    val dept = new Department
+    val dept = Fixtures.department("in")
     val set = new SmallGroupSet()
     set.openForSignups = true
     set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -76,7 +76,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def requiresUpdatePermissionsOnAllSetsToBeOpened() {
-    val dept = new Department
+    val dept = Fixtures.department("in")
     val set1 = new SmallGroupSet()
     val set2 = new SmallGroupSet()
 
@@ -93,7 +93,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def auditsLogsTheGroupsetsToBeOpened() {
-    val dept = new Department
+    val dept = Fixtures.department("in")
     val sets = Seq(new SmallGroupSet())
     val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState {
       val eventName: String = ""
@@ -147,7 +147,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
     new NotificationFixture {
       val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 
-      val dept = new Department
+      val dept = Fixtures.department("in")
 
       val set1 = new SmallGroupSet()
       set1.smallGroupService = None
@@ -190,7 +190,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def CommandStateReportsFirstGroupset {
-    val dept = new Department
+    val dept = Fixtures.department("in")
     val set = new SmallGroupSet
     val oneItem = new OpenSmallGroupSetState {
       val department: Department = dept
@@ -210,7 +210,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test(expected = classOf[RuntimeException])
   def CommandStateThrowsExceptionIfAskedForSingleSetFromNone {
-    val dept = new Department
+    val dept = Fixtures.department("in")
     val emptyList = new OpenSmallGroupSetState {
       val department: Department = dept
       val applicableSets: Seq[SmallGroupSet] = Seq()
@@ -221,7 +221,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
   def openSmallGroupCommandGluesEverythingTogether() {
-    val department = new Department
+    val department = Fixtures.department("in")
     val command = OpenSmallGroupSetCommand(department, Seq(new SmallGroupSet), operator, SmallGroupSetSelfSignUpState.Open)
 
     command should be(anInstanceOf[Appliable[SmallGroupSet]])

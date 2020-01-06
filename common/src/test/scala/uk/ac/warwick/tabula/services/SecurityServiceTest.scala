@@ -34,7 +34,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   @Test def explicitPermission() {
     val securityService = new SecurityService
 
-    val department = new Department
+    val department = Fixtures.department("xx")
     val currentUser = new CurrentUser(user, user)
 
     val roleService = mock[RoleService]
@@ -59,7 +59,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   @Test def role() {
     val securityService = new SecurityService
 
-    val department = new Department
+    val department = Fixtures.department("xx")
     val currentUser = new CurrentUser(user, user)
 
     val roleService = mock[RoleService]
@@ -82,7 +82,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test def globalPermission() {
-    val department = new Department
+    val department = Fixtures.department("xx")
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
@@ -108,7 +108,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test def exactScopeMatch() {
-    val department = new Department
+    val department = Fixtures.department("xx")
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
@@ -130,7 +130,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test def scopelessMatch() {
-    val department = new Department
+    val department = Fixtures.department("xx")
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
@@ -149,7 +149,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 
   @Test def higherScopeMatch() {
     val module = new Module
-    val department = new Department
+    val department = Fixtures.department("xx")
     module.adminDepartment = department
 
     val currentUser = new CurrentUser(user, user)
@@ -190,8 +190,8 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test def samePermissionMultipleScopes() {
-    val department1 = new Department
-    val department2 = new Department
+    val department1 = Fixtures.department("ab")
+    val department2 = Fixtures.department("cd")
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
@@ -215,7 +215,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 
   @Test def lowerScope() {
     val module = new Module
-    val department = new Department
+    val department = Fixtures.department("xx")
     module.adminDepartment = department
 
     val currentUser = new CurrentUser(user, user)
@@ -265,8 +265,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val securityService = new SecurityService
     val currentUser = new CurrentUser(user, user)
 
-    val department = new Department
-    department.code = "in"
+    val department = Fixtures.department("in")
 
     val student1 = new StudentMember
     student1.universityId = "1111111"

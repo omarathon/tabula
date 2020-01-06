@@ -12,7 +12,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.services.AuditEventService
-import uk.ac.warwick.tabula.{ElasticsearchTestBase, MockUserLookup, Mockito}
+import uk.ac.warwick.tabula.{ElasticsearchTestBase, Fixtures, MockUserLookup, Mockito}
 
 import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
@@ -154,8 +154,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
     new Fixture {
       val stopwatch = StopWatch()
 
-      val dept = new Department
-      dept.code = "zx"
+      val dept = Fixtures.department("zx")
 
       val assignment = new Assignment
       assignment.id = "4a0ce216-adda-b0b0-c0c0-000000000000"
@@ -274,8 +273,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
     new Fixture {
       // Specifically this verifies the fix to TAB-6888 and its predecessor TAB-4168 where the query doesn't fetch all terms
 
-      val dept = new Department
-      dept.code = "zx"
+      val dept = Fixtures.department("zx")
 
       val assignment = new Assignment
       assignment.id = "4a0ce216-adda-b0b0-c0c0-000000000000"

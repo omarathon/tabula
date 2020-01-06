@@ -18,8 +18,8 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
   trait SortRoutesWorld {
     val department: Department = Fixtures.department("in", "IT Services")
-    val ugDepartment: Department = Fixtures.department("in-ug", "ITS Undergraduates")
-    val pgDepartment: Department = Fixtures.department("in-pg", "ITS Postgraduates")
+    val ugDepartment: Department = Fixtures.department("in-ug", "ITS Undergraduates", isRootDepartment = false)
+    val pgDepartment: Department = Fixtures.department("in-pg", "ITS Postgraduates", isRootDepartment = false)
 
     department.children.add(ugDepartment)
     department.children.add(pgDepartment)

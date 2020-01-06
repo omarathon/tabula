@@ -7,12 +7,12 @@ import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroup
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 
 class NotificationSettingsCommandTest extends TestBase with Mockito {
 
   private trait Fixture {
-    val testDepartment = new Department
+    val testDepartment = Fixtures.department("in")
 
     val commandInternal = new NotificationSettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with UserLookupComponent with PopulateNotificationSettingsCommandState {
       var moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]

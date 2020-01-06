@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.groups.admin.{ReleaseSmallGroupSetCommand, 
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewModule, ViewSet}
 import uk.ac.warwick.tabula.web.controllers.groups.admin.{ReleaseAllSmallGroupSetsController, ReleaseSmallGroupSetController}
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -98,8 +98,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   def batchControllerShowsFormWithDepartment() {
     val controller = new ReleaseAllSmallGroupSetsController()
     val model = controller.newViewModel(AcademicYear(2014))
-    val department = new Department
-    department.code = "xyz"
+    val department = Fixtures.department("xyz")
     val mav = controller.form(model, department, AcademicYear(2014))
     mav.toModel.get("department") should be(Some(department))
     mav.viewName should be("groups/admin/groups/bulk-release")
@@ -109,9 +108,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   @Test
   def batchControllerInvokesCommand() {
     withUser("test") {
-      val dept = new Department {
-        code = "xx"
-      }
+      val dept = Fixtures.department("xx")
       val year = AcademicYear(2014)
       val controller = new ReleaseAllSmallGroupSetsController()
       val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
@@ -129,8 +126,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val controller = new ReleaseAllSmallGroupSetsController()
       val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
-      val department = new Department
-      department.code = "xyz"
+      val department = Fixtures.department("xyz")
       val year = AcademicYear(2014)
       when(model.createCommand(any[User])).thenReturn(command)
 

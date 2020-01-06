@@ -11,10 +11,7 @@ class ImportModulesCommandTest extends TestBase with Mockito {
 
   trait Environment {
     // Test data
-    val department = new Department {
-      code = "cs"
-      fullName = "Computer Science"
-    }
+    val department = Fixtures.department("cs", "Computer Science")
     val moduleInfos = Seq(
       ModuleInfo("Science for Computers", "SCOM", "CS101", null, DegreeType.Undergraduate),
       ModuleInfo("Computers for Science", "CS102", "CS102", null, DegreeType.Undergraduate))
