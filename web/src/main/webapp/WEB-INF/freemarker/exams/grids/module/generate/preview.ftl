@@ -18,7 +18,9 @@
       </p>
 
       <div id="examGridSpinner">
-        <i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+        <div><i class="id7-koan-spinner id7-koan-spinner--2x id7-koan-spinner--fast" aria-hidden="true"></i></div>
+        <h3>Generating exam grid preview&hellip;</h3>
+        <p>Please wait &mdash; the exam grid is being generated.</p>
       </div>
 
       <div id="examGridContainer" style="display: none;">

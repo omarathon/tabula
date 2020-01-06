@@ -206,8 +206,10 @@
                       </div>
                     </#list>
                     <div class="alert alert-info clash-info-alert">
-                      <div class="loading">
-                        <i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any small group event conflicts for all students&hellip;</em>
+                      <div class="loading text-center">
+                        <div><i class="id7-koan-spinner id7-koan-spinner--2x id7-koan-spinner--fast" aria-hidden="true"></i></div>
+                        <h3>Checking for conflicts&hellip;</h3>
+                        <p>Please wait &mdash; we're checking for any small group event conflicts for all students.</p>
                       </div>
                       <div class="clash-info hide">
                         <div class="clash-singular-info"><span class="clash-count"></span> student has small group event conflicts with this allocation.

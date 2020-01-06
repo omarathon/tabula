@@ -271,7 +271,7 @@
             <tr>
               <th colspan="6" class="no-sort">
 								<span class="studentsLoadingMessage">
-									<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+									<i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
 								</span>
                 <script type="text/javascript" nonce="${nonce()}">
                   jQuery(function ($) {

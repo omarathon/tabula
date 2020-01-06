@@ -58,7 +58,7 @@
               <div class="row item-info check-all">
                 <div class="col-md-12">
 									<span class="studentsLoadingMessage" style="display: none;">
-										<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+										<i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
 									</span>
 
                   <script nonce="${nonce()}">
