@@ -118,7 +118,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
   def otherApprovalsNotRequiredWhenCheckingSubDept(): Unit = new Fixture {
 
     student.homeDepartment.meetingRecordApprovalType = AllApprovals
-    val subDepartment: Department = Fixtures.department(code = "IN-UG")
+    val subDepartment: Department = Fixtures.department(code = "IN-UG", isRootDepartment = false)
     subDepartment.filterRule = AllMembersFilterRule
     subDepartment.meetingRecordApprovalType = OneApproval
     department.children.add(subDepartment)

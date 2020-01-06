@@ -65,18 +65,20 @@ object Fixtures extends Mockito {
     mf
   }
 
-  def department(code: String, name: String = null): Department = {
+  def department(code: String, name: String = null, isRootDepartment: Boolean = true): Department = {
     val d = new Department
     d.code = code
     d.fullName = Option(name).getOrElse("Department " + code)
+    d.isRootDepartment = isRootDepartment
     d
   }
 
-  def departmentWithId(code: String, name: String = null, id: String): Department = {
+  def departmentWithId(code: String, name: String = null, id: String, isRootDepartment: Boolean = true): Department = {
     val d = new Department
     d.code = code
     d.fullName = Option(name).getOrElse("Department " + code)
     d.id = id
+    d.isRootDepartment = isRootDepartment
     d
   }
 
