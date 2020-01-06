@@ -5,8 +5,8 @@ import java.util.UUID
 import org.hibernate.criterion._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
 import uk.ac.warwick.tabula.data.model.permissions._
+import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
 import uk.ac.warwick.userlookup.User
@@ -283,25 +283,25 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 
   override def getGlobalGrantedRole(builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[PermissionsTarget]] =
     session.newCriteria[GrantedRole[PermissionsTarget]]
-      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("scopeType", PermissionsTarget.GlobalScopeType))
       .add(is("builtInRoleDefinition", builtInRoleDefinition))
       .seq.headOption
 
   override def getGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]] =
     session.newCriteria[GrantedRole[PermissionsTarget]]
-      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("scopeType", PermissionsTarget.GlobalScopeType))
       .seq
 
   override def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]] =
     session.newCriteria[GrantedPermission[PermissionsTarget]]
-      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("scopeType", PermissionsTarget.GlobalScopeType))
       .add(is("permission", permission))
       .add(is("overrideType", overrideType))
       .seq.headOption
 
   override def getGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]] =
     session.newCriteria[GrantedPermission[PermissionsTarget]]
-      .add(is("scopeType", "___GLOBAL___"))
+      .add(is("scopeType", PermissionsTarget.GlobalScopeType))
       .seq
 
   // Hnnnnnnng we can't create these in Hibernate because it doesn't know how to persist scope_type when scope is null
@@ -314,7 +314,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
         .setParameter("id", id)
         .setParameter("usergroup_id", userGroupId)
         .setParameter("builtinroledefinition", new BuiltInRoleDefinitionUserType().convertToValue(builtInRoleDefinition))
-        .setParameter("scope_type", "___GLOBAL___")
+        .setParameter("scope_type", PermissionsTarget.GlobalScopeType)
 
     require(query.executeUpdate() == 1)
 
@@ -331,7 +331,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
         .setParameter("usergroup_id", userGroupId)
         .setParameter("permission", new PermissionUserType().convertToValue(permission))
         .setParameter("overridetype", overrideType)
-        .setParameter("scope_type", "___GLOBAL___")
+        .setParameter("scope_type", PermissionsTarget.GlobalScopeType)
 
     require(query.executeUpdate() == 1)
 

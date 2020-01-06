@@ -78,7 +78,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
     * Build a Role from this definition
     */
   def build(): GeneratedRole =
-    if (scopeType == "___GLOBAL___")
+    if (scopeType == PermissionsTarget.GlobalScopeType)
       RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
     else
       RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)

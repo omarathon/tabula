@@ -42,6 +42,8 @@ trait PermissionsTarget {
 }
 
 object PermissionsTarget {
+  final val GlobalScopeType: String = "___GLOBAL___"
+
   final val Global = new PermissionsTarget {
     override def permissionsParents: LazyList[Nothing] = LazyList.empty
 
