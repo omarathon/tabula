@@ -1,5 +1,5 @@
 <#list unableToSubmit as unableToSubmitForDepartment>
-    <div class="well">
+    <div class="well" id="${unableToSubmitForDepartment.department.code}">
         <h2>${unableToSubmitForDepartment.department.name}</h2>
         <table class="table table-condensed">
             <thead>
