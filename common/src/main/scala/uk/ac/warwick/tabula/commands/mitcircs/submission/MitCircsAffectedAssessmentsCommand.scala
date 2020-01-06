@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -79,6 +78,19 @@ object MitCircsAffectedAssessmentsCommand {
 trait MitCircsAffectedAssessmentsRequest {
   var startDate: LocalDate = _
   var endDate: LocalDate = _ // May be null
+
+  def academicYears: Seq[AcademicYear] = {
+    val startYear = AcademicYear.forDate(startDate)
+
+    // If we're "Ongoing" but have a start date in a future academic year, this will explode because the end year
+    // will be before the start year, so if the start date is in the future just use that year. We validate that
+    // if endDate is set that it's not before startDate.
+    val endYear =
+      if (Option(endDate).isEmpty && startDate.isAfter(LocalDate.now())) startYear
+      else AcademicYear.forDate(Option(endDate).getOrElse(LocalDate.now()))
+
+    startYear.to(endYear)
+  }
 }
 
 trait MitCircsAffectedAssessmentsState {
@@ -89,14 +101,9 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
   self: MitCircsAffectedAssessmentsRequest with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): Result = transactional(readOnly = true) {
-    val startYear = AcademicYear.forDate(startDate)
-    val endYear = AcademicYear.forDate(Option(endDate).getOrElse(LocalDate.now()))
-
-    val years = startYear.to(endYear)
-
     // Get all the UpstreamAssessmentGroups that the student is a member of between the two dates
     val upstreamAssessmentGroups =
-      years.flatMap { year => assessmentMembershipService.getUpstreamAssessmentGroups(student, year, resitOnly = false) }
+      academicYears.flatMap { year => assessmentMembershipService.getUpstreamAssessmentGroups(student, year, resitOnly = false) }
 
     // For each upstreamAssessmentGroup, get the related AssessmentComponent
     val assessmentComponents =
@@ -116,7 +123,7 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
         .sortBy { a => (a.academicYear, a.assessmentComponent.moduleCode, a.assessmentComponent.sequence) }
 
     val tabulaAssignments =
-      years.flatMap { year => assessmentMembershipService.getEnrolledAssignments(student.asSsoUser, Some(year)) }
+      academicYears.flatMap { year => assessmentMembershipService.getEnrolledAssignments(student.asSsoUser, Some(year)) }
         .filter(_.summative)
         .filterNot(_.openEnded)
         .filter { assignment =>
