@@ -44,4 +44,6 @@ object Routes {
     def quartzStatus(triggerKey: TriggerKey): String = context + "/jobs/quartz-status?key=%s" format encoded(triggerKey.getName)
   }
 
+  def globalPermissions: String = s"$context/global-permissions"
+
 }

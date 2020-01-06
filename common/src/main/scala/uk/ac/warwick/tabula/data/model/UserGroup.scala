@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
@@ -9,6 +10,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.immutable
 import scala.jdk.CollectionConverters._
 
 /**
@@ -182,10 +184,17 @@ class UserGroup private(val universityIds: Boolean)
     }
   }
 
+  def items: Set[(User, UserGroupItemType)] =
+    getUsersFromIds(includeUsers.asScala.toSet).map((_, UserGroupItemType.Included)) ++
+    getUsersFromIds(staticIncludeUsers.asScala.toSet).map((_, UserGroupItemType.Static)) ++
+    getUsersFromIds(webgroupMembers).map((_, UserGroupItemType.WebGroup)) ++
+    getUsersFromIds(excludeUsers.asScala.toSet).map((_, UserGroupItemType.Excluded))
+
   def excludes: Set[User] = getUsersFromIds(excludeUsers.asScala.toSet)
 
   private def webgroupMembers: Set[String] = baseWebgroup match {
-    case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toSet
+    case webgroup: String =>
+      groupService.getUserCodesInGroup(webgroup).asScala.toSet ++ groupService.getGroupByName(webgroup).getOwners.asScala.toSet
     case _ => Set.empty
   }
 
@@ -225,6 +234,16 @@ object UserGroup {
   def ofUniversityIds = new UserGroup(true)
 }
 
+sealed trait UserGroupItemType extends EnumEntry
+object UserGroupItemType extends Enum[UserGroupItemType] {
+  case object Included extends UserGroupItemType
+  case object Static extends UserGroupItemType
+  case object WebGroup extends UserGroupItemType
+  case object Excluded extends UserGroupItemType
+
+  override val values: immutable.IndexedSeq[UserGroupItemType] = findValues
+}
+
 /**
   * A usergroup where the value of universityId is hidden from the caller.
   *
@@ -238,6 +257,11 @@ trait UnspecifiedTypeUserGroup {
     * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
     */
   def users: Set[User]
+
+  /**
+   * @return All of the included items in this user group, with the type - this will include excluded users with the Excluded type
+   */
+  def items: Set[(User, UserGroupItemType)]
 
   def baseWebgroup: String
 

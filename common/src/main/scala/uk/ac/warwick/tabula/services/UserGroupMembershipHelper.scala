@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, StringId, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, StringId, UnspecifiedTypeUserGroup, UserGroupItemType}
 import uk.ac.warwick.tabula.data.{Daoisms, HelperRestrictions, SessionComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
@@ -356,6 +356,8 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
   }
 
   def users: Set[User] = underlying.users
+
+  def items: Set[(User, UserGroupItemType)] = underlying.items
 
   def baseWebgroup: String = underlying.baseWebgroup
 
