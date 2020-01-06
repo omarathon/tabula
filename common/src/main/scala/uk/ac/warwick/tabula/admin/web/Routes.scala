@@ -63,6 +63,11 @@ object Routes {
     }
 
     def manualMembership(department: Department): String = context + "/department/%s/manualmembership" format encoded(department.code)
+
+    object settings {
+      def apply(department: Department): String = context + "/department/%s/settings/display" format encoded(department.code)
+      def mitigatingCircumstances(department: Department): String = s"${apply(department)}#mitcircs-options"
+    }
   }
 
   object module {
