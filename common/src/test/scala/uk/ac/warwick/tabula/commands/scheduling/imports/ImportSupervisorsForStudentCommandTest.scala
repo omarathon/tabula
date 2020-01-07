@@ -22,7 +22,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
     relationshipType.description = "Research supervisor"
     session.saveOrUpdate(relationshipType)
 
-    val department = Fixtures.department("cs", "Computer Science")
+    val department = Fixtures.department("xx")
     session.saveOrUpdate(department)
 
     // set up and persist student
