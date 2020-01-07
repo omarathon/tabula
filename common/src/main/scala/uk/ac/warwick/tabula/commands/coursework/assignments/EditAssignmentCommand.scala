@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
+// TODO TAB-7991 - Nuke this
 class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null, user: CurrentUser)
   extends ModifyAssignmentCommand(module) with NotificationHandling {
 
@@ -31,16 +32,6 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
     if (academicYear != assignment.academicYear) {
       errors.rejectValue("academicYear", "academicYear.immutable")
-    }
-  }
-
-  override def contextSpecificValidation(errors: Errors) {
-
-    // compare ids directly as this.markingWorkflow always comes back with the type MarkingWorkflow which breaks .equals
-
-    val workflowChanged = Option(assignment.markingWorkflow).map(_.id) != Option(markingWorkflow).map(_.id)
-    if (!canUpdateMarkingWorkflow && workflowChanged) {
-      errors.rejectValue("markingWorkflow", "markingWorkflow.cannotChange")
     }
   }
 

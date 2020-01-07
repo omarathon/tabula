@@ -14,9 +14,9 @@ trait AutowiringStateServiceComponent extends StateServiceComponent {
 }
 
 trait StateService {
-  def updateState(markerFeedback: MarkerFeedback, state: MarkingState)
+  def updateState(markerFeedback: MarkerFeedback, state: MarkingState): Unit
 
-  def updateStateUnsafe(markerFeedback: MarkerFeedback, state: MarkingState)
+  def updateStateUnsafe(markerFeedback: MarkerFeedback, state: MarkingState): Unit
 }
 
 @Service(value = "stateService")
@@ -25,7 +25,7 @@ class StateServiceImpl extends ComposableStateServiceImpl with Daoisms
 class ComposableStateServiceImpl extends StateService {
   this: SessionComponent =>
 
-  def updateState(markerFeedback: MarkerFeedback, state: MarkingState) {
+  def updateState(markerFeedback: MarkerFeedback, state: MarkingState): Unit = {
     if (markerFeedback.state != null && !markerFeedback.state.canTransitionTo(state))
       throw new IllegalStateException(
         s"Cannot transition from ${markerFeedback.state} to $state. " +
@@ -34,7 +34,7 @@ class ComposableStateServiceImpl extends StateService {
     updateStateUnsafe(markerFeedback, state)
   }
 
-  def updateStateUnsafe(markerFeedback: MarkerFeedback, state: MarkingState) {
+  def updateStateUnsafe(markerFeedback: MarkerFeedback, state: MarkingState): Unit = {
     markerFeedback.state = state
     session.saveOrUpdate(markerFeedback)
   }

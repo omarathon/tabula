@@ -59,7 +59,7 @@ trait ModifyAssignmentStudentsCommandState extends EditAssignmentMembershipComma
 
   val updateStudentMembershipGroupIsUniversityIds: Boolean = false
 
-  def copyTo(assignment: Assignment) {
+  def copyTo(assignment: Assignment): Unit = {
     copySharedStudentTo(assignment)
     assignment.assessmentGroups.clear()
     assignment.assessmentGroups.addAll(assessmentGroups)

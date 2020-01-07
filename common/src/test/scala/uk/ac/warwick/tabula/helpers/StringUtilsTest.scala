@@ -7,7 +7,7 @@ import scala.util.Random
 
 class StringUtilsTest extends TestBase with StringUtils {
 
-  @Test def superString {
+  @Test def superString: Unit = {
     val empty: String = ""
     val whitespace: String = "  "
     val nullString: String = null
@@ -38,7 +38,7 @@ class StringUtilsTest extends TestBase with StringUtils {
     nullString.textOrEmpty should be("")
   }
 
-  @Test def compareAlphaNumeric {
+  @Test def compareAlphaNumeric: Unit = {
     val s1 = "Group 1"
     val s2 = "group 2"
     val s3 = "group 20"

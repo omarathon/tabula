@@ -12,7 +12,7 @@ class JobContextTest extends AppContextTestBase {
 
   @Transactional
   @Test
-  def jobInstanceSerialization() {
+  def jobInstanceSerialization(): Unit = {
     val id = {
       val jsi = new JobInstanceImpl
       jsi.jobType = "Steven"
@@ -33,7 +33,7 @@ class JobContextTest extends AppContextTestBase {
   @Transactional
   @Ignore
   @Test
-  def load() {
+  def load(): Unit = {
     val id = jobService.add(None, TestingJob("anything really")).id
     jobService.getInstance(id).map { _ =>
       jobService.run()(new EarlyRequestInfoImpl)

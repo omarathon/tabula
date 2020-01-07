@@ -6,7 +6,7 @@ import scala.math.max
 
 // scalastyle:off magic.number
 class ShortCodeTest extends TestBase {
-  @Test def randomShortCode {
+  @Test def randomShortCode: Unit = {
     ShortCode.random() should fullyMatch regex """[a-zA-Z0-9]{5}"""
   }
 
@@ -14,7 +14,7 @@ class ShortCodeTest extends TestBase {
     * Check that we can generate a bunch of unique codes with only
     * a few retries in case of collision.
     */
-  @Test(timeout = 10000) def roughUniqueness {
+  @Test(timeout = 10000) def roughUniqueness: Unit = {
     val number = 100000
     var generated = SortedSet[String]()
     var collisions = 0;

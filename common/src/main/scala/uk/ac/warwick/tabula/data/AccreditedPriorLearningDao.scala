@@ -13,7 +13,7 @@ trait AutowiringAccreditedPriorLearningDaoComponent extends AccreditedPriorLearn
 }
 
 trait AccreditedPriorLearningDao {
-  def saveOrUpdate(accreditedPriorLearning: AccreditedPriorLearning)
+  def saveOrUpdate(accreditedPriorLearning: AccreditedPriorLearning): Unit
 
   def getByNotionalKey(studentCourseDetails: StudentCourseDetails, award: Award, sequenceNumber: Integer): Option[AccreditedPriorLearning]
 }

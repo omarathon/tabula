@@ -40,7 +40,7 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
   }
 
   @Test //thisTestHasARidculouslyLongNameButICantThinkOfASensibleWayToShortenItWhichProbablyMeansTheCommandNeedsRefactoring...
-  def applyCombinesStudentsInDepartmentWithStudentsWhoHaveTutorsInDepartment() {
+  def applyCombinesStudentsInDepartmentWithStudentsWhoHaveTutorsInDepartment(): Unit = {
     new Fixture {
       mockRelationshipService.listAgentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns TreeMap(
         SortableAgentIdentifier(studentRel1) -> Seq(studentRel1),

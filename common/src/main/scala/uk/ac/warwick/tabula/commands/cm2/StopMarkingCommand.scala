@@ -20,7 +20,7 @@ import scala.jdk.CollectionConverters._
 
 object StopMarkingMarkingCommand {
   def apply(assignment: Assignment, user: CurrentUser) = new StopMarkingMarkingCommandInternal(assignment, user)
-    with ComposableCommand[Seq[AssignmentFeedback]]
+    with ComposableCommand[Seq[Feedback]]
     with StopMarkingValidation
     with StopMarkingPermissions
     with StopMarkingDescription
@@ -30,11 +30,11 @@ object StopMarkingMarkingCommand {
 }
 
 class StopMarkingMarkingCommandInternal(val assignment: Assignment, val currentUser: CurrentUser)
-  extends CommandInternal[Seq[AssignmentFeedback]] with StopMarkingState with StopMarkingRequest {
+  extends CommandInternal[Seq[Feedback]] with StopMarkingState with StopMarkingRequest {
 
   self: CM2MarkingWorkflowServiceComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = {
+  def applyInternal(): Seq[Feedback] = {
     val feedbackToStop = feedbacks.filterNot(f => studentsAlreadyFinished.contains(f.usercode))
     stoppedMarkerFeedback = feedbackToStop.flatMap(_.markingInProgress).asJava
     cm2MarkingWorkflowService.stopMarking(feedbackToStop)
@@ -57,7 +57,7 @@ trait StopMarkingValidation extends SelfValidating {
   }
 }
 
-trait StopMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
+trait StopMarkingDescription extends Describable[Seq[Feedback]] {
   self: StopMarkingState with StopMarkingRequest =>
 
   override lazy val eventName: String = "StopMarking"
@@ -66,7 +66,7 @@ trait StopMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
     d.assignment(assignment)
      .studentUsercodes(students.asScala.toSeq)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit =
     d.assignment(assignment)
       .feedbacks(result)
 }
@@ -91,11 +91,11 @@ trait StopMarkingRequest extends SelectedStudentsRequest {
 }
 
 
-trait StopMarkingNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFeedback]] {
+trait StopMarkingNotifier extends Notifies[Seq[Feedback], Seq[MarkerFeedback]] {
 
   self: StopMarkingRequest with StopMarkingState =>
 
-  def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
+  def emit(commandResult: Seq[Feedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
     // emit notifications to each marker that has new feedback
     val markerMap: Map[String, Seq[MarkerFeedback]] =
       stoppedMarkerFeedback.asScala.toSeq
@@ -112,11 +112,11 @@ trait StopMarkingNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFe
   }
 }
 
-trait StopMarkingNotificationCompletion extends CompletesNotifications[Seq[AssignmentFeedback]] {
+trait StopMarkingNotificationCompletion extends CompletesNotifications[Seq[Feedback]] {
 
   self: StopMarkingRequest with StopMarkingState with NotificationHandling =>
 
-  def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
+  def notificationsToComplete(commandResult: Seq[Feedback]): CompletesNotificationsResult = {
     val notificationsToComplete = stoppedMarkerFeedback.asScala.toSeq.flatMap(mf =>
       notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
         notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)

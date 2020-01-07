@@ -12,7 +12,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
   smallGroupSet.academicYear = AcademicYear(2015)
 
   @Test
-  def signupControllerConstructsAppropriateCommand() {
+  def signupControllerConstructsAppropriateCommand(): Unit = {
     withUser("test") {
       val controller = new StudentSignUpController
       val command = controller.command(new SmallGroupSet, currentUser)
@@ -24,7 +24,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def signUpAppliesCommand() {
+  def signUpAppliesCommand(): Unit = {
     val controller = new StudentSignUpController
     val command = mock[Appliable[SmallGroupSet]]
     command.apply() returns smallGroupSet
@@ -33,7 +33,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def unSignupControllerConstructsAppropriateCommand() {
+  def unSignupControllerConstructsAppropriateCommand(): Unit = {
     withUser("test") {
       val controller = new StudentUnSignUpController
       val command = controller.command(new SmallGroupSet, currentUser)
@@ -45,7 +45,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def unSignUpAppliesCommand() {
+  def unSignUpAppliesCommand(): Unit = {
     val controller = new StudentUnSignUpController
     val command = mock[Appliable[SmallGroupSet]]
     command.apply() returns smallGroupSet

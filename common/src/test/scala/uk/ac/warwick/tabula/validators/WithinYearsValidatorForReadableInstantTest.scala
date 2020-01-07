@@ -11,7 +11,7 @@ class WithinYearsValidatorForReadableInstantTest extends TestBase {
 
   val now = new DateTime(2013, DateTimeConstants.DECEMBER, 1, 12, 18, 9, 0)
 
-  @Test def maxFuture {
+  @Test def maxFuture: Unit = {
     withFakeTime(now) {
       val a = classOf[WithinYearsValidatorForReadableInstantTest].getDeclaredField("futureTest").getAnnotation(classOf[WithinYears])
 
@@ -36,7 +36,7 @@ class WithinYearsValidatorForReadableInstantTest extends TestBase {
   @WithinYears(maxPast = 2)
   var pastTest: DateTime = _
 
-  @Test def maxPast {
+  @Test def maxPast: Unit = {
     withFakeTime(now) {
       val a = classOf[WithinYearsValidatorForReadableInstantTest].getDeclaredField("pastTest").getAnnotation(classOf[WithinYears])
 
@@ -61,7 +61,7 @@ class WithinYearsValidatorForReadableInstantTest extends TestBase {
   @WithinYears(maxFuture = 0, maxPast = 0) // must be within 1 year
   var withinYear: DateTime = _
 
-  @Test def equal {
+  @Test def equal: Unit = {
     withFakeTime(now) {
       val a = classOf[WithinYearsValidatorForReadableInstantTest].getDeclaredField("withinYear").getAnnotation(classOf[WithinYears])
 

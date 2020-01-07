@@ -5,18 +5,18 @@ import org.junit.Test
 
 class RoleTest extends TestBase {
 
-  @Test def of {
+  @Test def of: Unit = {
     RoleDefinition.of("DepartmentalAdministratorRoleDefinition") match {
       case DepartmentalAdministratorRoleDefinition =>
       case what: Any => fail("what is this?" + what)
     }
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def invalidAction {
+  @Test(expected = classOf[IllegalArgumentException]) def invalidAction: Unit = {
     RoleDefinition.of("Spank")
   }
 
-  @Test def name {
+  @Test def name: Unit = {
     DepartmentalAdministratorRoleDefinition.getName should be("DepartmentalAdministratorRoleDefinition")
     SysadminRoleDefinition.getName should be("SysadminRoleDefinition")
     RoleDefinition.of("SysadminRoleDefinition").getName should be("SysadminRoleDefinition")

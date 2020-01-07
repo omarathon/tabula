@@ -40,17 +40,17 @@ values ('4', '4', 'g901', 'AI', true, 'PG', false);
 -- set up an assignment for the "Intro to Programming" module
 insert into assignment(id, name, module_id, academicyear, attachmentlimit,
                        collectmarks, deleted, collectsubmissions, restrictsubmissions,
-                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, archived, createdDate)
-values ('1', 'Test Assignment', '1', '2011', 1, true, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');
+                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, createdDate)
+values ('1', 'Test Assignment', '1', '2011', 1, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');
 
 -- set up an assignment for the "Intro to Programming" module
 insert into assignment(id, name, module_id, academicyear, attachmentlimit,
                        collectmarks, deleted, collectsubmissions, restrictsubmissions,
-                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, archived, createdDate)
-values ('2', 'Test Computing Assignment', '1', '2011', 1, true, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');
+                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, createdDate)
+values ('2', 'Test Computing Assignment', '1', '2011', 1, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');
 
 -- set up an assignment for the "History of Computing" module
 insert into assignment(id, name, module_id, academicyear, attachmentlimit,
                        collectmarks, deleted, collectsubmissions, restrictsubmissions,
-                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, archived, createdDate)
-values ('3', 'Programming Assignment', '2', '2011', 1, true, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');
+                       allowlatesubmissions, allowresubmission, displayplagiarismnotice, createdDate)
+values ('3', 'Programming Assignment', '2', '2011', 1, true, true, true, true, true, true, true, current_timestamp at time zone 'Europe/London');

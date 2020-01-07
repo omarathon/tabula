@@ -20,7 +20,7 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
   /**
     * Test the relationship between Submission and OriginalityReport.
     */
-  @Test def submissionsAndReports {
+  @Test def submissionsAndReports: Unit = {
     transactional { t =>
 
       val submission = Fixtures.submission()
@@ -65,10 +65,6 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
 
       session.flush()
       session.clear()
-
-      // expecting: no exception from having >1 matching OriginalityReport
-      //            val session2 = session.get(classOf[Submission], submission.id).asInstanceOf[Submission]
-      //        	session2.originalityReport should be ('completed)
     }
   }
 

@@ -38,7 +38,7 @@ class DeleteSchemeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateNoCheckpoints() {
+  def validateNoCheckpoints(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.countCheckpointsForPoint(point) returns 0
       validator.validate(errors)
@@ -47,7 +47,7 @@ class DeleteSchemeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateHasCheckpoints() {
+  def validateHasCheckpoints(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.countCheckpointsForPoint(point) returns 1
       validator.validate(errors)

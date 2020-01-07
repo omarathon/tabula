@@ -5,8 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{Cm2FeedbackAdjustmentNotification, Cm2StudentFeedbackAdjustmentNotification}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.Cm2StudentFeedbackAdjustmentNotification
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -17,25 +16,6 @@ import uk.ac.warwick.userlookup.User
 import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentCommand {
-
-  final val REASON_SIZE_LIMIT = 600
-
-  def apply(assignment: Assessment, student: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-    new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
-      with CopiesMarkToFeedback
-      with ComposableCommand[Feedback]
-      with FeedbackAdjustmentCommandPermissions
-      with FeedbackAdjustmentCommandDescription
-      with FeedbackAdjustmentCommandValidation
-      with FeedbackAdjustmentNotifier
-      with AutowiringFeedbackServiceComponent
-      with AutowiringZipServiceComponent
-      with AutowiringFeedbackForSitsServiceComponent
-      with QueuesFeedbackForSits
-      with FeedbackAdjustmentSitsGradeValidation
-}
-
-object AssignmentFeedbackAdjustmentCommand {
 
   final val REASON_SIZE_LIMIT = 600
 
@@ -156,9 +136,7 @@ trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking w
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
       case assignment: Assignment =>
-        p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
-      case exam: Exam =>
-        p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+        p.PermissionCheck(Permissions.Feedback.Manage, assignment)
     }
   }
 }
@@ -179,30 +157,11 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
   self: FeedbackAdjustmentCommandState =>
 
-  def emit(feedback: Feedback): Seq[NotificationWithTarget[AssignmentFeedback, Assignment] with SingleItemNotification[AssignmentFeedback] with AutowiringUserLookupComponent] = {
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback =>
-        val isCm2 = assignmentFeedback.assignment.cm2Assignment
-        val studentsNotifications = if (assignmentFeedback.released) {
-          if (isCm2) {
-            Seq(Notification.init(new Cm2StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-          } else {
-            Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-          }
-        } else {
-          Nil
-        }
-        val adminsNotifications = if (assessment.hasWorkflow) {
-          if (isCm2) {
-            Seq(Notification.init(new Cm2FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-          } else {
-            Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-          }
-        } else {
-          Nil
-        }
-        studentsNotifications ++ adminsNotifications
-      case _ => Seq()
+  def emit(feedback: Feedback): Seq[NotificationWithTarget[Feedback, Assignment] with SingleItemNotification[Feedback] with AutowiringUserLookupComponent] = {
+    if (feedback.released) {
+      Seq(Notification.init(new Cm2StudentFeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+    } else {
+      Nil
     }
   }
 }

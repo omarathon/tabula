@@ -15,13 +15,13 @@ trait AutowiringStudentCourseDetailNoteDaoComponent extends StudentCourseDetailN
 }
 
 trait StudentCourseDetailNoteDao {
-  def saveOrUpdate(note: StudentCourseDetailsNote)
+  def saveOrUpdate(note: StudentCourseDetailsNote): Unit
 
   def getNoteByCode(code: String): Option[StudentCourseDetailsNote]
 
   def getAllNotes: Seq[StudentCourseDetailsNote]
 
-  def delete(note: StudentCourseDetailsNote)
+  def delete(note: StudentCourseDetailsNote): Unit
 }
 
 @Repository

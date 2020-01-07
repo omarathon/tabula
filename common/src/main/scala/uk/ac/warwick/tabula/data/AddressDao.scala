@@ -14,7 +14,7 @@ trait AutowiringAddressDaoComponent extends AddressDaoComponent {
 }
 
 trait AddressDao {
-  def saveOrUpdate(address: Address)
+  def saveOrUpdate(address: Address): Unit
 
   def delete(address: Address): Unit
 

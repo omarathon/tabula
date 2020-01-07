@@ -36,17 +36,17 @@ class PostDataLoggingFilterTest extends TestBase {
     }
   }
 
-  @Test def noParametersAnonymous {
+  @Test def noParametersAnonymous: Unit = {
     assert(filter.generateLogLine(request) === "userId= multipart=false /url.php ")
   }
 
-  @Test def noParametersLoggedIn {
+  @Test def noParametersLoggedIn: Unit = {
     withSsoUser("ada") {
       assert(filter.generateLogLine(request) === "userId=ada multipart=false /url.php ")
     }
   }
 
-  @Test def withParametersLoggedIn {
+  @Test def withParametersLoggedIn: Unit = {
     request.addParameter("sql", "select SYSDATE from hedgefund where snakes='gravy'")
     request.addParameter("multiball", "baseball", "pinball")
     withSsoUser("beatrice") {
@@ -54,19 +54,19 @@ class PostDataLoggingFilterTest extends TestBase {
     }
   }
 
-  @Test def doFilterGet {
+  @Test def doFilterGet: Unit = {
     filter.doFilter(request, response, chain)
-    TestLoggerFactory.retrieveEvents(testLogger) should be('empty)
+    TestLoggerFactory.retrieveEvents(testLogger) should be(Symbol("empty"))
   }
 
-  @Test def doFilterPut {
+  @Test def doFilterPut: Unit = {
     request.setMethod("PUT")
     request.addParameter("query", "acomudashun")
     filter.doFilter(request, response, chain)
-    TestLoggerFactory.retrieveEvents(testLogger) should be('empty)
+    TestLoggerFactory.retrieveEvents(testLogger) should be(Symbol("empty"))
   }
 
-  @Test def doFilterPost {
+  @Test def doFilterPost: Unit = {
     request.setMethod("POST")
     request.addParameter("query", "acomudashun")
     filter.doFilter(request, response, chain)
@@ -76,7 +76,7 @@ class PostDataLoggingFilterTest extends TestBase {
 
   @Test(timeout = 1000)
   @Ignore("This test is broken since TAB-3840 - I think because multipart stuff happens much earlier we don't need to handle it separately any more")
-  def doFilterMultipart {
+  def doFilterMultipart: Unit = {
     val request = new MockMultipartHttpServletRequest()
     request.setMethod("POST")
 

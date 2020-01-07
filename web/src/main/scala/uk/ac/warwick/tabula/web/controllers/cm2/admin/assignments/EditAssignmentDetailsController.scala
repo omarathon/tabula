@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/edit"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/edit"))
 class EditAssignmentDetailsController extends AbstractAssignmentController {
 
   type EditAssignmentDetailsCommand = Appliable[Assignment] with EditAssignmentDetailsCommandState
@@ -24,7 +23,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
   @ModelAttribute("command")
   def createAssignmentDetailsCommand(@PathVariable assignment: Assignment) =
-    EditAssignmentDetailsCommand(mustBeCM2(mandatory(assignment)))
+    EditAssignmentDetailsCommand(mandatory(assignment))
 
   @RequestMapping
   def showForm(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {

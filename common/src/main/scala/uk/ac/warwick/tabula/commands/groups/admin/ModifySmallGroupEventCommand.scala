@@ -73,7 +73,7 @@ trait ModifySmallGroupEventCommandState {
   def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map(_.intValue))
   } getOrElse Seq()
 
-  def weekRanges_=(ranges: Seq[WeekRange]) {
+  def weekRanges_=(ranges: Seq[WeekRange]): Unit = {
     weeks =
       JHashSet(ranges
         .flatMap { range => range.minWeek to range.maxWeek }
@@ -130,7 +130,7 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 abstract class ModifySmallGroupEventCommandInternal
   extends CommandInternal[SmallGroupEvent] with ModifySmallGroupEventCommandState {
 
-  def copyFromDefaults(set: SmallGroupSet) {
+  def copyFromDefaults(set: SmallGroupSet): Unit = {
     weekRanges = set.defaultWeekRanges
     day = set.defaultDay
     startTime = set.defaultStartTime
@@ -150,7 +150,7 @@ abstract class ModifySmallGroupEventCommandInternal
     if (set.defaultTutors != null) tutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
   }
 
-  def copyFrom(event: SmallGroupEvent) {
+  def copyFrom(event: SmallGroupEvent): Unit = {
     title = event.title
 
     Option(event.location).foreach {
@@ -174,7 +174,7 @@ abstract class ModifySmallGroupEventCommandInternal
     if (event.tutors != null) tutors.addAll(event.tutors.knownType.allIncludedIds.asJava)
   }
 
-  def copyTo(event: SmallGroupEvent) {
+  def copyTo(event: SmallGroupEvent): Unit = {
     event.title = title
 
     // If the location name has changed, but the location ID hasn't, we're changing from a map location

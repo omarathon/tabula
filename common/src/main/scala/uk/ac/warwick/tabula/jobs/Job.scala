@@ -93,7 +93,7 @@ trait NotifyingJob[A] { // Doesn't extend Notifies[A] because we don't know whic
 
   var notifications: mutable.Map[JobInstance, ListBuffer[Notification[_, _]]] = mutable.Map[JobInstance, mutable.ListBuffer[Notification[_, _]]]()
 
-  def pushNotification(instance: JobInstance, n: Notification[_, _]) {
+  def pushNotification(instance: JobInstance, n: Notification[_, _]): Unit = {
     notifications.getOrElseUpdate(instance, new mutable.ListBuffer[Notification[_, _]]).append(n)
   }
 

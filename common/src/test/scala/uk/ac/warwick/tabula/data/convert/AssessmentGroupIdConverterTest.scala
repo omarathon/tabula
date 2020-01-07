@@ -11,7 +11,7 @@ class AssessmentGroupIdConverterTest extends TestBase with Mockito {
   val service: AssessmentMembershipService = mock[AssessmentMembershipService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val group = new AssessmentGroup
     group.id = "steve"
 
@@ -20,13 +20,13 @@ class AssessmentGroupIdConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(group)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getAssessmentGroup("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val group = new AssessmentGroup
     group.id = "steve"
 

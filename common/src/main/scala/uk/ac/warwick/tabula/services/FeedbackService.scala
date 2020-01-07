@@ -16,33 +16,31 @@ import uk.ac.warwick.spring.Wire
 trait FeedbackService {
   def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback]
 
-  def loadFeedbackForAssignment(assignment: Assignment): Seq[AssignmentFeedback]
+  def loadFeedbackForAssignment(assignment: Assignment): Seq[Feedback]
 
   def countPublishedFeedback(assignment: Assignment): Int
 
   def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
 
-  def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback]
+  def getFeedbackByUsercode(assignment: Assignment, usercode: String): Option[Feedback]
 
-  def getAssignmentFeedbackById(feedbackId: String): Option[AssignmentFeedback]
+  def getFeedbackById(feedbackId: String): Option[Feedback]
 
   def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 
   def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
 
-  def saveOrUpdate(feedback: Feedback)
+  def saveOrUpdate(feedback: Feedback): Unit
 
-  def saveOrUpdate(mark: Mark)
+  def saveOrUpdate(mark: Mark): Unit
 
-  def delete(feedback: Feedback)
+  def delete(feedback: Feedback): Unit
 
-  def save(feedback: MarkerFeedback)
+  def save(feedback: MarkerFeedback): Unit
 
-  def delete(feedback: MarkerFeedback)
+  def delete(feedback: MarkerFeedback): Unit
 
-  def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
-
-  def addAnonymousIds(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+  def addAnonymousIds(feedbacks: Seq[Feedback]): Seq[Feedback]
 }
 
 @Service(value = "feedbackService")
@@ -65,8 +63,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
     assessment.findFullFeedback(usercode)
   }
 
-  def loadFeedbackForAssignment(assignment: Assignment): Seq[AssignmentFeedback] =
-    session.newCriteria[AssignmentFeedback]
+  def loadFeedbackForAssignment(assignment: Assignment): Seq[Feedback] =
+    session.newCriteria[Feedback]
       .add(is("assignment", assignment))
       .setFetchMode("_marks", FetchMode.JOIN)
       .setFetchMode("markerFeedback", FetchMode.JOIN)
@@ -85,12 +83,12 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
       .asInstanceOf[Number].intValue
   }
 
-  def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback] = transactional(readOnly = true) {
-    dao.getAssignmentFeedbackByUsercode(assignment, usercode)
+  def getFeedbackByUsercode(assignment: Assignment, usercode: String): Option[Feedback] = transactional(readOnly = true) {
+    dao.getFeedbackByUsercode(assignment, usercode)
   }
 
-  def getAssignmentFeedbackById(feedbackId: String): Option[AssignmentFeedback] = {
-    dao.getAssignmentFeedback(feedbackId)
+  def getFeedbackById(feedbackId: String): Option[Feedback] = {
+    dao.getFeedback(feedbackId)
   }
 
   def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback] = {
@@ -105,11 +103,11 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
     dao.delete(feedback)
   }
 
-  def saveOrUpdate(feedback: Feedback) {
+  def saveOrUpdate(feedback: Feedback): Unit = {
     session.saveOrUpdate(feedback)
   }
 
-  def saveOrUpdate(mark: Mark) {
+  def saveOrUpdate(mark: Mark): Unit = {
     session.saveOrUpdate(mark)
   }
 
@@ -120,18 +118,12 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
   def delete(markerFeedback: MarkerFeedback): Unit = transactional() {
     // remove link to parent
     val parentFeedback = markerFeedback.feedback
-    if (markerFeedback == parentFeedback.firstMarkerFeedback) parentFeedback.firstMarkerFeedback = null
-    else if (markerFeedback == parentFeedback.secondMarkerFeedback) parentFeedback.secondMarkerFeedback = null
-    else if (markerFeedback == parentFeedback.thirdMarkerFeedback) parentFeedback.thirdMarkerFeedback = null
     parentFeedback.markerFeedback.remove(markerFeedback)
     saveOrUpdate(parentFeedback)
     dao.delete(markerFeedback)
   }
 
-  def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback] =
-    dao.getExamFeedbackMap(exam, users)
-
-  def addAnonymousIds(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = transactional() {
+  def addAnonymousIds(feedbacks: Seq[Feedback]): Seq[Feedback] = transactional() {
     val assignments = feedbacks.map(_.assignment).distinct
     if (assignments.length > 1) throw new IllegalArgumentException("Can only generate IDs for feedback from the same assignment")
     assignments.headOption.foreach(assignment => {

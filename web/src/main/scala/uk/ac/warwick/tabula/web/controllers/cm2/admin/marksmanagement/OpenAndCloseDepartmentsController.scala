@@ -10,9 +10,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/marksmanagement/departments"))
+@RequestMapping(value = Array("/coursework/admin/marksmanagement/departments"))
 class OpenAndCloseDepartmentsController extends CourseworkController {
 
   type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm

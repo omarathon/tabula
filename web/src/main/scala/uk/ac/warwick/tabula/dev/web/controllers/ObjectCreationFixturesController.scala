@@ -54,7 +54,7 @@ class SmallGroupSetMembershipCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[SmallGroupSet]) {
+  def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[SmallGroupSet]): Unit = {
     cmd.apply()
   }
 }
@@ -69,7 +69,7 @@ class SmallGroupEventCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createEventCommand") cmd: Appliable[SmallGroupEvent]) {
+  def submit(@ModelAttribute("createEventCommand") cmd: Appliable[SmallGroupEvent]): Unit = {
     cmd.apply()
   }
 }
@@ -85,7 +85,7 @@ class SmallGroupMembershipCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[SmallGroup]) {
+  def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[SmallGroup]): Unit = {
     cmd.apply()
   }
 }
@@ -100,7 +100,7 @@ class StaffMemberCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[StaffMember]) {
+  def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[StaffMember]): Unit = {
     cmd.apply()
   }
 }
@@ -115,7 +115,7 @@ class StudentMemberCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[StudentMember]) {
+  def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[StudentMember]): Unit = {
     cmd.apply()
   }
 }
@@ -130,7 +130,7 @@ class RouteCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createRouteCommand") cmd: Appliable[Route]) {
+  def submit(@ModelAttribute("createRouteCommand") cmd: Appliable[Route]): Unit = {
     cmd.apply()
   }
 }
@@ -145,7 +145,7 @@ class CourseCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createCourseCommand") cmd: Appliable[Course]) {
+  def submit(@ModelAttribute("createCourseCommand") cmd: Appliable[Course]): Unit = {
     cmd.apply()
   }
 }
@@ -160,7 +160,7 @@ class AssessmentComponentCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createAssessmentComponentCommand") cmd: Appliable[AssessmentComponent]) {
+  def submit(@ModelAttribute("createAssessmentComponentCommand") cmd: Appliable[AssessmentComponent]): Unit = {
     cmd.apply()
   }
 }
@@ -175,7 +175,7 @@ class UpstreamAssessmentGroupCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createUpstreamAssessmentGroupCommand") cmd: Appliable[UpstreamAssessmentGroup]) {
+  def submit(@ModelAttribute("createUpstreamAssessmentGroupCommand") cmd: Appliable[UpstreamAssessmentGroup]): Unit = {
     cmd.apply()
   }
 }
@@ -190,7 +190,7 @@ class RelationshipCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createRelationship") cmd: Appliable[MemberStudentRelationship]) {
+  def submit(@ModelAttribute("createRelationship") cmd: Appliable[MemberStudentRelationship]): Unit = {
     cmd.apply()
   }
 }
@@ -205,7 +205,7 @@ class ModuleRegistrationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("moduleRegistrationCommand") cmd: Appliable[ModuleRegistration]) {
+  def submit(@ModelAttribute("moduleRegistrationCommand") cmd: Appliable[ModuleRegistration]): Unit = {
     cmd.apply()
   }
 }
@@ -220,7 +220,7 @@ class UpdateAssignmentFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("updateAssignmentCommand") cmd: Appliable[Seq[Assignment]]) {
+  def submit(@ModelAttribute("updateAssignmentCommand") cmd: Appliable[Seq[Assignment]]): Unit = {
     cmd.apply()
   }
 }
@@ -235,7 +235,7 @@ class CreateExtensionFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createExtensionCommand") cmd: Appliable[Extension]) {
+  def submit(@ModelAttribute("createExtensionCommand") cmd: Appliable[Extension]): Unit = {
     cmd.apply()
   }
 }
@@ -250,7 +250,7 @@ class UpdateExtensionSettingsFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("updateExtensionSettingsFixtureCommand") cmd: Appliable[Department]) {
+  def submit(@ModelAttribute("updateExtensionSettingsFixtureCommand") cmd: Appliable[Department]): Unit = {
     cmd.apply()
   }
 }
@@ -265,7 +265,7 @@ class CreateAttendanceMonitoringSchemeFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createAttendanceMonitoringSchemeFixtureCommand") cmd: Appliable[AttendanceMonitoringScheme]) {
+  def submit(@ModelAttribute("createAttendanceMonitoringSchemeFixtureCommand") cmd: Appliable[AttendanceMonitoringScheme]): Unit = {
     cmd.apply()
   }
 }
@@ -280,7 +280,7 @@ class CreateCM2AssignmentFixtureController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createCM2AssignmentFixtureCommand") cmd: Appliable[Assignment]) {
+  def submit(@ModelAttribute("createCM2AssignmentFixtureCommand") cmd: Appliable[Assignment]): Unit = {
     cmd.apply()
   }
 }
@@ -296,7 +296,7 @@ class MemberNoteCreationFixturesController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createMemberNoteCommand") cmd: Appliable[MemberNote]) {
+  def submit(@ModelAttribute("createMemberNoteCommand") cmd: Appliable[MemberNote]): Unit = {
     cmd.apply()
   }
 }

@@ -16,7 +16,7 @@ class ConditionalInterceptorTest extends TestBase with Mockito {
   val request = new MockHttpServletRequest
   val servletRequest = new ServletWebRequest(request)
 
-  @Test def nonMatching {
+  @Test def nonMatching: Unit = {
     interceptor.preHandle(servletRequest)
     verify(delegate, times(1)).preHandle(servletRequest)
 
@@ -27,7 +27,7 @@ class ConditionalInterceptorTest extends TestBase with Mockito {
     verify(delegate, times(1)).afterCompletion(servletRequest, null)
   }
 
-  @Test def matching {
+  @Test def matching: Unit = {
     request.setContextPath("/tabula")
     request.setRequestURI("/tabula/sysadmin/home")
 

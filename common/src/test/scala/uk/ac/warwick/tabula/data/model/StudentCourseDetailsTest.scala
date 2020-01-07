@@ -26,9 +26,9 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
   staff.firstName = "Steve"
   staff.lastName = "Taff"
 
-  @Test def personalTutor() {
+  @Test def personalTutor(): Unit = {
     relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Nil
-    student.freshStudentCourseDetails.head.relationships(relationshipType) should be('empty)
+    student.freshStudentCourseDetails.head.relationships(relationshipType) should be(Symbol("empty"))
 
     val rel = StudentRelationship(staff, relationshipType, student, DateTime.now)
 
@@ -36,7 +36,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
     student.freshStudentCourseDetails.head.relationships(relationshipType).flatMap(_.agentMember) should be(Seq(staff))
   }
 
-  @Test def testModuleRegistrations() {
+  @Test def testModuleRegistrations(): Unit = {
     val member = new StudentMember
     member.universityId = "01234567"
 
@@ -60,7 +60,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
   }
 
-  @Test def relationships() {
+  @Test def relationships(): Unit = {
     val rel1 = StudentRelationship(staff, relationshipType, student, DateTime.now)
     rel1.id = "1"
     val rel2 = StudentRelationship(staff, relationshipType, student, DateTime.now)
@@ -72,7 +72,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
     studentCourseDetails.relationships(relationshipType) should be(Seq(rel1))
   }
 
-  @Test def relationshipsOfTypeOrderedByPercentage() {
+  @Test def relationshipsOfTypeOrderedByPercentage(): Unit = {
     val rel1 = StudentRelationship(staff, relationshipType, student, DateTime.now)
     rel1.percentage = new JBigDecimal(40)
     val rel2 = StudentRelationship(staff, relationshipType, student, DateTime.now)

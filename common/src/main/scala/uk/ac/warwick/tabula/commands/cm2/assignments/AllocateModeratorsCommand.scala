@@ -87,7 +87,7 @@ trait AllocateModeratorsActionDescription extends Describable[Seq[Feedback]] {
       .studentUsercodes(students.asScala.toSeq)
   }
 
-  override def describeResult(d: Description, result: Seq[Feedback]) {
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit = {
     d.assignment(assignment)
       .studentUsercodes(result.map(_.usercode))
   }

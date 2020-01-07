@@ -13,7 +13,7 @@ class ObserverTest extends TestBase {
   class Service {
     var changedState: EventSource[Boolean] = EventSource[Boolean]
 
-    def updateState(state: Boolean) {
+    def updateState(state: Boolean): Unit = {
       changedState.emit(state)
     }
   }
@@ -27,7 +27,7 @@ class ObserverTest extends TestBase {
 
   }
 
-  @Test def listening {
+  @Test def listening: Unit = {
     val service = new Service
     val observer = new ServiceObserver(service)
 
@@ -43,7 +43,7 @@ class ObserverTest extends TestBase {
 
   // Exceptions thrown in observers bubble up to emit().
   @Test(expected = classOf[InvalidKeyException])
-  def exceptions() {
+  def exceptions(): Unit = {
     val state = EventSource[Boolean]
     state.observe { b =>
       throw new InvalidKeyException()

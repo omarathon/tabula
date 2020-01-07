@@ -12,7 +12,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 
   val controller = new SortRoutesController
 
-  @Test def createsCommand() {
+  @Test def createsCommand(): Unit = {
     val department = Fixtures.department("in")
 
     val command = controller.command(department)
@@ -20,7 +20,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     command should be(anInstanceOf[Appliable[Unit]])
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment(): Unit = {
     controller.command(null)
   }
 
@@ -33,11 +33,11 @@ class SortRoutesControllerTest extends TestBase with Mockito {
       populateCount += 1
     }
 
-    def sort() {
+    def sort(): Unit = {
       sortCount += 1
     }
 
-    def apply() {
+    def apply(): Unit = {
       applyCount += 1
     }
   }
@@ -49,7 +49,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     subDepartment.parent = department
   }
 
-  @Test def formOnParent() {
+  @Test def formOnParent(): Unit = {
     new Fixture {
       val command = new CountingCommand(department)
       val mav: Mav = controller.showForm(command)
@@ -62,12 +62,12 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def formOnChild() {
+  @Test def formOnChild(): Unit = {
     new Fixture {
       val command = new CountingCommand(subDepartment)
       val mav: Mav = controller.showForm(command)
       mav.viewName should be(s"redirect:${Routes.admin.department.sortRoutes(department)}")
-      mav.toModel should be('empty)
+      mav.toModel should be(Symbol("empty"))
 
       command.populateCount should be(1)
       command.sortCount should be(1)
@@ -75,7 +75,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def formOnLoneDepartment() {
+  @Test def formOnLoneDepartment(): Unit = {
     new Fixture {
       val command = new CountingCommand(Fixtures.department("xx"))
       val mav: Mav = controller.showForm(command)
@@ -88,7 +88,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def submitParent() {
+  @Test def submitParent(): Unit = {
     new Fixture {
       val command = new CountingCommand(department)
       val errors = new BindException(command, "command")
@@ -103,7 +103,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def submitValidationErrors() {
+  @Test def submitValidationErrors(): Unit = {
     new Fixture {
       val command = new CountingCommand(department)
       val errors = new BindException(command, "command")

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
@@ -28,6 +27,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
 import AssignmentController._
+import uk.ac.warwick.tabula.commands.cm2.assignments.{DeleteAssignmentCommand, SubmissionAndFeedbackCommand, SubmitAssignmentBinding, SubmitAssignmentCommand, SubmitAssignmentCommandInternal, SubmitAssignmentDescription, SubmitAssignmentNotifications, SubmitAssignmentOnBehalfOfPermissions, SubmitAssignmentRequest, SubmitAssignmentTriggers, SubmitAssignmentValidation}
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
@@ -44,7 +44,7 @@ abstract class AssignmentController extends ApiController
 
   @ModelAttribute("getCommand")
   def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-    SubmissionAndFeedbackCommand(module, assignment)
+    SubmissionAndFeedbackCommand(assignment)
 
   def getAssignmentMav(command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, assignment: Assignment): Mav = {
     if (errors.hasErrors) {
@@ -138,7 +138,6 @@ trait EditAssignmentApi {
   @ModelAttribute("editCommand")
   def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
     val cmd = new EditAssignmentCommand(module, assignment, user)
-    cmd.cm2Assignment = assignment.cm2Assignment
     cmd
   }
 
@@ -191,7 +190,7 @@ trait DeleteAssignmentApi {
 
   @ModelAttribute("deleteCommand")
   def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
-    val command = new DeleteAssignmentCommand(module, assignment)
+    val command = new DeleteAssignmentCommand(assignment)
     command.confirm = true
     command
   }
@@ -216,7 +215,7 @@ trait CreateSubmissionApi {
 
   @ModelAttribute("createCommand")
   def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @RequestParam("universityId") member: Member): SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
-    SubmitAssignmentCommand.onBehalfOf(module, assignment, member)
+    SubmitAssignmentCommand.onBehalfOf(assignment, member)
 
   // Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
   @RequestMapping(method = Array(POST), consumes = Array("multipart/mixed"), produces = Array(MediaType.APPLICATION_JSON_VALUE))

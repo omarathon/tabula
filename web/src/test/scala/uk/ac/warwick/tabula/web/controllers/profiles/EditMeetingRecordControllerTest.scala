@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings._
 class EditMeetingRecordControllerTest extends TestBase with Mockito {
 
   @Test
-  def nullMeetingRecordIsAbsolutelyNotOK() {
+  def nullMeetingRecordIsAbsolutelyNotOK(): Unit = {
     val controller = new EditMeetingRecordController()
     intercept[ItemNotFoundException] {
       controller.getCommand(null)
@@ -17,7 +17,7 @@ class EditMeetingRecordControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def returnsAppropriateCommand() {
+  def returnsAppropriateCommand(): Unit = {
     val controller = new EditMeetingRecordController()
 
     // faffy setup to keep the permissions checking happy

@@ -11,20 +11,20 @@ class GeneratedIdTest extends TestBase {
   class Bar extends GeneratedId
 
   @Test
-  def sameObjectsAreEqual() {
+  def sameObjectsAreEqual(): Unit = {
     val a = new Foo().tap(_.id = "test")
     a should equal(a)
   }
 
   @Test
-  def sameClassWithSameIdAreEqual() {
+  def sameClassWithSameIdAreEqual(): Unit = {
     val a = new Foo().tap(_.id = "test")
     val b = new Foo().tap(_.id = "test")
     a should equal(b)
   }
 
   @Test
-  def sameClassWithDifferentIdAreNotEqual() {
+  def sameClassWithDifferentIdAreNotEqual(): Unit = {
     val a = new Foo().tap(_.id = "teimst")
     val b = new Foo().tap(_.id = "test2")
     a should not equal (b)
@@ -32,21 +32,21 @@ class GeneratedIdTest extends TestBase {
 
 
   @Test
-  def differentClassWithSameIdAreNotEqual() {
+  def differentClassWithSameIdAreNotEqual(): Unit = {
     val a = new Foo().tap(_.id = "test")
     val b = new Bar().tap(_.id = "test")
     a should not equal (b)
   }
 
   @Test
-  def differentClassWithNulIdAreNotEqual() {
+  def differentClassWithNulIdAreNotEqual(): Unit = {
     val a = new Foo()
     val b = new Bar()
     a should not equal (b)
   }
 
   @Test
-  def sameClassWithNulIdAreReferenceEqual() {
+  def sameClassWithNulIdAreReferenceEqual(): Unit = {
     val a = new Foo()
     val b = new Foo()
     a should equal(a)
@@ -56,7 +56,7 @@ class GeneratedIdTest extends TestBase {
   // it would be nice if we could make this kind of comparison
   // be true, but we can't
   @Test
-  def extendedClasssWithSameIdAreNotEqual() {
+  def extendedClasssWithSameIdAreNotEqual(): Unit = {
     val a = new Foo() {
       def x = 1
     }.tap(_.id = "test")

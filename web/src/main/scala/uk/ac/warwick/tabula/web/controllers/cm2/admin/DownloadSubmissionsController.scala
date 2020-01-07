@@ -15,9 +15,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/submissions.zip"))
 class DownloadSubmissionsController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -35,9 +34,8 @@ class DownloadSubmissionsController extends CourseworkController {
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/submissions.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/submissions.zip"))
 class DownloadMarkerSubmissionsController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -55,9 +53,8 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/submissions.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/submissions.zip"))
 class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
   @RequestMapping
   def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
@@ -65,9 +62,8 @@ class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkControlle
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download-zip/{filename}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/submissions/download-zip/{filename}"))
 class DownloadAllSubmissionsController extends CourseworkController {
 
   @ModelAttribute("downloadAllSubmissionsCommand")
@@ -80,10 +76,9 @@ class DownloadAllSubmissionsController extends CourseworkController {
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(
-  value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
+  value = Array("/coursework/admin/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
   params = Array("!single"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
@@ -96,9 +91,8 @@ class DownloadSingleSubmissionController extends CourseworkController {
     cmd.apply()
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download/{submission}/{filename}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/submissions/download/{submission}/{filename}"))
 class DownloadSingleSubmissionFileController extends CourseworkController {
   @ModelAttribute("adminSingleSubmissionCommand")
   def getSingleSubmissionCommand(@PathVariable assignment: Assignment, @PathVariable submission: Submission, @PathVariable filename: String): AdminGetSingleSubmissionCommand.Command =
@@ -110,9 +104,8 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback-templates.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/feedback-templates.zip"))
 class DownloadFeedbackSheetsController extends CourseworkController {
 
   @ModelAttribute("downloadFeedbackSheetsCommand")
@@ -126,9 +119,8 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker-templates.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker-templates.zip"))
 class DownloadMarkerTemplatesAsCurrentUserController extends CourseworkController {
   @RequestMapping
   def downloadFeedbackTemplates(@PathVariable assignment: Assignment): Mav = {
@@ -136,9 +128,8 @@ class DownloadMarkerTemplatesAsCurrentUserController extends CourseworkControlle
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marker-templates.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/marker-templates.zip"))
 class DownloadMarkerTemplatesController extends CourseworkController {
 
   @ModelAttribute("downloadFeedbackSheetsCommand")

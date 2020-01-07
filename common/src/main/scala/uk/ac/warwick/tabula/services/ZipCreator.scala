@@ -142,7 +142,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
   def invalidate(name: String): Future[Unit] = objectStorageService.delete(objectKey(name))
 
   private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = { (_, _) => }): Unit = benchmarkTask("Write zip items") {
-    def writeFolder(basePath: String, items: Seq[ZipItem]) {
+    def writeFolder(basePath: String, items: Seq[ZipItem]): Unit = {
       items.zipWithIndex.foreach { case (item, index) =>
         item match {
           case file: ZipFileItem if Option(file.source).nonEmpty && file.length > 0 =>
@@ -186,7 +186,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
     * The output stream is always closed, and if anything bad happens the file
     * is deleted.
     */
-  private def openZipStream(file: File)(fn: ZipArchiveOutputStream => Unit) {
+  private def openZipStream(file: File)(fn: ZipArchiveOutputStream => Unit): Unit = {
     var zip: ZipArchiveOutputStream = null
     var thrownException: Exception = null
     try {

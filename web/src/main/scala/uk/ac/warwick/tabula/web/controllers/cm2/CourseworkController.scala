@@ -10,10 +10,6 @@ abstract class CourseworkController extends BaseController with CourseworkBreadc
   final def optionalCurrentMember: Option[Member] = user.profile
 
   final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
-
-  def mustBeCM2(assignment: Assignment): Assignment =
-    if (!assignment.cm2Assignment) throw new ItemNotFoundException(assignment, "Tried to edit a CM1 assignment using the CM2 edit pages")
-    else assignment
 }
 
 /*

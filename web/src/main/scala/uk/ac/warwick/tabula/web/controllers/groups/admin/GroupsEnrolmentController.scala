@@ -44,7 +44,7 @@ class GroupsEnrolmentController extends GroupsController {
   }
 
   @InitBinder
-  def upstreamGroupBinder(binder: WebDataBinder) {
+  def upstreamGroupBinder(binder: WebDataBinder): Unit = {
     binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
   }
 

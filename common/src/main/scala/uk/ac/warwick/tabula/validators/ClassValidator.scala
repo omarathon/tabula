@@ -11,9 +11,9 @@ import scala.reflect._
   */
 abstract class ClassValidator[A: ClassTag] extends Validator {
 
-  def valid(target: A, errors: Errors)
+  def valid(target: A, errors: Errors): Unit
 
-  final override def validate(target: Object, errors: Errors) {
+  final override def validate(target: Object, errors: Errors): Unit = {
     valid(target.asInstanceOf[A], errors)
   }
 

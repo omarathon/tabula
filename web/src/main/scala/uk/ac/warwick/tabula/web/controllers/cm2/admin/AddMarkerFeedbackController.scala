@@ -12,9 +12,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/feedback"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
   @ModelAttribute
@@ -78,9 +77,8 @@ class AddMarkerFeedbackController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/feedback"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/feedback"))
 class AddMarkerFeedbackControllerCurrentUser extends CourseworkController {
 
   @RequestMapping

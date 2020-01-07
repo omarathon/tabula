@@ -8,7 +8,7 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 
 class FeaturesTest extends TestBase {
 
-  @Test def jackson() {
+  @Test def jackson(): Unit = {
     val features = new FeaturesImpl
     val mapper = new ObjectMapper
 
@@ -20,7 +20,7 @@ class FeaturesTest extends TestBase {
     assert(features.emailStudents === features2.emailStudents)
   }
 
-  @Test def update() {
+  @Test def update(): Unit = {
     val features1 = new FeaturesImpl
     val features2 = new FeaturesImpl
 

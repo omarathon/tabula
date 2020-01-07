@@ -29,7 +29,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
     val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
   }
 
-  @Before def wire() {
+  @Before def wire(): Unit = {
     service.routeDao.asInstanceOf[RouteDaoImpl].sessionFactory = sessionFactory
     service.courseDao.asInstanceOf[CourseDaoImpl].sessionFactory = sessionFactory
     service.permissionsService.asInstanceOf[PermissionsDaoComponent].permissionsDao.asInstanceOf[PermissionsDaoImpl].sessionFactory = sessionFactory

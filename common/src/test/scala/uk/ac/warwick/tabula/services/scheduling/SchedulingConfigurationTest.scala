@@ -18,7 +18,7 @@ class SchedulingConfigurationTest extends AppContextTestBase {
     val jobs: Seq[JobConfiguration[_ <: AutowiredJobBean]] =
       SchedulingConfiguration.scheduledJobs(properties) ++ SchedulingConfiguration.scheduledSitsJobs(properties)
 
-    jobs should not be 'empty
+    jobs should not be Symbol("empty")
 
     // Check a cron job, a simple trigger job, a multi-config job and an unscheduled job
     val cleanupTemporaryFilesJob =
@@ -42,13 +42,13 @@ class SchedulingConfigurationTest extends AppContextTestBase {
     val importProfilesSingleDepartmentJob =
       jobs.filter(_.name == "ImportProfilesSingleDepartmentJob").collectFirst { case j: SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob] => j }
 
-    importProfilesSingleDepartmentJob should not be 'empty
+    importProfilesSingleDepartmentJob should not be Symbol("empty")
 
     // This job is actively unscheduled in test/resources/tabula.properties
     val importModuleMembershipDataJob =
       jobs.filter(_.name == "ImportModuleMembershipDataJob").collectFirst { case j: SimpleUnscheduledJob[ImportModuleMembershipDataJob] => j }
 
-    importProfilesSingleDepartmentJob should not be 'empty
+    importProfilesSingleDepartmentJob should not be Symbol("empty")
   }
 
 }

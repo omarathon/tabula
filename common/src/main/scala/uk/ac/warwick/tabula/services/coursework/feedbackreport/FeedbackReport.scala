@@ -64,7 +64,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
     sheet
   }
 
-  def populateAssignmentSheet(sheet: Sheet) {
+  def populateAssignmentSheet(sheet: Sheet): Unit = {
     for (assignmentInfo <- assignmentData) {
       val row = sheet.createRow(sheet.getLastRowNum + 1)
 
@@ -104,7 +104,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
     }
   }
 
-  def buildAssignmentData() {
+  def buildAssignmentData(): Unit = {
     val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
     val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
       && a.closeDate != null && a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
@@ -172,7 +172,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
   }
 
 
-  def populateModuleSheet(sheet: Sheet) {
+  def populateModuleSheet(sheet: Sheet): Unit = {
     val modules = assignmentData.groupBy(_.assignment.module.code)
     val sortedModules = TreeMap(modules.toSeq: _*)
     for ((moduleCode, assignmentInfoList) <- sortedModules) {
@@ -228,7 +228,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 
     val times: Seq[FeedbackCount] = for {
       submission <- submissions
-      feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, submission.usercode)
+      feedback <- feedbackService.getFeedbackByUsercode(assignment, submission.usercode)
       if feedback.released
       publishEventDate <- Option(feedback.releasedDate).orElse {
         try {

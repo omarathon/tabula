@@ -59,7 +59,7 @@ trait UnlinkAttendanceMonitoringSchemeDescription extends Describable[Map[Depart
 
   }
 
-  override def describeResult(d: Description, result: Map[Department, Seq[AttendanceMonitoringScheme]]) {
+  override def describeResult(d: Description, result: Map[Department, Seq[AttendanceMonitoringScheme]]): Unit = {
     d.property("updatedSchemes" -> result.map { case (dept, schemes) => dept.code -> schemes.map(_.id) })
   }
 }

@@ -147,7 +147,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def findSmallGroupsByMemberCallsMembershipHelper() {
+  def findSmallGroupsByMemberCallsMembershipHelper(): Unit = {
     new Environment {
       val departmentGroup = new DepartmentSmallGroup(new DepartmentSmallGroupSet)
       departmentGroup.linkedGroups.add(group2)
@@ -162,7 +162,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def testRemoveFromSmallGroups() {
+  def testRemoveFromSmallGroups(): Unit = {
     new Environment {
       mockUserLookup.getUserByUserId("cusdx") returns user
 
@@ -188,7 +188,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def testTimetableConflictSmallGroupTimetableClash() {
+  def testTimetableConflictSmallGroupTimetableClash(): Unit = {
     new Environment {
 
       mockUserLookup.getUserByUserId("cusdx") returns user

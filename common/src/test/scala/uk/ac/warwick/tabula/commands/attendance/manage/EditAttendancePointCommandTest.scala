@@ -88,7 +88,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateName() {
+  def validateName(): Unit = {
     new Fixture {
       validator.validateName(errors, "Name")
       errors.hasFieldErrors("name") should be (false)
@@ -98,7 +98,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateWeek() {
+  def validateWeek(): Unit = {
     new Fixture {
       validator.validateWeek(errors, 1, AcademicYear(2015), "startWeek")
       errors.hasFieldErrors("startWeek") should be (false)
@@ -110,7 +110,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateWeeks() {
+  def validateWeeks(): Unit = {
     new Fixture {
       validator.validateWeeks(errors, 2, 3)
       errors.hasFieldErrors("startWeek") should be (false)
@@ -120,7 +120,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateDate() {
+  def validateDate(): Unit = {
     new Fixture {
       validator.validateDate(errors, null, null, "startDate")
       errors.hasFieldErrors("startDate") should be (true)
@@ -149,7 +149,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateDates() {
+  def validateDates(): Unit = {
     new Fixture {
       validator.validateDates(errors, new DateTime().toLocalDate, new DateTime().toLocalDate)
       errors.hasFieldErrors("startDate") should be (false)
@@ -161,7 +161,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTypeForEndDate() {
+  def validateTypeForEndDate(): Unit = {
     new Fixture {
       validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Standard, new DateTime().toLocalDate.minusDays(1))
       errors.hasFieldErrors("pointType") should be (false)
@@ -173,7 +173,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTypeMeeting() {
+  def validateTypeMeeting(): Unit = {
     new Fixture {
       validator.validateTypeMeeting(errors, mutable.Set(), mutable.Set(), 0, null)
       errors.hasFieldErrors("meetingRelationships") should be (true)
@@ -198,7 +198,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTypeSmallGroup() {
+  def validateTypeSmallGroup(): Unit = {
     new Fixture {
       validator.validateTypeSmallGroup(errors, JHashSet(), isAnySmallGroupEventModules = false, smallGroupEventQuantity = 0)
       errors.hasFieldErrors("smallGroupEventQuantity") should be (true)
@@ -212,7 +212,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTypeAssignmentSubmission() {
+  def validateTypeAssignmentSubmission(): Unit = {
     new Fixture {
       validator.validateTypeAssignmentSubmission(
         errors,
@@ -305,7 +305,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateCanPointBeEditedByDate() {
+  def validateCanPointBeEditedByDate(): Unit = {
     val startDate = new DateTime(2014, DateTimeConstants.NOVEMBER, 1, 9, 50, 22, 0) // Autumn term, 14/15
     val studentId = "1234"
     new Fixture {
@@ -325,7 +325,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateDuplicateForWeekForEdit() {
+  def validateDuplicateForWeekForEdit(): Unit = {
     val scheme = new AttendanceMonitoringScheme
     val nonDupPoint = new AttendanceMonitoringPoint
     nonDupPoint.id = "1"
@@ -362,7 +362,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateDuplicateForDateForEdit() {
+  def validateDuplicateForDateForEdit(): Unit = {
     val scheme = new AttendanceMonitoringScheme
     val baseDate = DateTime.now.toLocalDate
     val nonDupPoint = new AttendanceMonitoringPoint

@@ -1,22 +1,19 @@
 package uk.ac.warwick.tabula.helpers.coursework
 
 import org.joda.time.{DateTime, DateTimeConstants}
-import org.mockito.Mockito._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.{Extension, MarkerSelectField, SavedFormValue, WordCountField}
-import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, SavedFormValue, WordCountField}
+import uk.ac.warwick.tabula.helpers.cm2._
+import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService}
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
+import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {
@@ -41,24 +38,17 @@ class CourseworkFiltersTest extends TestBase with Mockito {
   assignment.extensionService = smartMock[ExtensionService]
   assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
-  @Test def of() {
-    CourseworkFilters.of("NotReleasedForMarking") match {
-      case CourseworkFilters.NotReleasedForMarking =>
-      case what: Any => fail("what is this?" + what)
-    }
-  }
 
-  @Test(expected = classOf[IllegalArgumentException]) def invalidFilter() {
+  @Test(expected = classOf[IllegalArgumentException]) def invalidFilter(): Unit = {
     CourseworkFilters.of("Spank")
   }
 
-  @Test def name() {
+  @Test def name(): Unit = {
     CourseworkFilters.AllStudents.getName should be("AllStudents")
-    CourseworkFilters.NotReleasedForMarking.getName should be("NotReleasedForMarking")
     CourseworkFilters.of("NotReleasedForMarking").getName should be("NotReleasedForMarking")
   }
 
-  @Test def AllStudents() {
+  @Test def AllStudents(): Unit = {
     val filter = CourseworkFilters.AllStudents
 
     // Should pass anything and any assignment, so just check with null
@@ -78,7 +68,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     WorkflowItems(
       student = student,
       enhancedSubmission = submission map { s => SubmissionListItem(s, submissionDownloaded) },
-      enhancedFeedback = feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, new FeedbackForSits) },
+      enhancedFeedback = feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, Some(new FeedbackForSits)) },
       enhancedExtension = extension map { e => ExtensionListItem(e, withinExtension) }
     )
 
@@ -92,7 +82,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     withinExtension: Boolean = false,
     assignment: Assignment = null,
     user: User = Fixtures.user()) =
-    Student(
+    AssignmentSubmissionStudentInfo(
       user = user,
       progress = null,
       nextStage = None,
@@ -107,7 +97,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     elems foreach { case (k, v) => filter.put(k, v) }
   }
 
-  @Test def SubmittedBetweenDates() {
+  @Test def SubmittedBetweenDates(): Unit = {
     val filter = CourseworkFilters.SubmittedBetweenDates
 
     // Only applies to assignments that collect submissions
@@ -197,7 +187,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(params)(student(submission = Option(submission))) should be (true)
   }
 
-  @Test def OnTime() {
+  @Test def OnTime(): Unit = {
     val filter = CourseworkFilters.OnTime
 
     // Only applies to assignments that collect submissions
@@ -242,7 +232,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission), extension = Option(extension), withinExtension = true)) should be (false)
   }
 
-  @Test def Late() {
+  @Test def Late(): Unit = {
     val filter = CourseworkFilters.Late
 
     // Only applies to assignments that collect submissions
@@ -286,7 +276,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission), extension = Option(extension), withinExtension = true)) should be (false)
   }
 
-  @Test def WithExtension() {
+  @Test def WithExtension(): Unit = {
     val filter = CourseworkFilters.WithExtension
 
     // Only applies to assignments that collect submissions and accept extensions
@@ -311,7 +301,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(extension = Option(Fixtures.extension()))) should be (true)
   }
 
-  @Test def WithinExtension() {
+  @Test def WithinExtension(): Unit = {
     val filter = CourseworkFilters.WithinExtension
 
     // Only applies to assignments that collect submissions and accept extensions
@@ -365,7 +355,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission), extension = Option(extension), withinExtension = true)) should be (true)
   }
 
-  @Test def WithWordCount() {
+  @Test def WithWordCount(): Unit = {
     val filter = CourseworkFilters.WithWordCount
 
     // Only applies to assignments that collect submissions and have a word count field defined
@@ -469,7 +459,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(params)(student(submission = Option(submission))) should be (true)
   }
 
-  @Test def Submitted() {
+  @Test def Submitted(): Unit = {
     val filter = CourseworkFilters.Submitted
 
     // Only applies to assignments that collect submissions
@@ -484,7 +474,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(Fixtures.submission()))) should be (true)
   }
 
-  @Test def Unsubmitted() {
+  @Test def Unsubmitted(): Unit = {
     val filter = CourseworkFilters.Unsubmitted
 
     // Only applies to assignments that collect submissions
@@ -499,176 +489,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(Fixtures.submission()))) should be (false)
   }
 
-  @Test def NotReleasedForMarking() {
-    val filter = CourseworkFilters.NotReleasedForMarking
-
-    // Only applies to assignments that collect submissions and have a marking workflow
-    assignment.markingWorkflow = null
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (false)
-
-    assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (true)
-
-    val s = Fixtures.user("0672089", "cuscav")
-    val submission = Fixtures.submission("0672089", "cuscav")
-    submission.assignment = assignment
-
-    assignment.isReleasedForMarking(submission.usercode) should be (false)
-
-    filter.predicate(student(user = s, submission = Option(submission), assignment = assignment)) should be (true)
-
-    // Release for marking, no longer fits
-    val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
-    assignment.feedbacks.add(feedback)
-    feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-    assignment.isReleasedForMarking(submission.usercode) should be (true)
-
-    filter.predicate(student(user = s, submission = Option(submission), assignment = assignment)) should be (false)
-  }
-
-  @Test def NotMarked() {
-    val filter = CourseworkFilters.NotMarked
-
-    // Only applies to assignments that collect submissions and have a marking workflow
-    assignment.markingWorkflow = null
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (false)
-
-    val workflow = Fixtures.studentsChooseMarkerWorkflow("my marking workflow")
-    workflow.submissionService = mock[SubmissionService]
-    assignment.markingWorkflow = workflow
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (true)
-
-    // Valid only where a submission exists, has been released for marking, and has a first marker
-    filter.predicate(student(submission = None, assignment = assignment)) should be (false)
-
-    val s = Fixtures.user("0672089", "cuscav")
-    val submission = Fixtures.submission("0672089", "cuscav")
-    submission.assignment = assignment
-    when(workflow.submissionService.getSubmissionByUsercode(assignment, "cuscav")) thenReturn Option(submission)
-
-    assignment.isReleasedForMarking(submission.usercode) should be (false)
-
-    filter.predicate(student(user = s, submission = Option(submission), assignment = assignment)) should be (false)
-
-    // Release for marking and make sure it has a first marker
-    val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
-    assignment.feedbacks.add(feedback)
-    feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-    assignment.isReleasedForMarking(submission.usercode) should be (true)
-
-    val f = new MarkerSelectField
-    f.name = Assignment.defaultMarkerSelectorName
-    assignment.addField(f)
-
-    val v = new SavedFormValue
-    v.name = Assignment.defaultMarkerSelectorName
-    v.value = "cusmab"
-    submission.values.add(v)
-
-    filter.predicate(student(user = s, submission = Option(submission), assignment = assignment)) should be (true)
-  }
-
-  @Test def MarkedByFirst() {
-    val filter = CourseworkFilters.MarkedByFirst
-
-    // Only applies to assignments that collect submissions and have a marking workflow
-    assignment.markingWorkflow = null
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (false)
-
-    assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (true)
-
-    // Valid only if released to second marker OR marking is completed
-    filter.predicate(student(submission = None)) should be (false)
-
-    val submission = Fixtures.submission("0672089", "cuscav")
-    submission.assignment = assignment
-
-    val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
-    assignment.feedbacks.add(feedback)
-    feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-    assignment.isReleasedToSecondMarker(submission.usercode) should be (false)
-
-    filter.predicate(student(feedback = Option(feedback))) should be (false)
-
-    feedback.firstMarkerFeedback.state = MarkingState.MarkingCompleted
-    filter.predicate(student(feedback = Option(feedback))) should be (true)
-
-    feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
-    assignment.isReleasedToSecondMarker(submission.usercode) should be (true)
-
-    filter.predicate(student(feedback = Option(feedback))) should be (true)
-  }
-
-  @Test def MarkedBySecond() {
-    val filter = CourseworkFilters.MarkedBySecond
-
-    // Only applies to assignments that collect submissions and have a marking workflow, and only if it's seen second marking
-    assignment.markingWorkflow = null
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (false)
-
-    assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
-
-    assignment.collectSubmissions = false
-    filter.applies(assignment) should be (false)
-
-    assignment.collectSubmissions = true
-    filter.applies(assignment) should be (true)
-
-    // Valid only if marking is completed
-    filter.predicate(student(feedback = None)) should be (false)
-
-    val submission = Fixtures.submission("0672089", "cuscav")
-    submission.assignment = assignment
-
-    val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
-    assignment.feedbacks.add(feedback)
-    feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-    feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
-
-    filter.predicate(student(feedback = Option(feedback))) should be (false)
-
-    feedback.secondMarkerFeedback.state = MarkingState.MarkingCompleted
-
-    filter.predicate(student(feedback = Option(feedback))) should be (true)
-  }
-
-  @Test def CheckedForPlagiarism() {
+  @Test def CheckedForPlagiarism(): Unit = {
     val filter = CourseworkFilters.CheckedForPlagiarism
 
     // Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -709,7 +530,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission))) should be (true)
   }
 
-  @Test def WithOverlapPercentage() {
+  @Test def WithOverlapPercentage(): Unit = {
     val filter = CourseworkFilters.WithOverlapPercentage
 
     // Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -819,7 +640,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(params)(student(submission = Option(submission))) should be (true)
   }
 
-  @Test def NotCheckedForPlagiarism() {
+  @Test def NotCheckedForPlagiarism(): Unit = {
     val filter = CourseworkFilters.NotCheckedForPlagiarism
 
     // Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -862,7 +683,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission))) should be (false)
   }
 
-  @Test def markedPlagiarised() {
+  @Test def markedPlagiarised(): Unit = {
     val filter = CourseworkFilters.MarkedPlagiarised
 
     // Only applies to assignments that collect submissions
@@ -891,7 +712,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(submission = Option(submission))) should be (false)
   }
 
-  @Test def NoFeedback() {
+  @Test def NoFeedback(): Unit = {
     val filter = CourseworkFilters.NoFeedback
 
     // Should pass any assignment, so just check with null
@@ -900,13 +721,13 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     // Valid where there's no feedback
     filter.predicate(student(feedback = None)) should be (true)
 
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
     feedback.actualMark = Option(41)
     feedback.assignment = assignment
     filter.predicate(student(feedback = Option(feedback))) should be (false)
   }
 
-  @Test def FeedbackNotReleased() {
+  @Test def FeedbackNotReleased(): Unit = {
     val filter = CourseworkFilters.FeedbackNotReleased
 
     // Should pass any assignment, so just check with null
@@ -927,7 +748,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     filter.predicate(student(feedback = Option(feedback))) should be (false)
   }
 
-  @Test def FeedbackNotDownloaded() {
+  @Test def FeedbackNotDownloaded(): Unit = {
     val filter = CourseworkFilters.FeedbackNotDownloaded
 
     // Should pass any assignment, so just check with null

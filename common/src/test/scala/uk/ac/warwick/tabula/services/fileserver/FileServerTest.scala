@@ -23,7 +23,7 @@ class FileServerTest extends TestBase with Mockito {
   val tmpFile: File = File.createTempFile("fileservertest", ".txt")
   FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
 
-  @Test def streamEmptyAttachment {
+  @Test def streamEmptyAttachment: Unit = {
     implicit val req = new MockHttpServletRequest
     implicit val res = new MockHttpServletResponse
 
@@ -42,7 +42,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentAsByteArray().length should be(0)
   }
 
-  @Test def streamAttachment {
+  @Test def streamAttachment: Unit = {
     implicit val req = new MockHttpServletRequest
     implicit val res = new MockHttpServletResponse
 
@@ -63,7 +63,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentAsString() should be(content)
   }
 
-  @Test def serveAttachment {
+  @Test def serveAttachment: Unit = {
     implicit val req = new MockHttpServletRequest
     implicit val res = new MockHttpServletResponse
 
@@ -84,7 +84,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentAsString() should be(content)
   }
 
-  @Test def streamHead {
+  @Test def streamHead: Unit = {
     implicit val req = new MockHttpServletRequest
     req.setMethod("HEAD")
 
@@ -107,7 +107,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentAsByteArray().length should be(0)
   }
 
-  @Test def serveHead {
+  @Test def serveHead: Unit = {
     implicit val req = new MockHttpServletRequest
     req.setMethod("HEAD")
 
@@ -130,7 +130,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentAsByteArray().length should be(0)
   }
 
-  @Test def expiresHeader {
+  @Test def expiresHeader: Unit = {
     implicit val req = new MockHttpServletRequest
     implicit val res = mock[MockHttpServletResponse]
 

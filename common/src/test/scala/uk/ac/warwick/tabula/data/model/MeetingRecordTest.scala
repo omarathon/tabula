@@ -81,7 +81,7 @@ class MeetingRecordTest extends PersistenceTestBase {
     meeting.relationships should be(empty)
     meeting.meetingDate should be(null)
     meeting.format should be(null)
-    meeting should be('approved)
+    meeting should be(Symbol("approved"))
   }
 
   @Test def everydayConstructor() = withFakeTime(aprilFool) {
@@ -101,7 +101,7 @@ class MeetingRecordTest extends PersistenceTestBase {
     meeting.relationships should contain only relationship
     meeting.meetingDate should be(null)
     meeting.format should be(null)
-    meeting should be('approved)
+    meeting should be(Symbol("approved"))
   }
 
   @Test def relationships(): Unit = {

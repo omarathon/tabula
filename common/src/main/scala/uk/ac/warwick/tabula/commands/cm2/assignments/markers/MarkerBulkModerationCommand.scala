@@ -76,7 +76,7 @@ trait MarkerBulkModerationPermissions extends RequiresPermissionsChecking with P
   self: MarkerBulkModerationState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
     }
@@ -119,7 +119,7 @@ trait MarkerBulkModerationDescription extends Describable[Seq[MarkerFeedback]] {
     d.property("oldGrades", validForAdjustment(previousMarker).map(mf => mf.student.getUserId -> mf.grade).toMap)
   }
 
-  override def describeResult(d: Description, result: Seq[MarkerFeedback]) {
+  override def describeResult(d: Description, result: Seq[MarkerFeedback]): Unit = {
     d.property("newMarks", result.map(mf => mf.student.getUserId -> mf.mark).toMap)
     d.property("newGrades", result.map(mf => mf.student.getUserId -> mf.grade).toMap)
   }

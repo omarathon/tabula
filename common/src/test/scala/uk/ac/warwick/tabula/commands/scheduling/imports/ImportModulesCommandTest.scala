@@ -30,7 +30,7 @@ class ImportModulesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def createModule {
+  def createModule: Unit = {
     new Environment {
       when(mockModuleService.getModuleByCode("CS101")) thenReturn None
       when(mockModuleService.getModuleByCode("CS102")) thenReturn None
@@ -43,7 +43,7 @@ class ImportModulesCommandTest extends TestBase with Mockito {
 
   // HFC-354
   @Test
-  def updateModuleName {
+  def updateModuleName: Unit = {
     new Environment {
       val existingModule = new Module {
         code = "CS101"

@@ -18,7 +18,7 @@ class MasqueraderRoleProviderTest extends TestBase {
     ("cuscav", "tabula-masques") -> true
   )
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     withUser("cuscav") {
       provider.getRolesFor(currentUser) should be(Seq(Masquerader()))
     }

@@ -60,7 +60,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
       val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has written some non-final feedback for student1
       val assignment: Assignment = {
-        val feedback = new AssignmentFeedback
+        val feedback = new Feedback
         feedback.usercode = student1.getUserId
         val mf = new MarkerFeedback
         mf.userLookup = userlookupService
@@ -77,7 +77,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         a1.feedbackService = smartMock[FeedbackService]
         a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
-        mf should not be 'finalised
+        mf should not be Symbol("finalised")
 
         a1
       }
@@ -109,7 +109,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
       val cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
       // Set up an assignment where marker1 has finalised some feedback for student1
       val assignment: Assignment = {
-        val feedback = new AssignmentFeedback
+        val feedback = new Feedback
         feedback.usercode = student1.getUserId
         val mf = new MarkerFeedback
         mf.userLookup = userlookupService
@@ -126,7 +126,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         a1.feedbackService = smartMock[FeedbackService]
         a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
-        mf shouldBe 'finalised
+        mf shouldBe Symbol("finalised")
 
         a1
       }
@@ -165,7 +165,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
       // Set up an assignment where marker1 has written some non-final feedback for student1
       val assignment: Assignment = {
         a1.assessmentMembershipService = assessmentMembershipService
-        val feedback = new AssignmentFeedback
+        val feedback = new Feedback
         feedback.usercode = student1.getUserId
         val mf = new MarkerFeedback
         mf.userLookup = userlookupService
@@ -182,7 +182,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         a1.feedbackService = smartMock[FeedbackService]
         a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
-        mf should not be 'finalised
+        mf should not be Symbol("finalised")
         val department = new Department
         val module = new Module("IN101", department)
         a1.module = module
@@ -232,7 +232,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
       val assignment: Assignment = {
         a1.assessmentMembershipService = assessmentMembershipService
 
-        val feedback = new AssignmentFeedback
+        val feedback = new Feedback
         feedback.usercode = student2.getUserId
         val mf = new MarkerFeedback
         mf.userLookup = userlookupService
@@ -249,7 +249,7 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
         a1.feedbackService = smartMock[FeedbackService]
         a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala.toSeq
 
-        mf shouldBe 'finalised
+        mf shouldBe Symbol("finalised")
 
         val department = new Department
         val module = new Module("IN101", department)

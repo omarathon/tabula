@@ -45,7 +45,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
   }
 
   // Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
-  @Test def worksWithNew() {
+  @Test def worksWithNew(): Unit = {
     new Environment {
       val memberDao: MemberDao = smartMock[MemberDao]
       memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
@@ -71,7 +71,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def worksWithExisting() {
+  @Test def worksWithExisting(): Unit = {
     new Environment {
       val existing = new StaffMember("0672089")
       val existingTimetableHash = "1234"
@@ -101,7 +101,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def changesExistingType() {
+  @Test def changesExistingType(): Unit = {
     new Environment {
       val existing = new StaffMember("0672089")
 

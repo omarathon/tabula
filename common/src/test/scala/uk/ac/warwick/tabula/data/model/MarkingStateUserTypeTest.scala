@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState._
 
 class MarkingStateUserTypeTest extends TestBase {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new MarkingStateUserType
     t.convertToObject("ReleasedForMarking") should be(ReleasedForMarking)
     t.convertToObject("InProgress") should be(InProgress)
@@ -16,7 +16,7 @@ class MarkingStateUserTypeTest extends TestBase {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new MarkingStateUserType
     t.convertToValue(ReleasedForMarking) should be("ReleasedForMarking")
     t.convertToValue(InProgress) should be("InProgress")

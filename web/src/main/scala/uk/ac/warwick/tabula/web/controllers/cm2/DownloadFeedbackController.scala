@@ -10,16 +10,15 @@ import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}"))
 class DownloadFeedbackController extends CourseworkController {
 
   var feedbackService: FeedbackService = Wire[FeedbackService]
 
   @ModelAttribute("downloadFeedbackCommand")
   def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-    DownloadFeedbackCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, user.userId).filter(_.released)), optionalCurrentMember)
+    DownloadFeedbackCommand(assignment, mandatory(feedbackService.getFeedbackByUsercode(assignment, user.userId).filter(_.released)), optionalCurrentMember)
 
   @RequestMapping(value = Array("/all/feedback.zip"))
   def getAll(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command): RenderableFile =

@@ -86,9 +86,8 @@ abstract class AbstractFilterExtensionsController extends CourseworkController
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/extensions"))
+@RequestMapping(Array("/coursework/admin/extensions"))
 class FilterExtensionsController extends AbstractFilterExtensionsController {
 
   @ModelAttribute("activeAcademicYear")
@@ -97,9 +96,8 @@ class FilterExtensionsController extends AbstractFilterExtensionsController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/extensions/{academicYear:\\d{4}}"))
+@RequestMapping(Array("/coursework/admin/extensions/{academicYear:\\d{4}}"))
 class FilterExtensionsForYearController extends AbstractFilterExtensionsController {
 
   @ModelAttribute("activeAcademicYear")
@@ -108,9 +106,8 @@ class FilterExtensionsForYearController extends AbstractFilterExtensionsControll
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/extensions/{extension}"))
+@RequestMapping(Array("/coursework/admin/extensions/{extension}"))
 class ExtensionController extends CourseworkController {
 
   type ExtensionsDetailCommand = Appliable[ExtensionDetail] with ViewExtensionState
@@ -157,9 +154,8 @@ class ExtensionController extends CourseworkController {
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/extensions/{extension}/supporting-file/{filename}"))
+@RequestMapping(Array("/coursework/admin/extensions/{extension}/supporting-file/{filename}"))
 class DownloadExtensionAttachmentController extends CourseworkController {
 
   type DownloadAttachmentCommand = Appliable[Option[RenderableAttachment]] with ModifyExtensionState
@@ -179,9 +175,8 @@ class DownloadExtensionAttachmentController extends CourseworkController {
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/extensions"))
 class ListExtensionsForAssignmentController extends CourseworkController {
   @ModelAttribute("listCommand")
   def listCommand(@PathVariable assignment: Assignment): ListExtensionsForAssignmentCommand.Command =
@@ -199,9 +194,8 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions/{student}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/extensions/{student}"))
 class EditExtensionController extends CourseworkController with ExtensionServices {
 
   type ExtensionsDetailCommand = Appliable[DisplayExtensionDetail] with DisplayExtensionState
@@ -316,9 +310,8 @@ class EditExtensionController extends CourseworkController with ExtensionService
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/manage/extensions"))
+@RequestMapping(Array("/coursework/admin/department/{department}/manage/extensions"))
 class RedirectExtensionManagementController extends CourseworkController with AcademicYearScopedController
   with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
@@ -331,9 +324,8 @@ class RedirectExtensionManagementController extends CourseworkController with Ac
     Redirect(s"${Routes.admin.extensions(activeAcademicYear.getOrElse(AcademicYear.now()))}?departments=${mandatory(department).code}")
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/manage/extensions"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear:\\d{4}}/manage/extensions"))
 class RedirectExtensionManagementForYearController extends CourseworkController {
   @RequestMapping def redirect(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav =
     Redirect(s"${Routes.admin.extensions(academicYear)}?departments=${mandatory(department).code}")

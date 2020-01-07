@@ -28,11 +28,11 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
   }
 
   // don't care about handling this, but required for interface
-  override def headerFooter(text: String, isHeader: Boolean, tagName: String) {}
+  override def headerFooter(text: String, isHeader: Boolean, tagName: String): Unit = {}
 
   def newCurrentItem: A
 
-  override def startRow(row: Int) {
+  override def startRow(row: Int): Unit = {
     logger.debug("startRow: " + row.toString)
     if (row > 0) {
       isFirstRow = false
@@ -40,7 +40,7 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
     }
   }
 
-  override def endRow(row: Int) {
+  override def endRow(row: Int): Unit = {
     if (!isFirstRow)
       items.add(currentItem)
   }

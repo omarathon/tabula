@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkCommandTypes
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Submission}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
@@ -26,7 +26,7 @@ object StudentAssignmentInfoHelper {
    * downloadPdf	The URL that a student would go to to download a PDF version of the feedback
    */
   def makeFeedbackInfo(
-    feedback: AssignmentFeedback,
+    feedback: Feedback,
     toplevelUrl: String,
   ): Map[String, Any] = {
     val assignment: Assignment = feedback.assignment
@@ -60,7 +60,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
   def jsonAssignmentInfoObject(info: AssignmentInfo): Map[String, Any] = {
     val assignment: Assignment = info("assignment").asInstanceOf[Assignment]
     val submission: Option[Submission] = info("submission").asInstanceOf[Option[Submission]]
-    val feedback: Option[AssignmentFeedback] = info("feedback").asInstanceOf[Option[AssignmentFeedback]]
+    val feedback: Option[Feedback] = info("feedback").asInstanceOf[Option[Feedback]]
     val extension: Option[Extension] = info("extension").asInstanceOf[Option[Extension]]
 
     val basicInfo = Map(

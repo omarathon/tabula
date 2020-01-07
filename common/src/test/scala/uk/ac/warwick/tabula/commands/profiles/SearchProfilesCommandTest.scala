@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.Member
 
 class SearchProfilesCommandTest extends TestBase with Mockito {
 
-  @Test def validQuery() {
+  @Test def validQuery(): Unit = {
 
     val member = smartMock[Member]
     val user = smartMock[CurrentUser]

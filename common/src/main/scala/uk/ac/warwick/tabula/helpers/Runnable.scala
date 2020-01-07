@@ -9,7 +9,7 @@ import java.util.concurrent.Callable
   * run, which is more concise.
   */
 final class Runnable(f: => Unit) extends JRunnable {
-  override def run() {
+  override def run(): Unit = {
     f
   }
 }

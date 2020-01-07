@@ -18,7 +18,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   val operator: User = mock[User]
 
   @Test
-  def marksSelfSignupGroupAsOpen() {
+  def marksSelfSignupGroupAsOpen(): Unit = {
     val department = new Department
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -28,7 +28,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def ignoresSetsThatAreNotSelfSignUp() {
+  def ignoresSetsThatAreNotSelfSignUp(): Unit = {
     val department = new Department
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.Manual
@@ -39,7 +39,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def processesMultipleSets() {
+  def processesMultipleSets(): Unit = {
     val department = new Department
     val set1 = new SmallGroupSet()
     set1.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -53,7 +53,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def returnsUpdatedSets() {
+  def returnsUpdatedSets(): Unit = {
     val department = new Department
     val set = new SmallGroupSet()
     set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -63,7 +63,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def ignoresSetsAlreadyOpened() {
+  def ignoresSetsAlreadyOpened(): Unit = {
     val dept = new Department
     val set = new SmallGroupSet()
     set.openForSignups = true
@@ -75,7 +75,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def requiresUpdatePermissionsOnAllSetsToBeOpened() {
+  def requiresUpdatePermissionsOnAllSetsToBeOpened(): Unit = {
     val dept = new Department
     val set1 = new SmallGroupSet()
     val set2 = new SmallGroupSet()
@@ -92,7 +92,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def auditsLogsTheGroupsetsToBeOpened() {
+  def auditsLogsTheGroupsetsToBeOpened(): Unit = {
     val dept = new Department
     val sets = Seq(new SmallGroupSet())
     val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState {
@@ -143,7 +143,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def notifiesEachAffectedUser() {
+  def notifiesEachAffectedUser(): Unit = {
     new NotificationFixture {
       val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 
@@ -181,15 +181,15 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
       }
 
       notifications.size should be(3)
-      notifications.find(_.recipients.head == student1) should be('defined)
-      notifications.find(_.recipients.head == student2) should be('defined)
-      notifications.find(_.recipients.head == student3) should be('defined)
+      notifications.find(_.recipients.head == student1) should be(Symbol("defined"))
+      notifications.find(_.recipients.head == student2) should be(Symbol("defined"))
+      notifications.find(_.recipients.head == student3) should be(Symbol("defined"))
 
     }
   }
 
   @Test
-  def CommandStateReportsFirstGroupset {
+  def CommandStateReportsFirstGroupset: Unit = {
     val dept = new Department
     val set = new SmallGroupSet
     val oneItem = new OpenSmallGroupSetState {
@@ -209,7 +209,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[RuntimeException])
-  def CommandStateThrowsExceptionIfAskedForSingleSetFromNone {
+  def CommandStateThrowsExceptionIfAskedForSingleSetFromNone: Unit = {
     val dept = new Department
     val emptyList = new OpenSmallGroupSetState {
       val department: Department = dept
@@ -220,7 +220,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def openSmallGroupCommandGluesEverythingTogether() {
+  def openSmallGroupCommandGluesEverythingTogether(): Unit = {
     val department = new Department
     val command = OpenSmallGroupSetCommand(department, Seq(new SmallGroupSet), operator, SmallGroupSetSelfSignUpState.Open)
 

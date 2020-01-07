@@ -41,9 +41,6 @@ class FeedbackDaoTest extends PersistenceTestBase {
     val mf1 = Fixtures.markerFeedback(f1)
     val mf2 = Fixtures.markerFeedback(f2)
 
-    f1.firstMarkerFeedback = mf1
-    f2.firstMarkerFeedback = mf2
-
     session.saveOrUpdate(f1)
     session.saveOrUpdate(mf1)
     session.saveOrUpdate(f2)
@@ -51,35 +48,32 @@ class FeedbackDaoTest extends PersistenceTestBase {
     session.flush()
 
     val mf3 = Fixtures.markerFeedback(f3)
-
-    f3.firstMarkerFeedback = mf3
-
     session.saveOrUpdate(f3)
     session.saveOrUpdate(mf3)
     session.flush()
     session.clear()
 
-    dao.getAssignmentFeedback(f1.id) should be(Some(f1))
-    dao.getAssignmentFeedback(f2.id) should be(Some(f2))
-    dao.getAssignmentFeedback(f3.id) should be(Some(f3))
-    dao.getAssignmentFeedback("blah") should be(None)
+    dao.getFeedback(f1.id) should be(Some(f1))
+    dao.getFeedback(f2.id) should be(Some(f2))
+    dao.getFeedback(f3.id) should be(Some(f3))
+    dao.getFeedback("blah") should be(None)
 
     dao.getMarkerFeedback(mf1.id).map(_.feedback) should be(Some(f1))
     dao.getMarkerFeedback(mf2.id).map(_.feedback) should be(Some(f2))
     dao.getMarkerFeedback(mf3.id).map(_.feedback) should be(Some(f3))
     dao.getMarkerFeedback("blah") should be(None)
 
-    dao.getAssignmentFeedbackByUsercode(ass1, "0205225") should be(Some(f1))
-    dao.getAssignmentFeedbackByUsercode(ass2, "0205225") should be(Some(f2))
-    dao.getAssignmentFeedbackByUsercode(ass1, "0205226") should be(Some(f3))
-    dao.getAssignmentFeedbackByUsercode(ass2, "0205226") should be(None)
+    dao.getFeedbackByUsercode(ass1, "0205225") should be(Some(f1))
+    dao.getFeedbackByUsercode(ass2, "0205225") should be(Some(f2))
+    dao.getFeedbackByUsercode(ass1, "0205226") should be(Some(f3))
+    dao.getFeedbackByUsercode(ass2, "0205226") should be(None)
     session.flush()
 
-    dao.delete(dao.getAssignmentFeedback(f1.id).get)
+    dao.delete(dao.getFeedback(f1.id).get)
     session.flush()
 
-    dao.getAssignmentFeedbackByUsercode(ass1, "0205225") should be(None)
-    dao.getAssignmentFeedback(f1.id) should be(None)
+    dao.getFeedbackByUsercode(ass1, "0205225") should be(None)
+    dao.getFeedback(f1.id) should be(None)
     dao.getMarkerFeedback(mf1.id) should be(None)
   }
 

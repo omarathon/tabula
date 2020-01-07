@@ -3,28 +3,23 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.userlookup.User
 
 trait FeedbackDao {
-  def getAssignmentFeedback(id: String): Option[AssignmentFeedback]
+  def getFeedback(id: String): Option[Feedback]
 
-  def getExamFeedback(id: String): Option[ExamFeedback]
-
-  def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback]
+  def getFeedbackByUsercode(assignment: Assignment, usercode: String): Option[Feedback]
 
   def getMarkerFeedback(id: String): Option[MarkerFeedback]
 
   def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
 
-  def save(feedback: Feedback)
+  def save(feedback: Feedback): Unit
 
-  def delete(feedback: Feedback)
+  def delete(feedback: Feedback): Unit
 
-  def save(feedback: MarkerFeedback)
+  def save(feedback: MarkerFeedback): Unit
 
-  def delete(feedback: MarkerFeedback)
-
-  def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
+  def delete(feedback: MarkerFeedback): Unit
 
   def getLastAnonIndex(assignment: Assignment): Int
 }
@@ -32,9 +27,7 @@ trait FeedbackDao {
 abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
   self: ExtendedSessionComponent =>
 
-  override def getAssignmentFeedback(id: String): Option[AssignmentFeedback] = getById[AssignmentFeedback](id)
-
-  override def getExamFeedback(id: String): Option[ExamFeedback] = getById[ExamFeedback](id)
+  override def getFeedback(id: String): Option[Feedback] = getById[Feedback](id)
 
   override def getMarkerFeedback(id: String): Option[MarkerFeedback] = getById[MarkerFeedback](id)
 
@@ -44,8 +37,8 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
       .add(is("feedback", feedback))
       .seq
 
-  override def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback] =
-    session.newCriteria[AssignmentFeedback]
+  override def getFeedbackByUsercode(assignment: Assignment, usercode: String): Option[Feedback] =
+    session.newCriteria[Feedback]
       .add(is("usercode", usercode))
       .add(is("assignment", assignment))
       .uniqueResult
@@ -55,13 +48,7 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
   }
 
   override def delete(feedback: Feedback): Unit = {
-    // We need to delete any markerfeedback first
-    Option(feedback.firstMarkerFeedback).foreach(_.markDeleted())
-    Option(feedback.secondMarkerFeedback).foreach(_.markDeleted())
-    Option(feedback.thirdMarkerFeedback).foreach(_.markDeleted())
-
     feedback.clearAttachments()
-
     session.delete(feedback)
   }
 
@@ -71,19 +58,6 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
   override def delete(feedback: MarkerFeedback): Unit = {
     session.delete(feedback)
-  }
-
-  override def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback] = {
-    safeInSeq(
-      () => {
-        session.newCriteria[ExamFeedback]
-          .add(is("exam", exam))
-      },
-      "usercode",
-      users.map(_.getUserId)
-    ).groupBy(_.usercode).map { case (usercode, feedbacks) =>
-      users.find(_.getUserId == usercode).get -> feedbacks.head
-    }
   }
 
   override def getLastAnonIndex(assignment: Assignment): Int = {

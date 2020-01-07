@@ -19,7 +19,7 @@ class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebReq
 
   private var excludeString: String = _
 
-  override def afterPropertiesSet {
+  override def afterPropertiesSet(): Unit = {
     if (!excludePath.endsWith("/*")) throw new IllegalArgumentException("excludePath only knows how to end in /*")
     excludeString = excludePath.substring(0, excludePath.length - 2)
   }
@@ -51,7 +51,7 @@ class ConditionalHandlerInterceptorAdapter(val delegate: HandlerInterceptorAdapt
 
   private var excludeString: String = _
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     if (!excludePath.endsWith("/*")) throw new IllegalArgumentException("excludePath only knows how to end in /*")
     excludeString = excludePath.substring(0, excludePath.length - 2)
   }

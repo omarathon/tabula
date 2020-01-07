@@ -374,4 +374,4 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
   }
 }
 
-@SerialVersionUID(5445676324342l) case class CelcatStaffInfo(celcatId: String, universityId: UniversityId, initials: String, fullName: String) extends Serializable
+@SerialVersionUID(5445676324342L) case class CelcatStaffInfo(celcatId: String, universityId: UniversityId, initials: String, fullName: String) extends Serializable

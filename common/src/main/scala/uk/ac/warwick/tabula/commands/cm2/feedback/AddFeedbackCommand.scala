@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Description, Notifies, UploadedFile}
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
@@ -16,13 +15,13 @@ import scala.jdk.CollectionConverters._
 class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: CurrentUser)
   extends UploadFeedbackCommand[Seq[Feedback]](assignment, marker) with Notifies[Seq[Feedback], Feedback] {
 
-  PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+  PermissionCheck(Permissions.Feedback.Manage, assignment)
 
   override def applyInternal(): Seq[Feedback] = transactional() {
 
     def saveFeedback(student: User, file: UploadedFile): Option[Feedback] = {
       val feedback = assignment.findFeedback(student.getUserId).getOrElse({
-        val newFeedback = new AssignmentFeedback
+        val newFeedback = new Feedback
         newFeedback.assignment = assignment
         newFeedback.uploaderId = marker.getUserId
         newFeedback._universityId = student.getWarwickId
@@ -50,7 +49,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
     }).toList.flatten
   }
 
-  override def validateExisting(item: FeedbackItem, errors: Errors) {
+  override def validateExisting(item: FeedbackItem, errors: Errors): Unit = {
     // warn if feedback for this student is already uploaded
     assignment.feedbacks.asScala.find { feedback => feedback._universityId == item.uniNumber && feedback.hasAttachments } match {
       case Some(feedback) =>
@@ -62,7 +61,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
     }
   }
 
-  private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback) {
+  private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback): Unit = {
     case class duplicatePair(attached: FileAttachment, feedback: FileAttachment)
 
     val attachmentNames = item.file.attached.asScala.toSeq.map(_.name)
@@ -70,7 +69,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
       attached <- item.file.attached.asScala;
       feedback <- feedback.attachments.asScala
       if attached.name == feedback.name
-    ) yield new duplicatePair(attached, feedback)
+    ) yield duplicatePair(attached, feedback)
 
     item.duplicateFileNames = withSameName.filterNot(p => p.attached.isDataEqual(p.feedback)).map(_.attached.name).toSet
     item.ignoredFileNames = withSameName.map(_.attached.name).toSet -- item.duplicateFileNames
@@ -90,12 +89,7 @@ class AddFeedbackCommand(assignment: Assignment, marker: User, currentUser: Curr
 
   def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = {
     updatedFeedback.filter(_.released).flatMap { feedback =>
-      HibernateHelpers.initialiseAndUnproxy(feedback) match {
-        case assignmentFeedback: AssignmentFeedback =>
-          Option(Notification.init(new FeedbackChangeNotification, marker, assignmentFeedback, assignment))
-        case _ =>
-          None
-      }
+      Option(Notification.init(new FeedbackChangeNotification, marker, feedback, assignment))
     }
   }
 }

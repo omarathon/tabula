@@ -11,7 +11,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class AdminGetSingleFeedbackCommand(assignment: Assignment, feedback: Feedback) extends Command[RenderableFile] with ReadOnly {
-  PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
+  PermissionCheck(Permissions.Feedback.Read, feedback)
 
   var zipService: ZipService = Wire.auto[ZipService]
 
@@ -23,7 +23,7 @@ class AdminGetSingleFeedbackCommand(assignment: Assignment, feedback: Feedback) 
 }
 
 class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
-  PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
+  PermissionCheck(Permissions.Feedback.Read, feedback)
 
   var filename: String = _
 
@@ -48,7 +48,7 @@ class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedba
 class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableFile] with ReadOnly {
 
   mustBeLinked(assignment, module)
-  PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+  PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
 
   var zipService: ZipService = Wire.auto[ZipService]
 

@@ -12,11 +12,10 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
   * Provides access to the Turnitin Document Viewer for a submission
   * that's been submitted to Turnitin.
   */
-@Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array(
-  "/${cm2.prefix}/admin/assignments/{assignment}/turnitin/report/{attachment}",
-  "/${cm2.prefix}/admin/assignments/{assignment}/turnitin/lti-report/{attachment}"
+  "/coursework/admin/assignments/{assignment}/turnitin/report/{attachment}",
+  "/coursework/admin/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
 class TurnitinReportController extends CourseworkController {
 

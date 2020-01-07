@@ -90,7 +90,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
     Result(studentCourseDetails, lastMeetingWithTotalPendingApprovalsMap)
   }
 
-  def onBind(result: BindingResult) {
+  def onBind(result: BindingResult): Unit = {
     // Add all non-withdrawn codes to SPR statuses by default
     if (sprStatuses.isEmpty) {
       allSprStatuses.filterNot(SitsStatus.isWithdrawnStatusOnRoute).foreach {

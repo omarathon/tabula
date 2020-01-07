@@ -29,7 +29,7 @@ class UploadedFileTest extends TestBase with Mockito {
   }
 
   @Test // HFC-375
-  def ignoreEmptyMultipartFiles() {
+  def ignoreEmptyMultipartFiles(): Unit = {
     val uploadedFile = new UploadedFile
     uploadedFile.maintenanceMode = smartMock[MaintenanceModeService]
     uploadedFile.fileDao = smartMock[FileDao]
@@ -43,7 +43,7 @@ class UploadedFileTest extends TestBase with Mockito {
   }
 
   @Test
-  def uploads() {
+  def uploads(): Unit = {
     val uploadedFile = new UploadedFile
     uploadedFile.upload = JArrayList()
     uploadedFile.hasUploads should be (false)
@@ -60,7 +60,7 @@ class UploadedFileTest extends TestBase with Mockito {
 
 
   @Test // TAB-48
-  def ignoreSystemFiles() {
+  def ignoreSystemFiles(): Unit = {
     val uploadedFile = new UploadedFile
     uploadedFile.maintenanceMode = smartMock[MaintenanceModeService]
     uploadedFile.disallowedFilenames = List("thumbs.db")
@@ -77,7 +77,7 @@ class UploadedFileTest extends TestBase with Mockito {
 
 
   @Test // TAB-48
-  def ignoreAppleDouble() {
+  def ignoreAppleDouble(): Unit = {
     val uploadedFile = new UploadedFile
     uploadedFile.maintenanceMode = smartMock[MaintenanceModeService]
     uploadedFile.disallowedPrefixes = List("._")
@@ -92,7 +92,7 @@ class UploadedFileTest extends TestBase with Mockito {
   }
 
   @Test
-  def customDisallowed() {
+  def customDisallowed(): Unit = {
     val uploadedFile = new UploadedFile
     uploadedFile.maintenanceMode = smartMock[MaintenanceModeService]
     uploadedFile.fileDao = smartMock[FileDao]

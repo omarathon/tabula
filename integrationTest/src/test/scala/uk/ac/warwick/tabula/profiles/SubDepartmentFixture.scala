@@ -11,7 +11,7 @@ trait SubDepartmentFixture extends BrowserTest with GivenWhenThen with FixturesD
   val TEST_UNDERGRAD_COURSE_CODE = "Ux123"
   val TEST_POSTGRAD_COURSE_CODE = "Rx123"
 
-  def beforeEverything() {
+  def beforeEverything(): Unit = {
     Given("A department xxx,a sub-department xxx-ug, and a sub-sub department xxx-ug1 exist")
     And("Admin1 is a departmental admin in xxx")
     And("Admin3 is a departmental admin in xxx-ug")

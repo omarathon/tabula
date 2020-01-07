@@ -14,11 +14,7 @@
 <#macro assignment_wizard current_step module edit_mode=false assignment={}>
   <p class="progress-arrows">
     <#if edit_mode>
-      <#if assignment.cm2Assignment>
-        <#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
-      <#else>
-        <#local details_url><@routes.coursework.assignmentedit assignment /></#local>
-      </#if>
+      <#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
       <@wizard_link
       label="Assignment details"
       is_first=true
@@ -45,7 +41,7 @@
       tooltip="Edit students"
       url=students_url />
 
-      <#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+      <#if assignment.cm2MarkingWorkflow??>
         <#local markers_url><@routes.cm2.assignmentmarkers assignment 'edit'/></#local>
         <@wizard_link
         label="Markers"
@@ -85,11 +81,7 @@
     <#else>
       <#assign displayLink=assignment.id?? />
       <#if displayLink><#-- Assignment not persisted yet - no link -->
-        <#if assignment.cm2Assignment>
-          <#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
-        <#else>
-          <#local details_url><@routes.coursework.assignmentedit assignment /></#local>
-        </#if>
+      <#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
       </#if>
       <@wizard_link
       label="Assignment details"
@@ -117,7 +109,7 @@
       tooltip="Edit students"
       url=students_url />
 
-      <#if displayLink && assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+      <#if displayLink && assignment.cm2MarkingWorkflow??>
         <#local markers_url><#if assignment.id??><@routes.cm2.assignmentmarkers assignment 'new' /></#if></#local>
         <@wizard_link
         label="Markers"

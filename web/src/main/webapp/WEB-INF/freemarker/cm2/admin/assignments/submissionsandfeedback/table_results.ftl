@@ -43,19 +43,13 @@
               <col class="word-count" />
             </#if>
 
-            <#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
-              <#if assignment.cm2Assignment>
-                <#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
-                <#list results.workflowMarkers as marker_col>
-                  <col class="${marker_col}" />
-                </#list>
-                <#if assignment.hasModeration>
-                  <col class="wasModerated" />
-                </#if>
-              <#else>
-                <#assign submissionColspan=submissionColspan+2 />
-                <col class="first-marker" />
-                <col class="second-marker" />
+            <#if assignment.cm2MarkingWorkflow??>
+              <#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
+              <#list results.workflowMarkers as marker_col>
+                <col class="${marker_col}" />
+              </#list>
+              <#if assignment.hasModeration>
+                <col class="wasModerated" />
               </#if>
             </#if>
           </colgroup>
@@ -124,18 +118,13 @@
             <#if assignment.wordCountField??>
               <th class="submission sortable" title="Declared word count">Words</th>
             </#if>
-            <#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
-              <#if assignment.cm2Assignment>
-                <#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
-                <#list results.workflowMarkers as marker_col>
-                  <th class="submission sortable">${marker_col}</th>
-                </#list>
-                <#if assignment.hasModeration>
-                  <th class="wasModerated sortable">Was moderated</th>
-                </#if>
-              <#else>
-                <th class="submission sortable">First Marker</th>
-                <th class="submission sortable">Second Marker</th>
+            <#if assignment.cm2MarkingWorkflow??>
+              <#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
+              <#list results.workflowMarkers as marker_col>
+                <th class="submission sortable">${marker_col}</th>
+              </#list>
+              <#if assignment.hasModeration>
+                <th class="wasModerated sortable">Was moderated</th>
               </#if>
             </#if>
 
@@ -191,9 +180,9 @@
               </td>
               <#if submission?? && submission.submittedDate??>
                 <td class="submitted" data-datesort="${submission.submittedDate.millis?c!''}">
-								<span tabindex="0" class="date tabula-tooltip" data-title="${lateness!''}">
-									<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
-								</span>
+                <span tabindex="0" class="date tabula-tooltip" data-title="${lateness!''}">
+                  <@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
+                </span>
                 </td>
               <#else>
                 <td class="submitted"></td>
@@ -218,39 +207,22 @@
                   </#if>
                 </td>
               </#if>
-              <#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
-                <#if assignment.cm2Assignment>
-                  <#if enhancedFeedback??>
-                    <#local feedback=enhancedFeedback.feedback />
-                    <#list results.workflowMarkers as markerRole>
-                      <#local markerUser=feedback.feedbackMarkerByAllocationName(markerRole)! />
-                      <td>
-                        <#if markerUser?has_content>
-                          ${markerUser.fullName}
-                        </#if>
-                      </td>
-                    </#list>
-                    <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("Yes", "No")}</td></#if>
-                  <#else>
-                    <#list results.workflowMarkers as markerRole>
-                      <td></td>
-                    </#list>
-                  </#if>
+              <#if assignment.cm2MarkingWorkflow??>
+                <#if enhancedFeedback??>
+                  <#local feedback=enhancedFeedback.feedback />
+                  <#list results.workflowMarkers as markerRole>
+                    <#local markerUser=feedback.feedbackMarkerByAllocationName(markerRole)! />
+                    <td>
+                      <#if markerUser?has_content>
+                        ${markerUser.fullName}
+                      </#if>
+                    </td>
+                  </#list>
+                  <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("Yes", "No")}</td></#if>
                 <#else>
-                  <td>
-                    <#if submissionfeedbackinfo.user.userId??>
-                      <#if (assignment.getStudentsFirstMarker(submissionfeedbackinfo.user.userId)!"")?has_content>
-                        ${assignment.getStudentsFirstMarker(submissionfeedbackinfo.user.userId).fullName}
-                      </#if>
-                    </#if>
-                  </td>
-                  <td>
-                    <#if submissionfeedbackinfo.user.userId??>
-                      <#if (assignment.getStudentsSecondMarker(submissionfeedbackinfo.user.userId)!"")?has_content>
-                        ${assignment.getStudentsSecondMarker(submissionfeedbackinfo.user.userId).fullName}
-                      </#if>
-                    </#if>
-                  </td>
+                  <#list results.workflowMarkers as markerRole>
+                    <td></td>
+                  </#list>
                 </#if>
               </#if>
               <#if results.hasOriginalityReport>

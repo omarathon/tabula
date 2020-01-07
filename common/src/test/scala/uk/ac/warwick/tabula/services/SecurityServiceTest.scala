@@ -19,7 +19,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     true
   }
 
-  @Test def godMode() {
+  @Test def godMode(): Unit = {
     val securityService = new SecurityService
 
     val currentUser = new CurrentUser(user, user, god = true)
@@ -31,7 +31,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     securityService.can(currentUser, null, null) should be (true)
   }
 
-  @Test def explicitPermission() {
+  @Test def explicitPermission(): Unit = {
     val securityService = new SecurityService
 
     val department = new Department
@@ -56,7 +56,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be (true)
   }
 
-  @Test def role() {
+  @Test def role(): Unit = {
     val securityService = new SecurityService
 
     val department = new Department
@@ -81,7 +81,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(new StudentRelationshipType), null) should be (false)
   }
 
-  @Test def globalPermission() {
+  @Test def globalPermission(): Unit = {
     val department = new Department
     val currentUser = new CurrentUser(user, user)
 
@@ -107,7 +107,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def exactScopeMatch() {
+  @Test def exactScopeMatch(): Unit = {
     val department = new Department
     val currentUser = new CurrentUser(user, user)
 
@@ -129,7 +129,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def scopelessMatch() {
+  @Test def scopelessMatch(): Unit = {
     val department = new Department
     val currentUser = new CurrentUser(user, user)
 
@@ -147,7 +147,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def higherScopeMatch() {
+  @Test def higherScopeMatch(): Unit = {
     val module = new Module
     val department = new Department
     module.adminDepartment = department
@@ -172,7 +172,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def scopelessPermission() {
+  @Test def scopelessPermission(): Unit = {
     val currentUser = new CurrentUser(user, user)
 
     val securityService = new SecurityService
@@ -189,7 +189,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def samePermissionMultipleScopes() {
+  @Test def samePermissionMultipleScopes(): Unit = {
     val department1 = new Department
     val department2 = new Department
     val currentUser = new CurrentUser(user, user)
@@ -213,7 +213,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def lowerScope() {
+  @Test def lowerScope(): Unit = {
     val module = new Module
     val department = new Department
     module.adminDepartment = department
@@ -239,7 +239,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Continue)
   }
 
-  @Test def runtimeMemberDenied() {
+  @Test def runtimeMemberDenied(): Unit = {
     val currentUser = new CurrentUser(user, user)
     val securityService = new SecurityService
     val runtimeMember = new RuntimeMember(currentUser)
@@ -258,7 +258,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     ) should be(securityService.Deny)
   }
 
-  @Test def selectors() {
+  @Test def selectors(): Unit = {
     val type1 = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
     val type2 = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
@@ -359,7 +359,7 @@ class SecurityServiceTest extends TestBase with Mockito {
    * only when the superclass is a case class, which we don't do.
    * I'll leave this in though!
    */
-  @Test def caseMatching() {
+  @Test def caseMatching(): Unit = {
     val action = Permissions.GodMode
 
     (action: Any) match {
@@ -372,7 +372,7 @@ class SecurityServiceTest extends TestBase with Mockito {
    * Test that we don't accidentally make permissions of the same
    * name equal to each other in future. Sigh
    */
-  @Test def equality() {
+  @Test def equality(): Unit = {
     (Permissions.Module.Create == Permissions.RolesAndPermissions.Create) should be (false)
     (Permissions.Module.Create == Permissions.Module.Create) should be (true)
   }
@@ -396,7 +396,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def canDelegateReturnsFalseIfUserHasNoDelegatableRoles() {
+  def canDelegateReturnsFalseIfUserHasNoDelegatableRoles(): Unit = {
     val securityService = new SecurityService
     val currentUser = new CurrentUser(user, user)
     val module = new Module("xxx01")
@@ -406,7 +406,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def canDelegateReturnsTrueIfUserHasDelegatableRoles() {
+  def canDelegateReturnsTrueIfUserHasDelegatableRoles(): Unit = {
     val securityService = new SecurityService
     val currentUser = new CurrentUser(user, user)
     val module = new Module("xxx01")
@@ -416,7 +416,7 @@ class SecurityServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def canDelegateReturnsTrueIfUserIsGod() {
+  def canDelegateReturnsTrueIfUserIsGod(): Unit = {
     val securityService = new SecurityService
     val currentUser = new CurrentUser(user, user, god = true)
     val module = new Module("xxx01")

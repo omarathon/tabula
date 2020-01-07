@@ -188,11 +188,11 @@ class AuditEventServiceImpl extends AuditEventService {
     events
   }
 
-  def save(event: Event, stage: String) {
+  def save(event: Event, stage: String): Unit = {
     doSave(event, stage)
   }
 
-  def save(auditEvent: AuditEvent) {
+  def save(auditEvent: AuditEvent): Unit = {
     doSave(auditEvent.toEvent, auditEvent.eventStage)
   }
 
@@ -201,7 +201,7 @@ class AuditEventServiceImpl extends AuditEventService {
     * so that it can be committed even if the main operation is
     * rolling back.
     */
-  def doSave(event: Event, stage: String) {
+  def doSave(event: Event, stage: String): Unit = {
     transactional(propagation = REQUIRES_NEW) {
       // Both Oracle and HSQLDB support sequences, but with different select syntax
       // TODO evaluate this and the SQL once on init

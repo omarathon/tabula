@@ -199,7 +199,7 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 
   override def isEmpty = false
 
-  def clearCaches() {
+  def clearCaches(): Unit = {
     cachedResults.clear()
   }
 }

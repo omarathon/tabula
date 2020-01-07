@@ -19,7 +19,7 @@ class FeedbackTemplateIdConverterTest extends TestBase with Mockito {
 
   converter.sessionFactory = sessionFactory
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val template = new FeedbackTemplate
     template.id = "steve"
 
@@ -28,14 +28,14 @@ class FeedbackTemplateIdConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(template)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     session.get(classOf[FeedbackTemplate].getName(), "20X6") returns (null)
 
     converter.convertRight("20X6") should be(null)
     converter.convertRight(null) should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val template = new FeedbackTemplate
     template.id = "steve"
 

@@ -134,7 +134,7 @@ trait StudentGroupAttendanceToJsonConverter {
     result.attendance
       .values.flatten
       .groupBy { case (group, _) => group }
-      .mapValues(_.map { case (_, a) => a })
+      .view.mapValues(_.map { case (_, a) => a })
       .toSeq
       .groupBy { case (group, _) => group.groupSet }
       .toSeq

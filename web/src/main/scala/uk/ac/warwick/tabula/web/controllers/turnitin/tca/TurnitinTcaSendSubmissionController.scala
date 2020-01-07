@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Profile(Array("turnitinTca"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/turnitin/tca"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/turnitin/tca"))
 class TurnitinTcaSendSubmissionController extends CourseworkController with Logging {
 
   type TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand.CommandType

@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheManager}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.{ListMap, SortedSet}
+import scala.jdk.CollectionConverters._
 
 object CM2MarkingWorkflow {
   implicit val defaultOrdering: Ordering[CM2MarkingWorkflow] = Ordering.by {
@@ -119,7 +119,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
     !((studentsChooseMarkers && hasSubmissions) || markersAssigned)
   }
 
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureSettings
   }
 }
@@ -160,7 +160,7 @@ class StageMarkers extends GeneratedId with Serializable {
     }
   }
 
-  def markers_=(group: UserGroup) {
+  def markers_=(group: UserGroup): Unit = {
     _markers = group
   }
 

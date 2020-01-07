@@ -25,7 +25,7 @@ import scala.language.implicitConversions
 object PublishFeedbackCommand {
 
   case class PublishFeedbackResults(
-    notifications: Seq[Notification[AssignmentFeedback, Assignment]] = Nil,
+    notifications: Seq[Notification[Feedback, Assignment]] = Nil,
     missingUsers: Seq[MissingUser] = Nil,
     badEmails: Seq[BadEmail] = Nil
   )
@@ -97,33 +97,29 @@ class PublishFeedbackCommandInternal(val assignment: Assignment, val submitter: 
   }
 
   private def generateNotification(user: User, feedback: Feedback) = {
-    feedback match {
-      case assignmentFeedback: AssignmentFeedback =>
-        if (user.isFoundUser) {
-          val email = user.getEmail
-          if (email.hasText) {
-            val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(assignmentFeedback), assignmentFeedback.assignment)
-            n.recipientUniversityId = user.getUserId
-            PublishFeedbackResults(
-              notifications = Seq(n)
-            )
-          } else {
-            PublishFeedbackResults(
-              badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
-            )
-          }
-        } else {
-          PublishFeedbackResults(
-            missingUsers = Seq(PublishFeedbackCommand.MissingUser(user.getUserId))
-          )
-        }
-      case _ => PublishFeedbackResults()
+    if (user.isFoundUser) {
+      val email = user.getEmail
+      if (email.hasText) {
+        val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(feedback), feedback.assignment)
+        n.recipientUniversityId = user.getUserId
+        PublishFeedbackResults(
+          notifications = Seq(n)
+        )
+      } else {
+        PublishFeedbackResults(
+          badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
+        )
+      }
+    } else {
+      PublishFeedbackResults(
+        missingUsers = Seq(PublishFeedbackCommand.MissingUser(user.getUserId))
+      )
     }
   }
 }
 
 trait PublishFeedbackNotification extends Notifies[PublishFeedbackResults, Feedback] {
-  override def emit(results: PublishFeedbackResults): Seq[Notification[AssignmentFeedback, Assignment]] = results.notifications
+  override def emit(results: PublishFeedbackResults): Seq[Notification[Feedback, Assignment]] = results.notifications
 }
 
 trait PublishFeedbackNotificationCompletion extends CompletesNotifications[PublishFeedbackResults] {
@@ -279,7 +275,7 @@ trait PublishFeedbackPermissions extends RequiresPermissionsChecking with Permis
   self: PublishFeedbackCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Publish, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Publish, mandatory(assignment))
   }
 }
 

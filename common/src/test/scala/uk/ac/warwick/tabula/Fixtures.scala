@@ -22,13 +22,6 @@ import scala.jdk.CollectionConverters._
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
 
-
-  def exam(name: String): Exam = {
-    val exam = new Exam()
-    exam.name = name
-    exam
-  }
-
   def submission(universityId: String = "0123456", userId: String = "cuspxp"): Submission = {
     val s = new Submission
     s._universityId = universityId
@@ -44,8 +37,8 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assignmentFeedback(universityId: String = "0123456", userId: String = null): AssignmentFeedback = {
-    val f = new AssignmentFeedback
+  def assignmentFeedback(universityId: String = "0123456", userId: String = null): Feedback = {
+    val f = new Feedback
     f._universityId = universityId
     f.usercode = if (userId == null) universityId else userId
     f
@@ -197,25 +190,6 @@ object Fixtures extends Mockito {
       code = assignment.assessmentGroup,
       module = assignment.moduleCode + "-30",
       occurrence = "A")
-
-
-  def seenSecondMarkingLegacyWorkflow(name: String): SeenSecondMarkingLegacyWorkflow = {
-    val workflow = new SeenSecondMarkingLegacyWorkflow
-    workflow.name = name
-    workflow
-  }
-
-  def seenSecondMarkingWorkflow(name: String): SeenSecondMarkingWorkflow = {
-    val workflow = new SeenSecondMarkingWorkflow
-    workflow.name = name
-    workflow
-  }
-
-  def studentsChooseMarkerWorkflow(name: String): OldStudentsChooseMarkerWorkflow = {
-    val workflow = new OldStudentsChooseMarkerWorkflow
-    workflow.name = name
-    workflow
-  }
 
   def feedbackTemplate(name: String): FeedbackTemplate = {
     val template = new FeedbackTemplate
@@ -473,24 +447,6 @@ object Fixtures extends Mockito {
     d.tabulaDefinition = description
     d.code = if (code.isEmpty) description.charAt(0).toString else code
     d
-  }
-
-  def firstMarkerMap(assignment: Assignment, marker_id: String, students: Seq[String] = Seq()): FirstMarkersMap = {
-    val fmm = new FirstMarkersMap
-    fmm.assignment = assignment
-    fmm.marker_id = marker_id
-    fmm.students = UserGroup.ofUsercodes
-    students.foreach(fmm.students.knownType.addUserId)
-    fmm
-  }
-
-  def secondMarkerMap(assignment: Assignment, marker_id: String, students: Seq[String] = Seq()): SecondMarkersMap = {
-    val smm = new SecondMarkersMap
-    smm.assignment = assignment
-    smm.marker_id = marker_id
-    smm.students = UserGroup.ofUsercodes
-    students.foreach(smm.students.knownType.addUserId)
-    smm
   }
 
   def withParents(target: PermissionsTarget): LazyList[PermissionsTarget] = {

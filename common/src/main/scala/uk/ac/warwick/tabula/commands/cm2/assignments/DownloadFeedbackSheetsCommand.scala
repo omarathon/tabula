@@ -20,7 +20,7 @@ object DownloadFeedbackSheetsCommand {
   type Result = RenderableFile
   type Command = Appliable[RenderableFile] with DownloadFeedbackSheetsCommandState
 
-  val AdminPermission = Permissions.AssignmentFeedback.Read
+  val AdminPermission = Permissions.Feedback.Read
 
   def apply(assignment: Assignment): Command =
     new DownloadFeedbackSheetsCommandInternal(assignment)

@@ -156,7 +156,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
       .list
   }
 
-  private def deleteSomeFiles(files: Seq[FileAttachment]) {
+  private def deleteSomeFiles(files: Seq[FileAttachment]): Unit = {
     transactional(propagation = REQUIRES_NEW) {
       // To be safe, split off temporary files which are attached to non-temporary things
       // (which shouldn't happen, but we definitely don't want to delete things because of a bug elsewhere)

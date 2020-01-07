@@ -21,9 +21,9 @@ trait HibernateExtensionPersistenceComponent extends ExtensionPersistenceCompone
 }
 
 trait ExtensionPersistenceComponent {
-  def delete(attachment: FileAttachment)
+  def delete(attachment: FileAttachment): Unit
 
-  def delete(extension: Extension)
+  def delete(extension: Extension): Unit
 
-  def save(extension: Extension)
+  def save(extension: Extension): Unit
 }

@@ -67,7 +67,7 @@ abstract class AbstractMeetingRecordCommand {
     meeting
   }
 
-  private def persistAttachments(meeting: MeetingRecord) {
+  private def persistAttachments(meeting: MeetingRecord): Unit = {
 
     // delete attachments that have been removed
     if (meeting.attachments != null) {

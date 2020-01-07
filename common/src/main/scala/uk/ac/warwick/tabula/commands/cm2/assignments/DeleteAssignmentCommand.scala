@@ -23,7 +23,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null)
     }
   }
 
-  private def commonChecks(errors: Errors) {
+  private def commonChecks(errors: Errors): Unit = {
     if (assignment.deleted) {
       errors.reject("assignment.delete.deleted")
     } else if (!assignment.submissions.isEmpty) {
@@ -36,7 +36,7 @@ class DeleteAssignmentCommand(val assignment: Assignment = null)
   /**
     * Test whether we could delete this assignment.
     */
-  def prechecks(errors: Errors) {
+  def prechecks(errors: Errors): Unit = {
     commonChecks(errors)
   }
 

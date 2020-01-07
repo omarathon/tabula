@@ -16,8 +16,8 @@ object Cm2StudentFeedbackAdjustmentNotification {
 @Proxy
 @DiscriminatorValue("Cm2StudentFeedbackAdjustment")
 class Cm2StudentFeedbackAdjustmentNotification
-  extends NotificationWithTarget[AssignmentFeedback, Assignment]
-    with SingleItemNotification[AssignmentFeedback]
+  extends NotificationWithTarget[Feedback, Assignment]
+    with SingleItemNotification[Feedback]
     with SingleRecipientNotification
     with AutowiringUserLookupComponent
     with MyWarwickActivity {

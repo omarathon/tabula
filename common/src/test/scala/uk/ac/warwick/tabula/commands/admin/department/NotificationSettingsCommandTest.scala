@@ -21,7 +21,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def objectApplyCreatesCommand() {
+  def objectApplyCreatesCommand(): Unit = {
     new Fixture {
       val command = NotificationSettingsCommand(testDepartment)
 
@@ -32,7 +32,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandSetsStateFromDepartmentWhenConstructing() {
+  def commandSetsStateFromDepartmentWhenConstructing(): Unit = {
     new Fixture {
       commandInternal.smallGroupEventAttendanceReminderEnabled should be(true)
       commandInternal.smallGroupEventAttendanceReminderNotifyTutors should be(true)
@@ -49,7 +49,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandUpdatesDepartmentWhenApplied() {
+  def commandUpdatesDepartmentWhenApplied(): Unit = {
     new Fixture {
       commandInternal.smallGroupEventAttendanceReminderEnabled = true
       commandInternal.smallGroupEventAttendanceReminderNotifyTutors = false
@@ -84,7 +84,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyInvokesSaveOnDepartmentService() {
+  def commandApplyInvokesSaveOnDepartmentService(): Unit = {
     new Fixture {
       commandInternal.applyInternal()
       verify(commandInternal.moduleAndDepartmentService, times(1)).saveOrUpdate(testDepartment)
@@ -92,7 +92,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDescriptionDescribedDepartment() {
+  def commandDescriptionDescribedDepartment(): Unit = {
     new Fixture {
       val describable = new DisplaySettingsCommandDescription with DisplaySettingsCommandState {
         val eventName: String = "test"
@@ -106,7 +106,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireManageDisplaySettingsOnDepartment {
+  def permissionsRequireManageDisplaySettingsOnDepartment: Unit = {
     new Fixture {
       val perms = new NotificationSettingsPermissions() with NotificationSettingsCommandState {
         val department: Department = testDepartment

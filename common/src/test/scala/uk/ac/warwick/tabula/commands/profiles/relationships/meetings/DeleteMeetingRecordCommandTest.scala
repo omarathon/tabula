@@ -24,7 +24,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testDeleted() {
+  def testDeleted(): Unit = {
     new Fixture {
       var deleted: Boolean = meeting.deleted
       deleted should be (false)
@@ -40,7 +40,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testRestore() {
+  def testRestore(): Unit = {
     new Fixture {
       meeting.deleted = true
 
@@ -55,7 +55,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testPurge() {
+  def testPurge(): Unit = {
     new Fixture {
       meeting.deleted = true
 

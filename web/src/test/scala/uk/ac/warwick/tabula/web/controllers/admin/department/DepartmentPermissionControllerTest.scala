@@ -28,7 +28,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     userLookup.registerUsers("cuscav", "cusebr")
   }
 
-  @Test def createCommands {
+  @Test def createCommands: Unit = {
     Seq(listController, addController, removeController).foreach { controller =>
       new Fixture {
         val addCommand: GrantRoleCommand.Command[Department] = controller.addCommandModel(department)
@@ -43,18 +43,18 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def list {
+  @Test def list: Unit = {
     new Fixture {
       val mav: Mav = listController.permissionsForm(department, Array(), null, null)
       mav.viewName should be("admin/department/permissions")
       mav.toModel("department") should be(department)
-      mav.toModel("users").asInstanceOf[mutable.Map[String, User]] should be('empty)
+      mav.toModel("users").asInstanceOf[mutable.Map[String, User]] should be(Symbol("empty"))
       mav.toModel("role") should be(Some(null))
       mav.toModel("action") should be(null.asInstanceOf[String])
     }
   }
 
-  @Test def listFromRedirect {
+  @Test def listFromRedirect: Unit = {
     new Fixture {
       val mav: Mav = listController.permissionsForm(department, Array("cuscav", "cusebr"), DepartmentalAdministratorRoleDefinition, "add")
       mav.viewName should be("admin/department/permissions")
@@ -68,7 +68,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def add {
+  @Test def add: Unit = {
     new Fixture {
       val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
@@ -100,7 +100,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def addValidationErrors {
+  @Test def addValidationErrors: Unit = {
     new Fixture {
       val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
@@ -134,7 +134,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def remove {
+  @Test def remove: Unit = {
     new Fixture {
       val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
@@ -166,7 +166,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def removeValidationErrors {
+  @Test def removeValidationErrors: Unit = {
     new Fixture {
       val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 

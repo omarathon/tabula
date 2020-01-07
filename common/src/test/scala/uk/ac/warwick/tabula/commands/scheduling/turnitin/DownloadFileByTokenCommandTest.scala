@@ -29,7 +29,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def validToken() {
+  def validToken(): Unit = {
     new Fixture {
       command.validate(errors)
       errors.hasErrors should be (false)
@@ -37,7 +37,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def invalidUsedToken() {
+  def invalidUsedToken(): Unit = {
     new Fixture {
       token.dateUsed = new DateTime()
       command.validate(errors)
@@ -46,7 +46,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def invalidExpiredToken() {
+  def invalidExpiredToken(): Unit = {
     new Fixture {
       token.expires = new DateTime().minusMinutes(1)
       command.validate(errors)
@@ -55,7 +55,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def invalidAccessToken() {
+  def invalidAccessToken(): Unit = {
     new Fixture {
       token.fileAttachmentId = "wrong id"
       command.validate(errors)

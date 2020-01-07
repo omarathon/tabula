@@ -22,7 +22,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 
   @Transactional
   @Test
-  def groupsAndEvents() {
+  def groupsAndEvents(): Unit = {
     val group = new SmallGroup()
     group.name = "Ron"
 

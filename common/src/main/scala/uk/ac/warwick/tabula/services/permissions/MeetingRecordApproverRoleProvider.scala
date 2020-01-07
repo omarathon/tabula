@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{MeetingRecordApproverRoleDefinition, MeetingRecordApprover, Role}
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component

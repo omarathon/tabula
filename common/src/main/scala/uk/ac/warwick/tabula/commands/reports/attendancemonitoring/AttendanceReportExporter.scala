@@ -97,7 +97,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
     sheet
   }
 
-  private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData) {
+  private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData): Unit = {
     val plainCellStyle = {
       val cs = sheet.getWorkbook.createCellStyle()
       cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))

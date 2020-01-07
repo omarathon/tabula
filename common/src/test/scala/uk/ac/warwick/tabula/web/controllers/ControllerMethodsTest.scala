@@ -33,28 +33,28 @@ class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito
     PermissionCheck(Permissions.Module.Create, dept)
   }
 
-  @Test def restricted {
+  @Test def restricted: Unit = {
     securityService.check(user, Permissions.Module.Create, dept) throws (PermissionDeniedException(user, Permissions.Module.Create, dept))
 
     restricted(BasicCommand()) should be(None)
 
     reset(securityService)
 
-    restricted(BasicCommand()) should be('defined)
+    restricted(BasicCommand()) should be(Symbol("defined"))
   }
 
-  @Test def restrictedBy {
+  @Test def restrictedBy: Unit = {
     securityService.check(user, Permissions.Module.Create, dept) throws (PermissionDeniedException(user, Permissions.Module.Create, dept))
 
     restrictedBy(true)(BasicCommand()) should be(None)
 
     // Restriction doesn't apply because predicate returns false
-    restrictedBy(false)(BasicCommand()) should be('defined)
+    restrictedBy(false)(BasicCommand()) should be(Symbol("defined"))
 
     reset(securityService)
 
-    restrictedBy(true)(BasicCommand()) should be('defined)
-    restrictedBy(false)(BasicCommand()) should be('defined)
+    restrictedBy(true)(BasicCommand()) should be(Symbol("defined"))
+    restrictedBy(false)(BasicCommand()) should be(Symbol("defined"))
   }
 
 }

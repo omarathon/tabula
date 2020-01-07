@@ -22,7 +22,7 @@ class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
     val command = new ListCustomRoleOverridesCommandInternal(department, customRole) with CommandTestSupport
   }
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     new Fixture {
       val override1 = new RoleOverride
       val override2 = new RoleOverride
@@ -36,7 +36,7 @@ class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     val command = new ListCustomRoleOverridesCommandPermissions with ListCustomRoleOverridesCommandState {
       override val department: Department = Fixtures.department("in")
       override val customRoleDefinition = new CustomRoleDefinition
@@ -50,7 +50,7 @@ class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
     verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Read, command.customRoleDefinition)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     val command = new ListCustomRoleOverridesCommandPermissions with ListCustomRoleOverridesCommandState {
       override val department = null
       override val customRoleDefinition = new CustomRoleDefinition

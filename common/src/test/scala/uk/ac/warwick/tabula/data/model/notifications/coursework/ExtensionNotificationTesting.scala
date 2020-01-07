@@ -11,10 +11,7 @@ trait ExtensionNotificationTesting {
   lazy val mockProfileService: ProfileService = smartMock[ProfileService]
   lazy val mockRelationshipService: RelationshipService = mock[RelationshipService]
 
-  val cm2Prefix = "cm2"
-  Routes.cm2._cm2Prefix = Some(cm2Prefix)
-
-  def wireUserlookup(n: AutowiringUserLookupComponent, student: User) {
+  def wireUserlookup(n: AutowiringUserLookupComponent, student: User): Unit = {
     n.userLookup = mockUserLookup
     mockUserLookup.getUserByUserId(student.getUserId) returns student
     mockUserLookup.getUserByWarwickUniId(any[String]) returns null

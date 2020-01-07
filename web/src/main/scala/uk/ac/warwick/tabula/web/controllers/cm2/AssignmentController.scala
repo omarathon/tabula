@@ -22,9 +22,9 @@ import scala.jdk.CollectionConverters._
   * If the studentMember is not specified it works for the current user, whether they are a member of not.
   */
 
-@Profile(Array("cm2Enabled"))
+
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/submission/{assignment}"))
+@RequestMapping(Array("/coursework/submission/{assignment}"))
 class AssignmentController extends CourseworkController
   with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent with AutowiringFeaturesComponent {
 

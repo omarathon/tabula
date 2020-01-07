@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AllocateSelfToGroupCommand {
   def apply(user: User, groupSet: SmallGroupSet): AllocateSelfToGroupCommand with ComposableCommand[SmallGroupSet] with StudentSignupCommandPermissions with StudentSignUpCommandDescription with AllocateSelfToGroupValidator with AllocateSelfToGroupNotificationCompletion = {

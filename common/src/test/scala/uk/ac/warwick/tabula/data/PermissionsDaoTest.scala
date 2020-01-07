@@ -80,15 +80,15 @@ class PermissionsDaoTest extends PersistenceTestBase {
     // Make sure we don't throw an exception with a permissions type we don't know how to set roles/permissions for
     val scope = Fixtures.userSettings("cuscav")
 
-    dao.getGrantedRolesFor(scope) should be('empty)
-    dao.getGrantedPermissionsFor(scope) should be('empty)
+    dao.getGrantedRolesFor(scope) should be(Symbol("empty"))
+    dao.getGrantedPermissionsFor(scope) should be(Symbol("empty"))
 
     val crd = new CustomRoleDefinition
     session.save(crd)
 
-    dao.getGrantedRole(scope, DepartmentalAdministratorRoleDefinition) should be('empty)
-    dao.getGrantedRole(scope, crd) should be('empty)
-    dao.getGrantedPermission(scope, Permissions.Module.Create, true) should be('empty)
+    dao.getGrantedRole(scope, DepartmentalAdministratorRoleDefinition) should be(Symbol("empty"))
+    dao.getGrantedRole(scope, crd) should be(Symbol("empty"))
+    dao.getGrantedPermission(scope, Permissions.Module.Create, true) should be(Symbol("empty"))
   }
 
 }

@@ -84,7 +84,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
   }
 
   @Test
-  def updatesMissedCheckpoint() {
+  def updatesMissedCheckpoint(): Unit = {
     new Fixture {
       service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
       service.smallGroupService.findOccurrencesInWeeks(1, 2, academicYear2013) returns Seq()
@@ -96,7 +96,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
   }
 
   @Test
-  def updatesMissedCheckpointSpecificModule() {
+  def updatesMissedCheckpointSpecificModule(): Unit = {
     new Fixture {
       smallGroupPoint.smallGroupEventModules = Seq(groupSet.module)
       service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
@@ -109,7 +109,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
   }
 
   @Test
-  def updatesMissedCheckpointQuantityForMoreThanOnceAttendance() {
+  def updatesMissedCheckpointQuantityForMoreThanOnceAttendance(): Unit = {
     new Fixture {
       val otherAttendance = new SmallGroupEventAttendance
       otherAttendance.occurrence = new SmallGroupEventOccurrence
@@ -132,7 +132,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
   }
 
   @Test
-  def ignoresAttendanceFromPreviousYears() {
+  def ignoresAttendanceFromPreviousYears(): Unit = {
     new Fixture {
       val groupOld = new SmallGroup
       val groupSetOld = new SmallGroupSet
@@ -165,7 +165,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
   }
 
   @Test
-  def notMissed() {
+  def notMissed(): Unit = {
     new Fixture {
       attendanceMarkedAsMissed.state = AttendanceState.Attended
       service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be(0)

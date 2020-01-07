@@ -17,12 +17,12 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
   val service: ModuleAndDepartmentService = new ModuleAndDepartmentService
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     moduleDao.sessionFactory = sessionFactory
     service.moduleDao = moduleDao
   }
 
-  @Test def nullSettingsAreReplacedWithEmptyMap() {
+  @Test def nullSettingsAreReplacedWithEmptyMap(): Unit = {
     transactional { ts =>
       val cs108 = service.getModuleByCode("cs108").get
       val set = new SmallGroupSet(cs108)
@@ -47,7 +47,7 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
   }
 
   @Transactional
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     // Use data from data.sql
     {
       val cs108 = service.getModuleByCode("cs108").get

@@ -42,7 +42,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase with ComponentMixins with
     assignment.academicYear = AcademicYear(2014)
 
     // set up feedback
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")
+    val feedback: Feedback = Fixtures.assignmentFeedback("0070790")
     feedback.assignment = assignment
     feedback.actualGrade = Some("B")
     feedback.actualMark = Some(73)

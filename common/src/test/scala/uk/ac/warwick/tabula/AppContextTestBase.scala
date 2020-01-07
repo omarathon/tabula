@@ -47,7 +47,7 @@ abstract class PersistenceTestBase extends TestBase with ContextSetup with Trans
 trait ContextSetup {
   @Autowired var beans: AbstractAutowireCapableBeanFactory = _
 
-  @Before def setupCtx() {
+  @Before def setupCtx(): Unit = {
 
   }
 }

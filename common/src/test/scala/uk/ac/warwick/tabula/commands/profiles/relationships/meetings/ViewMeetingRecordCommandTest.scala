@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 
   @Test
-  def listsAllMeetingsForRequestedStudentAndCurrentUser() {
+  def listsAllMeetingsForRequestedStudentAndCurrentUser(): Unit = {
     withUser("test") {
       val studentCourseDetails = new StudentCourseDetails()
       val requestor = new StaffMember()

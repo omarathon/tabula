@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 
 class FeedbackTemplateTest extends PersistenceTestBase {
 
-  @Test def deleteFileAttachmentOnDelete {
+  @Test def deleteFileAttachmentOnDelete: Unit = {
     transactional { tx =>
       // TAB-667
       val orphanAttachment = flushing(session) {

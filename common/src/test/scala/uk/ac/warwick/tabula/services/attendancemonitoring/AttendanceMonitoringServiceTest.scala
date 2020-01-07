@@ -53,7 +53,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def setAttendance() {
+  def setAttendance(): Unit = {
     new CheckpointFixture {
       withUser("cusfal") {
         member1.mostSignificantCourse.beginDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.OCTOBER, 1)
@@ -79,7 +79,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def updateCheckpointTotal() {
+  def updateCheckpointTotal(): Unit = {
     new CheckpointFixture {
       withUser("cusfal") {
         member1.mostSignificantCourse.beginDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.OCTOBER, 1)

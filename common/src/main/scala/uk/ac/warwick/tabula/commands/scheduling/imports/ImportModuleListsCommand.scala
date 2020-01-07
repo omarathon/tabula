@@ -32,7 +32,7 @@ trait ImportModuleListsCommand extends CommandInternal[Unit]
 
   val ImportGroupSize = 100
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     benchmark("ImportModuleLists") {
       doLists()
       logger.debug("Imported lists. Importing entries...")
@@ -40,7 +40,7 @@ trait ImportModuleListsCommand extends CommandInternal[Unit]
     }
   }
 
-  def doLists() {
+  def doLists(): Unit = {
     // Split into chunks so we commit transactions periodically.
     for (lists <- logSize(moduleListImporter.getModuleLists).grouped(ImportGroupSize)) {
       saveLists(lists)
@@ -57,7 +57,7 @@ trait ImportModuleListsCommand extends CommandInternal[Unit]
     }
   }
 
-  def doEntries() {
+  def doEntries(): Unit = {
     // Split into chunks so we commit transactions periodically.
     val listCount = transactional(readOnly = true) {
       upstreamModuleListService.countAllModuleLists

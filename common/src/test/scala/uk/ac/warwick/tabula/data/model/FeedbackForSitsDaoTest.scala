@@ -21,7 +21,7 @@ class FeedbackForSitsDaoTest extends PersistenceTestBase with Mockito {
     new Environment {
       val assignment: Assignment = Fixtures.assignment("some assignment")
 
-      val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567")
+      val feedback: Feedback = Fixtures.assignmentFeedback("1234567")
       feedback.assignment = assignment
 
       val feedbackForSits = new FeedbackForSits

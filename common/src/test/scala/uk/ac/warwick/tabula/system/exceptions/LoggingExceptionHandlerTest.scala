@@ -13,7 +13,7 @@ class LoggingExceptionHandlerTest extends TestBase {
   val handler = new LoggingExceptionHandler
   val lineSeparator: String = System.getProperty("line.separator")
 
-  @Test def userError {
+  @Test def userError: Unit = {
     val context = ExceptionContext("1", new ItemNotFoundException("An egg cracked"), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 
     handler.exception(context)
@@ -23,7 +23,7 @@ class LoggingExceptionHandlerTest extends TestBase {
     logEvent.getLevel should be(Level.DEBUG)
   }
 
-  @Test def handledException {
+  @Test def handledException: Unit = {
     val context = ExceptionContext("1", new MaintenanceModeEnabledException(None, None), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 
     handler.exception(context)
@@ -33,7 +33,7 @@ class LoggingExceptionHandlerTest extends TestBase {
     logEvent.getLevel should be(Level.DEBUG)
   }
 
-  @Test def normalException {
+  @Test def normalException: Unit = {
     val context = ExceptionContext("1", new RuntimeException("An egg cracked"), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 
     handler.exception(context)

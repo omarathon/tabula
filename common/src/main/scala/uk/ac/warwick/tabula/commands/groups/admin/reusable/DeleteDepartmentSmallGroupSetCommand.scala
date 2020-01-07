@@ -50,7 +50,7 @@ trait DeleteDepartmentSmallGroupSetValidation extends SelfValidating {
     }
   }
 
-  def validateCanDelete(errors: Errors) {
+  def validateCanDelete(errors: Errors): Unit = {
     if (set.deleted) {
       errors.reject("smallGroupSet.delete.deleted")
     } else if (set.linkedSets.asScala.exists { set => set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted }) {

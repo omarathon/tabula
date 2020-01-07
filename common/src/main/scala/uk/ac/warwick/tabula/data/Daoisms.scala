@@ -163,7 +163,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Help
 
   def dataSource: DataSource = _dataSource.orNull
 
-  def dataSource_=(dataSource: DataSource) {
+  def dataSource_=(dataSource: DataSource): Unit = {
     _dataSource = Option(dataSource)
   }
 
@@ -171,7 +171,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Help
 
   def sessionFactory: SessionFactory = _sessionFactory.orNull
 
-  def sessionFactory_=(sessionFactory: SessionFactory) {
+  def sessionFactory_=(sessionFactory: SessionFactory): Unit = {
     _sessionFactory = Option(sessionFactory)
   }
 
@@ -206,7 +206,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Help
     * a session, you can access it through the `session` getter (within
     * the callback of this method, it should work too).
     */
-  protected def inSession(fn: Session => Unit) {
+  protected def inSession(fn: Session => Unit): Unit = {
     val sess = sessionFactory.openSession()
     val tx = sess.beginTransaction()
 

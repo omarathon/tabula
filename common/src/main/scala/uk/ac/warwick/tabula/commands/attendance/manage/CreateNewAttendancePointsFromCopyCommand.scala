@@ -171,7 +171,7 @@ trait CreateNewAttendancePointsFromCopyDescription extends Describable[Seq[Atten
     d.attendanceMonitoringSchemes(schemes)
   }
 
-  override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+  override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]): Unit = {
     d.attendanceMonitoringPoints(points, verbose = true)
     val assignmentPoint = points.filter(_.isSpecificAssignmentPoint)
     if (assignmentPoint.nonEmpty) {

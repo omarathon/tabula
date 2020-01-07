@@ -12,7 +12,7 @@ class UserConverterTest extends TestBase with Mockito {
   val userLookup: UserLookupService = mock[UserLookupService]
   converter.userLookup = userLookup
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val user = new User {
       setUserId("cuscav"); setFoundUser(true)
     }
@@ -22,7 +22,7 @@ class UserConverterTest extends TestBase with Mockito {
     converter.convertRight("cuscav") should be(user)
   }
 
-  @Test def validFallback {
+  @Test def validFallback: Unit = {
     val user = new User {
       setWarwickId("1170836"); setFoundUser(true)
     }
@@ -32,13 +32,13 @@ class UserConverterTest extends TestBase with Mockito {
     converter.convertRight("1170836") should be(user)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     userLookup.getUserByUserId("20X6") returns (new AnonymousUser)
 
     converter.convertRight("20X6") should be(new AnonymousUser)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     converter.convertLeft(new User("cuscav")) should be("cuscav")
 
     val user = new User("cuslaj") {

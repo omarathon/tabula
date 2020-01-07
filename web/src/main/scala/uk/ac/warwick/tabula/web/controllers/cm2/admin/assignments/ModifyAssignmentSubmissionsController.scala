@@ -39,9 +39,8 @@ abstract class AbstractAssignmentSubmissionsController extends AbstractAssignmen
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmissionsController {
 
   @RequestMapping(method = Array(GET), value = Array("/new/submissions"))

@@ -21,7 +21,7 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
     session.flush()
   }
 
-  @Test def memberRelationship() {
+  @Test def memberRelationship(): Unit = {
     transactional { tx =>
       new Fixture {
         val rel = StudentRelationship(memberAgent, relType, student, DateTime.now)
@@ -42,7 +42,7 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
     }
   }
 
-  @Test def externalRelationship() {
+  @Test def externalRelationship(): Unit = {
     transactional { tx =>
       new Fixture {
         val rel = ExternalStudentRelationship(externalAgent, relType, student, DateTime.now)

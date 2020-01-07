@@ -33,7 +33,7 @@ class MockJobDao extends JobDao {
 
   def clear(): Unit = instances.clear
 
-  def update(instance: JobInstance) {}
+  def update(instance: JobInstance): Unit = {}
 
   override def listRunningJobs: Seq[JobInstance] = instances.toSeq.filterNot(_.finished).filter(_.started)
 

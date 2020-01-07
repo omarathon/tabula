@@ -6,7 +6,6 @@ import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
@@ -20,8 +19,7 @@ import scala.jdk.CollectionConverters._
 class MarkerFeedback extends GeneratedId
   with FeedbackAttachments
   with ToEntityReference
-  with CanBeDeleted
-  with CM1MarkerFeedbackSupport {
+  with CanBeDeleted {
   type Entity = MarkerFeedback
 
   def this(parent: Feedback) {
@@ -127,7 +125,7 @@ class MarkerFeedback extends GeneratedId
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.markerFeedback = this
@@ -165,16 +163,12 @@ class MarkerFeedback extends GeneratedId
       }.value = value
   }
 
-  def fieldNameValuePairsMap: Map[String, String] =
-    feedback.assessment match {
-      case assignment: Assignment =>
-        customFormValues.asScala.flatMap { formValue =>
-          assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
-            feedbackField.name -> formValue.value
-          }
-        }.toMap
-      case _ => Map.empty
+  def fieldNameValuePairsMap: Map[String, String] = customFormValues.asScala.flatMap { formValue =>
+    feedback.assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
+      feedbackField.name -> formValue.value
     }
+  }.toMap
+
 
   def hasBeenModified: Boolean = updatedOn != null
 
@@ -199,32 +193,4 @@ class MarkerFeedback extends GeneratedId
   def outstanding: Boolean = feedback.outstandingStages.contains(stage)
 
   def finalised: Boolean = hasContent && feedback.currentStageIndex > stage.order
-}
-
-trait CM1MarkerFeedbackSupport {
-  this: MarkerFeedback =>
-
-  @Deprecated
-  def getMarkerUser: Option[User] = getMarkerUsercode.map(userLookup.getUserByUserId)
-
-  @Deprecated
-  def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
-
-  @Deprecated
-  def getMarkerUsercode: Option[String] = {
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback =>
-        val student = feedback.usercode
-        val assignment = assignmentFeedback.assignment
-        Option(assignment.markingWorkflow).flatMap { workflow =>
-          getFeedbackPosition match {
-            case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
-            case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
-            case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
-            case _ => None
-          }
-        }
-      case _ => None
-    }
-  }
 }

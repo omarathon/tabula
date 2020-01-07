@@ -64,7 +64,7 @@ trait StudentCourseworkGadgetCommandPermissions extends RequiresPermissionsCheck
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Profiles.Read.Coursework, student)
     p.PermissionCheck(Permissions.Submission.Read, student)
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, student)
+    p.PermissionCheck(Permissions.Feedback.Read, student)
     p.PermissionCheck(Permissions.Extension.Read, student)
   }
 }

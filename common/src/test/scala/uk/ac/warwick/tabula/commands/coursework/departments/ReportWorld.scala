@@ -101,7 +101,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 
   var feedbackService: FeedbackService = mock[FeedbackService]
-  feedbackService.getAssignmentFeedbackByUsercode(any[Assignment], any[String]) answers { args: Array[AnyRef] => {
+  feedbackService.getFeedbackByUsercode(any[Assignment], any[String]) answers { args: Array[AnyRef] => {
     val assignment = args(0).asInstanceOf[Assignment]
     val usercode = args(1).asInstanceOf[String]
     assignment.feedbacks.asScala.find(_.usercode == usercode)
@@ -110,7 +110,7 @@ trait ReportWorld extends TestBase with Mockito {
 
   def studentData(start: Int, end: Int): List[String] = (start to end).map(i => s"u${idFormat(i)}").toList
 
-  def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) {
+  def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]): Unit = {
     val date = assignment.closeDate.plusDays(daysAfter)
     val event = AuditEvent(
       eventId = "event", eventType = "PublishFeedback", userId = "cuslat", eventDate = date,
@@ -164,10 +164,10 @@ trait ReportWorld extends TestBase with Mockito {
   }
 
 
-  def addFeedback(assignment: Assignment) {
+  def addFeedback(assignment: Assignment): Unit = {
     withFakeTime(dateTime(2013, 3, 13)) {
       val feedback = assignment.submissions.asScala.map { s =>
-        val newFeedback = new AssignmentFeedback
+        val newFeedback = new Feedback
         newFeedback.assignment = assignment
         newFeedback.usercode = s.usercode
         newFeedback._universityId = s._universityId
@@ -181,7 +181,7 @@ trait ReportWorld extends TestBase with Mockito {
 
   def idFormat(i: Int): String = "1" + ("%06d" format i)
 
-  def generateSubmission(assignment: Assignment, num: Int, lateModNumber: Int) {
+  def generateSubmission(assignment: Assignment, num: Int, lateModNumber: Int): Unit = {
     val submissionDate = if (lateModNumber != 0 && num % lateModNumber == 0) {
       assignment.closeDate.plusDays(1)
     } else {

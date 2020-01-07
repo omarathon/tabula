@@ -3,11 +3,10 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import java.io.ByteArrayOutputStream
 
 import com.google.common.io.ByteSource
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports.{JList, _}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadSubmissionsForPrintingCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, MarkerFeedback, Submission}
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorComponent}
@@ -17,7 +16,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 
 import scala.jdk.CollectionConverters._
 
@@ -38,7 +36,7 @@ object DownloadAdminSubmissionsForPrintingCommand {
   type Command = DownloadSubmissionsForPrintingCommand.Command with DownloadSubmissionsForPrintingCommandState
 
   final val receiptTemplate = "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftlh"
-  final val nonPDFTemplate = "/WEB-INF/freemarker/coursework/admin/assignments/submissionsandfeedback/non-pdf-attachments.ftl"
+  final val nonPDFTemplate = "/WEB-INF/freemarker/cm2/admin/assignments/submissionsandfeedback/non-pdf-attachments.ftl"
   final val pdfExtension = ".pdf"
 
   def apply(assignment: Assignment): Command =
@@ -176,14 +174,7 @@ trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmiss
       if (markerFeedback.isEmpty) students.asScala.toSeq
       else markerFeedback.asScala.toSeq.map(_.student.getUserId)
 
-    val allMarkerSubmissions =
-      if (assignment.cm2Assignment)
-        assignment.cm2MarkerSubmissions(marker)
-      else
-        assignment.getMarkersSubmissions(marker).filter { submission =>
-          val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
-          markerFeedback.exists(mf => mf.state != MarkingCompleted)
-        }
+    val allMarkerSubmissions = assignment.cm2MarkerSubmissions(marker)
 
     if (selectedStudents.isEmpty) allMarkerSubmissions
     else selectedStudents.flatMap { s => allMarkerSubmissions.find(_.usercode == s) }

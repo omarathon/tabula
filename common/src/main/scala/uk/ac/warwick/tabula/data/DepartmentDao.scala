@@ -14,7 +14,7 @@ trait DepartmentDao {
 
   def getById(id: String): Option[Department]
 
-  def saveOrUpdate(department: Department)
+  def saveOrUpdate(department: Department): Unit
 }
 
 @Repository

@@ -31,7 +31,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
   var userLookup: UserLookupService = _
   val nobody: UserGroup = UserGroup.ofUsercodes
 
-  @Before def before() {
+  @Before def before(): Unit = {
     userLookup = smartMock[UserLookupService]
     userLookup.getUserByUserId(any[String]) answers { id: Any =>
       userDatabase find {
@@ -63,17 +63,17 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     }
   }
 
-  @Test def whenEmpty() {
+  @Test def whenEmpty(): Unit = {
     val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody), resitOnly = false).items
     membership.size should be(0)
   }
 
-  @Test def emptyWithNone() {
+  @Test def emptyWithNone(): Unit = {
     val membership = assignmentMembershipService.determineMembership(Nil, None, resitOnly = false).items
     membership.size should be(0)
   }
 
-  @Test def plainSits() {
+  @Test def plainSits(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(nobody), resitOnly = false).items
@@ -82,7 +82,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     membership(1).user.getFullName should be("Roger Aaaag")
   }
 
-  @Test def plainSitsWithNone() {
+  @Test def plainSitsWithNone(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = false).items
@@ -91,7 +91,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     membership(1).user.getFullName should be("Roger Aaaag")
   }
 
-  @Test def resitOnly() {
+  @Test def resitOnly(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     upstream.members.get(0).resitExpected = Some(true)
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
@@ -100,7 +100,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     membership.head.user.getFullName should be("Roger Aaaaf")
   }
 
-  @Test def includeAndExclude() {
+  @Test def includeAndExclude(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq)
     val others = UserGroup.ofUsercodes
@@ -139,7 +139,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     * part of the SITS group, and excluded code "aaaah" is not in the
     * group anyway so the exclusion does nothing.
     */
-  @Test def redundancy() {
+  @Test def redundancy(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val others = UserGroup.ofUsercodes

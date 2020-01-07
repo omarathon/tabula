@@ -41,7 +41,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
     val features = new FeaturesImpl
   }
 
-  @Test def parseJSON() {
+  @Test def parseJSON(): Unit = {
     val events = service.parseJSON(
       resourceAsString("1503003.json"),
       filterLectures = true
@@ -94,7 +94,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
     ))
   }
 
-  @Test def tab2662() {
+  @Test def tab2662(): Unit = {
     val events = service.parseJSON(
       resourceAsString("duplicates.json"),
       filterLectures = true

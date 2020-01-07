@@ -7,7 +7,7 @@ import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
 
-@SerialVersionUID(-8143257003489402756l) sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) extends Serializable {
+@SerialVersionUID(-8143257003489402756L) sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) extends Serializable {
   def name: String = toString
 
   def shortName: String = name.substring(0, 3)

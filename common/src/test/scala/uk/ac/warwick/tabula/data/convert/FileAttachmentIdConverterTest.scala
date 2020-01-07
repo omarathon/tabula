@@ -12,7 +12,7 @@ class FileAttachmentIdConverterTest extends TestBase with Mockito {
   var service: FileDao = mock[FileDao]
   converter.fileDao = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val file = new FileAttachment
     file.id = "steve"
 
@@ -21,13 +21,13 @@ class FileAttachmentIdConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(file)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getFileById("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val file = new FileAttachment
     file.id = "steve"
 

@@ -16,9 +16,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates"))
+@RequestMapping(Array("/coursework/admin/department/{department}/settings/feedback-templates"))
 class FeedbackTemplateController extends CourseworkController
   with DepartmentScopedController with AutowiringUserLookupComponent
   with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
@@ -50,9 +49,8 @@ class FeedbackTemplateController extends CourseworkController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/edit/{template}"))
+@RequestMapping(Array("/coursework/admin/department/{department}/settings/feedback-templates/edit/{template}"))
 class EditFeedbackTemplateController extends CourseworkController {
 
   validatesSelf[SelfValidating]
@@ -75,9 +73,8 @@ class EditFeedbackTemplateController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/delete/{template}"))
+@RequestMapping(Array("/coursework/admin/department/{department}/settings/feedback-templates/delete/{template}"))
 class DeleteFeedbackTemplateController extends CourseworkController {
 
   @ModelAttribute("deleteFeedbackTemplateCommand")

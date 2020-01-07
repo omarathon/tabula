@@ -33,7 +33,7 @@ class CreateScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   val notifier = new CreateScheduledMeetingRecordNotification {}
 
   @Test
-  def testStudent() {
+  def testStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifications: Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
       notifications.length should be (1)
@@ -42,7 +42,7 @@ class CreateScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgent() {
+  def testAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifications: Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
       notifications.length should be (1)
@@ -51,7 +51,7 @@ class CreateScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdmin() {
+  def testAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifications: Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
       notifications.length should be (2)
@@ -72,7 +72,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testStudentCreatedByStaff() {
+  def testStudentCreatedByStaff(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = student
 
@@ -84,7 +84,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testStudentCreatedByStudent() {
+  def testStudentCreatedByStudent(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = student
 
@@ -96,7 +96,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testStudentCreatedByAdmin() {
+  def testStudentCreatedByAdmin(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = student
 
@@ -108,7 +108,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByAgent() {
+  def testAgentCreatedByAgent(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = staff
 
@@ -120,7 +120,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByStudent() {
+  def testAgentCreatedByStudent(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = staff
 
@@ -132,7 +132,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByAdmin() {
+  def testAgentCreatedByAdmin(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = staff
 
@@ -144,7 +144,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByAgent() {
+  def testAdminCreatedByAgent(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = admin
 
@@ -167,7 +167,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByStudent() {
+  def testAdminCreatedByStudent(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = admin
 
@@ -190,7 +190,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByAdmin() {
+  def testAdminCreatedByAdmin(): Unit = {
     val notifier = new EditScheduledMeetingRecordNotification with EditScheduledMeetingRecordState {
       override def editor: Member = admin
 
@@ -216,7 +216,7 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito {
 
   @Test
-  def testStudentCreatedByStudent() {
+  def testStudentCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -230,7 +230,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testStudentCreatedByAgent() {
+  def testStudentCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -244,7 +244,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testStudentCreatedByAdmin() {
+  def testStudentCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -258,7 +258,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByStudent() {
+  def testAgentCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -272,7 +272,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByAgent() {
+  def testAgentCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -286,7 +286,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAgentCreatedByAdmin() {
+  def testAgentCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -300,7 +300,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByStudent() {
+  def testAdminCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -317,7 +317,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByAgent() {
+  def testAdminCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -334,7 +334,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
   }
 
   @Test
-  def testAdminCreatedByAdmin() {
+  def testAdminCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new DeleteScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -354,7 +354,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockito {
 
   @Test
-  def testStudentCreatedByStudent() {
+  def testStudentCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -368,7 +368,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testStudentCreatedByAgent() {
+  def testStudentCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -382,7 +382,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testStudentCreatedByAdmin() {
+  def testStudentCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -396,7 +396,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAgentCreatedByStudent() {
+  def testAgentCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -410,7 +410,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAgentCreatedByAgent() {
+  def testAgentCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -424,7 +424,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAgentCreatedByAdmin() {
+  def testAgentCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -438,7 +438,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAdminCreatedByStudent() {
+  def testAdminCreatedByStudent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -455,7 +455,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAdminCreatedByAgent() {
+  def testAdminCreatedByAgent(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null
@@ -472,7 +472,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
   }
 
   @Test
-  def testAdminCreatedByAdmin() {
+  def testAdminCreatedByAdmin(): Unit = {
     new ScheduledMeetingRecordNotificationFixture {
       val notifier = new RestoreScheduledMeetingRecordNotification with RemoveMeetingRecordState {
         override def meetingRecord: AbstractMeetingRecord = null

@@ -27,7 +27,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def reportsWhenNotAllGroupsetsAreReleased() {
+  def reportsWhenNotAllGroupsetsAreReleased(): Unit = {
     new SmallGroupFixture {
       withUser("test") {
         groupSet1.releasedToStudents = true
@@ -55,7 +55,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def reportsWhenAllGroupsetsAreReleased() {
+  def reportsWhenAllGroupsetsAreReleased(): Unit = {
     new SmallGroupFixture {
       withUser("test") {
 

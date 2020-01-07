@@ -14,7 +14,7 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
 
   var assignment: Assignment = _
 
-  var feedback: AssignmentFeedback = _
+  var feedback: Feedback = _
   val marker1: User = Fixtures.user("9999991", "9999991")
   val marker2: User = Fixtures.user("9999992", "9999992")
 

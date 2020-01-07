@@ -52,27 +52,27 @@ trait SmallGroupService {
 
   def getAllSmallGroupEventOccurrencesForEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
 
-  def saveOrUpdate(smallGroupSet: SmallGroupSet)
+  def saveOrUpdate(smallGroupSet: SmallGroupSet): Unit
 
-  def saveOrUpdate(smallGroup: SmallGroup)
+  def saveOrUpdate(smallGroup: SmallGroup): Unit
 
-  def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
+  def saveOrUpdate(smallGroupEvent: SmallGroupEvent): Unit
 
-  def saveOrUpdate(note: SmallGroupEventAttendanceNote)
+  def saveOrUpdate(note: SmallGroupEventAttendanceNote): Unit
 
-  def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
+  def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet): Unit
 
-  def saveOrUpdate(smallGroup: DepartmentSmallGroup)
+  def saveOrUpdate(smallGroup: DepartmentSmallGroup): Unit
 
-  def saveOrUpdate(attendance: SmallGroupEventAttendance)
+  def saveOrUpdate(attendance: SmallGroupEventAttendance): Unit
 
   def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 
   def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 
-  def removeUserFromGroup(user: User, smallGroup: SmallGroup)
+  def removeUserFromGroup(user: User, smallGroup: SmallGroup): Unit
 
-  def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
+  def removeFromSmallGroups(moduleRegistration: ModuleRegistration): Unit
 
   def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 
@@ -126,7 +126,7 @@ trait SmallGroupService {
 
   def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]]
 
-  def delete(occurrence: SmallGroupEventOccurrence)
+  def delete(occurrence: SmallGroupEventOccurrence): Unit
 
   def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
 
@@ -260,7 +260,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
     }
   }
 
-  def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false) {
+  def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false): Unit = {
     for {
       occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
       attendance <- smallGroupDao.getAttendance(studentId, occurrence)
@@ -326,7 +326,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
     smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup).filter { groupEventOccurrence => groupEventOccurrence.event.allWeeks.contains(groupEventOccurrence.week) }
   }
 
-  def removeFromSmallGroups(modReg: ModuleRegistration) {
+  def removeFromSmallGroups(modReg: ModuleRegistration): Unit = {
     if (modReg.module.adminDepartment.autoGroupDeregistration) {
       val userId = modReg.studentCourseDetails.student.userId
       val user = userLookup.getUserByUserId(userId)
@@ -346,7 +346,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
     }
   }
 
-  def removeUserFromGroup(user: User, smallGroup: SmallGroup) {
+  def removeUserFromGroup(user: User, smallGroup: SmallGroup): Unit = {
     userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply() match {
       case group: UserGroupCacheManager => group.underlying.asInstanceOf[UserGroup]
       case group: UnspecifiedTypeUserGroup => group.asInstanceOf[UserGroup]
@@ -399,7 +399,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
   def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]] =
     smallGroupDao.findSmallGroupSetsLinkedToSITSByDepartment(year)
 
-  def delete(occurrence: SmallGroupEventOccurrence) {
+  def delete(occurrence: SmallGroupEventOccurrence): Unit = {
     if (occurrence.attendance.asScala.exists { attendance => attendance.state != AttendanceState.NotRecorded })
       throw new IllegalStateException("Tried to delete event with linked event occurrence")
 

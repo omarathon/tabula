@@ -88,12 +88,6 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
   def isForUser(user: User): Boolean = usercode == user.getUserId
 
-  @Deprecated
-  def firstMarker: Option[User] = assignment.getStudentsFirstMarker(usercode)
-
-  @Deprecated
-  def secondMarker: Option[User] = assignment.getStudentsSecondMarker(usercode)
-
   def valuesByFieldName: Map[String, String] = values.asScala.map { v => (v.name, v.value) }.toMap
 
   def valuesWithAttachments: mutable.Set[SavedFormValue] = values.asScala.filter(_.hasAttachments)

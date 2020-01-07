@@ -174,7 +174,7 @@ class MemberTest extends TestBase with Mockito {
     user.isStaff should be (true)
     user.isStudent should be (false)
     user.getExtraProperty("urn:websignon:usertype") should be("Staff")
-    Option(user.getExtraProperty("urn:websignon:timestamp")) should be('defined)
+    Option(user.getExtraProperty("urn:websignon:timestamp")) should be(Symbol("defined"))
     user.getExtraProperty("urn:websignon:usersource") should be("Tabula")
   }
 
@@ -267,24 +267,24 @@ class MemberTest extends TestBase with Mockito {
     val member = Fixtures.staff()
 
     member.inUseFlag = null
-    member should not be 'active
+    member should not be Symbol("active")
 
     member.inUseFlag = ""
-    member should not be 'active
+    member should not be Symbol("active")
 
     member.inUseFlag = "Active"
-    member shouldBe 'activeNow
-    member shouldBe 'active
+    member shouldBe Symbol("activeNow")
+    member shouldBe Symbol("active")
 
     member.inUseFlag = "Inactive - Starts 01/01/01"
-    member shouldBe 'activeLater
-    member shouldBe 'active
+    member shouldBe Symbol("activeLater")
+    member shouldBe Symbol("active")
 
     member.inUseFlag = "Inactive - Ended 01/01/01"
-    member should not be 'active
+    member should not be Symbol("active")
 
     member.inUseFlag = "Inactive"
-    member should not be 'active
+    member should not be Symbol("active")
   }
 }
 

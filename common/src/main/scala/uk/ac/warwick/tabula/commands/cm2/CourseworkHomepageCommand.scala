@@ -27,7 +27,7 @@ object CourseworkHomepageCommand {
     studentDeadline: DateTime,
     submittable: Boolean,
     resubmittable: Boolean,
-    feedback: Option[AssignmentFeedback],
+    feedback: Option[Feedback],
     feedbackDeadline: Option[LocalDate],
     feedbackLate: Boolean,
     lateFormative: Boolean
@@ -100,7 +100,7 @@ class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandIn
     CourseworkHomepageInformation(
       homeDepartment,
       studentInformation,
-      (allCM1MarkerAssignments.map(_.academicYear) ++ allCM2MarkerAssignments.map(_.academicYear)).distinct.sorted,
+      allCM2MarkerAssignments.map(_.academicYear).distinct.sorted,
       adminInformation
     )
 

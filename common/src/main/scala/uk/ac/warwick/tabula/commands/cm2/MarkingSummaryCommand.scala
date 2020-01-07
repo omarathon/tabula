@@ -154,10 +154,6 @@ class MarkingSummaryCommandInternal[T <: MarkingSummaryCommandTarget](val target
 trait MarkingSummaryMarkerAssignmentList extends TaskBenchmarking {
   self: MarkingSummaryCommandState with AssessmentServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
-  protected lazy val allCM1MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM1 assignments for marking") {
-    assessmentService.getAssignmentWhereMarker(markerUser, academicYear) // Any academic year
-  }
-
   protected lazy val allCM2MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM2 assignments for marking") {
     assessmentService.getCM2AssignmentsWhereMarker(markerUser, academicYear) // Any academic year
       .filter { assignment => cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, markerUser).nonEmpty }
@@ -192,13 +188,9 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
 
   // Action required - assignments which need an action
   lazy val markerActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
-    // needed to retrieve CM1 assignments for marking
-    lazy val cm1AssignmentsForMarking = benchmarkTask("Get CM1 assignments for marking") {
-      assessmentService.getAssignmentWhereMarker(markerUser, None).sortBy(assignment => Option(assignment.closeDate).getOrElse(assignment.openDate))
-    }
 
     allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
-      info.assignment.allFeedback.exists(_.markingInProgress.exists(_.marker == markerUser)) || cm1AssignmentsForMarking.contains(info.assignment)
+      info.assignment.allFeedback.exists(_.markingInProgress.exists(_.marker == markerUser))
     }
   }
 
@@ -214,15 +206,6 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
     }
   }
 
-  private lazy val allEnhancedCM1MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Enhance CM1 assignments for marking") {
-    allCM1MarkerAssignments.map { assignment =>
-      val markingWorkflow = assignment.markingWorkflow
-      val students = markingWorkflow.getMarkersStudents(assignment, markerUser)
-
-      enhance(assignment, students)
-    }
-  }
-
   private lazy val allEnhancedCM2MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Enhance CM2 assignments for marking") {
     allCM2MarkerAssignments.map { assignment =>
       enhance(
@@ -233,8 +216,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
   }
 
   private lazy val allMarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get assignments for marking") {
-    (allEnhancedCM1MarkerAssignments ++ allEnhancedCM2MarkerAssignments)
-      .sortBy(info => (info.assignment.openEnded, Option(info.assignment.closeDate)))
+    allEnhancedCM2MarkerAssignments.sortBy(info => (info.assignment.openEnded, Option(info.assignment.closeDate)))
   }
 
 }
@@ -244,7 +226,7 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
     with CM2WorkflowProgressServiceComponent =>
 
   protected def enhance(assignment: Assignment, students: Set[User]): MarkerAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
-    val workflowStudents = markerWorkflowInformation(assignment).filterKeys(usercode => students.exists(_.getUserId == usercode))
+    val workflowStudents = markerWorkflowInformation(assignment).view.filterKeys(usercode => students.exists(_.getUserId == usercode))
 
     val allStages = workflowProgressService.getStagesFor(assignment).filter(_.markingRelated)
 
@@ -255,7 +237,7 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
       if (progresses.nonEmpty) {
         Seq(MarkingStage(
           stage,
-          progresses.groupBy(identity).mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
+          progresses.groupBy(identity).view.mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
         ))
       } else {
         Nil
@@ -269,7 +251,7 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
       if (progresses.nonEmpty) {
         Seq(MarkingStage(
           stage,
-          progresses.groupBy(identity).mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
+          progresses.groupBy(identity).view.mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
         ))
       } else {
         Nil
@@ -277,7 +259,7 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
     }
 
     val allNextStages =
-      workflowStudents.values.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
+      workflowStudents.values.flatMap(_.nextStage).groupBy(identity).view.mapValues(_.size)
 
     val nextStages =
       allStages.filter(allNextStages.contains).map { stage =>

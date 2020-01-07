@@ -140,7 +140,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
   }
 
   @Test
-  def studentNotificationNewAgent() {
+  def studentNotificationNewAgent(): Unit = {
     new Environment {
       val notification = new BulkStudentRelationshipNotification
       notification.relationshipService = service
@@ -152,7 +152,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
   }
 
   @Test
-  def studentNotificationMultipleAgentsAddedAndRemoved() {
+  def studentNotificationMultipleAgentsAddedAndRemoved(): Unit = {
     new Environment {
       val notification = new BulkStudentRelationshipNotification
       notification.relationshipService = service

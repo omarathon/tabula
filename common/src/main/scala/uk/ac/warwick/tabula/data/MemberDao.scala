@@ -25,11 +25,11 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 }
 
 trait MemberDao {
-  def saveOrUpdate(member: Member)
+  def saveOrUpdate(member: Member): Unit
 
-  def delete(member: Member)
+  def delete(member: Member): Unit
 
-  def deleteByUniversityIds(universityIds: Seq[String])
+  def deleteByUniversityIds(universityIds: Seq[String]): Unit
 
   def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 
@@ -89,7 +89,7 @@ trait MemberDao {
 
   def getMissingBefore[A <: Member : ClassTag](from: DateTime): Seq[String]
 
-  def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
+  def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime): Unit
 
   def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 
@@ -99,7 +99,7 @@ trait MemberDao {
 
   def getMemberByTimetableHash(timetableHash: String): Option[Member]
 
-  def setTimetableHash(member: Member, timetableHash: String)
+  def setTimetableHash(member: Member, timetableHash: String): Unit
 
   def findAllUsercodesByRestrictions(
     restrictions: Iterable[ScalaRestriction],

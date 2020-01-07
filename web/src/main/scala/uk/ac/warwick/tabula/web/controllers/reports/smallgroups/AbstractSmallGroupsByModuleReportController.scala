@@ -165,7 +165,7 @@ class SmallGroupsByModuleReportRequest extends Serializable {
   var reportRangeStartDate: String = _
   var reportRangeEndDate: String = _
 
-  def copyTo(state: SmallGroupsByModuleReportProcessorState) {
+  def copyTo(state: SmallGroupsByModuleReportProcessorState): Unit = {
     state.counts = counts
     state.students = students
     state.modules = modules

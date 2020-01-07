@@ -29,7 +29,7 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateValid() {
+  def validateValid(): Unit = {
     new Fixture {
       var errors = new BindException(command, "command")
       command.resource_link_id = s"${TurnitinLtiService.AssignmentPrefix}1234"
@@ -39,7 +39,7 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateIncorrectAssignment() {
+  def validateIncorrectAssignment(): Unit = {
     new Fixture {
       var errors = new BindException(command, "command")
       command.resource_link_id = s"${TurnitinLtiService.AssignmentPrefix}4321"
@@ -49,7 +49,7 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateUnknownAssignment() {
+  def validateUnknownAssignment(): Unit = {
     new Fixture {
       var errors = new BindException(command, "command")
       command.resource_link_id = s"${TurnitinLtiService.AssignmentPrefix}9999"

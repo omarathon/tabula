@@ -71,7 +71,7 @@ trait ModifyMemberNoteCommandRequest {
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JList[FileAttachment] = JArrayList()
 
-  def copyTo(memberNote: AbstractMemberNote) {
+  def copyTo(memberNote: AbstractMemberNote): Unit = {
     memberNote.note = note
     memberNote.title = title
     memberNote.lastUpdatedDate = DateTime.now

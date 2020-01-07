@@ -71,9 +71,8 @@ abstract class AbstractDepartmentHomeController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}"))
+@RequestMapping(Array("/coursework/admin/department/{department}"))
 class DepartmentHomeController extends AbstractDepartmentHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -82,9 +81,8 @@ class DepartmentHomeController extends AbstractDepartmentHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear:\\d{4}}"))
 class DepartmentHomeForYearController extends AbstractDepartmentHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -93,9 +91,8 @@ class DepartmentHomeForYearController extends AbstractDepartmentHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/assignments.xml"))
+@RequestMapping(Array("/coursework/admin/department/{department}/assignments.xml"))
 class LegacyApiRedirectController extends CourseworkController {
 
   @RequestMapping def redirect(@PathVariable department: Department) =

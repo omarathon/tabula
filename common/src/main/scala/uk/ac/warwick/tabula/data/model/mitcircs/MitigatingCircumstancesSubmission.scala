@@ -208,7 +208,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     (_attachments.asScala.toSeq ++ messageEvidence).sortBy(_.dateUploaded)
   }
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.mitigatingCircumstancesSubmission = this

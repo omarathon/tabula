@@ -16,9 +16,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/extensions"))
+@RequestMapping(Array("/coursework/admin/department/{department}/settings/extensions"))
 class ExtensionSettingsController extends CourseworkController
   with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
   with AutowiringMaintenanceModeServiceComponent {

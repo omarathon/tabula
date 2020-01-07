@@ -110,7 +110,7 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
     sheet
   }
 
-  def addRow(sheet: Sheet)(item: WorkflowItems) {
+  def addRow(sheet: Sheet)(item: WorkflowItems): Unit = {
     val plainCellStyle = {
       val cs = sheet.getWorkbook.createCellStyle()
       cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
@@ -236,8 +236,7 @@ trait SubmissionAndFeedbackExport {
   val submissionFields: Seq[String] = Seq("id", "time", "downloaded")
   val submissionStatusFields: Seq[String] = Seq("late", "within-extension", "markable")
   val markerFields: Seq[String] =
-    if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
-    else if (assignment.cm2MarkingWorkflow != null) {
+    if (assignment.cm2MarkingWorkflow != null) {
       val stagesByDescription = assignment.cm2MarkingWorkflow.markerStages.groupBy(_.description)
 
       val markerDescriptions = stagesByDescription.keys.toList.sortBy(r => stagesByDescription(r).map(_.order).min) // sort descriptions by their earliest stages
@@ -280,7 +279,7 @@ trait SubmissionAndFeedbackExport {
     case Some(item) => Map(
       "late" -> item.submission.isLate,
       "within-extension" -> item.submission.isAuthorisedLate,
-      "markable" -> assignment.isReleasedForMarking(item.submission.usercode)
+      "markable" -> assignment.isReleasedForMarking
     )
     case _ => student.enhancedExtension match {
       case Some(item) =>
@@ -298,12 +297,7 @@ trait SubmissionAndFeedbackExport {
   }
 
   protected def markerData(student: WorkflowItems): Map[String, Any] =
-    if (assignment.markingWorkflow != null) {
-      Map(
-        "first-marker" -> assignment.getStudentsFirstMarker(student.student.getUserId).map(_.getFullName).getOrElse(""),
-        "second-marker" -> assignment.getStudentsSecondMarker(student.student.getUserId).map(_.getFullName).getOrElse("")
-      )
-    } else if (assignment.cm2MarkingWorkflow != null) {
+    if (assignment.cm2MarkingWorkflow != null) {
       val markerNames: Map[String, Any] = student.enhancedFeedback.map(ef => {
         ef.feedback.feedbackByStage.map(fbs => fbs._1.description -> ef.feedback.feedbackMarkerByAllocationName(fbs._1.roleName).map(_.getFullName).getOrElse(""))
       }).getOrElse(Map())

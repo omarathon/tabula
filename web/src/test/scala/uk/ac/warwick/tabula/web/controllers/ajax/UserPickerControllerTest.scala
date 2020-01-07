@@ -9,7 +9,7 @@ class UserPickerControllerTest extends TestBase {
   val controller = new UserPickerController
   controller.json = new JsonObjectMapperFactory().createInstance
 
-  @Test def queryJson {
+  @Test def queryJson: Unit = {
     val cmd = new UserPickerController.UserPickerCommand()
 
     val userLookup = new MockUserLookup
@@ -32,7 +32,7 @@ class UserPickerControllerTest extends TestBase {
     users(1).get("value") should be(Some("cusebr"))
   }
 
-  @Test def setQuery {
+  @Test def setQuery: Unit = {
     val cmd = new UserPickerController.UserPickerCommand()
 
     cmd.query = "billy"

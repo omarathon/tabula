@@ -69,7 +69,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def addPointsFromTemplate() {
+  def addPointsFromTemplate(): Unit = {
     new Fixture {
       val newPoints: Seq[AttendanceMonitoringPoint] = command.applyInternal()
       newPoints.size should be(6)
@@ -80,7 +80,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateAll() {
+  def validateAll(): Unit = {
     new Fixture {
       command.validate(errors)
       errors.getErrorCount should be(0)
@@ -88,7 +88,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def noTemplateScheme() {
+  def noTemplateScheme(): Unit = {
     new Fixture {
       command.templateScheme = null
       command.validate(errors)
@@ -97,7 +97,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def mixedSchemeType() {
+  def mixedSchemeType(): Unit = {
     new Fixture {
       command.scheme1.pointStyle = AttendanceMonitoringPointStyle.Week
       command.validate(errors)
@@ -106,7 +106,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicatePoints() {
+  def duplicatePoints(): Unit = {
     new Fixture {
       command.scheme1.points.add(command.point1)
       command.validate(errors)

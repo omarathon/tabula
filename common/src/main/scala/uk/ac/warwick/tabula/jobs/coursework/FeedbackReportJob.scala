@@ -118,7 +118,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
       }
     }
 
-    def run() {
+    def run(): Unit = {
       val report = new FeedbackReport(department, academicYear, startDate, endDate)
 
       updateStatus("Generating base worksheets")

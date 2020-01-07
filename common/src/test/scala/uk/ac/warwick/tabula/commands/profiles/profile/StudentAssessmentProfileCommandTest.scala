@@ -13,7 +13,7 @@ class StudentAssessmentProfileCommandTest extends TestBase with Mockito {
   val year = AcademicYear(2014)
 
   @Test
-  def requiresModuleRegistrationCoreReadPermissions() {
+  def requiresModuleRegistrationCoreReadPermissions(): Unit = {
     val perms: StudentAssessmentProfilePermissions with StudentAssessmentCommandState = new StudentAssessmentProfilePermissions with StudentAssessmentCommandState {
       val studentCourseDetails: StudentCourseDetails = scd
       val academicYear: AcademicYear = year
@@ -25,7 +25,7 @@ class StudentAssessmentProfileCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def mixesCorrectPermissionsIntoCommand() {
+  def mixesCorrectPermissionsIntoCommand(): Unit = {
     val composedCommand = StudentAssessmentProfileCommand(scd, year)
     composedCommand should be(anInstanceOf[StudentAssessmentProfilePermissions])
   }

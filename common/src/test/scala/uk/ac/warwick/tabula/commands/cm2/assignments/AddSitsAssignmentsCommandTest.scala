@@ -65,7 +65,7 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def applyCommand() {
+  @Test def applyCommand(): Unit = {
     new Fixture {
       withUser("cuscav") {
         val cmd = new AddSitsAssignmentsCommandInternal(thisDepartment, AcademicYear(2016), currentUser) with AddSitsAssignmentsCommandState
@@ -91,10 +91,10 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
         module1result.name should be("Assignment 1")
         //check the default fields were added.
         withClue("Expecting attachment field.") {
-          module1result.attachmentField should be('defined)
+          module1result.attachmentField should be(Symbol("defined"))
         }
         withClue("Expecting comment field.") {
-          module1result.commentField should be('defined)
+          module1result.commentField should be(Symbol("defined"))
         }
         withClue("Expected not open ended") {
           assert(module1result.openEnded === false)
@@ -105,10 +105,10 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
         module3result.name should be("Assignment 3")
         //check the default fields were added.
         withClue("Expecting attachment field.") {
-          module3result.attachmentField should be('defined)
+          module3result.attachmentField should be(Symbol("defined"))
         }
         withClue("Expecting comment field.") {
-          module3result.commentField should be('defined)
+          module3result.commentField should be(Symbol("defined"))
         }
         withClue("Expected open ended") {
           assert(module3result.openEnded === true)
@@ -117,7 +117,7 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def optionsMapBinding() {
+  @Test def optionsMapBinding(): Unit = {
     new Fixture {
       val cmd = new AddSitsAssignmentsCommandInternal(null, AcademicYear(2016), null) with AddSitsAssignmentsCommandState
         with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {

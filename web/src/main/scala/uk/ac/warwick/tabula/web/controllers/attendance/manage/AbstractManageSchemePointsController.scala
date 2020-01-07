@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.web.Mav
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 abstract class AbstractManageSchemePointsController extends AttendanceController {
 

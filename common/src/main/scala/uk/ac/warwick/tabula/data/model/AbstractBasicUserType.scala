@@ -46,7 +46,7 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B: ClassTag] extend
     }
   }
 
-  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor) {
+  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor): Unit = {
     basicType.nullSafeSet(stmt, toValue(value), index, impl)
   }
 

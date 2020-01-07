@@ -64,19 +64,19 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
       search(index).query(queryStringQuery("mat*")) should containId(m.universityId)
       search(index).query(termQuery("userType", "S")) should containId(m.universityId)
 
-      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
       queryService.find("Mathew", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("mat", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("mann", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("m mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
-      queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
       queryService.find("mat mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("m m", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("m m", Seq(m.homeDepartment), Set(Student, Staff), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("m m", Seq(Fixtures.department("OT", "Some other department"), m.homeDepartment), Set(Student, Staff), searchAllDepts = false, activeOnly = true).head should be(m)
-      queryService.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), searchAllDepts = false, activeOnly = true) should be('empty)
-      queryService.find("m m", Seq(m.homeDepartment), Set(Staff), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
+      queryService.find("m m", Seq(m.homeDepartment), Set(Staff), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
     }
   }
 
@@ -101,7 +101,7 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
       blockUntilCount(1, index.name)
 
       // Check inactive student is filtered out
-      queryService.find(query = "mat", departments = Seq(m.homeDepartment), userTypes = Set(), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find(query = "mat", departments = Seq(m.homeDepartment), userTypes = Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
 
       // Check inactive student is included
       queryService.find(query = "mat", departments = Seq(m.homeDepartment), userTypes = Set(), searchAllDepts = false, activeOnly = false).head should be(m)
@@ -128,8 +128,8 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
       }
       blockUntilCount(1, index.name)
 
-      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be('empty)
-      queryService.find("joconnell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
+      queryService.find("joconnell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
       queryService.find("o'connell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("connell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("johnny connell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
@@ -164,7 +164,7 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
       // General sanity that this is working before we go into the tests of the query service
       search(index) should containId(m.universityId)
 
-      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be('empty)
+      queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be(Symbol("empty"))
       queryService.find("Aist\u0117", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("aist", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)
       queryService.find("aiste", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be(m)

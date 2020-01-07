@@ -32,7 +32,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     val command = new FindStudentsForUserGroupCommandInternal(department, AcademicYear.now(), MemberQueryMembershipAdapter(set)) with CommandTestSupport
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.routes.add(new Route() {
         this.code = "a100"
@@ -105,7 +105,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
@@ -120,7 +120,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
     val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -130,7 +130,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet(): Unit = {
     val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -140,7 +140,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet(): Unit = {
     val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -152,7 +152,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def wires() {
+  @Test def wires(): Unit = {
     new Fixture {
       val command = FindStudentsForUserGroupCommand(department, set)
 

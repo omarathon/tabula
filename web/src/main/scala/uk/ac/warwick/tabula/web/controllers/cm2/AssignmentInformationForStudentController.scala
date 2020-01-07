@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.commands.cm2.{StudentMemberSubmissionAndFeedbackComm
 import uk.ac.warwick.tabula.data.model.{Assignment, Member}
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm2Enabled"))
+
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/submission/{assignment}/{studentMember}"))
+@RequestMapping(Array("/coursework/submission/{assignment}/{studentMember}"))
 class AssignmentInformationForStudentController extends CourseworkController {
 
   type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState

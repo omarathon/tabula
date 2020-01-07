@@ -4,7 +4,7 @@ import org.springframework.validation.BindingResult
 import scala.reflect._
 
 trait BindListener {
-  def onBind(result: BindingResult)
+  def onBind(result: BindingResult): Unit
 
   implicit class RichBindingResult(result: BindingResult) {
     def target[A: ClassTag]: Option[A] = result.getTarget match {

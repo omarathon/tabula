@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.CM2MarkingWorkflowDao
-import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, SingleMarker, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, ModeratedWorkflow, ModerationSampler, SingleMarkerWorkflow}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -57,14 +57,14 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def save() {
+  def save(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
     service.save(workflow)
     verify(mwd, times(1)).saveOrUpdate(workflow)
   }
 
   @Test
-  def releaseFeedback() {
+  def releaseFeedback(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
     val assignment = Fixtures.assignment("test")
     assignment.cm2MarkingWorkflow = workflow
@@ -86,7 +86,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def progressAndReturnFeedback() {
+  def progressAndReturnFeedback(): Unit = {
     val markerA = Fixtures.user("1170836", "cuslaj")
     val markerB = Fixtures.user("1170837", "cuslak")
     val finalMarker = Fixtures.user("1170838", "cuslal")
@@ -142,7 +142,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def finish() {
+  def finish(): Unit = {
     new MarkerFeedbackFixture {
       val marker = Fixtures.user("1170836", "cuslaj")
       val moderator = Fixtures.user("1170838", "cuslal")
@@ -185,7 +185,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def markerAllocationsAndFeedbackByMarker() {
+  def markerAllocationsAndFeedbackByMarker(): Unit = {
     new MarkerFeedbackFixture {
       service.getMarkerAllocations(assignment, SingleMarker) should be(Map(marker1 -> Set(student1, student2), marker2 -> Set(student3)))
       service.feedbackByMarker(assignment, SingleMarker) should be(Map(marker1 -> Seq(mf1, mf2), marker2 -> Seq(mf3)))
@@ -193,7 +193,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def addMarkersForStage() {
+  def addMarkersForStage(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Nil)
     service.addMarkersForStage(workflow, SingleMarker, Seq(marker1))
     verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
@@ -201,7 +201,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def removeMarkersForStage() {
+  def removeMarkersForStage(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1, marker2))
     service.removeMarkersForStage(workflow, SingleMarker, Seq(marker1))
     verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
@@ -209,14 +209,14 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def removeMarkersForStageErrorNoStageMarkers() {
+  def removeMarkersForStageErrorNoStageMarkers(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
     workflow.stageMarkers = JArrayList()
     service.removeMarkersForStage(workflow, SingleMarker, Seq(marker1))
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def removeMarkersForStageErrorExistingFeedback() {
+  def removeMarkersForStageErrorExistingFeedback(): Unit = {
     new MarkerFeedbackFixture {
       val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
       workflow.assignments.add(assignment)
@@ -225,7 +225,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def allocateMarkersForStage() {
+  def allocateMarkersForStage(): Unit = {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
     val assignment = Fixtures.assignment("test")
     assignment.cm2MarkingWorkflow = workflow
@@ -251,7 +251,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
     mwd.markerFeedbackForAssignmentAndStage(assignment, SingleMarker) returns result
     //add the mock userlookup to all the generated mf so the next test will work - bleah :(
     result.foreach(_.userLookup = userLookup)
-    result.map(_.feedback.asInstanceOf[AssignmentFeedback]).foreach(assignment.feedbacks.add)
+    result.map(_.feedback.asInstanceOf[Feedback]).foreach(assignment.feedbacks.add)
 
     val allocations2 = Seq(
       marker1 -> Set(student1),
@@ -285,7 +285,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def allFeedbackForMarker() {
+  def allFeedbackForMarker(): Unit = {
 
     val assignment = Fixtures.assignment("test")
 

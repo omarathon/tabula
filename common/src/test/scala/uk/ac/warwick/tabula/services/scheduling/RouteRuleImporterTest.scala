@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, LevelService}
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamModuleListService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class RouteRuleImporterTest extends TestBase with Mockito {
 
   val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
 
-  @After def afterTheFeast() {
+  @After def afterTheFeast(): Unit = {
     sits.shutdown()
   }
 

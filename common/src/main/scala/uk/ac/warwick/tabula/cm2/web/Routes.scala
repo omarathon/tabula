@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.cm2.web
 
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -19,14 +18,9 @@ object Routes {
 
   import RoutesUtils._
 
-  // FIXME this isn't really an optional property, but testing is a pain unless it's made so
-  var _cm2Prefix: Option[String] = Wire.optionProperty("${cm2.prefix}")
-
-  def cm2Prefix: String = _cm2Prefix.orNull
-
   def zipFileJob(jobInstance: JobInstance): String = "/zips/%s" format encoded(jobInstance.id)
 
-  private lazy val context = s"/$cm2Prefix"
+  private val context = "/coursework"
 
   def home: String = context + "/"
 
@@ -40,7 +34,7 @@ object Routes {
 
     def feedback(assignment: Assignment): String = apply(assignment) + "all/feedback.zip"
 
-    def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + s"${encoded(feedback.usercode)}/feedback.pdf"
+    def feedbackPdf(assignment: Assignment, feedback: Feedback): String = apply(assignment) + s"${encoded(feedback.usercode)}/feedback.pdf"
   }
 
   object extensionRequest {

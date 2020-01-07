@@ -15,7 +15,7 @@ class CsrfEnforceListener extends QueueListener with InitializingBean with Loggi
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     item match {
       case copy: CsrfEnforceMessage => csrfService.enforce = copy.enforce
       case _ =>

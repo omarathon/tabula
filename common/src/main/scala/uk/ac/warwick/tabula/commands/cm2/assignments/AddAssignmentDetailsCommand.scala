@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.hibernate.validator.constraints.{Length, NotEmpty}
+import org.hibernate.validator.constraints.Length
+import javax.validation.constraints.NotEmpty
 import org.joda.time.{DateTimeConstants, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
@@ -61,7 +62,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
   }
 
 
-  def prefillFromRecentAssignment() {
+  def prefillFromRecentAssignment(): Unit = {
     if (prefillAssignment != null) {
       copyNonspecificFrom(prefillAssignment)
     } else {
@@ -80,7 +81,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     * another recently created assignment, that may have good
     * initial values for submission options.
     */
-  def copyNonspecificFrom(assignment: Assignment) {
+  def copyNonspecificFrom(assignment: Assignment): Unit = {
     openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
     closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
@@ -95,7 +96,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
 trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
-  def copyTo(assignment: Assignment) {
+  def copyTo(assignment: Assignment): Unit = {
     assignment.name = name
 
     if (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate)) {
@@ -118,7 +119,6 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     if (workflowCategory == WorkflowCategory.Reusable) {
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
-    assignment.cm2Assignment = true
     assignment.anonymity = anonymity
     copySharedDetailTo(assignment)
   }

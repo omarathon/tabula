@@ -10,7 +10,7 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
   val mitCircsSubmissionDao = new MitCircsSubmissionDaoImpl
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     mitCircsSubmissionDao.sessionFactory = sessionFactory
   }
 

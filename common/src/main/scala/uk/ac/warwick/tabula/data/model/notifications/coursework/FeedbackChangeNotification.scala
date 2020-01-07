@@ -10,14 +10,14 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 @Entity
 @Proxy
 @DiscriminatorValue(value = "FeedbackChange")
-class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
-  with SingleItemNotification[AssignmentFeedback]
+class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assignment]
+  with SingleItemNotification[Feedback]
   with SingleRecipientNotification
   with UniversityIdOrUserIdRecipientNotification
   with AutowiringUserLookupComponent
   with AllCompletedActionRequiredNotification {
 
-  def feedback: AssignmentFeedback = item.entity
+  def feedback: Feedback = item.entity
 
   def assignment: Assignment = target.entity
 
@@ -27,7 +27,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedba
 
   priority = Warning
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     recipientUniversityId = feedback.usercode
   }
 

@@ -26,11 +26,11 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     extends CustomDataBinder(obj, name)
       with PermissionsBinding
 
-  private def clearAnyChecks() {
+  private def clearAnyChecks(): Unit = {
     permissionsAnyChecks.clear()
   }
 
-  @Test def checks() {
+  @Test def checks(): Unit = {
     PermissionCheck(Permissions.Module.Create, dept)
     PermissionCheck(Permissions.Module.Delete, dept)
     PermissionCheckAll(Permissions.Module.ManageAssignments, Seq(mod1, mod2))
@@ -44,7 +44,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     ))
   }
 
-  @Test def linkedAssignmentToModule() {
+  @Test def linkedAssignmentToModule(): Unit = {
     val assignment = Fixtures.assignment("my assignment")
     assignment.module = mod1
 
@@ -60,7 +60,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def linkedFeedbackToAssignment() {
+  @Test def linkedFeedbackToAssignment(): Unit = {
     val ass1 = Fixtures.assignment("my assignment")
     ass1.id = "ass1"
 
@@ -83,7 +83,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def linkedSubmissionToAssignment() {
+  @Test def linkedSubmissionToAssignment(): Unit = {
     val ass1 = Fixtures.assignment("my assignment")
     ass1.id = "ass1"
 
@@ -106,7 +106,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def linkedFileAttachmentToSubmission() {
+  @Test def linkedFileAttachmentToSubmission(): Unit = {
 
     val attachment = new FileAttachment
 
@@ -133,26 +133,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def linkedMarkingWorkflowToDepartment() {
-    val markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
-    markingWorkflow.department = dept
-
-    mustBeLinked(markingWorkflow, dept)
-
-    val dept2 = Fixtures.department("xx", "dept 2")
-    dept2.id = "dept2"
-
-    markingWorkflow.department = dept2
-
-    try {
-      mustBeLinked(markingWorkflow, dept)
-      fail("expected exception")
-    } catch {
-      case e: ItemNotFoundException =>
-    }
-  }
-
-  @Test def linkedFeedbackTemplateToDepartment() {
+  @Test def linkedFeedbackTemplateToDepartment(): Unit = {
     val template = Fixtures.feedbackTemplate("my template")
     template.department = dept
 
@@ -171,7 +152,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def mandatory() {
+  @Test def mandatory(): Unit = {
     val assignment = Fixtures.assignment("my assignment")
     mandatory(assignment) should be(assignment)
 
@@ -192,7 +173,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def notDeleted() {
+  @Test def notDeleted(): Unit = {
     val assignment = Fixtures.assignment("my assignment")
     notDeleted(assignment)
 
@@ -205,7 +186,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
     }
   }
 
-  @Test def checkOneOf() {
+  @Test def checkOneOf(): Unit = {
     val user = new User("custard")
     user.setIsLoggedIn(true)
     user.setFoundUser(true)

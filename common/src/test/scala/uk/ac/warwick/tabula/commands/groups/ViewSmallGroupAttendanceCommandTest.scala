@@ -72,7 +72,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
         (event1, 4),
         (event2, 7)
       ))
-      info.attendance should be('empty)
+      info.attendance should be(Symbol("empty"))
     }
   }
 
@@ -252,7 +252,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
     }
   }
 
-  private def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState) {
+  private def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState): Unit = {
     val attendance = new SmallGroupEventAttendance
     attendance.occurrence = occurrence
     attendance.universityId = user.getWarwickId

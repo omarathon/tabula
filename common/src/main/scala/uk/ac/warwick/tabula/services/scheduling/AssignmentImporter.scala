@@ -56,7 +56,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   var gradeBoundaryQuery: GradeBoundaryQuery = _
   var jdbc: NamedParameterJdbcTemplate = _
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     assessmentComponentQuery = new AssessmentComponentQuery(sits)
     upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
     gradeBoundaryQuery = new GradeBoundaryQuery(sits)
@@ -78,7 +78,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     * Iterates through ALL module registration elements in SITS (that's many),
     * passing each ModuleRegistration item to the given callback for it to process.
     */
-  def allMembers(callback: UpstreamModuleRegistration => Unit) {
+  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
       "academic_year_code" -> yearsToImportArray)
     jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
@@ -93,7 +93,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   }
 
   class UpstreamModuleRegistrationRowCallbackHandler(callback: UpstreamModuleRegistration => Unit) extends RowCallbackHandler {
-    override def processRow(rs: ResultSet) {
+    override def processRow(rs: ResultSet): Unit = {
       callback(UpstreamModuleRegistration(
         year = rs.getString("academic_year_code"),
         sprCode = rs.getString("spr_code"),

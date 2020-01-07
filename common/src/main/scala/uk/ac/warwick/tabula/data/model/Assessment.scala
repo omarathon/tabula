@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AssessmentMembershipInfo, AssessmentMembershipService}
 
-import collection.JavaConverters._
-import uk.ac.warwick.userlookup.User
+import scala.jdk.CollectionConverters._
 
 trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
@@ -18,24 +17,6 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
   var academicYear: AcademicYear
   var name: String
   var assessmentGroups: JList[AssessmentGroup]
-  var markingWorkflow: MarkingWorkflow
-  var firstMarkers: JList[FirstMarkersMap]
-  var secondMarkers: JList[SecondMarkersMap]
-
-  /** Map between first markers and the students assigned to them */
-  def firstMarkerMap: Map[String, UserGroup] = Option(firstMarkers).map { markers =>
-    markers.asScala.map {
-      markerMap => markerMap.marker_id -> markerMap.students
-    }.toMap
-  }.getOrElse(Map())
-
-  /** Map between second markers and the students assigned to them */
-  def secondMarkerMap: Map[String, UserGroup] = Option(secondMarkers).map { markers =>
-    markers.asScala.map {
-      markerMap => markerMap.marker_id -> markerMap.students
-    }.toMap
-  }.getOrElse(Map())
-
 
   def addDefaultFeedbackFields(): Unit
 
@@ -64,51 +45,12 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
   def collectMarks: JBoolean
 
-  def hasWorkflow: Boolean = markingWorkflow != null
-
-  def isMarker(user: User): Boolean = isFirstMarker(user) || isSecondMarker(user)
-
-  def isFirstMarker(user: User): Boolean = {
-    if (markingWorkflow != null)
-      markingWorkflow.firstMarkers.includesUser(user)
-    else false
-  }
-
-  def isSecondMarker(user: User): Boolean = {
-    if (markingWorkflow != null)
-      markingWorkflow.secondMarkers.includesUser(user)
-    else false
-  }
-
-  def isThirdMarker(user: User): Boolean = {
-    if (markingWorkflow != null)
-      markingWorkflow.thirdMarkers.includesUser(user)
-    else false
-  }
-
-
-  def isReleasedForMarking(usercode: String): Boolean =
-    allFeedback.find(_.usercode == usercode) match {
-      case Some(f) => f.firstMarkerFeedback != null
-      case _ => false
-    }
-
-  def isReleasedToSecondMarker(usercode: String): Boolean =
-    allFeedback.find(_.usercode == usercode) match {
-      case Some(f) => f.secondMarkerFeedback != null
-      case _ => false
-    }
-
-  def isReleasedToThirdMarker(usercode: String): Boolean =
-    allFeedback.find(_.usercode == usercode) match {
-      case Some(f) => f.thirdMarkerFeedback != null
-      case _ => false
-    }
-
   // if any feedback exists that has a marker feedback with a marker then at least one marker has been assigned
   def markersAssigned: Boolean = allFeedback.exists(_.allMarkerFeedback.exists(_.marker != null))
 
   def isReleasedForMarking: Boolean
+
+  def isReleasedForMarking(usercode: String): Boolean = allFeedback.find(_.usercode == usercode).exists(_.releasedToMarkers)
 
   def members: UnspecifiedTypeUserGroup
 }

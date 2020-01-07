@@ -26,10 +26,10 @@ trait EmergencyMessageStatus {
 trait EmergencyMessageService extends EmergencyMessageStatus {
 
   /** Enable emergency message. **/
-  def enable
+  def enable: Unit
 
   /** Disable emergency message. **/
-  def disable
+  def disable: Unit
 
   /** Returns whether emergency message is enabled. */
   def enabled: Boolean
@@ -77,14 +77,14 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 
   private def notEnabled = new IllegalStateException("Maintenance not enabled")
 
-  def enable {
+  def enable: Unit = {
     if (!_enabled) {
       _enabled = true
       changingState.emit(_enabled)
     }
   }
 
-  def disable {
+  def disable: Unit = {
     if (_enabled) {
       _enabled = false
       changingState.emit(_enabled)
@@ -144,7 +144,7 @@ class EmergencyMessageListener extends QueueListener with InitializingBean with 
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     item match {
       case copy: EmergencyMessage => emergencyMessageService.update(copy)
       case _ =>

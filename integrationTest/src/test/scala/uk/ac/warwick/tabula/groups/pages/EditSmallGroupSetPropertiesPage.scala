@@ -10,23 +10,23 @@ trait EditSmallGroupSetProgressWizardLinks {
 
   implicit def webDriver: WebDriver
 
-  def goToEditProperties() {
+  def goToEditProperties(): Unit = {
     click on linkText("Properties")
   }
 
-  def goToEditGroups() {
+  def goToEditGroups(): Unit = {
     click on linkText("Groups")
   }
 
-  def goToEditStudents() {
+  def goToEditStudents(): Unit = {
     click on linkText("Students")
   }
 
-  def goToEditEvents() {
+  def goToEditEvents(): Unit = {
     click on linkText("Events")
   }
 
-  def goToAllocate() {
+  def goToAllocate(): Unit = {
     click on linkText("Allocation")
   }
 
@@ -41,11 +41,11 @@ class EditSmallGroupSetPropertiesPage(implicit val webDriver: WebDriver) extends
     heading.text.startsWith("Edit small groups")
   }
 
-  def submitAndExit() {
+  def submitAndExit(): Unit = {
     click on cssSelector("input.btn-primary[value='Save and exit']")
   }
 
-  def save() {
+  def save(): Unit = {
     click on cssSelector("input.btn-primary[value='Save']")
   }
 
@@ -61,11 +61,11 @@ class EditSmallGroupSetGroupsPage(implicit val webDriver: WebDriver) extends Web
     currentUrl.endsWith("/groups")
   }
 
-  def submitAndExit() {
+  def submitAndExit(): Unit = {
     click on cssSelector("input.btn-primary[value='Save and exit']")
   }
 
-  def save() {
+  def save(): Unit = {
     click on cssSelector("input.btn-primary[value='Save']")
   }
 
@@ -81,11 +81,11 @@ class EditSmallGroupSetStudentsPage(implicit val webDriver: WebDriver) extends W
     currentUrl.endsWith("/students")
   }
 
-  def submitAndExit() {
+  def submitAndExit(): Unit = {
     click on cssSelector("input.btn-primary[value='Save and exit']")
   }
 
-  def save() {
+  def save(): Unit = {
     click on cssSelector("input.btn-primary[value='Save']")
   }
 
@@ -101,11 +101,11 @@ class EditSmallGroupSetEventsPage(implicit val webDriver: WebDriver) extends Web
     currentUrl.endsWith("/events")
   }
 
-  def submitAndExit() {
+  def submitAndExit(): Unit = {
     click on cssSelector("input.btn-primary[value='Save and exit']")
   }
 
-  def save() {
+  def save(): Unit = {
     click on cssSelector("input.btn-primary[value='Save']")
   }
 

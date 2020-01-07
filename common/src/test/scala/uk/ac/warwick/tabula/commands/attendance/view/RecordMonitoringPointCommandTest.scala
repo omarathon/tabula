@@ -94,7 +94,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def statePointsToRecord() {
+  def statePointsToRecord(): Unit = {
     new StateFixture with FilteredPointsFixture with StudentDatasFixture {
       state.filteredPoints = thisFilteredPoints
       state.studentDatas = thisStudentDatas
@@ -105,7 +105,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def stateStudentMap() {
+  def stateStudentMap(): Unit = {
     new StateFixture with FilteredPointsFixture with StudentDatasFixture {
       state.filteredPoints = thisFilteredPoints
       state.studentDatas = thisStudentDatas
@@ -182,7 +182,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateInvalidPoint() {
+  def validateInvalidPoint(): Unit = {
     new ValidatorFixture {
       validator.checkpointMap = JHashMap(
         student3 -> JHashMap(point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
@@ -193,7 +193,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateAlreadyReported() {
+  def validateAlreadyReported(): Unit = {
     new ValidatorFixture {
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq()
       validator.checkpointMap = JHashMap(
@@ -205,7 +205,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTooSoon() {
+  def validateTooSoon(): Unit = {
     new ValidatorFixture {
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns PeriodType.values().toSeq.map(_.toString)
       validator.checkpointMap = JHashMap(
@@ -218,7 +218,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateOk() {
+  def validateOk(): Unit = {
     new ValidatorFixture {
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns PeriodType.values().toSeq.map(_.toString)
       validator.checkpointMap = JHashMap(

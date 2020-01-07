@@ -5,9 +5,10 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.assignments.SharedAssignmentProperties
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
-import uk.ac.warwick.tabula.services.{AssessmentService, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.{AssessmentService, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, AutowiringZipServiceComponent}
 
 import scala.jdk.CollectionConverters._
 
@@ -15,6 +16,7 @@ import scala.jdk.CollectionConverters._
 /**
   * Common behaviour
   */
+// TODO TAB-7991 - Nuke this
 abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMembershipGroupIsUniversityIds: Boolean = false)
   extends Command[Assignment]
     with SharedAssignmentProperties
@@ -24,6 +26,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
     with ModifyAssignmentCommandNotifications
     with AutowiringUserLookupComponent
     with AutowiringAssessmentMembershipServiceComponent
+    with AutowiringZipServiceComponent
     with UpdatesStudentMembership
     with GeneratesTriggers[Assignment] {
 
@@ -50,19 +53,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
 
   var removeWorkflow: Boolean = false
 
-  // TAB-3597
-  lazy val allMarkingWorkflows: Seq[MarkingWorkflow] = assignment match {
-    case existing: Assignment if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
-      module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
-    case _ =>
-      module.adminDepartment.markingWorkflows
-  }
-
-  // can be overridden in concrete implementations to provide additional validation
-  def contextSpecificValidation(errors: Errors)
-
   def validate(errors: Errors): Unit = {
-    contextSpecificValidation(errors)
 
     // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
     if (name != null && name.length < 3000) {
@@ -74,14 +65,6 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
 
     if (openDate == null) {
       errors.rejectValue("openDate", "openDate.missing")
-    } else {
-      //disallow assignments with open date >= 1st Aug 2017
-      var validOpenDate: DateTime = DateTime.parse("2017-08-01")
-
-      //bypass validation if it is cm2 assignment
-      if (!cm2Assignment && openDate.isAfter(validOpenDate) || openDate.isEqual(validOpenDate)) {
-        errors.rejectValue("openDate", "openDate.invalid")
-      }
     }
 
     if (!openEnded) {
@@ -95,14 +78,13 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
     validateShared(errors)
   }
 
-  def copyTo(assignment: Assignment) {
+  def copyTo(assignment: Assignment): Unit = {
     assignment.name = name
     assignment.openDate = openDate
     assignment.closeDate = closeDate
     assignment.academicYear = academicYear
     assignment.feedbackTemplate = feedbackTemplate
-    assignment.cm2Assignment = cm2Assignment
-    if (cm2Assignment && assignment.cm2MarkingWorkflow != null) {
+    if (assignment.cm2MarkingWorkflow != null) {
       assignment.workflowCategory = Option(WorkflowCategory.Reusable)
     } else {
       assignment.workflowCategory = Option(WorkflowCategory.NoneUse)
@@ -116,14 +98,14 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
 
     copySharedTo(assignment: Assignment)
     if (removeWorkflow) {
-      assignment.markingWorkflow = null
+      assignment.cm2MarkingWorkflow = null
     }
 
     if (assignment.members == null) assignment.members = UserGroup.ofUsercodes
     assignment.members.copyFrom(members)
   }
 
-  def prefillFromRecentAssignment() {
+  def prefillFromRecentAssignment(): Unit = {
     if (prefillAssignment != null) {
       copyNonspecificFrom(prefillAssignment)
     } else {
@@ -142,13 +124,13 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
     * another recently created assignment, that may have good
     * initial values for submission options.
     */
-  def copyNonspecificFrom(assignment: Assignment) {
+  def copyNonspecificFrom(assignment: Assignment): Unit = {
     openDate = assignment.openDate
     closeDate = assignment.closeDate
     copySharedFrom(assignment)
   }
 
-  def copyGroupsFrom(assignment: Assignment) {
+  def copyGroupsFrom(assignment: Assignment): Unit = {
     assessmentGroups = assignment.assessmentGroups
     // TAB-4848 get all the groups that are linked even if they're marked not in use
     upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
@@ -156,7 +138,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
     }.asJava)
   }
 
-  def copyFrom(assignment: Assignment) {
+  def copyFrom(assignment: Assignment): Unit = {
     name = assignment.name
     academicYear = assignment.academicYear
     feedbackTemplate = assignment.feedbackTemplate
@@ -172,7 +154,7 @@ abstract class ModifyAssignmentCommand(val module: Module, val updateStudentMemb
   /**
     * Convert Spring-bound upstream group references to an AssessmentGroup buffer
     */
-  def updateAssessmentGroups() {
+  def updateAssessmentGroups(): Unit = {
     assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
       val template = new AssessmentGroup
       template.assessmentComponent = ug.assessmentComponent

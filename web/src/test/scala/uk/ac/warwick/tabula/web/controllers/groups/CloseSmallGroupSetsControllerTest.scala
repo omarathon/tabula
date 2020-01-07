@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters._
 class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
   @Test
-  def createsViewModelAbleToBuildCommand() {
+  def createsViewModelAbleToBuildCommand(): Unit = {
     val controller = new OpenSmallGroupSetsController()
     controller.newViewModelOpen(new Department, SmallGroupSetSelfSignUpState.Closed) should be(anInstanceOf[controller.GroupsetListViewModel])
     controller.newViewModelOpen(new Department, SmallGroupSetSelfSignUpState.Closed).createCommand(new User, Nil) should be(anInstanceOf[OpenSmallGroupSet])
@@ -23,7 +23,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def exposesOnlySelfSignupGroupSetsToForm() {
+  def exposesOnlySelfSignupGroupSetsToForm(): Unit = {
     new SmallGroupFixture {
       groupSet1.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
       groupSet2.allocationMethod = SmallGroupAllocationMethod.Manual
@@ -39,7 +39,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def exposesDepartmentToForm() {
+  def exposesDepartmentToForm(): Unit = {
     new SmallGroupFixture {
       val controller = new OpenSmallGroupSetsController()
       controller.smallGroupService = mockSmallGroupService
@@ -53,7 +53,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def exposesFlashStatusToForm() {
+  def exposesFlashStatusToForm(): Unit = {
     new SmallGroupFixture {
       val controller = new OpenSmallGroupSetsController()
       controller.smallGroupService = mockSmallGroupService
@@ -65,7 +65,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def usesCorrectViewNameForForm() {
+  def usesCorrectViewNameForForm(): Unit = {
     new SmallGroupFixture {
       val controller = new OpenSmallGroupSetsController()
       controller.smallGroupService = mockSmallGroupService
@@ -76,7 +76,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def viewModelPassesApplyOntoCommand() {
+  def viewModelPassesApplyOntoCommand(): Unit = {
     val controller = new OpenSmallGroupSetsController()
     val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
 
@@ -89,7 +89,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def submitSendsRedirectBackToOpenGroupsPage() {
+  def submitSendsRedirectBackToOpenGroupsPage(): Unit = {
     new SmallGroupFixture {
       department.code = "XYZ"
       val user = new CurrentUser(new User, new User)

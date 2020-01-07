@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestProperties}
 
 trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 
-  def setFeatureState(name: String, state: Boolean) {
+  def setFeatureState(name: String, state: Boolean): Unit = {
     signIn as P.Sysadmin to Path("/sysadmin/features")
     val featureForm = webDriver.findElement(By.id(name + "_form"))
     val buttonText = state.toString
@@ -21,11 +21,11 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
     }
   }
 
-  def enableFeature(name: String) {
+  def enableFeature(name: String): Unit = {
     setFeatureState(name, state = true)
   }
 
-  def disableFeature(name: String) {
+  def disableFeature(name: String): Unit = {
     setFeatureState(name, state = false)
   }
 

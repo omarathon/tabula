@@ -32,7 +32,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     cmd
   }
 
-  @Test def justUser {
+  @Test def justUser: Unit = {
     val user = new User("cuscav")
 
     val cmd = newCommand()
@@ -63,7 +63,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     result.scopeMissing should be(true)
   }
 
-  @Test def scopeMismatch {
+  @Test def scopeMismatch: Unit = {
     val user = new User("cuscav")
 
     val cmd = newCommand()
@@ -97,7 +97,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
   }
 
 
-  @Test def scopeMismatchWithScopeless {
+  @Test def scopeMismatchWithScopeless: Unit = {
     val user = new User("cuscav")
 
     val cmd = newCommand()
@@ -130,7 +130,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     result.scopeMissing should be(true)
   }
 
-  @Test def scopeResolved {
+  @Test def scopeResolved: Unit = {
     val user = new User("cuscav")
 
     val cmd = newCommand()
@@ -169,7 +169,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     result.scopeMissing should be(false)
   }
 
-  @Test def cantResolveScope {
+  @Test def cantResolveScope: Unit = {
     val user = new User("cuscav")
 
     val cmd = newCommand()
@@ -207,7 +207,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     result.scopeMissing should be(true)
   }
 
-  @Test def validatePasses {
+  @Test def validatePasses: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -227,7 +227,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     errors.hasErrors should be(false)
   }
 
-  @Test def validateNoPermissionOrScopePasses {
+  @Test def validateNoPermissionOrScopePasses: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -240,7 +240,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     errors.hasErrors should be(false)
   }
 
-  @Test def validateNoUser {
+  @Test def validateNoUser: Unit = {
     val cmd = newCommand()
     cmd.permission = Permissions.Assignment.Create
     cmd.scopeType = classOf[Department]
@@ -258,7 +258,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     errors.getFieldError.getCode should be("permissionsHelper.user.invalid")
   }
 
-  @Test def validateNotFoundUser {
+  @Test def validateNotFoundUser: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(false)
 
@@ -280,7 +280,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     errors.getFieldError.getCode should be("permissionsHelper.user.invalid")
   }
 
-  @Test def validateInvalidScopeType {
+  @Test def validateInvalidScopeType: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -300,7 +300,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
     errors.getFieldError.getCode should be("permissionsHelper.scopeType.invalid")
   }
 
-  @Test def validateInvalidScope {
+  @Test def validateInvalidScope: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 

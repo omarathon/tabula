@@ -65,7 +65,7 @@ abstract class FormField extends GeneratedId with Logging {
 
   def properties: String = getProperties
 
-  def setProperties(props: String) {
+  def setProperties(props: String): Unit = {
     propertiesMap = json.readValue(new StringReader(props), classOf[Map[String, Any]])
   }
 
@@ -113,13 +113,13 @@ abstract class FormField extends GeneratedId with Logging {
     */
   def populatedFormValue(value: SavedFormValue): FormValue
 
-  def validate(value: FormValue, errors: Errors)
+  def validate(value: FormValue, errors: Errors): Unit
 
 }
 
 trait SimpleValue[A] {
   self: FormField =>
-  def value_=(value: A) {
+  def value_=(value: A): Unit = {
     propertiesMap += "value" -> value
   }
 
@@ -129,7 +129,7 @@ trait SimpleValue[A] {
 
   def getValue(): A = value
 
-  override def validate(value: FormValue, errors: Errors) {
+  override def validate(value: FormValue, errors: Errors): Unit = {
     value match {
       case s: StringFormValue if s.value != null =>
         val length = s.value.toString.length
@@ -220,7 +220,7 @@ class WordCountField extends AssignmentFormField {
     formValue
   }
 
-  override def validate(value: FormValue, errors: Errors) {
+  override def validate(value: FormValue, errors: Errors): Unit = {
     value match {
       case i: IntegerFormValue =>
         if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
@@ -270,42 +270,7 @@ class CheckboxField extends FormField {
     formValue
   }
 
-  override def validate(value: FormValue, errors: Errors) {}
-}
-
-@Entity
-@Proxy
-@DiscriminatorValue("marker")
-class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
-  context = FormFieldContext.Submission
-
-  def markers: Seq[User] = {
-    if (assignment.markingWorkflow == null) Seq()
-    else assignment.markingWorkflow.firstMarkers.users.toSeq
-  }
-
-  override def validate(value: FormValue, errors: Errors) {
-    super.validate(value, errors)
-    value match {
-      case v: StringFormValue =>
-        Option(v.value) match {
-          case None => errors.rejectValue("value", "marker.missing")
-          case Some(v1) if v1 == "" => errors.rejectValue("value", "marker.missing")
-          case Some(v1) if !markers.exists {
-            _.getUserId == v1
-          } => errors.rejectValue("value", "marker.invalid")
-          case _ =>
-        }
-    }
-  }
-
-  override def duplicate(newAssignment: Assignment): MarkerSelectField = {
-    val newField = new MarkerSelectField
-    newField.assignment = newAssignment
-    newField.name = Assignment.defaultMarkerSelectorName
-    newField.label = this.label
-    newField
-  }
+  override def validate(value: FormValue, errors: Errors): Unit = {}
 }
 
 @Entity
@@ -336,7 +301,7 @@ class FileField extends AssignmentFormField {
   private def individualFileSizeLimitInBytes: JLong = JLong(Option(individualFileSizeLimit).map(_.longValue() * 1024 * 1024))
 
   // This is after onBind is called, so any multipart files have been persisted as attachments
-  override def validate(value: FormValue, errors: Errors) {
+  override def validate(value: FormValue, errors: Errors): Unit = {
 
     /** Are there any duplicate values (ignoring case)? */
     def hasDuplicates(names: Seq[String]) = names.size != names.map(_.toLowerCase).distinct.size
@@ -385,21 +350,6 @@ class FileField extends AssignmentFormField {
     newField.individualFileSizeLimit = this.individualFileSizeLimit
     newField
   }
-}
-
-@Entity
-@Proxy
-abstract class ExamFormField extends FormField {
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "exam_id")
-  var exam: Exam = _
-}
-
-@Entity
-@Proxy
-@DiscriminatorValue("examText")
-class ExamTextField extends ExamFormField with SimpleValue[String] {
-  context = FormFieldContext.Feedback
 }
 
 sealed abstract class FormFieldContext(val dbValue: String, val description: String)

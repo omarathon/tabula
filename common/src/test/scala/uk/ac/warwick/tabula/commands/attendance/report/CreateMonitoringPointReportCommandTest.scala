@@ -35,7 +35,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     val command = new CreateMonitoringPointReportCommandInternal(department, currentUser) with CommandTestSupport
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -75,7 +75,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     val command = new CreateMonitoringPointReportCommandPermissions with CreateMonitoringPointReportCommandState {
       val department: Department = Fixtures.department("in")
       val currentUser: CurrentUser = mock[CurrentUser]
@@ -87,7 +87,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     verify(checking, times(1)).PermissionCheck(Permissions.MonitoringPoints.Report, command.department)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment(): Unit = {
     val command = new CreateMonitoringPointReportCommandPermissions with CreateMonitoringPointReportCommandState {
       val department = null
       val currentUser: CurrentUser = mock[CurrentUser]
@@ -107,7 +107,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors() {
+  @Test def validateNoErrors(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -140,7 +140,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoStudents() {
+  @Test def validateNoStudents(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -157,7 +157,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateInvalidTerm() {
+  @Test def validateInvalidTerm(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Winter"
@@ -180,7 +180,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoAcademicYear() {
+  @Test def validateNoAcademicYear(): Unit = {
     new ValidationFixture {
       command.period = "Autumn"
 
@@ -202,7 +202,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyReported() {
+  @Test def validateAlreadyReported(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -239,7 +239,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoPermission() {
+  @Test def validateNoPermission(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -276,7 +276,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateZeroMissedPoints() {
+  @Test def validateZeroMissedPoints(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -312,7 +312,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoSCD() {
+  @Test def validateNoSCD(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -345,7 +345,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoSCYD() {
+  @Test def validateNoSCYD(): Unit = {
     new ValidationFixture {
       command.academicYear = AcademicYear(2013)
       command.period = "Autumn"
@@ -378,7 +378,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description() {
+  @Test def description(): Unit = {
     val command = new CreateMonitoringPointReportCommandDescription with CreateMonitoringPointReportCommandState {
       override lazy val eventName: String = "test"
       val department: Department = Fixtures.department("in")

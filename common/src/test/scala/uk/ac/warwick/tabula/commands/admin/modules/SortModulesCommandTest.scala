@@ -51,16 +51,16 @@ class SortModulesCommandTest extends TestBase with Mockito {
     val command = new SortModulesCommandInternal(department) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new Fixture {
       command.department should be(department)
       command.departments.toSet should be(Set(department, ugDepartment, pgDepartment))
     }
   }
 
-  @Test def populateAndSort {
+  @Test def populateAndSort: Unit = {
     new Fixture {
-      command.mapping.asScala should be('empty)
+      command.mapping.asScala should be(Symbol("empty"))
 
       command.populate()
       command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
@@ -78,9 +78,9 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def mappingByCode {
+  @Test def mappingByCode: Unit = {
     new Fixture {
-      command.mappingByCode should be('empty)
+      command.mappingByCode should be(Symbol("empty"))
 
       command.populate()
       command.sort()
@@ -94,7 +94,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new Fixture {
       command.populate()
       command.sort()
@@ -109,7 +109,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
       mod1.adminDepartment should be(ugDepartment)
       mod2.adminDepartment should be(pgDepartment)
 
-      department.modules.asScala should be('empty)
+      department.modules.asScala should be(Symbol("empty"))
       ugDepartment.modules.asScala.toSet should be(Set(mod1, mod3, mod4, mod5))
       pgDepartment.modules.asScala.toSet should be(Set(mod2, mod6, mod7))
 
@@ -129,7 +129,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     command.sort()
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -138,7 +138,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateLeaveRootDeptEmpty {
+  @Test def validateLeaveRootDeptEmpty: Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
 
@@ -153,7 +153,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectUnrelatedDepartments {
+  @Test def rejectUnrelatedDepartments: Unit = {
     new ValidationFixture {
       command.mapping.put(Fixtures.department("other"), JArrayList())
 
@@ -165,7 +165,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectUnrelatedModules {
+  @Test def rejectUnrelatedModules: Unit = {
     new ValidationFixture {
       command.mapping.get(department).add(Fixtures.module("cs205"))
 
@@ -177,7 +177,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectOrphanModules {
+  @Test def rejectOrphanModules: Unit = {
     new ValidationFixture {
       command.mapping.get(department).remove(mod1)
 
@@ -190,13 +190,13 @@ class SortModulesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireCreateModuleOnDepartment {
+  def permissionsRequireCreateModuleOnDepartment: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new SortModulesCommandPermissions with CommandTestSupport {
       val department: Department = dept
 
-      def sort() {}
+      def sort(): Unit = {}
 
       def populate(): Unit = {}
     }
@@ -207,14 +207,14 @@ class SortModulesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe {
+  def describe: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new SortModulesCommandDescription with CommandTestSupport {
       val eventName: String = "test"
       val department: Department = dept
 
-      def sort() {}
+      def sort(): Unit = {}
 
       def populate(): Unit = {}
     }
@@ -228,7 +228,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def glueEverythingTogether() {
+  def glueEverythingTogether(): Unit = {
     val department = Fixtures.department("in", "IT Services")
     val command = SortModulesCommand(department)
 

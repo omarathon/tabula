@@ -54,7 +54,7 @@ trait PopulateStateWithExistingData {
 class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
   self: SmallGroupServiceComponent with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-  def copyTo(set: SmallGroupSet) {
+  def copyTo(set: SmallGroupSet): Unit = {
     set.assessmentGroups.clear()
     set.assessmentGroups.addAll(assessmentGroups)
     for (group <- set.assessmentGroups.asScala if group.smallGroupSet == null) {
@@ -94,7 +94,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
   lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map(_.upstreamAssessmentGroupInfos)
   lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map(_.members)
 
-  def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
+  def copyGroupsFrom(smallGroupSet: SmallGroupSet): Unit = {
     // TAB-4848 get all the groups that are linked even if they're marked not in use
     upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
       assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
@@ -104,7 +104,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
   /**
     * Convert Spring-bound upstream group references to an AssessmentGroup buffer
     */
-  def updateAssessmentGroups() {
+  def updateAssessmentGroups(): Unit = {
     assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
       val template = new AssessmentGroup
       template.assessmentComponent = ug.assessmentComponent
@@ -186,7 +186,7 @@ trait StubEditSmallGroupSetMembershipPermissions extends RequiresPermissionsChec
 }
 
 trait RemovesUsersFromGroups {
-  def removeFromGroup(user: User, group: SmallGroup)
+  def removeFromGroup(user: User, group: SmallGroup): Unit
 }
 
 trait RemovesUsersFromGroupsCommand extends RemovesUsersFromGroups {

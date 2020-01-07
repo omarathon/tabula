@@ -44,7 +44,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyTrue() {
+  def testApplyTrue(): Unit = {
     new Fixture {
       cmd.approved = true
       cmd.applyInternal()
@@ -55,7 +55,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyFalse() {
+  def testApplyFalse(): Unit = {
     new Fixture {
       cmd.approved = false
       cmd.applyInternal()
@@ -66,7 +66,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validApproval() {
+  def validApproval(): Unit = {
     val student = Fixtures.student()
 
     val meetingRecord = new MeetingRecord
@@ -108,10 +108,10 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
     cmd.approved = true
     cmd.applyInternal()
 
-    meetingRecord should be('approved)
+    meetingRecord should be(Symbol("approved"))
 
-    proposedApproval should be('approved)
-    otherApproval should not be 'required
+    proposedApproval should be(Symbol("approved"))
+    otherApproval should not be Symbol("required")
   }
 
   @Test
@@ -138,14 +138,14 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
     cmd.approved = true
     cmd.applyInternal()
 
-    meetingRecord should be('approved)
+    meetingRecord should be(Symbol("approved"))
 
-    proposedApproval should be('approved)
-    otherApproval should not be 'required
+    proposedApproval should be(Symbol("approved"))
+    otherApproval should not be Symbol("required")
   }
 
   @Test
-  def deletedMeetingRecord() {
+  def deletedMeetingRecord(): Unit = {
     val student = Fixtures.student()
 
     val meetingRecord = new MeetingRecord

@@ -13,7 +13,7 @@ trait AutowiringSitsStatusDaoComponent extends SitsStatusDaoComponent {
 }
 
 trait SitsStatusDao {
-  def saveOrUpdate(sitsStatus: SitsStatus)
+  def saveOrUpdate(sitsStatus: SitsStatus): Unit
 
   def getByCode(code: String): Option[SitsStatus]
 

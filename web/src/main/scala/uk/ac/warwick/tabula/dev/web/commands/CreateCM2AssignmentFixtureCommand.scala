@@ -22,7 +22,6 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
   val assignmentSrv: AssessmentService = Wire[AssessmentService]
   val userLookup: UserLookupService = Wire[UserLookupService]
   val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-  val markingWorkflowService: MarkingWorkflowService = Wire[MarkingWorkflowService]
   val cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire[CM2MarkingWorkflowService]
   val submissionService: SubmissionService = Wire[SubmissionService]
   val feedbackService: FeedbackService = Wire[FeedbackService]
@@ -54,7 +53,6 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
     assignment.allowExtensions = true
     assignment.summative = false
     assignment.workflowCategory = Some(WorkflowCategory.Reusable)
-    assignment.cm2Assignment = true
 
     transactional() {
 
@@ -87,7 +85,7 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
       assignment.submissions = submissions.asJava
 
       val feedbacks = CreateCM2AssignmentFixtureCommand.students.map(student => {
-        val f = new AssignmentFeedback
+        val f = new Feedback
         f._universityId = student.universityId
         f.usercode = student.userId
         f.assignment = assignment

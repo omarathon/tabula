@@ -21,7 +21,7 @@ class UserSettingsServiceTest extends AppContextTestBase {
       service.save(currentUser, userSettings)
     }
 
-    service.getByUserId("cuscav") should be('defined)
+    service.getByUserId("cuscav") should be(Symbol("defined"))
     service.getByUserId("cuscav").get.alertsSubmission should be(UserSettings.AlertsNoteworthySubmissions)
     service.getByUserId("cuscav").get.newAssignmentSettings should be(UserSettings.NewAssignmentPrefill)
 
@@ -30,7 +30,7 @@ class UserSettingsServiceTest extends AppContextTestBase {
       service.save(currentUser, new UserSettings)
     }
 
-    service.getByUserId("cuscav") should be('defined)
+    service.getByUserId("cuscav") should be(Symbol("defined"))
     service.getByUserId("cuscav").get.alertsSubmission should be(UserSettings.AlertsNoteworthySubmissions)
     service.getByUserId("cuscav").get.newAssignmentSettings should be(UserSettings.NewAssignmentPrefill)
   }

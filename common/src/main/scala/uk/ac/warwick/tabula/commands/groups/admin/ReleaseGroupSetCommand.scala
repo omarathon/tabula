@@ -99,7 +99,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish: Seq[SmallGroupSet], privat
     }
   }
 
-  def describe(desc: Description) {
+  def describe(desc: Description): Unit = {
     desc.smallGroupSetCollection(groupsToPublish)
   }
 

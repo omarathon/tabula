@@ -32,7 +32,7 @@ trait SmallGroupSetsController extends GroupsController {
 
   @ModelAttribute("allFormats") def allFormats: Seq[SmallGroupFormat with Product with Serializable] = SmallGroupFormat.members
 
-  override final def binding[A](binder: WebDataBinder, cmd: A) {
+  override final def binding[A](binder: WebDataBinder, cmd: A): Unit = {
     binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
       override def fromString(code: String): SmallGroupFormat = SmallGroupFormat.fromCode(code)
 

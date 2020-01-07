@@ -12,12 +12,12 @@ class GrantedPermissionTest extends TestBase {
   val staffMember: StaffMember = Fixtures.staff()
   val studentMember: StudentMember = Fixtures.student()
 
-  val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
+  val feedback: Feedback = Fixtures.assignmentFeedback()
 
   val permission = Permissions.Module.Create
   val overrideType = true
 
-  @Test def initDepartment {
+  @Test def initDepartment: Unit = {
     GrantedPermission.canDefineFor[Department] should be(true)
     val gp = GrantedPermission(dept, permission, overrideType)
     gp.scope should be(dept)
@@ -25,7 +25,7 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test def initModule {
+  @Test def initModule: Unit = {
     GrantedPermission.canDefineFor[Module] should be(true)
     val gp = GrantedPermission(module, permission, overrideType)
     gp.scope should be(module)
@@ -33,7 +33,7 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test def initAssignment {
+  @Test def initAssignment: Unit = {
     GrantedPermission.canDefineFor[Assignment] should be(true)
     val gp = GrantedPermission(assignment, permission, overrideType)
     gp.scope should be(assignment)
@@ -41,7 +41,7 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test def initStaffMember {
+  @Test def initStaffMember: Unit = {
     GrantedPermission.canDefineFor[StaffMember] should be(true)
     val gp = GrantedPermission(staffMember, permission, overrideType)
     gp.scope should be(staffMember)
@@ -49,7 +49,7 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test def initStudentMember {
+  @Test def initStudentMember: Unit = {
     GrantedPermission.canDefineFor[StudentMember] should be(true)
     val gp = GrantedPermission(studentMember, permission, overrideType)
     gp.scope should be(studentMember)
@@ -57,8 +57,8 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def initInvalid {
-    GrantedPermission.canDefineFor[AssignmentFeedback] should be(false)
+  @Test(expected = classOf[IllegalArgumentException]) def initInvalid: Unit = {
+    GrantedPermission.canDefineFor[Feedback] should be(false)
     GrantedPermission(feedback, permission, overrideType)
   }
 

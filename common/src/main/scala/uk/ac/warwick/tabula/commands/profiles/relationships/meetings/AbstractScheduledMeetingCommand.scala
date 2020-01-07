@@ -39,7 +39,7 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
     }
   }
 
-  def persistAttachments(meeting: ScheduledMeetingRecord) {
+  def persistAttachments(meeting: ScheduledMeetingRecord): Unit = {
     // delete attachments that have been removed
     if (meeting.attachments != null) {
       val filesToKeep = Option(attachedFiles).map(_.asScala.toSeq).getOrElse(Seq())
@@ -55,7 +55,7 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
     }
   }
 
-  def onBind(result: BindingResult) {
+  def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

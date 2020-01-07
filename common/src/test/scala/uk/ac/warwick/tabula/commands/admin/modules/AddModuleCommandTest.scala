@@ -20,13 +20,13 @@ class AddModuleCommandTest extends TestBase with Mockito {
     val command = new AddModuleCommandInternal(department) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new Fixture {
       command.department should be(department)
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new Fixture {
       command.code = " CS205  "
       command.name = "Introduction to module creation"
@@ -45,7 +45,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       command.code = "cs205"
       command.name = "Introduction to module creation"
@@ -59,7 +59,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectEmptyCode {
+  @Test def rejectEmptyCode: Unit = {
     new ValidationFixture {
       command.code = "    "
       command.name = "Introduction to module creation"
@@ -73,7 +73,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectInvalidCode {
+  @Test def rejectInvalidCode: Unit = {
     new ValidationFixture {
       command.code = "CS 205"
       command.name = "Introduction to module creation"
@@ -87,7 +87,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectEmptyName {
+  @Test def rejectEmptyName: Unit = {
     new ValidationFixture {
       command.code = "cs205"
       command.name = "        "
@@ -101,7 +101,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectDuplicateModuleCodeGlobal {
+  @Test def rejectDuplicateModuleCodeGlobal: Unit = {
     new ValidationFixture {
       command.code = "cs205"
       command.name = "Introduction to module creation"
@@ -117,7 +117,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectDuplicateModuleNameInDepartment {
+  @Test def rejectDuplicateModuleNameInDepartment: Unit = {
     new ValidationFixture {
       command.code = "cs205"
       command.name = "Introduction to module creation"
@@ -136,7 +136,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireCreateModuleOnDepartment {
+  def permissionsRequireCreateModuleOnDepartment: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new AddModuleCommandPermissions with CommandTestSupport {
@@ -149,7 +149,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe {
+  def describe: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new AddModuleCommandDescription with CommandTestSupport {
@@ -171,7 +171,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def glueEverythingTogether() {
+  def glueEverythingTogether(): Unit = {
     val department = Fixtures.department("in", "IT Services")
     val command = AddModuleCommand(department)
 

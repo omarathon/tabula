@@ -5,7 +5,7 @@ import org.springframework.web.servlet.view.RedirectView
 
 class MavTest extends TestBase {
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     val mav = Mav("my/view",
       "steve" -> "loves you",
       "yes" -> false
@@ -24,7 +24,7 @@ class MavTest extends TestBase {
     mav.getModel.get("bodyClasses") should be("body rocking")
   }
 
-  @Test def viewObject() {
+  @Test def viewObject(): Unit = {
     val view = new RedirectView("google.com")
     val mav = Mav(view)
     mav.toModelAndView.getView should be(view)

@@ -52,7 +52,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
   var lastUpdatedDate: DateTime = creationDate
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.memberNote = this

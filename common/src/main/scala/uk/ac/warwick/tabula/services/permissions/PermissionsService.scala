@@ -27,15 +27,15 @@ import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 trait PermissionsService {
-  def saveOrUpdate(roleDefinition: CustomRoleDefinition)
+  def saveOrUpdate(roleDefinition: CustomRoleDefinition): Unit
 
-  def saveOrUpdate(permission: GrantedPermission[_])
+  def saveOrUpdate(permission: GrantedPermission[_]): Unit
 
-  def saveOrUpdate(role: GrantedRole[_])
+  def saveOrUpdate(role: GrantedRole[_]): Unit
 
-  def delete(role: GrantedRole[_])
+  def delete(role: GrantedRole[_]): Unit
 
-  def delete(roleDefinition: CustomRoleDefinition)
+  def delete(roleDefinition: CustomRoleDefinition): Unit
 
   def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
 
@@ -71,9 +71,9 @@ trait PermissionsService {
 
   def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition]
 
-  def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
+  def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true): Unit
 
-  def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
+  def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true): Unit
 }
 
 @Service(value = "permissionsService")
@@ -118,7 +118,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     item match {
       case copy: PermissionsCacheBusterMessage if Option(copy.usercode).isDefined =>
         clearCachesForUser((copy.usercode, copy.classTag), propagate = false)
@@ -128,11 +128,11 @@ abstract class AbstractPermissionsService extends PermissionsService {
     }
   }
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     queue.addListener(classOf[PermissionsCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
   }
 
-  def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true) {
+  def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true): Unit = {
     GrantedRolesForUserCache.remove(cacheKey)
     GrantedPermissionsForUserCache.remove(cacheKey)
 
@@ -148,7 +148,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
     }
   }
 
-  def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true) {
+  def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true): Unit = {
     GrantedRolesForGroupCache.remove(cacheKey)
     GrantedPermissionsForGroupCache.remove(cacheKey)
 

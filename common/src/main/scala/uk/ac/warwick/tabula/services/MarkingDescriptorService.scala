@@ -24,9 +24,9 @@ trait MarkingDescriptorService {
 
   def getForMark(mark: Int, department: Department): MarkingDescriptor
 
-  def save(markingDescriptor: MarkingDescriptor)
+  def save(markingDescriptor: MarkingDescriptor): Unit
 
-  def delete(markingDescriptor: MarkingDescriptor)
+  def delete(markingDescriptor: MarkingDescriptor): Unit
 }
 
 @Service("markingDescriptorService")

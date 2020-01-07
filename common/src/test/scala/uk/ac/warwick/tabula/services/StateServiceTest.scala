@@ -14,7 +14,7 @@ class StateServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def nullState {
+  def nullState: Unit = {
     val markerFeedback = new MarkerFeedback
     service.updateState(markerFeedback, MarkingCompleted)
     markerFeedback.state should be(MarkingCompleted)

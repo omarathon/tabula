@@ -42,7 +42,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito {
 
 
   @Test
-  def translatesFromSmallGroupEventToTimetableEvent() {
+  def translatesFromSmallGroupEventToTimetableEvent(): Unit = {
     mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns Seq(group)
     mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns Nil
     mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns Nil

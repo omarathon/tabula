@@ -17,9 +17,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marks"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marks"))
 class AdminUploadMarksController extends CourseworkController {
 
   type Command = Appliable[Seq[Feedback]] with AdminAddMarksState with AddMarksCommandBindListener

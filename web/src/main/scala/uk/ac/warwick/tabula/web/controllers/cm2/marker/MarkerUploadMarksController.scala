@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/marks"))
 class MarkerUploadMarksController extends CourseworkController {
 
   type Command = Appliable[Seq[MarkerFeedback]] with MarkerAddMarksState with AddMarksCommandBindListener
@@ -59,9 +58,8 @@ class MarkerUploadMarksController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/marks"))
 class CurrentMarkerUploadMarksController extends CourseworkController {
 
   @RequestMapping

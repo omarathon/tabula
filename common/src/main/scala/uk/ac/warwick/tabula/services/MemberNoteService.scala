@@ -21,9 +21,9 @@ trait MemberNoteService {
 
   def listNonDeletedNotes(student: Member): Seq[MemberNote]
 
-  def saveOrUpdate(memberNote: MemberNote)
+  def saveOrUpdate(memberNote: MemberNote): Unit
 
-  def delete(note: MemberNote)
+  def delete(note: MemberNote): Unit
 
 }
 

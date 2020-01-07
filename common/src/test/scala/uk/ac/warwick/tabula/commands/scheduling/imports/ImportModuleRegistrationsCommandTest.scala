@@ -47,7 +47,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
   }
 
   @Transactional
-  @Test def captureModuleRegistration() {
+  @Test def captureModuleRegistration(): Unit = {
     new Environment {
 
       // apply the command

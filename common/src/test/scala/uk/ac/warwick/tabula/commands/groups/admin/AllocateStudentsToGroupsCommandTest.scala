@@ -153,7 +153,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
         with PopulateAllocateStudentsToGroupsCommand
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.unallocated should be(JList())
       command.mapping should be(JMap(group1 -> JArrayList(), group2 -> JArrayList()))
@@ -181,7 +181,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def removePermanentlyWithdrawn() {
+  @Test def removePermanentlyWithdrawn(): Unit = {
     new CommandFixture {
       val usersWithoutPermWithdrawn: Seq[User] = command.removePermanentlyWithdrawn(Seq(user1, user2, user3, user4, user5))
       student1.freshStudentCourseDetails.size should be(1)
@@ -205,7 +205,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
         with AllocateStudentsToGroupsValidation
   }
 
-  @Test def validatePasses() {
+  @Test def validatePasses(): Unit = {
     new ValidationFixture {
       command.populate()
       command.sort()
@@ -217,7 +217,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantSubmitUnrelatedGroup() {
+  @Test def validateCantSubmitUnrelatedGroup(): Unit = {
     new ValidationFixture {
       command.populate()
       command.sort()
@@ -252,7 +252,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     command.smallGroupService.getSmallGroupById(group2.id) returns Some(group2)
   }
 
-  @Test def fileUploadSupport() {
+  @Test def fileUploadSupport(): Unit = {
     new FileUploadSupportFixture {
       command.populate()
       command.sort()
@@ -285,7 +285,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateUploadedFilePasses() {
+  @Test def validateUploadedFilePasses(): Unit = {
     new FileUploadSupportFixture {
       val attachment = new FileAttachment
       attachment.id = "456"
@@ -307,7 +307,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateUploadedFileWrongExtension() {
+  @Test def validateUploadedFileWrongExtension(): Unit = {
     new FileUploadSupportFixture {
       val attachment = new FileAttachment
       attachment.id = "789"
@@ -332,7 +332,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new Fixture {
       val (theModule, theSet) = (module, set)
       val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
@@ -348,7 +348,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
     val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
       val module = null
       val set = new SmallGroupSet
@@ -359,7 +359,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet(): Unit = {
     val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
       val module: Module = Fixtures.module("in101")
       val set = null
@@ -370,7 +370,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet(): Unit = {
     val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
       val module: Module = Fixtures.module("in101")
       module.id = "set id"
@@ -383,7 +383,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def describe() {
+  @Test def describe(): Unit = {
     new Fixture {
       val (mod, s) = (module, set)
       val command = new AllocateStudentsToGroupsDescription with AllocateStudentsToGroupsCommandState {
@@ -404,7 +404,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wires() {
+  @Test def wires(): Unit = {
     new Fixture {
       withUser("cuscav") {
         val command = AllocateStudentsToGroupsCommand(module, set, currentUser)

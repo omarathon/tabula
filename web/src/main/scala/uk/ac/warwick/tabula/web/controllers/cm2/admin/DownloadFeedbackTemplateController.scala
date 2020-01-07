@@ -9,9 +9,8 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/download/{template}/{filename}"))
+@RequestMapping(Array("/coursework/admin/department/{department}/settings/feedback-templates/download/{template}/{filename}"))
 class DownloadFeedbackTemplateController extends CourseworkController {
 
   @ModelAttribute def command(

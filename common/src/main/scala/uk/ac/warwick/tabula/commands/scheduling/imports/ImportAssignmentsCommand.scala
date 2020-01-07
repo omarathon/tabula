@@ -98,7 +98,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   var modifiedAssignments: Set[Assignment] = Set.empty
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     benchmark("ImportAssessment") {
       if (importEverything) {
         doAssignments()
@@ -117,7 +117,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
-  def doAssignments() {
+  def doAssignments(): Unit = {
     benchmark("Process Assessment components") {
 
       val existingAssessmentComponents = transactional(readOnly = true) {
@@ -155,7 +155,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
-  def doGroups(year: AcademicYear) {
+  def doGroups(year: AcademicYear): Unit = {
     benchmark("Import assessment groups") {
       val existingUpstreamAssessmentGroupsForThatYear = transactional(readOnly = true) {
         assessmentMembershipService.getUpstreamAssessmentGroups(Seq(year))
@@ -185,7 +185,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     * what it's got and starts a new list. This way we don't have to load many
     * things into memory at once.
     */
-  def doGroupMembers() {
+  def doGroupMembers(): Unit = {
     benchmark("Import all group members") {
       var registrations = List[UpstreamModuleRegistration]()
       var notEmptyGroupIds = Set[String]()
@@ -386,7 +386,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
-  def doGradeBoundaries() {
+  def doGradeBoundaries(): Unit = {
     transactional() {
       val boundaries = assignmentImporter.getAllGradeBoundaries
       boundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
@@ -398,7 +398,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =
     modifiedAssignments.toSeq
-      .filter(_.cm2Assignment)
       .flatMap { assignment =>
         transactional() {
           // Find students who are assigned to a marker but are not a member of the assignment
@@ -437,7 +436,7 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
 
   @Value("${tabula.yearZero}") var yearZero: Int = 2000
 
-  override def applyInternal() {
+  override def applyInternal(): Unit = {
     val next = AcademicYear.now().next.startYear
     for (year <- yearZero until next) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(year))
@@ -449,7 +448,7 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
 }
 
 trait RemovesMissingAssessmentComponents {
-  def removeAssessmentComponent(assessmentComponent: AssessmentComponent)
+  def removeAssessmentComponent(assessmentComponent: AssessmentComponent): Unit
 }
 
 trait RemovesMissingAssessmentComponentsCommand extends RemovesMissingAssessmentComponents {
@@ -457,7 +456,7 @@ trait RemovesMissingAssessmentComponentsCommand extends RemovesMissingAssessment
 }
 
 trait RemovesMissingUpstreamAssessmentGroups {
-  def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup)
+  def removeUpstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit
 }
 
 trait RemovesMissingUpstreamAssessmentGroupsCommand extends RemovesMissingUpstreamAssessmentGroups {

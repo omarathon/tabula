@@ -15,7 +15,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
   mockSessionFactory.getCurrentSession returns mockSession
   mockSessionFactory.openSession() returns mockSession
 
-  @Test def membership() {
+  @Test def membership(): Unit = {
     transactional { t =>
       var group = UserGroup.ofUsercodes
       group.sessionFactory = mockSessionFactory
@@ -54,7 +54,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def withWebgroup() {
+  @Test def withWebgroup(): Unit = {
     val userLookup = new MockUserLookup
 
     val group = UserGroup.ofUsercodes
@@ -75,7 +75,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.members should be(Set("sb_systemtest", "cuscav", "curef", "cusebr"))
   }
 
-  @Test def copy() {
+  @Test def copy(): Unit = {
     val group = UserGroup.ofUsercodes
     group.sessionFactory = mockSessionFactory
     group.addUserId("cuscav")
@@ -98,14 +98,14 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
   }
 
   @Test(expected = classOf[AssertionError])
-  def cannotCopyBetweenDifferentGroupTypes() {
+  def cannotCopyBetweenDifferentGroupTypes(): Unit = {
     val group = UserGroup.ofUniversityIds
     val group2 = UserGroup.ofUsercodes
     group2.copyFrom(group)
   }
 
   @Test
-  def canGetUsersWhenHoldingUserIds() {
+  def canGetUsersWhenHoldingUserIds(): Unit = {
     val test = new User("test")
     val group = UserGroup.ofUsercodes
     group.addUserId("test")
@@ -117,7 +117,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
   }
 
   @Test
-  def canGetUsersWhenHoldingWarwickIds() {
+  def canGetUsersWhenHoldingWarwickIds(): Unit = {
     val test = new User("test")
     val group = UserGroup.ofUniversityIds
     group.addUserId("test")
@@ -129,7 +129,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
   }
 
   @Test
-  def canGetExcludedUsersWhenHoldingUserIds() {
+  def canGetExcludedUsersWhenHoldingUserIds(): Unit = {
     val test = new User("test")
     val group = UserGroup.ofUsercodes
     group.excludeUserId("test")
@@ -141,7 +141,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
   }
 
   @Test
-  def canGetExcludedUsersWhenHoldingWarwickIds() {
+  def canGetExcludedUsersWhenHoldingWarwickIds(): Unit = {
     val test = new User("test")
     val group = UserGroup.ofUniversityIds
     group.excludeUserId("test")

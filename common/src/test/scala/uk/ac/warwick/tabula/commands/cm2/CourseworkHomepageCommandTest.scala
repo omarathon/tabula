@@ -90,7 +90,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
         assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
         assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map("cuscav" -> Seq(extension))
 
-        val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0672089", "cuscav")
+        val feedback: Feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
         feedback.released = true
         assignment.feedbacks.add(feedback)
 

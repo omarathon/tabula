@@ -31,7 +31,7 @@ trait CourseImporter extends Logging {
     }
   }
 
-  protected def updateCourseMap() {
+  protected def updateCourseMap(): Unit = {
     courseMap = slurpCourses()
   }
 

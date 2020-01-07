@@ -16,7 +16,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def objectApplyCreatesCommand() {
+  def objectApplyCreatesCommand(): Unit = {
     new Fixture {
       val command = ListStudentRelationshipTypesCommand()
 
@@ -25,7 +25,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandListsRelationshipTypesWhenApplied() {
+  def commandListsRelationshipTypesWhenApplied(): Unit = {
     new Fixture {
       val tutorRT = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
       val supervisorRT = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
@@ -41,7 +41,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireGlobalStudentRelationshipTypeRead {
+  def permissionsRequireGlobalStudentRelationshipTypeRead: Unit = {
     new Fixture {
       val perms = new ListStudentRelationshipTypesCommandPermissions() {}
       val checking: PermissionsChecking = mock[PermissionsChecking]

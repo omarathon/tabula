@@ -83,7 +83,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
     }
   }
 
-  def requestedExpiryDate_=(red: DateTime) {
+  def requestedExpiryDate_=(red: DateTime): Unit = {
     _requestedExpiryDate = red
   }
 
@@ -91,7 +91,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   @Column(name = "expiryDate")
   private var _expiryDate: DateTime = _
 
-  def expiryDate_=(ed: DateTime) {
+  def expiryDate_=(ed: DateTime): Unit = {
     _expiryDate = ed
   }
 
@@ -118,7 +118,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   def state: ExtensionState = _state
 
   /** Don't use rawState_ directly, call approve() or reject() instead **/
-  def rawState_=(state: ExtensionState) {
+  def rawState_=(state: ExtensionState): Unit = {
     _state = state
   }
 
@@ -129,7 +129,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
   def nonEmptyAttachments: Seq[FileAttachment] = attachments.asScala.toSeq.filter(_.hasData)
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.extension = this

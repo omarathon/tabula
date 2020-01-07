@@ -15,9 +15,8 @@ import uk.ac.warwick.tabula.services.{FeedbackService, ProfileService}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}/feedback.pdf"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/{student}/feedback.pdf"))
 class DownloadFeedbackAsPdfController extends CourseworkController {
 
   type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
@@ -27,11 +26,11 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
   @ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): DownloadFeedbackAsPdfCommand = {
     // We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
     if (!user.loggedIn) {
-      throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
+      throw PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
     }
     val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
 
-    DownloadFeedbackAsPdfCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId).filter(_.released)), studentMember)
+    DownloadFeedbackAsPdfCommand(assignment, mandatory(feedbackService.getFeedbackByUsercode(assignment, student.getUserId).filter(_.released)), studentMember)
   }
 
   @RequestMapping

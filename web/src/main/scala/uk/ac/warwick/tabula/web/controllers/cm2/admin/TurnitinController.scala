@@ -19,9 +19,8 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/turnitin"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/turnitin"))
 class TurnitinController extends CourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
   type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType

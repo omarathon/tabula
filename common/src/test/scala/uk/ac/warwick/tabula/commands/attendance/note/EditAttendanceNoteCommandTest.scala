@@ -41,7 +41,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def onBindNoExistingCheckpoints() {
+  def onBindNoExistingCheckpoints(): Unit = {
     new Fixture {
       command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns Option(command.attendanceNote)
       command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map()
@@ -51,7 +51,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def onBindExistingCheckpoints() {
+  def onBindExistingCheckpoints(): Unit = {
     new Fixture {
       val aCheckpoint = new AttendanceMonitoringCheckpoint
       command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns Option(command.attendanceNote)
@@ -62,7 +62,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApply() {
+  def testApply(): Unit = {
     new Fixture {
       val attendanceNote: AttendanceMonitoringNote = command.applyInternal()
       attendanceNote.note should be(theNote)
@@ -72,7 +72,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateNullAbsenceType() {
+  def validateNullAbsenceType(): Unit = {
     new Fixture {
       validator.absenceType = null
       validator.validate(errors)
@@ -81,7 +81,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateValidAbsenceType() {
+  def validateValidAbsenceType(): Unit = {
     new Fixture {
       validator.absenceType = AbsenceType.Academic
       validator.validate(errors)

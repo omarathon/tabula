@@ -25,14 +25,13 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
     case _ => None
   }
 
-  @Test def redirectPage() {
+  @Test def redirectPage(): Unit = {
     resolve("redirect:/sysadmin/departments") should be(Some("https://tabula.warwick.ac.uk/sysadmin/departments"))
     resolve("sysadmin/departments") should be(None)
   }
 
-  @Test def context() {
+  @Test def context(): Unit = {
     new ControllerViews {
-      Routes.coursework._cm1Prefix = Some("coursework")
 
       def requestInfo = None
 
@@ -40,12 +39,12 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
         code = "ch"
       }
 
-      val viewName: String = Redirect(Routes.coursework.admin.department(chemistry)).viewName
-      resolve(viewName) should be(Some("https://tabula.warwick.ac.uk/coursework/admin/department/ch/"))
+      val viewName: String = Redirect(Routes.cm2.admin.department(chemistry)).viewName
+      resolve(viewName) should be(Some("https://tabula.warwick.ac.uk/coursework/admin/department/ch"))
     }
   }
 
-  @Test def redirectToRoot() {
+  @Test def redirectToRoot(): Unit = {
     resolve("redirect:/") should be(Some("https://tabula.warwick.ac.uk/"))
   }
 

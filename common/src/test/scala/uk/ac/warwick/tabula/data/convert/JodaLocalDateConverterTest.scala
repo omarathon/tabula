@@ -6,17 +6,17 @@ import org.joda.time.{LocalDate, DateTime}
 class JodaLocalDateConverterTest extends TestBase {
   val converter = new JodaLocalDateConverter
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     converter.convertRight("10-Mar-2012") should be(new LocalDate(2012, 3, 10))
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     converter.convertRight("5th April 1996") should be(null)
     converter.convertRight("") should be(null)
     converter.convertRight(null) should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     converter.convertLeft(new LocalDate(2013, 12, 31)) should be("31-Dec-2013")
     converter.convertLeft(null) should be(null)
   }

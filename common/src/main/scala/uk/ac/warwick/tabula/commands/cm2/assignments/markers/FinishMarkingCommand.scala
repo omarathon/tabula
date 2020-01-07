@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 object FinishMarkingCommand {
   def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
     new FinishMarkingCommandInternal(assignment, marker, submitter, stagePosition)
-      with ComposableCommand[Seq[AssignmentFeedback]]
+      with ComposableCommand[Seq[Feedback]]
       with WorkflowProgressValidation
       with WorkflowProgressPermissions
       with FinishMarkingDescription
@@ -23,11 +23,11 @@ object FinishMarkingCommand {
 }
 
 class FinishMarkingCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
-  extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with WorkflowProgressValidation {
+  extends CommandInternal[Seq[Feedback]] with WorkflowProgressState with WorkflowProgressValidation {
 
   self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = transactional() {
+  def applyInternal(): Seq[Feedback] = transactional() {
 
     val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
       .filterKeys(_.order == stagePosition)
@@ -36,7 +36,7 @@ class FinishMarkingCommandInternal(val assignment: Assignment, val marker: User,
     feedbackForReleaseByStage.flatMap { case (stage, mf) =>
       val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
       cm2MarkingWorkflowService.finish(stage, f)
-    }.collect { case f: AssignmentFeedback => f }.toSeq
+    }.collect { case f: Feedback => f }.toSeq
 
   }
 }

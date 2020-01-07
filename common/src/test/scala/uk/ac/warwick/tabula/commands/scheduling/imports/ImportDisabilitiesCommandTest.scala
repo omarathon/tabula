@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 class ImportDisabilitiesCommandTest extends AppContextTestBase with Mockito with Logging {
 
   @Transactional
-  @Test def testImportDisabilitiesCommand() {
+  @Test def testImportDisabilitiesCommand(): Unit = {
     val info = new DisabilityInfo("72", "HERON", "You spear fish like a demon, but struggle in academic environments")
 
     // test command

@@ -69,7 +69,7 @@ object World {
 
 class ScalaBeansWrapperTest extends TestBase with Mockito {
 
-  @Test def nestedObjects {
+  @Test def nestedObjects: Unit = {
     World.Scotland.plant should be("Thistle")
 
     val wrapper = new ScalaBeansWrapper()
@@ -89,7 +89,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
     * def getGreeting(name:String="you") should be able to access the
     * default no-param version as if it were a regular getGreeting() getter.
     */
-  @Test def defaultParameters {
+  @Test def defaultParameters: Unit = {
     val wrapper = new ScalaBeansWrapper()
     wrapper.wrap(new MyObject) match {
       case hash: ScalaHashModel => {
@@ -99,7 +99,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
     }
   }
 
-  @Test def scalaGetter {
+  @Test def scalaGetter: Unit = {
     val wrapper = new ScalaBeansWrapper()
     wrapper.wrap(new MyObject) match {
       case hash: ScalaHashModel => {
@@ -133,7 +133,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
   }
 
-  @Test def accessingSameProperty {
+  @Test def accessingSameProperty: Unit = {
     val wrapper = new ScalaBeansWrapper()
     val wrapped = wrapper.wrap(new MyObject)
 
@@ -184,7 +184,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
     }
   }
 
-  @Test def nameCollision {
+  @Test def nameCollision: Unit = {
     // TAB-766
 
     val wrapper = new ScalaBeansWrapper()
@@ -235,7 +235,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
   }
 
   @Test
-  def cachesResultsOfGettersByDefault() {
+  def cachesResultsOfGettersByDefault(): Unit = {
     val wrapper = new ScalaBeansWrapper
     val target = new MyObject
     val wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
@@ -246,7 +246,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
   }
 
   @Test
-  def doesntCacheIfToldNotTo() {
+  def doesntCacheIfToldNotTo(): Unit = {
     val wrapper = new ScalaBeansWrapper
     wrapper.useWrapperCache = false
     val target = new MyObject

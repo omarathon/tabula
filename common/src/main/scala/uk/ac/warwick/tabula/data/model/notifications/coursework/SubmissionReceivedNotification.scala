@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
 @DiscriminatorValue("SubmissionReceived")
 class SubmissionReceivedNotification extends SubmissionNotification {
 
-  override def onPreSave(isNew: Boolean) {
+  override def onPreSave(isNew: Boolean): Unit = {
     // if this submission was noteworthy then the priority is higher
     if (submission.isNoteworthy) {
       priority = Warning
@@ -63,7 +63,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
   override def urlFor(user: User): String = {
     val feedback = assignment.findFeedback(submission.usercode)
 
-    if (assignment.hasCM2Workflow && feedback.toSeq.flatMap(_.allMarkerFeedback).map(_.marker).contains(user)) {
+    if (assignment.hasWorkflow && feedback.toSeq.flatMap(_.allMarkerFeedback).map(_.marker).contains(user)) {
       Routes.admin.assignment.markerFeedback(assignment, user)
     } else {
       Routes.admin.assignment.submissionsandfeedback.list(assignment)
@@ -100,10 +100,8 @@ class SubmissionReceivedNotification extends SubmissionNotification {
     // Contact the current marker, if there is one, and the submission has already been released
     val feedback = assignment.findFeedback(submission.usercode)
 
-    val currentMarker = if (assignment.hasCM2Workflow) {
+    val currentMarker = if (assignment.hasWorkflow) {
       feedback.toSeq.flatMap(_.markingInProgress).map(_.marker)
-    } else if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
-      feedback.flatMap(_.getCurrentWorkflowFeedback).flatMap(_.getMarkerUser).toSeq
     } else {
       Seq()
     }

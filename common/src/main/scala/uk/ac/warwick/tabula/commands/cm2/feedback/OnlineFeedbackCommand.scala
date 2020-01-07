@@ -51,8 +51,8 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 
   def applyInternal(): Feedback = {
 
-    val updatedFeedback: AssignmentFeedback = feedback.getOrElse({
-      val newFeedback = new AssignmentFeedback
+    val updatedFeedback: Feedback = feedback.getOrElse({
+      val newFeedback = new Feedback
       newFeedback.assignment = assignment
       newFeedback.uploaderId = submitter.apparentUser.getUserId
       newFeedback.usercode = student.getUserId
@@ -74,7 +74,7 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
     updatedFeedback
   }
 
-  private def copyFrom(feedback: AssignmentFeedback) {
+  private def copyFrom(feedback: Feedback): Unit = {
 
     copyFormFields(feedback)
 
@@ -88,7 +88,7 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
     attachedFiles = JArrayList[FileAttachment](feedback.attachments.asScala)
   }
 
-  private def copyTo(feedback: AssignmentFeedback) {
+  private def copyTo(feedback: Feedback): Unit = {
 
     saveFormFields(feedback)
 
@@ -138,7 +138,7 @@ trait OnlineFeedbackValidation extends SelfValidating {
     fieldValidation(errors)
   }
 
-  private def fieldValidation(errors: Errors) {
+  private def fieldValidation(errors: Errors): Unit = {
     // Individually validate all the custom fields
     if (fields != null) {
       assignment.feedbackFields.foreach { field =>
@@ -177,7 +177,7 @@ trait CopyFromFormFields {
 
   self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-  def copyFormFields(feedback: AssignmentFeedback) {
+  def copyFormFields(feedback: Feedback): Unit = {
     // get custom field values
     fields = {
       val pairs = assignment.feedbackFields.map { field =>
@@ -198,7 +198,7 @@ trait WriteToFormFields {
 
   self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-  def saveFormFields(feedback: AssignmentFeedback) {
+  def saveFormFields(feedback: Feedback): Unit = {
     // save custom fields
     feedback.clearCustomFormValues()
     feedback.customFormValues.addAll(
@@ -230,7 +230,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
   self: OnlineFeedbackState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.Feedback.Manage, assignment)
   }
 }
 
@@ -260,7 +260,7 @@ trait OnlineFeedbackState extends SubmissionState with ExtensionState {
 
   def submitter: CurrentUser
 
-  val feedback: Option[AssignmentFeedback] = assignment.allFeedback.find(_.usercode == student.getUserId)
+  val feedback: Option[Feedback] = assignment.allFeedback.find(_.usercode == student.getUserId)
   val submission: Option[Submission] = assignment.submissions.asScala.find(_.usercode == student.getUserId)
   val extension: Option[Extension] = assignment.requestedOrApprovedExtensions.get(student.getUserId)
 

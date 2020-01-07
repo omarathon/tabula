@@ -49,15 +49,15 @@ trait AttendanceMonitoringService {
 
   def updateCheckpointTotalHigh(total: AttendanceMonitoringCheckpointTotal): Unit
 
-  def deleteScheme(scheme: AttendanceMonitoringScheme)
+  def deleteScheme(scheme: AttendanceMonitoringScheme): Unit
 
-  def deletePoint(point: AttendanceMonitoringPoint)
+  def deletePoint(point: AttendanceMonitoringPoint): Unit
 
-  def deleteTemplate(template: AttendanceMonitoringTemplate)
+  def deleteTemplate(template: AttendanceMonitoringTemplate): Unit
 
-  def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint)
+  def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint): Unit
 
-  def deleteCheckpointDangerously(checkpoint: AttendanceMonitoringCheckpoint)
+  def deleteCheckpointDangerously(checkpoint: AttendanceMonitoringCheckpoint): Unit
 
   def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 

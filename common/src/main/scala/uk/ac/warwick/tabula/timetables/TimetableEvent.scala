@@ -128,7 +128,7 @@ object TimetableEvent {
 
 }
 
-@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String, val core: Boolean = true) extends Serializable
+@SerialVersionUID(2903326840601345835L) sealed abstract class TimetableEventType(val code: String, val displayName: String, val core: Boolean = true) extends Serializable
 
 object TimetableEventType {
 

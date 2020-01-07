@@ -96,7 +96,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
           processFiles(file.attached.asScala.toSeq)
         }
 
-        def processFiles(files: Seq[FileAttachment]) {
+        def processFiles(files: Seq[FileAttachment]): Unit = {
           for (file <- files.filter(_.hasData)) {
             try {
               marks.addAll(yearMarksExtractor.readXSSFExcelFile(file.asByteSource.openBufferedStream()))

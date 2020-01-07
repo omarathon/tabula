@@ -14,7 +14,7 @@ trait MitCircsNotificationFixture {
   self: Mockito =>
 
   val submission: MitigatingCircumstancesSubmission = Fixtures.mitigatingCircumstancesSubmission("student", "student")
-  submission.key = 1000l
+  submission.key = 1000L
   val student: User = submission.student.asSsoUser
   val admin: User = Fixtures.user("admin", "admin")
   val mcoRole: GrantedRole[Department] = new GrantedRole[Department]

@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 object SkipAndFinishMarkingCommand {
   def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
     new SkipAndFinishMarkingCommandInternal(assignment, marker, submitter, stagePosition)
-      with ComposableCommand[Seq[AssignmentFeedback]]
+      with ComposableCommand[Seq[Feedback]]
       with WorkflowProgressValidation
       with WorkflowProgressPermissions
       with SkipAndFinishMarkingDescription
@@ -23,14 +23,14 @@ object SkipAndFinishMarkingCommand {
 }
 
 class SkipAndFinishMarkingCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
-  extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with WorkflowProgressValidation {
+  extends CommandInternal[Seq[Feedback]] with WorkflowProgressState with WorkflowProgressValidation {
 
   self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = transactional() {
+  def applyInternal(): Seq[Feedback] = transactional() {
 
     val feedbackForSkippingByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
-      .filterKeys(_.order == stagePosition)
+      .view.filterKeys(_.order == stagePosition)
       .mapValues(_.filter(feedbackForRelease.contains))
 
     val finalisedFeedback = for {
@@ -41,7 +41,7 @@ class SkipAndFinishMarkingCommandInternal(val assignment: Assignment, val marker
       cm2MarkingWorkflowService.finish(previousStage, f)
     }
 
-    finalisedFeedback.flatten.collect { case f: AssignmentFeedback => f }.toSeq
+    finalisedFeedback.flatten.collect { case f: Feedback => f }.toSeq
   }
 }
 

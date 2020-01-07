@@ -18,7 +18,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
   sessionFactory.openSession() returns session
 
   @Test
-  def duplicateCopiesAllFields() {
+  def duplicateCopiesAllFields(): Unit = {
     val source = new SmallGroupSet
     source.smallGroupService = None
 
@@ -73,7 +73,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicateWithNullDefaultTutors() {
+  def duplicateWithNullDefaultTutors(): Unit = {
     val source = new SmallGroupSet
     source.defaultTutors = null
     source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
@@ -82,7 +82,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicateCreatesNewSettingsMap() {
+  def duplicateCreatesNewSettingsMap(): Unit = {
     val source = new SmallGroupSet
     source.studentsCanSeeOtherMembers = true
     source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
@@ -94,7 +94,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
   }
 
   @Test
-  def canGetAndSetTutorVisibility() {
+  def canGetAndSetTutorVisibility(): Unit = {
     val set = new SmallGroupSet()
     set.studentsCanSeeTutorName should be (false)
     set.studentsCanSeeTutorName = true
@@ -102,7 +102,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
   }
 
   @Test
-  def canGetAndSetOtherStudentVisibility() {
+  def canGetAndSetOtherStudentVisibility(): Unit = {
     val set = new SmallGroupSet()
     set.studentsCanSeeOtherMembers should be (false)
     set.studentsCanSeeOtherMembers = true
@@ -110,13 +110,13 @@ class SmallGroupSetTest extends TestBase with Mockito {
   }
 
   @Test
-  def allowSelfGroupSwitchingDefaultsToTrue() {
+  def allowSelfGroupSwitchingDefaultsToTrue(): Unit = {
     val set = new SmallGroupSet()
     set.allowSelfGroupSwitching should be (true)
   }
 
   @Test
-  def nameWithoutModulePrefix() {
+  def nameWithoutModulePrefix(): Unit = {
     val module = new Module()
     module.code = "LA101"
     val set = new SmallGroupSet()

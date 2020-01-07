@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.{WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
@@ -16,6 +17,7 @@ import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceCo
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters._
 
 object SubmissionAndFeedbackCommand {
@@ -281,7 +283,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
       studentsFiltered
     }
 
-    val workflowMarkers = if (!assignment.cm2Assignment || assignment.cm2MarkingWorkflow == null) {
+    val workflowMarkers = if (assignment.cm2MarkingWorkflow == null) {
       Nil
     } else {
       assignment.cm2MarkingWorkflow.allocationOrder

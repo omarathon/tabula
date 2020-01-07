@@ -21,7 +21,7 @@ trait AwardImporter extends Logging {
 
   private var awardMap: Map[String, Award] = _
 
-  protected def updateAwardMap() {
+  protected def updateAwardMap(): Unit = {
     awardMap = slurpAwards()
   }
 

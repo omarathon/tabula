@@ -648,15 +648,9 @@
     <#if show_actions>
       <div class="col-md-2">
         <#if verb?has_content>
-          <#if assignment.cm2Assignment>
-            <a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment marker />">
-              ${verb}
-            </a>
-          <#else>
-            <a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment marker />">
-              ${verb}
-            </a>
-          </#if>
+          <a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment marker />">
+            ${verb}
+          </a>
         </#if>
       </div>
     </#if>
@@ -750,11 +744,7 @@
 
     <div class="clearfix">
       <div class="pull-right">
-        <#if assignment.cm2Assignment>
-          <#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-        <#else>
-          <#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
-        </#if>
+        <#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
         <@fmt.permission_button
         classes='btn btn-primary btn-xs'
         permission='Assignment.Update'
@@ -773,7 +763,7 @@
         </#if>
         <#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
         <@fmt.permission_button
-        permission='AssignmentFeedback.Read'
+        permission='Feedback.Read'
         scope=assignment
         action_descr=sub_caption?lower_case
         href=edit_url>
@@ -789,8 +779,6 @@
           <h6 class="sr-only">Assignment information</h6>
 
           <ul class="list-unstyled">
-            <#if assignment.archived>
-              <li><strong>Archived</strong></li></#if>
             <#if !assignment.opened>
               <li><strong>Assignment opens:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                                                            data-html="true"><@fmt.date date=assignment.openDate /></span></li>
@@ -818,8 +806,8 @@
               </#if>
             </li>
 
-            <#if (assignment.markingWorkflow.markingMethod)??>
-              <li><strong>Workflow type:</strong> ${assignment.markingWorkflow.markingMethod.description}</li>
+            <#if (assignment.cm2MarkingWorkflow.markingMethod)??>
+              <li><strong>Workflow type:</strong> ${assignment.cm2MarkingWorkflow.markingMethod.description}</li>
             </#if>
 
             <#if assignment.feedbackDeadline??>
@@ -941,25 +929,13 @@
 
 <#macro workflowMessage code assignment="" student=""><#compress>
   <#local studentName = "student" />
-  <#local firstMarkerName = "first marker" />
-  <#local secondMarkerName = "second marker" />
   <#if assignment?has_content && student?has_content>
     <#local studentName><span
       data-profile="${student.warwickId!(student.userId)}"><#if assignment.module.adminDepartment.showStudentName>${student.fullName}<#else>${student.warwickId!(student.userId)}</#if></span></#local>
-
-    <#local firstMarker = assignment.getStudentsFirstMarker(student.userId)!"" />
-    <#if firstMarker?has_content>
-      <#local firstMarkerName><span data-profile="${firstMarker.warwickId!(firstMarker.userId)}">${firstMarker.fullName}</span></#local>
-    </#if>
-
-    <#local secondMarker = assignment.getStudentsSecondMarker(student.userId)!"" />
-    <#if secondMarker?has_content>
-      <#local secondMarkerName><span data-profile="${secondMarker.warwickId!(secondMarker.userId)}">${secondMarker.fullName}</span></#local>
-    </#if>
   </#if>
 
   <#local text><@spring.message code=code /></#local>
-  ${(text!"")?replace("[STUDENT]", studentName)?replace("[FIRST_MARKER]", firstMarkerName)?replace("[SECOND_MARKER]", secondMarkerName)}
+  ${(text!"")?replace("[STUDENT]", studentName)}
 </#compress></#macro>
 
 <#macro workflow_stage stage>
@@ -996,10 +972,6 @@
   </#if>
 </#macro>
 
-<#macro uniIdSafeMarkerLink marker role>
-  - <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
-</#macro>
-
 <#macro uniIdSafeCM2MarkerLink stage marker student>
   - <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
 </#macro>
@@ -1032,57 +1004,9 @@
               </#if>
             </#list>
           </#if>
-        <#elseif stage_name == 'CM1FirstMarking'>
-          <#local fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
-          <#if fm?has_content>
-            <#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
-          </#if>
-
-          <#if firstMarker!?length gt 0>
-            (${firstMarker})
-            <#if canProxy>
-              <@uniIdSafeMarkerLink fm "marker" />
-            </#if>
-          </#if>
-        <#elseif stage_name == 'CM1SecondMarking'>
-          <#local sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
-          <#if sm?has_content>
-            <#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
-          </#if>
-
-          <#if secondMarker!?length gt 0>
-            (${secondMarker})
-            <#if canProxy>
-              <@uniIdSafeMarkerLink sm "marker" />
-            </#if>
-          </#if>
-        <#elseif stage_name == 'CM1Moderation'>
-          <#local sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
-          <#if sm?has_content>
-            <#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
-          </#if>
-
-          <#if secondMarker!?length gt 0>
-            (${secondMarker})
-            <#if canProxy>
-              <@uniIdSafeMarkerLink sm "moderator" />
-            </#if>
-          </#if>
-        <#elseif stage_name == 'CM1FinaliseSeenSecondMarking'>
-          <#local fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
-          <#if fm?has_content>
-            <#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
-          </#if>
-
-          <#if firstMarker!?length gt 0>
-            (${firstMarker})
-            <#if canProxy>
-              <@uniIdSafeMarkerLink fm "marker" />
-            </#if>
-          </#if>
         <#elseif stage_name == 'CM2ReleaseForMarking'>
 
-        <#elseif assignment.cm2Assignment && student.stages[stage_name].stage.markingRelated>
+        <#elseif student.stages[stage_name].stage.markingRelated>
           <#if feedback??>
             <#local markingStage = student.stages[stage_name].stage.markingStage />
             <#local marker = mapGet(feedback.feedbackMarkers, markingStage)! />

@@ -19,7 +19,7 @@ trait AutowiringRouteDaoComponent extends RouteDaoComponent {
 trait RouteDao {
   def allRoutes: Seq[Route]
 
-  def saveOrUpdate(route: Route)
+  def saveOrUpdate(route: Route): Unit
 
   def getByCode(code: String): Option[Route]
 
@@ -35,9 +35,9 @@ trait RouteDao {
 
   def findRoutesNamedLike(query: String): Seq[Route]
 
-  def saveOrUpdate(teachingInfo: RouteTeachingInformation)
+  def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit
 
-  def delete(teachingInfo: RouteTeachingInformation)
+  def delete(teachingInfo: RouteTeachingInformation): Unit
 
   def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
 

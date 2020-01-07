@@ -92,7 +92,7 @@ class DepartmentSmallGroupSet
     }
   }
 
-  def members_=(group: UserGroup) {
+  def members_=(group: UserGroup): Unit = {
     _membersGroup = group
   }
 

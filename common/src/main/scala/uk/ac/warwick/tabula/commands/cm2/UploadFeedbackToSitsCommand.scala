@@ -40,7 +40,7 @@ trait UploadFeedbackToSitsPermissions extends RequiresPermissionsChecking with P
   self: UploadFeedbackToSitsCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assessment)
+    p.PermissionCheck(Permissions.Feedback.Publish, assessment)
   }
 }
 

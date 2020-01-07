@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.TestBase
 
 class StudentCourseYearDetailsTest extends TestBase with Mockito {
 
-  @Test def comparison {
+  @Test def comparison: Unit = {
     val student = new StudentMember("0205225")
 
     val scd = new StudentCourseDetails(student, "0205225/1")

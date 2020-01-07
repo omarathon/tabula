@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
@@ -11,8 +10,6 @@ import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers._
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
-import uk.ac.warwick.tabula.commands.coursework.turnitin.{SubmitToTurnitinCommand, SubmitToTurnitinRequest}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
@@ -20,6 +17,8 @@ import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 import AssignmentTurnitinController._
+import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.cm2.turnitin.{SubmitToTurnitinCommand, SubmitToTurnitinRequest}
 
 object AssignmentTurnitinController {
   type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
@@ -43,7 +42,7 @@ trait CreateAssignmentTurnitinJobApi {
 
   @ModelAttribute("createCommand")
   def createCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): SubmitToTurnitinCommand =
-    SubmitToTurnitinCommand(module, assignment)
+    SubmitToTurnitinCommand(assignment)
 
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
   def create(@RequestBody request: CreateAssignmentTurnitinJobRequest, @ModelAttribute("createCommand") command: SubmitToTurnitinCommand, errors: Errors)(implicit response: HttpServletResponse): Mav = {
@@ -83,7 +82,7 @@ trait GetAssignmentApiTurnitinOutput extends GetAssignmentApiOutput {
 
   override def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
     "students" -> results.students.map { student =>
-      jsonAssignmentStudentObject(student).filterKeys { key => key == "universityId" || key == "submission" } // only include the universityId and submission keys
+      jsonAssignmentStudentObject(student).view.filterKeys { key => key == "universityId" || key == "submission" } // only include the universityId and submission keys
     }
   )
 }

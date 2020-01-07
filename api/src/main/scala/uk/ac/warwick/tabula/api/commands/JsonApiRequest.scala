@@ -6,6 +6,6 @@ import org.springframework.validation.Errors
 @JsonAutoDetect
 trait JsonApiRequest[A] extends Serializable {
 
-  def copyTo(state: A, errors: Errors)
+  def copyTo(state: A, errors: Errors): Unit
 
 }

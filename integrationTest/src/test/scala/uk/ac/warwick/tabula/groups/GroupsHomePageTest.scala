@@ -36,7 +36,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
     val groupsPage = new GroupsHomePage
     groupsPage.isCurrentPage
 
-    groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be 'defined
+    groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be Symbol("defined")
   }
 
   "A student" should "be able to see released groups" in {
@@ -59,7 +59,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
     val groupsPage = new GroupsHomePage
     groupsPage.isCurrentPage should be (true)
 
-    groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be('defined)
+    groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be(Symbol("defined"))
   }
 
   "Department Admin" should "be offered a link to the department's group pages" in {
@@ -101,7 +101,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
     And("The administrator is logged in and viewing the groups home page")
     signIn as P.Admin1 to groupsetSummaryPage.url
 
-    groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be('defined)
+    groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be(Symbol("defined"))
     val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
     Then("The Bulk Open Groups menu button is enabled")
@@ -127,7 +127,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
     batchOpen.submit()
 
     Then("The open page is displayed again")
-    batchOpen should be('currentPage)
+    batchOpen should be(Symbol("currentPage"))
 
     And("The checkbox to open the groupset is disabled")
     batchOpen.checkboxForGroupSet(setInfo).isEnabled should not be true
@@ -137,7 +137,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
     go to updatedSummary.url
 
     Then("The option to open the groupset is absent")
-    updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get should not be 'showingOpenButton
+    updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get should not be Symbol("showingOpenButton")
   }
 
 }

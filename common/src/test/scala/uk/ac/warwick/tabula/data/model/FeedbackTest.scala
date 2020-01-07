@@ -13,7 +13,7 @@ object FeedbackTest {
 }
 
 class FeedbackTest extends TestBase {
-  @Test def fields {
+  @Test def fields: Unit = {
 
     val random = new Random
     val actualGrades: List[Option[String]] = List(Some("1"), Some("21"), Some("22"), Some("3"), Some("A"), Some("A+"), Some("AB"), Some("B"), Some("C"), Some("CO"), Some("CP"), Some("D"), Some("E, F"), Some("L"), Some("M"), Some("N"), Some("NC"), Some("P"), Some("PL"), Some("QF"), Some("R"), Some("RF"), Some("RW"), Some("S"), Some("T"), Some("W"), Some("WW"))
@@ -37,7 +37,7 @@ class FeedbackTest extends TestBase {
     assignment.feedbacks.size should be(10)
   }
 
-  @Test def commentField() {
+  @Test def commentField(): Unit = {
     val feedback = Fixtures.assignmentFeedback(universityId = "0123456")
     feedback.hasOnlineFeedback should be(false)
     feedback.commentsFormValue should be(None)

@@ -71,7 +71,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def populateFromNoUser() {
+  def populateFromNoUser(): Unit = {
     new Fixture {
       cmd.usercode should be(null)
       cmd.name should be(null)
@@ -84,14 +84,14 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
     currentUser.apparentUser.setFullName("Billy Bob")
     currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
     new Fixture {
-      cmd.usercode should not be 'empty
-      cmd.name should not be 'empty
-      cmd.email should not be 'empty
+      cmd.usercode should not be Symbol("empty")
+      cmd.name should not be Symbol("empty")
+      cmd.email should not be Symbol("empty")
     }
   }
 
   @Test
-  def validatePasses() {
+  def validatePasses(): Unit = {
     new Fixture {
       validator.message = "I'm coming for you"
       validator.recipient = AppCommentCommand.Recipients.WebTeam
@@ -104,7 +104,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def validateNoMessage() {
+  def validateNoMessage(): Unit = {
     new Fixture {
       validator.message = "   "
       validator.recipient = AppCommentCommand.Recipients.WebTeam
@@ -119,7 +119,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToDeptAdminWithNothing() {
+  def sendToDeptAdminWithNothing(): Unit = {
     new Fixture {
       // As they aren't signed in, this should throw (checked by validation)
       cmd.message = "I'm coming for you"
@@ -132,7 +132,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToDeptAdminFullyPopulated() {
+  def sendToDeptAdminFullyPopulated(): Unit = {
     withUser("cuscav") {
       currentUser.apparentUser.setFullName("Billy Bob")
       currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
@@ -169,7 +169,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToWebTeamWithNothing() {
+  def sendToWebTeamWithNothing(): Unit = {
     new Fixture {
       // Only message is required, so this should work even if the user doesn't fill anything out
       cmd.message = "I'm coming for you"
@@ -194,7 +194,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToWebTeamFullyPopulated() {
+  def sendToWebTeamFullyPopulated(): Unit = {
     withUser("cuscav") {
       currentUser.apparentUser.setFullName("Billy Bob")
       currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")

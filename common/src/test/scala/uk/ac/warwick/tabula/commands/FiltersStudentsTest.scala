@@ -40,7 +40,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
   }
 
   @Test
-  def initState() {
+  def initState(): Unit = {
     new Fixture {
       thisProfileService.allSprStatuses(dept) returns Seq(sprF, sprP)
       thisProfileService.allModesOfAttendance(dept) returns Seq(moaFT, moaPT)
@@ -73,7 +73,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
   }
 
   @Test
-  def serializeFilter() {
+  def serializeFilter(): Unit = {
     new Fixture {
       thisProfileService.allSprStatuses(dept) returns Seq(sprF, sprP)
       thisProfileService.allModesOfAttendance(dept) returns Seq(moaFT, moaPT)
@@ -116,7 +116,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
   }
 
   @Test
-  def serializeFilterEmpty() {
+  def serializeFilterEmpty(): Unit = {
     new Fixture {
       thisProfileService.allSprStatuses(dept) returns Seq(sprF, sprP)
       thisProfileService.allModesOfAttendance(dept) returns Seq(moaFT, moaPT)

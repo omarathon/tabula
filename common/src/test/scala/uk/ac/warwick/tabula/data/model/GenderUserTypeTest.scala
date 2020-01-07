@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.Gender._
 
 class GenderUserTypeTest extends TestBase {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new GenderUserType
     t.convertToObject("M") should be(Male)
     t.convertToObject("F") should be(Female)
@@ -16,7 +16,7 @@ class GenderUserTypeTest extends TestBase {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new GenderUserType
     t.convertToValue(Male) should be("M")
     t.convertToValue(Female) should be("F")

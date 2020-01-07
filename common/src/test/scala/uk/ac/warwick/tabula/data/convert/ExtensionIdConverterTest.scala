@@ -12,7 +12,7 @@ class ExtensionIdConverterTest extends TestBase with Mockito {
   val service: ExtensionService = mock[ExtensionService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val extension = new Extension
     extension.id = "steve"
 
@@ -21,13 +21,13 @@ class ExtensionIdConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(extension)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getExtensionById("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val extension = new Extension
     extension.id = "steve"
 

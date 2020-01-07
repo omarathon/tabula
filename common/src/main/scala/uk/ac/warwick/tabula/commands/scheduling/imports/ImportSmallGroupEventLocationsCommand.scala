@@ -33,7 +33,7 @@ trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with R
     p.PermissionCheck(Permissions.ImportSystemData)
   }
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     logger.info(s"Finding events without a location in ${year.toString} ...")
     benchmark("ImportEventLocations") {
       val events: Seq[SmallGroupEvent] = transactional(readOnly = true) {

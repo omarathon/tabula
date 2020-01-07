@@ -1,1 +1,0 @@
-<#-- deliberately empty pagelet template for signed-out users -->

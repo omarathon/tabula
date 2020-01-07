@@ -19,7 +19,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
   val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
   val sprPermanentlyWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     relationshipDao.sessionFactory = sessionFactory
     memberDao.sessionFactory = sessionFactory
     sitsStatusDao.sessionFactory = sessionFactory

@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}"))
 class SubmissionAndFeedbackController extends CourseworkController with AutowiringFeaturesComponent with AutowiringAssessmentMembershipServiceComponent {
 
   @ModelAttribute("submissionAndFeedbackCommand")

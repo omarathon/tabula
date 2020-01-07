@@ -12,7 +12,7 @@ class DepartmentCodeConverterTest extends TestBase with Mockito {
   val service: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val department = new Department
     department.id = "steve"
     department.code = "in"
@@ -25,14 +25,14 @@ class DepartmentCodeConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(department)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getDepartmentByCode("20x6") returns (None)
     service.getDepartmentById("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val department = new Department
     department.id = "steve"
     department.code = "in"

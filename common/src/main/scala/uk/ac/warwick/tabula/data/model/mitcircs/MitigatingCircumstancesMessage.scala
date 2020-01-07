@@ -57,7 +57,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   private val _attachments: JSet[FileAttachment] = JHashSet()
   def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.mitigatingCircumstancesMessage = this

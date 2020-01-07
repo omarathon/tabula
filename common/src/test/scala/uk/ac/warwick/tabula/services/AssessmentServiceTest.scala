@@ -18,19 +18,15 @@ import scala.jdk.CollectionConverters._
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
   val thisAssignmentDao = new AssessmentDaoImpl
-  val thisFirstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
-  val thisSecondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
   val thisCM2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = smartMock[UserGroupMembershipHelper[StageMarkers]]
-  val thisMarkingWorkflowService: MarkingWorkflowService = smartMock[MarkingWorkflowService]
   val thisCM2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
 
   val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-    with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent {
+    with AssessmentServiceUserGroupHelpers with CM2MarkingWorkflowServiceComponent {
     val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
-    val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisFirstMarkerHelper
-    val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisSecondMarkerHelper
+
     val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = thisCM2MarkerHelper
-    val markingWorkflowService: MarkingWorkflowService = thisMarkingWorkflowService
+
     val cm2MarkingWorkflowService: CM2MarkingWorkflowService = thisCM2MarkingWorkflowService
   }
   val assignmentMembershipService = new AssessmentMembershipServiceImpl
@@ -41,7 +37,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   var userLookup: MockUserLookup = _
   var extensionService: ExtensionService = _
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     userLookup = new MockUserLookup()
     userLookup.defaultFoundUser = true
     thisAssignmentDao.sessionFactory = sessionFactory
@@ -69,7 +65,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def recentAssignment() {
+  @Test def recentAssignment(): Unit = {
     val assignment = newDeepAssignment()
     val department = assignment.module.adminDepartment
 
@@ -84,7 +80,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     * The Hibernate filter that adds deleted != 0
     */
   @Transactional
-  @Test def notDeletedFilter() {
+  @Test def notDeletedFilter(): Unit = {
     val module = new Module
     session.save(module)
     val assignment = Fixtures.assignment("Essay")
@@ -101,12 +97,12 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.enableFilter("notDeleted")
     assignmentService.getAssignmentById(assignment.id) should be(None)
 
-    assignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be('empty)
+    assignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be(Symbol("empty"))
   }
 
   /** Checks that assignment field positions don't intefere across FormFieldContexts. */
   @Transactional
-  @Test def overlappingFieldPositions() {
+  @Test def overlappingFieldPositions(): Unit = {
     val assignment = newDeepAssignment()
 
     val wordCountField = new WordCountField()
@@ -146,11 +142,11 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def findDuplicateAssignmentNames() {
+  @Test def findDuplicateAssignmentNames(): Unit = {
     val module = new Module
     session.save(module)
 
-    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should be('empty)
+    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should be(Symbol("empty"))
 
     val assignment = Fixtures.assignment("Essay")
     assignment.module = module
@@ -158,15 +154,15 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentService.save(assignment)
     session.flush()
 
-    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should not be 'empty
-    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2008), module) should be('empty)
-    assignmentService.getAssignmentByNameYearModule("Blessay", AcademicYear(2009), module) should be('empty)
+    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should not be Symbol("empty")
+    assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2008), module) should be(Symbol("empty"))
+    assignmentService.getAssignmentByNameYearModule("Blessay", AcademicYear(2009), module) should be(Symbol("empty"))
   }
 
   @Transactional
-  @Test def assignmentsByNameTest() {
+  @Test def assignmentsByNameTest(): Unit = {
     val compSciDept = modAndDeptService.getDepartmentByCode("cs")
-    compSciDept should be('defined)
+    compSciDept should be(Symbol("defined"))
 
     compSciDept.foreach(dept => {
       assignmentService.getAssignmentsByName("Test", dept) should have size 2
@@ -182,17 +178,16 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
    *     2. have a submission associated with that assignment which is not suspected plagiarised.
    */
   @Transactional
-  @Test def usersForFeedbackTest() {
+  @Test def usersForFeedbackTest(): Unit = {
     val assignment = assignmentService.getAssignmentById("1")
-    assignment should be('defined)
-    assignment.foreach(_.cm2Assignment = false)
+    assignment should be(Symbol("defined"))
 
     assignment.foreach { assmt =>
       assmt.feedbackService = smartMock[FeedbackService]
       assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _: Any => assmt.feedbacks.asScala.toSeq }
 
       // create a feedback for the assignment, not yet released
-      val feedback = new AssignmentFeedback
+      val feedback = new Feedback
       feedback._universityId = "0070790"
       feedback.usercode = "abcdef"
       feedback.actualMark = Some(41)
@@ -248,7 +243,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def updateAssessmentComponent() {
+  @Test def updateAssessmentComponent(): Unit = {
     val module = new Module("ch101")
     session.save(module)
 
@@ -276,27 +271,27 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def findAssignmentsWithFeedback() {
+  @Test def findAssignmentsWithFeedback(): Unit = {
     val ThisUser = "1234567"
     val OtherUser = "1234568"
 
     val thisStudent = Fixtures.student("1234567", "1234567")
 
-    val myFeedback = new AssignmentFeedback
+    val myFeedback = new Feedback
     myFeedback._universityId = ThisUser
     myFeedback.usercode = ThisUser
     myFeedback.released = true
 
-    val otherFeedback = new AssignmentFeedback
+    val otherFeedback = new Feedback
     otherFeedback._universityId = OtherUser
     otherFeedback.usercode = OtherUser
     otherFeedback.released = true
 
-    val unreleasedFeedback = new AssignmentFeedback
+    val unreleasedFeedback = new Feedback
     unreleasedFeedback._universityId = ThisUser
     unreleasedFeedback.usercode = ThisUser
 
-    val deletedFeedback = new AssignmentFeedback
+    val deletedFeedback = new Feedback
     deletedFeedback._universityId = ThisUser
     deletedFeedback.usercode = ThisUser
     deletedFeedback.released = true
@@ -334,7 +329,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def findAssignmentsWithSubmission() {
+  @Test def findAssignmentsWithSubmission(): Unit = {
     val ThisUser = "1234567"
     val OtherUser = "1234568"
 
@@ -417,7 +412,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.clear()
 
     val foundGroup = assignmentMembershipService.find(group)
-    foundGroup should be('defined)
+    foundGroup should be(Symbol("defined"))
     foundGroup.eq(Some(group)) should be(false)
 
     foundGroup.get.occurrence = "B"
@@ -426,8 +421,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    assignmentMembershipService.find(group) should be('empty)
-    assignmentMembershipService.find(foundGroup.get) should be('defined)
+    assignmentMembershipService.find(group) should be(Symbol("empty"))
+    assignmentMembershipService.find(foundGroup.get) should be(Symbol("defined"))
   }
 
   @Test def upstreamAssignments(): Unit = transactional { tx =>
@@ -571,7 +566,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentMembershipService.getAssessmentGroup(group.id) foreach {
       assignmentMembershipService.delete
     }
-    assignmentMembershipService.getAssessmentGroup(group.id) should be('empty)
+    assignmentMembershipService.getAssessmentGroup(group.id) should be(Symbol("empty"))
   }
 
   @Test def submissions(): Unit = transactional { tx =>
@@ -592,10 +587,10 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    submissionService.getSubmission(submission.id) should be('defined)
+    submissionService.getSubmission(submission.id) should be(Symbol("defined"))
     submissionService.getSubmission(submission.id).eq(Some(submission)) should be(false)
 
-    submissionService.getSubmissionByUsercode(assignment, "abcdef") should be('defined)
+    submissionService.getSubmissionByUsercode(assignment, "abcdef") should be(Symbol("defined"))
     submissionService.getSubmissionByUsercode(assignment, "abcdef").eq(Some(submission)) should be(false)
 
     submissionService.getSubmissionByUsercode(assignment, "abcdef") foreach {
@@ -605,7 +600,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    submissionService.getSubmissionByUsercode(assignment, "abcdef") should be('empty)
+    submissionService.getSubmissionByUsercode(assignment, "abcdef") should be(Symbol("empty"))
   }
 
   @Test def extensions(): Unit = transactional { tx =>
@@ -625,7 +620,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    extensionService.getExtensionById(extension.id) should be('defined)
+    extensionService.getExtensionById(extension.id) should be(Symbol("defined"))
     extensionService.getExtensionById(extension.id).eq(Some(extension)) should be(false)
 
     extensionService.getExtensionById(extension.id) foreach {
@@ -635,7 +630,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    extensionService.getExtensionById(extension.id) should be('empty)
+    extensionService.getExtensionById(extension.id) should be(Symbol("empty"))
   }
 
   trait AssignmentMembershipFixture {
@@ -849,7 +844,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     userIdGroup.excludeUserId("manual4")
   }
 
-  @Test def enrolledAssignments() {
+  @Test def enrolledAssignments(): Unit = {
     transactional { tx =>
       new AssignmentMembershipFixture() {
         val ams: AssessmentMembershipServiceImpl = assignmentMembershipService
@@ -898,7 +893,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def determineMembership() {
+  @Test def determineMembership(): Unit = {
     transactional { tx =>
       new AssignmentMembershipFixture() {
         // Assignment1:
@@ -980,7 +975,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def countMembershipWithUniversityIdGroup() {
+  @Test def countMembershipWithUniversityIdGroup(): Unit = {
     transactional { tx =>
       new AssignmentMembershipFixture() {
         assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1), None) should be(2)
@@ -997,7 +992,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def submissionsForAssignmentsBetweenDates() {
+  @Test def submissionsForAssignmentsBetweenDates(): Unit = {
     val universityId = "1234"
 
     val startDate = new DateTime(2014, 3, 1, 0, 0, 0)
@@ -1042,7 +1037,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def filterAssignments() {
+  @Test def filterAssignments(): Unit = {
 
     val assignment1 = Fixtures.assignment("Ass1")
     val assignment2 = Fixtures.assignment("Ass2")

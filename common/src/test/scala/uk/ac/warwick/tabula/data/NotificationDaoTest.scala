@@ -40,14 +40,14 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
   }
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     notificationDao.sessionFactory = sessionFactory
     SSOUserType.userLookup = smartMock[UserLookupService]
     SSOUserType.userLookup.getUserByUserId("heronVictim") returns staff.asSsoUser
   }
 
   @After
-  def teardown() {
+  def teardown(): Unit = {
     SSOUserType.userLookup = null
     DateTimeUtils.setCurrentMillisSystem()
   }
@@ -98,7 +98,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
   }
 
   @Test
-  def submissionReceived() {
+  def submissionReceived(): Unit = {
     val submission = Fixtures.submission()
     val assignment = Fixtures.assignment("Fun")
     assignment.addSubmission(submission)
@@ -148,7 +148,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 
   @Test
-  def scheduledMeetings() {
+  def scheduledMeetings(): Unit = {
     val staff = Fixtures.staff("1234567")
     val student = Fixtures.student("9876543")
     val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
@@ -211,7 +211,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
     * Ensure there's nothing obviously wrong with the Notification subclass mappings. This will detect e.g.
     * if an @Entity or @DiscriminatorValue are missing.
     */
-  @Test def nooneDied() {
+  @Test def nooneDied(): Unit = {
     val notificationClasses = PackageScanner.subclassesOf[Notification[_, _]]("uk.ac.warwick.tabula.data.model")
     withClue("Package scanner should find a sensible number of classes") {
       notificationClasses.size should be > 5

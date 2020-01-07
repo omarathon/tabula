@@ -55,8 +55,8 @@ trait StudentSubmissionAndFeedbackCommandState {
 
   def viewer: User
 
-  lazy val feedback: Option[AssignmentFeedback] =
-    feedbackService.getAssignmentFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
+  lazy val feedback: Option[Feedback] =
+    feedbackService.getFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
   lazy val submission: Option[Submission] =
     submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter(_.submitted)
 }
@@ -126,7 +126,7 @@ trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermi
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(studentMember))
+    p.PermissionCheck(Permissions.Feedback.Read, mandatory(studentMember))
   }
 }
 
@@ -137,7 +137,7 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
     var perms = collection.mutable.ListBuffer[CheckablePermission]()
 
     submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
-    feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }
+    feedback.foreach { feedback => perms += CheckablePermission(Permissions.Feedback.Read, Some(feedback)) }
 
     perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
 
@@ -151,7 +151,7 @@ trait CurrentUserSubmissionAndFeedbackNotificationCompletion extends CompletesNo
 
   def notificationsToComplete(commandResult: StudentSubmissionInformation): CompletesNotificationsResult = {
     commandResult.feedback match {
-      case Some(feedbackResult: AssignmentFeedback) =>
+      case Some(feedbackResult: Feedback) =>
         CompletesNotificationsResult(
           notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackPublishedNotification](feedbackResult) ++
             notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackChangeNotification](feedbackResult),

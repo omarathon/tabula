@@ -17,9 +17,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension"))
+@RequestMapping(value = Array("/coursework/assignment/{assignment}/extension"))
 class RequestExtensionController extends CourseworkController {
 
   type ExtensionRequestCommand = Appliable[Extension] with RequestExtensionCommandState

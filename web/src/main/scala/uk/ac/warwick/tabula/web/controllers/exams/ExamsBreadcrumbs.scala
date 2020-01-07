@@ -15,31 +15,6 @@ object ExamsBreadcrumbs {
 
   case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
-  object Exams {
-
-    case object HomeDefaultYear extends Abstract {
-      val title = "Manage Exams"
-      val url = Some(Routes.Exams.homeDefaultYear)
-    }
-
-    case class Home(academicYear: AcademicYear) extends Abstract {
-      val title = "Manage Exams"
-      val url = Some(Routes.Exams.home(academicYear))
-    }
-
-    case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
-      val title: String = department.name
-      val url = Some(Routes.Exams.admin.department(department, academicYear))
-    }
-
-    case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
-      val title: String = module.code.toUpperCase
-      val url = Some(Routes.Exams.admin.module(module, academicYear))
-      override val tooltip: String = module.name
-    }
-
-  }
-
   object Grids {
 
     case object Home extends Abstract {

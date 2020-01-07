@@ -28,7 +28,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
   }
 
   @Test
-  def usesUsersPreferredNumberingSystemIfAvailable() {
+  def usesUsersPreferredNumberingSystemIfAvailable(): Unit = {
     new Fixture {
       withUser("test") {
         withFakeTime(TEST_TIME) {
@@ -46,7 +46,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
   }
 
   @Test
-  def usesDepartmentNumberingSystemIfNoUserPreference() {
+  def usesDepartmentNumberingSystemIfNoUserPreference(): Unit = {
     new Fixture {
       withFakeTime(TEST_TIME) {
         // have to manually set up a user with a department code so we can
@@ -70,7 +70,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
   }
 
   @Test
-  def passesYearAndWeekNumberToFormatter() {
+  def passesYearAndWeekNumberToFormatter(): Unit = {
     new Fixture {
       withUser("test") {
         withFakeTime(TEST_TIME) {
@@ -94,7 +94,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
   }
 
   @Test
-  def outputsJSONArray() {
+  def outputsJSONArray(): Unit = {
     new Fixture {
       withUser("test") {
         withFakeTime(TEST_TIME) {

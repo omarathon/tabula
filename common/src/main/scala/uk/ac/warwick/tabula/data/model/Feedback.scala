@@ -5,7 +5,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -25,7 +25,7 @@ trait FeedbackAttachments {
 
   var attachments: JSet[FileAttachment]
 
-  def addAttachment(attachment: FileAttachment)
+  def addAttachment(attachment: FileAttachment): Unit
 
   def hasAttachments: Boolean = !attachments.isEmpty
 
@@ -54,7 +54,7 @@ trait FeedbackAttachments {
     attachments.remove(attachment)
   }
 
-  def clearAttachments() {
+  def clearAttachments(): Unit = {
     for (attachment <- attachments.asScala) {
       attachment.feedback = null
       attachment.markerFeedback = null
@@ -63,119 +63,41 @@ trait FeedbackAttachments {
   }
 }
 
-trait AssessmentFeedback {
-
-  def hasGenericFeedback: Boolean
-
-  def markingWorkflow: MarkingWorkflow
-
-  /**
-    * Whether ratings are being collected for this feedback.
-    * Doesn't take into account whether the ratings feature is enabled, so you
-    * need to check that separately.
-    */
-  def collectRatings: Boolean
-
-  /**
-    * Whether marks are being collected for this feedback.
-    * Doesn't take into account whether the marks feature is enabled, so you
-    * need to check that separately.
-    */
-  def collectMarks: Boolean
-
-  def module: Module
-
-  def academicYear: AcademicYear
-
-  def assessmentGroups: Seq[AssessmentGroup]
-
-  def fieldNameValuePairsMap: Map[String, String]
-}
-
-trait CM1WorkflowSupport {
-
-  this: Feedback =>
-
-  @OneToOne(cascade = Array(PERSIST, MERGE, REFRESH, DETACH), fetch = FetchType.LAZY)
-  @JoinColumn(name = "first_marker_feedback")
-  @Deprecated
-  var firstMarkerFeedback: MarkerFeedback = _
-
-  @OneToOne(cascade = Array(PERSIST, MERGE, REFRESH, DETACH), fetch = FetchType.LAZY)
-  @JoinColumn(name = "second_marker_feedback")
-  @Deprecated
-  var secondMarkerFeedback: MarkerFeedback = _
-  @OneToOne(cascade = Array(PERSIST, MERGE, REFRESH, DETACH), fetch = FetchType.LAZY)
-  @JoinColumn(name = "third_marker_feedback")
-  @Deprecated
-  var thirdMarkerFeedback: MarkerFeedback = _
-
-  @Deprecated
-  def getFeedbackPosition(markerFeedback: MarkerFeedback): FeedbackPosition = {
-    if (markerFeedback == firstMarkerFeedback) FirstFeedback
-    else if (markerFeedback == secondMarkerFeedback) SecondFeedback
-    else if (markerFeedback == thirdMarkerFeedback) ThirdFeedback
-    else throw new IllegalArgumentException
-  }
-
-  // Returns None if marking is completed for the current workflow or if no workflow exists - i.e. not in the middle of a workflow
-  @Deprecated
-  def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
-
-    def markingCompleted(workflow: MarkingWorkflow) = {
-      (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted) ||
-        (!workflow.hasThirdMarker && workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted) ||
-        (!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-    }
-
-    Option(markingWorkflow)
-      .filterNot(markingCompleted)
-      .map { workflow =>
-        if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-          ThirdFeedback
-        else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
-          FirstFeedback
-        else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-          SecondFeedback
-        else
-          FirstFeedback
-      }
-  }
-
-  @Deprecated
-  def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
-    getCurrentWorkflowFeedbackPosition match {
-      case Some(FirstFeedback) => getFirstMarkerFeedback
-      case Some(SecondFeedback) => getSecondMarkerFeedback
-      case Some(ThirdFeedback) => getThirdMarkerFeedback
-      case _ => None
-    }
-  }
-
-  @Deprecated
-  def getFirstMarkerFeedback: Option[MarkerFeedback] = Option(firstMarkerFeedback)
-
-  @Deprecated
-  def getSecondMarkerFeedback: Option[MarkerFeedback] = Option(secondMarkerFeedback)
-
-  @Deprecated
-  def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
-
-  @Deprecated
-  def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
-
-  @Deprecated
-  def getAllCompletedMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
-    .filter(_ != null)
-    .filter(_.state == MarkingState.MarkingCompleted)
-}
-
 @Entity
-@Proxy
-@Access(AccessType.FIELD)
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with AssessmentFeedback with ToEntityReference with CM1WorkflowSupport {
+class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference {
+
+  @ManyToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST, MERGE))
+  var assignment: Assignment = _
+
+  def module: Module = assignment.module
+
+  override def humanReadableId: String = s"Feedback for $usercode for ${assignment.humanReadableId}"
+
+  def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
+
+  def collectMarks: Boolean = assignment.collectMarks
+
+  def collectRatings: Boolean = assignment.module.adminDepartment.collectFeedbackRatings
+
+  def academicYear: AcademicYear = assignment.academicYear
+
+  // Will only return assessment groups that are relevant to this Feedback item
+  def assessmentGroups: Seq[AssessmentGroup] = assignment.assessmentGroups.asScala.toSeq.filter { assessmentGroup =>
+    assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
+  }
+
+  def permissionsParents: LazyList[Assignment] = Option(assignment).to(LazyList)
+
+  def fieldNameValuePairsMap: Map[String, String] =
+    customFormValues.asScala.flatMap { formValue =>
+      assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
+        feedbackField.name -> formValue.value
+      }
+    }.toMap
+
+  def markPoint: Option[MarkPoint] = if (assignment.useMarkPoints) actualMark.flatMap(MarkPoint.forMark) else None
+
+  def markingDescriptor: Option[MarkingDescriptor] = markPoint.flatMap(mp => assignment.availableMarkingDescriptors.find(_.isForMarkPoint(mp)))
 
   var uploaderId: String = _
 
@@ -189,13 +111,13 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   @Column(name = "universityId")
   var _universityId: String = _
 
-  def universityId = Option(_universityId)
+  def universityId: Option[String] = Option(_universityId)
 
   def isForUser(user: User): Boolean = isForUser(user.getUserId)
 
   def isForUser(theUsercode: String): Boolean = usercode == theUsercode
 
-  def studentIdentifier = universityId.getOrElse(usercode)
+  def studentIdentifier: String = universityId.getOrElse(usercode)
 
   // simple sequential ID for feedback on the parent assignment
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
@@ -291,8 +213,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
   def hasPrivateOrNonPrivateAdjustments: Boolean = marks.asScala.nonEmpty
 
-  def assessment: Assessment
-
   @OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
   @BatchSize(size = 200)
   var markerFeedback: JSet[MarkerFeedback] = JHashSet()
@@ -300,7 +220,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq
 
   def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
-    val unsortedMap = allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
+    val unsortedMap = allMarkerFeedback.groupBy(_.stage).view.mapValues(_.head)
     TreeMap(unsortedMap.toSeq.sortBy { case (stage, _) => stage.order }: _*)
   }
 
@@ -334,17 +254,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   @Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
   var outstandingStages: JSet[MarkingWorkflowStage] = JHashSet()
 
-  def isPlaceholder: Boolean = assessment match {
-    case a: Assignment if a.cm2Assignment => if (a.cm2MarkingWorkflow != null) !isMarkingCompleted else !hasContent
-    case _ => getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
-  }
+  def isPlaceholder: Boolean = if (assignment.cm2MarkingWorkflow != null) !isMarkingCompleted else !hasContent
 
   def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
     case (_: FinalStage) :: Nil => true
     case _ => false
   }
 
-  def notReleasedToMarkers: Boolean = outstandingStages.asScala.isEmpty
+  def releasedToMarkers: Boolean = outstandingStages.asScala.nonEmpty
 
   def currentStageIndex: Int = outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
 
@@ -407,7 +324,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.feedback = this
@@ -427,118 +344,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   def hasBeenModified: Boolean = hasContent || allMarkerFeedback.exists(_.hasBeenModified)
 }
 
-@Entity
-@Proxy
-@DiscriminatorValue("assignment")
-class AssignmentFeedback extends Feedback {
-
-  type Entity = AssignmentFeedback
-
-  @ManyToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST, MERGE))
-  var assignment: Assignment = _
-
-  def assessment: Assessment = assignment
-
-  def module: Module = assignment.module
-
-  override def humanReadableId: String = s"Feedback for $usercode for ${assignment.humanReadableId}"
-
-  override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
-
-  override def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
-
-  override def collectMarks: Boolean = assignment.collectMarks
-
-  override def collectRatings: Boolean = assignment.module.adminDepartment.collectFeedbackRatings
-
-  override def academicYear: AcademicYear = assignment.academicYear
-
-  // Will only return assessment groups that are relevant to this Feedback item
-  override def assessmentGroups: Seq[AssessmentGroup] = assignment.assessmentGroups.asScala.toSeq.filter { assessmentGroup =>
-    assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
-  }
-
-  def permissionsParents: LazyList[Assignment] = Option(assignment).to(LazyList)
-
-  def fieldNameValuePairsMap: Map[String, String] =
-    customFormValues.asScala.flatMap { formValue =>
-      assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
-        feedbackField.name -> formValue.value
-      }
-    }.toMap
-
-  def markPoint: Option[MarkPoint] = if (assignment.useMarkPoints) actualMark.flatMap(MarkPoint.forMark) else None
-
-  def markingDescriptor: Option[MarkingDescriptor] = markPoint.flatMap(mp => assignment.availableMarkingDescriptors.find(_.isForMarkPoint(mp)))
-}
-
-@Entity
-@Proxy
-@DiscriminatorValue("exam")
-class ExamFeedback extends Feedback {
-
-  type Entity = ExamFeedback
-
-  @ManyToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST, MERGE))
-  var exam: Exam = _
-
-  def assessment: Assessment = exam
-
-  def module: Module = exam.module
-
-  override def markingWorkflow: MarkingWorkflow = null
-
-  override def hasGenericFeedback: Boolean = false
-
-  override def collectMarks: Boolean = true
-
-  override def collectRatings: Boolean = false
-
-  override def academicYear: AcademicYear = exam.academicYear
-
-  override def assessmentGroups: Seq[AssessmentGroup] = exam.assessmentGroups.asScala.toSeq.filter { assessmentGroup =>
-    assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
-  }
-
-  def permissionsParents: LazyList[Exam] = Option(exam).to(LazyList)
-
-  def fieldNameValuePairsMap: Map[String, String] = Map.empty
-
-}
-
 object Feedback {
   val PublishDeadlineInWorkingDays = 20
-}
-
-@Deprecated
-object FeedbackPosition {
-  def getPreviousPosition(position: Option[FeedbackPosition]): Option[FeedbackPosition] = position match {
-    case Some(FirstFeedback) => None
-    case Some(SecondFeedback) => Option(FirstFeedback)
-    case Some(ThirdFeedback) => Option(SecondFeedback)
-    case None => Option(ThirdFeedback)
-  }
-}
-
-@Deprecated
-sealed trait FeedbackPosition extends Ordered[FeedbackPosition] {
-  val description: String
-  val position: Int
-
-  def compare(that: FeedbackPosition): Int = this.position compare that.position
-}
-
-case object FirstFeedback extends FeedbackPosition {
-  val description = "First marker's feedback";
-  val position = 1
-}
-
-case object SecondFeedback extends FeedbackPosition {
-  val description = "Second marker's feedback";
-  val position = 2
-}
-
-case object ThirdFeedback extends FeedbackPosition {
-  val description = "Third marker's feedback";
-  val position = 3
 }

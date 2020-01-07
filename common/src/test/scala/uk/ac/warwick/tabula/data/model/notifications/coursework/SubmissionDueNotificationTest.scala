@@ -23,7 +23,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
   assignment.closeDate = DateTime.now.plusDays(1)
 
   @Test
-  def generalRecipients() {
+  def generalRecipients(): Unit = {
     val notification = new SubmissionDueGeneralNotification {
       override def assignment: Assignment = SubmissionDueNotificationTest.this.assignment
     }
@@ -58,7 +58,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
   }
 
   @Test
-  def extensionRecipients() {
+  def extensionRecipients(): Unit = {
     val anExtension = new Extension
     anExtension._universityId = "0133454"
     anExtension.usercode = "u0133454"
@@ -75,7 +75,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(anExtension.usercode -> anExtension)
 
     withClue("Shouldn't send if the extension hasn't been approved") {
-      notification.recipients should be('empty)
+      notification.recipients should be(Symbol("empty"))
     }
 
     anExtension.approve()

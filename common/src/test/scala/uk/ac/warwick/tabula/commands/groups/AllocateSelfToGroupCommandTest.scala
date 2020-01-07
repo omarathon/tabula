@@ -36,7 +36,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def allocateAddsStudentToGroupMembers() {
+  def allocateAddsStudentToGroupMembers(): Unit = {
     new Fixture {
       allocateCommand.applyInternal()
       testGroup.students.users should contain(user)
@@ -44,7 +44,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def allocateDoesNothingIfStudentAlreadyAssigned() {
+  def allocateDoesNothingIfStudentAlreadyAssigned(): Unit = {
     new Fixture {
       testGroup.students.add(user)
       testGroup.students.users should contain(user)
@@ -55,14 +55,14 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def allocateCommandReturnsGroupset() {
+  def allocateCommandReturnsGroupset(): Unit = {
     new Fixture {
       allocateCommand.applyInternal() should be(testGroupSet)
     }
   }
 
   @Test
-  def deallocateRemovesStudentFromGroupMembers() {
+  def deallocateRemovesStudentFromGroupMembers(): Unit = {
     new Fixture {
       testGroup.students.add(user)
       deallocateCommand.applyInternal()
@@ -71,7 +71,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def deallocateDoesNothingIfStudentNotAlreadyAssigned() {
+  def deallocateDoesNothingIfStudentNotAlreadyAssigned(): Unit = {
     new Fixture {
       deallocateCommand.applyInternal()
       testGroup.students.users should be(Set.empty)
@@ -80,14 +80,14 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def deallocateCommandReturnsGroupset() {
+  def deallocateCommandReturnsGroupset(): Unit = {
     new Fixture {
       deallocateCommand.applyInternal() should be(testGroupSet)
     }
   }
 
   @Test
-  def requiresAllocateSelfPermission() {
+  def requiresAllocateSelfPermission(): Unit = {
     new Fixture {
       val perms = new StudentSignupCommandPermissions with StudentSignUpCommandState {
         val user = null
@@ -121,7 +121,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def signUpValidatesGroupIsNotFull() {
+  def signUpValidatesGroupIsNotFull(): Unit = {
     new ValidatorFixture {
 
       signUpValidator.validate(errors)
@@ -130,7 +130,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
 
 
       testGroup.maxGroupSize = 0
-      testGroup should be('full)
+      testGroup should be(Symbol("full"))
 
       signUpValidator.validate(errors)
       verify(errors, times(1)).reject("smallGroup.full")
@@ -138,7 +138,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def signUpValidatesGroupIsNotClosed() {
+  def signUpValidatesGroupIsNotClosed(): Unit = {
     new ValidatorFixture {
 
       signUpValidator.validate(errors)
@@ -153,7 +153,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def signUpValidatesAllocationMethodIsStudentSignUp() {
+  def signUpValidatesAllocationMethodIsStudentSignUp(): Unit = {
     new ValidatorFixture {
 
       signUpValidator.validate(errors)
@@ -168,7 +168,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def unsignUpValidatesGroupAllowsSwitching() {
+  def unsignUpValidatesGroupAllowsSwitching(): Unit = {
     new ValidatorFixture {
 
       unsignUpValidator.validate(errors)
@@ -184,7 +184,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def unsignUpValidatesGroupIsNotClosed() {
+  def unsignUpValidatesGroupIsNotClosed(): Unit = {
     new ValidatorFixture {
 
       unsignUpValidator.validate(errors)
@@ -199,7 +199,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def unsignUpValidatesAllocationMethodIsStudentSignUp() {
+  def unsignUpValidatesAllocationMethodIsStudentSignUp(): Unit = {
     new ValidatorFixture {
 
       unsignUpValidator.validate(errors)

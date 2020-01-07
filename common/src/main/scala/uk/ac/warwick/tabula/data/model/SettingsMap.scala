@@ -20,7 +20,7 @@ object HasSettings {
 
     def isDefined: Boolean = allSettings.getSetting(key).isDefined
 
-    def value_=(v: A) {
+    def value_=(v: A): Unit = {
       allSettings.settings += key -> v
     }
   }
@@ -49,7 +49,7 @@ object HasSettings {
   case class UserSeqSetting(allSettings: HasSettings)(val key: String, val default: Seq[User], userLookup: UserLookupService) extends Setting[Seq[User]] {
     def value: Seq[User] = allSettings.getStringSeqSetting(key).map(_.map(userLookup.getUserByUserId).filter(_.isFoundUser)).getOrElse(default)
 
-    override def value_=(v: Seq[User]) {
+    override def value_=(v: Seq[User]): Unit = {
       allSettings.settings += key -> v.map(_.getUserId).filter(_.hasText).toList
     }
   }
@@ -124,7 +124,7 @@ trait HasSettings {
 
   protected def settingsSeq: Seq[(String, Any)] = Option(settings).map(_.toSeq).getOrElse(Nil)
 
-  protected def ensureSettings {
+  protected def ensureSettings: Unit = {
     if (settings == null) settings = Map()
   }
 

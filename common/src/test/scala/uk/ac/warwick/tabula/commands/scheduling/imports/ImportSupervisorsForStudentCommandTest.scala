@@ -45,7 +45,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
     // Asserts that this course details is current and has exactly one relationship with
     // the given supervisor member.
-    def assertRelationshipIsValid(scd: StudentCourseDetails, expectedSupervisor: StaffMember) {
+    def assertRelationshipIsValid(scd: StudentCourseDetails, expectedSupervisor: StaffMember): Unit = {
       val supRels = scd.relationships(relationshipType)
       withClue(s"should be 1 item in $supRels") {
         supRels.size should be(1)
@@ -77,7 +77,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
   }
 
   @Transactional
-  @Test def testImportConcurrentCourseSupervisors() {
+  @Test def testImportConcurrentCourseSupervisors(): Unit = {
 
     new Environment {
       val course2 = new CourseFixture("1111111/2", "1111111/2")
@@ -90,7 +90,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
   }
 
   @Transactional
-  @Test def testCaptureValidSupervisor() {
+  @Test def testCaptureValidSupervisor(): Unit = {
     new Environment {
       // set up importer to return supervisor
       val codes = Seq((supervisor.universityId, new JBigDecimal("100")))
@@ -116,7 +116,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
   }
 
   @Transactional
-  @Test def testCaptureInvalidSupervisor() {
+  @Test def testCaptureInvalidSupervisor(): Unit = {
     new Environment {
       // set up importer to return supervisor
       val importer: SupervisorImporter = smartMock[SupervisorImporter]
@@ -136,7 +136,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
   }
 
   @Transactional
-  @Test def testCaptureExistingOtherSupervisor() {
+  @Test def testCaptureExistingOtherSupervisor(): Unit = {
     new Environment {
       // create and persist existing supervisor
       val existingSupervisorMember = new StaffMember("1234")

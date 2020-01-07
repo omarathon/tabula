@@ -33,7 +33,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
     val command = new EditSmallGroupSetMembershipCommandInternal(module, set) with CommandTestSupport with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership
   }
 
-  @Test def autoDeregister {
+  @Test def autoDeregister: Unit = {
     new CommandFixture {
       val (user1, user2, user3, user4, user5) = (new User("user1"), new User("user2"), new User("user3"), new User("user4"), new User("user5"))
       command.userLookup.registerUserObjects(user1, user2, user3, user4, user5)
@@ -117,7 +117,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateLinked {
+  @Test def validateLinked: Unit = {
     new ValidationFixture {
       set.allocationMethod = SmallGroupAllocationMethod.Linked
 

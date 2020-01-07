@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
 class TutorHomeCommandTest extends TestBase with Mockito {
 
-  @Test def commandWorks() {
+  @Test def commandWorks(): Unit = {
     withUser("cusebr") {
       val department = new Department
       val academicYear = AcademicYear(2015)

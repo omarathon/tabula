@@ -9,7 +9,7 @@ import scala.jdk.CollectionConverters._
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
-  @Test def testDetermineMembership() {
+  @Test def testDetermineMembership(): Unit = {
     val userLookup = new MockUserLookup
     userLookup.registerUsers("aaaaa", "bbbbb", "ccccc", "ddddd", "eeeee", "fffff")
 
@@ -60,7 +60,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     info.items(2).userId should be(Some("ccccc"))
   }
 
-  @Test def studentMember() {
+  @Test def studentMember(): Unit = {
     val service = new AssessmentMembershipServiceImpl
 
     val user = new User("cuscav").tap(_.setWarwickId("0672089"))

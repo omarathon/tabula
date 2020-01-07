@@ -13,7 +13,7 @@ class TimeBuilderTest extends TestBase with FreemarkerRendering {
 
   import TimeBuilder._
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     withFakeTime(new DateTime(2012, 4, 12, 13, 36, 44)) {
       val time = new LocalTime()
       val elevenPm = new LocalTime(23, 35, 19)

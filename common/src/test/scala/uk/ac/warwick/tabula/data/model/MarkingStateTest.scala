@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState._
 class MarkingStateTest extends TestBase with Mockito {
 
   // test all valid state transitions
-  @Test def stateTransitionTest() {
+  @Test def stateTransitionTest(): Unit = {
     MarkingCompleted.canTransitionTo(InProgress) should be(false)
     MarkingCompleted.canTransitionTo(Rejected) should be(true)
     ReleasedForMarking.canTransitionTo(InProgress) should be(true)

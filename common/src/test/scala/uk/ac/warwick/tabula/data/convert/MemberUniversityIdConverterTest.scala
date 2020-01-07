@@ -13,7 +13,7 @@ class MemberUniversityIdConverterTest extends TestBase with Mockito {
   var service: ProfileService = mock[ProfileService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val member = new StaffMember
     member.universityId = "0672089"
 
@@ -22,13 +22,13 @@ class MemberUniversityIdConverterTest extends TestBase with Mockito {
     converter.convertRight("0672089") should be(member)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getMemberByUniversityIdStaleOrFresh("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val member = new StaffMember
     member.universityId = "0672089"
 

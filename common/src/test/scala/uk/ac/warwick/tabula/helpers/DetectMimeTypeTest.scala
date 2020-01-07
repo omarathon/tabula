@@ -8,7 +8,7 @@ import scala.util.Using
 class DetectMimeTypeTest extends TestBase {
 
   @Test
-  def detect() {
+  def detect(): Unit = {
     Using.resource(new ClassPathResource("/feedback1.zip").getInputStream) { is =>
       val mimeType = DetectMimeType.detectMimeType(is).toString
       mimeType should be("application/zip")

@@ -53,7 +53,7 @@ trait AddAdditionalStudent {
 
   var linkedAttendance: SmallGroupEventAttendance = _
 
-  def addAdditionalStudent(members: Seq[MemberOrUser]) {
+  def addAdditionalStudent(members: Seq[MemberOrUser]): Unit = {
     Option(additionalStudent)
       .filterNot { member => members.exists(_.universityId == member.universityId) }
       .foreach { member =>
@@ -98,7 +98,7 @@ trait RemoveAdditionalStudent {
 
   var removeAdditionalStudent: Member = _
 
-  def doRemoveAdditionalStudent(members: Seq[MemberOrUser]) {
+  def doRemoveAdditionalStudent(members: Seq[MemberOrUser]): Unit = {
     Option(removeAdditionalStudent)
       .filter { member => members.exists(_.universityId == member.universityId) }
       .foreach { member =>

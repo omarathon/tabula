@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Profile(Array("turnitinTca"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/sysadmin/assignments/{assignment}/turnitin/tca-retry-report/{attachment}"))
+@RequestMapping(Array("/coursework/sysadmin/assignments/{assignment}/turnitin/tca-retry-report/{attachment}"))
 class TurnitinTcaRetrySimilarityReportController extends BaseController with Logging with AutowiringTurnitinTcaServiceComponent  {
 
   type TurnitinTcaRetrySimilarityReportCommand = TurnitinTcaRetrySimilarityReportCommand.CommandType

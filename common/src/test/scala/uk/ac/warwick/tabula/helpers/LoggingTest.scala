@@ -11,7 +11,7 @@ class LoggingTest extends TestBase with Logging {
 
   val testLogger: Logger = TestLoggerFactory.getTestLogger(logger.getName)
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     testLogger should be(logger)
 
     debug("my message")

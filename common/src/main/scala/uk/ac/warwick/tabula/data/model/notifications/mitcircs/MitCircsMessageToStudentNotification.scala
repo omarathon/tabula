@@ -39,7 +39,7 @@ abstract class AbstractMitCircsMessageToStudentNotification
     with AutowiringUserLookupComponent
     with Logging {
 
-  override def onPreSave(isNew: Boolean) {
+  override def onPreSave(isNew: Boolean): Unit = {
     recipientUserId = submission.student.userId
   }
 

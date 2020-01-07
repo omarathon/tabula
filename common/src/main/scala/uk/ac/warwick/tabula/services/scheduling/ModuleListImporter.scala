@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.{UpstreamModuleList, UpstreamModuleListEntry}
 import uk.ac.warwick.tabula.services.AutowiringCourseAndRouteServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.ModuleListImporter.{UpstreamModuleListEntityQuery, UpstreamModuleListQuery}
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import util.Try
 import uk.ac.warwick.tabula.AcademicYear
@@ -40,7 +40,7 @@ class ModuleListImporterImpl extends ModuleListImporter with InitializingBean
   var moduleListQuery: UpstreamModuleListQuery = _
   var moduleListEntityQuery: UpstreamModuleListEntityQuery = _
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     moduleListQuery = new UpstreamModuleListQuery(sits)
     moduleListEntityQuery = new UpstreamModuleListEntityQuery(sits)
   }

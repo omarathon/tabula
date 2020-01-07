@@ -44,7 +44,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     val command = new EditDepartmentCommandInternal(department) with CommandTestSupport with EditDepartmentCommandValidation
   }
 
-  @Test def init() {
+  @Test def init(): Unit = {
     new Fixture {
       command.code should be("in-ug")
       command.fullName should be("IT Services Undergraduate")
@@ -52,7 +52,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     inContext[MinimalCommandContext] {
       new Fixture {
         command.code = "in-ugs"
@@ -74,7 +74,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateNoErrors() {
+  @Test def validateNoErrors(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduate"
@@ -87,7 +87,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateEmptyCode() {
+  @Test def validateEmptyCode(): Unit = {
     new Fixture {
       command.code = ""
       command.fullName = "Information Technology Services Undergraduate"
@@ -103,7 +103,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateCodeDoesntStartWithParent() {
+  @Test def validateCodeDoesntStartWithParent(): Unit = {
     new Fixture {
       command.code = "itservices-ug"
       command.fullName = "Information Technology Services Undergraduate"
@@ -119,7 +119,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateCodeTooLong() {
+  @Test def validateCodeTooLong(): Unit = {
     new Fixture {
       command.code = "in-an-incredibly-long-code-this-is-silly-now"
       command.fullName = "Information Technology Services Undergraduate"
@@ -135,7 +135,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateCodeBadFormat() {
+  @Test def validateCodeBadFormat(): Unit = {
     new Fixture {
       command.code = "in-UG Students"
       command.fullName = "Information Technology Services Undergraduate"
@@ -151,7 +151,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateExistingCode() {
+  @Test def validateExistingCode(): Unit = {
     new Fixture {
       command.code = "in-pg"
       command.fullName = "Information Technology Services Postgraduate"
@@ -167,7 +167,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateEmptyName() {
+  @Test def validateEmptyName(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "  "
@@ -183,7 +183,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateNameDoesntStartWithParent() {
+  @Test def validateNameDoesntStartWithParent(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "ITS Undergraduates"
@@ -199,7 +199,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateNameTooLong() {
+  @Test def validateNameTooLong(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduate Students Who Have Come To Study Computers And Programming And Things, What A Wonderful Sight This Is"
@@ -215,7 +215,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateShortNameTooLong() {
+  @Test def validateShortNameTooLong(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduates"
@@ -232,7 +232,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateEmptyFilterRule() {
+  @Test def validateEmptyFilterRule(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduates"
@@ -248,7 +248,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateLessSpecificFilterRule() {
+  @Test def validateLessSpecificFilterRule(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduates"
@@ -266,7 +266,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     }
   }
 
-  @Test def validateContradictoryFilterRule() {
+  @Test def validateContradictoryFilterRule(): Unit = {
     new Fixture {
       command.code = "in-ug"
       command.fullName = "Information Technology Services Undergraduates"

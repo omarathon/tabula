@@ -1,6 +1,5 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "feedback/_feedback_summary.ftlh" as fs />
-<#import "/WEB-INF/freemarker/coursework/admin/assignments/feedback/_feedback_summary.ftl" as cm1fs>
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2/>
 
@@ -14,37 +13,14 @@
 </#if>
 
 <#if auditData.feedback??>
-
-  <#if assignment.cm2Assignment>
-    <#if assignment.cm2MarkingWorkflow??>
-      <#list auditData.feedback.completedFeedbackByStage?keys as stage>
-        <#if mapGet(auditData.feedback.completedFeedbackByStage, stage)??>
-          <@fs.markerFeedbackSummary stage mapGet(auditData.feedback.completedFeedbackByStage, stage)/>
-        </#if>
-      </#list>
-    <#else>
-        <@fs.feedbackSummary auditData.feedback />
-    </#if>
+  <#if assignment.cm2MarkingWorkflow??>
+    <#list auditData.feedback.completedFeedbackByStage?keys as stage>
+      <#if mapGet(auditData.feedback.completedFeedbackByStage, stage)??>
+        <@fs.markerFeedbackSummary stage mapGet(auditData.feedback.completedFeedbackByStage, stage)/>
+      </#if>
+    </#list>
   <#else>
-  <#-- For CM1 assignments we can't cycle through allFeedback as it may contained orphened rejected feedback -->
-    <#if auditData.feedback.firstMarkerFeedback??>
-      <div class="well">
-        <@cm1fs.feedbackSummary auditData.feedback.firstMarkerFeedback isModerated true/>
-        <@cm1fs.secondMarkerNotes auditData.feedback.firstMarkerFeedback isModerated />
-      </div>
-    </#if>
-    <#if auditData.feedback.secondMarkerFeedback??>
-      <div class="well">
-        <@cm1fs.feedbackSummary auditData.feedback.secondMarkerFeedback isModerated true/>
-        <@cm1fs.secondMarkerNotes auditData.feedback.secondMarkerFeedback isModerated />
-      </div>
-    </#if>
-    <#if auditData.feedback.thirdMarkerFeedback??>
-      <div class="well">
-        <@cm1fs.markerFeedbackSummary auditData.feedback.thirdMarkerFeedback isModerated true/>
-        <@cm1fs.secondMarkerNotes auditData.feedback.thirdMarkerFeedback isModerated />
-      </div>
-    </#if>
+      <@fs.feedbackSummary auditData.feedback />
   </#if>
 
   <#assign feedback = auditData.feedback />
