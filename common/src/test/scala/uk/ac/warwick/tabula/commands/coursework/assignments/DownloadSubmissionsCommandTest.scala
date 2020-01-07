@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, Submission}
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService, Zips}
-import uk.ac.warwick.tabula.{Features, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Features, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 class DownloadSubmissionsCommandTest extends TestBase with Mockito {
@@ -27,7 +27,7 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 
   @Test def test() = withUser("cusfal") {
     val assignment = new Assignment
-    assignment.module = new Module(code = "ph105", adminDepartment = new Department)
+    assignment.module = new Module(code = "ph105", adminDepartment = Fixtures.department("in"))
 
     val cmd = new DownloadSubmissionsCommand(assignment.module, assignment, currentUser)
 

@@ -75,7 +75,7 @@ trait AssignmentFixture extends Mockito {
 
   userLookup.usersByUserIds(ownersGroup.includedUserIds.toSeq) returns Map("admin1" -> admin1, "admin2" -> admin2)
 
-  val department = new Department
+  val department = Fixtures.department("in")
   val permissionsService: PermissionsService = mock[PermissionsService]
   permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns ownersGroup
 

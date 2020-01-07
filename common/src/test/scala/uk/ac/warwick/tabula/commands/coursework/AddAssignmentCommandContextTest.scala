@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework
 
-import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures}
 import uk.ac.warwick.tabula.commands.coursework.assignments.AddAssignmentCommand
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.ModuleDao
@@ -23,8 +23,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
   @Test def add() {
     withUser("abc") {
 
-      val dept = new Department
-      dept.code = "in"
+      val dept = Fixtures.department("in")
       session.save(dept)
 
       val module = new Module

@@ -39,6 +39,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   mockUserLookup.registerUserObjects(owner)
   val dept = new Department {
     code = "its"
+    isRootDepartment = true
     override lazy val owners: UserGroup = UserGroup.ofUsercodes
     owners.userLookup = mockUserLookup
   }

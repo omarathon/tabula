@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.util.parsing.json.JSON
@@ -17,7 +17,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
     val settingsWithNumberingSystem = new UserSettings()
     settingsWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Term
 
-    val departmentWithNumberingSystem = new Department()
+    val departmentWithNumberingSystem = Fixtures.department("xx")
     departmentWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
 
     val dumper = new WeekRangesDumper with StoppedClockComponent with UserSettingsServiceComponent with ModuleAndDepartmentServiceComponent {

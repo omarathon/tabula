@@ -29,7 +29,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
   }
 
   @Test def submit {
-    val department = Fixtures.department("in-ug")
+    val department = Fixtures.department("in-ug", isRootDepartment = false)
     val command = mock[Appliable[Department] with EditDepartmentCommandState]
     command.apply() returns (department)
 

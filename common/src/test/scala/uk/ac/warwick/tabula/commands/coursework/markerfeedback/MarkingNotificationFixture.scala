@@ -13,7 +13,7 @@ object MarkingNotificationFixture {
 
 trait MarkingNotificationFixture extends Mockito {
 
-  val department = new Department()
+  val department = Fixtures.department("heron")
   val testmodule = new Module("heron101", department)
   val testAssignment = new Assignment {
     id = "1"; name = "Test assignment"; module = testmodule

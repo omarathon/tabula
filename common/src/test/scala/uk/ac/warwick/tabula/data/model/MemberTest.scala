@@ -20,12 +20,11 @@ class MemberTest extends TestBase with Mockito {
     member.universityId = "01234567"
 
     // create their home department
-    val homeDept = new Department
+    val homeDept = Fixtures.department("zx")
     homeDept.code = "zx"
 
     // create another department where they're taking a module
-    val extDept = new Department
-    extDept.code = "pi"
+    val extDept = Fixtures.department("pi")
 
     // set home department and test
     member.homeDepartment = homeDept
@@ -33,8 +32,7 @@ class MemberTest extends TestBase with Mockito {
 
     // set course department and test
     // create their course department
-    val courseDept = new Department
-    courseDept.code = "mn"
+    val courseDept = Fixtures.department("mn")
 
     val studentCourseDetails = new StudentCourseDetails(member, "2222222/2")
     studentCourseDetails.department = courseDept
@@ -60,8 +58,7 @@ class MemberTest extends TestBase with Mockito {
     member.touchedDepartments should be(LazyList(homeDept, courseDept, extDept))
 
     // also set route department and test
-    val routeDept = new Department
-    routeDept.code = "ch"
+    val routeDept = Fixtures.department("ch")
     val route = new Route
     route.adminDepartment = routeDept
     member.mostSignificantCourseDetails.get.currentRoute = route
@@ -78,8 +75,7 @@ class MemberTest extends TestBase with Mockito {
     member.touchedDepartments should be(LazyList(homeDept, courseDept, extDept))
 
     // check teaching departments aren't included
-    val teachingDepartment = new Department
-    teachingDepartment.code = "td"
+    val teachingDepartment = Fixtures.department("td")
     route.teachingInfo = Fixtures.routeTeachingInformation(route, Seq(homeDept, teachingDepartment)).toSet.asJava
     route.teachingDepartmentsActive = false
     member.affiliatedDepartments should be(LazyList(homeDept, courseDept))

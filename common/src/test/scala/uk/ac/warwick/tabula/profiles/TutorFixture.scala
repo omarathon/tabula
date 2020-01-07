@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles
 
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
@@ -11,7 +11,7 @@ trait TutorFixture extends Mockito {
 
   val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-  val department = new Department
+  val department = Fixtures.department("xx")
   department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
   val actor = new User
   val recipient = new User

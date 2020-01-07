@@ -27,7 +27,7 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
     val module = new Module
-    module.adminDepartment = new Department
+    module.adminDepartment = Fixtures.department("in")
 
     val student = new User("student") {
       setWarwickId("student")

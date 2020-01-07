@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.ReflectionsSetup
@@ -10,9 +10,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase with Reflecti
 
   @Test def saveAndLoad {
     transactional { t =>
-      val department = new Department
-      department.code = "IN"
-      department.fullName = "IT Services"
+      val department = Fixtures.department("IN", "IT Services")
 
       session.save(department)
       session.flush()
