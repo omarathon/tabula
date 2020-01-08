@@ -5,7 +5,7 @@ import java.io.StringWriter
 import freemarker.template.Configuration
 import org.joda.time.Duration
 import org.junit.Before
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Routes
 
@@ -38,8 +38,7 @@ class FreemarkerEngineTest extends TestBase {
     * but at the time of writing we don't use it. It could replace the routes.ftl
     */
   @Test def routes(): Unit = {
-    val department = new Department
-    department.code = "la"
+    val department = Fixtures.department("la")
     val output = render("renderroutes.ftl", Map("Routes" -> Routes, "department" -> department))
     output should be("The path to department LA is /coursework/admin/department/la")
   }

@@ -58,7 +58,7 @@ $(function () {
       if ($this.data('request')) {
         $this.data('request').abort();
         $this.data('request', null);
-        $content.html('<i class="fa fa-spinner fa-spin"></i> Loading');
+        $content.html('<i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;');
       }
 
       $this.data('request', $.ajax({
@@ -242,7 +242,7 @@ $(function () {
 
     $row.on('hidden.bs.collapse', function (e) {
       $row.data('loaded', false);
-      $row.find('.detailrow-container').html('<i class="fa fa-spinner fa-spin"></i> Loading');
+      $row.find('.detailrow-container').html('<i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading');
       $(this).unbind(e);
     });
   });
@@ -499,7 +499,7 @@ var prepareAjaxForm = function ($form, $container, options) {
         // reset if empty
         $detailrow.collapse("hide");
         $detailrow.data('loaded', false);
-        $container.html('<span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Loading&hellip;</span>');
+        $container.html('<span class="text-muted"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;</span>');
         successCallback($container);
       } else {
         $container.html(result);

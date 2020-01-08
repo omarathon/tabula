@@ -53,7 +53,7 @@ trait ExtensionFixture extends Mockito {
   extensionManagers.userLookup = userLookup
   extensionManagers.includedUserIds = Set("admin", "admin2", "admin3")
 
-  val department = new Department
+  val department = Fixtures.department("xx")
   val permissionsService: PermissionsService = mock[PermissionsService]
   when(permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition)) thenReturn extensionManagers
   department.permissionsService = permissionsService

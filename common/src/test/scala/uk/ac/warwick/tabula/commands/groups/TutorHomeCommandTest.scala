@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.commands.groups
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class TutorHomeCommandTest extends TestBase with Mockito {
 
   @Test def commandWorks(): Unit = {
     withUser("cusebr") {
-      val department = new Department
+      val department = Fixtures.department("in")
       val academicYear = AcademicYear(2015)
       val groups = Seq(new SmallGroup, new SmallGroup)
       val set = new SmallGroupSet

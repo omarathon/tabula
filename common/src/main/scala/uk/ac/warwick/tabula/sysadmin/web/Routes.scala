@@ -20,8 +20,10 @@ object Routes {
 
   object Departments {
     def home: String = context + "/departments"
+    def mandatoryPermissions: String = s"$home/mandatory-permissions"
 
     def department(department: Department): String = context + "/departments/%s" format encoded(department.code)
+    def admins(d: Department): String = s"${department(d)}/permissions"
   }
 
   object AttendanceTemplates {
@@ -41,5 +43,7 @@ object Routes {
 
     def quartzStatus(triggerKey: TriggerKey): String = context + "/jobs/quartz-status?key=%s" format encoded(triggerKey.getName)
   }
+
+  def globalPermissions: String = s"$context/global-permissions"
 
 }

@@ -333,7 +333,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
     restrictions: Seq[ScalaRestriction],
     orders: Seq[ScalaOrder] = Seq()
   ): Seq[StudentMember] = transactional(readOnly = true) {
-    if (department.hasParent) {
+    if (!department.isImportDepartment) {
       val allRestrictions = ScalaRestriction.is(
         "studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
         FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
@@ -360,12 +360,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
   }
 
   private def affiliatedDepartmentsRestriction(department: Department, restrictions: Seq[ScalaRestriction]) = {
-    val queryDepartment = {
-      if (department.hasParent)
-        department.rootDepartment
-      else
-        department
-    }
+    val queryDepartment = department.rootDepartment
 
     val departmentRestriction = Aliasable.addAliases(
       new ScalaRestriction(
@@ -392,20 +387,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
   }
 
   def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String] = transactional(readOnly = true) {
-    val allRestrictions = {
-      if (department.hasParent) {
-        ScalaRestriction.is(
-          "studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
-          FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
-        ) ++ restrictions
-      } else {
-        ScalaRestriction.is(
-          "studentCourseYearDetails.enrolmentDepartment", department,
-          FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
-        ) ++ restrictions
-      }
-    }
-    memberDao.findUniversityIdsByRestrictions(allRestrictions)
+    memberDao.findUniversityIdsByRestrictions(
+      ScalaRestriction.is(
+        "studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+        FiltersStudents.AliasPaths("studentCourseYearDetails"): _*
+      ) ++ restrictions
+    )
   }
 
   def findAllUniversityIdsByRestrictions(

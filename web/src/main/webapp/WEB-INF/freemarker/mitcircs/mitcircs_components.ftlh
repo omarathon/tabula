@@ -63,7 +63,7 @@
   <div id="${id}" class="mitcircs-details__section async row form-horizontal" data-href="${url}">
     <div class="control-label">${label}</div>
     <div class="content form-control-static">
-      <i class="fas fa-spinner fa-pulse"></i> Loading&hellip;
+      <i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
     </div>
   </div>
 </#macro>

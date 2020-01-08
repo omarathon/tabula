@@ -8,12 +8,12 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange.NumberingSystem._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class DisplaySettingsCommandTest extends TestBase with Mockito {
 
   private trait Fixture {
-    val testDepartment = new Department
+    val testDepartment = Fixtures.department("in")
     testDepartment.defaultGroupAllocationMethod = StudentSignUp
     testDepartment.showStudentName = true
     testDepartment.plagiarismDetectionEnabled = true

@@ -20,7 +20,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     val feedback: Feedback = Fixtures.assignmentFeedback("0123456") // matches a member in Fixtures.assessmentGroup
     feedback.assignment = new Assignment
     feedback.assignment.module = module
-    feedback.assignment.module.adminDepartment = new Department
+    feedback.assignment.module.adminDepartment = Fixtures.department("xx")
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
 

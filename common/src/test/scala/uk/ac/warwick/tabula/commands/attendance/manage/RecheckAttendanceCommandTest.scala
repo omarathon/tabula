@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 import uk.ac.warwick.tabula.data.model.{Department, MeetingRecord, StudentMember, Submission}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring._
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
 class RecheckAttendanceCommandTest extends TestBase with Mockito {
 
   trait Fixture {
-    val department = new Department
+    val department = Fixtures.department("in")
     val academicYear = AcademicYear(2018)
     val scheme = new AttendanceMonitoringScheme
     scheme.pointStyle = AttendanceMonitoringPointStyle.Week

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ComponentMixins extends Mockito
@@ -68,9 +68,7 @@ trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
   sitsStatusImporter.getSitsStatusForCode("P") returns Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
   importCommandFactory.sitsStatusImporter = sitsStatusImporter
 
-  val department = new Department
-  department.code = "ph"
-  department.fullName = "Philosophy"
+  val department = Fixtures.department("ph", "Philosophy")
 
   val modAndDeptService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
   modAndDeptService.getDepartmentByCode("ph") returns Some(department)

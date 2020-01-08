@@ -6,8 +6,9 @@ import com.google.common.io.Files
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.junit.Before
 import org.springframework.core.io.ClassPathResource
+
 import scala.concurrent.Future
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.IDOnly
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -60,7 +61,7 @@ class ZipServiceTest extends TestBase with Mockito {
     service.features = emptyFeatures
     service.userLookup = userLookup
 
-    val module = new Module(code = "ph105", adminDepartment = new Department)
+    val module = new Module(code = "ph105", adminDepartment = Fixtures.department("ph"))
 
     val assignment = new Assignment
     val submission = new Submission
@@ -90,7 +91,7 @@ class ZipServiceTest extends TestBase with Mockito {
     service.features = emptyFeatures
     service.userLookup = userLookup
 
-    val department = new Department
+    val department = Fixtures.department("ph")
     department.showStudentName = true
 
     val module = new Module(code = "ph105", adminDepartment = department)
@@ -124,7 +125,7 @@ class ZipServiceTest extends TestBase with Mockito {
     service.features = emptyFeatures
     service.userLookup = userLookup
 
-    val department = new Department
+    val department = Fixtures.department("ph")
     department.showStudentName = true
 
     val module = new Module(code = "ph105", adminDepartment = department)
@@ -161,7 +162,7 @@ class ZipServiceTest extends TestBase with Mockito {
     service.features = emptyFeatures
     service.userLookup = userLookup
 
-    val department = new Department
+    val department = Fixtures.department("ph")
     department.showStudentName = true
 
     val module = new Module(code = "ph105", adminDepartment = department)

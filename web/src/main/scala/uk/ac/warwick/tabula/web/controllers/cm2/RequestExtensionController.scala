@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{DownloadExtensionAttachmentCommand, DownloadExtensionAttachmentState, RequestExtensionCommand, RequestExtensionCommandState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{RequestExtensionCommand, RequestExtensionCommandState}
-import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException}
 
 @Controller
 @RequestMapping(value = Array("/coursework/assignment/{assignment}/extension"))
@@ -28,14 +27,13 @@ class RequestExtensionController extends CourseworkController {
   @ModelAttribute("command")
   def cmd(
     @PathVariable assignment: Assignment,
-    @RequestParam(defaultValue = "")
-    action: String,
+    @RequestParam(defaultValue = "") action: String,
     user: CurrentUser
-  ) = RequestExtensionCommand(assignment, user, action)
+  ): ExtensionRequestCommand = RequestExtensionCommand(assignment, user, action)
 
   validatesSelf[SelfValidating]
 
-  @RequestMapping(method = Array(HEAD, GET))
+  @RequestMapping
   def showForm(@ModelAttribute("command") cmd: ExtensionRequestCommand): Mav = {
     val assignment = cmd.assignment
 
@@ -67,7 +65,7 @@ class RequestExtensionController extends CourseworkController {
     }
   }
 
-  @RequestMapping(method = Array(POST))
+  @PostMapping
   def persistExtensionRequest(@Valid @ModelAttribute("command") cmd: ExtensionRequestCommand, errors: Errors): Mav = {
     if (errors.hasErrors) {
       showForm(cmd)
@@ -80,5 +78,31 @@ class RequestExtensionController extends CourseworkController {
       )
     }
   }
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension/supporting-file/{filename}"))
+class RequestExtensionSupportingFileController extends CourseworkController {
+
+  type DownloadAttachmentCommand = Appliable[Option[RenderableAttachment]] with DownloadExtensionAttachmentState
+
+  @ModelAttribute("downloadAttachmentCommand")
+  def attachmentCommand(
+    @PathVariable assignment: Assignment,
+    @PathVariable filename: String,
+    user: CurrentUser
+  ): DownloadAttachmentCommand = {
+    val existingExtension = assignment.approvedExtensions.get(user.userId)
+    val existingRequest = assignment.currentExtensionRequests.get(user.userId)
+    val extension = existingRequest.orElse(existingExtension)
+
+    DownloadExtensionAttachmentCommand(mandatory(extension), mandatory(filename))
+  }
+
+  @RequestMapping
+  def supportingFile(@ModelAttribute("downloadAttachmentCommand") attachmentCommand: DownloadAttachmentCommand): RenderableFile =
+    attachmentCommand.apply().getOrElse(throw new ItemNotFoundException)
 
 }

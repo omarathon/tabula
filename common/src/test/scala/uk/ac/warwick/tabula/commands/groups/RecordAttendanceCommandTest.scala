@@ -37,7 +37,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
     event.group = new SmallGroup
     event.group.groupSet = new SmallGroupSet
     event.group.groupSet.module = new Module
-    event.group.groupSet.module.adminDepartment = new Department
+    event.group.groupSet.module.adminDepartment = Fixtures.department("in")
     event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints = false
     val occurrence = new SmallGroupEventOccurrence
     occurrence.event = event

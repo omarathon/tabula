@@ -54,6 +54,9 @@ class Department extends GeneratedId
 
   var shortName: String = _
 
+  @Column(name = "is_root_department")
+  var isImportDepartment: Boolean = false
+
   @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
   @BatchSize(size = 200)
   var children: JSet[Department] = JHashSet()
@@ -416,12 +419,12 @@ class Department extends GeneratedId
 
   override def urlSlug: String = code
 
-  /** The 'top' ancestor of this department, or itself if
+  /** The 'top' ancestor of this department that imports members, or itself if
     * it has no parent.
     */
   @tailrec
   final def rootDepartment: Department =
-    if (parent == null) this
+    if (isImportDepartment) this
     else parent.rootDepartment
 
   def hasParent: Boolean = parent != null

@@ -27,8 +27,8 @@ class AddSubDepartmentControllerTest extends TestBase with Mockito {
     controller.showForm().viewName should be("admin/department/add/form")
   }
 
-  @Test def submit: Unit = {
-    val subDepartment = Fixtures.department("in-ug")
+  @Test def submit(): Unit = {
+    val subDepartment = Fixtures.department("in-ug", isImportDepartment = false)
     val command = mock[Appliable[Department]]
     command.apply() returns (subDepartment)
 

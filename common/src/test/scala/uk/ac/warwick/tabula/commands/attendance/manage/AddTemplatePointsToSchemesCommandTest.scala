@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
   val academicYear = AcademicYear(2014)
-  val department = new Department
+  val department = Fixtures.department("in")
   val student: StudentMember = Fixtures.student("1234")
 
   trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState

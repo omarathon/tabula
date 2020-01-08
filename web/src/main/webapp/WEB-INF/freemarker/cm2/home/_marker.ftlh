@@ -5,7 +5,7 @@
 
   <#if !markerInformation??>
     <div class="marker-information">
-      <p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
+      <p class="hint"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;</p>
     </div>
 
     <script type="text/javascript" nonce="${nonce()}">

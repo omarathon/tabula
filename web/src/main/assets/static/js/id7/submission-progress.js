@@ -13,7 +13,7 @@ class SubmissionProgress {
     const $form = $(this.form);
     this.$progress = $('<div />')
       .append(
-        $('<p />').html('<i class="fal fa-spinner fa-spin"></i> Uploading, please wait&hellip; ')
+        $('<p />').html('<i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Uploading, please wait&hellip; ')
           .append($('<button />').addClass('btn btn-link').text('Cancel upload').on('click', this.cancel.bind(this))),
       )
       .append($('<div />').addClass('progress')

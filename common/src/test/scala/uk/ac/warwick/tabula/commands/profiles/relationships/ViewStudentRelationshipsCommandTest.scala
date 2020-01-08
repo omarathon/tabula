@@ -13,7 +13,7 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
   private trait Fixture {
     val mockRelationshipService: RelationshipService = smartMock[RelationshipService]
 
-    val departmentOfXXX: Department = new Department().tap(_.code = "xxx")
+    val departmentOfXXX: Department = Fixtures.department("xx")
     val tutorRelType: StudentRelationshipType = new StudentRelationshipType().tap(_.description = "tutor")
 
     // give them both the same surname, just to prove that we don't accidentally merge users when sorting

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.SupervisorImporter
-import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
+import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures, Mockito}
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
@@ -22,7 +22,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
     relationshipType.description = "Research supervisor"
     session.saveOrUpdate(relationshipType)
 
-    val department = new Department
+    val department = Fixtures.department("xx")
     session.saveOrUpdate(department)
 
     // set up and persist student

@@ -26,7 +26,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 
     val student: StudentMember = Fixtures.student("1234")
 
-    val department = new Department
+    val department = Fixtures.department("aa")
     department.autoMarkMissedMonitoringPoints = true
 
     val module1: Module = Fixtures.module("aa101")

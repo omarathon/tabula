@@ -26,7 +26,7 @@
           </select>
         </@bs3form.labelled_form_group>
         <div class="loading hide">
-          <i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+          <i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
         </div>
         <div class="content"></div>
       </@modal.body>

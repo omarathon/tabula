@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -41,8 +41,7 @@ trait ReportWorld extends TestBase with Mockito {
       .toMap
   }
 
-  val department = new Department
-  department.code = "IN"
+  val department = Fixtures.department("IN")
   department.fullName = "Test Department"
 
   val moduleOne = new Module("IN101", department)

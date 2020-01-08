@@ -7,7 +7,7 @@ import org.springframework.web.servlet.view.RedirectView
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
-import uk.ac.warwick.tabula.{HttpMocking, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, HttpMocking, TestBase}
 
 class RedirectViewResolverTest extends TestBase with HttpMocking {
 
@@ -35,9 +35,7 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
 
       def requestInfo = None
 
-      val chemistry = new Department {
-        code = "ch"
-      }
+      val chemistry = Fixtures.department("ch")
 
       val viewName: String = Redirect(Routes.cm2.admin.department(chemistry)).viewName
       resolve(viewName) should be(Some("https://tabula.warwick.ac.uk/coursework/admin/department/ch"))

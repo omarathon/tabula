@@ -34,7 +34,7 @@ class EditDepartmentCommandTest extends TestBase with FunctionalContextTesting w
     permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
     parent.permissionsService = permissionsService
 
-    val department: Department = Fixtures.department("in-ug", "IT Services Undergraduate")
+    val department: Department = Fixtures.department("in-ug", "IT Services Undergraduate", isImportDepartment = false)
     department.id = "in-ug"
     department.allowExtensionRequests = false
     department.autoGroupDeregistration = true

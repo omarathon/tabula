@@ -136,7 +136,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
       errors.hasFieldErrors("meetingFormats") should be (true)
     }
     new Fixture {
-      val department = new Department
+      val department = Fixtures.department("in")
       department.relationshipService = smartMock[RelationshipService]
       department.relationshipService.allStudentRelationshipTypes returns Seq()
       validator.validateTypeMeeting(errors, mutable.Set(StudentRelationshipType("tutor", "tutor", "tutor", "tutee")), mutable.Set(), 0, department)
@@ -145,7 +145,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
     new Fixture {
       val validRelationship = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
       validRelationship.defaultDisplay = true
-      val department = new Department
+      val department = Fixtures.department("in")
       department.relationshipService = smartMock[RelationshipService]
       department.relationshipService.allStudentRelationshipTypes returns Seq(validRelationship)
       validator.validateTypeMeeting(errors, mutable.Set(validRelationship), mutable.Set(), 0, department)

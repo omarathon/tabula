@@ -21,7 +21,9 @@
       </p>
 
       <div id="examGridSpinner">
-        <i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+        <div><i class="id7-koan-spinner id7-koan-spinner--2x id7-koan-spinner--fast" aria-hidden="true"></i></div>
+        <h3>Generating exam grid preview&hellip;</h3>
+        <p>Please wait &mdash; the exam grid is being generated.</p>
         <div class="progress">
           <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0"
                aria-valuemax="${entities?size}" style="width: 0%"></div>

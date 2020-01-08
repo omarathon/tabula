@@ -772,7 +772,7 @@
       </h5>
     </div>
 
-    <#if skeleton><p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
+    <#if skeleton><p class="hint"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;</p>
     <#else>
       <div class="row">
         <div class="col-md-4">

@@ -5,6 +5,7 @@ import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
 
 trait StudentCourseDetailsDaoComponent {
@@ -96,6 +97,8 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
       .add(isNull("missingFromImportSince"))
       .createAlias("statusOnRoute", "statusOnRoute")
       .add(not(or(like("statusOnRoute.code", "P%"), like("statusOnRoute.code", "D%"))))
+      .createAlias("latestStudentCourseYearDetails", "latestStudentCourseYearDetails")
+      .add(is("latestStudentCourseYearDetails.academicYear", AcademicYear.now()))
       .seq
   }
 

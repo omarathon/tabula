@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.profiles.ViewRelatedStudentsCommand.Result
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 
 class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
@@ -13,9 +13,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
   val staffMember = new StaffMember("test")
 
   trait Fixture {
-    val testDepartment = new Department
-    testDepartment.fullName = "Department of Architecture and Explosions"
-    testDepartment.code = "DA"
+    val testDepartment = Fixtures.department("DA", "Department of Architecture and Explosions")
 
     val course = new Course
     course.code = "DA1"

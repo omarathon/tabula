@@ -14,7 +14,7 @@ class DepartmentTest extends TestBase with Mockito {
   val permissionsService: PermissionsService = mock[PermissionsService]
 
   @Test def settings(): Unit = {
-    val department = new Department
+    val department = Fixtures.department("in")
     department.collectFeedbackRatings should be (false)
     department.allowExtensionRequests should be (false)
     department.canRequestExtension should be (false)
@@ -50,7 +50,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test def groups(): Unit = {
-    val department = new Department
+    val department = Fixtures.department("in")
     department.permissionsService = permissionsService
 
     val ownersGroup = UserGroup.ofUsercodes
@@ -80,13 +80,13 @@ class DepartmentTest extends TestBase with Mockito {
 
   @Test
   def filterRuleDefaultsToAll(): Unit = {
-    val department = new Department
+    val department = Fixtures.department("in")
     department.filterRule should be(AllMembersFilterRule)
   }
 
   private trait FilterRuleFixture {
-    val department = new Department
-    val otherDepartment = new Department
+    val department = Fixtures.department("its1")
+    val otherDepartment = Fixtures.department("its2")
     val ugRoute: Route = new Route().tap(r => {
       r.degreeType = DegreeType.Undergraduate
       r.adminDepartment = department
@@ -199,7 +199,7 @@ class DepartmentTest extends TestBase with Mockito {
 
   @Test
   def replacedRoleDefinitionFor(): Unit = {
-    val department = new Department
+    val department = Fixtures.department("in")
 
     val roleDefinition = DepartmentalAdministratorRoleDefinition
 
@@ -221,7 +221,7 @@ class DepartmentTest extends TestBase with Mockito {
 
   @Test
   def replacedRoleDefinitionForSelector(): Unit = {
-    val department = new Department
+    val department = Fixtures.department("in")
 
     val selector = new StudentRelationshipType
 
@@ -246,8 +246,8 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def testUploadMarksSettings: Unit = {
-    val department = new Department
+  def testUploadMarksSettings(): Unit = {
+    val department = Fixtures.department("in")
     val year = AcademicYear(2014)
     var degreeType = DegreeType.Undergraduate
 

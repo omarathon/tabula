@@ -18,7 +18,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
     val mockUserLookup: UserLookupService = smartMock[UserLookupService]
 
-    val dept = new Department
+    val dept = Fixtures.department("xx")
 
     val user = new User
     user.setUserId("cusdx")

@@ -29,7 +29,7 @@
     <div class="tab-content">
       <#list markingAcademicYears as academicYear>
         <div role="tabpanel" class="tab-pane<#if academicYear.startYear = (activeAcademicYear.startYear)!0> active</#if>" id="marking-${academicYear.startYear?c}">
-          <p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
+          <p class="hint"><i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;</p>
         </div>
       </#list>
 
