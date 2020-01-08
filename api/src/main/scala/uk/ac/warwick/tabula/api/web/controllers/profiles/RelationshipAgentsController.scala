@@ -45,6 +45,7 @@ class RelationshipAgentsController extends ApiController {
         Seq(sr._1, sr._2.head.agentName, sr._2.head.agentLastName).toArray.asInstanceOf[Array[Object]]
       ).toSeq
       case PermissionsTarget.Global => relationshipsService.listCurrentRelationshipsGlobally(relationshipType)
+      case _ => throw new IllegalArgumentException("Unsupported permissionsTarget")
     }
   }
 
