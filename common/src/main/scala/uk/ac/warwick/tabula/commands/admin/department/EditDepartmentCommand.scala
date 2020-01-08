@@ -33,7 +33,7 @@ class EditDepartmentCommandInternal(val department: Department) extends CommandI
   fullName = department.fullName
   shortName = department.shortName
 
-  if (!department.isRootDepartment) {
+  if (!department.isImportDepartment) {
     code = department.code
     filterRule = department.filterRule
   }
@@ -42,7 +42,7 @@ class EditDepartmentCommandInternal(val department: Department) extends CommandI
     department.fullName = fullName
     department.shortName = shortName
 
-    if (!department.isRootDepartment) {
+    if (!department.isImportDepartment) {
       department.code = code
       department.filterRule = filterRule
     }
@@ -57,7 +57,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 
   def validate(errors: Errors): Unit = {
     // Code must be non-empty and start with parent code
-    if (!department.isRootDepartment) {
+    if (!department.isImportDepartment) {
       if (!code.hasText) {
         errors.rejectValue("code", "department.code.empty")
       } else if (code != department.code) {
@@ -88,7 +88,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
     if (!fullName.hasText) {
       errors.rejectValue("fullName", "department.name.empty")
     } else if (fullName != department.fullName) {
-      if (!department.isRootDepartment) {
+      if (!department.isImportDepartment) {
         if (fullName == department.parent.fullName) {
           errors.rejectValue("fullName", "department.name.mustDifferFromParent", Array(department.parent.fullName), "")
         }
@@ -105,7 +105,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
     }
 
     if (shortName.hasText && shortName != department.shortName) {
-      if (!department.isRootDepartment) {
+      if (!department.isImportDepartment) {
         if (shortName == department.parent.name) {
           errors.rejectValue("shortName", "department.name.mustDifferFromParent", Array(department.parent.name), "")
         }
@@ -122,7 +122,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
     }
 
     // Filter rule must not be null for sub-departments
-    if (!department.isRootDepartment) {
+    if (!department.isImportDepartment) {
       if (filterRule == null) {
         errors.rejectValue("filterRule", "department.filterRule.empty")
       } else if (filterRule != department.filterRule && department.parent.filterRule != null) {

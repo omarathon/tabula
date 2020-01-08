@@ -333,7 +333,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
     restrictions: Seq[ScalaRestriction],
     orders: Seq[ScalaOrder] = Seq()
   ): Seq[StudentMember] = transactional(readOnly = true) {
-    if (!department.isRootDepartment) {
+    if (!department.isImportDepartment) {
       val allRestrictions = ScalaRestriction.is(
         "studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
         FiltersStudents.AliasPaths("studentCourseYearDetails"): _*

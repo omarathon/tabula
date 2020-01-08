@@ -92,7 +92,7 @@ object ImportAcademicInformationCommand {
     department.code = d.code
     department.fullName = d.fullName
     department.shortName = d.shortName
-    department.isRootDepartment = d.parentCode.isEmpty
+    department.isImportDepartment = d.parentCode.isEmpty
 
     d.parentCode.foreach { code =>
       // Don't try and handle a badly-specified code - just let the .get fail
@@ -215,10 +215,10 @@ trait ImportDepartments {
 
           ImportResult(added = 1)
         case Some(department) =>
-          if (department.fullName != dept.fullName || department.shortName != dept.shortName || !department.isRootDepartment) {
+          if (department.fullName != dept.fullName || department.shortName != dept.shortName || !department.isImportDepartment) {
             department.fullName = dept.fullName
             department.shortName = dept.shortName
-            department.isRootDepartment = true
+            department.isImportDepartment = true
             moduleAndDepartmentService.saveOrUpdate(department)
             ImportResult(changed = 1)
           } else {

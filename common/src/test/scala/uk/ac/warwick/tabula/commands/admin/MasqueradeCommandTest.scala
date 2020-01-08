@@ -112,7 +112,7 @@ class MasqueradeCommandTest extends TestBase with Mockito {
       command.usercode = "cusebr"
 
       val parentDepartment: Department = Fixtures.department("in")
-      val subDepartment: Department = Fixtures.department("in-ug", isRootDepartment = false)
+      val subDepartment: Department = Fixtures.department("in-ug", isImportDepartment = false)
 
       parentDepartment.children.add(subDepartment)
       subDepartment.parent = parentDepartment

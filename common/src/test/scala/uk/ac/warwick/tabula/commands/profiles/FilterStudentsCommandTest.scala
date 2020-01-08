@@ -24,7 +24,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
   trait Fixture {
     val department: Department = Fixtures.department("arc", "School of Architecture")
-    val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates", isRootDepartment = false)
+    val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates", isImportDepartment = false)
     subDept.parent = department
     department.children.add(subDept)
 

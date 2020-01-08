@@ -68,7 +68,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
     assignment.turnitinLtiNotifyUsers.headOption.getOrElse(
       assignment.module.managers.users.headOption.getOrElse(
         assignment.module.adminDepartment.owners.users.headOption.getOrElse {
-          Option(assignment.module.adminDepartment).filterNot(_.isRootDepartment).flatMap(_.rootDepartment.owners.users.headOption).getOrElse {
+          Option(assignment.module.adminDepartment).filterNot(_.isImportDepartment).flatMap(_.rootDepartment.owners.users.headOption).getOrElse {
             val u = new User("tabula")
             u.setFoundUser(true)
             u.setEmail("tabula@warwick.ac.uk")
