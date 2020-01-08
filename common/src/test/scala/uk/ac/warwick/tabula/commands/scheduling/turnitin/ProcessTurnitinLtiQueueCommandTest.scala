@@ -21,7 +21,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
   val now: DateTime = DateTime.now
   val department = new Department {
     code = "its"
-    isRootDepartment = true
+    isImportDepartment = true
     override lazy val owners: UserGroup = UserGroup.ofUsercodes
     owners.userLookup = mockUserLookup
   }

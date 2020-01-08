@@ -55,7 +55,7 @@ class Department extends GeneratedId
   var shortName: String = _
 
   @Column(name = "is_root_department")
-  var isRootDepartment: Boolean = false
+  var isImportDepartment: Boolean = false
 
   @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
   @BatchSize(size = 200)
@@ -435,7 +435,7 @@ class Department extends GeneratedId
     */
   @tailrec
   final def rootDepartment: Department =
-    if (isRootDepartment) this
+    if (isImportDepartment) this
     else parent.rootDepartment
 
   def hasParent: Boolean = parent != null

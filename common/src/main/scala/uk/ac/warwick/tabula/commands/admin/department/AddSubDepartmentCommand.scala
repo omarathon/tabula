@@ -36,7 +36,7 @@ class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInt
     d.fullName = name
     d.filterRule = filterRule
     d.parent = parent
-    d.isRootDepartment = false
+    d.isImportDepartment = false
 
     // save settings first
     d.copySettingsFrom(parent)
