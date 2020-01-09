@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.helpers.cm2
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{SelectedModerationAdmin, SelectedModerationModerator}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SelectedModeratedMarking
@@ -259,45 +258,16 @@ object SubmissionAndFeedbackInfoFilters {
       def description = "Not released to markers"
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        if (item.assignment.cm2Assignment) {
-          item.assignment.hasCM2Workflow && item.coursework.enhancedFeedback.head.feedback.notReleasedToMarkers
-        } else {
-          item.assignment.hasWorkflow && !item.assignment.isReleasedForMarking(item.user.getUserId)
-        }
+        item.assignment.hasWorkflow && !item.coursework.enhancedFeedback.head.feedback.releasedToMarkers
 
-      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && (assignment.hasWorkflow || assignment.hasCM2Workflow)
-    }
-
-    case object MarkedByFirst extends SubmissionAndFeedbackInfoFilter {
-      def description = "Marked by first marker"
-
-      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
-
-      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null && !assignment.cm2Assignment
-    }
-
-    case object MarkedBySecond extends SubmissionAndFeedbackInfoFilter {
-      def description = "Marked by second marker"
-
-      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
-
-      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null &&
-        assignment.markingWorkflow.hasSecondMarker && !assignment.cm2Assignment
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.hasWorkflow
     }
 
     case object NoFeedback extends SubmissionAndFeedbackInfoFilter {
       def description = "No feedback"
 
-      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        if (item.assignment.cm2Assignment) {
-          //submissions where the marking has not been finalised. If there is no marking workflow we still want this (just shows ones that the admin hasn't uploaded feedback for)
-          !item.coursework.enhancedFeedback.exists(_.feedback.hasContent)
-        } else {
-          // existing cm1 filter logic as it is
-          item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
-        }
+      //submissions where the marking has not been finalised. If there is no marking workflow we still want this (just shows ones that the admin hasn't uploaded feedback for)
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = !item.coursework.enhancedFeedback.exists(_.feedback.hasContent)
 
       def apply(assignment: Assignment) = true
     }
@@ -346,12 +316,7 @@ object SubmissionAndFeedbackInfoFilters {
     case object ReleasedFeedback extends SubmissionAndFeedbackInfoFilter {
       def description = "Released feedback"
 
-      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        if (item.assignment.cm2Assignment) {
-          item.coursework.enhancedFeedback.exists(_.feedback.released)
-        } else {
-          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.feedback.released)
-        }
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.exists(_.feedback.released)
 
       def apply(assignment: Assignment) = true
     }
@@ -362,7 +327,7 @@ object SubmissionAndFeedbackInfoFilters {
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
         item.coursework.enhancedSubmission.exists(!_.downloaded)
 
-      def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
+      def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow != null
     }
 
     case object SubmissionDownloaded extends SubmissionAndFeedbackInfoFilter {
@@ -371,18 +336,15 @@ object SubmissionAndFeedbackInfoFilters {
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
         item.coursework.enhancedSubmission.exists(_.downloaded)
 
-      def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
+      def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow != null
     }
 
     case object FeedbackNotDownloaded extends SubmissionAndFeedbackInfoFilter {
       def description = "Feedback not downloaded"
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        if (item.assignment.cm2Assignment) {
-          !item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
-        } else {
-          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
-        }
+        !item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
+
 
       def apply(assignment: Assignment) = true
     }
@@ -391,11 +353,7 @@ object SubmissionAndFeedbackInfoFilters {
       def description = "Feedback downloaded"
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        if (item.assignment.cm2Assignment) {
-          item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
-        } else {
-          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.downloaded)
-        }
+        item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
 
       def apply(assignment: Assignment) = true
     }
@@ -420,7 +378,7 @@ object SubmissionAndFeedbackInfoFilters {
 
     }
 
-    lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded, SelectedForModeration) ++ allWorkflowFilters.values
+    lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded, SelectedForModeration) ++ allWorkflowFilters.values
 
     // marker specific filters
     case object MarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {

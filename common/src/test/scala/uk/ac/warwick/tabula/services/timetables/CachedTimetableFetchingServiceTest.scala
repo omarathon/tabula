@@ -26,7 +26,7 @@ class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
     val cache = new CachedCompleteTimetableFetchingService(delegate, "cacheName")
   }
 
-  @Before def clearCaches() {
+  @Before def clearCaches(): Unit = {
     Caches.builder("cacheName", Caches.CacheStrategy.CaffeineRequired)
       .maximumSize(10000) // y tho
       .buildStore()

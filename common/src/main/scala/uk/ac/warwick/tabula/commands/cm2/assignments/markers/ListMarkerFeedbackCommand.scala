@@ -137,7 +137,7 @@ trait ListMarkerFeedbackPermissions extends RequiresPermissionsChecking with Per
   self: ListMarkerFeedbackState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
     }

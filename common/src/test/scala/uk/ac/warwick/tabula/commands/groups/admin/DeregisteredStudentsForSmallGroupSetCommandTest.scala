@@ -84,7 +84,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test def populate {
+  @Test def populate: Unit = {
     new PopulateFixture {
       command.students.asScala should be(Nil)
 
@@ -94,7 +94,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       // Ignore profileService stuff
       command.profileService.getMemberByUser(user4, true) returns (None)
@@ -113,7 +113,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theModule, theSet) = (module, set)
       val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
@@ -128,7 +128,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule: Unit = {
     val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
       val module = null
       val set = new SmallGroupSet
@@ -138,7 +138,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
       val module: Module = Fixtures.module("in101")
       val set = null
@@ -148,7 +148,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
       val module: Module = Fixtures.module("in101")
       module.id = "set id"
@@ -160,7 +160,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     command.permissionsCheck(checking)
   }
 
-  @Test def describe {
+  @Test def describe: Unit = {
     new Fixture {
       val (mod, s) = (module, set)
       val command = new DeregisteredStudentsForSmallGroupSetDescription with DeregisteredStudentsForSmallGroupSetCommandState {
@@ -179,7 +179,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test def describeResult {
+  @Test def describeResult: Unit = {
     new Fixture {
       val (mod, s) = (module, set)
       val command = new DeregisteredStudentsForSmallGroupSetDescription with DeregisteredStudentsForSmallGroupSetCommandState {
@@ -204,7 +204,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     }
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = DeregisteredStudentsForSmallGroupSetCommand(module, set)
 

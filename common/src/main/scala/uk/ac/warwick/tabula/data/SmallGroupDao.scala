@@ -58,21 +58,21 @@ trait SmallGroupDao {
 
   def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
 
-  def saveOrUpdate(smallGroupSet: SmallGroupSet)
+  def saveOrUpdate(smallGroupSet: SmallGroupSet): Unit
 
-  def saveOrUpdate(smallGroup: SmallGroup)
+  def saveOrUpdate(smallGroup: SmallGroup): Unit
 
-  def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
+  def saveOrUpdate(smallGroupEvent: SmallGroupEvent): Unit
 
-  def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
+  def saveOrUpdate(occurrence: SmallGroupEventOccurrence): Unit
 
-  def saveOrUpdate(attendance: SmallGroupEventAttendance)
+  def saveOrUpdate(attendance: SmallGroupEventAttendance): Unit
 
-  def saveOrUpdate(note: SmallGroupEventAttendanceNote)
+  def saveOrUpdate(note: SmallGroupEventAttendanceNote): Unit
 
-  def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
+  def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet): Unit
 
-  def saveOrUpdate(smallGroup: DepartmentSmallGroup)
+  def saveOrUpdate(smallGroup: DepartmentSmallGroup): Unit
 
   def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 
@@ -124,7 +124,7 @@ trait SmallGroupDao {
 
   def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]]
 
-  def delete(occurrence: SmallGroupEventOccurrence)
+  def delete(occurrence: SmallGroupEventOccurrence): Unit
 
   def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance]
 

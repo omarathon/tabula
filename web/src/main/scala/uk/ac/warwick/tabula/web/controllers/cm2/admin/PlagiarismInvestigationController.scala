@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.{AdminSelectionAction, CourseworkController}
 
-@Profile(Array("cm2Enabled"))
+
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class PlagiarismInvestigationController extends CourseworkController with AdminSelectionAction {
 
   @ModelAttribute("command")

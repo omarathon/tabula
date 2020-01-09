@@ -49,7 +49,7 @@ case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRo
 
     // Can read own coursework info
     Submission.Read,
-    AssignmentFeedback.Read,
+    Feedback.Read,
     Extension.Read
   )
 

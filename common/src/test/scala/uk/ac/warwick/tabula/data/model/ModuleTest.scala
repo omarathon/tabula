@@ -6,7 +6,7 @@ import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 
 class ModuleTest extends TestBase {
-  @Test def stripCats {
+  @Test def stripCats: Unit = {
     Module.stripCats("md101-15") should be(Some("md101"))
     Module.stripCats("md105-5") should be(Some("md105"))
     Module.stripCats("md105-7.5") should be(Some("md105"))
@@ -14,20 +14,20 @@ class ModuleTest extends TestBase {
     Module.stripCats("what the feck!") should be(None)
   }
 
-  @Test def extractCats {
+  @Test def extractCats: Unit = {
     Module.extractCats("md101-7.5") should be(Some("7.5"))
     Module.extractCats("md101-15") should be(Some("15"))
     Module.extractCats("md101") should be(None)
   }
 
-  @Test def webgroupNameToModuleCode {
+  @Test def webgroupNameToModuleCode: Unit = {
     Module.nameFromWebgroupName("ch-ch101") should be("ch101")
     Module.nameFromWebgroupName("be-bo-101") should be("bo-101")
     Module.nameFromWebgroupName("nodashes") should be("nodashes")
   }
 
   @Test
-  def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased() {
+  def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased(): Unit = {
 
     val thisAcademicYear = AcademicYear.now()
 
@@ -56,18 +56,18 @@ class ModuleTest extends TestBase {
   }
 
   @Test
-  def hasLiveAssignments() {
+  def hasLiveAssignments(): Unit = {
     val module = new Module()
     val assignment1 = new Assignment()
     assignment1.deleted = true
 
     val assignment2 = new Assignment()
-    assignment2.archive()
+    assignment2.deleted = true
 
     module.assignments = Seq(assignment1, assignment2).asJava
     module.hasLiveAssignments should be(false)
 
-    assignment2.unarchive()
+    assignment2.deleted = false
     module.hasLiveAssignments should be(true)
   }
 

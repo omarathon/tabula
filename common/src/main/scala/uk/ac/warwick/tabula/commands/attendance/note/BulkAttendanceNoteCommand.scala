@@ -46,7 +46,7 @@ abstract class BulkAttendanceNoteCommand(
     isNew = firstNote.isEmpty
   }
 
-  def onBind(result: BindingResult) {
+  def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

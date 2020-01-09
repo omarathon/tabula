@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 
 class ProductsTest extends TestBase with Products {
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     val pairs = (Map(
       "a" -> null,
       "d" -> "e",

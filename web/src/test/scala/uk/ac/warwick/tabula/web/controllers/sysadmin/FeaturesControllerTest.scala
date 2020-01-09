@@ -14,7 +14,7 @@ class FeaturesControllerTest extends TestBase with MockitoSugar {
 
     controller.afterPropertiesSet()
 
-    controller.currentValues should not be 'empty
+    controller.currentValues should not be Symbol("empty")
 
     controller.currentValues.find(_.name == "emailStudents").get.value should be(false)
 

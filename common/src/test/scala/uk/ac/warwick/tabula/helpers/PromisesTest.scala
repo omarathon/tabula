@@ -5,7 +5,7 @@ import uk.ac.warwick.util.concurrency.promise.UnfulfilledPromiseException
 
 class PromisesTest extends TestBase with Promises {
 
-  @Test def mutable {
+  @Test def mutable: Unit = {
     val p = promise[String]
 
     try {
@@ -20,7 +20,7 @@ class PromisesTest extends TestBase with Promises {
     p.get should be("steve")
   }
 
-  @Test def functional {
+  @Test def functional: Unit = {
     var timesRun = 0
     val p = promise {
       timesRun += 1
@@ -34,7 +34,7 @@ class PromisesTest extends TestBase with Promises {
     timesRun should be(1)
   }
 
-  @Test def optional {
+  @Test def optional: Unit = {
     var timesRun = 0
     val p1 = optionPromise {
       timesRun += 1

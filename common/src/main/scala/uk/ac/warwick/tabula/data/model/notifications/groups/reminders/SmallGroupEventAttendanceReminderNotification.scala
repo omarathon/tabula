@@ -39,7 +39,7 @@ class SmallGroupEventAttendanceReminderNotification
   @transient
   final lazy val referenceDate: DateTime = item.entity.startDateTime.map(_.toDateTime).getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
 
-  override final def onPreSave(newRecord: Boolean) {
+  override final def onPreSave(newRecord: Boolean): Unit = {
     priority = if (Days.daysBetween(created, referenceDate).getDays >= 5) {
       Critical
     } else {

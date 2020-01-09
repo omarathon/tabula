@@ -10,11 +10,11 @@ sealed abstract class Location extends Serializable {
   override def toString: String = name
 }
 
-@SerialVersionUID(372489712389245l) case class NamedLocation(name: String) extends Location
+@SerialVersionUID(372489712389245L) case class NamedLocation(name: String) extends Location
 
-@SerialVersionUID(372489712389246l) case class MapLocation(name: String, locationId: String, syllabusPlusName: Option[String] = None) extends Location
+@SerialVersionUID(372489712389246L) case class MapLocation(name: String, locationId: String, syllabusPlusName: Option[String] = None) extends Location
 
-@SerialVersionUID(372489712389246l) case class AliasedMapLocation(alias: String, mapLocation: MapLocation) extends Location {
+@SerialVersionUID(372489712389246L) case class AliasedMapLocation(alias: String, mapLocation: MapLocation) extends Location {
   override def name: String = alias
 
   def locationId: String = mapLocation.locationId

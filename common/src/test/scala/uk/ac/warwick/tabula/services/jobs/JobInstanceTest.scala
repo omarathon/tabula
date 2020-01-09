@@ -26,7 +26,7 @@ class JobInstanceTest extends TestBase with Mockito {
     override def apply(user: User, forceUpdate: Boolean): UserNavigation = UserNavigation("", "")
   }
 
-  @Test def onLoad() {
+  @Test def onLoad(): Unit = {
     val instance = new JobInstanceImpl
     instance.jsonMapper = jsonMapper
     instance.userLookup = userLookup
@@ -40,7 +40,7 @@ class JobInstanceTest extends TestBase with Mockito {
     instance.data = """{"steve":"yes"}"""
 
     instance.user should be(null)
-    instance.json should be('empty)
+    instance.json should be(Symbol("empty"))
     instance.updatedDate should not be null
 
     val oldUpdatedDate = instance.updatedDate
@@ -52,7 +52,7 @@ class JobInstanceTest extends TestBase with Mockito {
     instance.json("steve") should be("yes")
   }
 
-  @Test def strings() {
+  @Test def strings(): Unit = {
     val instance = new JobInstanceImpl
     instance.jsonMapper = jsonMapper
 

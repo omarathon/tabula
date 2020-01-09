@@ -16,9 +16,8 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear}/assignments/new"))
+@RequestMapping(value = Array("/coursework/admin/{module}/{academicYear}/assignments/new"))
 class AddAssignmentDetailsController extends AbstractAssignmentController
   with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 

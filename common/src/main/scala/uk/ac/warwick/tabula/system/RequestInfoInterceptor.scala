@@ -22,7 +22,7 @@ class EarlyRequestInfoInterceptor extends HandlerInterceptorAdapter {
     true
   }
 
-  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
+  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception): Unit = {
     EarlyRequestInfo.close()
   }
 }
@@ -54,7 +54,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
     }
   }
 
-  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
+  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception): Unit = {
     RequestInfo.close()
   }
 

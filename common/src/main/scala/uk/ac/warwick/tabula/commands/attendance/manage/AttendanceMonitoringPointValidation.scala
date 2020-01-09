@@ -24,7 +24,7 @@ trait AttendanceMonitoringPointValidation {
     }
   }
 
-  def validateName(errors: Errors, name: String) {
+  def validateName(errors: Errors, name: String): Unit = {
     if (!name.hasText) {
       errors.rejectValue("name", "NotEmpty")
     } else if (name.length > 4000) {
@@ -32,7 +32,7 @@ trait AttendanceMonitoringPointValidation {
     }
   }
 
-  def validateWeek(errors: Errors, week: Int, academicYear: AcademicYear, bindPoint: String) {
+  def validateWeek(errors: Errors, week: Int, academicYear: AcademicYear, bindPoint: String): Unit = {
     week match {
       case y if y < academicYear.weeks.keys.min => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
       case y if y > academicYear.weeks.keys.max => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
@@ -40,13 +40,13 @@ trait AttendanceMonitoringPointValidation {
     }
   }
 
-  def validateWeeks(errors: Errors, startWeek: Int, endWeek: Int) {
+  def validateWeeks(errors: Errors, startWeek: Int, endWeek: Int): Unit = {
     if (startWeek > endWeek) {
       errors.rejectValue("startWeek", "attendanceMonitoringPoint.weeks")
     }
   }
 
-  def validateDate(errors: Errors, date: LocalDate, academicYear: AcademicYear, bindPoint: String) {
+  def validateDate(errors: Errors, date: LocalDate, academicYear: AcademicYear, bindPoint: String): Unit = {
     if (date == null) {
       errors.rejectValue(bindPoint, "NotEmpty")
     } else if (date.isBefore(academicYear.firstDay)) {
@@ -56,7 +56,7 @@ trait AttendanceMonitoringPointValidation {
     }
   }
 
-  def validateDates(errors: Errors, startDate: LocalDate, endDate: LocalDate) {
+  def validateDates(errors: Errors, startDate: LocalDate, endDate: LocalDate): Unit = {
     if (startDate.isAfter(endDate)) {
       errors.rejectValue("startDate", "attendanceMonitoringPoint.dates")
     }
@@ -74,7 +74,7 @@ trait AttendanceMonitoringPointValidation {
     meetingFormats: mutable.Set[MeetingFormat],
     meetingQuantity: Int,
     department: Department
-  ) {
+  ): Unit = {
 
     if (meetingRelationships.isEmpty) {
       errors.rejectValue("meetingRelationships", "attendanceMonitoringPoint.meetingType.meetingRelationships.empty")
@@ -98,7 +98,7 @@ trait AttendanceMonitoringPointValidation {
     smallGroupEventModules: JSet[Module],
     isAnySmallGroupEventModules: Boolean,
     smallGroupEventQuantity: JInteger
-  ) {
+  ): Unit = {
 
     if (smallGroupEventQuantity < 1) {
       errors.rejectValue("smallGroupEventQuantity", "attendanceMonitoringPoint.pointType.quantity")
@@ -118,7 +118,7 @@ trait AttendanceMonitoringPointValidation {
     assignmentSubmissionModules: JSet[Module],
     assignmentSubmissionAssignments: JSet[Assignment],
     academicYear: AcademicYear
-  ) {
+  ): Unit = {
 
     assignmentSubmissionType match {
       case AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any =>

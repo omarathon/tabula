@@ -25,7 +25,7 @@ class APIFieldRestrictionTest extends TestBase {
     )
 
     APIFieldRestriction.parse(input) should be(expected)
-    APIFieldRestriction.parse("") should be('empty)
+    APIFieldRestriction.parse("") should be(Symbol("empty"))
 
     APIFieldRestriction.restriction("member", input) should be(memberRestriction)
     APIFieldRestriction.restriction("member", "") should be(APIFieldRestriction("member"))
@@ -55,8 +55,8 @@ class APIFieldRestrictionTest extends TestBase {
 
     // Test that the behaviour of nested is analogous to isAllowed, if it's allowed it should return a wildcard nested restriction
     tests.foreach {
-      case (k, true) => restriction.nested(k) should not be ('empty)
-      case (k, false) => restriction.nested(k) should be('empty)
+      case (k, true) => restriction.nested(k) should not be (Symbol("empty"))
+      case (k, false) => restriction.nested(k) should be(Symbol("empty"))
     }
   }
 

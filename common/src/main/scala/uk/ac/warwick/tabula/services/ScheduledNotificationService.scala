@@ -11,13 +11,13 @@ import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, Notific
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ScheduledNotificationService {
-  def removeInvalidNotifications[A >: Null <: ToEntityReference](target: A)
+  def removeInvalidNotifications[A >: Null <: ToEntityReference](target: A): Unit
 
-  def push(sn: ScheduledNotification[_])
+  def push(sn: ScheduledNotification[_]): Unit
 
   def generateNotification(sn: ScheduledNotification[_ >: Null <: ToEntityReference]): Option[Notification[_, _]]
 
-  def processNotifications()
+  def processNotifications(): Unit
 }
 
 @Service

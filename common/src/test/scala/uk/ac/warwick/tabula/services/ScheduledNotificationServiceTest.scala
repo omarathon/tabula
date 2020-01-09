@@ -60,7 +60,7 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
   when(dao.notificationsToComplete) thenReturn Scrollable[ScheduledNotification[_ >: Null <: ToEntityReference]](scrollingScheduledNotifications, session)
 
   @Test
-  def generateNotifications() {
+  def generateNotifications(): Unit = {
     val notification = service.generateNotification(sn1).get
 
     notification.isInstanceOf[HeronWarningNotification] should be(true)
@@ -70,7 +70,7 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def processNotifications() {
+  def processNotifications(): Unit = {
     service.processNotifications()
 
     verify(session, times(3)).saveOrUpdate(isA[Notification[_, _]])

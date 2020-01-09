@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.{CurrentUser, UniversityId}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType}
@@ -197,7 +197,7 @@ trait EditSchemeMembershipCommandState {
   // parse massAddUsers into a collection of individual tokens
   def massAddUsersEntries: Seq[String] =
     if (massAddUsers == null) Nil
-    else massAddUsers split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
+    else massAddUsers.split("(\\s|[^A-Za-z\\d\\-_.])+").map(_.trim).filterNot(_.isEmpty).toSeq
 
   var excludeIds: JList[String] = LazyLists.create()
   var resetStudentIds: JList[String] = LazyLists.create()

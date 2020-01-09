@@ -42,7 +42,7 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 
   def hasAssignments: Boolean = countLinkedAssignments > 0
 
-  def attachFile(attachment: FileAttachment) {
+  def attachFile(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.feedbackForm = this

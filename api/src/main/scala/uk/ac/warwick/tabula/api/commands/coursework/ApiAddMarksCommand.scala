@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.{ApiAddMa
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description, Notifies}
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Notification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringFeedbackServiceComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
@@ -43,7 +43,7 @@ abstract class ApiAddMarksCommandInternal(val assignment: Assignment, val submit
     def saveFeedback(feedbackItem: FeedbackItem) = {
       feedbackItem.user(assignment).map(u => {
         val feedback = feedbackItem.currentFeedback(assignment).getOrElse {
-          val newFeedback = new AssignmentFeedback
+          val newFeedback = new Feedback
           newFeedback.assignment = assignment
           newFeedback.uploaderId = submitter.apparentId
           newFeedback.usercode = u.getUserId
@@ -71,7 +71,7 @@ trait ApiAddMarksPermissions extends RequiresPermissionsChecking with Permission
   self: ApiAddMarksState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.Feedback.Manage, assignment)
   }
 }
 
@@ -94,11 +94,6 @@ trait ApiAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
   self: ApiAddMarksState =>
 
   def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = updatedReleasedFeedback.flatMap { feedback =>
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback =>
-        Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-      case _ =>
-        None
-    }
+    Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, feedback.assignment))
   }
 }

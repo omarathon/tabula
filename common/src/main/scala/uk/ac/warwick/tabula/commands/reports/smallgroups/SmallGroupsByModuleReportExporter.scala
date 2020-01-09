@@ -65,7 +65,7 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
     sheet
   }
 
-  private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData) {
+  private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData): Unit = {
     val plainCellStyle = {
       val cs = sheet.getWorkbook.createCellStyle()
       cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))

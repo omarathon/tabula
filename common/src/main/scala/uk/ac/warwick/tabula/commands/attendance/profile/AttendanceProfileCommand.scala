@@ -46,7 +46,7 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
       }
     }
 
-    val notes = attendanceMonitoringService.getAttendanceNoteMap(student).filterKeys(points.contains).values.toSeq.sortBy(_.updatedDate)
+    val notes = attendanceMonitoringService.getAttendanceNoteMap(student).view.filterKeys(points.contains).values.toSeq.sortBy(_.updatedDate)
 
     val noteCheckpoints = notes.map(note => note -> checkpointMap.get(note.point)).toMap
 

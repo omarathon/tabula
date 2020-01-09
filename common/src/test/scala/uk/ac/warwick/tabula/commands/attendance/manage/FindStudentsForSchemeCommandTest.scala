@@ -40,7 +40,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def apply() {
+  def apply(): Unit = {
     withUser("cusfal") {
       new Fixture {
         val command = new FindStudentsForSchemeCommandInternal(scheme, currentUser) with CommandTestSupport

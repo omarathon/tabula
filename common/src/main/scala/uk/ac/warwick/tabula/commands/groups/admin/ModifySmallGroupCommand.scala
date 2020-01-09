@@ -74,12 +74,12 @@ class EditSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet, 
 abstract class ModifySmallGroupCommandInternal
   extends CommandInternal[SmallGroup] with ModifySmallGroupCommandState {
 
-  protected def copyFrom(smallGroup: SmallGroup) {
+  protected def copyFrom(smallGroup: SmallGroup): Unit = {
     name = smallGroup.name
     maxGroupSize = smallGroup.maxGroupSize
   }
 
-  protected def copyTo(smallGroup: SmallGroup) {
+  protected def copyTo(smallGroup: SmallGroup): Unit = {
     smallGroup.name = name
     smallGroup.maxGroupSize = maxGroupSize
   }

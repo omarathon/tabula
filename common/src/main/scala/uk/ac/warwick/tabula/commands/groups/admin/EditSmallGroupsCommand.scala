@@ -135,7 +135,7 @@ trait EditSmallGroupsValidation extends SelfValidating {
       errors.reject("smallGroupSet.linked")
     }
 
-    def validateGroupProperties(props: GroupProperties) {
+    def validateGroupProperties(props: GroupProperties): Unit = {
       if (!props.name.hasText) errors.rejectValue("name", "smallGroup.name.NotEmpty")
       else if (props.name.orEmpty.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
     }

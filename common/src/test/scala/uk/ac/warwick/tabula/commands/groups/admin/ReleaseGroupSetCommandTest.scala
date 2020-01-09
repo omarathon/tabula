@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.{Mockito, SmallGroupEventBuilder, SmallGroupFixture,
 class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
   @Test
-  def applyShouldSetReleasedToStudentsFlag() {
+  def applyShouldSetReleasedToStudentsFlag(): Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
       command.notifyStudents = true
@@ -22,7 +22,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyShouldNotUnsetReleasedToStudentsFlag() {
+  def applyShouldNotUnsetReleasedToStudentsFlag(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToStudents = true
       groupSet2.releasedToStudents = true
@@ -36,7 +36,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyShouldNotSetReleasedToStudentsFlagIfNotifyStudentsIsFalse() {
+  def applyShouldNotSetReleasedToStudentsFlagIfNotifyStudentsIsFalse(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToStudents = false
       groupSet2.releasedToStudents = false
@@ -50,7 +50,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyShouldSetReleasedToTutorsFlag() {
+  def applyShouldSetReleasedToTutorsFlag(): Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
       command.notifyTutors = true
@@ -63,7 +63,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyShouldNotUnsetReleasedToTutorsFlag() {
+  def applyShouldNotUnsetReleasedToTutorsFlag(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = true
       groupSet2.releasedToTutors = true
@@ -77,7 +77,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyShouldNotSetReleasedToTutorsFlagIfNotifyTutorsIsFalse() {
+  def applyShouldNotSetReleasedToTutorsFlagIfNotifyTutorsIsFalse(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = false
       groupSet2.releasedToTutors = false
@@ -91,7 +91,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describeShouldIncludeSmallGroupSets() {
+  def describeShouldIncludeSmallGroupSets(): Unit = {
     new SmallGroupFixture {
       val sets = Seq(groupSet1, groupSet2)
       val command = new ReleaseGroupSetCommandImpl(sets, requestingUser)
@@ -103,7 +103,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def emitShouldCreateNotificationToAllStudents() {
+  def emitShouldCreateNotificationToAllStudents(): Unit = {
     new SmallGroupFixture {
       val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       cmd.notifyStudents = true
@@ -120,7 +120,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldNotCreateNotificationsIfNotifyStudentsIsFalse() {
+  def emitShouldNotCreateNotificationsIfNotifyStudentsIsFalse(): Unit = {
     new SmallGroupFixture {
       val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       cmd.notifyStudents = false
@@ -135,7 +135,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldCreateNotificationToAllTutors() {
+  def emitShouldCreateNotificationToAllTutors(): Unit = {
     new SmallGroupFixture {
       val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       cmd.notifyTutors = true
@@ -151,7 +151,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldCreateOneNotificationPerTutor() {
+  def emitShouldCreateOneNotificationPerTutor(): Unit = {
     new SmallGroupFixture {
       val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       cmd.notifyTutors = true
@@ -172,7 +172,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldNotCreateNotificationsIfNotifyTutorsIsFalse() {
+  def emitShouldNotCreateNotificationsIfNotifyTutorsIsFalse(): Unit = {
     new SmallGroupFixture {
       val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       cmd.notifyTutors = false
@@ -187,7 +187,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def notifyStudentsIsDefaultedFromGroupSetIfSingleGroup() {
+  def notifyStudentsIsDefaultedFromGroupSetIfSingleGroup(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToStudents = false
       new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser).notifyStudents.booleanValue() should be(true)
@@ -199,7 +199,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def notifyTutorsIsDefaultedFromGroupSetIfSingleGroup() {
+  def notifyTutorsIsDefaultedFromGroupSetIfSingleGroup(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = false
       new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser).notifyTutors.booleanValue() should be(true)
@@ -211,7 +211,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def notifyStudentsIsTrueForMultipleGroups() {
+  def notifyStudentsIsTrueForMultipleGroups(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = true
       new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser).notifyStudents.booleanValue() should be(true)
@@ -219,7 +219,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def notifyTutorsIsTrueForMultipleGroups() {
+  def notifyTutorsIsTrueForMultipleGroups(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = true
       new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser).notifyTutors.booleanValue() should be(true)
@@ -228,7 +228,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def shouldNotSendNotificationsForUnchangedGroupSets() {
+  def shouldNotSendNotificationsForUnchangedGroupSets(): Unit = {
     new SmallGroupFixture {
       groupSet1.releasedToTutors = true
       groupSet1.releasedToStudents = true
@@ -246,7 +246,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[RuntimeException])
-  def singleGroupToPublishThrowsExceptionIfNoGroups {
+  def singleGroupToPublishThrowsExceptionIfNoGroups: Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Nil, requestingUser)
       command.singleGroupToPublish
@@ -254,7 +254,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[RuntimeException])
-  def singleGroupToPublishThrowsExceptionIfMultipleGroups {
+  def singleGroupToPublishThrowsExceptionIfMultipleGroups: Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
       command.singleGroupToPublish
@@ -262,7 +262,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def singleGroupToPublishReturnsGroupIfExactlyOne {
+  def singleGroupToPublishReturnsGroupIfExactlyOne: Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       command.singleGroupToPublish should be(groupSet1)
@@ -270,7 +270,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describeOutcomeWorks() {
+  def describeOutcomeWorks(): Unit = {
     new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
       command.notifyStudents = true

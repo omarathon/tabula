@@ -26,7 +26,7 @@ trait UpdatesStudentMembership {
   /**
     * Convert Spring-bound upstream group references to an AssessmentGroup buffer
     */
-  def updateAssessmentGroups()
+  def updateAssessmentGroups(): Unit
 
   /** linked assessment groups, which are to be persisted with the assignment.
     * They can be used to lookup SITS UpstreamAssessmentGroups on demand,
@@ -74,23 +74,24 @@ trait UpdatesStudentMembership {
   def massAddUsersEntries: Seq[String] =
     if (massAddUsers == null) Nil
     else massAddUsers
-      .split("(\\s|[^A-Za-z\\d\\-_\\.])+")
+      .split("(\\s|[^A-Za-z\\d\\-_.])+")
       .map(_.trim)
       .filterNot(_.isEmpty)
+      .toSeq
 
-  def afterBind() {
+  def afterBind(): Unit = {
     updateMembership()
     updateAssessmentGroups()
   }
 
-  private def bufferUserFromUserId(userId: String, buffer: ListBuffer[User]) {
+  private def bufferUserFromUserId(userId: String, buffer: ListBuffer[User]): Unit = {
     val user = userLookup.getUserByUserId(userId)
     if (user.isFoundUser) {
       buffer += user
     }
   }
 
-  private def bufferValidUser(userString: String, buffer: ListBuffer[User]) {
+  private def bufferValidUser(userString: String, buffer: ListBuffer[User]): Unit = {
     if (UniversityId.isValid(userString)) {
       val user = userLookup.getUserByWarwickUniId(userString)
       if (user.isFoundUser) {
@@ -106,7 +107,7 @@ trait UpdatesStudentMembership {
   /**
     * Convert Spring-bound user lists into an explicit UserGroup
     */
-  private def updateMembership() {
+  private def updateMembership(): Unit = {
 
     // buffers to hold the users we're adding/removing
     val usersToAdd = ListBuffer[User]()

@@ -8,21 +8,21 @@ class PermissionConverterTest extends TestBase {
 
   val converter = new PermissionConverter
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     converter.convertRight("Module.Create") should be(Permissions.Module.Create)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     converter.convertRight("20X6") should be(null)
     converter.convertRight("") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     converter.convertLeft(Permissions.Module.Create) should be("Module.Create")
     converter.convertLeft(null) should be(null)
   }
 
-  @Test def selector {
+  @Test def selector: Unit = {
     converter.convertRight("Profiles.StudentRelationship.Manage(*)") should be(Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]))
     converter.convertLeft(Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType])) should be("Profiles.StudentRelationship.Manage(*)")
   }

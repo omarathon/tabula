@@ -41,7 +41,7 @@ object ExceptionHandler {
 }
 
 trait ExceptionHandler {
-  def exception(context: ExceptionContext)
+  def exception(context: ExceptionContext): Unit
 }
 
 class CompositeExceptionHandler(handlers: JList[ExceptionHandler]) extends ExceptionHandler {

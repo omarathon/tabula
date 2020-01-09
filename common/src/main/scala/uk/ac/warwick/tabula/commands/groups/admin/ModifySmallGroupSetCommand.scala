@@ -187,7 +187,7 @@ class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSe
 }
 
 abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallGroupSet] with ModifySmallGroupSetCommandState {
-  def copyFrom(set: SmallGroupSet) {
+  def copyFrom(set: SmallGroupSet): Unit = {
     name = set.name
     academicYear = set.academicYear
     format = set.format
@@ -200,7 +200,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
     linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
   }
 
-  def copyTo(set: SmallGroupSet) {
+  def copyTo(set: SmallGroupSet): Unit = {
     if (membershipStyle != set.membershipStyle) {
       // If changing the membership style, clear out membership and deregister
       set.memberQuery = null

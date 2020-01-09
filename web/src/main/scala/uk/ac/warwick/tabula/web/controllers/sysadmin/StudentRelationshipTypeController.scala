@@ -22,7 +22,7 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 trait StudentRelationshipTypeController extends BaseSysadminController {
   validatesSelf[SelfValidating]
 
-  override final def binding[A](binder: WebDataBinder, cmd: A) {
+  override final def binding[A](binder: WebDataBinder, cmd: A): Unit = {
     binder.registerCustomEditor(classOf[StudentRelationshipSource], new AbstractPropertyEditor[StudentRelationshipSource] {
       override def fromString(code: String): StudentRelationshipSource = StudentRelationshipSource.fromCode(code)
 

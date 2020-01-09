@@ -27,7 +27,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createModule(departmentCode: String, code: String, name: String) {
+  def createModule(departmentCode: String, code: String, name: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/module"
 
     val req =
@@ -75,7 +75,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     id
   }
 
-  def createSmallGroupEvent(setId: String, title: String, weekRange: String = "1") {
+  def createSmallGroupEvent(setId: String, title: String, weekRange: String = "1"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupEvent"
 
     val req =
@@ -91,7 +91,7 @@ trait FixturesDriver extends SimpleHttpFetching {
   }
 
 
-  def addStudentToGroupSet(studentUserId: String, setId: String) {
+  def addStudentToGroupSet(studentUserId: String, setId: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupsetMembership"
 
     val req =
@@ -105,7 +105,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def addStudentToGroup(studentUserId: String, setId: String, groupName: String) {
+  def addStudentToGroup(studentUserId: String, setId: String, groupName: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupMembership"
 
     val req =
@@ -128,7 +128,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     courseCode: String = "",
     deptCode: String = "",
     academicYear: String = "2014"
-  ) {
+  ): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
 
     val req =
@@ -147,7 +147,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createStaffMember(userId: String, genderCode: String = "M", deptCode: String) {
+  def createStaffMember(userId: String, genderCode: String = "M", deptCode: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/staffMember"
 
     val req =
@@ -162,7 +162,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def updateAssignment(deptCode: String, assignmentName: String, openDate: Option[DateTime] = None, closeDate: Option[DateTime] = None) {
+  def updateAssignment(deptCode: String, assignmentName: String, openDate: Option[DateTime] = None, closeDate: Option[DateTime] = None): Unit = {
     val datesToUpdate: Seq[(String, String)] = Seq("openDate" -> openDate, "closeDate" -> closeDate).flatMap(t => t._2 match {
       case None => None
       case Some(d) => Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
@@ -179,7 +179,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createExtension(userId: String, assignmentId: String, approved: Boolean) {
+  def createExtension(userId: String, assignmentId: String, approved: Boolean): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/extension"
 
     val req =
@@ -194,7 +194,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createRoute(routeCode: String, departmentCode: String, routeName: String, degreeType: String = "UG") {
+  def createRoute(routeCode: String, departmentCode: String, routeName: String, degreeType: String = "UG"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/route"
 
     val req =
@@ -211,7 +211,7 @@ trait FixturesDriver extends SimpleHttpFetching {
   }
 
 
-  def createCourse(courseCode: String, courseName: String) {
+  def createCourse(courseCode: String, courseName: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/course"
 
     val req =
@@ -225,7 +225,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def registerStudentsOnModule(students: Seq[LoginDetails], moduleCode: String, academicYear: Option[String] = None) {
+  def registerStudentsOnModule(students: Seq[LoginDetails], moduleCode: String, academicYear: Option[String] = None): Unit = {
     val uniIds = students.map(_.warwickId).mkString(",")
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/moduleRegistration"
 
@@ -241,7 +241,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createStudentRelationship(student: LoginDetails, agent: LoginDetails, relationshipType: String = "tutor") {
+  def createStudentRelationship(student: LoginDetails, agent: LoginDetails, relationshipType: String = "tutor"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/relationship"
 
     val req =
@@ -256,7 +256,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createMonitoringPointSet(routeCode: String, pointCount: Int, academicYear: String, yearOption: Option[Int]) {
+  def createMonitoringPointSet(routeCode: String, pointCount: Int, academicYear: String, yearOption: Option[Int]): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/monitoringPointSet"
 
     val req =
@@ -274,7 +274,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createAttendanceMonitoringScheme(deptCode: String, pointCount: Int, academicYear: String, warwickId: String) {
+  def createAttendanceMonitoringScheme(deptCode: String, pointCount: Int, academicYear: String, warwickId: String): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/attendanceMonitoringScheme"
 
     val req =
@@ -290,7 +290,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createAssessmentComponent(departmentCode: String, moduleCode: String, name: String, assessmentGroup: String = "A", sequence: String = "A01") {
+  def createAssessmentComponent(departmentCode: String, moduleCode: String, name: String, assessmentGroup: String = "A", sequence: String = "A01"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/assessmentComponent"
 
     val req =
@@ -307,7 +307,7 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createUpstreamAssessmentGroup(moduleCode: String, universityIds: Seq[String], assessmentGroup: String = "A", occurrence: String = "A") {
+  def createUpstreamAssessmentGroup(moduleCode: String, universityIds: Seq[String], assessmentGroup: String = "A", occurrence: String = "A"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/upstreamAssessmentGroup"
 
     val req =

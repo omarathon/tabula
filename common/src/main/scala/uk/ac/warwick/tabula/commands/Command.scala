@@ -297,10 +297,7 @@ abstract class Description {
     studentUsercodes(feedback.usercode)
     studentIds(feedback.universityId.toSeq)
     property("feedback" -> feedback.id)
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback if assignmentFeedback.assignment != null => assignment(assignmentFeedback.assignment)
-      case examFeedback: ExamFeedback if examFeedback.exam != null => exam(examFeedback.exam)
-    }
+    if(feedback.assignment != null) assignment(feedback.assignment)
     this
   }
 
@@ -360,7 +357,6 @@ abstract class Description {
 
   def assessment(assessment: Assessment): Description = assessment match {
     case a: Assignment => assignment(a)
-    case e: Exam => exam(e)
   }
 
   /**
@@ -369,12 +365,6 @@ abstract class Description {
   def assignment(assignment: Assignment): Description = {
     property("assignment" -> assignment.id)
     if (assignment.module != null) module(assignment.module)
-    this
-  }
-
-  def exam(exam: Exam): Description = {
-    property("exam" -> exam.id)
-    if (exam.module != null) module(exam.module)
     this
   }
 
@@ -470,10 +460,6 @@ abstract class Description {
 
   def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
     property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
-  }
-
-  def markingWorkflow(scheme: MarkingWorkflow): Description = {
-    property("markingWorkflow" -> scheme.id)
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {

@@ -67,7 +67,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notApproved() {
+  def notApproved(): Unit = {
     new Fixture {
       meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
       service.getCheckpoints(meeting).size should be(0)
@@ -75,7 +75,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def noSuchStudent() {
+  def noSuchStudent(): Unit = {
     new Fixture {
       val thisMeeting = new MeetingRecord
       thisMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
@@ -88,7 +88,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def nonMeetingPoint() {
+  def nonMeetingPoint(): Unit = {
     new Fixture {
       meetingPoint.pointType = AttendanceMonitoringPointType.Standard
       service.getCheckpoints(meeting).size should be(0)
@@ -96,7 +96,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def wrongRelationship() {
+  def wrongRelationship(): Unit = {
     new Fixture {
       meetingPoint.meetingRelationships = Seq(supervisorRelationshipType)
       service.getCheckpoints(meeting).size should be(0)
@@ -104,7 +104,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def wrongFormat() {
+  def wrongFormat(): Unit = {
     new Fixture {
       meetingPoint.meetingFormats = Seq(MeetingFormat.Email)
       service.getCheckpoints(meeting).size should be(0)
@@ -112,7 +112,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def existingCheckpoint() {
+  def existingCheckpoint(): Unit = {
     new Fixture {
       val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
         student -> Map(
@@ -126,7 +126,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def beforePoint() {
+  def beforePoint(): Unit = {
     new Fixture {
       meetingPoint.startDate = meeting.meetingDate.plusDays(1).toLocalDate
       service.getCheckpoints(meeting).size should be(0)
@@ -134,7 +134,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def afterPoint() {
+  def afterPoint(): Unit = {
     new Fixture {
       meetingPoint.endDate = meeting.meetingDate.minusDays(1).toLocalDate
       service.getCheckpoints(meeting).size should be(0)
@@ -142,7 +142,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notEnoughMeetingsApproved() {
+  def notEnoughMeetingsApproved(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
 
@@ -157,7 +157,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notEnoughMeetingsCorrectFormat() {
+  def notEnoughMeetingsCorrectFormat(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
 
@@ -173,7 +173,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notEnoughMeetingsBeforePoint() {
+  def notEnoughMeetingsBeforePoint(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
 
@@ -189,7 +189,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notEnoughMeetingsAfterPoint() {
+  def notEnoughMeetingsAfterPoint(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
 
@@ -205,7 +205,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def validMeetings() {
+  def validMeetings(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
       val otherMeeting = new MeetingRecord
@@ -220,7 +220,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def alreadyReported() {
+  def alreadyReported(): Unit = {
     new Fixture {
       service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, meetingPoint) returns true
 
@@ -229,7 +229,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
   }
 
   @Test
-  def notApprovedButCreatedByAgent() {
+  def notApprovedButCreatedByAgent(): Unit = {
     new Fixture {
       meetingPoint.meetingQuantity = 2
       meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))

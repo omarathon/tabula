@@ -21,7 +21,7 @@ class CustomRoleDefinitionTest extends TestBase {
 
   }
 
-  @Test def polymorphicGetterAndSetter {
+  @Test def polymorphicGetterAndSetter: Unit = {
     val crd = new CustomRoleDefinition
     crd.baseRoleDefinition should be(null)
 
@@ -37,7 +37,7 @@ class CustomRoleDefinitionTest extends TestBase {
     crd.customBaseRoleDefinition should be(other)
   }
 
-  @Test def getPermissions {
+  @Test def getPermissions: Unit = {
     val crd = new CustomRoleDefinition
     crd.baseRoleDefinition = TestBuiltInDefinition
 
@@ -92,7 +92,7 @@ class CustomRoleDefinitionTest extends TestBase {
   }
 
   @Test
-  def delegatablePermisionsIsNilIfCanDelegateIsFalse() {
+  def delegatablePermisionsIsNilIfCanDelegateIsFalse(): Unit = {
     val crd = new CustomRoleDefinition
     crd.baseRoleDefinition = TestBuiltInDefinition
     val dept = Fixtures.department("in")
@@ -103,7 +103,7 @@ class CustomRoleDefinitionTest extends TestBase {
   }
 
   @Test
-  def delegatablePermisionsIsEqualToAllPermisionsIfCanDelegateIsTrue() {
+  def delegatablePermisionsIsEqualToAllPermisionsIfCanDelegateIsTrue(): Unit = {
     val crd = new CustomRoleDefinition
     crd.baseRoleDefinition = TestBuiltInDefinition
     val dept = Fixtures.department("in")
@@ -122,7 +122,7 @@ class CustomRoleDefinitionTest extends TestBase {
   * originals, which kind of misses the point of re-using the base role definition
    */
   @Test
-  def delegatablePermisionsIsIgnoredOnBaseRoleDefinition() {
+  def delegatablePermisionsIsIgnoredOnBaseRoleDefinition(): Unit = {
     val baseCrd = new CustomRoleDefinition
     baseCrd.baseRoleDefinition = TestBuiltInDefinition
     val dept = Fixtures.department("in")

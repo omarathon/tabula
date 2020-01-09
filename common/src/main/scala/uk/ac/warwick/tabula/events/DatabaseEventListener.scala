@@ -17,7 +17,7 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
   @Value("${filesystem.auditlog.dir}") var auditDirectory: File = _
   @Value("${filesystem.create.missing}") var createMissingDirs: Boolean = false
 
-  def save(event: Event, stage: String) {
+  def save(event: Event, stage: String): Unit = {
     if (maintenanceModeService.enabled) {
       val file = new File(auditDirectory, UUID.randomUUID() + "logentry")
       Using.resource(new ObjectOutputStream(new FileOutputStream(file))) { stream =>

@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.services._
 
 class CommandTest extends TestBase {
 
-  @Test def commandName() {
+  @Test def commandName(): Unit = {
     Spell6Command().eventName should be("DefendCastle")
     HealSelfSpell().eventName should be("HealSelfSpell")
     CastFlameSpellCommand().eventName should be("CastFlameSpell")
   }
 
-  @Test def maintenanceModeDisabled() {
+  @Test def maintenanceModeDisabled(): Unit = {
     val mmService = new MaintenanceModeServiceImpl()
     mmService.disable
 
@@ -24,7 +24,7 @@ class CommandTest extends TestBase {
     cmd.apply() should be(true)
   }
 
-  @Test(expected = classOf[MaintenanceModeEnabledException]) def maintenanceModeEnabled() {
+  @Test(expected = classOf[MaintenanceModeEnabledException]) def maintenanceModeEnabled(): Unit = {
     EventHandling.enabled = true
 
     val mmService = new MaintenanceModeServiceImpl()
@@ -37,7 +37,7 @@ class CommandTest extends TestBase {
     fail("expected exception")
   }
 
-  @Test def maintenanceModeEnabledButReadOnly() {
+  @Test def maintenanceModeEnabledButReadOnly(): Unit = {
     val mmService = new MaintenanceModeServiceImpl()
     mmService.enable
 
@@ -48,7 +48,7 @@ class CommandTest extends TestBase {
     cmd.apply() should be(true)
   }
 
-  @Test def description() {
+  @Test def description(): Unit = {
     val description = new DescriptionImpl
     description.properties("yes" -> "no", "steve" -> Seq("tom", "jerry"))
     description.properties(Map("queen" -> "sheeba", "nine" -> 9))
@@ -74,17 +74,12 @@ class CommandTest extends TestBase {
     feedback.id = "feedbackId"
     feedback.assignment = assignment
 
-    val workflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
-    workflow.id = "workflowId"
-    workflow.department = department
-
     val staff = Fixtures.staff("1010101")
 
     description.feedback(feedback)
       .submission(submission1)
       .studentIds(Seq("0000001", "0000002"))
       .submissions(Seq(submission1, submission2))
-      .markingWorkflow(workflow)
       .member(staff)
 
     description.allProperties should be(Map(
@@ -100,7 +95,6 @@ class CommandTest extends TestBase {
       "submissions" -> Seq("submission1Id", "submission2Id"),
       "students" -> List("0000001", "0000002"),
       "studentUsercodes" -> List("cuspxp", "cuspxp"),
-      "markingWorkflow" -> "workflowId",
       "member" -> "1010101"
     ))
   }

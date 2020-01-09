@@ -43,9 +43,8 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentOptionsController extends AbstractAssignmentOptionsController {
 
   @ModelAttribute("command") def command(@PathVariable assignment: Assignment): ModifyAssignmentOptionsCommand =

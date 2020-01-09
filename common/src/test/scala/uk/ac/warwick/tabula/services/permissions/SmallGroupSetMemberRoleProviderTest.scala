@@ -49,14 +49,14 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
   }
 
   @Test
-  def membersOfAGroupsetGetTheGroupsetMemberRole() {
+  def membersOfAGroupsetGetTheGroupsetMemberRole(): Unit = {
     new Fixture {
       roleProvider.getRolesFor(member, groupSet) should be(Seq(SmallGroupSetMember(groupSet)))
     }
   }
 
   @Test
-  def nonMembersDontGetTheGroupsetMemberRole() {
+  def nonMembersDontGetTheGroupsetMemberRole(): Unit = {
     new Fixture {
       roleProvider.getRolesFor(nonMember, groupSet) should be(LazyList.empty)
     }

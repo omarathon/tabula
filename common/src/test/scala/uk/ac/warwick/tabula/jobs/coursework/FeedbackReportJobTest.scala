@@ -13,7 +13,7 @@ class FeedbackReportJobTest extends TestBase with Mockito with JobTestHelp with 
 
   override def createJobs: Array[Job] = Array[Job](job)
 
-  @Test def run {
+  @Test def run: Unit = {
     val job = new FeedbackReportJob
     job.assignmentService = mock[AssessmentService]
     job.departmentService = mock[ModuleAndDepartmentService]

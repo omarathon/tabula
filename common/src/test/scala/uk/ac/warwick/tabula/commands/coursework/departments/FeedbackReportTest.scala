@@ -15,13 +15,13 @@ class FeedbackReportTest extends TestBase with ReportWorld {
   import FeedbackReport._
 
   @Test
-  def simpleGetFeedbackTest() {
+  def simpleGetFeedbackTest(): Unit = {
     val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, "u" + idFormat(1), None)
     publishes.futureValue.size should be(1)
   }
 
   @Test
-  def feedbackCountsTest() {
+  def feedbackCountsTest(): Unit = {
     val report = getTestFeedbackReport
 
     //For all below assignment submissions late submissions are excluded from 20 day calculation rule and treated on time in the report (similar to what
@@ -49,7 +49,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
   }
 
   @Test
-  def outstandingFeedbackCountTest() {
+  def outstandingFeedbackCountTest(): Unit = {
     val report = getTestFeedbackReport
 
     assignmentOne.feedbacks.get(9).released = false
@@ -65,7 +65,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
     **/
 
   @Test
-  def feedbackCountsDissertationTest() {
+  def feedbackCountsDissertationTest(): Unit = {
     val report = getTestFeedbackReport
 
     // assignmentSeven is a dissertation (100 submissions with 50 feedbacks), assignmentEight isn't
@@ -80,7 +80,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
     **/
 
   @Test
-  def deadlineDayTest() {
+  def deadlineDayTest(): Unit = {
 
     // For close date of 28/3/2013
     // if 20 working days allowed for feedback
@@ -105,7 +105,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
   }
 
   @Test
-  def deadlineDayTest2() {
+  def deadlineDayTest2(): Unit = {
     val report = getTestFeedbackReport
     val assignmentEleven = addAssignment("1010", "test deadline day - 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
     createPublishEvent(assignmentEleven, 27, studentData(0, 10)) // on time
@@ -137,7 +137,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
     }
 
     /** Check each cell in the row against the corresponding item in expected. */
-    def check(description: String, row: Row, expected: Seq[Any]) {
+    def check(description: String, row: Row, expected: Seq[Any]): Unit = {
       for ((cell, (expectedValue, i)) <- row.cellIterator().asScala.toSeq zip expected.zipWithIndex) {
         withClue(s"$description column index $i:") {
           compare(cell, expectedValue)
@@ -148,7 +148,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
   @Ignore("Fails on Travis and idk why")
   @Test
-  def sheetTest() {
+  def sheetTest(): Unit = {
     import SpreadsheetTester._
 
     val report = getTestFeedbackReport

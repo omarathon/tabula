@@ -92,7 +92,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be('empty)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be(Symbol("empty"))
 
       // Index the audit event
       client.execute {
@@ -138,7 +138,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be('empty)
+      queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala.toSeq).futureValue should be(Symbol("empty"))
 
       // Index the audit event
       client.execute {
@@ -326,8 +326,8 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       blockUntilExactCount(70, index.name)
 
-      val feedback: Seq[AssignmentFeedback] = studentUsercodes.map { usercode =>
-        val f = new AssignmentFeedback
+      val feedback: Seq[Feedback] = studentUsercodes.map { usercode =>
+        val f = new Feedback
         f.usercode = usercode
         f.released = true
         f.releasedDate = assignment.closeDate

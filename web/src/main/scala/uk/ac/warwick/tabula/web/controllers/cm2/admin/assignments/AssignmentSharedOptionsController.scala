@@ -18,9 +18,8 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
   * form, does validation and then the resulting form fields are injected into the
   * original HTML page.
   */
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/shared-options"))
+@RequestMapping(value = Array("/coursework/admin/department/{department}/shared-options"))
 class AssignmentSharedOptionsController extends CourseworkController {
 
   @ModelAttribute("sharedAssignmentPropertiesForm")

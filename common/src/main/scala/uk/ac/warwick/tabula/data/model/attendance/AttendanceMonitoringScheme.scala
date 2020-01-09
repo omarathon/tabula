@@ -54,7 +54,7 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
     }
   }
 
-  def members_=(group: UserGroup) {
+  def members_=(group: UserGroup): Unit = {
     _members = group
   }
 

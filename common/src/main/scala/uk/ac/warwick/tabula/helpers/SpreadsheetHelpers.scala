@@ -62,33 +62,33 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 
   def addCell(row: Row, cellType: CellType): Cell = row.createCell(getNextCellNum(row), cellType)
 
-  def addStringCell(value: String, row: Row) {
+  def addStringCell(value: String, row: Row): Unit = {
     val cell = addCell(row, CellType.STRING)
     cell.setCellValue(value)
   }
 
-  def addStringCell(value: String, row: Row, style: CellStyle) {
+  def addStringCell(value: String, row: Row, style: CellStyle): Unit = {
     val cell = addCell(row, CellType.STRING)
     cell.setCellStyle(style)
     cell.setCellValue(value)
   }
 
-  def addNumericCell(value: Double, row: Row) {
+  def addNumericCell(value: Double, row: Row): Unit = {
     val cell = addCell(row, CellType.NUMERIC)
     cell.setCellValue(value)
   }
 
-  def addNumericCell(value: Double, row: Row, style: CellStyle) {
+  def addNumericCell(value: Double, row: Row, style: CellStyle): Unit = {
     val cell = addCell(row, CellType.NUMERIC)
     cell.setCellStyle(style)
     cell.setCellValue(value)
   }
 
-  def addDateCell(value: DateTime, row: Row, style: CellStyle) {
+  def addDateCell(value: DateTime, row: Row, style: CellStyle): Unit = {
     addDateCell(Option(value).map(_.toLocalDate).orNull, row, style)
   }
 
-  def addDateCell(value: LocalDate, row: Row, style: CellStyle) {
+  def addDateCell(value: LocalDate, row: Row, style: CellStyle): Unit = {
     if (value != null) {
       val cell = addCell(row, CellType.NUMERIC)
       cell.setCellStyle(style)
@@ -96,14 +96,14 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
     } else addCell(row, CellType.BLANK)
   }
 
-  def addPercentageCell(num: Double, total: Double, row: Row, workbook: SXSSFWorkbook) {
+  def addPercentageCell(num: Double, total: Double, row: Row, workbook: SXSSFWorkbook): Unit = {
     if (total == 0)
       addStringCell("N/A", row)
     else
       addNumericCell(num / total, row, percentageCellStyle(workbook))
   }
 
-  def formatWorksheet(sheet: Sheet, cols: Int) {
+  def formatWorksheet(sheet: Sheet, cols: Int): Unit = {
     (0 to cols).foreach(sheet.autoSizeColumn)
   }
 

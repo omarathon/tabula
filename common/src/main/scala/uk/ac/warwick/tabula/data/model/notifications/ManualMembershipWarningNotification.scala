@@ -30,13 +30,13 @@ class ManualMembershipWarningNotification extends Notification[Department, Unit]
 
   def numAssignments: Int = getIntSetting("numAssignments", default = 0)
 
-  def numAssignments_=(count: Int) {
+  def numAssignments_=(count: Int): Unit = {
     settings += ("numAssignments" -> count)
   }
 
   def numSmallGroupSets: Int = getIntSetting("numSmallGroupSets", default = 0)
 
-  def numSmallGroupSets_=(count: Int) {
+  def numSmallGroupSets_=(count: Int): Unit = {
     settings += ("numSmallGroupSets" -> count)
   }
 

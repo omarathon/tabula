@@ -24,11 +24,7 @@
   <div class="fix-area">
     <@components.assignment_wizard 'review' assignment.module true assignment/>
     <div class="form-group">
-      <#if assignment.cm2Assignment>
-        <#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
-      <#else>
-        <#assign detailsUrl><@routes.coursework.assignmentedit assignment /></#assign>
-      </#if>
+      <#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
 
       <@review_details_header 'Assignment details' detailsUrl />
       <@review_details 'Assignment title' assignment.name />

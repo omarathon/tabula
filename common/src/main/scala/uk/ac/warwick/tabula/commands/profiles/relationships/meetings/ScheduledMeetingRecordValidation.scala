@@ -14,7 +14,7 @@ import scala.util.Try
 trait ScheduledMeetingRecordValidation extends AttachedFilesValidation {
   self: AbstractScheduledMeetingRecordCommandState =>
 
-  def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String) {
+  def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String): Unit = {
     rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
     if (title.hasText && title.length > MeetingRecord.MaxTitleLength) {
       errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")

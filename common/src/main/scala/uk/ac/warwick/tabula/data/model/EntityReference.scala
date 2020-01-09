@@ -27,8 +27,7 @@ class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
     metaValues = Array(
       new MetaValue(targetEntity = classOf[Assignment], value = "assignment"),
       new MetaValue(targetEntity = classOf[Submission], value = "submission"),
-      new MetaValue(targetEntity = classOf[AssignmentFeedback], value = "feedback"),
-      new MetaValue(targetEntity = classOf[ExamFeedback], value = "examFeedback"),
+      new MetaValue(targetEntity = classOf[Feedback], value = "feedback"),
       new MetaValue(targetEntity = classOf[MarkerFeedback], value = "markerFeedback"),
       new MetaValue(targetEntity = classOf[Module], value = "module"),
       new MetaValue(targetEntity = classOf[Extension], value = "extension"),
@@ -45,7 +44,6 @@ class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
       new MetaValue(targetEntity = classOf[DepartmentSmallGroup], value = "departmentSmallGroup"),
       new MetaValue(targetEntity = classOf[OriginalityReport], value = "originalityReport"),
       new MetaValue(targetEntity = classOf[Department], value = "department"),
-      new MetaValue(targetEntity = classOf[Exam], value = "exam"),
       new MetaValue(targetEntity = classOf[AttendanceMonitoringScheme], value = "attendanceMonitoringScheme"),
       new MetaValue(targetEntity = classOf[AttendanceMonitoringCheckpointTotal], value = "attendanceMonitoringCheckpointTotal"),
       new MetaValue(targetEntity = classOf[MonitoringPointReport], value = "MonitoringPointReport"),

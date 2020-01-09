@@ -29,7 +29,7 @@ trait LevelImporter extends Logging {
     }
   }
 
-  protected def updateLevelMap() {
+  protected def updateLevelMap(): Unit = {
     levelMap = slurpLevels()
   }
 

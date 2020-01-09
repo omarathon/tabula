@@ -24,7 +24,7 @@ abstract class EnumSeqUserType[E <: EnumEntry](enum: Enum[E]) extends UserType {
       .orNull
   }
 
-  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor) {
+  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor): Unit = {
     value match {
       case v: Seq[E] =>
         val array = stmt.getConnection.createArrayOf("VARCHAR", v.map(_.entryName).asJava.toArray)

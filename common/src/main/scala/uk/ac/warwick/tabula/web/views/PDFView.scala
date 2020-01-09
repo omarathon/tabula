@@ -11,7 +11,7 @@ class PDFView(filename: String, templateName: String, context: Map[String, _]) e
 
   override def getContentType() = "application/pdf"
 
-  override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) {
+  override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
     response.setContentType(s"$getContentType; charset=UTF-8")
     response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 

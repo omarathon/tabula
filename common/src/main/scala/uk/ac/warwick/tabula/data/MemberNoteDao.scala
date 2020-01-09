@@ -18,9 +18,9 @@ trait MemberNoteDao {
 
   def listNotes(student: Member, includeDeleted: Boolean = false): Seq[MemberNote]
 
-  def saveOrUpdate(memberNote: MemberNote)
+  def saveOrUpdate(memberNote: MemberNote): Unit
 
-  def delete(memberNote: MemberNote)
+  def delete(memberNote: MemberNote): Unit
 
 }
 

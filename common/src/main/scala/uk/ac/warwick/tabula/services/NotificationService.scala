@@ -42,7 +42,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 
   def getNotificationById(id: String): Option[Notification[_ >: Null <: ToEntityReference, _]] = dao.getById(id)
 
-  def push(notification: Notification[_, _]) {
+  def push(notification: Notification[_, _]): Unit = {
     // TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
     logger.info("Notification pushed - " + notification)
     dao.save(notification)
@@ -53,7 +53,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
   }
 
   // update the notifications and rebuild their entries index
-  def update(notifications: Seq[Notification[_, _]], user: User) {
+  def update(notifications: Seq[Notification[_, _]], user: User): Unit = {
     notifications.foreach(dao.update)
 
     indexService.indexItems(notifications.map { n => IndexedNotification(n.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })

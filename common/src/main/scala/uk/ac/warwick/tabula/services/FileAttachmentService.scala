@@ -14,7 +14,7 @@ trait AutowiringFileAttachmentServiceComponent extends FileAttachmentServiceComp
 }
 
 trait FileAttachmentService {
-  def deleteAttachments(files: Seq[FileAttachment])
+  def deleteAttachments(files: Seq[FileAttachment]): Unit
 
   def saveOrUpdate(attachmentToken: FileAttachmentToken): Unit
 

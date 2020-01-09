@@ -58,13 +58,13 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
     * Get a sequence of User-datetime pairs for when feedback was downloaded for
     * this assignment.
     */
-  def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]]
+  def feedbackDownloads(assignment: Assignment, feedback: Seq[Feedback]): Future[Seq[(User, DateTime)]]
 
   /**
     * Get a map of usercode-datetime for when online feedback was last viewed on
     * a per-student basis for this assignment.
     */
-  def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]]
+  def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[Feedback]): Future[Map[User, DateTime]]
 
   /**
     * Get a map of universityId-datetime for when online feedback was last
@@ -347,12 +347,12 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
   }
 
   // Only look at events since the first time feedback was released
-  private def afterFeedbackPublishedRestriction(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Query =
+  private def afterFeedbackPublishedRestriction(assignment: Assignment, feedback: Seq[Feedback]): Query =
     assignmentRangeRestriction(assignment, feedback.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse {
       Option(assignment.createdDate)
     })
 
-  def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]] =
+  def feedbackDownloads(assignment: Assignment, feedback: Seq[Feedback]): Future[Seq[(User, DateTime)]] =
     latestEventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
       .map(_.filterNot(_.hadError))
       .map { events =>
@@ -378,7 +378,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
     u
   }
 
-  def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]] = // User ID to DateTime
+  def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[Feedback]): Future[Map[User, DateTime]] = // User ID to DateTime
     latestEventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
       .map(_.filterNot(_.hadError))
       .map { events =>

@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.joda.time.{DateTime, DateTimeConstants}
 import org.joda.time.DateTimeConstants._
-import uk.ac.warwick.tabula.commands.coursework.feedback.SubmissionsReport
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, FormFieldContext, TextField}
 import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 import scala.jdk.CollectionConverters._
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase with Mockito {
-  @Test def academicYear() {
+  @Test def academicYear(): Unit = {
 
     withFakeTime(dateTime(2011, NOVEMBER)) {
       new Assignment().academicYear.startYear should be(2011)
@@ -23,24 +21,24 @@ class AssignmentTest extends TestBase with Mockito {
     }
   }
 
-  @Test def fields() {
+  @Test def fields(): Unit = {
     val assignment = new Assignment
-    assignment.findField(Assignment.defaultCommentFieldName) should not be 'defined
+    assignment.findField(Assignment.defaultCommentFieldName) should not be Symbol("defined")
     assignment.addDefaultSubmissionFields()
-    assignment.findField(Assignment.defaultCommentFieldName) should be('defined)
+    assignment.findField(Assignment.defaultCommentFieldName) should be(Symbol("defined"))
     assignment.addDefaultFeedbackFields()
-    assignment.findField(Assignment.defaultFeedbackTextFieldName) should be('defined)
+    assignment.findField(Assignment.defaultFeedbackTextFieldName) should be(Symbol("defined"))
 
     val ff = new TextField
     ff.name = "pantStyle"
     ff.value = "brief"
     ff.context = FormFieldContext.Feedback
     assignment.addField(ff)
-    assignment.findField("pantStyle") should be('defined)
+    assignment.findField("pantStyle") should be(Symbol("defined"))
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def fieldContext() {
+  def fieldContext(): Unit = {
     val assignment = new Assignment
     val ff = new TextField
     ff.name = "destinedToFail"
@@ -48,77 +46,40 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.addField(ff)
   }
 
-  @Test def unreleasedFeedback() {
+  @Test def unreleasedFeedback(): Unit = {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
     assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
-    assignment.feedbacks should be('empty)
-    assignment.unreleasedFeedback should be('empty)
+    assignment.feedbacks should be(Symbol("empty"))
+    assignment.unreleasedFeedback should be(Symbol("empty"))
 
     val feedback = mockFeedback(assignment)
     assignment.feedbacks add feedback
     assignment.feedbacks.size should be(1)
     assignment.unreleasedFeedback.size should be(1)
     feedback.released = true
-    assignment.unreleasedFeedback should be('empty)
+    assignment.unreleasedFeedback should be(Symbol("empty"))
   }
 
-  @Test def placeholderFeedback() {
+  @Test def placeholderFeedback(): Unit = {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
     assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
-    assignment.fullFeedback should be('empty)
-    assignment.markingWorkflow = new FirstMarkerOnlyWorkflow
+    assignment.fullFeedback should be(Symbol("empty"))
 
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
     feedback.assignment = assignment
     assignment.feedbacks add feedback
-    assignment.fullFeedback should be('empty)
+    assignment.fullFeedback should be(Symbol("empty"))
 
-    feedback.firstMarkerFeedback = new MarkerFeedback {
-      state = MarkingCompleted
-    }
+
     feedback.actualMark = Option(41)
     assignment.fullFeedback.size should be(1)
   }
 
-  @Test def submissionsReport() {
-    val assignment = new Assignment
-    assignment.collectSubmissions = false
-    assignment.collectMarks = false
-
-    assignment.feedbackService = smartMock[FeedbackService]
-    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
-
-    SubmissionsReport(assignment) should not be 'hasProblems
-
-    for (i <- 1 to 10) {
-      // 0000001 .. 0000010
-      val feedback = Fixtures.assignmentFeedback(universityId = idFormat(i))
-      feedback.assignment = assignment
-      feedback.actualMark = Some(i * 10)
-      assignment.feedbacks add feedback
-    }
-
-    for (i <- 8 to 20) // 0000008 .. 0000020
-      assignment.submissions add new Submission {
-        usercode = idFormat(i)
-        _universityId = idFormat(i)
-      }
-
-    // only 0000008 .. 0000010 are common to both lists
-    val report = SubmissionsReport(assignment)
-    assignment.collectSubmissions = false
-    report should not be 'hasProblems // be has problems.
-    assignment.collectSubmissions = true
-    report should be('hasProblems) // be has problems.
-    report.feedbackOnly.toSeq.sorted should be((1 to 7) map idFormat)
-    report.submissionOnly.toSeq.sorted should be((11 to 20) map idFormat)
-  }
-
-  @Test def openEnded() {
+  @Test def openEnded(): Unit = {
     val assignment = new Assignment
     assignment.openEnded = false
 
@@ -132,7 +93,7 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.isClosed should be (false)
   }
 
-  @Test def assignmentCanPublishFeedback() {
+  @Test def assignmentCanPublishFeedback(): Unit = {
     val assignment = new Assignment
     assignment.feedbackService = smartMock[FeedbackService]
     assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
@@ -155,7 +116,7 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.canPublishFeedback should be (true)
   }
 
-  @Test def inBetweenDays() {
+  @Test def inBetweenDays(): Unit = {
     val assignment = new Assignment
     assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
     assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 0, 0, 0, 0)
@@ -217,7 +178,7 @@ class AssignmentTest extends TestBase with Mockito {
     }
   }
 
-  @Test def assignmentIsLate() {
+  @Test def assignmentIsLate(): Unit = {
     val assignment = new Assignment
     assignment.extensionService = smartMock[ExtensionService]
     assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
@@ -271,15 +232,15 @@ class AssignmentTest extends TestBase with Mockito {
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i: Int): String = "%07d" format i
 
-  def mockFeedback(assignment: Assignment): AssignmentFeedback = {
-    val f = new AssignmentFeedback()
+  def mockFeedback(assignment: Assignment): Feedback = {
+    val f = new Feedback()
     f.assignment = assignment
     // add a mark so this is not treated like a placeholder
     f.actualMark = Some(41)
     f
   }
 
-  @Test def workingDaysLate() {
+  @Test def workingDaysLate(): Unit = {
     val assignment = new Assignment
     assignment.extensionService = smartMock[ExtensionService]
     assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
@@ -432,22 +393,22 @@ class AssignmentTest extends TestBase with Mockito {
 
     assignment.openEnded = false
 
-    assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000001") returns None
-    assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000002") returns None
+    assignment.feedbackService.getFeedbackByUsercode(assignment, "0000001") returns None
+    assignment.feedbackService.getFeedbackByUsercode(assignment, "0000002") returns None
 
     assignment.hasOutstandingFeedback should be(true)
 
     reset(assignment.feedbackService)
 
     // Publish feedback for student 1, add feedback for student 2 but don't publish it
-    val feedback1 = new AssignmentFeedback
+    val feedback1 = new Feedback
     feedback1.released = true
 
-    val feedback2 = new AssignmentFeedback
+    val feedback2 = new Feedback
     feedback2.released = false
 
-    assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000001") returns Some(feedback1)
-    assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000002") returns Some(feedback2)
+    assignment.feedbackService.getFeedbackByUsercode(assignment, "0000001") returns Some(feedback1)
+    assignment.feedbackService.getFeedbackByUsercode(assignment, "0000002") returns Some(feedback2)
 
     assignment.hasOutstandingFeedback should be(true)
 

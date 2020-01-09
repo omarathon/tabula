@@ -10,7 +10,7 @@ class ModuleListImporterTest extends TestBase with Mockito {
 
   val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
 
-  @After def afterTheFeast() {
+  @After def afterTheFeast(): Unit = {
     sits.shutdown()
   }
 

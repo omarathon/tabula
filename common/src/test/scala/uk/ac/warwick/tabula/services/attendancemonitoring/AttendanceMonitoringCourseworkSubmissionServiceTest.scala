@@ -87,7 +87,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def updatesCheckpointAnyAssignment() {
+  def updatesCheckpointAnyAssignment(): Unit = {
     new Fixture {
       service.getCheckpoints(submission).size should be(1)
 
@@ -97,7 +97,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def updatesCheckpointSpecificModule() {
+  def updatesCheckpointSpecificModule(): Unit = {
     new Fixture {
       assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
       assignmentPoint.assignmentSubmissionModules = Seq(module1)
@@ -111,7 +111,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def lateSubmissionInPointPeriod() {
+  def lateSubmissionInPointPeriod(): Unit = {
     new Fixture {
       submission.submittedDate = assignment.closeDate.plusDays(1)
       mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
@@ -123,7 +123,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def lateSubmissionOutsidePointPeriod() {
+  def lateSubmissionOutsidePointPeriod(): Unit = {
     new Fixture {
       submission.submittedDate = assignmentPoint.endDate.plusDays(1).toDateTimeAtStartOfDay()
       mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
@@ -132,7 +132,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def noPoints() {
+  def noPoints(): Unit = {
     new Fixture {
       service.attendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq()
       service.getCheckpoints(submission).size should be(0)
@@ -140,7 +140,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def pointDateInvalid() {
+  def pointDateInvalid(): Unit = {
     new Fixture {
       assignmentPoint.endDate = assignment.closeDate.toLocalDate.minusDays(1)
       service.getCheckpoints(submission).size should be(0)
@@ -148,7 +148,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def wrongPointType() {
+  def wrongPointType(): Unit = {
     new Fixture {
       assignmentPoint.pointType = AttendanceMonitoringPointType.Meeting
       service.getCheckpoints(submission).size should be(0)
@@ -156,7 +156,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def wrongModule() {
+  def wrongModule(): Unit = {
     new Fixture {
       assignmentPoint.assignmentSubmissionModules = Seq(module2)
       assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
@@ -165,7 +165,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def checkpointAlreadyExists() {
+  def checkpointAlreadyExists(): Unit = {
     new Fixture {
       val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
         student -> Map(
@@ -179,7 +179,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def reportedToSITS() {
+  def reportedToSITS(): Unit = {
     new Fixture {
       mockAttendanceMonitoringService.studentAlreadyReportedThisTerm(student, assignmentPoint) returns true
       service.getCheckpoints(submission).size should be(0)
@@ -187,7 +187,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def notEnough() {
+  def notEnough(): Unit = {
     new Fixture {
       assignmentPoint.assignmentSubmissionTypeModulesQuantity = 2
       assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
@@ -196,7 +196,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
   }
 
   @Test
-  def notEnoughForAny() {
+  def notEnoughForAny(): Unit = {
     new Fixture {
       assignmentPoint.assignmentSubmissionTypeAnyQuantity = 2
       assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any

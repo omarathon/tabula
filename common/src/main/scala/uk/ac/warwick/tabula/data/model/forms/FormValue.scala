@@ -30,7 +30,7 @@ abstract class FormValue extends BindListener {
 
   override def onBind(result: BindingResult): Unit = {}
 
-  def persist(value: SavedFormValue)
+  def persist(value: SavedFormValue): Unit
 
   protected def safeToString(value: Any): String = Option(value).map(_.toString).getOrElse("")
 }
@@ -38,7 +38,7 @@ abstract class FormValue extends BindListener {
 class StringFormValue(val field: FormField) extends FormValue {
   var value: String = _
 
-  def persist(ssv: SavedFormValue) {
+  def persist(ssv: SavedFormValue): Unit = {
     ssv.value = value
   }
 }
@@ -46,7 +46,7 @@ class StringFormValue(val field: FormField) extends FormValue {
 class IntegerFormValue(val field: FormField) extends FormValue {
   var value: JInteger = _
 
-  def persist(ssv: SavedFormValue) {
+  def persist(ssv: SavedFormValue): Unit = {
     ssv.value = safeToString(value)
   }
 }
@@ -54,7 +54,7 @@ class IntegerFormValue(val field: FormField) extends FormValue {
 class BooleanFormValue(val field: FormField) extends FormValue {
   var value: JBoolean = null
 
-  def persist(ssv: SavedFormValue) {
+  def persist(ssv: SavedFormValue): Unit = {
     ssv.value = safeToString(value)
   }
 }
@@ -70,7 +70,7 @@ class FileFormValue(val field: FormField) extends FormValue {
     result.popNestedPath()
   }
 
-  def persist(ssv: SavedFormValue) {
+  def persist(ssv: SavedFormValue): Unit = {
     val savedAttachments = for (attachment <- file.attached.asScala) yield {
       attachment.temporary = false
       attachment.submissionValue = ssv

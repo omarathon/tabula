@@ -53,7 +53,7 @@ class CreateMissedMeetingRecordCommandTest extends TestBase with Mockito {
 
       val meeting = cmd.applyInternal()
 
-      meeting should be('missed)
+      meeting should be(Symbol("missed"))
       meeting.missedReason should be("Junk mail")
     }
   }

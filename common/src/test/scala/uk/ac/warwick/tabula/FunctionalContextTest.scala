@@ -20,7 +20,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 class FunctionalContextTest extends TestBase with FunctionalContextTesting with Mockito {
 
   @Test
-  def contextAllowsWire() {
+  def contextAllowsWire(): Unit = {
 
     // Create a context based on the Ctx class defined below.
     inContext[Ctx] {

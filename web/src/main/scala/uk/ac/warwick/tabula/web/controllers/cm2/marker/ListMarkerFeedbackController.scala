@@ -22,9 +22,8 @@ object ListMarkerFeedbackController {
   val AllMarkerStatuses: Seq[SubmissionAndFeedbackInfoMarkerFilter] = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}"))
 class ListMarkerFeedbackController extends CourseworkController {
 
   type Command = Appliable[Seq[EnhancedFeedbackForOrderAndStage]] with ListMarkerFeedbackState

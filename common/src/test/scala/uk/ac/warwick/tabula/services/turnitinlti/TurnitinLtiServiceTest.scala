@@ -15,40 +15,40 @@ class TurnitinLtiServiceTest extends TestBase {
     assignment.id = "12345"
   }
 
-  @Test def testValidFileType() {
+  @Test def testValidFileType(): Unit = {
     new Fixture {
       file.name = "test.doc"
       TurnitinLtiService.validFileType(file) should be (true)
     }
   }
 
-  @Test def testInvalidFileType() {
+  @Test def testInvalidFileType(): Unit = {
     new Fixture {
       file.name = "test.gif"
       TurnitinLtiService.validFileType(file) should be (false)
     }
   }
 
-  @Test def generatedClassId() {
+  @Test def generatedClassId(): Unit = {
     new Fixture {
       val prefix = "TestModule"
       TurnitinLtiService.classIdFor(assignment, prefix).value should be("TestModule-ab101")
     }
   }
 
-  @Test def generatedAssignmentId() {
+  @Test def generatedAssignmentId(): Unit = {
     new Fixture {
       TurnitinLtiService.assignmentIdFor(assignment).value should be(s"${TurnitinLtiService.AssignmentPrefix}12345")
     }
   }
 
-  @Test def generatedClassName() {
+  @Test def generatedClassName(): Unit = {
     new Fixture {
       TurnitinLtiService.classNameFor(assignment).value should be("AB101 - First year module")
     }
   }
 
-  @Test def generatedLongClassName() {
+  @Test def generatedLongClassName(): Unit = {
     new Fixture {
       module.code = "ab102"
       module.name = "First year module with a very very long module name that exceeds Turnitin's maximum of 100 characters"
@@ -56,7 +56,7 @@ class TurnitinLtiServiceTest extends TestBase {
     }
   }
 
-  @Test def generatedAssignmentName() {
+  @Test def generatedAssignmentName(): Unit = {
     new Fixture {
       TurnitinLtiService.assignmentNameFor(assignment).value should be("12345 (14/15) 1500 word assignment")
     }

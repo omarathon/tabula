@@ -17,11 +17,11 @@ object NotificationDao {
 }
 
 trait NotificationDao {
-  def save(notification: Notification[_, _])
+  def save(notification: Notification[_, _]): Unit
 
-  def save(recipientInfo: RecipientNotificationInfo)
+  def save(recipientInfo: RecipientNotificationInfo): Unit
 
-  def update(notification: Notification[_, _])
+  def update(notification: Notification[_, _]): Unit
 
   def getById(id: String): Option[Notification[_ >: Null <: ToEntityReference, _]]
 
@@ -111,7 +111,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
       .setMaxResults(count)
       .seq
 
-  def save(notification: Notification[_, _]) {
+  def save(notification: Notification[_, _]): Unit = {
     /**
       * FIXME This should no longer be required but submitting assignments
       * doesn't work without it.
@@ -128,11 +128,11 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
     session.flush() // TAB-2381
   }
 
-  def save(recipientInfo: RecipientNotificationInfo) {
+  def save(recipientInfo: RecipientNotificationInfo): Unit = {
     session.saveOrUpdate(recipientInfo)
   }
 
-  def update(notification: Notification[_, _]) {
+  def update(notification: Notification[_, _]): Unit = {
     session.saveOrUpdate(notification)
   }
 

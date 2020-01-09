@@ -8,12 +8,12 @@ class JobServiceContextTest extends AppContextTestBase {
 
   @Autowired var jobService: JobService = _
 
-  @Test def containsSubmissionZipJob() {
+  @Test def containsSubmissionZipJob(): Unit = {
     jobService.jobs.length should (be > 1)
     jobService.jobs map (_.identifier) should contain("submission-zip-file")
   }
 
-  @Test def unknownJobType() {
+  @Test def unknownJobType(): Unit = {
     jobService.jobs map (_.identifier) should not contain "unknown-job-type"
 
     val instance = JobInstanceImpl.fromPrototype(JobPrototype("unknown", Map()))

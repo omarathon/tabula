@@ -35,7 +35,7 @@ class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def apply() {
+  def apply(): Unit = {
     new Fixture {
       val newMeetingRecord: MeetingRecord = command.applyInternal()
 

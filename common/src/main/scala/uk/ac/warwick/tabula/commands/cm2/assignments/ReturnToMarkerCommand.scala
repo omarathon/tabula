@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
 
 object ReturnToMarkerCommand {
   def apply(assignment: Assignment, user: CurrentUser) = new ReturnToMarkerCommandInternal(assignment, user)
-    with ComposableCommand[Seq[AssignmentFeedback]]
+    with ComposableCommand[Seq[Feedback]]
     with ReturnToMarkerValidation
     with ReturnToMarkerPermissions
     with ReturnToMarkerDescription
@@ -26,11 +26,11 @@ object ReturnToMarkerCommand {
 }
 
 class ReturnToMarkerCommandInternal(val assignment: Assignment, val currentUser: CurrentUser)
-  extends CommandInternal[Seq[AssignmentFeedback]] with ReturnToMarkerState with ReturnToMarkerRequest with ReleasedState {
+  extends CommandInternal[Seq[Feedback]] with ReturnToMarkerState with ReturnToMarkerRequest with ReleasedState {
 
   self: CM2MarkingWorkflowServiceComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = {
+  def applyInternal(): Seq[Feedback] = {
 
     // only move feedback backwards in the workflow
     val feedbackToReturn = feedbacks.filter(f => {
@@ -47,7 +47,7 @@ trait ReturnToMarkerPermissions extends RequiresPermissionsChecking with Permiss
   self: ReturnToMarkerState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
   }
 }
 
@@ -59,7 +59,7 @@ trait ReturnToMarkerValidation extends SelfValidating {
   }
 }
 
-trait ReturnToMarkerDescription extends Describable[Seq[AssignmentFeedback]] {
+trait ReturnToMarkerDescription extends Describable[Seq[Feedback]] {
   self: ReturnToMarkerState with ReturnToMarkerRequest =>
 
   override lazy val eventName: String = "ReturnToMarker"
@@ -68,7 +68,7 @@ trait ReturnToMarkerDescription extends Describable[Seq[AssignmentFeedback]] {
     d.assignment(assignment)
      .studentUsercodes(students.asScala.toSeq)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit =
     d.assignment(assignment)
      .feedbacks(result)
 }
@@ -91,11 +91,11 @@ trait ReturnToMarkerRequest extends SelectedStudentsRequest {
 }
 
 
-trait ReturnToMarkerNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFeedback]] {
+trait ReturnToMarkerNotifier extends Notifies[Seq[Feedback], Seq[MarkerFeedback]] {
 
   self: ReturnToMarkerRequest with ReturnToMarkerState =>
 
-  def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
+  def emit(commandResult: Seq[Feedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
 
     // emit notifications to each marker that has new feedback
     val markerMap: Map[String, Seq[MarkerFeedback]] = returnedMarkerFeedback.asScala.toSeq.groupBy(_.marker.getUserId)
@@ -108,11 +108,11 @@ trait ReturnToMarkerNotifier extends Notifies[Seq[AssignmentFeedback], Seq[Marke
   }
 }
 
-trait ReturnToMarkerNotificationCompletion extends CompletesNotifications[Seq[AssignmentFeedback]] {
+trait ReturnToMarkerNotificationCompletion extends CompletesNotifications[Seq[Feedback]] {
 
   self: ReturnToMarkerRequest with ReturnToMarkerState with NotificationHandling =>
 
-  def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
+  def notificationsToComplete(commandResult: Seq[Feedback]): CompletesNotificationsResult = {
     val notificationsToComplete = returnedMarkerFeedback.asScala.toSeq.flatMap(mf =>
       notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
       notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)

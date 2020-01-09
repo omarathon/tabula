@@ -55,13 +55,13 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def bindLoadsNonWithdrawnStatuses() {
+  def bindLoadsNonWithdrawnStatuses(): Unit = {
     new Fixture {
       val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
       command.profileService.allSprStatuses(department) returns Seq(sprF, sprP)
 
-      command.sprStatuses.asScala should be('empty)
+      command.sprStatuses.asScala should be(Symbol("empty"))
 
       command.onBind(null)
 
@@ -70,7 +70,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyDefaults() {
+  def commandApplyDefaults(): Unit = {
     new Fixture {
       val command = new FilterStudentsCommand(department, year) with CommandTestSupport
       command.applyInternal()
@@ -89,7 +89,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyComplicated() {
+  def commandApplyComplicated(): Unit = {
     new Fixture {
       val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
@@ -158,7 +158,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyDefaultsWithAliasedSort() {
+  def commandApplyDefaultsWithAliasedSort(): Unit = {
     new Fixture {
 
       val command = new FilterStudentsCommand(department, year) with CommandTestSupport

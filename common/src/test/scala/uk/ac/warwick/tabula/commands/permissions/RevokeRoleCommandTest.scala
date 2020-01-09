@@ -42,7 +42,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def nonExistingRole {
+  @Test def nonExistingRole: Unit = {
     new Fixture {
       command.roleDefinition = singlePermissionsRoleDefinition
       command.usercodes.add("cuscav")
@@ -57,7 +57,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def itWorksWithExisting {
+  @Test def itWorksWithExisting: Unit = {
     new Fixture {
       command.roleDefinition = singlePermissionsRoleDefinition
       command.usercodes.add("cuscav")
@@ -88,7 +88,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def deletesTheRoleWhenNoUsersAreLeft {
+  @Test def deletesTheRoleWhenNoUsersAreLeft: Unit = {
     new Fixture {
       command.roleDefinition = singlePermissionsRoleDefinition
       command.usercodes.add("cuscav")
@@ -111,7 +111,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validatePasses {
+  @Test def validatePasses: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -134,7 +134,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noUsercodes {
+  @Test def noUsercodes: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -157,7 +157,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def usercodeNotInGroup {
+  @Test def usercodeNotInGroup: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -182,7 +182,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noRole {
+  @Test def noRole: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.usercodes.add("cuscav")
@@ -201,7 +201,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def cantRevokeWhatYouDontHave {
+  @Test def cantRevokeWhatYouDontHave: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -226,7 +226,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe {
+  def describe: Unit = {
     val dept = Fixtures.department("in")
     dept.id = "dept-id"
 
@@ -251,7 +251,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
     ))
   }
 
-  @Test def gluesEverythingTogether {
+  @Test def gluesEverythingTogether: Unit = {
     val department = Fixtures.department("in")
     val command = RevokeRoleCommand(department)
 

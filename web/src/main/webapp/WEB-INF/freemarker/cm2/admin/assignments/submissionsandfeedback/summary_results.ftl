@@ -8,7 +8,7 @@
 
   <#function stage_incomplete markingStage enhancedFeedback="">
       <#if enhancedFeedback?has_content>
-          <#return enhancedFeedback.notReleasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
+          <#return !enhancedFeedback.releasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
       </#if>
       <#return false />
   </#function>

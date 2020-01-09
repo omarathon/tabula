@@ -2,11 +2,13 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Info
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
+
+import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentNotification {
   val templateLocation = "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
@@ -16,8 +18,8 @@ object FeedbackAdjustmentNotification {
 @Proxy
 @DiscriminatorValue("FeedbackAdjustment")
 class FeedbackAdjustmentNotification
-  extends NotificationWithTarget[AssignmentFeedback, Assignment]
-    with SingleItemNotification[AssignmentFeedback]
+  extends NotificationWithTarget[Feedback, Assignment]
+    with SingleItemNotification[Feedback]
     with AutowiringUserLookupComponent
     with MyWarwickActivity {
 
@@ -29,11 +31,7 @@ class FeedbackAdjustmentNotification
 
   def recipients: Seq[User] = {
     if (assignment.hasWorkflow) {
-
-      val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.usercode).getOrElse({
-        throw new IllegalStateException(s"No primary marker found for ${feedback.usercode}")
-      })
-      Seq(userLookup.getUserByUserId(userId))
+      feedback.markerFeedback.asScala.toSeq.sortBy(_.stage.order).headOption.map(_.marker).toSeq
     } else {
       Seq()
     }

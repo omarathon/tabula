@@ -66,7 +66,7 @@ trait NotificationHandling extends Logging {
     * For edge cases where manual notifications need to be made outside commands.
     * Use the command-triggered mixin above where possible for better type safety.
     */
-  def notify[A](notifications: Seq[Notification[_, _]]) {
+  def notify[A](notifications: Seq[Notification[_, _]]): Unit = {
     notifications.foreach { n => notificationService.push(n) }
   }
 }
@@ -75,7 +75,7 @@ trait JobNotificationHandling {
 
   var notificationService: NotificationService = Wire.auto[NotificationService]
 
-  def notify[A](instance: JobInstance, job: Job) {
+  def notify[A](instance: JobInstance, job: Job): Unit = {
     job match {
       case ns: NotifyingJob[A@unchecked] => for (notification <- ns.popNotifications(instance)) {
         notificationService.push(notification)

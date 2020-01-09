@@ -54,7 +54,7 @@ trait UnPublishFeedbackPermissions extends RequiresPermissionsChecking with Perm
   self: UnPublishFeedbackCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.UnPublish, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.UnPublish, mandatory(assignment))
   }
 }
 

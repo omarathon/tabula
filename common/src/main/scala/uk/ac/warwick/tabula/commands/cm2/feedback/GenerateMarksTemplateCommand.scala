@@ -220,7 +220,7 @@ trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking wi
   self: GenerateMarksTemplateCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.DownloadMarksTemplate, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.DownloadMarksTemplate, assignment)
   }
 
 }
@@ -230,7 +230,7 @@ trait GenerateMarksTemplatePermissions extends RequiresPermissionsChecking with 
   self: GenerateMarksTemplateCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.DownloadMarksTemplate, assignment)
+    p.PermissionCheck(Permissions.Feedback.DownloadMarksTemplate, assignment)
   }
 
 }

@@ -90,12 +90,11 @@ class CreateAssignmentController extends ModuleAssignmentsController {
   @ModelAttribute("createCommand")
   def command(@PathVariable module: Module): AddAssignmentCommand = {
     val cmd = new AddAssignmentCommand(module)
-    cmd.cm2Assignment = true
     cmd
   }
 
   @InitBinder(Array("createCommand"))
-  def upstreamGroupBinder(binder: WebDataBinder) {
+  def upstreamGroupBinder(binder: WebDataBinder): Unit = {
     binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
   }
 
@@ -142,7 +141,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
   @BeanProperty var maxWordCount: JInteger = null
   @BeanProperty var wordCountConventions: String = null
 
-  override def copyTo(state: A, errors: Errors) {
+  override def copyTo(state: A, errors: Errors): Unit = {
     if (Option(openDate).isEmpty && Option(closeDate).nonEmpty) {
       if (openEnded) openDate = LocalDate.now
       else openDate = closeDate.minusWeeks(2)
@@ -153,7 +152,6 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
     Option(closeDate).foreach { d => state.closeDate = d.toDateTime(Assignment.closeTime) }
     Option(academicYear).foreach(state.academicYear = _)
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
-    Option(markingWorkflow).foreach(state.markingWorkflow = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(upstreamGroups).foreach(state.upstreamGroups = _)
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)

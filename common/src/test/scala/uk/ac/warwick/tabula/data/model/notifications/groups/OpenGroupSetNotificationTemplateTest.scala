@@ -13,7 +13,7 @@ class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestH
   }
 
   @Test
-  def includesTheNameOfEachGroupSet {
+  def includesTheNameOfEachGroupSet: Unit = {
     new NotificationFixture {
       val output: String =
         renderToString(OpenSmallGroupSetsNotification.templateLocation,

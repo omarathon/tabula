@@ -99,7 +99,7 @@ trait ExportFeedbackToSitsCommandPermissions extends RequiresPermissionsChecking
 trait ExportFeedbackToSitsCommandDescription extends Describable[Seq[FeedbackForSits]] {
   override def describe(d: Description): Unit = {}
 
-  override def describeResult(d: Description, result: Seq[FeedbackForSits]) {
+  override def describeResult(d: Description, result: Seq[FeedbackForSits]): Unit = {
     d.property("feedbackForSits", result.map(feedback => Map(
       "id" -> feedback.id,
       "feedback" -> feedback.feedback.id,

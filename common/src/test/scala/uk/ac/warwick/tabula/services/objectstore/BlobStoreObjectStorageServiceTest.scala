@@ -127,7 +127,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
   @Test def listKeysTransient(): Unit = new TransientBlobStoreFixture {
     val key = "my-lovely-file"
 
-    service.listKeys().futureValue should be('empty)
+    service.listKeys().futureValue should be(Symbol("empty"))
     service.push(key, byteSource, ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

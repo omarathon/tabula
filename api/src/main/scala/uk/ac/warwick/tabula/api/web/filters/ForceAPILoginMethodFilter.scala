@@ -14,7 +14,7 @@ import uk.ac.warwick.util.web.filter.AbstractHttpFilter
 
 class ForceAPILoginMethodFilter extends AbstractHttpFilter with Logging {
 
-  override def doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+  override def doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain): Unit = {
     // Replaces ForceLoginFilter
     if (!SSOClientFilter.getUserFromRequest(request).isFoundUser) throw new APILoginMethodMissingException()
 

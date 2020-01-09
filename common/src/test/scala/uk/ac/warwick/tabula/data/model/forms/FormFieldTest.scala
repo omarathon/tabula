@@ -16,7 +16,7 @@ class FormFieldTest extends TestBase with Mockito {
 
   val userLookup = new MockUserLookup
 
-  @Test def commentField() {
+  @Test def commentField(): Unit = {
     val field = new CommentField
     field.value should be(null)
     field.value = "my comment\n\nwith newlines!"
@@ -26,7 +26,7 @@ class FormFieldTest extends TestBase with Mockito {
     field.template should be("comment")
   }
 
-  @Test def textField() {
+  @Test def textField(): Unit = {
     val field = new TextField
     field.value should be(null)
     field.value = "my comment"
@@ -35,7 +35,7 @@ class FormFieldTest extends TestBase with Mockito {
     field.template should be("text")
   }
 
-  @Test def textAreaField() {
+  @Test def textAreaField(): Unit = {
     val field = new TextareaField
     field.value should be(null)
     field.value = "my comment"
@@ -44,7 +44,7 @@ class FormFieldTest extends TestBase with Mockito {
     field.template should be("textarea")
   }
 
-  @Test def nullWordCount() {
+  @Test def nullWordCount(): Unit = {
     val field = new WordCountField
     field.min = 3
     field.max = 10
@@ -60,7 +60,7 @@ class FormFieldTest extends TestBase with Mockito {
     errors.getFieldError.getCodes should contain("assignment.submit.wordCount.missing")
   }
 
-  @Test def nullWordCountMinAndMax() {
+  @Test def nullWordCountMinAndMax(): Unit = {
     val field = new WordCountField
 
     val number = new IntegerFormValue(field)
@@ -72,7 +72,7 @@ class FormFieldTest extends TestBase with Mockito {
     errors.hasErrors should be(false)
   }
 
-  @Test def wordCountField() {
+  @Test def wordCountField(): Unit = {
     val field = new WordCountField
     field.max = 10
     field.min = 3
@@ -114,7 +114,7 @@ class FormFieldTest extends TestBase with Mockito {
     errors.hasErrors should be(false)
   }
 
-  @Test def checkboxField() {
+  @Test def checkboxField(): Unit = {
     val field = new CheckboxField
     field.template should be("checkbox")
   }
@@ -124,61 +124,7 @@ class FormFieldTest extends TestBase with Mockito {
     case ug: UserGroup => ug.userLookup = userLookup
   }
 
-  @Test def markerSelectField() {
-    val assignment = Fixtures.assignment("my assignment")
-    val workflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
-    workflow.firstMarkers.knownType.addUserId("cuscav")
-    workflow.firstMarkers.knownType.addUserId("cusebr")
-    wireUserLookup(workflow.firstMarkers)
-
-    val user1 = new User("cuscav")
-    val user2 = new User("cusebr")
-
-    userLookup.users ++= Map(
-      "cuscav" -> user1,
-      "cusebr" -> user2
-    )
-
-    val field = new MarkerSelectField
-    field.userLookup = userLookup
-
-    field.assignment = assignment
-    field.markers should be('empty)
-
-    assignment.markingWorkflow = workflow
-    field.markers should be(Seq(user1, user2))
-
-    field.value should be(null)
-    field.value = "my comment"
-    field.value should be("my comment")
-    field.propertiesMap should be(Map("value" -> "my comment"))
-    field.template should be("marker")
-
-    val value = field.blankFormValue
-
-    var errors = new BindException(value, "value")
-    field.validate(value, errors)
-
-    errors.getErrorCount should be(1)
-    errors.getFieldError.getField should be("value")
-    errors.getFieldError.getCode should be("marker.missing")
-
-    value.value = "steve"
-    errors = new BindException(value, "value")
-    field.validate(value, errors)
-
-    errors.getErrorCount should be(1)
-    errors.getFieldError.getField should be("value")
-    errors.getFieldError.getCode should be("marker.invalid")
-
-    value.value = "cuscav"
-    errors = new BindException(value, "value")
-    field.validate(value, errors)
-
-    errors.hasErrors should be(false)
-  }
-
-  @Test def fileField() {
+  @Test def fileField(): Unit = {
     val field = new FileField
     field.attachmentLimit = 2
     field.attachmentTypes = Seq("doc", "txt")
@@ -268,17 +214,17 @@ class FormFieldTest extends TestBase with Mockito {
     errors.getFieldError("file").getCode should be("file.toobig.one")
   }
 
-  @Test def commentFieldFormatting() {
+  @Test def commentFieldFormatting(): Unit = {
     val comment = new CommentField
 
     comment.value = " Text.\nMore text.\n\n   <b>New</b> paragraph "
     comment.formattedHtml.getOutputFormat.getMarkupString(comment.formattedHtml) should be("<p>Text.\nMore text.</p>\n<p>&lt;b&gt;New&lt;/b&gt; paragraph</p>\n")
   }
 
-  @Test def fileFieldCustomProperties() {
+  @Test def fileFieldCustomProperties(): Unit = {
     val file = new FileField
     file.attachmentLimit should be(1)
-    file.attachmentTypes should be('empty)
+    file.attachmentTypes should be(Symbol("empty"))
 
     file.attachmentLimit = 5
     file.attachmentTypes = Seq("pdf", "doc")
@@ -293,7 +239,7 @@ class FormFieldTest extends TestBase with Mockito {
     file.attachmentTypes should be(Seq("pdf", "doc"))
   }
 
-  @Test def wordCountFieldRange() {
+  @Test def wordCountFieldRange(): Unit = {
     val wc = new WordCountField
     wc.min should be(null)
     wc.max should be(null)
@@ -308,7 +254,7 @@ class FormFieldTest extends TestBase with Mockito {
     wc.max should be(5000)
   }
 
-  @Test def maintainFieldOrder() {
+  @Test def maintainFieldOrder(): Unit = {
     val assignment = new Assignment
     assignment.assignmentService = mock[AssessmentService]
     assignment.addDefaultSubmissionFields()
@@ -329,19 +275,10 @@ class FormFieldTest extends TestBase with Mockito {
     val wordCountField = assignment.findField(Assignment.defaultWordCountName).get
     wordCountField.position should be(2)
 
-    val mf = new MarkerSelectField
-    mf.name = Assignment.defaultMarkerSelectorName
-    assignment.addField(mf)
-
-    val markerField = assignment.findField(Assignment.defaultMarkerSelectorName).get
-    markerField.position should be(3)
-
     assignment.removeField(wordCountField)
     commentField.position should be(0)
     uploadField.position should be(1)
-    markerField.position should be(2)
 
-    assignment.removeField(markerField)
     commentField.position should be(0)
     uploadField.position should be(1)
 

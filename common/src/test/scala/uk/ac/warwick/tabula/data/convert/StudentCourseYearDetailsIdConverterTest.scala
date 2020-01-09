@@ -17,17 +17,17 @@ class StudentCourseYearDetailsIdConverterTest extends TestBase with Mockito {
   dao.getStudentCourseYearDetails("foo") returns Some(scyd)
   dao.getStudentCourseYearDetails("bar") returns None
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
 
     converter.convertRight("foo") should be(scyd)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
 
     converter.convertRight("bar") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val scyd = new StudentCourseYearDetails
     scyd.id = "foo"
 

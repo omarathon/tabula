@@ -24,14 +24,14 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
   when(profileService.getAllMembersWithUserId("supervisor", true)).thenReturn(Seq())
 
   @Test(expected = classOf[ItemNotFoundException])
-  def throwsWithoutRelationships() {
+  def throwsWithoutRelationships(): Unit = {
     withUser("tutor") {
       controller.getCommand(relationshipType, studentCourseDetails, Nil)
     }
   }
 
   @Test
-  def passesRelationshipTypeToCommand() {
+  def passesRelationshipTypeToCommand(): Unit = {
     withUser("tutor") {
       val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
@@ -45,7 +45,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def passesFirstRelationshipTypeToCommand() {
+  def passesFirstRelationshipTypeToCommand(): Unit = {
     val uniId = "1234765"
     withUser("supervisor", uniId) {
       val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
 class FormValueTest extends PersistenceTestBase {
 
-  @Test def makePermanentOnPersist() {
+  @Test def makePermanentOnPersist(): Unit = {
     val field = new FileField()
     val value = new FileFormValue(field)
     val attachment = new FileAttachment()

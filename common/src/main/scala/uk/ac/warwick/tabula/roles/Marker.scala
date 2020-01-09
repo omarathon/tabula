@@ -11,12 +11,9 @@ case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
   override def description = "Marker"
 
   GrantsScopedPermission(
-    AssignmentFeedback.Read,
-    AssignmentMarkerFeedback.DownloadMarksTemplate,
-    AssignmentMarkerFeedback.Manage,
-    ExamFeedback.Read,
-    ExamMarkerFeedback.DownloadMarksTemplate,
-    ExamMarkerFeedback.Manage,
+    Feedback.Read,
+    MarkerFeedback.DownloadMarksTemplate,
+    MarkerFeedback.Manage,
     Submission.Read,
     Submission.ViewPlagiarismStatus
   )

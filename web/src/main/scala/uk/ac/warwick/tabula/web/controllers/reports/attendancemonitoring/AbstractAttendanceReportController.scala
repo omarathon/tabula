@@ -179,7 +179,7 @@ class AttendanceReportRequest extends Serializable {
   var reportRangeStartDate: String = _
   var reportRangeEndDate: String = _
 
-  def copyTo(state: AttendanceReportProcessorState) {
+  def copyTo(state: AttendanceReportProcessorState): Unit = {
     state.attendance = attendance
 
     state.students = students

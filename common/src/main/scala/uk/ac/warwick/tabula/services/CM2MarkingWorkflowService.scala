@@ -29,9 +29,9 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
   def delete(workflow: CM2MarkingWorkflow): Unit
 
-  def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+  def releaseForMarking(feedbacks: Seq[Feedback]): Seq[Feedback]
 
-  def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+  def stopMarking(feedbacks: Seq[Feedback]): Seq[Feedback]
 
   /** All assignments using this marking workflow. */
   def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
@@ -48,7 +48,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
   def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback
 
   // essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
-  def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
+  def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
 
   // add new markers for a workflow stage
   def addMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
@@ -84,13 +84,13 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
   override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
 
-  override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+  override def releaseForMarking(feedbacks: Seq[Feedback]): Seq[Feedback] = feedbacks.map(f => {
     f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.toSet.asJava
     feedbackService.saveOrUpdate(f)
     f
   })
 
-  override def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+  override def stopMarking(feedbacks: Seq[Feedback]): Seq[Feedback] = feedbacks.map(f => {
     f.outstandingStages.clear()
     feedbackService.saveOrUpdate(f)
     f
@@ -143,6 +143,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
     // find the final stage for this workflow
     val finalStage: MarkingWorkflowStage = {
+      @scala.annotation.tailrec
       def findFinalStage(stage: MarkingWorkflowStage): MarkingWorkflowStage = stage match {
         case f: FinalStage => f
         case s: MarkingWorkflowStage if s.nextStages.nonEmpty => findFinalStage(s.nextStages.head)
@@ -190,7 +191,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
     parent
   }
 
-  override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
+  override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
     if (stages.isEmpty)
       throw new IllegalArgumentException(s"Must supply a target stage to return to")
 
@@ -247,7 +248,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
     for ((marker, students) <- allocations.toSeq; student <- students) yield {
       val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
-        val newFeedback = new AssignmentFeedback
+        val newFeedback = new Feedback
         newFeedback.assignment = assignment
         newFeedback.uploaderId = marker.getUserId
         newFeedback.usercode = student.getUserId

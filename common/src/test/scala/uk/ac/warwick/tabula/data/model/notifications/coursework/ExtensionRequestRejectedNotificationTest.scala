@@ -16,7 +16,7 @@ class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito wit
   @Test
   def urlIsSubmissionPage(): Unit = new ExtensionFixture {
     val n: ExtensionRequestRejectedNotification = createNotification(extension, student, admin)
-    n.url should be(s"/$cm2Prefix/submission/123/")
+    n.url should be("/coursework/submission/123/")
   }
 
   @Test
@@ -51,7 +51,7 @@ class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito wit
   }
 
   @Test
-  def title() {
+  def title(): Unit = {
     new ExtensionFixture {
       module.code = "cs118"
       assignment.name = "5,000 word essay"

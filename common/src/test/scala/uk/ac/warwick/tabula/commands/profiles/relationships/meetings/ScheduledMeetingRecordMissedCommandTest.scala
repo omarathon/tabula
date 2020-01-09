@@ -20,7 +20,7 @@ class ScheduledMeetingRecordMissedCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def apply() {
+  def apply(): Unit = {
     new Fixture {
       val missedReason = "no reason"
       command.missedReason = missedReason
@@ -34,7 +34,7 @@ class ScheduledMeetingRecordMissedCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def valid() {
+  def valid(): Unit = {
     new Fixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -43,7 +43,7 @@ class ScheduledMeetingRecordMissedCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def meetingInFuture() {
+  def meetingInFuture(): Unit = {
     new Fixture {
       val errors = new BindException(command, "command")
       scheduledMeetingRecord.meetingDate = new DateTime().plusDays(1)
@@ -54,7 +54,7 @@ class ScheduledMeetingRecordMissedCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def alreadyMissed() {
+  def alreadyMissed(): Unit = {
     new Fixture {
       val errors = new BindException(command, "command")
       scheduledMeetingRecord.missed = true

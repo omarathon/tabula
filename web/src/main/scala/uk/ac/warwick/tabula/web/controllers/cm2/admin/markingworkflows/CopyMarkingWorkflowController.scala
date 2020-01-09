@@ -18,9 +18,8 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 import scala.jdk.CollectionConverters._
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/copy"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/copy"))
 class CopyMarkingWorkflowController extends CM2MarkingWorkflowController {
 
   var messageSource: MessageSource = Wire.auto[MessageSource]

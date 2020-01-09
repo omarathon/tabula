@@ -56,14 +56,14 @@ trait ModifiesAssignmentMembership extends UpdatesStudentMembership with Specifi
   lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(assignment).map(_.upstreamAssessmentGroupInfos)
   lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 
-  def copyMembers(assignment: Assignment) {
+  def copyMembers(assignment: Assignment): Unit = {
     if (assignment.members != null) {
       members.copyFrom(assignment.members)
     }
 
   }
 
-  def updateAssessmentGroups() {
+  def updateAssessmentGroups(): Unit = {
     assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
       val template = new AssessmentGroup
       template.assessmentComponent = ug.assessmentComponent

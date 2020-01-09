@@ -14,7 +14,7 @@ import scala.reflect._
 trait EmbeddedSits {
   val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
-  @After def afterTheFeast() {
+  @After def afterTheFeast(): Unit = {
     sits.shutdown()
   }
 }
@@ -31,7 +31,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   val NONE = AssessmentComponent.NoneAssessmentGroup
 
-  @Test def groupImportSql() {
+  @Test def groupImportSql(): Unit = {
     // Not really testing AssignmentImporter but the behaviour of the query class for IN(..)
     // parameters. The SQL has to have the brackets, and the parameter value has to be a
     // Java List - a Scala collection will not be recognised and won't be expanded into multiple
@@ -47,7 +47,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     sqlToUse.trim should endWith("(?, ?)")
   }
 
-  @Test def importMembers() {
+  @Test def importMembers(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       var members = ArrayBuffer[UpstreamModuleRegistration]()
@@ -59,7 +59,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     }
   }
 
-  @Test def allAssessmentGroups() {
+  @Test def allAssessmentGroups(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       val allGroups = sorted(assignmentImporter.getAllAssessmentGroups)
@@ -84,7 +84,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     }
   }
 
-  @Test def allAssessmentComponents() {
+  @Test def allAssessmentComponents(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       val components = sorted(assignmentImporter.getAllAssessmentComponents)

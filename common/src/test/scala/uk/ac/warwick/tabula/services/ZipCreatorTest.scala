@@ -14,7 +14,7 @@ class ZipCreatorTest extends TestBase {
     override val objectStorageService: ObjectStorageService = transientObjectStore
   }
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     val items = Seq(
       ZipFileItem("one.txt", ByteSource.wrap("one".getBytes("UTF-8")), 3),
       ZipFileItem("two.txt", ByteSource.wrap("two".getBytes("UTF-8")), 3),
@@ -43,7 +43,7 @@ class ZipCreatorTest extends TestBase {
     transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).futureValue.openStream() should be(null)
   }
 
-  @Test def trunc {
+  @Test def trunc: Unit = {
     creator.trunc("steve", 100) should be("steve")
     creator.trunc("steve", 5) should be("steve")
     creator.trunc("steve", 3) should be("ste")

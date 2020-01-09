@@ -80,7 +80,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
   }
 
   // attaches the data validation to the sheet
-  def generateGroupDropdowns(sheet: Sheet, groups: Seq[_], totalStudents: Int) {
+  def generateGroupDropdowns(sheet: Sheet, groups: Seq[_], totalStudents: Int): Unit = {
     var lastRow = totalStudents
     if (lastRow == 0) lastRow = 1
     val dropdownRange = new CellRangeAddressList(1, lastRow, 2, 2)

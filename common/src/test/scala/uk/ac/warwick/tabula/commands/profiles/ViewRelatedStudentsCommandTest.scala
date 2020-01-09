@@ -46,7 +46,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def listsAllStudentsWithTutorRelationship() {
+  def listsAllStudentsWithTutorRelationship(): Unit = {
     new Fixture {
       val mockProfileService: ProfileService = mock[ProfileService]
       val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
@@ -82,7 +82,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def listsAllStudentsWithSupervisorRelationshipWithMeetingRecord() {
+  def listsAllStudentsWithSupervisorRelationshipWithMeetingRecord(): Unit = {
     new Fixture {
       val mockProfileService: ProfileService = mock[ProfileService]
       val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
@@ -134,7 +134,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def helperFunctions() {
+  def helperFunctions(): Unit = {
     new Fixture {
       val mockProfileService: ProfileService = mock[ProfileService]
       val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]

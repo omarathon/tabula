@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.hibernate.validator.constraints.NotEmpty
+import javax.validation.constraints.NotEmpty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.SearchStudentsInSmallGroupSetCommand._

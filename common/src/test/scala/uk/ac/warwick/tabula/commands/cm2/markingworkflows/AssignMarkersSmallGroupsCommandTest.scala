@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
 class AssignMarkersSmallGroupsCommandTest extends TestBase with Mockito {
 
   @Test
-  def getsAllocations() {
+  def getsAllocations(): Unit = {
     new Fixture {
       val cmd: AssignMarkersSmallGroupsState with PopulateOnForm = new AssignMarkersSmallGroupsCommandInternal(assignment) with AssignMarkersSmallGroupsCommandPopulate with AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest with MockServices
       cmd.populate()

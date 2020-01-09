@@ -4,7 +4,7 @@ import uk.ac.warwick.userlookup.User
 
 class CurrentUserTest extends TestBase {
 
-  @Test def stringify {
+  @Test def stringify(): Unit = {
     user("cusaaa", "cusaaa", false).toString should be("User cusaaa")
     user("cusaaa", "cusaab", false).toString should be("User cusaab (really cusaaa)")
     user("cusaaa", "cusaab", true).toString should be("User cusaab (really cusaaa) +GodMode")

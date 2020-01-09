@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, AssignmentFeedback, Feedback}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, ExportResitFeedbackToSitsQuery, SASPartialMatchQuery, SITSMarkRow, SRAPartialMatchQuery, SasCountQuery, SraCountQuery}
 
@@ -106,14 +106,14 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
   }
 
   def countMatchingSitsRecords(feedback: Feedback): Integer = feedback match {
-    case f: AssignmentFeedback if f.assignment.resitAssessment => countMatchingSraRecords(feedback: Feedback)
+    case f: Feedback if f.assignment.resitAssessment => countMatchingSraRecords(feedback: Feedback)
     case _ => countMatchingSasRecords(feedback: Feedback)
   }
 
   def exportToSits(feedback: Feedback): Integer = {
     val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
     val (updateQuery, tableName) = feedback match {
-      case f: AssignmentFeedback if f.assignment.resitAssessment => (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
+      case f: Feedback if f.assignment.resitAssessment => (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
       case _ => (new ExportFeedbackToSitsQuery(sitsDataSource), "CAM_SAS")
     }
 
@@ -139,7 +139,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
 
     val (matchQuery, tableName) = feedback match {
-      case f: AssignmentFeedback if f.assignment.resitAssessment => (new SRAPartialMatchQuery(sitsDataSource), "CAM_SRA")
+      case f: Feedback if f.assignment.resitAssessment => (new SRAPartialMatchQuery(sitsDataSource), "CAM_SRA")
       case _ => (new SASPartialMatchQuery(sitsDataSource), "CAM_SAS")
     }
 

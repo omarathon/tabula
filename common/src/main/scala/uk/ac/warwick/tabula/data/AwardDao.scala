@@ -15,7 +15,7 @@ trait AutowiringAwardDaoComponent extends AwardDaoComponent {
 }
 
 trait AwardDao {
-  def saveOrUpdate(award: Award)
+  def saveOrUpdate(award: Award): Unit
 
   def getByCode(code: String): Option[Award]
 

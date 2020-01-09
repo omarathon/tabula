@@ -25,15 +25,15 @@ trait RelationshipDao {
 
   def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 
-  def saveOrUpdate(relationshipType: StudentRelationshipType)
+  def saveOrUpdate(relationshipType: StudentRelationshipType): Unit
 
-  def delete(relationshipType: StudentRelationshipType)
+  def delete(relationshipType: StudentRelationshipType): Unit
 
   def getStudentRelationshipById(id: String): Option[StudentRelationship]
 
-  def saveOrUpdate(rel: StudentRelationship)
+  def saveOrUpdate(rel: StudentRelationship): Unit
 
-  def delete(relationship: StudentRelationship)
+  def delete(relationship: StudentRelationship): Unit
 
   def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 

@@ -143,7 +143,7 @@ abstract class Member
 
   override final def urlCategory = "member"
 
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureSettings
   }
 
@@ -409,7 +409,7 @@ class StudentMember extends Member with StudentProperties {
     case _ => ""
   }
 
-  def attachStudentCourseDetails(detailsToAdd: StudentCourseDetails) {
+  def attachStudentCourseDetails(detailsToAdd: StudentCourseDetails): Unit = {
     studentCourseDetails.remove(detailsToAdd)
     studentCourseDetails.add(detailsToAdd)
   }
@@ -501,7 +501,7 @@ class StaffMember extends Member with StaffProperties {
 
   def assistants: UnspecifiedTypeUserGroup = new UserGroupCacheManager(_assistantsGroup, profileService.staffAssistantsHelper)
 
-  def assistants_=(group: UserGroup) {
+  def assistants_=(group: UserGroup): Unit = {
     _assistantsGroup = group
   }
 }

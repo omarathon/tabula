@@ -13,7 +13,7 @@ trait AutowiringLevelDaoComponent extends LevelDaoComponent {
 }
 
 trait LevelDao {
-  def saveOrUpdate(level: Level)
+  def saveOrUpdate(level: Level): Unit
 
   def getByCode(code: String): Option[Level]
 

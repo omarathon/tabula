@@ -50,7 +50,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def allStudents() {
+  def allStudents(): Unit = {
     new Fixture {
       state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
       state.allStudents
@@ -59,7 +59,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def studentPointMap() {
+  def studentPointMap(): Unit = {
     new Fixture {
       state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
       state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1, point2)
@@ -71,7 +71,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def termPoints() {
+  def termPoints(): Unit = {
     new Fixture {
       state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
       state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1, point2)
@@ -83,7 +83,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def studentReportCounts() {
+  def studentReportCounts(): Unit = {
     new Fixture {
       state.period = PeriodType.autumnTerm.toString
       state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
@@ -104,7 +104,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def studentReportCountsUnreportedOnly() {
+  def studentReportCountsUnreportedOnly(): Unit = {
     new Fixture {
       state.period = PeriodType.autumnTerm.toString
       state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
@@ -129,7 +129,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def availablePeriods() {
+  def availablePeriods(): Unit = {
     new Fixture {
       withFakeTime(fakeNow) {
         state.profileService.findAllStudentsByRestrictions(ArgumentMatchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
@@ -154,7 +154,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validation() {
+  def validation(): Unit = {
     new ValidatorFixture {
       withFakeTime(fakeNow) {
         val errors = new BindException(validator, "command")
@@ -189,7 +189,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def apply() {
+  def apply(): Unit = {
     new CommandFixture {
       val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
       val student1point2missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.MissedUnauthorised)

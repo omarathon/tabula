@@ -47,7 +47,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
   def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map(_.intValue))
   } getOrElse Seq()
 
-  def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
+  def defaultWeekRanges_=(ranges: Seq[WeekRange]): Unit = {
     defaultWeeks =
       JHashSet(ranges
         .flatMap { range => range.minWeek to range.maxWeek }
@@ -79,7 +79,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
     set
   }
 
-  def copyFrom(set: SmallGroupSet) {
+  def copyFrom(set: SmallGroupSet): Unit = {
     Option(set.defaultLocation).foreach {
       case NamedLocation(name) => defaultLocation = name
       case MapLocation(name, lid, _) =>
@@ -99,7 +99,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
     if (set.defaultTutors != null) defaultTutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
   }
 
-  def copyTo(set: SmallGroupSet) {
+  def copyTo(set: SmallGroupSet): Unit = {
     // If the location name has changed, but the location ID hasn't, we're changing from a map location
     // to a named location
     Option(set.defaultLocation).collect { case m: MapLocation => m }.foreach { mapLocation =>

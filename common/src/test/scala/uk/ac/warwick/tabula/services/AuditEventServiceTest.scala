@@ -25,7 +25,7 @@ class AuditEventServiceTest extends PersistenceTestBase with Mockito {
   val now = new DateTime()
 
   @Transactional
-  @Test def getByIds() {
+  @Test def getByIds(): Unit = {
     for (i <- Range(0, 1020)) {
       val event = new Event(s"id$i", "DownloadFeedback", "cusebr", "cusebr", "137.205.194.140", "Chrome/58", readOnly = false, Map(), now.plusSeconds(i))
       service.save(event, "before")
@@ -39,7 +39,7 @@ class AuditEventServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Transactional
-  @Test def listEvents() {
+  @Test def listEvents(): Unit = {
     for (i <- Range(1, 30)) {
       val event = new Event("1138-9962-1813-4938", "Bite" + i, "cusebr", "cusebr", "137.205.194.140", "Chrome/58", readOnly = false, Map(), now.plusSeconds(i))
       service.save(event, "pre")

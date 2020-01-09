@@ -13,7 +13,7 @@ abstract class MeetingRecordApprovalNotification(@transient val verb: String)
     with SingleItemNotification[MeetingRecord]
     with AllCompletedActionRequiredNotification {
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     // if the meeting took place more than a week ago then this is more important
     priority = if (meeting.meetingDate.isBefore(DateTime.now.minusWeeks(1))) {
       Critical

@@ -15,7 +15,7 @@ import uk.ac.warwick.userlookup.User
 import scala.jdk.CollectionConverters._
 
 trait SubmissionService {
-  def saveSubmission(submission: Submission)
+  def saveSubmission(submission: Submission): Unit
 
   def getSubmissionByUsercode(assignment: Assignment, usercode: String): Option[Submission]
 
@@ -92,7 +92,7 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
       .add(le("submittedDate", endInclusive))
       .seq
 
-  def delete(submission: Submission) {
+  def delete(submission: Submission): Unit = {
     submission.assignment.submissions.remove(submission)
     // TAB-4564 delete the originality report; needs to be done manually because we don't cascade the delete through FileAttachment
     submission.valuesWithAttachments.flatMap(_.attachments.asScala).foreach(originalityReportService.deleteOriginalityReport)
@@ -126,7 +126,7 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
     * don't always happen until after some insert operation that assumes
     * we've deleted it.
     */
-  def deleteOriginalityReport(attachment: FileAttachment) {
+  def deleteOriginalityReport(attachment: FileAttachment): Unit = {
     if (attachment.originalityReport != null) {
       val report = attachment.originalityReport
       attachment.originalityReport = null
@@ -135,7 +135,7 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
     }
   }
 
-  def saveOriginalityReport(attachment: FileAttachment) {
+  def saveOriginalityReport(attachment: FileAttachment): Unit = {
     attachment.originalityReport.attachment = attachment
     session.saveOrUpdate(attachment.originalityReport)
   }

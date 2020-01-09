@@ -49,7 +49,7 @@ trait OnlineFeedbackListPermissions extends RequiresPermissionsChecking with Per
   self: OnlineFeedbackListState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.Feedback.Manage, assignment)
   }
 }
 

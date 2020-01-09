@@ -166,7 +166,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
       errors.rejectValue("openEnded", "assignment.openEnded.hasExtensions")
     }
 
-    if (assignment.hasCM2Workflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
+    if (assignment.hasWorkflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
       val (existingMarkersA, existingMarkersB) = extractMarkers
 
       if (!existingMarkersA.forall(markersA.asScala.contains)) {

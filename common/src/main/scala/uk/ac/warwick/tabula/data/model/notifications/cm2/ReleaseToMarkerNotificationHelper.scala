@@ -12,24 +12,18 @@ case class StudentAtStagesCount(stageName: String, count: Int)
 class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User, cm2MarkingWorkflowService: CM2MarkingWorkflowService) {
 
   // all students assigned to recipient (marker) for this assignment
-  lazy val studentsAllocatedToThisMarker: Set[Student] =
-    if (assignment.cm2Assignment) {
-      cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, recipient).toSet
-    } else {
-      assignment.markingWorkflow.getMarkersStudents(assignment, recipient)
-    }
+  lazy val studentsAllocatedToThisMarker: Set[Student] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, recipient).toSet
+
 
   // students at each stage that's assigned to the recipient for this assignment
   lazy val studentsAtStages: Seq[(MarkingWorkflowStage, Set[Student])] = {
-    if (assignment.cm2Assignment) {
-      assignment.cm2MarkingWorkflow.workflowType.allStages.map { stage =>
-        stage -> {
-          val allocationsForAllMarkers = cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)
-          val allocationsForThisMarker = allocationsForAllMarkers.get(recipient)
-          allocationsForThisMarker.map(_.intersect(studentsAllocatedToThisMarker)).getOrElse(Set.empty)
-        }
+    assignment.cm2MarkingWorkflow.workflowType.allStages.map { stage =>
+      stage -> {
+        val allocationsForAllMarkers = cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)
+        val allocationsForThisMarker = allocationsForAllMarkers.get(recipient)
+        allocationsForThisMarker.map(_.intersect(studentsAllocatedToThisMarker)).getOrElse(Set.empty)
       }
-    } else Seq.empty
+    }
   }
 
   lazy val studentsAtStagesCount: Seq[StudentAtStagesCount] = {
@@ -38,17 +32,9 @@ class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User,
     }
   }
 
-  lazy val submissions: Seq[Submission] =
-    if (assignment.cm2Assignment)
-      assignment.cm2MarkerSubmissions(recipient).distinct
-    else
-      assignment.getMarkersSubmissions(recipient).distinct
+  lazy val submissions: Seq[Submission] = assignment.cm2MarkerSubmissions(recipient).distinct
 
-  lazy val submissionsCount: Int =
-    if (assignment.cm2Assignment)
-      submissions.count(_.submitted)
-    else
-      submissions.size
+  lazy val submissionsCount: Int = submissions.count(_.submitted)
 
   lazy val approvedExtensions: Map[String, Extension] =
     assignment.approvedExtensions

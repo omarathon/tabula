@@ -25,7 +25,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
     case ug: UserGroup => ug.userLookup = userLookup
   }
 
-  @Test def stagesForAssignment() {
+  @Test def stagesForAssignment(): Unit = {
     import SmallGroupSetWorkflowStages._
 
     set.allocationMethod = SmallGroupAllocationMethod.Random
@@ -58,7 +58,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
     ))
   }
 
-  @Test def progress() {
+  @Test def progress(): Unit = {
     // Start with a very basic set, using random allocation.
     set.allocationMethod = SmallGroupAllocationMethod.Random
 

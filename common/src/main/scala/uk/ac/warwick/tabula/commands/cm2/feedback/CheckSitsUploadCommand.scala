@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.cm2.feedback
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback.CheckSitsUploadCommand.Result
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringFeedbackForSitsServiceComponent
@@ -75,13 +74,8 @@ trait CheckSitsUploadPermissions extends RequiresPermissionsChecking with Permis
   self: CheckSitsUploadCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback =>
-        mustBeLinked(mandatory(assignmentFeedback), mandatory(assignment))
-        p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assignmentFeedback)
-      case examFeedback: ExamFeedback =>
-        p.PermissionCheck(Permissions.ExamFeedback.Manage, examFeedback)
-    }
+    mustBeLinked(mandatory(feedback), mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Publish, feedback)
   }
 }
 

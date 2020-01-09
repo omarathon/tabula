@@ -53,7 +53,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def invalidPoint() {
+  def invalidPoint(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
@@ -68,7 +68,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def alreadyReported() {
+  def alreadyReported(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
@@ -83,7 +83,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def tooSoon() {
+  def tooSoon(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
@@ -99,7 +99,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def beforeStartDateButNull() {
+  def beforeStartDateButNull(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
@@ -115,7 +115,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def beforeStartDateButAuthorised() {
+  def beforeStartDateButAuthorised(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
@@ -132,7 +132,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def authorisedWithNoNote() {
+  def authorisedWithNoNote(): Unit = {
     new Fixture {
       validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
       validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)

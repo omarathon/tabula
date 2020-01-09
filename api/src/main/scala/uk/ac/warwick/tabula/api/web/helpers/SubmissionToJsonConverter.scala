@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
@@ -38,7 +38,7 @@ trait SubmissionToJsonConverter {
     )
   }
 
-  def jsonSubmissionObject(student: SubmissionAndFeedbackCommand.Student): Map[String, Any] = {
+  def jsonSubmissionObject(student: AssignmentSubmissionStudentInfo): Map[String, Any] = {
     student.coursework.enhancedSubmission.map { enhancedSubmission =>
       jsonSubmissionObject(enhancedSubmission.submission) ++ Map(
         "downloaded" -> enhancedSubmission.downloaded

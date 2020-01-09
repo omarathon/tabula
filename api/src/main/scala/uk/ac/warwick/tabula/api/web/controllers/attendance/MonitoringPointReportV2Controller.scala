@@ -63,7 +63,7 @@ class CreateMonitoringPointReportV2Request extends JsonApiRequest[SynchroniseAtt
   @BeanProperty var academicYear: AcademicYear = _
   @BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
 
-  override def copyTo(state: SynchroniseAttendanceToSitsBySequenceRequest, errors: Errors) {
+  override def copyTo(state: SynchroniseAttendanceToSitsBySequenceRequest, errors: Errors): Unit = {
     if (!features.attendanceMonitoringRealTimeReport) {
       errors.reject("attendanceMonitoringReport.realTimeNotEnabled")
     }

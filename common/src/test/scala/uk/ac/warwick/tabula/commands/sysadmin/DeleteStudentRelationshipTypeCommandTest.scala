@@ -30,7 +30,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def objectApplyCreatesCommand() {
+  def objectApplyCreatesCommand(): Unit = {
     new Fixture {
       val command = DeleteStudentRelationshipTypeCommand(testRelationshipType)
 
@@ -41,7 +41,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDeletesRelationshipWhenApplied() {
+  def commandDeletesRelationshipWhenApplied(): Unit = {
     new Fixture {
       commandInternal.applyInternal() should be(testRelationshipType)
 
@@ -50,7 +50,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDescriptionDescribedProperties() {
+  def commandDescriptionDescribedProperties(): Unit = {
     new Fixture {
       val describable = new DeleteStudentRelationshipTypeCommandDescription with HasExistingStudentRelationshipType {
         val eventName: String = "test"
@@ -70,7 +70,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireGlobalStudentRelationshipTypeDelete {
+  def permissionsRequireGlobalStudentRelationshipTypeDelete: Unit = {
     new Fixture {
       val perms = new DeleteStudentRelationshipTypeCommandPermissions with HasExistingStudentRelationshipType {
         val relationshipType: StudentRelationshipType = testRelationshipType
@@ -82,7 +82,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emptyValidation {
+  def emptyValidation: Unit = {
     new Fixture {
       var relationshipService: RelationshipService = mock[RelationshipService]
       relationshipService.countStudentsByRelationship(testRelationshipType) returns (5)
@@ -105,7 +105,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def confirmValidation {
+  def confirmValidation: Unit = {
     new Fixture {
       var relationshipService: RelationshipService = mock[RelationshipService]
       relationshipService.countStudentsByRelationship(testRelationshipType) returns (0)

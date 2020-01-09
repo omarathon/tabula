@@ -37,7 +37,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
   def department: Department = adminDepartment
 
   @deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-  def department_=(d: Department) {
+  def department_=(d: Department): Unit = {
     adminDepartment = d
   }
 

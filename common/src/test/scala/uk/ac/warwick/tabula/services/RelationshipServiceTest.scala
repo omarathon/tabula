@@ -360,7 +360,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
   }
 
   @Transactional
-  @Test def testEndStudentRelationship() {
+  @Test def testEndStudentRelationship(): Unit = {
     new Environment {
       val newRelationship = StudentRelationship(staff1, relationshipType, studentCourseDetails, DateTime.now)
       newRelationship.endDate should be(null)

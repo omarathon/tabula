@@ -15,58 +15,58 @@ class GrantedRoleTest extends TestBase {
   val staffMember: StaffMember = Fixtures.staff()
   val studentMember: StudentMember = Fixtures.student()
 
-  val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
+  val feedback: Feedback = Fixtures.assignmentFeedback()
 
   val roleDefinition = AssignmentSubmitterRoleDefinition
 
-  @Test def initDepartment {
+  @Test def initDepartment: Unit = {
     GrantedRole.canDefineFor[Department] should be(true)
     val gr = GrantedRole(dept, roleDefinition)
     gr.scope should be(dept)
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test def initModule {
+  @Test def initModule: Unit = {
     GrantedRole.canDefineFor[Module] should be(true)
     val gr = GrantedRole(module, roleDefinition)
     gr.scope should be(module)
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test def initAssignment {
+  @Test def initAssignment: Unit = {
     GrantedRole.canDefineFor[Assignment] should be(true)
     val gr = GrantedRole(assignment, roleDefinition)
     gr.scope should be(assignment)
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test def initStaffMember {
+  @Test def initStaffMember: Unit = {
     GrantedRole.canDefineFor[StaffMember] should be(true)
     val gr = GrantedRole(staffMember, roleDefinition)
     gr.scope should be(staffMember)
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test def initStudentMember {
+  @Test def initStudentMember: Unit = {
     GrantedRole.canDefineFor[StudentMember] should be(true)
     val gr = GrantedRole(studentMember, roleDefinition)
     gr.scope should be(studentMember)
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def initInvalid {
-    GrantedRole.canDefineFor[AssignmentFeedback] should be(false)
+  @Test(expected = classOf[IllegalArgumentException]) def initInvalid: Unit = {
+    GrantedRole.canDefineFor[Feedback] should be(false)
     GrantedRole(feedback, roleDefinition)
   }
 
-  @Test def build {
+  @Test def build: Unit = {
     val gr = GrantedRole(module, roleDefinition)
     val role = gr.build()
     role.getName should be("AssignmentSubmitterRoleDefinition")
     role.explicitPermissionsAsList.contains((Permissions.Submission.Create, Some(module))) should be(true)
   }
 
-  @Test def buildWithOverride {
+  @Test def buildWithOverride: Unit = {
     val gr = GrantedRole(module, roleDefinition)
 
     val custom = new CustomRoleDefinition

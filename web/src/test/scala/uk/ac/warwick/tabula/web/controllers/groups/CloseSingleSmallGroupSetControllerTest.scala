@@ -16,7 +16,7 @@ class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def createsCommand() {
+  def createsCommand(): Unit = {
     withUser("test") {
       val command = controller.getOpenGroupSetCommand(module, set, SmallGroupSetSelfSignUpState.Closed)
       command.singleSetToOpen should be(set)
@@ -24,7 +24,7 @@ class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def showsForm() {
+  def showsForm(): Unit = {
     val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
     controller.form(mockCommand).viewName should be("groups/admin/groups/open")
   }

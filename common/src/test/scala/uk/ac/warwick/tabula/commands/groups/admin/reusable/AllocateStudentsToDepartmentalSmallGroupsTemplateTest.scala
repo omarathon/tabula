@@ -106,7 +106,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     }
   }
 
-  @Test def allocateUsersSheet {
+  @Test def allocateUsersSheet: Unit = {
     new CommandFixture {
 
       implicit class SearchableSheet(self: Sheet) {
@@ -135,7 +135,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     }
   }
 
-  @Test def groupLookupSheet {
+  @Test def groupLookupSheet: Unit = {
     new CommandFixture {
       val workbook: SXSSFWorkbook = command.generateWorkbook()
 
@@ -159,7 +159,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     }
   }
 
-  @Test def checkExcelView {
+  @Test def checkExcelView: Unit = {
     new CommandFixture {
       val excelDownload: ExcelView = command.applyInternal()
 
@@ -167,7 +167,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
@@ -182,7 +182,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment: Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -192,7 +192,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -202,7 +202,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -214,7 +214,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
     command.permissionsCheck(checking)
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = AllocateStudentsToDepartmentalSmallGroupsTemplateCommand(department, set)
 

@@ -98,7 +98,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     }
   }
 
-  def tutors_=(group: UserGroup) {
+  def tutors_=(group: UserGroup): Unit = {
     _tutors = group
   }
 

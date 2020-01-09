@@ -96,7 +96,7 @@ class ImportStudentRowCommandInternal(
     }
   }
 
-  private def saveStudentDetails(isTransient: Boolean, member: StudentMember) {
+  private def saveStudentDetails(isTransient: Boolean, member: StudentMember): Unit = {
     // There are multiple rows returned by the SQL per student; only import non-course details if we haven't already
     val commandBean = new BeanWrapperImpl(this)
     val memberBean = new BeanWrapperImpl(member)

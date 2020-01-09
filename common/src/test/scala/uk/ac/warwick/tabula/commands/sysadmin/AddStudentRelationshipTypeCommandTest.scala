@@ -17,7 +17,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def objectApplyCreatesCommand() {
+  def objectApplyCreatesCommand(): Unit = {
     new Fixture {
       val command = AddStudentRelationshipTypeCommand()
 
@@ -26,7 +26,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandCreatesRelationshipWhenApplied() {
+  def commandCreatesRelationshipWhenApplied(): Unit = {
     new Fixture {
       commandInternal.id = "theId"
       commandInternal.urlPart = "theUrlPart"
@@ -57,7 +57,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyInvokesSaveOnRelationshipService() {
+  def commandApplyInvokesSaveOnRelationshipService(): Unit = {
     new Fixture {
       val newType: StudentRelationshipType = commandInternal.applyInternal()
       verify(commandInternal.relationshipService, times(1)).saveOrUpdate(newType)
@@ -65,7 +65,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDescriptionDescribedProperties() {
+  def commandDescriptionDescribedProperties(): Unit = {
     new Fixture {
       val describable = new ModifyStudentRelationshipTypeCommandDescription with StudentRelationshipTypeProperties {
         val eventName: String = "test"
@@ -86,7 +86,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireGlobalStudentRelationshipTypeCreate {
+  def permissionsRequireGlobalStudentRelationshipTypeCreate: Unit = {
     new Fixture {
       val perms = new AddStudentRelationshipTypeCommandPermissions() {}
       val checking: PermissionsChecking = mock[PermissionsChecking]
@@ -96,7 +96,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicateValidation {
+  def duplicateValidation: Unit = {
     new Fixture {
       commandInternal.id = "newId"
 

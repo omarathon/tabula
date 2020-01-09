@@ -10,9 +10,8 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/upload-to-sits"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/upload-to-sits"))
 class UploadFeedbackToSitsController extends CourseworkController {
 
   @ModelAttribute("command")

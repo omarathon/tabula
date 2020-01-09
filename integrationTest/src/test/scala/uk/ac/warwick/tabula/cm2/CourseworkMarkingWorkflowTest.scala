@@ -65,7 +65,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     val row = tbody.findElements(By.tagName("tr")).asScala.find({
       _.findElement(By.tagName("td")).getText == workflowName
     })
-    row should be('defined)
+    row should be(Symbol("defined"))
 
     click on row.get.findElement(By.partialLinkText("Delete"))
 
@@ -94,7 +94,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     val row = tbody.findElements(By.tagName("tr")).asScala.find({
       _.findElement(By.tagName("td")).getText == "Single marker workflow 2"
     })
-    row should be('defined)
+    row should be(Symbol("defined"))
     click on row.get.findElement(By.partialLinkText("Modify"))
 
     eventually {
@@ -147,7 +147,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     val row = tbody.findElements(By.tagName("tr")).asScala.find({
       _.findElement(By.tagName("td")).getText == "Single marker workflow 2"
     })
-    row should not be 'defined
+    row should not be Symbol("defined")
 
   }
 }

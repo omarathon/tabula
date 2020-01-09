@@ -176,7 +176,7 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
       .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     Assert.notNull(runtimeClass, "Must set runtime class")
     Assert.notNull(path, "Must set path")
 
@@ -189,7 +189,7 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
   var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
   var context: String = Wire.property("${module.context}")
 
-  def invalidate(helper: UserGroupMembershipHelperMethods[_], user: User) {
+  def invalidate(helper: UserGroupMembershipHelperMethods[_], user: User): Unit = {
     helper.cache match {
       case Some(cache: Cache[String, Array[String]]) =>
         cache.remove(user.getUserId)
@@ -209,7 +209,7 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     logger.debug(s"Synchronising item $item for $context")
     item match {
       case msg: UserGroupMembershipHelperCacheBusterMessage =>
@@ -222,7 +222,7 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
     }
   }
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     queue.addListener(classOf[UserGroupMembershipHelperCacheBusterMessage].getAnnotation(classOf[ItemType]).value, this)
   }
 }

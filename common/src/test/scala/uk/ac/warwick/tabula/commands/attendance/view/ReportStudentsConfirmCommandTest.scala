@@ -17,7 +17,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateInvalidPeriod() {
+  def validateInvalidPeriod(): Unit = {
     val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
       override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
       override lazy val studentMissedReportCounts = Seq()
@@ -30,7 +30,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateUnavailablePeriod() {
+  def validateUnavailablePeriod(): Unit = {
     val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
       override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
       override lazy val studentMissedReportCounts = Seq()
@@ -43,7 +43,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateNoStudents() {
+  def validateNoStudents(): Unit = {
     val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
       override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
       override lazy val studentMissedReportCounts = Seq()
@@ -56,7 +56,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateNotConfirmed() {
+  def validateNotConfirmed(): Unit = {
     val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
       override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
       override lazy val studentMissedReportCounts = Seq()
@@ -69,7 +69,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateValid() {
+  def validateValid(): Unit = {
     val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
       override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
       override lazy val studentMissedReportCounts = Seq(StudentReportCount(null, 1, 0))

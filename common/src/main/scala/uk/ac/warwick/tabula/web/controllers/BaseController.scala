@@ -122,7 +122,7 @@ trait ControllerImports {
 }
 
 trait PreRequestHandler {
-  def preRequest
+  def preRequest: Unit
 }
 
 trait MessageResolver {
@@ -184,7 +184,7 @@ abstract class BaseController extends ControllerMethods
     _hideDeletedItems = false
   }
 
-  final def preRequest {
+  final def preRequest(): Unit = {
     // if hideDeletedItems has been called, exclude all "deleted=1" items from Hib queries.
     if (_hideDeletedItems) {
       session.enableFilter("notDeleted")
@@ -193,7 +193,7 @@ abstract class BaseController extends ControllerMethods
   }
 
   // Stub implementation that can be overridden for logic that goes before a request
-  def onPreRequest {}
+  def onPreRequest(): Unit = {}
 
   /**
     * Sets up @Valid validation.
@@ -219,6 +219,6 @@ abstract class BaseController extends ControllerMethods
   /**
     * Do any custom binding init by overriding this method.
     */
-  def binding[A](binder: WebDataBinder, target: A) {}
+  def binding[A](binder: WebDataBinder, target: A): Unit = {}
 
 }

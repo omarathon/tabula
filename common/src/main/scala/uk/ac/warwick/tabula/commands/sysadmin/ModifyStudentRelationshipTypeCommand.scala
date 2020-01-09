@@ -15,7 +15,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
   with StudentRelationshipTypeProperties with SelfValidating {
   this: RelationshipServiceComponent =>
 
-  def copyFrom(tpe: StudentRelationshipType) {
+  def copyFrom(tpe: StudentRelationshipType): Unit = {
     id = tpe.id
     urlPart = tpe.urlPart
     agentRole = tpe.agentRole
@@ -29,7 +29,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
     sortOrder = tpe.sortOrder
   }
 
-  def copyTo(tpe: StudentRelationshipType) {
+  def copyTo(tpe: StudentRelationshipType): Unit = {
     tpe.id = id
     tpe.urlPart = urlPart
     tpe.agentRole = agentRole

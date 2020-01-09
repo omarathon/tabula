@@ -18,7 +18,7 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
   var profileService: ProfileService = Wire.auto[ProfileService]
   var relationshipService: RelationshipService = Wire.auto[RelationshipService]
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     if (studentCourseDetails.currentRoute != null && studentCourseDetails.currentRoute.degreeType == Postgraduate) {
       transactional() {
         importSupervisors()
@@ -28,7 +28,7 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
 
   override def describe(d: Description): Unit = d.property("sprCode" -> studentCourseDetails.sprCode)
 
-  def importSupervisors() {
+  def importSupervisors(): Unit = {
     relationshipService
       .getStudentRelationshipTypesWithRdxType // only look for relationship types that are in RDX
       .filter { relType => // where the department settings specify that SITS should be the source

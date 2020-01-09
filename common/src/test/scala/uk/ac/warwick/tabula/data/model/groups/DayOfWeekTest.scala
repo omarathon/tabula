@@ -5,24 +5,24 @@ import uk.ac.warwick.tabula.TestBase
 
 class DayOfWeekTest extends TestBase {
   @Test
-  def find() {
+  def find(): Unit = {
     DayOfWeek.find(3) should be(Some(DayOfWeek.Wednesday))
     DayOfWeek.find(9) should be(None)
   }
 
   @Test
-  def applyValid() {
+  def applyValid(): Unit = {
     DayOfWeek(3) should be(DayOfWeek.Wednesday)
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def applyInvalid() {
+  def applyInvalid(): Unit = {
     DayOfWeek(0)
     fail("No exception")
   }
 
   @Test
-  def equality() {
+  def equality(): Unit = {
     DayOfWeek.Tuesday should be(DayOfWeek.Tuesday)
     DayOfWeek.Tuesday should not be (DayOfWeek.Wednesday)
   }

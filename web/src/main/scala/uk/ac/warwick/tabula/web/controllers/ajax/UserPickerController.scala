@@ -69,7 +69,7 @@ object UserPickerController {
       * If more words are given, the first two are used
       * as firstname and surname.
       */
-    def setQuery(q: String) {
+    def setQuery(q: String): Unit = {
       firstName = ""
       lastName = ""
       q.split("\\s").toList match {

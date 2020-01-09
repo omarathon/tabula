@@ -4,7 +4,7 @@ trait SetsFindPointsResultOnCommandState {
 
   self: FindPointsResultCommandState =>
 
-  def setFindPointsResult(result: FindPointsResult) {
+  def setFindPointsResult(result: FindPointsResult): Unit = {
     findPointsResult = result
   }
 

@@ -196,7 +196,7 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
     d.attendanceMonitoringSchemes(schemesToEdit)
   }
 
-  override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+  override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]): Unit = {
     d.attendanceMonitoringPoints(points, verbose = true)
   }
 }

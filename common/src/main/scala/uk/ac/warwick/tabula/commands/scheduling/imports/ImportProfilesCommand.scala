@@ -43,7 +43,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   val BatchSize = 100
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     if (features.profiles) {
       benchmarkTask("Import members") {
         doMemberDetails(transactional(readOnly = true) {
@@ -58,7 +58,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   /** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 
-  def doMemberDetails(department: Department) {
+  def doMemberDetails(department: Department): Unit = {
     logger.info("Importing member details")
     val importCommandFactory = new ImportCommandFactory
 
@@ -191,7 +191,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   // and, since TAB-2517, apply to all SCYDs from the current SITS year onwards. If in future, a student's visa state
   // changes, then all SCYDs from that point onwards can be updated, so we retain data at no worse than
   // academic year granularity.
-  def updateVisa(rowCommands: Seq[ImportMemberCommand]) {
+  def updateVisa(rowCommands: Seq[ImportMemberCommand]): Unit = {
     logger.info("Updating visa status")
 
     toStudentMembers(rowCommands).foreach(student => ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear).apply())
@@ -201,7 +201,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   }
 
 
-  def updateAddress(rowCommands: Seq[ImportMemberCommand]) {
+  def updateAddress(rowCommands: Seq[ImportMemberCommand]): Unit = {
     logger.info("Updating address")
 
     toStudentOrApplicantMembers(rowCommands).foreach(member => ImportAddressCommand(member).apply())

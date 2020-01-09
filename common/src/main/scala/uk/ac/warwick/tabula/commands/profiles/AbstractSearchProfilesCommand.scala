@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles
 
-import org.hibernate.validator.constraints.NotEmpty
+import javax.validation.constraints.NotEmpty
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.{ApplicantMember, Member, MemberUserType}

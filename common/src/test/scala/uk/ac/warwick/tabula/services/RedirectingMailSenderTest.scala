@@ -14,7 +14,7 @@ import java.util.Properties
 
 
 class RedirectingMailSenderTest extends TestBase with Mockito {
-  @Test def barelyTest {
+  @Test def barelyTest: Unit = {
     val delegate = mock[WarwickMailSender]
 
     val session = Session.getDefaultInstance(new Properties)

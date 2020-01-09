@@ -543,7 +543,7 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 
   def describe(d: Description): Unit = {}
 
-  override def describeResult(d: Description, result: ImportAcademicInformationResults) {
+  override def describeResult(d: Description, result: ImportAcademicInformationResults): Unit = {
     def importProperties(d: Description, name: String, result: ImportResult): Description = {
       d.properties(
         s"${name}Added" -> result.added,

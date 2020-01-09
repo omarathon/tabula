@@ -29,10 +29,10 @@ trait MaintenanceStatus {
 trait MaintenanceModeService extends MaintenanceStatus {
 
   /** Enable maintenance mode. **/
-  def enable
+  def enable: Unit
 
   /** Disable maintenance mode. **/
-  def disable
+  def disable: Unit
 
   /** Returns whether maintenance mode is enabled. */
   def enabled: Boolean
@@ -88,14 +88,14 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 
   private def notEnabled = new IllegalStateException("Maintenance not enabled")
 
-  def enable {
+  def enable: Unit = {
     if (!_enabled) {
       _enabled = true
       changingState.emit(_enabled)
     }
   }
 
-  def disable {
+  def disable: Unit = {
     if (_enabled) {
       _enabled = false
       changingState.emit(_enabled)
@@ -162,7 +162,7 @@ class MaintenanceModeListener extends QueueListener with InitializingBean with L
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     item match {
       case copy: MaintenanceModeMessage => maintenanceModeService.update(copy)
       case _ =>

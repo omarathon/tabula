@@ -11,7 +11,7 @@ import scala.xml.{Elem, MinimizeMode, Utility}
 class XmlView(xml: Elem, filename: Option[String] = None) extends View {
   override def getContentType: String = "text/xml"
 
-  def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) {
+  def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
     filename.foreach(fn => response.setHeader("Content-Disposition", "attachment;filename=\"" + fn + "\""))
     // Scala's main XML library doesn't support XML declarations for some reason. So write one here.
     val writer = response.getWriter

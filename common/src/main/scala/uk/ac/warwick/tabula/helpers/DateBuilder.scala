@@ -19,9 +19,9 @@ object DateBuilder {
   private val formatterMap = new DateTimeFormatterCache
 
   private val _relativeWords = Map(
-    'yesterday -> "Yesterday",
-    'today -> "Today",
-    'tomorrow -> "Tomorrow")
+    Symbol("yesterday") -> "Yesterday",
+    Symbol("today") -> "Today",
+    Symbol("tomorrow") -> "Tomorrow")
   private val relativeWords = Map(
     true -> _relativeWords,
     false -> _relativeWords.mapValues(_.toLowerCase))
@@ -78,9 +78,9 @@ object DateBuilder {
       })
 
     if (!relative) absoluteDate
-    else if (today isEqual thatDay) relativeWords(capitalise)('today)
-    else if (today.minusDays(1) isEqual thatDay) relativeWords(capitalise)('yesterday)
-    else if (today.plusDays(1) isEqual thatDay) relativeWords(capitalise)('tomorrow)
+    else if (today isEqual thatDay) relativeWords(capitalise)(Symbol("today"))
+    else if (today.minusDays(1) isEqual thatDay) relativeWords(capitalise)(Symbol("yesterday"))
+    else if (today.plusDays(1) isEqual thatDay) relativeWords(capitalise)(Symbol("tomorrow"))
     else absoluteDate
   }
 }

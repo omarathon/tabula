@@ -184,7 +184,7 @@ class SmallGroupsReportRequest extends Serializable {
   var reportRangeStartDate: String = _
   var reportRangeEndDate: String = _
 
-  def copyTo(state: SmallGroupsReportProcessorState) {
+  def copyTo(state: SmallGroupsReportProcessorState): Unit = {
     state.attendance = attendance
 
     state.students = students

@@ -57,7 +57,7 @@ class FakeSyllabusPlusController extends Logging with AutowiringApacheHttpClient
   // note that the "year" variable should be in the same format Syllabus+ uses
   // i.e. 1213 for academic year 2012-2013
   @RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/student"))
-  def saveStudent(@RequestParam studentId: String, @RequestParam year: String, @RequestParam content: String) {
+  def saveStudent(@RequestParam studentId: String, @RequestParam year: String, @RequestParam content: String): Unit = {
     if (!studentId.matches("^[0-9]+")) {
       // it's probably a usercode, since functional tests don't have access  to warwickIds for their users
       val user = userLookup.getUserByUserId(studentId)
@@ -88,7 +88,7 @@ class FakeSyllabusPlusController extends Logging with AutowiringApacheHttpClient
   // note that the "year" variable should be in the same format Syllabus+ uses
   // i.e. 1213 for academic year 2012-2013
   @RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/module"))
-  def saveModule(@RequestParam moduleCode: String, @RequestParam year: String, @RequestParam content: String) {
+  def saveModule(@RequestParam moduleCode: String, @RequestParam year: String, @RequestParam content: String): Unit = {
     moduleTimetables.put(ModuleYearKey(moduleCode, year), content)
   }
 
@@ -111,7 +111,7 @@ class FakeSyllabusPlusController extends Logging with AutowiringApacheHttpClient
   }
 
   @RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/moduleNoStudents"))
-  def saveModuleNoStudents(@RequestParam moduleCode: String, @RequestParam year: String, @RequestParam content: String) {
+  def saveModuleNoStudents(@RequestParam moduleCode: String, @RequestParam year: String, @RequestParam content: String): Unit = {
     moduleNoStudentsTimetables.put(ModuleNoStudentsYearKey(moduleCode, year), content)
   }
 
@@ -136,7 +136,7 @@ class FakeSyllabusPlusController extends Logging with AutowiringApacheHttpClient
   // note that the "year" variable should be in the same format Syllabus+ uses
   // i.e. 1213 for academic year 2012-2013
   @RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/staff"))
-  def saveStaff(@RequestParam staffId: String, @RequestParam year: String, @RequestParam content: String) {
+  def saveStaff(@RequestParam staffId: String, @RequestParam year: String, @RequestParam content: String): Unit = {
     if (!staffId.matches("^[0-9]+")) {
       // it's probably a usercode, since functional tests don't have access  to warwickIds for their users
       val user = userLookup.getUserByUserId(staffId)

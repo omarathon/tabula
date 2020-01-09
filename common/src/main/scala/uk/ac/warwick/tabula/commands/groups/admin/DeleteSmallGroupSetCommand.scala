@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Module, ScheduledNotification}
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
   extends Command[SmallGroupSet] with SelfValidating with SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] {
@@ -33,7 +33,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
     } else validateCanDelete(errors)
   }
 
-  def validateCanDelete(errors: Errors) {
+  def validateCanDelete(errors: Errors): Unit = {
     if (set.deleted) {
       errors.reject("smallGroupSet.delete.deleted")
     } else if (set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted) {

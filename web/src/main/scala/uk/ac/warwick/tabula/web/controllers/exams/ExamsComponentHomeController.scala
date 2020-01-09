@@ -21,27 +21,19 @@ class ExamsComponentHomeController extends ExamsController {
   @RequestMapping
   def home: Mav = {
     val homeDepartment = moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
-    val examsEnabled = features.exams && user.isStaff && (homeDepartment.exists(_.uploadExamMarksToSits) || assessmentService.getExamsWhereMarker(user.apparentUser).nonEmpty)
+    // TODO - reuse this for the new exam management
+    val examsEnabled = features.exams && user.isStaff && false
     val canDeptAdmin = user.loggedIn && moduleService.departmentsWithPermission(user, Permissions.Department.Reports).nonEmpty
     val examGridsEnabled = features.examGrids && user.isStaff && (canDeptAdmin || moduleService.departmentsWithPermission(user, Permissions.Department.ExamGrids).nonEmpty)
 
-    if (examsEnabled && !examGridsEnabled) {
-      Redirect(Routes.Exams.homeDefaultYear)
-    } else if (!examsEnabled && examGridsEnabled) {
+    if (!examsEnabled && examGridsEnabled) {
       Redirect(Routes.Grids.home)
     } else {
       Mav("exams/home",
         "examsEnabled" -> examsEnabled,
         "examGridsEnabled" -> examGridsEnabled
       ).secondCrumbs(
-        (examsEnabled match {
-          case true => Seq(ExamsBreadcrumbs.Exams.HomeDefaultYear)
-          case false => Nil
-        }) ++
-          (examGridsEnabled match {
-            case true => Seq(ExamsBreadcrumbs.Grids.Home)
-            case false => Nil
-          }): _*
+        (if (examGridsEnabled) Seq(ExamsBreadcrumbs.Grids.Home) else Nil): _*
       )
     }
   }

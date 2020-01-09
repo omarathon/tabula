@@ -43,16 +43,7 @@
   <#assign name="attendance" />
   <#assign nonav=false />
   <#assign homeUrl><@routes.attendance.home /></#assign>
-<#elseif requestPath == cm1Context || requestPath?starts_with("${cm1Context}/")>
-  <#assign bodyClass="coursework-page" />
-  <#assign siteHeader="Coursework Management" />
-  <#assign subsite=true />
-  <#assign title="Coursework Management" />
-  <#assign name="courses" />
-  <#assign nonav=false />
-  <#assign homeUrl><@routes.coursework.home /></#assign>
-  <#assign context=cm1Context />
-<#elseif requestPath == cm2Context || requestPath?starts_with("${cm2Context}/")>
+<#elseif requestPath == '/coursework' || requestPath?starts_with('/coursework' )>
   <#assign bodyClass="coursework-page" />
   <#assign siteHeader="Coursework Management" />
   <#assign subsite=true />
@@ -60,7 +51,6 @@
   <#assign name="cm2" />
   <#assign nonav=false />
   <#assign homeUrl><@routes.cm2.home /></#assign>
-  <#assign context=cm2Context />
 <#elseif requestPath == '/profiles' || requestPath?starts_with('/profiles/')>
   <#assign bodyClass="profiles-page" />
   <#assign siteHeader="Profiles" />

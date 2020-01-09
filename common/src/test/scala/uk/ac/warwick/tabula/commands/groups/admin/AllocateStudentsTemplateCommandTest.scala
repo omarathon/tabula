@@ -136,7 +136,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.profileService.getMemberByUser(user5) returns (Some(studentWithUsercode5))
   }
 
-  @Test def allocateUsersSheet {
+  @Test def allocateUsersSheet: Unit = {
     new CommandFixture {
 
       implicit class SearchableSheet(self: Sheet) {
@@ -165,7 +165,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def groupLookupSheet {
+  @Test def groupLookupSheet: Unit = {
     new CommandFixture {
       val workbook: SXSSFWorkbook = command.generateWorkbook()
 
@@ -189,7 +189,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def checkExcelView {
+  @Test def checkExcelView: Unit = {
     new CommandFixture {
       val excelDownload: ExcelView = command.applyInternal()
 
@@ -197,7 +197,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theModule, theSet) = (module, set)
       val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
@@ -212,7 +212,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment: Unit = {
     val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
       val module = null
       val set = new SmallGroupSet
@@ -222,7 +222,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
       val module: Module = Fixtures.module("in101")
       val set = null
@@ -232,7 +232,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
       val module: Module = Fixtures.module("in101")
       module.id = "set id"
@@ -244,7 +244,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = AllocateStudentsToGroupsTemplateCommand(module, set)
 

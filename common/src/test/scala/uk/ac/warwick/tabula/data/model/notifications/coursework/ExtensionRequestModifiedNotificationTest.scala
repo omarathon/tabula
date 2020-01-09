@@ -22,7 +22,7 @@ class ExtensionRequestModifiedNotificationTest extends TestBase with ExtensionNo
   @Test
   def urlIsAssignmentExtensionsPage(): Unit = new ExtensionFixture {
     val n: ExtensionRequestModifiedNotification = createNotification(extension, student)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
+    n.url should be(s"/coursework/admin/assignments/123/extensions?extension=${extension.id}")
   }
 
   @Test
@@ -48,14 +48,14 @@ class ExtensionRequestModifiedNotificationTest extends TestBase with ExtensionNo
   def shouldCallTextRendererWithCorrectModel(): Unit = new ExtensionFixture {
     val n: ExtensionRequestModifiedNotification = createNotification(extension, student)
     n.content.model("requestedExpiryDate") should be("23 August 2013 at 12:00:00")
-    n.content.model.get("reasonForRequest") should be('empty)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
+    n.content.model.get("reasonForRequest") should be(Symbol("empty"))
+    n.url should be(s"/coursework/admin/assignments/123/extensions?extension=${extension.id}")
     n.content.model("assignment") should be(assignment)
     n.content.model("student") should be(student)
   }
 
   @Test
-  def title() {
+  def title(): Unit = {
     new ExtensionFixture {
       module.code = "cs118"
       assignment.name = "5,000 word essay"

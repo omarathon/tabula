@@ -7,9 +7,8 @@ import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.controllers.cm2.AbstractGenerateGradeFromMarkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/generate-grade"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/generate-grade"))
 class GenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Assignment] {
 
   @ModelAttribute("command")

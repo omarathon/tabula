@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.AddressType._
 
 class AddressTypeTest extends TestBase {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new AddressTypeUserType
     t.convertToObject("H") should be(Home)
     t.convertToObject("C") should be(TermTime)
@@ -14,7 +14,7 @@ class AddressTypeTest extends TestBase {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new AddressTypeUserType
     t.convertToValue(Home) should be("H")
     t.convertToValue(TermTime) should be("C")

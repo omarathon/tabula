@@ -101,7 +101,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     click on linkText("Test Services")
     verifyPageLoaded {
       // wait for the page to load
-      find(cssSelector("div.deptheader")) should be('defined)
+      find(cssSelector("div.deptheader")) should be(Symbol("defined"))
     }
     if ((assistants ++ managers).nonEmpty) {
       val module = eventually {
@@ -112,9 +112,9 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       eventually(editPerms.isDisplayed should be (true))
       click on editPerms
 
-      def pick(table: String, usercodes: Seq[String]) {
+      def pick(table: String, usercodes: Seq[String]): Unit = {
         verifyPageLoaded {
-          find(cssSelector(s"$table .pickedUser")) should be('defined)
+          find(cssSelector(s"$table .pickedUser")) should be(Symbol("defined"))
         }
         usercodes.foreach { u =>
           click on cssSelector(s"$table .pickedUser")
@@ -154,7 +154,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     click on linkText("Test Services")
     verifyPageLoaded {
       // wait for the page to load
-      find(cssSelector("div.deptheader")) should be('defined)
+      find(cssSelector("div.deptheader")) should be(Symbol("defined"))
     }
     loadCurrentAcademicYearTab()
 
@@ -413,7 +413,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     val row = tbody.findElements(By.tagName("tr")).asScala.find({
       _.findElement(By.tagName("td")).getText == workflowName
     })
-    row should be('defined)
+    row should be(Symbol("defined"))
     val link = row.get.findElement(By.partialLinkText("Modify"))
     val url = link.getAttribute("href")
     val pattern = """.*markingworkflows/(.*)/edit""".r

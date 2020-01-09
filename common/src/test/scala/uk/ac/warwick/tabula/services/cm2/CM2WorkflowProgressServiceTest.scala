@@ -15,7 +15,6 @@ class CM2WorkflowProgressServiceTest extends TestBase with Mockito {
   def testSingleMarking(): Unit = {
     val dept = Fixtures.department("IN")
     val assignment = Fixtures.assignment("Test")
-    assignment.cm2Assignment = true
     assignment.module = Fixtures.module("IN101")
     assignment.module.adminDepartment = dept
     assignment.cm2MarkingWorkflow = SingleMarkerWorkflow.apply(name = "Test single marker workflow", department = dept, firstMarkers = Nil)
@@ -37,7 +36,6 @@ class CM2WorkflowProgressServiceTest extends TestBase with Mockito {
   def testDoubleBlindInitialMarkerBStageComplete(): Unit = {
     val dept = Fixtures.department("IN")
     val assignment = Fixtures.assignment("Test")
-    assignment.cm2Assignment = true
     assignment.module = Fixtures.module("IN101")
     assignment.module.adminDepartment = dept
     assignment.cm2MarkingWorkflow = DoubleBlindWorkflow.apply(name = "Test double blind workflow", department = dept, initialMarkers = Nil, finalMarkers = Nil)

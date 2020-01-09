@@ -8,11 +8,11 @@ class MemberNoteDaoTest extends PersistenceTestBase {
   val memberNoteDao = new MemberNoteDaoImpl
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     memberNoteDao.sessionFactory = sessionFactory
   }
 
-  @Test def saveAndFetch {
+  @Test def saveAndFetch: Unit = {
     transactional { tx =>
 
       val student = Fixtures.student("123", "abc")
@@ -28,7 +28,7 @@ class MemberNoteDaoTest extends PersistenceTestBase {
     }
   }
 
-  @Test def listNotesIncludeDeleted {
+  @Test def listNotesIncludeDeleted: Unit = {
     transactional { tx =>
 
       val student = Fixtures.student("456", "def")
@@ -49,7 +49,7 @@ class MemberNoteDaoTest extends PersistenceTestBase {
     }
   }
 
-  @Test def listNotes {
+  @Test def listNotes: Unit = {
     transactional { tx =>
 
       val student = Fixtures.student("456", "def")

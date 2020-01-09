@@ -64,7 +64,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
         val allDbAllocatedStudents = dbAllocated.flatMap(_.students).distinct
         val allAllocatedStudents = allocatedWithAdditionsAndRemovals.flatMap(_.students).distinct
         val newUnallocated = allDbAllocatedStudents.filterNot(allAllocatedStudents.contains)
-        val newlyAllocatedUniIds = additions.asScala.mapValues(_.asScala).values.flatten.toSeq
+        val newlyAllocatedUniIds = additions.asScala.view.mapValues(_.asScala).values.flatten.toSeq
         val unallocatedWithAdditionsAndRemovals = newUnallocated ++ dbUnallocated.filterNot(student => newlyAllocatedUniIds.contains(student.universityId))
         (unallocatedWithAdditionsAndRemovals, allocatedWithAdditionsAndRemovals)
       } else {
@@ -153,7 +153,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
   }
 
   // attaches the data validation to the sheet
-  private def generateAgentDropdowns(sheet: Sheet, allocations: Seq[StudentAssociationEntityData], unallocated: Seq[StudentAssociationData]) {
+  private def generateAgentDropdowns(sheet: Sheet, allocations: Seq[StudentAssociationEntityData], unallocated: Seq[StudentAssociationData]): Unit = {
     if (allocations.nonEmpty) {
       val dropdownRange = new CellRangeAddressList(1, allocations.flatMap(_.students).length + unallocated.length, 3, 3)
       val validation = getDataValidation(allocations, sheet, dropdownRange)

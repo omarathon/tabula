@@ -43,7 +43,7 @@ class EditGroupSetPageTest extends SmallGroupsFixture with GivenWhenThen {
     editProperties.submitAndExit()
 
     Then("The page is the groupset summary page")
-    groupsetSummaryPage should be('currentPage)
+    groupsetSummaryPage should be(Symbol("currentPage"))
 
     When("I navigate to the edit properties page again")
     groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditProperties
@@ -85,7 +85,7 @@ class EditGroupSetPageTest extends SmallGroupsFixture with GivenWhenThen {
     editGroups.submitAndExit()
 
     Then("The page is the groupset summary page")
-    groupsetSummaryPage should be('currentPage)
+    groupsetSummaryPage should be(Symbol("currentPage"))
 
     When("I navigate to the edit groups page again")
     groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups

@@ -15,15 +15,15 @@ import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
 trait PermissionsDao {
-  def saveOrUpdate(roleDefinition: CustomRoleDefinition)
+  def saveOrUpdate(roleDefinition: CustomRoleDefinition): Unit
 
-  def saveOrUpdate(permission: GrantedPermission[_])
+  def saveOrUpdate(permission: GrantedPermission[_]): Unit
 
-  def saveOrUpdate(role: GrantedRole[_])
+  def saveOrUpdate(role: GrantedRole[_]): Unit
 
-  def delete(role: GrantedRole[_])
+  def delete(role: GrantedRole[_]): Unit
 
-  def delete(roleDefinition: CustomRoleDefinition)
+  def delete(roleDefinition: CustomRoleDefinition): Unit
 
   def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
 

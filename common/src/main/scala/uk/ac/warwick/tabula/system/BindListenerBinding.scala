@@ -8,7 +8,7 @@ import javax.servlet.ServletRequest
   */
 trait BindListenerBinding extends CustomDataBinder {
 
-  override def bind(request: ServletRequest) {
+  override def bind(request: ServletRequest): Unit = {
     super.bind(request)
 
     // Custom onBind methods

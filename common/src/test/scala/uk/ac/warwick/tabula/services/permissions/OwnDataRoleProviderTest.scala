@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, HeronWarningNotification, Submission, UserSettings}
+import uk.ac.warwick.tabula.data.model.{Feedback, HeronWarningNotification, Submission, UserSettings}
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.tabula.roles.{FeedbackRecipient, SettingsOwner, Submitter}
 import uk.ac.warwick.userlookup.User
@@ -10,7 +10,7 @@ class OwnDataRoleProviderTest extends TestBase {
   val provider = new OwnDataRoleProvider
 
   val submission: Submission = Fixtures.submission("0123456", "cuscav")
-  val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0123456", "cuscav")
+  val feedback: Feedback = Fixtures.assignmentFeedback("0123456", "cuscav")
   val userSettings: UserSettings = Fixtures.userSettings("cuscav")
 
   val agent: User = Fixtures.user("cuslaj")

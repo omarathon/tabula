@@ -29,7 +29,7 @@ class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
     val command = new ListDepartmentSmallGroupSetsCommandInternal(department, academicYear) with CommandTestSupport
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.smallGroupService.getDepartmentSmallGroupSets(department, academicYear) returns Seq(set1, set2)
 
@@ -37,7 +37,7 @@ class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     val command = new ListDepartmentSmallGroupSetsPermissions with ListDepartmentSmallGroupSetsCommandState {
       override val department: Department = Fixtures.department("in")
       override val academicYear = null
@@ -49,7 +49,7 @@ class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
     verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Create, command.department)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment(): Unit = {
     val command = new ListDepartmentSmallGroupSetsPermissions with ListDepartmentSmallGroupSetsCommandState {
       override val department = null
       override val academicYear = null
@@ -59,7 +59,7 @@ class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def wiresTogether() {
+  @Test def wiresTogether(): Unit = {
     new Fixture {
       val command = ListDepartmentSmallGroupSetsCommand(department, academicYear)
 

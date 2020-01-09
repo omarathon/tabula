@@ -76,7 +76,7 @@ class DepartmentSmallGroup
     }
   }
 
-  def students_=(group: UserGroup) {
+  def students_=(group: UserGroup): Unit = {
     _studentsGroup = group
   }
 

@@ -214,7 +214,7 @@ object Permissions {
     case object CreateOnBehalfOf extends Permission("Add a coursework submission on behalf of another member")
   }
 
-  object AssignmentFeedback {
+  object Feedback {
     case object Publish extends Permission("Release feedback to a student")
     case object UnPublish extends Permission("Unpublish a students feedback")
     case object Rate extends Permission("Rate feedback received")
@@ -223,18 +223,7 @@ object Permissions {
     case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
   }
 
-  object AssignmentMarkerFeedback {
-    case object Manage extends Permission("Manage marker feedback")
-    case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
-  }
-
-  object ExamFeedback {
-    case object Manage extends Permission("Manage feedback")
-    case object Read extends Permission("View feedback")
-    case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
-  }
-
-  object ExamMarkerFeedback {
+  object MarkerFeedback {
     case object Manage extends Permission("Manage marker feedback")
     case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
   }

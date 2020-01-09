@@ -55,7 +55,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
     binding.onBind(result)
 
     result.hasErrors should be(false)
-    binding.commands should be('empty)
+    binding.commands should be(Symbol("empty"))
   }
 
   @Test def bind(): Unit = new BindingFixture {
@@ -116,7 +116,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
     binding.onBind(result)
 
     result.hasErrors should be(false)
-    binding.commands should not be 'empty
+    binding.commands should not be Symbol("empty")
     binding.commands.size() should be(1)
 
     val commandHolder: ModifySmallGroupSetCommandHolder = binding.commands.get(0)

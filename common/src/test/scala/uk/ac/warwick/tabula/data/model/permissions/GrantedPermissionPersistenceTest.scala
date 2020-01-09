@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.helpers.ReflectionsSetup
 class GrantedPermissionPersistenceTest extends PersistenceTestBase with ReflectionsSetup {
 
 
-  @Test def saveAndLoad {
+  @Test def saveAndLoad: Unit = {
     transactional { t =>
       val department = Fixtures.department("IN", "IT Services")
 

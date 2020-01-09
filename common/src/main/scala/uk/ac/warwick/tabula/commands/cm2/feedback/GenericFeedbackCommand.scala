@@ -33,7 +33,7 @@ abstract class GenericFeedbackCommand(val assignment: Assignment)
 trait GenericFeedbackPermissions extends RequiresPermissionsChecking {
   self: GenericFeedbackState =>
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.Feedback.Manage, assignment)
   }
 }
 

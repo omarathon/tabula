@@ -9,7 +9,7 @@ class CreateScheduledMeetingRecordControllerTest extends TestBase with Mockito {
 
   // TAB-2430
   @Test
-  def createCommand() {
+  def createCommand(): Unit = {
     val cmd = controller.getCreateCommand(null)
     cmd should be(null)
   }

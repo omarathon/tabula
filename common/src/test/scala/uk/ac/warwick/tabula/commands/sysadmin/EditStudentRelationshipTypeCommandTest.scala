@@ -30,7 +30,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def objectApplyCreatesCommand() {
+  def objectApplyCreatesCommand(): Unit = {
     new Fixture {
       val command = EditStudentRelationshipTypeCommand(testRelationshipType)
 
@@ -39,7 +39,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandEditsRelationshipWhenApplied() {
+  def commandEditsRelationshipWhenApplied(): Unit = {
     new Fixture {
       commandInternal.id = "theId"
       commandInternal.urlPart = "theUrlPart"
@@ -70,7 +70,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApplyInvokesSaveOnRelationshipService() {
+  def commandApplyInvokesSaveOnRelationshipService(): Unit = {
     new Fixture {
       commandInternal.applyInternal()
       verify(commandInternal.relationshipService, times(1)).saveOrUpdate(testRelationshipType)
@@ -78,7 +78,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandDescriptionDescribedProperties() {
+  def commandDescriptionDescribedProperties(): Unit = {
     new Fixture {
       val describable = new ModifyStudentRelationshipTypeCommandDescription with StudentRelationshipTypeProperties {
         val eventName: String = "test"
@@ -99,7 +99,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireGlobalStudentRelationshipTypeUpdate {
+  def permissionsRequireGlobalStudentRelationshipTypeUpdate: Unit = {
     new Fixture {
       val perms = new EditStudentRelationshipTypeCommandPermissions with HasExistingStudentRelationshipType {
         val relationshipType: StudentRelationshipType = testRelationshipType
@@ -111,7 +111,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicateValidation {
+  def duplicateValidation: Unit = {
     new Fixture {
       val existing = StudentRelationshipType("existing", "existing", "existing", "existing")
 

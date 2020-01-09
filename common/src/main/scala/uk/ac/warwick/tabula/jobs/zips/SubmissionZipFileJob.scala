@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.concurrent.Await

@@ -73,7 +73,7 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
     sheet
   }
 
-  private def addRow(sheet: Sheet)(data: SmallGroupEventReportData) {
+  private def addRow(sheet: Sheet)(data: SmallGroupEventReportData): Unit = {
     val row = sheet.createRow(sheet.getLastRowNum + 1)
     headers.zipWithIndex foreach { case (_, index) =>
       val cell = row.createCell(index)

@@ -51,7 +51,7 @@ class AttendanceMonitoringCheckpoint extends GeneratedId {
 
   def state: AttendanceState = _state
 
-  def state_=(state: AttendanceState) {
+  def state_=(state: AttendanceState): Unit = {
     if (attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)) {
       throw new IllegalArgumentException
     }

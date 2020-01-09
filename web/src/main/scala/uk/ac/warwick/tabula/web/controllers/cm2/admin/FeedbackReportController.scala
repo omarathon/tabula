@@ -67,9 +67,8 @@ abstract class AbstractFeedbackReportController extends CourseworkController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/reports/feedback"))
+@RequestMapping(Array("/coursework/admin/department/{department}/reports/feedback"))
 class FeedbackReportController extends AbstractFeedbackReportController {
 
   @ModelAttribute("activeAcademicYear")
@@ -78,9 +77,8 @@ class FeedbackReportController extends AbstractFeedbackReportController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/reports/feedback"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear:\\d{4}}/reports/feedback"))
 class FeedbackReportForYearController extends AbstractFeedbackReportController {
 
   @ModelAttribute("activeAcademicYear")

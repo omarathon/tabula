@@ -17,9 +17,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}"))
 class DownloadMarkerFeedbackController extends CourseworkController {
 
   type Command = Appliable[Option[RenderableFile]] with DownloadMarkerFeedbackState
@@ -42,9 +41,8 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback.zip"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback.zip"))
 class DownloadAllFeedbackController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -63,9 +61,8 @@ class DownloadAllFeedbackController extends CourseworkController {
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
 class DownloadSelectedFeedbackController extends CourseworkController {
 
   var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
@@ -74,7 +71,7 @@ class DownloadSelectedFeedbackController extends CourseworkController {
   def singleFeedbackCommand(
     @PathVariable assignment: Assignment,
     @PathVariable feedbackId: String
-  ) = new AdminGetSingleFeedbackCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+  ) = new AdminGetSingleFeedbackCommand(mandatory(assignment), mandatory(feedbackDao.getFeedback(feedbackId)))
 
   @RequestMapping(method = Array(GET), value = Array("/{filename}.zip"))
   def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
@@ -88,9 +85,8 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
 
   var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
@@ -98,7 +94,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
   @ModelAttribute def singleFeedbackCommand(
     @PathVariable assignment: Assignment,
     @PathVariable feedbackId: String
-  ) = new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+  ) = new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getFeedback(feedbackId)))
 
   @RequestMapping(method = Array(GET), value = Array("/{filename}", "/attachment/{filename}"))
   def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
@@ -109,9 +105,8 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
   }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/summary/{student}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/summary/{student}"))
 class FeedbackSummaryController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -126,9 +121,8 @@ class FeedbackSummaryController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/feedback.zip"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/{stage}/feedback.zip"))
 class DownloadMarkerFeedbackForStageController extends CourseworkController {
 
   @ModelAttribute("command")

@@ -7,23 +7,23 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 
 class PermissionTest extends TestBase {
 
-  @Test def of {
+  @Test def of: Unit = {
     Permissions.of("Module.ManageAssignments") match {
       case Module.ManageAssignments =>
       case what: Any => fail("what is this?" + what)
     }
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def invalidAction {
+  @Test(expected = classOf[IllegalArgumentException]) def invalidAction: Unit = {
     Permissions.of("Spank")
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def obsoleteProfilesRead {
+  @Test(expected = classOf[IllegalArgumentException]) def obsoleteProfilesRead: Unit = {
     // this perm made obsolete (as leaf node) in TAB-564
     Permissions.of("Profiles.Read")
   }
 
-  @Test def name {
+  @Test def name: Unit = {
     Permissions.Assignment.Archive.getName should be("Assignment.Archive")
     Permissions.GodMode.getName should be("GodMode")
     Permissions.of("Module.ManageAssignments").getName should be("Module.ManageAssignments")
@@ -44,7 +44,7 @@ class PermissionTest extends TestBase {
   }
 
   @Test
-  def anyPermissionSelectorHashing() {
+  def anyPermissionSelectorHashing(): Unit = {
     val any = PermissionsSelector.Any[StudentRelationshipType]
     val anyMore = PermissionsSelector.Any[StudentRelationshipType]
     any should be(anyMore)
@@ -52,7 +52,7 @@ class PermissionTest extends TestBase {
   }
 
   @Test
-  def selectorPermissionsHashing() {
+  def selectorPermissionsHashing(): Unit = {
     val selectorPermission = Permissions.Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
     val selectorPermission2 = Permissions.Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
 

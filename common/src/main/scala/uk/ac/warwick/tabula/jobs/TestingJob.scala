@@ -16,7 +16,7 @@ object TestingJob {
 class TestingJob extends Job {
   val identifier: String = TestingJob.id
 
-  def run(implicit job: JobInstance) {
+  def run(implicit job: JobInstance): Unit = {
     val name = job.getString("name")
     val sleepTime = job.getString("sleepTime").toInt
     updateStatus("Running the job with name %s." format name)

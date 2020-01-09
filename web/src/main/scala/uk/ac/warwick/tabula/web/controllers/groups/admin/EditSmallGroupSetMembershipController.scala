@@ -90,7 +90,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
   ): Mav = submit(cmd, errors, set, Routes.admin(set.department, set.academicYear))
 
   @InitBinder
-  def upstreamGroupBinder(binder: WebDataBinder) {
+  def upstreamGroupBinder(binder: WebDataBinder): Unit = {
     binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
   }
 

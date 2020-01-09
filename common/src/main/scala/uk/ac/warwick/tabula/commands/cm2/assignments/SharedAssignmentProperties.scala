@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.Length
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
+import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, WordCountField}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 
 import scala.jdk.CollectionConverters._
@@ -35,7 +35,7 @@ trait SharedAssignmentDetailProperties extends BooleanAssignmentDetailProperties
   }
 }
 
-trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProperties {
+trait SharedFeedbackProperties extends BooleanFeedbackProperties {
   self: ZipServiceComponent =>
 
   // linked feedback template (optional)
@@ -193,7 +193,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   */
 trait SharedAssignmentProperties
   extends SharedAssignmentDetailProperties
-    with SharedAssignmentFeedbackProperties
+    with SharedFeedbackProperties
     with SharedAssignmentStudentProperties
     with SharedAssignmentSubmissionProperties
     with SharedAssignmentOptionsProperties {
@@ -224,9 +224,6 @@ trait SharedAssignmentProperties
 trait FindAssignmentFields {
   protected def findFileField(assignment: Assignment): Option[FileField] =
     assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
-
-  protected def findMarkerSelectField(assignment: Assignment): Option[MarkerSelectField] =
-    assignment.findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
 
   /** Find the standard free-text field if it exists */
   protected def findCommentField(assignment: Assignment): Option[CommentField] =

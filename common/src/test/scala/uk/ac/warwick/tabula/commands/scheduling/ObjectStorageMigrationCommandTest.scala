@@ -19,7 +19,7 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
       val fileDao: FileDao = smartMock[FileDao]
     }
 
-    command.applyInternal() should be('empty)
+    command.applyInternal() should be(Symbol("empty"))
   }
 
   private trait CommandTestSupport extends FileHasherComponent with ObjectStorageServiceComponent with FileDaoComponent {

@@ -29,7 +29,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
 
     Then("I should see the groupset listed with a radio button beside each group")
     val groupsPage = new GroupsHomePage
-    groupsPage should be('currentPage)
+    groupsPage should be(Symbol("currentPage"))
 
     val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
@@ -57,7 +57,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
 
     Then("The groups home page should be displayed")
     val updatedGroupsPage = new GroupsHomePage
-    updatedGroupsPage should be('currentPage)
+    updatedGroupsPage should be(Symbol("currentPage"))
 
     And("The group I selected should be displayed")
     val updatedGroupsetInfo = updatedGroupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
@@ -96,7 +96,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
 
     Then("The groups home page should be displayed")
     val updatedGroupsPage = new GroupsHomePage
-    updatedGroupsPage should be('currentPage)
+    updatedGroupsPage should be(Symbol("currentPage"))
 
     And("Both groups should be displayed, with radio buttons for selection")
     val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
@@ -132,7 +132,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     Then("The groupset is not displayed")
     val groupsPage = new GroupsHomePage
     val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
-    groupInfo should not be 'defined
+    groupInfo should not be Symbol("defined")
 
   }
 
@@ -157,7 +157,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
     And("The leave button is not shown ")
-    groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
+    groupInfo.findLeaveButtonFor("Group 1") should not be Symbol("defined")
 
     And("The group locked icon is shown")
     groupInfo.showsGroupLockedIcon should be (true)
@@ -186,7 +186,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     Then("The groupset is not displayed")
     val groupsPage = new GroupsHomePage
     val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
-    groupInfo should not be 'defined
+    groupInfo should not be Symbol("defined")
   }
 
   "A student" should "see a self-sign-up groupset which is not open if they are allocated to a group" in {
@@ -210,7 +210,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
     And("The leave button is not shown ")
-    groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
+    groupInfo.findLeaveButtonFor("Group 1") should not be Symbol("defined")
 
     And("The group locked icon is shown")
     groupInfo.showsGroupLockedIcon should be (true)
@@ -241,7 +241,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
 
     Then("I should see the groupset listed with a radio button beside each group")
     val groupsPage = new GroupsHomePage
-    groupsPage should be('currentPage)
+    groupsPage should be(Symbol("currentPage"))
 
     val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
@@ -278,7 +278,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
     And("The leave button is not shown ")
-    groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
+    groupInfo.findLeaveButtonFor("Group 1") should not be Symbol("defined")
 
     And("The group locked icon is shown")
     groupInfo.showsGroupLockedIcon should be (true)

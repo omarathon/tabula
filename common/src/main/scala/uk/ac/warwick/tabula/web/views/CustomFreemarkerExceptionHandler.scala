@@ -16,7 +16,7 @@ class CustomFreemarkerExceptionHandler extends TemplateExceptionHandler {
   lazy val handler: ExceptionHandler = Wire[ExceptionHandler]
   lazy val production: Boolean = Wire.property("${environment.production}").toBoolean
 
-  def handleTemplateException(exception: TemplateException, env: Environment, out: Writer) {
+  def handleTemplateException(exception: TemplateException, env: Environment, out: Writer): Unit = {
     // Ignore Tiles errors, since they are just multiple errors
     if (ExceptionUtils.retrieveException(exception, classOf[TilesException]) == null) {
       val token = ExceptionTokens.newToken // TODO output the token to HTML

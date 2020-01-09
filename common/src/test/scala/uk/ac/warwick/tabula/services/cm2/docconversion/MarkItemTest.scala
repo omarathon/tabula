@@ -22,7 +22,7 @@ class MarkItemTest extends TestBase with Mockito {
   @Test
   def userEmpty(): Unit = {
     val item = markItem()
-    item.user(assignment) should be('empty)
+    item.user(assignment) should be(Symbol("empty"))
   }
 
   @Test
@@ -78,7 +78,7 @@ class MarkItemTest extends TestBase with Mockito {
     item.userLookup.getUserByWarwickUniId("u1234567", true) returns new AnonymousUser
     item.userLookup.getUserByUserId("u1234567") returns new AnonymousUser
 
-    item.user(assignment) should be('empty)
+    item.user(assignment) should be(Symbol("empty"))
   }
 
 }

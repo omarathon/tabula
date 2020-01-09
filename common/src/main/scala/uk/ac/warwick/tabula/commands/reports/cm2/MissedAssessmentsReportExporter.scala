@@ -59,7 +59,7 @@ class MissedAssessmentsReportXlsxExporter(report: MissedAssessmentsReport) {
     "Working days late"
   )
 
-  private def addRow(sheet: Sheet)(entity: MissedAssessmentsReportEntity) {
+  private def addRow(sheet: Sheet)(entity: MissedAssessmentsReportEntity): Unit = {
     val plainCellStyle = {
       val cs = sheet.getWorkbook.createCellStyle()
       cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))

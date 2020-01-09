@@ -2,23 +2,23 @@ package uk.ac.warwick.tabula
 
 class JavaImportsTest extends TestBase with JavaImports {
 
-  @Test def jSet() {
+  @Test def jSet(): Unit = {
     JSet("a", "b", "b").size() should be(2)
   }
 
-  @Test def jBoolean() {
+  @Test def jBoolean(): Unit = {
     ToJBoolean(Some(true)) should be(java.lang.Boolean.TRUE)
     ToJBoolean(Some(false)) should be(java.lang.Boolean.FALSE)
     ToJBoolean(None) should be(null)
   }
 
-  @Test def jInteger() {
+  @Test def jInteger(): Unit = {
     ToJInteger(Some(1)) should be(1)
     ToJInteger(Some(0)) should be(0)
     ToJInteger(None) should be(null)
   }
 
-  @Test def concurrentHashMap() {
+  @Test def concurrentHashMap(): Unit = {
     val map = JConcurrentHashMap[String, Int]()
     map.put("1", 1)
 

@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
+import uk.ac.warwick.tabula.commands.cm2.feedback.PublishFeedbackCommand
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -13,7 +14,7 @@ import scala.jdk.CollectionConverters._
 class PublishFeedbackCommandTest extends TestBase with Mockito {
 
   @Test
-  def validation() {
+  def validation(): Unit = {
     val now = dateTime(2012, 12).withDayOfMonth(25)
     val closeDateBefore = now.minusDays(2)
     val closeDateAfter = now.plusDays(2)
@@ -50,9 +51,9 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
     val user = new User("admin")
     val currentUser = new CurrentUser(user, user)
     val assignment: Assignment = newDeepAssignment(moduleCode = "IN101")
-    val command = PublishFeedbackCommand(assignment.module, assignment, currentUser, smartMock[GeneratesGradesFromMarks])
+    val command = PublishFeedbackCommand(assignment, currentUser, smartMock[GeneratesGradesFromMarks])
     val errors = new BindException(command, "command")
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
     feedback.actualMark = Option(41)
     feedback.assignment = assignment
     assignment.feedbacks = JArrayList(feedback)

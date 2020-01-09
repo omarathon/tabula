@@ -19,7 +19,7 @@ class SysadminRoleProviderTest extends TestBase with Mockito {
     ("cuscav", "tabula-sysadmins") -> true
   )
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     withUser("cuscav") {
       provider.getRolesFor(currentUser) should be(Seq(Sysadmin()))
     }
@@ -29,7 +29,7 @@ class SysadminRoleProviderTest extends TestBase with Mockito {
     }
   }
 
-  @Test def groupServiceException {
+  @Test def groupServiceException: Unit = {
     val userLookup = mock[UserLookupService]
     val groupService = mock[GroupService]
     userLookup.getGroupService() returns (new LenientGroupService(groupService))

@@ -28,27 +28,27 @@ trait PermissionsChecking extends PermissionsCheckingMethods {
   var permissionsAnyChecks: PermissionsCheckMultiMap = newMap()
   var permissionsAllChecks: PermissionsCheckMultiMap = newMap()
 
-  def PermissionCheckAny(checkablePermissions: Iterable[CheckablePermission]) {
+  def PermissionCheckAny(checkablePermissions: Iterable[CheckablePermission]): Unit = {
     for (p <- checkablePermissions) checkAny(p.permission, p.scope)
   }
 
-  def PermissionCheckAll(permission: Permission, scopes: Iterable[PermissionsTarget]) {
+  def PermissionCheckAll(permission: Permission, scopes: Iterable[PermissionsTarget]): Unit = {
     for (scope <- scopes) checkAll(permission, Some(scope))
   }
 
-  def PermissionCheck(scopelessPermission: ScopelessPermission) {
+  def PermissionCheck(scopelessPermission: ScopelessPermission): Unit = {
     checkAll(scopelessPermission, None)
   }
 
-  def PermissionCheck(permission: Permission, scope: PermissionsTarget) {
+  def PermissionCheck(permission: Permission, scope: PermissionsTarget): Unit = {
     checkAll(permission, Some(scope))
   }
 
-  private def checkAny(permission: Permission, scope: Option[PermissionsTarget]) {
+  private def checkAny(permission: Permission, scope: Option[PermissionsTarget]): Unit = {
     permissionsAnyChecks.addBinding(permission, scope)
   }
 
-  private def checkAll(permission: Permission, scope: Option[PermissionsTarget]) {
+  private def checkAll(permission: Permission, scope: Option[PermissionsTarget]): Unit = {
     permissionsAllChecks.addBinding(permission, scope)
   }
 }
@@ -92,16 +92,10 @@ trait PermissionsCheckingMethods extends Logging {
       throw new ItemNotFoundException(set, "Not displaying department small group set as it doesn't belong to specified department")
     }
 
-  def mustBeLinked(feedback: AssignmentFeedback, assignment: Assignment): Unit =
+  def mustBeLinked(feedback: Feedback, assignment: Assignment): Unit =
     if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
       logger.info("Not displaying feedback as it doesn't belong to specified assignment")
       throw new ItemNotFoundException(feedback, "Not displaying feedback as it doesn't belong to specified assignment")
-    }
-
-  def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department): Unit =
-    if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
-      logger.info("Not displaying marking workflow as it doesn't belong to specified department")
-      throw new ItemNotFoundException(markingWorkflow, "Not displaying marking workflow as it doesn't belong to specified department")
     }
 
   def mustBeLinked(template: FeedbackTemplate, department: Department): Unit =
@@ -201,7 +195,7 @@ trait PermissionsCheckingMethods extends Logging {
     * Checks target.permissionsAllChecks for ANDed permission, then target.permissionsAnyChecks for ORed permissions.
     * Throws PermissionDeniedException if permissions are unmet or ItemNotFoundException (-> 404) if scope is missing.
     */
-  def permittedByChecks(securityService: SecurityService, user: CurrentUser, target: PermissionsChecking) {
+  def permittedByChecks(securityService: SecurityService, user: CurrentUser, target: PermissionsChecking): Unit = {
     Assert.isTrue(
       target.permissionsAnyChecks.nonEmpty || target.permissionsAllChecks.nonEmpty || target.isInstanceOf[Public],
       "Bind target " + target.getClass + " must specify permissions or extend Public"

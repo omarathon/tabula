@@ -51,7 +51,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def createsSnapshotOfSmallGroupWhenConstructed() {
+  def createsSnapshotOfSmallGroupWhenConstructed(): Unit = {
     new SmallGroupFixture {
       val command: StubCommand = new StubCommand(groupSet1, actor, userLookup)
 
@@ -62,7 +62,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def affectedStudentsGroupsDetectsAdditions() {
+  def affectedStudentsGroupsDetectsAdditions(): Unit = {
     new Fixture {
       // add user4 to group A
       val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1", "user2", "user4"))).build
@@ -74,7 +74,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def affectedStudentsGroupsDetectsRemovals() {
+  def affectedStudentsGroupsDetectsRemovals(): Unit = {
     new Fixture {
       // remove user2 from group A
       val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1"))).build
@@ -86,7 +86,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def affectedStudentsGroupDetectsChangesToEvents() {
+  def affectedStudentsGroupDetectsChangesToEvents(): Unit = {
     new Fixture {
       val event: SmallGroupEvent = new SmallGroupEventBuilder().build
       val modifiedGroupA: SmallGroup = groupA.withEvents(Seq(event)).build
@@ -103,7 +103,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def emitsANotificationForEachAffectedStudent() {
+  def emitsANotificationForEachAffectedStudent(): Unit = {
     new Fixture {
 
       val event: SmallGroupEvent = new SmallGroupEventBuilder().build
@@ -125,7 +125,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
 
   @Test
-  def emitsNoNotificationsToStudentsIfGroupsetIsNotReleased() {
+  def emitsNoNotificationsToStudentsIfGroupsetIsNotReleased(): Unit = {
     new Fixture {
       val unreleasedGroupset: SmallGroupSet = groupSet.withReleasedToStudents(isReleased = false).build
       val cmd = new StubCommand(unreleasedGroupset, actor, userLookup)
@@ -138,7 +138,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def createsFilteredGroupsetViewForTutors() {
+  def createsFilteredGroupsetViewForTutors(): Unit = {
     new Fixture {
 
       val addedEvent: SmallGroupEvent = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
@@ -159,7 +159,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   }
 
   @Test
-  def detectsAllocationChangesForTutors() {
+  def detectsAllocationChangesForTutors(): Unit = {
     new Fixture {
 
       val group: SmallGroup = command.set.groups.asScala.find(_.name == "groupA").get

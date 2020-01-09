@@ -35,12 +35,8 @@ class AssessmentGroup extends GeneratedId {
   @JoinColumn(name = "group_set_id")
   var smallGroupSet: SmallGroupSet = _
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "exam_id")
-  var exam: Exam = _
-
   def parent: Option[GeneratedId] =
-    Seq(Option(assignment), Option(smallGroupSet), Option(exam)).flatten.headOption
+    Seq(Option(assignment), Option(smallGroupSet)).flatten.headOption
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "upstream_id")
@@ -67,8 +63,7 @@ class AssessmentGroup extends GeneratedId {
 
       val entityInfo =
         if (assignment != null) Seq("assignment" -> assignment.id)
-        else if (smallGroupSet != null) Seq("smallGroupSet" -> smallGroupSet.id)
-        else Seq("exam" -> exam.id)
+        else Seq("smallGroupSet" -> smallGroupSet.id)
 
       val props = entityInfo ++ Seq(
         "assessmentComponent" -> assessmentComponent.id,

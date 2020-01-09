@@ -14,7 +14,7 @@ class SmallGroupEventTest extends TestBase with Mockito {
   mockSessionFactory.openSession() returns mockSession
 
   @Test
-  def duplicate() {
+  def duplicate(): Unit = {
     val source = new SmallGroupEvent
     source.id = "testId"
     source.day = DayOfWeek.Monday

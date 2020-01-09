@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.feedback
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import FeedbackSummaryCommand._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 object FeedbackSummaryCommand {
-  type Result = Option[AssignmentFeedback]
+  type Result = Option[Feedback]
   type Command = Appliable[Result]
 
   def apply(assignment: Assignment, student: User): Command =
@@ -32,15 +32,15 @@ class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: Us
     with FeedbackSummaryState {
   self: FeedbackServiceComponent =>
 
-  override def applyInternal(): Option[AssignmentFeedback] =
-    feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
+  override def applyInternal(): Option[Feedback] =
+    feedbackService.getFeedbackByUsercode(assignment, student.getUserId)
 }
 
 trait FeedbackSummaryPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: FeedbackSummaryState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit =
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Read, mandatory(assignment))
 }
 
 trait FeedbackSummaryDescription extends Describable[Result] {

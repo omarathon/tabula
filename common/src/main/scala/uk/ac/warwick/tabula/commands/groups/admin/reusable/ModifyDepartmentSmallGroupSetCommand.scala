@@ -85,11 +85,11 @@ class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val
 abstract class ModifyDepartmentSmallGroupSetCommandInternal
   extends CommandInternal[DepartmentSmallGroupSet] with ModifyDepartmentSmallGroupSetState {
 
-  def copyFrom(set: DepartmentSmallGroupSet) {
+  def copyFrom(set: DepartmentSmallGroupSet): Unit = {
     name = set.name
   }
 
-  def copyTo(set: DepartmentSmallGroupSet) {
+  def copyTo(set: DepartmentSmallGroupSet): Unit = {
     set.name = name
 
     if (set.members == null) set.members = UserGroup.ofUniversityIds

@@ -22,11 +22,7 @@ trait AssessmentDao {
 
   def getAssignmentById(id: String): Option[Assignment]
 
-  def getExamById(id: String): Option[Exam]
-
   def save(assignment: Assignment): Unit
-
-  def save(exam: Exam): Unit
 
   def deleteFormField(field: FormField): Unit
 
@@ -42,8 +38,6 @@ trait AssessmentDao {
 
   def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
-  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
-
   def getAssignments(department: Department, year: AcademicYear): Seq[Assignment]
 
   def recentAssignment(department: Department): Option[Assignment]
@@ -57,8 +51,6 @@ trait AssessmentDao {
   def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
 
   def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment]
-
-  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 }
 
 @Repository
@@ -66,13 +58,9 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 
   def getAssignmentById(id: String): Option[Assignment] = getById[Assignment](id)
 
-  def getExamById(id: String): Option[Exam] = getById[Exam](id)
-
   def save(assignment: Assignment): Unit = session.saveOrUpdate(assignment)
 
-  def save(exam: Exam): Unit = session.saveOrUpdate(exam)
-
-  def deleteFormField(field: FormField) {
+  def deleteFormField(field: FormField): Unit = {
     session.delete(field)
   }
 
@@ -86,7 +74,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
       .distinct.seq
 
   def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
-    val c = session.newCriteria[AssignmentFeedback]
+    val c = session.newCriteria[Feedback]
       .createAlias("assignment", "assignment")
       .add(is("usercode", usercode))
       .add(is("released", true))
@@ -139,20 +127,12 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
       .setEntity("module", module)
       .seq
 
-  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
-    session.newQuery[Exam]("from Exam where name=:name and academicYear=:year and module=:module and deleted=false")
-      .setString("name", name)
-      .setParameter("year", year)
-      .setEntity("module", module)
-      .seq
-
   def getAssignments(department: Department, year: AcademicYear): Seq[Assignment] = {
     val assignments = session.newCriteria[Assignment]
       .createAlias("module", "m")
       .add(is("m.adminDepartment", department))
       .add(is("academicYear", year))
       .add(is("deleted", false))
-      .add(is("_archived", false))
       .seq
     assignments
   }
@@ -196,7 +176,6 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
       .add(is("openEnded", false))
       .add(ge("closeDate", startInclusive))
       .add(lt("closeDate", endExclusive))
-      .add(is("_archived", false))
       .addOrder(asc("closeDate"))
       .seq
 
@@ -207,15 +186,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
       .add(is("m.adminDepartment", department))
       .add(ge("closeDate", startDate.toDateTimeAtStartOfDay))
       .add(lt("closeDate", endExclusive.toDateTimeAtStartOfDay))
-      .add(is("_archived", false))
       .addOrder(asc("closeDate"))
       .seq
 
-  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] = {
-    safeInSeq(() => {
-      session.newCriteria[Exam]
-        .add(is("academicYear", academicYear))
-        .add(isNot("deleted", true))
-    }, "module", modules).groupBy(_.module)
-  }
 }

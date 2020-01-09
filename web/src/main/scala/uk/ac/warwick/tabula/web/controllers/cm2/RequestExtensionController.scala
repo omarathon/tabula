@@ -16,9 +16,8 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension"))
+@RequestMapping(value = Array("/coursework/assignment/{assignment}/extension"))
 class RequestExtensionController extends CourseworkController {
 
   type ExtensionRequestCommand = Appliable[Extension] with RequestExtensionCommandState

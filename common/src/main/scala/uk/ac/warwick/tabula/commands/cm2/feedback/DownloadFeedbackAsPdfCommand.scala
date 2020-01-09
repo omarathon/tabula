@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object DownloadFeedbackAsPdfCommand {
 
-  final val feedbackDownloadTemple = "/WEB-INF/freemarker/coursework/admin/assignments/markerfeedback/feedback-download.ftl"
+  final val feedbackDownloadTemple = "/WEB-INF/freemarker/cm2/admin/assignments/markerfeedback/feedback-download.ftl"
 
   def apply(assignment: Assignment, feedback: Feedback, student: Option[Member]) =
     new DownloadFeedbackAsPdfCommandInternal(assignment, feedback, student)
@@ -29,10 +29,10 @@ trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with 
 
     student match {
       case Some(student: StudentMember) => p.PermissionCheckAny(
-        Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback),
-          CheckablePermission(Permissions.AssignmentFeedback.Read, student))
+        Seq(CheckablePermission(Permissions.Feedback.Read, feedback),
+          CheckablePermission(Permissions.Feedback.Read, student))
       )
-      case _ => p.PermissionCheckAny(Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback)))
+      case _ => p.PermissionCheckAny(Seq(CheckablePermission(Permissions.Feedback.Read, feedback)))
     }
   }
 }

@@ -85,11 +85,11 @@ class EditSmallGroupEventsCommandInternal(val module: Module, val set: SmallGrou
 }
 
 trait DeletesSmallGroupEvents {
-  def deleteEvent(group: SmallGroup, event: SmallGroupEvent)
+  def deleteEvent(group: SmallGroup, event: SmallGroupEvent): Unit
 }
 
 trait DeletesSmallGroupEventsWithCommand extends DeletesSmallGroupEvents {
-  def deleteEvent(group: SmallGroup, event: SmallGroupEvent) {
+  def deleteEvent(group: SmallGroup, event: SmallGroupEvent): Unit = {
     DeleteSmallGroupEventCommand(group, event).apply()
   }
 }

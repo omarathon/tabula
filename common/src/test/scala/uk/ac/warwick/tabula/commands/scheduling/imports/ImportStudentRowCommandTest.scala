@@ -192,7 +192,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   /** When a SPR is (P)ermanently withdrawn, end relationships
     * FOR THAT ROUTE ONLY
     */
-  @Test def endingWithdrawnRouteRelationships() {
+  @Test def endingWithdrawnRouteRelationships(): Unit = {
     new Environment {
       val student = new StudentMember()
 
@@ -224,7 +224,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     }
   }
 
-  @Test def testImportStudentCourseYearCommand() {
+  @Test def testImportStudentCourseYearCommand(): Unit = {
     new Environment {
       val studentCourseDetails = new StudentCourseDetails
       studentCourseDetails.scjCode = "0672089/2"
@@ -248,7 +248,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     }
   }
 
-  @Test def testImportStudentCourseCommand() {
+  @Test def testImportStudentCourseCommand(): Unit = {
     new Environment {
       // first set up the studentCourseYearDetails as above
       var studentCourseDetails = new StudentCourseDetails
@@ -274,7 +274,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     }
   }
 
-  @Test def testMarkAsSeenInSits() {
+  @Test def testMarkAsSeenInSits(): Unit = {
     new Environment {
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
@@ -302,7 +302,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   }
 
   @Test
-  def testImportStudentRowCommandWorksWithNew() {
+  def testImportStudentRowCommandWorksWithNew(): Unit = {
     new Environment {
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
@@ -390,7 +390,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet
 
   @Test
-  def testImportStudentRowCommandWorksWithNulls() {
+  def testImportStudentRowCommandWorksWithNulls(): Unit = {
     new EnvironmentWithNulls {
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
@@ -435,7 +435,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   }
 
   @Test
-  def worksWithExistingMember() {
+  def worksWithExistingMember(): Unit = {
     new Environment {
       val existing = new StudentMember("0672089")
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns Some(existing)
@@ -456,7 +456,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   }
 
   @Transactional
-  @Test def testCaptureTutorIfSourceIsLocal() {
+  @Test def testCaptureTutorIfSourceIsLocal(): Unit = {
 
     new Environment {
       val existing = new StudentMember("0672089")
@@ -486,7 +486,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
   }
 
   @Transactional
-  @Test def testCaptureTutorIfSourceIsSits() {
+  @Test def testCaptureTutorIfSourceIsSits(): Unit = {
     withFakeTime(DateTime.now) {
 
       new Environment {
@@ -517,7 +517,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     }
   }
 
-  @Test def testDisabilityHandling() {
+  @Test def testDisabilityHandling(): Unit = {
     new Environment {
       memberDao.getByUniversityIdStaleOrFresh("0672089", eagerLoad = true) returns None
 
@@ -535,7 +535,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     }
   }
 
-  @Test def testImportStudentCourseYearCommandMultipleYearsAndCourses() {
+  @Test def testImportStudentCourseYearCommandMultipleYearsAndCourses(): Unit = {
     new Environment {
       val row1 = SitsStudentRow(getResultSet("0770884/1", 1))
       val row2 = SitsStudentRow(getResultSet("0770884/1", 2))

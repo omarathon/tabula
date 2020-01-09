@@ -54,7 +54,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def fetchesEventsFromEventSource() {
+  def fetchesEventsFromEventSource(): Unit = {
     new Fixture {
       command.applyInternal()
       verify(command.studentTimetableEventSource, times(1)).eventsFor(testStudent, user, TimetableEvent.Context.Student)
@@ -62,7 +62,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def transformsEventsIntoOccurrences() {
+  def transformsEventsIntoOccurrences(): Unit = {
     new Fixture {
       command.applyInternal()
       verify(command.eventOccurrenceService, times(1)).fromTimetableEvent(event, DateRange(command.start, command.end))
@@ -70,7 +70,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def sortsOccurencesByDate() {
+  def sortsOccurencesByDate(): Unit = {
     new Fixture {
       val sortedEvents: ReturnType = command.applyInternal()
       sortedEvents.toOption.map(_.events) should be(Some(Seq(earlierEvent, occurrence, laterEvent)))
@@ -78,7 +78,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def requiresReadTimetablePermissions() {
+  def requiresReadTimetablePermissions(): Unit = {
     new Fixture {
       val perms = new ViewMemberEventsPermissions with ViewMemberEventsState {
         val member: StudentMember = testStudent
@@ -91,7 +91,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def mixesCorrectPermissionsIntoCommand() {
+  def mixesCorrectPermissionsIntoCommand(): Unit = {
     new Fixture {
       val composedCommand = ViewMemberEventsCommand(testStudent, user)
       composedCommand should be(anInstanceOf[ViewMemberEventsPermissions])

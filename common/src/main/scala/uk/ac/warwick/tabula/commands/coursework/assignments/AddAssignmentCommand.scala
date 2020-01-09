@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions._
 
-
+// TODO TAB-7991 - Nuke this
 class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentCommand(module) {
 
   PermissionCheck(Permissions.Assignment.Create, module)
@@ -36,6 +36,4 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
     "closeDate" -> Option(closeDate).map(_.toString()).orNull,
   )
 
-  // can be overridden in concrete implementations to provide additional validation
-  def contextSpecificValidation(errors: Errors) {}
 }

@@ -14,7 +14,7 @@ class MarkdownRendererTest extends TestBase {
   val renderer = new MarkdownRendererImpl {}
 
   // Trying to reproduce ClassCast error.
-  @Test def TAB_2169() {
+  @Test def TAB_2169(): Unit = {
     val input =
       """This message confirms that you made a submission for the assignment 'Assessment 2' for EC204 Economics 2.
         				|

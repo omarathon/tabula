@@ -17,13 +17,13 @@ trait AutowiringMeetingRecordServiceComponent extends MeetingRecordServiceCompon
 
 trait MeetingRecordService {
 
-  def saveOrUpdate(meeting: MeetingRecord)
+  def saveOrUpdate(meeting: MeetingRecord): Unit
 
-  def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
+  def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord): Unit
 
-  def saveOrUpdate(meeting: AbstractMeetingRecord)
+  def saveOrUpdate(meeting: AbstractMeetingRecord): Unit
 
-  def saveOrUpdate(approval: MeetingRecordApproval)
+  def saveOrUpdate(approval: MeetingRecordApproval): Unit
 
   def list(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[MeetingRecord]
 

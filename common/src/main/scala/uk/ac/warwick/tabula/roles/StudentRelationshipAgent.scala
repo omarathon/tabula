@@ -38,8 +38,7 @@ object StudentRelationshipAgent {
 
     // Can read Coursework info for student
     Submission.Read,
-    AssignmentFeedback.Read,
-    ExamFeedback.Read,
+    Feedback.Read,
     Extension.Read
   )
 

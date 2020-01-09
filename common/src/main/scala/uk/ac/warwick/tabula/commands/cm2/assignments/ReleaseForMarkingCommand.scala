@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters._
 
 object ReleaseForMarkingCommand {
   def apply(assignment: Assignment, user: User) = new ReleaseForMarkingCommandInternal(assignment, user)
-    with ComposableCommand[Seq[AssignmentFeedback]]
+    with ComposableCommand[Seq[Feedback]]
     with ReleaseForMarkingValidation
     with ReleaseForMarkingPermissions
     with ReleaseForMarkingDescription
@@ -22,11 +22,11 @@ object ReleaseForMarkingCommand {
 }
 
 class ReleaseForMarkingCommandInternal(val assignment: Assignment, val user: User)
-  extends CommandInternal[Seq[AssignmentFeedback]] with ReleaseForMarkingState with ReleaseForMarkingRequest with ReleasedState {
+  extends CommandInternal[Seq[Feedback]] with ReleaseForMarkingState with ReleaseForMarkingRequest with ReleasedState {
 
   self: CM2MarkingWorkflowServiceComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = {
+  def applyInternal(): Seq[Feedback] = {
     val feedbackForRelease = feedbacks.filterNot(f => unreleasableSubmissions.contains(f.usercode))
     val feedback = cm2MarkingWorkflowService.releaseForMarking(feedbackForRelease)
     newReleasedFeedback = feedback.flatMap(_.markingInProgress).asJava
@@ -49,7 +49,7 @@ trait ReleaseForMarkingValidation extends SelfValidating {
   }
 }
 
-trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
+trait ReleaseForMarkingDescription extends Describable[Seq[Feedback]] {
   self: ReleaseForMarkingState with ReleaseForMarkingRequest =>
 
   override lazy val eventName: String = "ReleaseForMarking"
@@ -58,7 +58,7 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
     d.assignment(assignment)
      .studentUsercodes(students.asScala.toSeq)
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit =
     d.assignment(assignment)
      .feedbacks(result)
 }

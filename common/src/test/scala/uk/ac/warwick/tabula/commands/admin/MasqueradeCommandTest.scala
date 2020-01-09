@@ -22,12 +22,12 @@ class MasqueradeCommandTest extends TestBase with Mockito {
     val command = new MasqueradeCommandInternal(user) with CommandTestSupport
   }
 
-  @Test def set {
+  @Test def set: Unit = {
     new Fixture {
       command.usercode = "cusebr"
 
       val cookie: Option[Cookie] = command.applyInternal()
-      cookie should be('defined)
+      cookie should be(Symbol("defined"))
       cookie.map { cookie =>
         cookie.cookie.getName() should be(CurrentUser.masqueradeCookie)
         cookie.cookie.getValue() should be("cusebr")
@@ -36,21 +36,21 @@ class MasqueradeCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def setInvalidUser {
+  @Test def setInvalidUser: Unit = {
     new Fixture {
       command.usercode = "undefined"
 
       val cookie: Option[Cookie] = command.applyInternal()
-      cookie should be('empty)
+      cookie should be(Symbol("empty"))
     }
   }
 
-  @Test def remove {
+  @Test def remove: Unit = {
     new Fixture {
       command.action = "remove"
 
       val cookie: Option[Cookie] = command.applyInternal()
-      cookie should be('defined)
+      cookie should be(Symbol("defined"))
       cookie.map { cookie =>
         cookie.cookie.getName() should be(CurrentUser.masqueradeCookie)
         cookie.cookie.getValue() should be(null) // removal
@@ -70,7 +70,7 @@ class MasqueradeCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCan() {
+  @Test def validateCan(): Unit = {
     new ValidationFixture {
       command.usercode = "cusebr"
 
@@ -87,7 +87,7 @@ class MasqueradeCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCant() {
+  @Test def validateCant(): Unit = {
     new ValidationFixture {
       command.usercode = "cusebr"
 
@@ -107,7 +107,7 @@ class MasqueradeCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantBecauseSubDepartment() {
+  @Test def validateCantBecauseSubDepartment(): Unit = {
     new ValidationFixture {
       command.usercode = "cusebr"
 

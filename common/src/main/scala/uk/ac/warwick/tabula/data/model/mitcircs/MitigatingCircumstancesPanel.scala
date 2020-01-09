@@ -67,7 +67,7 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
     _submissions.asScala.toSet
   }
 
-  def addSubmission(submission: MitigatingCircumstancesSubmission) {
+  def addSubmission(submission: MitigatingCircumstancesSubmission): Unit = {
     submission.panel = this
     _submissions.add(submission)
   }

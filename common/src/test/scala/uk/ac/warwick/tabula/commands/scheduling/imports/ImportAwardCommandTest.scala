@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 class ImportAwardCommandTest extends AppContextTestBase with Mockito with Logging {
 
   @Transactional
-  @Test def testImportAwardCommand() {
+  @Test def testImportAwardCommand(): Unit = {
     val info = new AwardInfo("BSC", "BSc", "Bachelor of Science")
 
     // test command

@@ -106,7 +106,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
               if (mergedCells) {
                 mergedRegions += new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex)
               } else {
-                entityRows(entity).filterKeys(_ != ExamGridColumnValueType.Overall).values.foreach(row => {
+                entityRows(entity).view.filterKeys(_ != ExamGridColumnValueType.Overall).values.foreach(row => {
                   val cell = row.createCell(currentColumnIndex)
                   chosenYearColumnValues(leftColumn)(entity).populateCell(cell, cellStyleMap, commentHelper)
                 })

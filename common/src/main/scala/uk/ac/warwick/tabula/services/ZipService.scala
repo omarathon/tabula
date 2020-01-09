@@ -6,7 +6,7 @@ import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInp
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
+import uk.ac.warwick.tabula.commands.cm2.feedback.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}

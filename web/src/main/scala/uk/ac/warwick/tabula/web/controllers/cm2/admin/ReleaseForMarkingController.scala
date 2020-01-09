@@ -9,17 +9,16 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ReleaseForMarkingCommand, ReleaseForMarkingRequest}
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.{AdminSelectionAction, CourseworkController}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/release-submissions"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/release-submissions"))
 class ReleaseForMarkingController extends CourseworkController with AdminSelectionAction {
 
   validatesSelf[SelfValidating]
-  type Command = Appliable[Seq[AssignmentFeedback]] with ReleaseForMarkingRequest
+  type Command = Appliable[Seq[Feedback]] with ReleaseForMarkingRequest
 
   @ModelAttribute("command")
   def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {

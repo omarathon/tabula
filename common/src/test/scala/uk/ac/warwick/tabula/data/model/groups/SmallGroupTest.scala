@@ -37,20 +37,20 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
   @Test
-  def equivalentEventsToReturnsTrueForSameGroup() {
+  def equivalentEventsToReturnsTrueForSameGroup(): Unit = {
     val group = newSmallGroupWithMockedServices
 
     group.hasEquivalentEventsTo(group) should be (true)
   }
 
   @Test
-  def equivalentEventsToReturnsTrueForGroupsWithNoEvents() {
+  def equivalentEventsToReturnsTrueForGroupsWithNoEvents(): Unit = {
     val group = newSmallGroupWithMockedServices
     group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be (true)
   }
 
   @Test
-  def equivalentEventsToReturnsTrueForGroupsWithEquivalentEvents() {
+  def equivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(): Unit = {
 
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
@@ -60,7 +60,7 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
   @Test
-  def equivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents() {
+  def equivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(): Unit = {
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
@@ -69,7 +69,7 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
   @Test
-  def equivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents() {
+  def equivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(): Unit = {
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
@@ -79,7 +79,7 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
   @Test
-  def duplicateCopiesAllFields() {
+  def duplicateCopiesAllFields(): Unit = {
 
     val source = newSmallGroupWithMockedServices
     val clonedEvent = newEventWithMockedServices
@@ -126,7 +126,7 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
   @Test
-  def fullReportsFullnessWhenGroupSizeSet() {
+  def fullReportsFullnessWhenGroupSizeSet(): Unit = {
 
     // set up a group with 1 member, with group size limits enabled
     val group = newSmallGroupWithMockedServices
@@ -139,13 +139,13 @@ class SmallGroupTest extends TestBase with Mockito {
 
 
     group.maxGroupSize = 2
-    group should not be 'full
+    group should not be Symbol("full")
 
     group.maxGroupSize = 1
-    group should be('full)
+    group should be(Symbol("full"))
 
     group.maxGroupSize = 0
-    group should be('full)
+    group should be(Symbol("full"))
 
   }
 

@@ -27,7 +27,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 
   override def getGroupService = new LenientGroupService(groupService)
 
-  def addFindUsersWithFilterResult(user: User) {
+  def addFindUsersWithFilterResult(user: User): Unit = {
     filterUserResult.add(user)
   }
 
@@ -96,7 +96,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
     }
   }
 
-  def registerUserObjects(u: User*) {
+  def registerUserObjects(u: User*): Unit = {
     for (user <- u) {
       users += (user.getUserId -> user)
     }
@@ -183,7 +183,7 @@ class MockGroupService extends GroupService {
 
   override def isUserInGroup(user: String, group: String): Boolean = usersInGroup((user, group))
 
-  override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
+  override def setTimeoutConfig(config: WebServiceTimeoutConfig): Unit = {}
 
   override def getGroupInfo(name: String) = new GroupInfo(getGroupByName(name).getUserCodes.size())
 

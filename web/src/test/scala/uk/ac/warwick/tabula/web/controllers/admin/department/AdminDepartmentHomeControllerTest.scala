@@ -9,7 +9,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito with Funct
 
   val controller = new AdminDepartmentHomeController
 
-  @Test def createsCommand {
+  @Test def createsCommand: Unit = {
     inContext[AdminDepartmentHomeCommandTest.MinimalCommandContext] {
       val department = Fixtures.department("in", "IT Services")
       val user = mock[CurrentUser]
@@ -24,7 +24,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito with Funct
     }
   }
 
-  @Test def adminPage {
+  @Test def adminPage: Unit = {
     val department = Fixtures.department("in", "IT Services")
     val modules = Seq(Fixtures.module("in101"), Fixtures.module("in102"), Fixtures.module("in103"))
     val routes = Seq(Fixtures.route("i100"), Fixtures.route("i200"), Fixtures.route("i300"))

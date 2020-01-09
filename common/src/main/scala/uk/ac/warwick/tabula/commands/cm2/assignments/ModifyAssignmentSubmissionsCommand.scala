@@ -43,7 +43,7 @@ trait ModifyAssignmentSubmissionsCommandState {
 
   def assignment: Assignment
 
-  def copyTo(assignment: Assignment) {
+  def copyTo(assignment: Assignment): Unit = {
     copySharedSubmissionTo(assignment)
   }
 
@@ -88,7 +88,7 @@ trait ModifyAssignmentSubmissionsValidation extends SelfValidating {
   self: ModifyAssignmentSubmissionsCommandState with SharedAssignmentSubmissionProperties =>
 
   override def validate(errors: Errors): Unit = {
-    if (!restrictSubmissions && assignment.hasCM2Workflow) {
+    if (!restrictSubmissions && assignment.hasWorkflow) {
       errors.rejectValue("restrictSubmissions", "assignment.restrictSubmissions.hasWorkflow")
     }
   }

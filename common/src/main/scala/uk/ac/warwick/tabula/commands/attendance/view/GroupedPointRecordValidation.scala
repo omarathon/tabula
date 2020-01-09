@@ -17,7 +17,7 @@ trait FiltersCheckpointMapChanges {
     existingCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]]
   ): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]] = {
     val flattenedChanges: Seq[(StudentMember, AttendanceMonitoringPoint, AttendanceState)] =
-      changedCheckpointMap.mapValues(_.toSeq).toSeq.flatMap { case (student, pointCheckpoints) => pointCheckpoints.map { case (point, state) => (student, point, state) } }
+      changedCheckpointMap.view.mapValues(_.toSeq).toSeq.flatMap { case (student, pointCheckpoints) => pointCheckpoints.map { case (point, state) => (student, point, state) } }
     val changes = flattenedChanges.filter { case (student, point, state) =>
       !existingCheckpointMap.get(student).flatMap(_.get(point)).contains(state)
     }

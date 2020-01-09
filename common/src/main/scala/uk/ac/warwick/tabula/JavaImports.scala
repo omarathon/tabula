@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import collection.mutable
 import language.implicitConversions
 import scala.collection.GenTraversableOnce
@@ -113,11 +113,11 @@ trait JavaImports {
       list
     }
 
-    def apply[A](orig: GenTraversableOnce[A]): java.util.ArrayList[A] = {
-      if (orig.isEmpty)
+    def apply[A](orig: IterableOnce[A]): java.util.ArrayList[A] = {
+      if (orig.iterator.isEmpty)
         new java.util.ArrayList[A]
       else
-        new java.util.ArrayList[A](orig.toIndexedSeq.asJavaCollection)
+        new java.util.ArrayList[A](orig.iterator.toIndexedSeq.asJavaCollection)
     }
   }
 

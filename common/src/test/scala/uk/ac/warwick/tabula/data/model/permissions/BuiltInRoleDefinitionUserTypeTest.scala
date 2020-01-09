@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 
 class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new BuiltInRoleDefinitionUserType
     t.convertToObject("DepartmentalAdministratorRoleDefinition") should be(DepartmentalAdministratorRoleDefinition)
     t.convertToObject("ModuleManagerRoleDefinition") should be(ModuleManagerRoleDefinition)
@@ -19,7 +19,7 @@ class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new BuiltInRoleDefinitionUserType
     t.convertToValue(DepartmentalAdministratorRoleDefinition) should be("DepartmentalAdministratorRoleDefinition")
     t.convertToValue(ModuleManagerRoleDefinition) should be("ModuleManagerRoleDefinition")
@@ -27,7 +27,7 @@ class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
     t.convertToValue(SubmitterRoleDefinition) should be("SubmitterRoleDefinition")
   }
 
-  @Test def selectorRoles() {
+  @Test def selectorRoles(): Unit = {
     val t = new BuiltInRoleDefinitionUserType
 
     val tutorType = StudentRelationshipType("personalTutor", "tutor", "tutor", "tutee")

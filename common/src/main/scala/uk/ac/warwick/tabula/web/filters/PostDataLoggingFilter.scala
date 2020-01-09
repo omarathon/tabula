@@ -151,7 +151,7 @@ object PostDataLoggingFilter {
           read
         }
 
-        override def close() {
+        override def close(): Unit = {
           super.close()
           outputPipe.close()
         }

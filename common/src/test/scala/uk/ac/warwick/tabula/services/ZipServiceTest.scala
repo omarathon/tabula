@@ -39,7 +39,7 @@ class ZipServiceTest extends TestBase with Mockito {
 
   var userLookup: UserLookupService = _
 
-  @Before def before() {
+  @Before def before(): Unit = {
     userLookup = mock[UserLookupService]
 
     userLookup.getUserByUserId(any[String]) answers { id: Any =>
@@ -55,7 +55,7 @@ class ZipServiceTest extends TestBase with Mockito {
   }
 
 
-  @Test def generateSubmissionDownload() {
+  @Test def generateSubmissionDownload(): Unit = {
     val service = new ZipService
     service.objectStorageService = createTransientObjectStore()
     service.features = emptyFeatures
@@ -85,7 +85,7 @@ class ZipServiceTest extends TestBase with Mockito {
     items.head.name should be("ph105 - 0000007 - garble.doc")
   }
 
-  @Test def generateSubmissionDownloadFullNamePrefix() {
+  @Test def generateSubmissionDownloadFullNamePrefix(): Unit = {
     val service = new ZipService
     service.objectStorageService = createTransientObjectStore()
     service.features = emptyFeatures
@@ -119,7 +119,7 @@ class ZipServiceTest extends TestBase with Mockito {
     items.head.name should be("ph105 - Roger Aaaah - 0000007 - garble.doc")
   }
 
-  @Test def generateSubmissionDownloadAnonymityIDOnly() {
+  @Test def generateSubmissionDownloadAnonymityIDOnly(): Unit = {
     val service = new ZipService
     service.objectStorageService = createTransientObjectStore()
     service.features = emptyFeatures
@@ -156,7 +156,7 @@ class ZipServiceTest extends TestBase with Mockito {
     items.head.name should be("ph105 - 0000007 - garble.doc")
   }
 
-  @Test def generateSubmissionDownloadUserLookupFail() {
+  @Test def generateSubmissionDownloadUserLookupFail(): Unit = {
     val service = new ZipService
     service.objectStorageService = createTransientObjectStore()
     service.features = emptyFeatures
@@ -191,12 +191,12 @@ class ZipServiceTest extends TestBase with Mockito {
   }
 
 
-  @Test def readZip() {
+  @Test def readZip(): Unit = {
     val zip = new ZipInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
     val names = Zips.map(zip) {
       _.getName
     }.sorted
-    names should have('size (8))
+    names should have(Symbol("size") (8))
     names should contain("0123456/")
     names should contain("0123456/feedback.doc")
     names should contain("0123456/feedböck.mp3")
@@ -207,12 +207,12 @@ class ZipServiceTest extends TestBase with Mockito {
     names should contain("marks.csv")
   }
 
-  @Test def iterateZip() {
+  @Test def iterateZip(): Unit = {
     val zip = new ZipArchiveInputStream(new ClassPathResource("/feedback1.zip").getInputStream)
     val names = Zips.iterator(zip) { (iterator) =>
       for (i <- iterator) yield i.getName
     }
-    names should have('size (8))
+    names should have(Symbol("size") (8))
     names should contain("0123456/")
     names should contain("0123456/feedback.doc")
     names should contain("0123456/feedböck.mp3")

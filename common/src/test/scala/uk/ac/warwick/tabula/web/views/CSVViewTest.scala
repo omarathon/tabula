@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.TestBase
 class CSVViewTest extends TestBase {
 
   @Test
-  def encoding {
+  def encoding: Unit = {
     val text = "Nick\u2019s Unicode Text"
     val view = new CSVView(csv = text)
     val request = new MockHttpServletRequest

@@ -27,7 +27,7 @@ class PdfGeneratorTest extends TestBase {
   }.pdfGenerator
 
   @Test
-  def renderXHTML() {
+  def renderXHTML(): Unit = {
     val baos = new ByteArrayOutputStream()
     pdfGenerator.renderTemplate("minimal", Map(), baos)
     val of = new FileOutputStream(new File("/tmp/test.pdf"))

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class SubmissionTest extends PersistenceTestBase {
 
-  @Test def allAttachments() {
+  @Test def allAttachments(): Unit = {
     val submission = new Submission
     submission.allAttachments.size should be(0)
   }

@@ -136,11 +136,11 @@ class FileAttachment extends GeneratedId {
 
   def getName: String = _name
 
-  def setName(n: String) {
+  def setName(n: String): Unit = {
     name = n
   }
 
-  def name_=(n: String) {
+  def name_=(n: String): Unit = {
     _name = Option(n).map(sanitisedFilename).orNull
   }
 

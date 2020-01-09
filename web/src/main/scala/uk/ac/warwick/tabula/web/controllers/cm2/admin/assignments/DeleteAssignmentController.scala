@@ -13,9 +13,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/delete"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/delete"))
 class DeleteAssignmentController extends CourseworkController {
 
   validatesSelf[DeleteAssignmentCommand]

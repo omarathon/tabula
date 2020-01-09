@@ -12,7 +12,7 @@ class GetMemberCalendarJsonApiTest extends TestBase with Mockito {
   }
 
   @Test
-  def colouriseBasedOnModule() {
+  def colouriseBasedOnModule(): Unit = {
     // create a bunch events spread over 3 modules, with blank colours
     val events = for {
       i <- 1 until 21
@@ -53,7 +53,7 @@ class GetMemberCalendarJsonApiTest extends TestBase with Mockito {
     )
 
     // every event should have a colour
-    coloured.find(_.backgroundColor == "") should not be 'defined
+    coloured.find(_.backgroundColor == "") should not be Symbol("defined")
 
     // there should be 4 colours in use
     coloured.map(_.backgroundColor).distinct.size should be(4)

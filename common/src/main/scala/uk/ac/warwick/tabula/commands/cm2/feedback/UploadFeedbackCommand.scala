@@ -59,7 +59,7 @@ case class ProblemFile(var path: String, var file: FileAttachment) {
 
 // Purely to generate an audit log event
 class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
-  def applyInternal() {}
+  def applyInternal(): Unit = {}
 
   def describe(d: Description): Unit =
     d.assignment(cmd.assignment)
@@ -86,7 +86,6 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
   var userLookup: UserLookupService = Wire[UserLookupService]
   var fileDao: FileDao = Wire[FileDao]
   var assignmentService: AssessmentService = Wire[AssessmentService]
-  var stateService: StateService = Wire[StateService]
 
   var file: UploadedFile = new UploadedFile
 
@@ -104,7 +103,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 
   private def filenameOf(path: String) = new java.io.File(path).getName
 
-  def preExtractValidation(errors: Errors) {
+  def preExtractValidation(errors: Errors): Unit = {
     if (batch) {
       if (archive != null && !archive.isEmpty) {
         logger.debug("file name is " + archive.getOriginalFilename)
@@ -117,7 +116,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
     }
   }
 
-  def postExtractValidation(errors: Errors) {
+  def postExtractValidation(errors: Errors): Unit = {
     if (!invalidFiles.isEmpty) errors.rejectValue("invalidFiles", "invalidFiles")
     items.asScala.zipWithIndex.foreach { case (item, i) =>
       errors.pushNestedPath("items[" + i + "]")
@@ -126,7 +125,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
     }
   }
 
-  private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
+  private def validateUploadedFile(item: FeedbackItem, errors: Errors): Unit = {
     val file = item.file
 
     if (file.isMissing) errors.rejectValue("file", "file.missing")
@@ -157,9 +156,9 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 
   }
 
-  def validateExisting(item: FeedbackItem, errors: Errors)
+  def validateExisting(item: FeedbackItem, errors: Errors): Unit
 
-  private def processFiles(bits: Seq[(String, FileAttachment)]) {
+  private def processFiles(bits: Seq[(String, FileAttachment)]): Unit = {
 
     def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) = {
       val student = userLookup.getUserByWarwickUniId(number)

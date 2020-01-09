@@ -12,7 +12,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 
   val department: Department = Fixtures.department("cs")
 
-  @Test def titlePoints() {
+  @Test def titlePoints(): Unit = {
     val notification = Notification.init(new AttendanceMonitoringUnrecordedPointsNotification, new AnonymousUser, department)
     notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
     notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
@@ -28,7 +28,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
     notification.title should be("1 monitoring point needs recording")
   }
 
-  @Test def titlePointsPlural() {
+  @Test def titlePointsPlural(): Unit = {
     val notification = Notification.init(new AttendanceMonitoringUnrecordedPointsNotification, new AnonymousUser, department)
     notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
     notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
@@ -44,7 +44,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
     notification.title should be("2 monitoring points need recording")
   }
 
-  @Test def titleStudents() {
+  @Test def titleStudents(): Unit = {
     val notification = Notification.init(new AttendanceMonitoringUnrecordedStudentsNotification, new AnonymousUser, department)
     notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
     notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
@@ -72,7 +72,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
     notification.title should be("1 student needs monitoring points recording")
   }
 
-  @Test def titleStudentsPlural() {
+  @Test def titleStudentsPlural(): Unit = {
     val notification = Notification.init(new AttendanceMonitoringUnrecordedStudentsNotification, new AnonymousUser, department)
     notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
     notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)

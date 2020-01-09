@@ -27,13 +27,13 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 
   verify(queue, times(1)).addListener("MaintenanceMode", observer)
 
-  @Test def defaults {
+  @Test def defaults: Unit = {
     cache.isDatabaseEnabled() should be(true)
     config.getString("mode") should be("new")
     config.getString("origin.login.location") should be("https://xebsignon.warwick.ac.uk/origin/hs")
   }
 
-  @Test def enableQueue {
+  @Test def enableQueue: Unit = {
     val message = new MaintenanceModeMessage
     message.enabled = true
     observer.onReceive(message)
@@ -43,7 +43,7 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
     config.getString("origin.login.location") should be("https://websignon.warwick.ac.uk/origin/slogin")
   }
 
-  @Test def disableQueue {
+  @Test def disableQueue: Unit = {
     // Enable then disable to override the defaults
     val message = new MaintenanceModeMessage
     message.enabled = true
@@ -56,7 +56,7 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
     config.getString("origin.login.location") should be("https://websignon.warwick.ac.uk/origin/hs")
   }
 
-  @Test def enableSameHost {
+  @Test def enableSameHost: Unit = {
     observer.maintenanceModeService.enable
 
     cache.isDatabaseEnabled() should be(false)
@@ -64,7 +64,7 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
     config.getString("origin.login.location") should be("https://websignon.warwick.ac.uk/origin/slogin")
   }
 
-  @Test def disableSameHost {
+  @Test def disableSameHost: Unit = {
     // Enable then disable to override the defaults
     observer.maintenanceModeService.enable
     observer.maintenanceModeService.disable

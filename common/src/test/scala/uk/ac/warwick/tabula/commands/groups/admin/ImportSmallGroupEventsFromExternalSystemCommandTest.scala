@@ -20,7 +20,7 @@ import scala.concurrent.Future
 
 class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with Mockito {
 
-  @Before def tidyUpContext() {
+  @Before def tidyUpContext(): Unit = {
     // TODO it would be better to find where this context is actually coming from
     SpringConfigurer.applicationContext = null
   }
@@ -156,7 +156,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
     )))
   }
 
-  @Test def init() {
+  @Test def init(): Unit = {
     new FixtureWithSingleSeminarForYear with CommandFixture {
       command.eventsToImport.size() should be(2)
       command.eventsToImport.get(0).timetableEvent should be(tEventSeminar2)
@@ -164,7 +164,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
     }
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new FixtureWithSingleSeminarForYear with CommandFixture {
       command.eventsToImport.get(0).group = group1
       command.eventsToImport.get(1).group = group2
@@ -198,7 +198,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new PermissionsFixture {
       module.groupSets.add(set)
       set.module = module
@@ -211,7 +211,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException])
-  def notLinked() {
+  def notLinked(): Unit = {
     new PermissionsFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -220,7 +220,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
     }
   }
 
-  @Test def description() {
+  @Test def description(): Unit = {
     val command = new ImportSmallGroupEventsFromExternalSystemDescription with ImportSmallGroupEventsFromExternalSystemCommandState {
       override val eventName: String = "test"
       val module: Module = Fixtures.module("in101")

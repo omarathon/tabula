@@ -56,7 +56,7 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
   }
 
   @Test
-  def titleIsHardcoded() {
+  def titleIsHardcoded(): Unit = {
     new SmallGroupFixture {
       val n: SmallGroupSetChangedStudentNotification = createStudentNotification(groupSet1, actor, recipient)
       n.title should be("LA101: Your lab allocation has changed")

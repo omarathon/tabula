@@ -8,7 +8,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
 
   val profileService: ProfileService = mock[ProfileService]
 
-  @Test def agentMember() {
+  @Test def agentMember(): Unit = {
     val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
     val staff = Fixtures.staff(universityId = "0672089")
@@ -30,7 +30,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
     rel.studentMember.get should be(student)
   }
 
-  @Test def stringMethod() {
+  @Test def stringMethod(): Unit = {
     val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
     val staff = Fixtures.staff(universityId = "0672089")

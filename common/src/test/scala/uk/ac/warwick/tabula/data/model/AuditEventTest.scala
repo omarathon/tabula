@@ -7,7 +7,7 @@ import org.junit.Test
 
 class AuditEventTest extends TestBase {
 
-  @Test def emptyGetters {
+  @Test def emptyGetters: Unit = {
     val event = new AuditEvent
     event.related = Seq(event)
     event.submissionIds.size should be(0)

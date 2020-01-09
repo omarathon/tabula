@@ -65,7 +65,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupsToDisplayReturnsNilForNonSelfSignUpWithNoAllocations() {
+  def groupsToDisplayReturnsNilForNonSelfSignUpWithNoAllocations(): Unit = {
     new Fixture {
       groupSet.allocationMethod = Manual
       getGroupsToDisplay(groupSet, unallocatedUser) should be((Nil, StudentNotAssignedToGroup))
@@ -73,7 +73,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupsToDisplayReturnsAllocatedGroupsForNonSelfSignUpWithNoAllocations() {
+  def groupsToDisplayReturnsAllocatedGroupsForNonSelfSignUpWithNoAllocations(): Unit = {
     new Fixture {
       groupSet.allocationMethod = Manual
       getGroupsToDisplay(groupSet, unallocatedUser) should be((Nil, StudentNotAssignedToGroup))
@@ -81,7 +81,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupstoDisplayReturnsAllGroupsForOpenSelfSignupWithNoAllocation() {
+  def groupstoDisplayReturnsAllGroupsForOpenSelfSignupWithNoAllocation(): Unit = {
     new Fixture {
       groupSet.openForSignups = true
       groupSet.allocationMethod = StudentSignUp
@@ -90,7 +90,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupstoDisplayReturnsNilForClosedSelfSignupWithNoAllocation() {
+  def groupstoDisplayReturnsNilForClosedSelfSignupWithNoAllocation(): Unit = {
     new Fixture {
       groupSet.openForSignups = false
       groupSet.allocationMethod = StudentSignUp
@@ -99,7 +99,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupsToDisplayReturnsAllocatedGroupForNonSelfSignUp() {
+  def groupsToDisplayReturnsAllocatedGroupForNonSelfSignUp(): Unit = {
     new Fixture {
       groupSet.allocationMethod = Manual
       getGroupsToDisplay(groupSet, allocatedUser) should be((Seq(group1), StudentAssignedToGroup))
@@ -107,7 +107,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def groupsToDisplayReturnsAllocatedGroupForSelfSignUp() {
+  def groupsToDisplayReturnsAllocatedGroupForSelfSignUp(): Unit = {
     new Fixture {
       groupSet.allocationMethod = StudentSignUp
       getGroupsToDisplay(groupSet, allocatedUser) should be((Seq(group1), StudentAssignedToGroup))
@@ -115,7 +115,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def viewModulesRemovesModulesWithNoGroups() {
+  def viewModulesRemovesModulesWithNoGroups(): Unit = {
     new Fixture {
       // dummy getGroupsToDisplay that always returns an empty set
       def neverReturnGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (Nil, StudentNotAssignedToGroup)
@@ -125,7 +125,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def ManualGroupSetsReleasedToStudents() {
+  def ManualGroupSetsReleasedToStudents(): Unit = {
     new Fixture {
       groupSet.allocationMethod = Manual
       groupSet.releasedToStudents = false
@@ -137,7 +137,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def selfSignUpGroupSetsReleasedToStudents() {
+  def selfSignUpGroupSetsReleasedToStudents(): Unit = {
     new Fixture {
       groupSet.allocationMethod = StudentSignUp
       // self signup groups should be returned - we ignore the releasedToStudents flag
@@ -149,7 +149,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def viewModulesConvertsModuleToViewModule() {
+  def viewModulesConvertsModuleToViewModule(): Unit = {
     new Fixture {
       // dummy getGroupsToDisplay that always returns all groups in the set
       def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala.toSeq, StudentNotAssignedToGroup)
@@ -164,7 +164,7 @@ class HomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def viewModulesGroupsByModule() {
+  def viewModulesGroupsByModule(): Unit = {
     new Fixture {
       // dummy getGroupsToDisplay that always returns all groups in the set
       def allGroups(set: SmallGroupSet): (Seq[SmallGroup], ViewerRole) = (set.groups.asScala.toSeq, StudentNotAssignedToGroup)

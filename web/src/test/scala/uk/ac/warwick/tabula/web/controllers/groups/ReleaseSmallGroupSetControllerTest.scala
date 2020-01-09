@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters._
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
   @Test
-  def createsCommandObject() {
+  def createsCommandObject(): Unit = {
     withUser("test") {
       val set = new SmallGroupSet
       val controller = new ReleaseSmallGroupSetController
@@ -26,7 +26,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def showsForm() {
+  def showsForm(): Unit = {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
       val cmd = mock[ReleaseSmallGroupSetCommand]
@@ -36,7 +36,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def invokesCommand() {
+  def invokesCommand(): Unit = {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
       val cmd = mock[ReleaseSmallGroupSetCommand]
@@ -49,7 +49,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def returnsContextAsExpected() {
+  def returnsContextAsExpected(): Unit = {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
       val cmd = mock[ReleaseSmallGroupSetCommand]
@@ -68,7 +68,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def moduleListViewModelConvertsModulesToGroupSets() {
+  def moduleListViewModelConvertsModulesToGroupSets(): Unit = {
 
     def newGroupSetFor2014 = new SmallGroupSet {
       academicYear = AcademicYear(2014)
@@ -90,12 +90,12 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def batchControllerCreatesViewModel() {
+  def batchControllerCreatesViewModel(): Unit = {
     new ReleaseAllSmallGroupSetsController().newViewModel(AcademicYear(2014)) should not be null
   }
 
   @Test
-  def batchControllerShowsFormWithDepartment() {
+  def batchControllerShowsFormWithDepartment(): Unit = {
     val controller = new ReleaseAllSmallGroupSetsController()
     val model = controller.newViewModel(AcademicYear(2014))
     val department = Fixtures.department("xyz")
@@ -106,7 +106,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def batchControllerInvokesCommand() {
+  def batchControllerInvokesCommand(): Unit = {
     withUser("test") {
       val dept = Fixtures.department("xx")
       val year = AcademicYear(2014)
@@ -120,7 +120,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def batchControllerReturnsNewFormWithFlashMessage() {
+  def batchControllerReturnsNewFormWithFlashMessage(): Unit = {
     withUser("test") {
 
       val controller = new ReleaseAllSmallGroupSetsController()

@@ -132,8 +132,8 @@ trait StudentCourseworkCommandHelper
     assignmentsWithSubmissionInfo: Seq[AssignmentInfo],
     lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
     assignmentsWithFeedbackInfo
-      .union(assignmentsWithSubmissionInfo)
-      .union(lateFormativeAssignmentsInfo)
+      .concat(assignmentsWithSubmissionInfo)
+      .concat(lateFormativeAssignmentsInfo)
       .sortWith { (info1, info2) =>
         def toDate(info: AssignmentInfo) = {
           val assignment = info("assignment").asInstanceOf[Assignment]

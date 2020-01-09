@@ -91,7 +91,7 @@ class RequestLevelCache {
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
   }
 
-  def shutdown() {
+  def shutdown(): Unit = {
     for ((_, cache) <- cacheMap) {
       cache.clear()
     }

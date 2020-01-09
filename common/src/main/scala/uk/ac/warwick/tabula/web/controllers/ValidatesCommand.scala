@@ -27,7 +27,7 @@ trait ValidatesCommand {
 
   type ValidatorMethod[A] = (A, Errors) => Unit
 
-  private def _validatesWith[A: ClassTag](fn: ValidatorMethod[A]) {
+  private def _validatesWith[A: ClassTag](fn: ValidatorMethod[A]): Unit = {
     if (validator != null) throw new IllegalStateException("Already set validator once")
     validator = new ClassValidator[A] {
       override def valid(target: A, errors: Errors): Unit = fn(target, errors)
@@ -38,7 +38,7 @@ trait ValidatesCommand {
     * If the command object implements SelfValidating, this will
     * run its validation command when a @Valid object is requested.
     */
-  def validatesSelf[A <: SelfValidating : ClassTag] {
+  def validatesSelf[A <: SelfValidating : ClassTag]: Unit = {
     _validatesWith[A] { (cmd, errors) => cmd.validate(errors) }
   }
 

@@ -66,7 +66,7 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateNotOk() {
+  def validateNotOk(): Unit = {
     withUser("cusfal") {
       new Fixture {
         val validator = new AddStudentsToSchemeValidation with AddStudentsToSchemeCommandState

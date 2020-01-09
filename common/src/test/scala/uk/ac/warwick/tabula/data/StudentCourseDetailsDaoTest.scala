@@ -15,7 +15,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
   val memberDao = new AutowiringMemberDaoImpl
   val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     memberDao.sessionFactory = sessionFactory
     studentCourseDetailsDao.sessionFactory = sessionFactory
     transactional { tx =>

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{StudentAssignedToG
 class GroupsViewModelTest extends TestBase {
 
   @Test
-  def viewSetReportsWhenViewerMustSignUp() {
+  def viewSetReportsWhenViewerMustSignUp(): Unit = {
     val set = new SmallGroupSet()
     set.allocationMethod = StudentSignUp
     set.openForSignups = true
@@ -19,7 +19,7 @@ class GroupsViewModelTest extends TestBase {
   }
 
   @Test
-  def studentsAlreadySignedUpNeedNotSignUp() {
+  def studentsAlreadySignedUpNeedNotSignUp(): Unit = {
     val set = new SmallGroupSet()
     set.allocationMethod = StudentSignUp
     set.openForSignups = true
@@ -30,7 +30,7 @@ class GroupsViewModelTest extends TestBase {
   }
 
   @Test
-  def studentsNeedNotSignToNonOpenGroup() {
+  def studentsNeedNotSignToNonOpenGroup(): Unit = {
     val set = new SmallGroupSet()
     set.allocationMethod = StudentSignUp
     set.openForSignups = false
@@ -41,7 +41,7 @@ class GroupsViewModelTest extends TestBase {
   }
 
   @Test
-  def studentsNeedNotSignToNonSelfSignUpGroup() {
+  def studentsNeedNotSignToNonSelfSignUpGroup(): Unit = {
     val set = new SmallGroupSet()
     set.allocationMethod = Manual
     set.openForSignups = true

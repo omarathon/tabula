@@ -16,7 +16,7 @@ class SettingsMapTest extends TestBase {
     )
   }
 
-  @Test def emptyDefaults() {
+  @Test def emptyDefaults(): Unit = {
     new TestSettingsMap {
       settingsSeq should be(Seq())
       getSetting("some setting") should be(None)
@@ -26,7 +26,7 @@ class SettingsMapTest extends TestBase {
     }
   }
 
-  @Test def valuesFound() {
+  @Test def valuesFound(): Unit = {
     new TestSettingsMap with TestValues {
       getSetting("string setting") should be(Some("tease"))
       getStringSetting("string setting", "default") should be("tease")
@@ -39,7 +39,7 @@ class SettingsMapTest extends TestBase {
     }
   }
 
-  @Test def incompatibleType() {
+  @Test def incompatibleType(): Unit = {
     new TestSettingsMap with TestValues {
       getBooleanSetting("string setting", false) should be(false)
       getStringSetting("bool setting", "default") should be("default")

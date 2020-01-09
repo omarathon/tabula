@@ -69,7 +69,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
         with CommandTestSupport
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.includedStudentIds.add(user1.getWarwickId)
       command.includedStudentIds.add(user2.getWarwickId)
@@ -93,7 +93,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
         with CommandTestSupport
   }
 
-  @Test def addUsers {
+  @Test def addUsers: Unit = {
     new AddsCommandFixture {
       val validStudent: StudentMember = Fixtures.student("1111111", "abcd")
       val validStudentWithUsercode: StudentMember = Fixtures.student("2222222", "cdef")
@@ -120,7 +120,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new EditDepartmentSmallGroupSetMembershipPermissions {
@@ -135,7 +135,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment: Unit = {
     val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -145,7 +145,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -155,7 +155,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -167,7 +167,7 @@ class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = EditUserGroupMembershipCommand(department, set)
 

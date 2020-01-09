@@ -14,8 +14,6 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 trait AssessmentMembershipService {
   def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
 
-  def examManualMembershipHelper: UserGroupMembershipHelperMethods[Exam]
-
   def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 
   def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
@@ -113,8 +111,6 @@ trait AssessmentMembershipService {
 
   def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])]
 
-  def determineMembershipUsersWithOrderForMarker(exam: Assessment, marker: User): Seq[(User, Option[Int])]
-
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
   def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Boolean
@@ -147,7 +143,6 @@ class AssessmentMembershipServiceImpl
   @Autowired var profileService: ProfileService = _
 
   val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
-  val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
 
   def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
     val autoEnrolled =
@@ -185,7 +180,7 @@ class AssessmentMembershipServiceImpl
     }
   }
 
-  private def debugReplace(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
+  private def debugReplace(template: UpstreamAssessmentGroup, universityIds: Seq[String]): Unit = {
     logger.debug("Setting %d members in group %s" format(universityIds.size, template.toString))
   }
 
@@ -228,15 +223,15 @@ class AssessmentMembershipServiceImpl
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember] = dao.getCurrentUpstreamAssessmentGroupMembers(uagid)
 
-  def delete(group: AssessmentGroup) {
+  def delete(group: AssessmentGroup): Unit = {
     dao.delete(group)
   }
 
-  def delete(assessmentComponent: AssessmentComponent) {
+  def delete(assessmentComponent: AssessmentComponent): Unit = {
     dao.delete(assessmentComponent)
   }
 
-  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup) {
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit = {
     dao.delete(upstreamAssessmentGroup)
   }
 
@@ -369,7 +364,7 @@ trait AssessmentMembershipMethods extends Logging {
 
   def determineMembership(assessment: Assessment): AssessmentMembershipInfo = assessment match {
     case a: Assignment => determineMembership(a.upstreamAssessmentGroupInfos, Option(a.members), resitOnly = a.resitAssessment)
-    case e: Exam => determineMembership(e.upstreamAssessmentGroupInfos, Option(e.members), resitOnly = false)
+    case _ => new AssessmentMembershipInfo(Nil)
   }
 
   /**
@@ -384,12 +379,12 @@ trait AssessmentMembershipMethods extends Logging {
     */
   def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
     case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroupInfos, Option(a.members), a.resitAssessment)
-    case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
+    case _ => Nil
   }
 
   def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User] = assessment match {
     case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true, a.resitAssessment).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
-    case e: Exam => generateMembershipUsersWithOrder(e, includePWD = true).map(_._1)
+    case _ => Nil
   }
 
 
@@ -406,14 +401,6 @@ trait AssessmentMembershipMethods extends Logging {
 
   def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])] =
     generateMembershipUsersWithOrder(exam)
-
-  def determineMembershipUsersWithOrderForMarker(exam: Assessment, marker: User): Seq[(User, Option[Int])] =
-    if (!exam.isReleasedForMarking || exam.markingWorkflow == null) {
-      Seq()
-    } else {
-      val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)
-      determineMembershipUsersWithOrder(exam).filter(s => markersStudents.contains(s._1))
-    }
 
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
     others.foreach { g => assert(g.universityIds) }

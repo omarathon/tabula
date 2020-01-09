@@ -225,7 +225,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   // This used to implement the trait that the Hibernate listener listens to.
   // But we call this manually instead, so it doesn't have that trait and isn't
   // called by Hibernate.
-  final def preSave(newRecord: Boolean) {
+  final def preSave(newRecord: Boolean): Unit = {
     onPreSave(newRecord)
     // Generate recipientNotificationInfos for non-null recipients
     // (users could be null if inflating user entities that no longer exist in membership)
@@ -298,7 +298,7 @@ trait UserIdRecipientNotification extends SingleRecipientNotification with Notif
 
   def recipient: User = userLookup.getUserByUserId(recipientUserId)
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     Assert.notNull(recipientUserId, "recipientUserId must be set")
   }
 }
@@ -315,7 +315,7 @@ trait UniversityIdRecipientNotification extends SingleRecipientNotification with
 
   def recipient: User = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     Assert.notNull(recipientUniversityId, "recipientUniversityId must be set")
   }
 }
@@ -337,7 +337,7 @@ trait UniversityIdOrUserIdRecipientNotification extends SingleRecipientNotificat
 
   def recipient: User = fetchUser(recipientUniversityId)
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     Assert.notNull(recipientUniversityId, "recipientIdentifier must be set")
   }
 }
@@ -396,7 +396,7 @@ trait ActionRequiredNotification extends MyWarwickNotification {
 
   @transient final protected val _completed = BooleanSetting("completed", false)
 
-  protected def completed_=(isCompleted: Boolean) {
+  protected def completed_=(isCompleted: Boolean): Unit = {
     _completed.value = isCompleted
   }
 
@@ -404,7 +404,7 @@ trait ActionRequiredNotification extends MyWarwickNotification {
 
   @transient final protected val _completedBy = StringSetting("completedBy", "")
 
-  protected def completedBy_=(userId: String) {
+  protected def completedBy_=(userId: String): Unit = {
     _completedBy.value = userId
   }
 
@@ -412,13 +412,13 @@ trait ActionRequiredNotification extends MyWarwickNotification {
 
   @transient final protected val _completedOn = StringSetting("completedOn", "")
 
-  protected def completedOn_=(dateTime: DateTime) {
+  protected def completedOn_=(dateTime: DateTime): Unit = {
     _completedOn.value = dateTime.getMillis.toString
   }
 
   def completedOn = new DateTime(_completedOn.value.toLong)
 
-  def actionCompleted(user: User)
+  def actionCompleted(user: User): Unit
 
   def notificationItems: JList[EntityReference[_]] = items.asInstanceOf[JList[EntityReference[_]]]
 

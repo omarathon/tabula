@@ -13,9 +13,8 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear}/markingworkflows"))
 class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController {
 
   type ListReusableWorkflowsCommand = Appliable[Seq[CM2MarkingWorkflow]] with ListReusableWorkflowsState
@@ -56,9 +55,8 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows", "/${cm2.prefix}/admin/department/{department}/markingworkflows/**"))
+@RequestMapping(Array("/coursework/admin/department/{department}/markingworkflows", "/coursework/admin/department/{department}/markingworkflows/**"))
 class ListReusableMarkingWorkflowRedirectController extends BaseController
   with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 

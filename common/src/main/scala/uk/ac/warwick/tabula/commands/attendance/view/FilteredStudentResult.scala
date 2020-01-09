@@ -88,11 +88,11 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
     val maxPointsPerDatePerPeriod = results.flatMap(fsr => {
       // For each student get the number of points per date
       fsr.groupedPointCheckpointPairs.map { case (period, pairs) =>
-        period -> pairs.groupBy(_._1.startDate).mapValues(_.size)
+        period -> pairs.groupBy(_._1.startDate).view.mapValues(_.size)
       }.toSeq
     }).groupBy(_._1).map { case (period, maxPointsPerDatePerPeriodPerUser) => period -> {
       // For all the date-count pairs, get the max for each date
-      maxPointsPerDatePerPeriodPerUser.flatMap(_._2.toSeq).groupBy(_._1).mapValues(_.map(_._2).max)
+      maxPointsPerDatePerPeriodPerUser.flatMap(_._2.toSeq).groupBy(_._1).view.mapValues(_.map(_._2).max)
     }
     }
 
@@ -103,7 +103,7 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
           requiredDatesByPeriod(period).flatMap(requiredDate => {
             val pointsForDate = pointCheckpointPairs.filter(_._1.startDate == requiredDate)
             // Return all the student's points for this date, followed by enough nulls to pad out to the max for that date
-            pointsForDate ++ (pointsForDate.size until maxPointsPerDatePerPeriod(period)(requiredDate)).map(i => null)
+            pointsForDate ++ (pointsForDate.size until maxPointsPerDatePerPeriod(period)(requiredDate)).map(_ => null)
           })
         }
         },

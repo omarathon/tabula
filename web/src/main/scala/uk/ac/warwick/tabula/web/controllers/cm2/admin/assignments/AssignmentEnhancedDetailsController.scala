@@ -12,9 +12,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/detail/{assignment}"))
+@RequestMapping(Array("/coursework/admin/assignments/detail/{assignment}"))
 class AssignmentEnhancedDetailsController extends CourseworkController
   with AcademicYearScopedController
   with AutowiringUserSettingsServiceComponent

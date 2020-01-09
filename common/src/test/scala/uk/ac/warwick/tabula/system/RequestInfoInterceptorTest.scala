@@ -17,26 +17,26 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
   interceptor.maintenance = maintenanceModeService
   interceptor.emergencyMessage = emergencyMessageService
 
-  @Test def fromExisting {
+  @Test def fromExisting: Unit = {
     val req = new MockHttpServletRequest
     withUser("cuscav") {
       req.setAttribute(RequestInfoInterceptor.RequestInfoAttribute, RequestInfo.fromThread.get)
     }
 
-    RequestInfo.fromThread should be('empty)
+    RequestInfo.fromThread should be(Symbol("empty"))
 
     val resp = new MockHttpServletResponse
 
     interceptor.preHandle(req, resp, null) should be(true)
 
-    RequestInfo.fromThread should be('defined)
+    RequestInfo.fromThread should be(Symbol("defined"))
 
     interceptor.afterCompletion(req, resp, null, null)
 
-    RequestInfo.fromThread should be('empty)
+    RequestInfo.fromThread should be(Symbol("empty"))
   }
 
-  @Test def withNewEmpty {
+  @Test def withNewEmpty: Unit = {
     val req = new MockHttpServletRequest
     req.setServerName("tabula.warwick.ac.uk")
     req.setScheme("https")
@@ -47,7 +47,7 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
     interceptor.preHandle(req, resp, null) should be(true)
 
-    RequestInfo.fromThread should be('defined)
+    RequestInfo.fromThread should be(Symbol("defined"))
     val info = RequestInfo.fromThread.get
 
     info.ajax should be(false)
@@ -58,10 +58,10 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
     interceptor.afterCompletion(req, resp, null, null)
 
-    RequestInfo.fromThread should be('empty)
+    RequestInfo.fromThread should be(Symbol("empty"))
   }
 
-  @Test def withNew {
+  @Test def withNew: Unit = {
     val user = new CurrentUser(new User(), new User())
 
     val req = new MockHttpServletRequest
@@ -78,7 +78,7 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
     interceptor.preHandle(req, resp, null) should be(true)
 
-    RequestInfo.fromThread should be('defined)
+    RequestInfo.fromThread should be(Symbol("defined"))
     val info = RequestInfo.fromThread.get
 
     info.ajax should be(true)
@@ -93,7 +93,7 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
     interceptor.afterCompletion(req, resp, null, null)
 
-    RequestInfo.fromThread should be('empty)
+    RequestInfo.fromThread should be(Symbol("empty"))
   }
 
 }

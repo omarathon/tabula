@@ -39,7 +39,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
   }
 
-  @Test def itWorksForNewRole() {
+  @Test def itWorksForNewRole(): Unit = {
     new Fixture {
       command.roleDefinition = DepartmentalAdministratorRoleDefinition
       command.usercodes.add("cuscav")
@@ -63,7 +63,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def itWorksWithExisting() {
+  @Test def itWorksWithExisting(): Unit = {
     new Fixture {
       command.roleDefinition = DepartmentalAdministratorRoleDefinition
       command.usercodes.add("cuscav")
@@ -92,7 +92,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validatePasses() {
+  @Test def validatePasses(): Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -111,7 +111,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noUsercodes() {
+  @Test def noUsercodes(): Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -130,7 +130,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def duplicateUsercode() {
+  @Test def duplicateUsercode(): Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = singlePermissionsRoleDefinition
@@ -155,7 +155,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noPermission() {
+  @Test def noPermission(): Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.usercodes.add("cuscav")
@@ -175,7 +175,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def cantGiveWhatYouDontHave() {
+  @Test def cantGiveWhatYouDontHave(): Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.roleDefinition = DepartmentalAdministratorRoleDefinition
@@ -198,7 +198,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe() {
+  def describe(): Unit = {
     val dept = Fixtures.department("in")
     dept.id = "dept-id"
 
@@ -223,7 +223,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
     ))
   }
 
-  @Test def gluesEverythingTogether() {
+  @Test def gluesEverythingTogether(): Unit = {
     val department = Fixtures.department("in")
     val command = GrantRoleCommand(department)
 

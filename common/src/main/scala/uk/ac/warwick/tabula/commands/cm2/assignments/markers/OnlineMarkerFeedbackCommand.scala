@@ -64,7 +64,7 @@ class OnlineMarkerFeedbackCommandInternal(
     markerFeedback
   }
 
-  def copyFrom(markerFeedback: MarkerFeedback) {
+  def copyFrom(markerFeedback: MarkerFeedback): Unit = {
     copyFormFields(markerFeedback)
 
     // mark and grade
@@ -110,7 +110,7 @@ trait MarkerCopyFromFormFields {
 
   self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-  def copyFormFields(markerFeedback: MarkerFeedback) {
+  def copyFormFields(markerFeedback: MarkerFeedback): Unit = {
     // get custom field values
     fields = {
       val pairs = assignment.feedbackFields.map { field =>
@@ -131,7 +131,7 @@ trait MarkerWriteToFormFields {
 
   self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-  def saveFormFields(markerFeedback: MarkerFeedback) {
+  def saveFormFields(markerFeedback: MarkerFeedback): Unit = {
     // save custom fields
     markerFeedback.customFormValues = fields.asScala.map {
       case (_, formValue) =>
@@ -162,7 +162,7 @@ trait OnlineMarkerFeedbackPermissions extends RequiresPermissionsChecking with P
   self: OnlineMarkerFeedbackState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, mandatory(assignment))
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
     }

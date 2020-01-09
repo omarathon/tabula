@@ -30,7 +30,7 @@ trait ImportRouteRulesCommand extends CommandInternal[Unit]
 
   val ImportGroupSize = 100
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     benchmark("ImportRouteRules") {
       // Get the new rules first, split into chunks
       val newRules = logSize(routeRuleImporter.getRouteRules).grouped(ImportGroupSize)

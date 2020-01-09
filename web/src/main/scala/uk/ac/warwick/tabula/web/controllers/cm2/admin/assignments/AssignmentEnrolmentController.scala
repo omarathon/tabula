@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 /**
   * Controller to populate the user listing for editing, without persistence
   */
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/enrolment"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/enrolment"))
 class AssignmentEnrolmentController extends CourseworkController {
 
   validatesSelf[SelfValidating]
@@ -45,7 +44,7 @@ class AssignmentEnrolmentController extends CourseworkController {
   }
 
   @InitBinder
-  def upstreamGroupBinder(binder: WebDataBinder) {
+  def upstreamGroupBinder(binder: WebDataBinder): Unit = {
     binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
   }
 }

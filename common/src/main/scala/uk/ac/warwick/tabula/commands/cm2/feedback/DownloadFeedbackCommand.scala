@@ -17,7 +17,7 @@ object DownloadFeedbackCommand {
   type Result = Option[RenderableFile]
   type Command = Appliable[Result]
 
-  val RequiredPermission = Permissions.AssignmentFeedback.Read
+  val RequiredPermission = Permissions.Feedback.Read
 
   def apply(assignment: Assignment, feedback: Feedback, student: Option[Member]): Command =
     new DownloadFeedbackCommandInternal(assignment, feedback, student)

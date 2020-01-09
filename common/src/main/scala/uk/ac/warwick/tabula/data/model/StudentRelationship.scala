@@ -66,7 +66,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 
   def studentMember: Option[StudentMember] = Option(studentCourseDetails).map(_.student)
 
-  def studentMember_=(student: StudentMember) {
+  def studentMember_=(student: StudentMember): Unit = {
     student.mostSignificantCourseDetails.foreach { scd =>
       studentCourseDetails = scd
     }
@@ -100,7 +100,7 @@ class MemberStudentRelationship extends StudentRelationship {
 
   def agentMember = Option(_agentMember)
 
-  def agentMember_=(member: Member) {
+  def agentMember_=(member: Member): Unit = {
     _agentMember = member
   }
 
@@ -124,7 +124,7 @@ class ExternalStudentRelationship extends StudentRelationship {
 
   def agent: String = _agentName
 
-  def agent_=(name: String) {
+  def agent_=(name: String): Unit = {
     _agentName = name
   }
 

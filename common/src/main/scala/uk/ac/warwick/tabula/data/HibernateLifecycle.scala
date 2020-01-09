@@ -13,23 +13,23 @@ import org.hibernate.event.service.spi.EventListenerRegistry
   */
 
 trait PreLoadBehaviour {
-  def preLoad()
+  def preLoad(): Unit
 }
 
 /** Happens before save */
 trait PreSaveBehaviour {
-  def preSave(newRecord: Boolean)
+  def preSave(newRecord: Boolean): Unit
 }
 
 trait PostLoadBehaviour {
-  def postLoad()
+  def postLoad(): Unit
 }
 
 class HibernateLifecycle extends InitializingBean with PostLoadEventListener with PreLoadEventListener with PreInsertEventListener with PreUpdateEventListener {
 
   var sessionFactory: SessionFactory = _
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     assert(sessionFactory != null)
 
     // Supposed correct way to register listeners is to wire in your own Integrator,
@@ -43,7 +43,7 @@ class HibernateLifecycle extends InitializingBean with PostLoadEventListener wit
     registry.appendListeners(EventType.PRE_UPDATE, this)
   }
 
-  override def onPostLoad(event: PostLoadEvent) {
+  override def onPostLoad(event: PostLoadEvent): Unit = {
     HibernateHelpers.initialiseAndUnproxy(event.getEntity) match {
       case listener: PostLoadBehaviour => listener.postLoad()
       case _ =>
@@ -66,7 +66,7 @@ class HibernateLifecycle extends InitializingBean with PostLoadEventListener wit
     false
   }
 
-  override def onPreLoad(event: PreLoadEvent) {
+  override def onPreLoad(event: PreLoadEvent): Unit = {
     event.getEntity match {
       case listener: PreLoadBehaviour => listener.preLoad()
       case _ =>

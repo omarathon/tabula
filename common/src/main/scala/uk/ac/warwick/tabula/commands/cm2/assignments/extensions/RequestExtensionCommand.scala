@@ -183,7 +183,7 @@ trait RequestExtensionCommandState {
   val assignment: Assignment
   val submitter: CurrentUser
 
-  def presetValues(extension: Extension) {
+  def presetValues(extension: Extension): Unit = {
     reason = extension.reason
     requestedExpiryDate = extension.expiryDate.orElse(extension.requestedExpiryDate).orNull
     attachedFiles = extension.attachments

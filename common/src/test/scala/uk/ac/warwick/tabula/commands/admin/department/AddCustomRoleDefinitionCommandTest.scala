@@ -24,7 +24,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     val command = new AddCustomRoleDefinitionCommandInternal(department) with CommandTestSupport
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.name = "Custom role"
       command.baseDefinition = DepartmentalAdministratorRoleDefinition
@@ -40,7 +40,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     val command = new AddCustomRoleDefinitionCommandPermissions with AddCustomRoleDefinitionCommandState {
       override val department: Department = Fixtures.department("in")
     }
@@ -51,7 +51,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, command.department)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     val command = new AddCustomRoleDefinitionCommandPermissions with AddCustomRoleDefinitionCommandState {
       override val department = null
     }
@@ -66,7 +66,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       command.name = "Custom role"
       command.baseDefinition = DepartmentalAdministratorRoleDefinition
@@ -78,7 +78,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoName {
+  @Test def validateNoName: Unit = {
     new ValidationFixture {
       command.name = "         "
       command.baseDefinition = DepartmentalAdministratorRoleDefinition
@@ -93,7 +93,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNameTooLong {
+  @Test def validateNameTooLong: Unit = {
     new ValidationFixture {
       command.name = (1 to 300).map { _ => "a" }.mkString("")
       command.baseDefinition = DepartmentalAdministratorRoleDefinition
@@ -108,7 +108,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoBaseDefinition {
+  @Test def validateNoBaseDefinition: Unit = {
     new ValidationFixture {
       command.name = "Custom role"
 
@@ -122,7 +122,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description {
+  @Test def description: Unit = {
     val command = new AddCustomRoleDefinitionCommandDescription with AddCustomRoleDefinitionCommandState {
       override val eventName: String = "test"
       val department: Department = Fixtures.department("in")

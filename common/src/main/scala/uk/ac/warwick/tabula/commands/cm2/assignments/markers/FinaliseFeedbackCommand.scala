@@ -41,7 +41,7 @@ trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with Permi
   self: FinaliseFeedbackCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, mandatory(assignment))
   }
 }
 
@@ -64,14 +64,14 @@ trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
 }
 
 trait FinaliseFeedbackComponent {
-  def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback])
+  def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]): Unit
 }
 
 trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
 
   val marker: User
 
-  def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) {
+  def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]): Unit = {
     val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedback, marker)
     finaliseFeedbackCommand.apply()
   }

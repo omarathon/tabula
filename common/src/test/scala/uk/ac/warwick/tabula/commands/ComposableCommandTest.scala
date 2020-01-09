@@ -52,13 +52,13 @@ class ComposableCommandTest extends TestBase with Mockito {
   val sampleName = "Reverend Arthur Belling"
 
 
-  @Test def composedCommandIsAValidCommand() {
+  @Test def composedCommandIsAValidCommand(): Unit = {
     val realCommand = new HelloCommandInternals(sampleName) with ComposableCommand[String] with HelloCommandPermissions with HelloCommandNotification
 
     realCommand.isInstanceOf[Command[String]] should be(true)
   }
 
-  @Test def canComposeCommandWithMocksForTesting() {
+  @Test def canComposeCommandWithMocksForTesting(): Unit = {
 
     val stubbedCommand = new HelloCommandInternals(sampleName) with RequiresPermissionsChecking with Describable[String] {
       def describe(d: Description): Unit = {
@@ -75,18 +75,18 @@ class ComposableCommandTest extends TestBase with Mockito {
     stubbedCommand.applyInternal() should be("hello " + sampleName)
   }
 
-  @Test def canSeeInternalCommandsInterfaceAfterComposition() {
+  @Test def canSeeInternalCommandsInterfaceAfterComposition(): Unit = {
     val realCommand = new HelloCommandInternals(sampleName) with ComposableCommand[String] with HelloCommandPermissions with HelloCommandNotification
     realCommand.name should be(sampleName)
   }
 
-  @Test def UnauditedTraitIsVisibleOnCommand() {
+  @Test def UnauditedTraitIsVisibleOnCommand(): Unit = {
     val realCommand = new HelloCommandInternals(sampleName) with ComposableCommand[String] with HelloCommandPermissions with Unaudited
 
     realCommand.isInstanceOf[Unaudited] should be(true)
   }
 
-  @Test def CanTestPermissionsIndependently() {
+  @Test def CanTestPermissionsIndependently(): Unit = {
     val perms = new HelloCommandPermissions with HelloCommand {
       val name: String = sampleName
     }
@@ -105,7 +105,7 @@ class ComposableCommandTest extends TestBase with Mockito {
     verify(mockChecking2, times(0)).PermissionCheck(GodMode)
   }
 
-  @Test def CanTestNotificationIndependently() {
+  @Test def CanTestNotificationIndependently(): Unit = {
     val desc = new HelloCommandNotification with HelloCommand {
       val name: String = sampleName
       val eventName = "test"

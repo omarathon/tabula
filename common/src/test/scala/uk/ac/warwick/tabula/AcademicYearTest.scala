@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula
 
 //scalastyle:off magic.number
 class AcademicYearTest extends TestBase {
-  @Test def year {
+  @Test def year: Unit = {
     AcademicYear.forDate(dateTime(2010, 11)).startYear should be(2010)
     AcademicYear.forDate(dateTime(2010, 5)).startYear should be(2009)
   }
 
-  @Test def strings {
+  @Test def strings: Unit = {
     AcademicYear(2011).toString should be("11/12")
     AcademicYear(1999).toString should be("99/00")
 
@@ -15,7 +15,7 @@ class AcademicYearTest extends TestBase {
     (AcademicYear(2012) - 10) should be(AcademicYear(2002))
   }
 
-  @Test def range {
+  @Test def range: Unit = {
     AcademicYear(2001).yearsSurrounding(2, 4) should be(Seq(
       AcademicYear(1999),
       AcademicYear(2000),
@@ -27,7 +27,7 @@ class AcademicYearTest extends TestBase {
     ))
   }
 
-  @Test def parse {
+  @Test def parse: Unit = {
     AcademicYear.parse("05/06") should be(AcademicYear(2005))
     AcademicYear.parse("99/00") should be(AcademicYear(1999))
     intercept[IllegalArgumentException] {
@@ -35,11 +35,11 @@ class AcademicYearTest extends TestBase {
     }
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def tooHigh {
+  @Test(expected = classOf[IllegalArgumentException]) def tooHigh: Unit = {
     AcademicYear(9999)
   }
 
-  @Test(expected = classOf[IllegalArgumentException]) def tooLow {
+  @Test(expected = classOf[IllegalArgumentException]) def tooLow: Unit = {
     AcademicYear(999)
   }
 

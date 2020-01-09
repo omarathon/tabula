@@ -25,7 +25,7 @@ class HibernateStatisticsService extends QueueListener with InitializingBean wit
 
   override def isListeningToQueue = true
 
-  override def onReceive(item: Any) {
+  override def onReceive(item: Any): Unit = {
     logger.info("Updating sessionFactory statistics options " + item + " for " + context)
     item match {
       case HibernateStatisticsMessage("enable") => sessionFactory.getStatistics.setStatisticsEnabled(true)
@@ -52,7 +52,7 @@ class HibernateStatisticsService extends QueueListener with InitializingBean wit
 		""".stripMargin
   }
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     logger.debug("Registering listener for " + classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
     queue.addListener(classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value, this)
   }

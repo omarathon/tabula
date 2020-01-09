@@ -16,7 +16,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 
   val module: Module = Fixtures.module("cs132")
 
-  @Test def parseXML() {
+  @Test def parseXML(): Unit = {
     val userLookup = new MockUserLookup
 
     val tutor = new User("abcdef")

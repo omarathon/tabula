@@ -11,19 +11,19 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 
   val service: UserSettingsService = mock[UserSettingsService]
 
-  @Test def setupWithNonExisting {
+  @Test def setupWithNonExisting: Unit = {
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
     cmd.dismiss should be(false)
   }
 
-  @Test def setupWithExisting {
+  @Test def setupWithExisting: Unit = {
     settings.hiddenIntros = Seq("hash")
 
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
     cmd.dismiss should be(true)
   }
 
-  @Test def dismissNonExisting {
+  @Test def dismissNonExisting: Unit = {
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
     cmd.service = service
 
@@ -36,7 +36,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
     verify(service, times(1)).save(user, settings)
   }
 
-  @Test def dismissExisting {
+  @Test def dismissExisting: Unit = {
     settings.hiddenIntros = Seq("hash", "otherhash")
 
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
@@ -51,7 +51,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
     verify(service, times(1)).save(user, settings)
   }
 
-  @Test def undismissExisting {
+  @Test def undismissExisting: Unit = {
     settings.hiddenIntros = Seq("hash", "otherhash")
 
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
@@ -66,7 +66,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
     verify(service, times(1)).save(user, settings)
   }
 
-  @Test def undismissNonExisting {
+  @Test def undismissNonExisting: Unit = {
     settings.hiddenIntros = Seq("otherhash")
 
     val cmd = new DismissHiddenIntroCommand(user, settings, "hash")

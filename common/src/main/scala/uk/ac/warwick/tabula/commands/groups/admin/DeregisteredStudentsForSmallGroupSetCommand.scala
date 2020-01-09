@@ -86,7 +86,7 @@ trait DeregisteredStudentsForSmallGroupSetDescription extends Describable[Seq[St
     d.smallGroupSet(set)
   }
 
-  override def describeResult(d: Description, result: Seq[StudentNotInMembership]) {
+  override def describeResult(d: Description, result: Seq[StudentNotInMembership]): Unit = {
     d.smallGroupSet(set)
       .studentIds(result.flatMap(_.student.universityId.maybeText))
   }

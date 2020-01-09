@@ -42,15 +42,11 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
     profiles ++ extraProfiles
   }
 
-  def extraProfiles: Iterable[String] = scheduler ++ web ++ cm1Enabled ++ cm2Enabled ++ turnitinTca
+  def extraProfiles: Iterable[String] = scheduler ++ web ++ turnitinTca
 
   def scheduler: Option[String] = extraProfile("scheduling.enabled", "scheduling", default = false)
 
   def web: Option[String] = extraProfile("web.enabled", "web", default = true)
-
-  def cm1Enabled: Option[String] = extraProfile("cm1.enabled", "cm1Enabled", default = true)
-
-  def cm2Enabled: Option[String] = extraProfile("cm2.enabled", "cm2Enabled", default = true)
 
   def turnitinTca: Option[String] = extraProfile("features.turnitinTca", "turnitinTca", default = false)
 

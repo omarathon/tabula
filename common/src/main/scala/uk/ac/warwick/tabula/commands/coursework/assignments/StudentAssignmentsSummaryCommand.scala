@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentAssignmentsSummaryCommand.Result
 import uk.ac.warwick.tabula.data.model.EnhancedAssignment
@@ -92,7 +92,7 @@ trait StudentAssignmentsSummaryPermissions extends RequiresPermissionsChecking w
     val member = mandatory(student.asMember)
     p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
     p.PermissionCheck(Permissions.Submission.Read, member)
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, member)
+    p.PermissionCheck(Permissions.Feedback.Read, member)
     p.PermissionCheck(Permissions.Extension.Read, member)
   }
 

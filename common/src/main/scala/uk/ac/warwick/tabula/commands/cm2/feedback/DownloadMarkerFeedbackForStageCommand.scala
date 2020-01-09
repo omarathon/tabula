@@ -5,16 +5,16 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback.DownloadMarkerFeedbackForStageCommand._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.jdk.CollectionConverters._
 
 object DownloadMarkerFeedbackForStageCommand {
   type Result = RenderableFile
@@ -55,7 +55,7 @@ trait DownloadMarkerFeedbackForStageRequest {
   // can only download these students submissions or a subset
   def markersStudents: Seq[User] = assignment.cm2MarkerAllocations(marker).flatMap(_.students).distinct
 
-  lazy val feedbacks: Seq[AssignmentFeedback] = {
+  lazy val feedbacks: Seq[Feedback] = {
     // filter out ones we aren't the marker for
     val studentsToDownload = students.filter(markersStudents.contains).map(_.getUserId)
     assignment.feedbacks.asScala.toSeq.filter(s => studentsToDownload.contains(s.usercode))
@@ -83,7 +83,7 @@ trait DownloadMarkerFeedbackForStagePermissions extends RequiresPermissionsCheck
   self: DownloadMarkerFeedbackForStageState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Read, mandatory(assignment))
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, mandatory(assignment))
     }

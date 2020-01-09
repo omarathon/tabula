@@ -13,11 +13,11 @@ trait AutowiringFeedbackForSitsDaoComponent extends FeedbackForSitsDaoComponent 
 }
 
 trait FeedbackForSitsDao {
-  def saveOrUpdate(feedbackForSits: FeedbackForSits)
+  def saveOrUpdate(feedbackForSits: FeedbackForSits): Unit
 
-  def saveOrUpdate(feedback: Feedback)
+  def saveOrUpdate(feedback: Feedback): Unit
 
-  def saveOrUpdate(mark: Mark)
+  def saveOrUpdate(mark: Mark): Unit
 
   def feedbackToLoad: Seq[FeedbackForSits]
 

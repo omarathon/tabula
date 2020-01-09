@@ -75,7 +75,7 @@ trait PopulateMarkerFeedbackPermissions extends RequiresPermissionsChecking with
   self: PopulateMarkerFeedbackCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, mandatory(assignment))
   }
 }
 
@@ -90,12 +90,12 @@ trait PopulateMarkerFeedbackDescription extends Describable[Seq[MarkerFeedback]]
 }
 
 trait PopulateMarkerFeedbackComponent {
-  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback])
+  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]): Unit
 }
 
 trait PopulateMarkerFeedbackComponentImpl extends PopulateMarkerFeedbackComponent {
 
-  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) {
+  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]): Unit = {
     val populateMarkerFeedbackCommand = PopulateMarkerFeedbackCommand(assignment, markerFeedback)
     populateMarkerFeedbackCommand.apply()
   }

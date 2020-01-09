@@ -10,7 +10,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
 
   val controller = new AddModuleController
 
-  @Test def createsCommand {
+  @Test def createsCommand: Unit = {
     val department = Fixtures.department("in")
 
     val command = controller.command(department)
@@ -18,11 +18,11 @@ class AddModuleControllerTest extends TestBase with Mockito {
     command should be(anInstanceOf[Appliable[Department]])
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment: Unit = {
     controller.command(null)
   }
 
-  @Test def form {
+  @Test def form: Unit = {
     val department = Fixtures.department("in")
 
     val mav = controller.showForm(department)
@@ -30,7 +30,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
     mav.toModel("department") should be(department)
   }
 
-  @Test def submit {
+  @Test def submit: Unit = {
     val department = Fixtures.department("in")
     val command = mock[Appliable[Module]]
 
@@ -47,7 +47,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
     verify(command, times(1)).apply()
   }
 
-  @Test def submitValidationError {
+  @Test def submitValidationError: Unit = {
     val department = Fixtures.department("in")
     val command = mock[Appliable[Module]]
 

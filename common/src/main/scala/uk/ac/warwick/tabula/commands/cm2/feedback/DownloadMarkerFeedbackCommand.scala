@@ -40,7 +40,7 @@ trait DownloadMarkerFeedbackPermissions extends RequiresPermissionsChecking with
   self: DownloadMarkerFeedbackState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
+    p.PermissionCheck(Permissions.Feedback.Read, markerFeedback.feedback)
   }
 }
 

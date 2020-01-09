@@ -16,7 +16,7 @@ class YearMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStrin
 
   override def newCurrentItem = new YearMarkItem()
 
-  override def cell(cellReference: String, formattedValue: String, comment: XSSFComment) {
+  override def cell(cellReference: String, formattedValue: String, comment: XSSFComment): Unit = {
     val col = new CellReference(cellReference).getCol
     if (isFirstRow) {
       columnMap(col) = formattedValue

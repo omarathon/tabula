@@ -15,7 +15,7 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def commandApply() {
+  def commandApply(): Unit = {
     new Fixture {
       assignment.genericFeedback should be (null)
       val result: Assignment = command.applyInternal()

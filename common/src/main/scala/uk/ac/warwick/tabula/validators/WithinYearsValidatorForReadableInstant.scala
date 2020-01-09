@@ -11,7 +11,7 @@ class WithinYearsValidatorForReadableInstant extends ConstraintValidator[WithinY
   var maxPast: Int = _
   var maxFuture: Int = _
 
-  override def initialize(annotation: WithinYears) {
+  override def initialize(annotation: WithinYears): Unit = {
     maxPast = annotation.maxPast()
     maxFuture = annotation.maxFuture()
   }
