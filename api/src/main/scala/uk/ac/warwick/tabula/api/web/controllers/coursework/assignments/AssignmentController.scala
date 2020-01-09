@@ -1,35 +1,34 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
-import uk.ac.warwick.tabula.api.web.helpers._
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.AssignmentController._
+import uk.ac.warwick.tabula.api.web.helpers._
+import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{FileFormValue, IntegerFormValue}
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.JavaImports._
 
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
-import AssignmentController._
-import uk.ac.warwick.tabula.commands.cm2.assignments.{DeleteAssignmentCommand, SubmissionAndFeedbackCommand, SubmitAssignmentBinding, SubmitAssignmentCommand, SubmitAssignmentCommandInternal, SubmitAssignmentDescription, SubmitAssignmentNotifications, SubmitAssignmentOnBehalfOfPermissions, SubmitAssignmentRequest, SubmitAssignmentTriggers, SubmitAssignmentValidation}
-import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
-import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
 object AssignmentController {
   type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest with BindListener with SelfValidating
@@ -136,14 +135,14 @@ trait EditAssignmentApi {
   self: AssignmentController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
   @ModelAttribute("editCommand")
-  def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
-    val cmd = new EditAssignmentCommand(module, assignment, user)
-    cmd
+  def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentMonolithCommand.Command = {
+    mustBeLinked(assignment, module)
+    EditAssignmentMonolithCommand(assignment)
   }
 
 
   @RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-  def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentCommand, errors: Errors): Mav = {
+  def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentMonolithCommand.Command, errors: Errors): Mav = {
     request.copyTo(command, errors)
 
     globalValidator.validate(command, errors)
@@ -161,7 +160,7 @@ trait EditAssignmentApi {
   }
 }
 
-class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCommand] {
+class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentMonolithRequest] {
 
   // set defaults to null
   openEnded = null

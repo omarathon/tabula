@@ -47,6 +47,10 @@ trait ModifyFeedbackCommandState {
   }
 }
 
+trait ModifyFeedbackRequest extends SharedFeedbackProperties {
+  self: ZipServiceComponent =>
+}
+
 trait ModifyFeedbackDescription extends Describable[Assignment] {
   self: ModifyFeedbackCommandState with SharedFeedbackProperties =>
 

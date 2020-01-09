@@ -120,7 +120,7 @@
   <@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
     <#if canEditWorkflowType>
       <@f.select path="workflowCategory" id="workflowCategory" class="form-control">
-        <@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
+        <@f.options items=allWorkflowCategories itemLabel="displayName" itemValue="code" />
       </@f.select>
       <div class="help-block">
         A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to

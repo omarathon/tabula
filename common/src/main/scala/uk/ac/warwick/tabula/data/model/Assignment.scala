@@ -925,6 +925,11 @@ trait BooleanAssignmentDetailProperties {
     assignment.openEnded = openEnded
     assignment.resitAssessment = resitAssessment
   }
+
+  def copyBooleanAssignmentDetailPropertiesFrom(other: BooleanAssignmentDetailProperties): Unit = {
+    openEnded = other.openEnded
+    resitAssessment = other.resitAssessment
+  }
 }
 
 trait BooleanFeedbackProperties {

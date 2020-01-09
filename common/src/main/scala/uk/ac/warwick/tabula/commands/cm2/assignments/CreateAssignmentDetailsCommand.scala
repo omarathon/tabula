@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.hibernate.validator.constraints.Length
 import javax.validation.constraints.NotEmpty
+import org.hibernate.validator.constraints.Length
 import org.joda.time.{DateTimeConstants, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowRequest, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
@@ -21,13 +20,22 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import scala.jdk.CollectionConverters._
 
 object CreateAssignmentDetailsCommand {
-  def apply(module: Module, academicYear: AcademicYear) =
+  type Command =
+    Appliable[Assignment]
+      with ModifyAssignmentDetailsCommandState
+      with CreateAssignmentDetailsRequest
+      with CreateAssignmentDetailsPrefill
+      with SelfValidating
+      with SchedulesNotifications[Assignment, Assignment]
+      with GeneratesTriggers[Assignment]
+
+  def apply(module: Module, academicYear: AcademicYear): Command =
     new CreateAssignmentDetailsCommandInternal(module, academicYear)
       with ComposableCommand[Assignment]
-      with BooleanAssignmentDetailProperties
+      with CreateAssignmentDetailsRequest
+      with CreateAssignmentDetailsPrefill
       with CreateAssignmentPermissions
       with CreateAssignmentDetailsDescription
-      with CreateAssignmentDetailsCommandState
       with CreateAssignmentDetailsValidation
       with ModifyAssignmentScheduledNotifications
       with AutowiringAssessmentServiceComponent
@@ -36,16 +44,15 @@ object CreateAssignmentDetailsCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
-  with CreateAssignmentDetailsCommandState with SharedAssignmentDetailProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
-
-  private var _prefilled: Boolean = _
-
-  def prefilled: Boolean = _prefilled
-
-  markersA = JArrayList()
-  markersB = JArrayList()
+abstract class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear)
+  extends CommandInternal[Assignment]
+    with ModifyAssignmentDetailsCommandState
+    with AssignmentDetailsCopy
+    with CreatesMarkingWorkflow {
+  self: CreateAssignmentDetailsRequest
+    with AssessmentServiceComponent
+    with UserLookupComponent
+    with CM2MarkingWorkflowServiceComponent =>
 
   override def applyInternal(): Assignment = {
     val assignment = new Assignment(module)
@@ -60,7 +67,15 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     assessmentService.save(assignment)
     assignment
   }
+}
 
+trait CreateAssignmentDetailsPrefill {
+  self: CreateAssignmentDetailsRequest
+    with ModifyAssignmentDetailsCommandState
+    with AssessmentServiceComponent =>
+
+  private var _prefilled: Boolean = _
+  def prefilled: Boolean = _prefilled
 
   def prefillFromRecentAssignment(): Unit = {
     if (prefillAssignment != null) {
@@ -76,11 +91,11 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
   }
 
   /**
-    * Copy just the fields that it might be useful to
-    * prefill. The assignment passed in might typically be
-    * another recently created assignment, that may have good
-    * initial values for submission options.
-    */
+   * Copy just the fields that it might be useful to
+   * prefill. The assignment passed in might typically be
+   * another recently created assignment, that may have good
+   * initial values for submission options.
+   */
   def copyNonspecificFrom(assignment: Assignment): Unit = {
     openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
     closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
@@ -90,11 +105,11 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     }
     copySharedDetailFrom(assignment)
   }
-
 }
 
-trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
+trait AssignmentDetailsCopy {
+  self: ModifyAssignmentDetailsRequest
+    with ModifyAssignmentDetailsCommandState =>
 
   def copyTo(assignment: Assignment): Unit = {
     assignment.name = name
@@ -124,14 +139,16 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
   }
 }
 
-trait ModifyAssignmentDetailsCommandState {
-
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
+trait ModifyAssignmentDetailsCommandState extends ModifyMarkingWorkflowState {
+  self: CM2MarkingWorkflowServiceComponent
+    with UserLookupComponent =>
 
   def module: Module
-
   def academicYear: AcademicYear
+  lazy val department: Department = module.adminDepartment
+}
 
+trait ModifyAssignmentDetailsRequest extends SharedAssignmentDetailProperties with ModifyMarkingWorkflowRequest {
   @Length(max = 200)
   @NotEmpty(message = "{NotEmpty.assignmentName}")
   var name: String = _
@@ -144,30 +161,39 @@ trait ModifyAssignmentDetailsCommandState {
 
   var workflowCategory: WorkflowCategory = WorkflowCategory.NotDecided
 
-  lazy val workflowCategories: Seq[WorkflowCategory] = {
-    WorkflowCategory.values
-  }
-
   var reusableWorkflow: CM2MarkingWorkflow = _
-
-  lazy val department: Department = module.adminDepartment
-  lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
-    cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
 
   var anonymity: AssignmentAnonymity = _
 
+  def copyModifyAssignmentDetailsRequestFrom(other: ModifyAssignmentDetailsRequest): Unit = {
+    name = other.name
+    openDate = other.openDate
+    closeDate = other.closeDate
+    openEndedReminderDate = other.openEndedReminderDate
+    workflowCategory = other.workflowCategory
+    reusableWorkflow = other.reusableWorkflow
+    anonymity = other.anonymity
+
+    copyBooleanAssignmentDetailPropertiesFrom(other)
+    copyModifyMarkingWorkflowRequestFrom(other)
+  }
 }
 
-trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState with ModifyMarkingWorkflowState {
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
-
+trait CreateAssignmentDetailsRequest extends ModifyAssignmentDetailsRequest {
   // can be set to false if that's not what you want.
   var prefillFromRecent = true
   var prefillAssignment: Assignment = _
+
+  def copyCreateAssignmentDetailsRequestFrom(other: CreateAssignmentDetailsRequest): Unit = {
+    prefillFromRecent = other.prefillFromRecent
+    prefillAssignment = other.prefillAssignment
+
+    copyModifyAssignmentDetailsRequestFrom(other)
+  }
 }
 
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+  self: ModifyAssignmentDetailsRequest
     with UserLookupComponent =>
 
   private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
@@ -217,12 +243,13 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
   }
 }
 
+trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation {
+  self: CreateAssignmentDetailsRequest
+    with ModifyAssignmentDetailsCommandState
+    with AssessmentServiceComponent
+    with UserLookupComponent =>
 
-trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-  self: CreateAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent
-    with ModifyMarkingWorkflowState with UserLookupComponent =>
-
-  override def validate(errors: Errors): Unit = {
+  def validateCreateAssignmentDetails(errors: Errors): Unit = {
     // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
@@ -237,22 +264,25 @@ trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidatio
     validateOpenDate(errors)
     validateCloseDate(errors)
   }
+
+  // Don't add things here as a Command might mix in multiple validators, add to validateCreateAssignmentDetails
+  override def validate(errors: Errors): Unit = validateCreateAssignmentDetails(errors)
 }
 
 trait CreateAssignmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: CreateAssignmentDetailsCommandState =>
+  self: ModifyAssignmentDetailsCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.Assignment.Create, module)
-  }
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(Permissions.Assignment.Create, mandatory(module))
 }
 
 trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
-  self: CreateAssignmentDetailsCommandState =>
+  self: CreateAssignmentDetailsRequest
+    with ModifyAssignmentDetailsCommandState =>
 
   override lazy val eventName = "AddAssignmentDetails"
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.module(module).properties(
       "name" -> name,
       "openDate" -> Option(openDate).map(_.toString()).orNull,
@@ -261,8 +291,6 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
       "workflowType" -> Option(workflowType).map(_.name).orNull,
       "anonymity" -> Option(anonymity).map(_.code).orNull
     )
-  }
-
 }
 
 trait GeneratesNotificationsForAssignment {
