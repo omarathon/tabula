@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesOfficerRoleDefinition,
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.UserNavigationGeneratorImpl
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
@@ -68,7 +69,11 @@ abstract class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val 
       }
 
       // For each usercode that we've removed, clear the cache
-      usercodes.asScala.foreach { usercode => permissionsService.clearCachesForUser((usercode, classTag[A])) }
+      usercodes.asScala.foreach(usercode => {
+        permissionsService.clearCachesForUser((usercode, classTag[A]))
+        // clear the users navigation cache as well
+        UserNavigationGeneratorImpl(usercode, forceUpdate = true)
+      })
       result
     }
   }

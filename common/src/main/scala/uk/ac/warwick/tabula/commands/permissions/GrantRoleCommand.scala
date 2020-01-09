@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.UserNavigationGeneratorImpl
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
@@ -63,6 +64,8 @@ abstract class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val s
     // For each usercode that we've added, clear the cache
     usercodes.asScala.foreach { usercode =>
       permissionsService.clearCachesForUser((usercode, classTag[A]))
+      // clear the users navigation cache as well
+      UserNavigationGeneratorImpl(usercode, forceUpdate = true)
     }
 
     role
