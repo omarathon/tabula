@@ -101,7 +101,6 @@ case class JSONUserSettings(
   newAssignmentSettings: String,
   weekNumberingSystem: String,
   bulkEmailSeparator: String,
-  profilesDefaultView: String
 )
 
 object JSONUserSettings {
@@ -111,7 +110,6 @@ object JSONUserSettings {
       newAssignmentSettings = u.newAssignmentSettings,
       weekNumberingSystem = u.weekNumberingSystem,
       bulkEmailSeparator = u.bulkEmailSeparator,
-      profilesDefaultView = u.profilesDefaultView
     )
   }
 }

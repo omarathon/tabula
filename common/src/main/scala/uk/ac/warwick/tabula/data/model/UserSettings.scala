@@ -44,10 +44,6 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def bulkEmailSeparator_=(separator: String): Unit = settings += (Settings.BulkEmailSeparator -> separator)
 
-  def profilesDefaultView: String = getStringSetting(Settings.ProfilesDefaultView).getOrElse(DefaultProfilesDefaultView)
-
-  def profilesDefaultView_=(view: String): Unit = settings += (Settings.ProfilesDefaultView -> view)
-
   // Active department should be Optional; if the user has chosen one yet they must pick the initial value
   def activeDepartment: Option[Department] = getStringSetting(Settings.ActiveDepartment).flatMap(moduleAndDepartmentService.getDepartmentByCode)
 
@@ -106,8 +102,6 @@ object UserSettings {
 
   val DefaultBulkEmailSeparator = ";"
 
-  val DefaultProfilesDefaultView = "gadget"
-
   val DefaultCourseworkShowEmptyModules = true
   val DefaultReceiveStudentComments = true
 
@@ -117,7 +111,6 @@ object UserSettings {
     val HiddenIntros = "hiddenIntros"
     val WeekNumberingSystem = "weekNumberSystem"
     val BulkEmailSeparator = "bulkEmailSeparator"
-    val ProfilesDefaultView = "profilesDefaultView"
     val ActiveDepartment = "activeDepartment"
     val ActiveAcademicYear = "activeAcademicYear"
     val CourseworkShowEmptyModules = "courseworkShowEmptyModules"

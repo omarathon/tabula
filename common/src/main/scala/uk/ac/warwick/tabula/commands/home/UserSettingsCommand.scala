@@ -31,7 +31,6 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
   var newAssignmentSettings: String = settings.newAssignmentSettings
   var weekNumberingSystem: String = settings.weekNumberingSystem
   var bulkEmailSeparator: String = settings.bulkEmailSeparator
-  var profilesDefaultView: String = settings.profilesDefaultView
   var deptAdminReceiveStudentComments: Boolean = settings.deptAdminReceiveStudentComments
 
   lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
@@ -45,7 +44,6 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
     settings.newAssignmentSettings = newAssignmentSettings
     settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
     settings.bulkEmailSeparator = bulkEmailSeparator
-    settings.profilesDefaultView = profilesDefaultView
     settings.deptAdminReceiveStudentComments = deptAdminReceiveStudentComments
     smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
     finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
@@ -84,7 +82,6 @@ trait UserSettingsDescription extends Describable[UserSettings] {
       "hiddenIntros" -> result.hiddenIntros,
       "weekNumberingSystem" -> result.weekNumberingSystem,
       "bulkEmailSeparator" -> result.bulkEmailSeparator,
-      "profilesDefaultView" -> result.profilesDefaultView,
       "activeAcademicYear" -> result.activeAcademicYear.map(_.toString)
     )
   }
