@@ -38,7 +38,7 @@
     </div>
 
     <div class="filter-results admin-assignment-submission-list">
-      <i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+      <i class="id7-koan-spinner id7-koan-spinner--xs id7-koan-spinner--inline" aria-hidden="true"></i> Loading&hellip;
     </div>
   </div>
 </#escape>

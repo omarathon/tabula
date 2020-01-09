@@ -13,7 +13,7 @@ class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 
   def getPermissionsFor(user: CurrentUser): LazyList[PermissionDefinition] =
     service.getGrantedPermissionsFor[PermissionsTarget](user) map {
-      case global: GrantedPermission[_] if global.scopeType == "___GLOBAL___" =>
+      case global: GrantedPermission[_] if global.scopeType == PermissionsTarget.GlobalScopeType =>
         PermissionDefinition(global.permission, None, global.overrideType)
 
       case grantedPermission =>

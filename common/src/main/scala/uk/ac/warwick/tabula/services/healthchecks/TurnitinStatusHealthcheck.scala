@@ -32,6 +32,7 @@ object TurnitinStatusHealthcheck {
   sealed abstract class StatusPageStatus(override val entryName: String, val healthcheckStatus: ServiceHealthcheck.Status) extends EnumEntry
   object StatusPageStatus extends Enum[StatusPageStatus] with PlayJsonEnum[StatusPageStatus] {
     case object Operational extends StatusPageStatus("operational", ServiceHealthcheck.Status.Okay)
+    case object UnderMaintenance extends StatusPageStatus("under_maintenance", ServiceHealthcheck.Status.Okay)
     case object DegradedPerformance extends StatusPageStatus("degraded_performance", ServiceHealthcheck.Status.Warning)
     case object PartialOutage extends StatusPageStatus("partial_outage", ServiceHealthcheck.Status.Warning)
     case object MajorOutage extends StatusPageStatus("major_outage", ServiceHealthcheck.Status.Error)

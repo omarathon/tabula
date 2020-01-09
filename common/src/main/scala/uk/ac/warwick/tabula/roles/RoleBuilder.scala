@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.roles
 
-import uk.ac.warwick.tabula.permissions.ScopelessPermission
-import uk.ac.warwick.tabula.permissions.Permission
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.apache.commons.lang3.builder.{ToStringStyle, ToStringBuilder, HashCodeBuilder, EqualsBuilder}
 
 object RoleBuilder {
   def build(definition: RoleDefinition, scope: Option[PermissionsTarget], name: String) =

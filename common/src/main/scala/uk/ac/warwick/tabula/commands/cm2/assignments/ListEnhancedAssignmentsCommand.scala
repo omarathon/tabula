@@ -579,7 +579,7 @@ object AssignmentInfoFilters {
     case object NotReleasedToMarkers extends AssignmentInfoFilter {
       val description = "Not released to markers"
 
-      def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback.flatMap(_.outstandingStages.asScala).isEmpty
+      def apply(info: AssignmentInfo): Boolean = (info.assignment.hasWorkflow || info.assignment.hasCM2Workflow) && info.assignment.allFeedback.flatMap(_.outstandingStages.asScala).isEmpty
     }
 
     case object BeingMarked extends AssignmentInfoFilter {

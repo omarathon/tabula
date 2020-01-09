@@ -80,10 +80,10 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
   override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)
 
   // Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-  lazy val allModules: Seq[Module] = allDepartments.map(modulesForDepartmentAndSubDepartments).flatten
+  lazy val allModules: Seq[Module] = allDepartments.flatMap(modulesForDepartmentAndSubDepartments)
   lazy val allCourseTypes: Seq[CourseType] = CourseType.all
-  lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.map(dept => profileService.allSprStatuses(dept.rootDepartment)).flatten.distinct
-  lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance).flatten.distinct
+  lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.flatMap(dept => profileService.allSprStatuses(dept.rootDepartment)).distinct
+  lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.flatMap(profileService.allModesOfAttendance).distinct
 
   protected override def latestYearDetailsForYear(year: AcademicYear): DetachedCriteria =
     DetachedCriteria.forClass(classOf[StudentCourseYearDetails], "latestSCYD")

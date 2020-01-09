@@ -87,7 +87,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
     }
 
     Mav("sysadmin/metrics",
-      "period" -> startDate.toString("MMMM YYYY"),
+      "period" -> startDate.toString("MMMM yyyy"),
       "startDate" -> startDate.toString(DateTimeFormat.forPattern(DateFormats.DatePickerPattern)),
       "submissions" -> submissions,
       "assignments" -> assignments,

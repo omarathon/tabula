@@ -12,7 +12,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
     val thisProfileService: ProfileService = mock[ProfileService]
 
     val dept: Department = Fixtures.department("arc", "School of Architecture")
-    val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates")
+    val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates", isImportDepartment = false)
     subDept.parent = dept
     dept.children.add(subDept)
 

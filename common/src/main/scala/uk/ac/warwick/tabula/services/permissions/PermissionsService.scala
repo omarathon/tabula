@@ -71,6 +71,14 @@ trait PermissionsService {
 
   def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition]
 
+  def getGlobalGrantedRole(roleDefinition: RoleDefinition): Option[GrantedRole[PermissionsTarget]]
+  def getOrCreateGlobalGrantedRole(roleDefinition: RoleDefinition): GrantedRole[PermissionsTarget]
+  def getAllGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]]
+
+  def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]]
+  def getOrCreateGlobalGrantedPermission(permission: Permission, overrideType: Boolean): GrantedPermission[PermissionsTarget]
+  def getAllGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]]
+
   def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
 
   def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
@@ -218,8 +226,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
   def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] =
     ensureFoundUserSeq(user)(transactional(readOnly = true) {
       permissionsDao.getGrantedPermissionsFor(scope).to(LazyList).filter(_.users.includesUser(user.apparentUser))
-    }
-    )
+    })
 
   def getAllGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(getGrantedRolesFor[PermissionsTarget](user))
 
@@ -294,12 +301,37 @@ abstract class AbstractPermissionsService extends PermissionsService {
 
   def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition] = {
     def departmentPlusParents(department: Department): Seq[Department] = {
-      if (department.hasParent) departmentPlusParents(department.parent) ++ Seq(department)
+      if (!department.isImportDepartment) departmentPlusParents(department.parent) ++ Seq(department)
       else Seq(department)
     }
 
     permissionsDao.getCustomRoleDefinitionsFor(departmentPlusParents(department))
   }
+
+  override def getGlobalGrantedRole(roleDefinition: RoleDefinition): Option[GrantedRole[PermissionsTarget]] =
+    roleDefinition match {
+      case builtIn: BuiltInRoleDefinition => permissionsDao.getGlobalGrantedRole(builtIn)
+      case _ => None
+    }
+
+  override def getOrCreateGlobalGrantedRole(roleDefinition: RoleDefinition): GrantedRole[PermissionsTarget] =
+    getGlobalGrantedRole(roleDefinition).getOrElse {
+      require(roleDefinition.isInstanceOf[BuiltInRoleDefinition])
+
+      permissionsDao.createGlobalGrantedRole(roleDefinition.asInstanceOf[BuiltInRoleDefinition])
+    }
+
+  override def getAllGlobalGrantedRoles: Seq[GrantedRole[PermissionsTarget]] = permissionsDao.getGlobalGrantedRoles
+
+  override def getGlobalGrantedPermission(permission: Permission, overrideType: Boolean): Option[GrantedPermission[PermissionsTarget]] =
+    permissionsDao.getGlobalGrantedPermission(permission, overrideType)
+
+  override def getOrCreateGlobalGrantedPermission(permission: Permission, overrideType: Boolean): GrantedPermission[PermissionsTarget] =
+    getGlobalGrantedPermission(permission, overrideType).getOrElse {
+      permissionsDao.createGlobalGrantedPermission(permission, overrideType)
+    }
+
+  override def getAllGlobalGrantedPermissions: Seq[GrantedPermission[PermissionsTarget]] = permissionsDao.getGlobalGrantedPermissions
 }
 
 class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {

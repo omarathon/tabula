@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.data.convert
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.Department
 
 class DepartmentCodeConverterTest extends TestBase with Mockito {
@@ -13,9 +11,7 @@ class DepartmentCodeConverterTest extends TestBase with Mockito {
   converter.service = service
 
   @Test def validInput {
-    val department = new Department
-    department.id = "steve"
-    department.code = "in"
+    val department = Fixtures.departmentWithId("in", id = "steve")
 
     service.getDepartmentByCode("steve") returns (None)
     service.getDepartmentByCode("in") returns (Some(department))
@@ -33,9 +29,7 @@ class DepartmentCodeConverterTest extends TestBase with Mockito {
   }
 
   @Test def formatting {
-    val department = new Department
-    department.id = "steve"
-    department.code = "in"
+    val department = Fixtures.departmentWithId("in", id = "steve")
 
     converter.convertLeft(department) should be("in")
     converter.convertLeft(null) should be(null)

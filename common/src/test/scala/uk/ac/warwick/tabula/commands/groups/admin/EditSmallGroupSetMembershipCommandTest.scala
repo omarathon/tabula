@@ -18,7 +18,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
   }
 
   private trait Fixture {
-    val department = new Department()
+    val department = Fixtures.department("in")
 
     val module: Module = Fixtures.module("in101", "Introduction to Scala")
     module.id = "moduleId"

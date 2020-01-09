@@ -176,7 +176,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
   }
 
   private def validateStudent(studentId: String, maybeScyd: Option[StudentCourseYearDetails], isSCJCode: Boolean): Seq[String] = {
-    def departmentAndParents(department: Department): LazyList[Department] = department #:: (if (department.hasParent) departmentAndParents(department.parent) else LazyList.empty)
+    def departmentAndParents(department: Department): LazyList[Department] = department #:: (if (!department.isImportDepartment) departmentAndParents(department.parent) else LazyList.empty)
 
     maybeScyd match {
       case None =>

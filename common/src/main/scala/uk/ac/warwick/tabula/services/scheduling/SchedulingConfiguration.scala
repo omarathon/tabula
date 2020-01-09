@@ -225,6 +225,8 @@ object SchedulingConfiguration {
 
     propertiesConfiguredJob[ProcessTurnitinLtiQueueJob]("scheduling.processTurnitinLtiQueue"),
 
+    propertiesConfiguredJob[DepartmentMandatoryPermissionsWarningJob]("scheduling.departmentMandatoryPermissionsWarning"),
+
     // Migration now complete, don't need this any more
     // propertiesConfiguredJob[ObjectStorageMigrationJob]("scheduling.objectStorageMigration"),
   ).flatten

@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.{Appliable, UserAware}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{OldFinaliseFeedbackCommand, FinaliseFeedbackComponent}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, OldFinaliseFeedbackCommand}
 import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected, ReleasedForMarking}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class OnlineModerationCommandTest extends TestBase with Mockito {
@@ -26,7 +26,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
     val module = new Module
     assignment.module = module
     assignment.collectMarks = true
-    module.adminDepartment = new Department
+    module.adminDepartment = Fixtures.department("in")
 
     val marker: User = fakeUser("marker")
     val currentUser = new CurrentUser(realUser = marker, apparentUser = marker)

@@ -338,7 +338,7 @@ class Assignment
       }
 
   // if any feedback exists that has outstanding stages marking has begun (when marking is finished there is a completed stage)
-  override def isReleasedForMarking: Boolean = allFeedback.exists(_.outstandingStages.asScala.nonEmpty)
+  override def isReleasedForMarking: Boolean = (hasWorkflow || hasCM2Workflow) && allFeedback.exists(_.outstandingStages.asScala.nonEmpty)
 
   // sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))

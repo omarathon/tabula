@@ -28,7 +28,7 @@ class AddSubDepartmentControllerTest extends TestBase with Mockito {
   }
 
   @Test def submit {
-    val subDepartment = Fixtures.department("in-ug")
+    val subDepartment = Fixtures.department("in-ug", isImportDepartment = false)
     val command = mock[Appliable[Department]]
     command.apply() returns (subDepartment)
 

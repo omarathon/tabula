@@ -12,8 +12,7 @@ import uk.ac.warwick.userlookup.User
 class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 
   trait Fixture {
-    val department = new Department
-    department.code = "hr"
+    val department = Fixtures.department("hr")
     val module = new Module
     module.adminDepartment = department
     module.code = "hrn101"
@@ -43,8 +42,7 @@ class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 class OldOnlineFeedbackFormControllerTest extends AppContextTestBase with Mockito {
 
   trait Fixture {
-    val department = new Department
-    department.code = "hr"
+    val department = Fixtures.department("hr")
     val module = new Module
     module.adminDepartment = department
     module.code = "hrn101"

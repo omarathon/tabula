@@ -44,7 +44,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 
   trait Fixture {
     val department: Department = Fixtures.department("in")
-    val subDepartment: Department = Fixtures.department("in-ug")
+    val subDepartment: Department = Fixtures.department("in-ug", isImportDepartment = false)
     department.children.add(subDepartment)
     subDepartment.parent = department
   }

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
-import javax.validation.Valid
-
 import com.fasterxml.jackson.databind.ObjectMapper
+import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
@@ -23,7 +22,6 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
 
-//FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
 trait ExtensionServices {
   var json: ObjectMapper = Wire[ObjectMapper]
   var userLookup: UserLookupService = Wire[UserLookupService]
@@ -162,10 +160,10 @@ class ExtensionController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/admin/extensions/{extension}/supporting-file/{filename}"))
 class DownloadExtensionAttachmentController extends CourseworkController {
 
-  type DownloadAttachmentCommand = Appliable[Option[RenderableAttachment]] with ModifyExtensionState
+  type DownloadAttachmentCommand = Appliable[Option[RenderableAttachment]] with DownloadExtensionAttachmentState
 
   @ModelAttribute("downloadAttachmentCommand")
-  def attachmentCommand(@PathVariable extension: Extension, @PathVariable filename: String) =
+  def attachmentCommand(@PathVariable extension: Extension, @PathVariable filename: String): DownloadAttachmentCommand =
     DownloadExtensionAttachmentCommand(mandatory(extension), mandatory(filename))
 
   @RequestMapping(method = Array(GET))
