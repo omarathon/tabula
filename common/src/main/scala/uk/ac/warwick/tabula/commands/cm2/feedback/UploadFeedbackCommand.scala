@@ -86,7 +86,6 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
   var userLookup: UserLookupService = Wire[UserLookupService]
   var fileDao: FileDao = Wire[FileDao]
   var assignmentService: AssessmentService = Wire[AssessmentService]
-  var stateService: StateService = Wire[StateService]
 
   var file: UploadedFile = new UploadedFile
 

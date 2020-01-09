@@ -28,8 +28,6 @@ trait FeedbackService {
 
   def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 
-  def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
-
   def saveOrUpdate(feedback: Feedback): Unit
 
   def saveOrUpdate(mark: Mark): Unit
@@ -93,10 +91,6 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
   def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback] = {
     dao.getMarkerFeedback(markerFeedbackId)
-  }
-
-  def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback] = {
-    dao.getRejectedMarkerFeedbackByFeedback(feedback)
   }
 
   def delete(feedback: Feedback): Unit = transactional() {

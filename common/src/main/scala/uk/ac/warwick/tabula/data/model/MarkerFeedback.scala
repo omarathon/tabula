@@ -114,13 +114,6 @@ class MarkerFeedback extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var grade: Option[String] = None
 
-  @Deprecated
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
-  var state: MarkingState = _
-
-  @Deprecated
-  var rejectionComments: String = _
-
   @OneToMany(mappedBy = "markerFeedback", fetch = FetchType.EAGER, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
