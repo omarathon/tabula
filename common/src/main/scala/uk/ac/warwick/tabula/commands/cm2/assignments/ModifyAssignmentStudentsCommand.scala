@@ -104,11 +104,10 @@ trait ModifyAssignmentStudentsDescription extends Describable[Assignment] {
 }
 
 trait ModifyAssignmentStudentsValidation extends SelfValidating {
+  self: UpdatesStudentMembership
+    with UserLookupComponent =>
 
-  self: ModifyAssignmentStudentsCommandState with AssessmentServiceComponent with UserLookupComponent with ModifiesAssignmentMembership =>
-
-  override def validate(errors: Errors): Unit = {
-
+  def validateModifyAssignmentStudents(errors: Errors): Unit = {
     def isValidUniID(userString: String) = {
       UniversityId.isValid(userString) && userLookup.getUserByWarwickUniId(userString).isFoundUser
     }
@@ -123,5 +122,8 @@ trait ModifyAssignmentStudentsValidation extends SelfValidating {
       errors.rejectValue("massAddUsers", "userString.notfound.specified", Array(invalidUserStrings.mkString(", ")), "")
     }
   }
+
+  // Don't add things here as a Command might mix in multiple validators, add to validateModifyAssignmentStudents
+  override def validate(errors: Errors): Unit = validateModifyAssignmentStudents(errors)
 }
 

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
 
+import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.DateFormats.DatePickerFormatter
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -12,13 +13,19 @@ class JodaLocalDateConverter extends TwoWayConverter[String, LocalDate] {
       try {
         new DateTime(text.toLong * 1000).toLocalDate
       } catch {
-        case e: NumberFormatException => null
+        case _: NumberFormatException => null
       }
     else if (text.hasText)
       try {
         LocalDate.parse(text, DatePickerFormatter)
       } catch {
-        case e: IllegalArgumentException => null
+        // Try ISO format
+        case _: IllegalArgumentException =>
+          try {
+            LocalDate.parse(text, ISODateTimeFormat.date())
+          } catch {
+            case _: IllegalArgumentException => null
+          }
       }
     else null
 

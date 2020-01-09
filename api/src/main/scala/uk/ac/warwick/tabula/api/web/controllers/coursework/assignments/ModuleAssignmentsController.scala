@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter, AssignmentToXmlConverter}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentCommand, ModifyAssignmentCommand}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentMonolithCommand, CreateAssignmentMonolithRequest, ModifyAssignmentMonolithRequest}
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
@@ -79,19 +79,13 @@ class ListAssignmentsForModuleController extends ModuleAssignmentsController {
   }
 }
 
-/**
- * TODO This all needs rewriting to use CM2 controllers, it won't actually work at the moment because we
- * don't let you create CM1 assignments after 2016/17
- */
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments"))
 class CreateAssignmentController extends ModuleAssignmentsController {
 
   @ModelAttribute("createCommand")
-  def command(@PathVariable module: Module): AddAssignmentCommand = {
-    val cmd = new AddAssignmentCommand(module)
-    cmd
-  }
+  def command(@PathVariable module: Module): CreateAssignmentMonolithCommand.Command =
+    CreateAssignmentMonolithCommand(module)
 
   @InitBinder(Array("createCommand"))
   def upstreamGroupBinder(binder: WebDataBinder): Unit = {
@@ -99,7 +93,7 @@ class CreateAssignmentController extends ModuleAssignmentsController {
   }
 
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-  def create(@RequestBody request: CreateAssignmentRequest, @ModelAttribute("createCommand") command: AddAssignmentCommand, errors: Errors)(implicit response: HttpServletResponse): Mav = {
+  def create(@RequestBody request: CreateAssignmentRequest, @ModelAttribute("createCommand") command: CreateAssignmentMonolithCommand.Command, errors: Errors)(implicit response: HttpServletResponse): Mav = {
     request.copyTo(command, errors)
 
     globalValidator.validate(command, errors)
@@ -123,7 +117,7 @@ class CreateAssignmentController extends ModuleAssignmentsController {
   }
 }
 
-trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiRequest[A]
+trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends JsonApiRequest[A]
   with BooleanAssignmentProperties {
 
   @BeanProperty var name: String = null
@@ -148,9 +142,17 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
     }
 
     Option(name).foreach(state.name = _)
-    Option(openDate).foreach { d => state.openDate = d.toDateTime(Assignment.openTime) }
-    Option(closeDate).foreach { d => state.closeDate = d.toDateTime(Assignment.closeTime) }
-    Option(academicYear).foreach(state.academicYear = _)
+    Option(openDate).foreach(state.openDate = _)
+    Option(closeDate).foreach(state.closeDate = _)
+
+    state match {
+      case createState: CreateAssignmentMonolithRequest =>
+        Option(academicYear).foreach(createState.academicYear = _)
+
+      // Don't allow editing the academic year
+      case _ => require(academicYear == null || academicYear == state.academicYear)
+    }
+
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(upstreamGroups).foreach(state.upstreamGroups = _)
@@ -180,11 +182,13 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
     Option(turnitinExcludeBibliography).foreach(state.turnitinExcludeBibliography = _)
     Option(turnitinExcludeQuoted).foreach(state.turnitinExcludeQuoted = _)
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
+
+    state.afterBind()
   }
 
 }
 
-class CreateAssignmentRequest extends AssignmentPropertiesRequest[AddAssignmentCommand] {
+class CreateAssignmentRequest extends AssignmentPropertiesRequest[CreateAssignmentMonolithRequest] {
 
   // Default values
   includeUsers = JArrayList()
