@@ -31,9 +31,6 @@ const paths = {
     'static/js/id7/attendance': './src/main/assets/static/js/id7/attendance.js',
     'static/js/id7/mitcircs': './src/main/assets/static/js/id7/mitcircs.js',
 
-    // Old ID6 junk
-    'static/js/render': './src/main/assets/static/js/render.js',
-
     // Stuff that gets included from FTLs
     'static/js/sortable-table': './src/main/assets/static/js/sortable-table.js',
     'static/js/assignment-batch-select': './src/main/assets/static/js/assignment-batch-select.js',
