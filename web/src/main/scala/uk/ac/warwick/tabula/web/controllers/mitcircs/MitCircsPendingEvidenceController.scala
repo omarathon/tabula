@@ -4,7 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.mitcircs.submission.{MitCircsPendingEvidenceCommand, MitCircsPendingEvidenceState}
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -33,6 +33,12 @@ class MitCircsPendingEvidenceController extends AbstractViewProfileController {
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {
     mustBeLinked(mandatory(submission), mandatory(student))
+
+    if (!submission.isEvidencePending) {
+      logger.info("Not displaying mitigating circumstances submission pending evidence form as there is no pending evidence")
+      throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission pending evidence form as there is no pending evidence")
+    }
+
     Mav("mitcircs/submissions/pending_evidence", "allowMorePendingEvidence" -> submission.isEditable(currentUser.apparentUser))
       .crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
