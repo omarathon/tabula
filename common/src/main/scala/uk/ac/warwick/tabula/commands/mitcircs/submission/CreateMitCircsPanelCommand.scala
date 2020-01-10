@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsPanelCommand._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsAddedToPanelNotification
-import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -29,43 +29,32 @@ object CreateMitCircsPanelCommand {
   type Command = Appliable[Result] with CreateMitCircsPanelState with CreateMitCircsPanelRequest with SelfValidating
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Modify
 
-  def apply(department: Department, year: AcademicYear, currentUser: User) = new CreateMitCircsPanelCommandInternal(department, year, currentUser)
-    with ComposableCommand[MitigatingCircumstancesPanel]
-    with CreateMitCircsPanelRequest
-    with ModifyMitCircsPanelValidation
-    with CreateMitCircsPanelPermissions
-    with CreateMitCircsPanelDescription
-    with CreateMitCircsPanelNotifications
-    with AutowiringMitCircsPanelServiceComponent
-    with AutowiringUserLookupComponent
-    with AutowiringPermissionsServiceComponent
+  def apply(department: Department, year: AcademicYear, currentUser: User): Command =
+    new CreateMitCircsPanelCommandInternal(department, year, currentUser)
+      with ComposableCommand[MitigatingCircumstancesPanel]
+      with CreateMitCircsPanelRequest
+      with ModifyMitCircsPanelPropertyCopying
+      with ModifyMitCircsPanelValidation
+      with CreateMitCircsPanelPermissions
+      with CreateMitCircsPanelDescription
+      with CreateMitCircsPanelNotifications
+      with AutowiringMitCircsPanelServiceComponent
+      with AutowiringUserLookupComponent
+      with AutowiringPermissionsServiceComponent
 }
 
 abstract class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesPanel] with CreateMitCircsPanelState {
-  self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent with PermissionsServiceComponent =>
+  self: CreateMitCircsPanelRequest
+    with ModifyMitCircsPanelPropertyCopying
+    with MitCircsPanelServiceComponent =>
 
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val transientPanel = new MitigatingCircumstancesPanel(department, year)
-    transientPanel.name = name
-    if(date != null) {
-      if(start != null) transientPanel.date = date.toDateTime(start)
-      if(end != null) transientPanel.endDate = date.toDateTime(end)
-    }
-    if (locationId.hasText) {
-      transientPanel.location = MapLocation(location, locationId)
-    } else if (location.hasText) {
-      transientPanel.location = NamedLocation(location)
-    }
-    submissions.asScala.foreach(transientPanel.addSubmission)
-    if(chair.hasText) transientPanel.chair = userLookup.getUserByUserId(chair)
-    if(secretary.hasText) transientPanel.secretary = userLookup.getUserByUserId(secretary)
+    copyTo(transientPanel)
+
     val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
-    val viewers = (members.asScala.toSet ++ Set(chair, secretary)).filter(_.hasText)
-    panel.viewers = viewers
-    viewers.foreach { usercode =>
-      permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
-    }
+    copyViewersTo(panel)
 
     mitCircsPanelService.saveOrUpdate(transientPanel)
   }
@@ -144,6 +133,41 @@ trait ModifyMitCircsPanelRequest {
   var chair: String = _
   var secretary: String = _
   var members: JList[String] = JArrayList()
+}
+
+trait ModifyMitCircsPanelPropertyCopying {
+  self: ModifyMitCircsPanelRequest
+    with UserLookupComponent
+    with PermissionsServiceComponent =>
+
+  def copyTo(panel: MitigatingCircumstancesPanel): Unit = {
+    panel.name = name
+    panel.date = Option(date).flatMap(panelDate => Option(start).map(panelDate.toDateTime))
+    panel.endDate = Option(date).flatMap(panelDate => Option(end).map(panelDate.toDateTime))
+
+    if (locationId.hasText) {
+      panel.location = Some(MapLocation(location, locationId))
+    } else if (location.hasText) {
+      panel.location = Some(NamedLocation(location))
+    } else {
+      panel.location = None
+    }
+
+    (panel.submissions -- submissions.asScala).foreach(panel.removeSubmission)
+    submissions.asScala.foreach(panel.addSubmission)
+
+    panel.chair = chair.maybeText.map(userLookup.getUserByUserId)
+    panel.secretary = secretary.maybeText.map(userLookup.getUserByUserId)
+  }
+
+  def copyViewersTo(panel: MitigatingCircumstancesPanel): Unit = {
+    val viewers = (members.asScala.toSet ++ Set(chair, secretary)).filter(_.hasText)
+    val oldViewers = panel.viewers.map(_.getUserId)
+    panel.viewers = viewers
+    (viewers ++ oldViewers).foreach { usercode =>
+      permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
+    }
+  }
 }
 
 trait CreateMitCircsPanelNotifications extends Notifies[MitigatingCircumstancesPanel, MitigatingCircumstancesPanel] {
