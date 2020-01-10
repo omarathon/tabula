@@ -7,17 +7,15 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsAddedToPanelNotification, MitCircsPanelUpdatedNotification, MitCircsRemovedFromPanelNotification}
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
-import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
-import scala.reflect.classTag
 
 object EditMitCircsPanelCommand {
   type Result = MitigatingCircumstancesPanel
@@ -28,6 +26,7 @@ object EditMitCircsPanelCommand {
     new EditMitCircsPanelCommandInternal(panel, user)
       with ComposableCommand[Result]
       with EditMitCircsPanelRequest
+      with ModifyMitCircsPanelPropertyCopying
       with ModifyMitCircsPanelValidation
       with EditMitCircsPanelPermissions
       with EditMitCircsPanelDescription
@@ -40,37 +39,13 @@ object EditMitCircsPanelCommand {
 
 abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstancesPanel, val user: User)
   extends CommandInternal[Result] with EditMitCircsPanelState {
-  self: EditMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent with PermissionsServiceComponent =>
+  self: EditMitCircsPanelRequest
+    with ModifyMitCircsPanelPropertyCopying
+    with MitCircsPanelServiceComponent =>
 
   override def applyInternal(): Result = transactional() {
-    panel.name = name
-
-    if (date != null) {
-      panel.date = Option(start).map(date.toDateTime).orNull
-      panel.endDate = Option(end).map(date.toDateTime).orNull
-    } else {
-      panel.date = null
-      panel.endDate = null
-    }
-
-    if (locationId.hasText) {
-      panel.location = MapLocation(location, locationId)
-    } else if (location.hasText) {
-      panel.location = NamedLocation(location)
-    } else {
-      panel.location = null
-    }
-
-    (panel.submissions -- submissions.asScala).foreach(panel.removeSubmission)
-    submissions.asScala.foreach(panel.addSubmission)
-
-    panel.chair = chair.maybeText.map(userLookup.getUserByUserId).orNull
-    panel.secretary = secretary.maybeText.map(userLookup.getUserByUserId).orNull
-    val viewers = (members.asScala.toSet ++ Set(chair, secretary)).filter(_.hasText)
-    panel.viewers = viewers
-    viewers.foreach { usercode =>
-      permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
-    }
+    copyTo(panel)
+    copyViewersTo(panel)
 
     mitCircsPanelService.saveOrUpdate(panel)
   }
@@ -111,25 +86,25 @@ trait EditMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
 
   val originalName: String = panel.name
 
-  val originalDate: DateTime = panel.date
-  val originalEndDate: DateTime = panel.endDate
-  val originalLocation: Location = panel.location
+  val originalDate: Option[DateTime] = panel.date
+  val originalEndDate: Option[DateTime] = panel.endDate
+  val originalLocation: Option[Location] = panel.location
 
   val originalSubmissions: Set[MitigatingCircumstancesSubmission] = panel.submissions
   val originalViewers: Set[User] = panel.viewers
 
   name = panel.name
 
-  Option(panel.date).foreach { d =>
+  panel.date.foreach { d =>
     date = d.toLocalDate
     start = d.toLocalTime
 
-    Option(panel.endDate).foreach { e =>
+    panel.endDate.foreach { e =>
       end = e.toLocalTime
     }
   }
 
-  Option(panel.location).foreach {
+  panel.location.foreach {
     case NamedLocation(n) =>
       location = n
 
@@ -142,8 +117,8 @@ trait EditMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
       locationId = id
   }
 
-  Option(panel.chair).foreach(u => chair = u.getUserId)
-  Option(panel.secretary).foreach(u => secretary = u.getUserId)
+  panel.chair.foreach(u => chair = u.getUserId)
+  panel.secretary.foreach(u => secretary = u.getUserId)
 
   members.clear()
   members.addAll(panel.members.map(_.getUserId).asJavaCollection)

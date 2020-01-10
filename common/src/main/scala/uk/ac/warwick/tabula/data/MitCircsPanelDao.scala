@@ -40,8 +40,8 @@ class MitCircsPanelDaoImpl extends MitCircsPanelDao
     session.newCriteria[MitigatingCircumstancesPanel]
       .add(is("department", department))
       .add(is("academicYear", academicYear))
-      .addOrder(asc("date"))
-      .addOrder(asc("endDate"))
+      .addOrder(asc("_date"))
+      .addOrder(asc("_endDate"))
       .addOrder(asc("lastModified"))
       .seq
 
