@@ -23,7 +23,7 @@
         <a href="http://warwick.ac.uk/evision/">SITS e:Vision portal</a>.
         On this report, all students who have been reported as having missed one or more monitoring report will be listed.
         Please print this report, obtain the signature of your Head of Department,
-        and return it to the Academic Office contact noted on the report screen. For further guidance please consult the guidance notes.</p>
+        and return it to the Student Administrative Services contact noted on the report screen. For further guidance please consult the guidance notes.</p>
 
       <p>
         Once these points are uploaded to SITS you won't be able to change this information via Tabula.
