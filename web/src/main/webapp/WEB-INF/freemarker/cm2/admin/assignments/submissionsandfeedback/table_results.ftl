@@ -16,6 +16,11 @@
       <#return result />
     </#function>
 
+    <#--  use the university ID from feedback if possible  -->
+    <#macro studentIdentifier user coursework><#compress>
+        <#if coursework.enhancedFeedback??>${coursework.enhancedFeedback.feedback.studentIdentifier}<#elseif user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
+    </#compress></#macro>
+
     <div class="submission-feedback-results" data-popout="false">
       <#if (results.students?size > 0)>
         <table id="submission-feedback-info"
@@ -165,8 +170,9 @@
                 <td class="student">${submissionfeedbackinfo.user.lastName!}</td>
               </#if>
               <td class="id">
-                <#if submissionfeedbackinfo.user.warwickId??>${submissionfeedbackinfo.user.warwickId}<#else>${submissionfeedbackinfo.user.userId}</#if>
-                <#if submissionfeedbackinfo.user.warwickId??><@pl.profile_link submissionfeedbackinfo.user.warwickId /><#else><@pl.profile_link submissionfeedbackinfo.user.userId /></#if>
+                <#local identifier><@studentIdentifier submissionfeedbackinfo.user coursework /></#local>
+                ${identifier}
+                <@pl.profile_link identifier />
               </td>
 
               <#if assignment.showSeatNumbers>
