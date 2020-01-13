@@ -629,6 +629,12 @@
   <!-- Custom implementation of FlashMapManager -->
   <bean id="flashMapManager" class="uk.ac.warwick.tabula.system.CookieFlashMapManager" />
 
+  <bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.SingleThreadedImageResizer">
+    <constructor-arg>
+      <bean class="uk.ac.warwick.util.files.imageresize.JAIImageResizer" />
+    </constructor-arg>
+  </bean>
+
   <!-- Expose local properties as system properties -->
   <bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
