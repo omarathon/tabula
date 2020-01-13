@@ -10,22 +10,22 @@
     <ul>
       <li><h3><a href="<@routes.attendance.viewStudents department academicYear />">View by student<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department)><#if features.attendanceMonitoringRealTimeReport></a>
           <#assign introText>
-            <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS e:Vision.
+            <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS.
               Only unauthorised missed points are uploaded; authorised missed points are not.</p>
 
             <p>If the attendance/fulfilment of the point is subsequently changed to anything other than ‘Missed (unauthorised)’,
-              the missed point is removed from SITS e:Vision.</p>
+              the missed point is removed from SITS.</p>
           </#assign>
           <a href="#"
              id="attendance-monitoring-realtime"
              class="use-introductory<#if showIntro("attendance-monitoring-realtime", "anywhere")> auto</#if>"
              data-hash="${introHash("attendance-monitoring-realtime", "anywhere")}"
-             data-title="Automatic upload of monitoring points to SITS e:Vision"
+             data-title="Automatic upload of monitoring points to SITS"
              data-placement="right"
              data-html="true"
              aria-label="Help"
              data-content="${introText}"><i class="fa fa-question-circle"></i></a>
-          <#else> and report to SITS e:Vision</a></#if></#if></h3></li>
+          <#else> and report to SITS</a></#if></#if></h3></li>
       <li><h3><a href="<@routes.attendance.viewPoints department academicYear />">View by point</a></h3></li>
       <#if can.do("MonitoringPoints.View", department)>
         <#list department.displayedStudentRelationshipTypes as relationshipType>
