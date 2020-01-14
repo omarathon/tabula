@@ -132,7 +132,7 @@
           <#if coursework.enhancedExtension??>
             <#local enhancedExtension=coursework.enhancedExtension />
           </#if>
-          <#local identifier><@studentIdentifier student.user /></#local>
+          <#local identifier><@studentIdentifier student.user coursework.enhancedFeedback /></#local>
           <#local lateness><@components.lateness submission /></#local>
 
           <tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true"</#if>
