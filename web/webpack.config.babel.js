@@ -34,7 +34,6 @@ const paths = {
     // Stuff that gets included from FTLs
     'static/js/sortable-table': './src/main/assets/static/js/sortable-table.js',
     'static/js/assignment-batch-select': './src/main/assets/static/js/assignment-batch-select.js',
-    'static/js/textList': './src/main/assets/static/js/textList.js',
   },
   CSS_ENTRY: {
     'static/css/id7/render': './src/main/assets/static/css/id7/render.less',
