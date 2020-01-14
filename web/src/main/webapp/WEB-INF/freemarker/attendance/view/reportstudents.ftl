@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-  <h1>Upload missed monitoring points to SITS e:Vision</h1>
+  <h1>Upload missed monitoring points to SITS</h1>
 
   <#assign confirmPath><@routes.attendance.viewReportConfirm department academicYear /></#assign>
   <@f.form modelAttribute="command" action="${confirmPath}" method="POST">
@@ -10,7 +10,7 @@
 
     <#if command.studentReportCounts?size == 0>
       <div class="alert alert-info">
-        All of the selected students have already been uploaded to SITS e:Vision for this period.
+        All of the selected students have already been uploaded to SITS for this period.
       </div>
     <#elseif studentMissedReportCounts?size == 0>
       <div class="alert alert-info">
