@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.apache.commons.codec.digest.DigestUtils
 import org.hibernate.annotations.Proxy
@@ -9,7 +10,8 @@ import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-import scala.collection._
+import scala.collection.immutable
+import scala.concurrent.duration._
 
 @Entity
 @Proxy
@@ -29,7 +31,7 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def newAssignmentSettings: String = getStringSetting(Settings.NewAssignmentSettings).getOrElse(NewAssignmentPrefill)
 
-  def newAssignmentSettings_=(prefill: String): Unit = settings += (Settings.NewAssignmentSettings) -> prefill
+  def newAssignmentSettings_=(prefill: String): Unit = settings += (Settings.NewAssignmentSettings -> prefill)
 
   def hiddenIntros: Seq[String] = getStringSeqSetting(Settings.HiddenIntros).getOrElse(Nil)
 
@@ -78,6 +80,14 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> receiveStudentComments)
 
+  def batchedNotifications: BatchedNotificationsSetting =
+    getStringSetting(Settings.BatchedNotifications)
+      .map(BatchedNotificationsSetting.withName)
+      .getOrElse(DefaultBatchedNotificationsSetting)
+
+  def batchedNotifications_=(setting: BatchedNotificationsSetting): Unit =
+    settings += (Settings.BatchedNotifications -> setting.entryName)
+
   def string(key: String): String = getStringSetting(key).orNull
 
   def this(userId: String) = {
@@ -91,8 +101,6 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 }
 
 object UserSettings {
-
-
   val AlertsAllSubmissions = "allSubmissions"
   val AlertsNoteworthySubmissions = "lateSubmissions"
   val AlertsNoSubmissions = "none"
@@ -105,6 +113,19 @@ object UserSettings {
   val DefaultCourseworkShowEmptyModules = true
   val DefaultReceiveStudentComments = true
 
+  val DefaultBatchedNotificationsSetting: BatchedNotificationsSetting = BatchedNotificationsSetting.SendImmediately
+
+  sealed abstract class BatchedNotificationsSetting(val description: String, val delay: FiniteDuration) extends EnumEntry
+  object BatchedNotificationsSetting extends Enum[BatchedNotificationsSetting] {
+    case object SendImmediately extends BatchedNotificationsSetting("Send me notifications immediately", Duration.Zero)
+    case object FiveMinutes extends BatchedNotificationsSetting("Receive notifications every 5 minutes", 5.minutes)
+    case object TenMinutes extends BatchedNotificationsSetting("Receive notifications every 10 minutes", 10.minutes)
+    case object ThirtyMinutes extends BatchedNotificationsSetting("Receive notifications every 30 minutes", 30.minutes)
+    case object OneHour extends BatchedNotificationsSetting("Receive notifications every hour", 1.hour)
+
+    override def values: immutable.IndexedSeq[BatchedNotificationsSetting] = findValues
+  }
+
   object Settings {
     val AlertsSubmission = "alertsSubmission"
     val NewAssignmentSettings = "newAssignmentSettings"
@@ -115,6 +136,7 @@ object UserSettings {
     val ActiveAcademicYear = "activeAcademicYear"
     val CourseworkShowEmptyModules = "courseworkShowEmptyModules"
     val ReceiveStudentComments = "receiveStudentComments"
+    val BatchedNotifications = "batchedNotifications"
 
     object RegisterPdf {
       val ShowPhotos = "registerPdfShowPhotos"
@@ -125,7 +147,7 @@ object UserSettings {
 
     def hiddenIntroHash(mappedPage: String, setting: String): String = {
       val popover = mappedPage + ":" + setting
-      val shaHash = DigestUtils.shaHex(popover)
+      val shaHash = DigestUtils.sha1Hex(popover)
 
       shaHash
     }
@@ -136,10 +158,7 @@ object UserSettings {
     val StringForcedFalse = "f"
 
     @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
-    def forceBooleanString(value: Boolean): String = value match {
-      case true => StringForcedTrue
-      case false => StringForcedFalse
-    }
+    def forceBooleanString(value: Boolean): String = if (value) StringForcedTrue else StringForcedFalse
 
     @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def fromForceBooleanString(value: String): Boolean = value match {

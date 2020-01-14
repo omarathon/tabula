@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Profile(Array("scheduling"))
 @DisallowConcurrentExecution
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
+@deprecated("NotificationListener is deprecated", since = "2020.1.2")
 class ProcessNotificationListenersJob extends AutowiredJobBean {
 
   @Autowired var notificationService: NotificationService = _

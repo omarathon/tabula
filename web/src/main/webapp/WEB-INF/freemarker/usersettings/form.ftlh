@@ -67,23 +67,36 @@
     </@bs3form.radio>
   </@bs3form.labelled_form_group>
 
-  <@bs3form.labelled_form_group labelText="Notifications">
-    <p>Send me notifications about:</p>
+  <fieldset>
+    <h2>Notifications</h2>
 
-    <@bs3form.checkbox>
-      <@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
-      Small group attendance
-    </@bs3form.checkbox>
+    <#if features.notificationBatching>
+      <@bs3form.labelled_form_group path="batchedNotifications" labelText="Batching email notifications" help="By batching email notifications, you can reduce the number of emails you're getting from Tabula. Instead of sending emails immediately, we'll group emails of the same type together and send you a single summary email.">
+        <#list batchedNotificationSettings as setting>
+          <@bs3form.radio>
+            <@f.radiobutton path="batchedNotifications" value=setting.entryName />
+            ${setting.description}
+          </@bs3form.radio>
+        </#list>
+      </@bs3form.labelled_form_group>
+    </#if>
 
-    <@bs3form.checkbox>
-      <@f.checkbox path="finaliseFeedbackNotificationEnabled" />
-      Coursework submissions which have been marked
-    </@bs3form.checkbox>
-    <#if isDepartmentalAdmin>
-        <p></p>
+    <@bs3form.labelled_form_group>
+      <p>Send me notifications about:</p>
+
+      <@bs3form.checkbox>
+        <@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
+        Small group attendance
+      </@bs3form.checkbox>
+
+      <@bs3form.checkbox>
+        <@f.checkbox path="finaliseFeedbackNotificationEnabled" />
+        Coursework submissions which have been marked
+      </@bs3form.checkbox>
+      <#if isDepartmentalAdmin>
         <@bs3form.checkbox>
-            <@f.checkbox path="deptAdminReceiveStudentComments" />
-            Student requests for assistance from a Departmental Administrator
+          <@f.checkbox path="deptAdminReceiveStudentComments" />
+          Student requests for assistance from a Departmental Administrator
         </@bs3form.checkbox>
 
         <#list deptsWithNoOtherContacts as item>
@@ -92,9 +105,9 @@
             If you opt out, students will be unable to request departmental assistance from within Tabula.
           </div>
         </#list>
-    </#if>
-
-  </@bs3form.labelled_form_group>
+      </#if>
+    </@bs3form.labelled_form_group>
+  </fieldset>
 
   <@bs3form.labelled_form_group>
     <input type="submit" value="Save" class="btn btn-primary">

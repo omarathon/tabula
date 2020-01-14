@@ -34,6 +34,9 @@ class RecipientNotificationInfo extends GeneratedId {
   @Column(name = "email_sent", nullable = false)
   var emailSent: Boolean = false
 
+  @Column(name = "mywarwick_activity_sent", nullable = false)
+  var myWarwickActivitySent: Boolean = false
+
   var attemptedAt: DateTime = null
 
 }
