@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.AssignmentController._
 import uk.ac.warwick.tabula.api.web.helpers._
-import uk.ac.warwick.tabula.commands.cm2.assignments._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentStudentsCommand, _}
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{FileFormValue, IntegerFormValue}
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
@@ -32,6 +32,7 @@ import scala.jdk.CollectionConverters._
 
 object AssignmentController {
   type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest with BindListener with SelfValidating
+  type ModifyAssignmentStudentsCommand = Appliable[Assignment] with ModifyAssignmentStudentsCommandState with ModifiesAssignmentMembership with PopulateOnForm
 }
 
 abstract class AssignmentController extends ApiController
@@ -86,6 +87,16 @@ class EditAssignmentController extends AssignmentController with EditAssignmentA
   params = Array("!universityId"),
   produces = Array("application/json"))
 class DeleteAssignmentController extends AssignmentController with DeleteAssignmentApi {
+  validatesSelf[SelfValidating]
+}
+
+@Controller
+@RequestMapping(
+  method = Array(RequestMethod.PATCH),
+  value = Array("/v1/module/{module}/assignments/{assignment}/students/modify"),
+  params = Array("!universityId"),
+  produces = Array("application/json"))
+class AddStudentsToAssignmentController extends AssignmentController with ModifyStudentsOnAssignmentApi {
   validatesSelf[SelfValidating]
 }
 
@@ -148,6 +159,30 @@ trait EditAssignmentApi {
     globalValidator.validate(command, errors)
     command.validate(errors)
     command.afterBind()
+
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val assignment = command.apply()
+
+      // Return the GET representation
+      getAssignmentMav(getCommand(assignment.module, assignment), errors, assignment)
+    }
+  }
+}
+
+
+trait ModifyStudentsOnAssignmentApi {
+  self: AssignmentController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+
+  @ModelAttribute("modifyStudentsCommand")
+  def modifyStudentsCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): ModifyAssignmentStudentsCommand = {
+    mustBeLinked(assignment, module)
+    ModifyAssignmentStudentsCommand(assignment)
+  }
+
+  @RequestMapping(method = Array(PATCH), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+  def modify(@ModelAttribute("modifyStudentsCommand") command: ModifyAssignmentStudentsCommand, errors: Errors): Mav = {
 
     if (errors.hasErrors) {
       Mav(new JSONErrorView(errors))
