@@ -127,6 +127,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
   @BeanProperty var feedbackTemplate: FeedbackTemplate = null
   @BeanProperty var markingWorkflow: CM2MarkingWorkflow = null
   @BeanProperty var includeUsers: JList[String] = null
+  @BeanProperty var excludeUsers: JList[String] = null
   @BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
   @BeanProperty var fileAttachmentLimit: JInteger = null
   @BeanProperty var fileAttachmentTypes: JList[String] = null
@@ -155,6 +156,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
 
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
+    Option(excludeUsers).foreach { state.excludeUsers = _ }
     Option(upstreamGroups).foreach(state.upstreamGroups = _)
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
     Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
