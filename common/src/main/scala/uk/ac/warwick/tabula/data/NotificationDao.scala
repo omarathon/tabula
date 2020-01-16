@@ -112,7 +112,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
     unemailedRecipientCriteria(retryBackoff)
       .add(is("recipient", recipient))
       .add(is("notification._notificationType", notificationType))
-      .addOrder(asc("created"))
+      .addOrder(asc("notification.created"))
       .seq
 
   def oldestUnemailedRecipient: Option[RecipientNotificationInfo] =
