@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserLookupService}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PackageScanner, PersistenceTestBase}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, PackageScanner, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -178,33 +178,33 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
     val agent = Fixtures.user()
     val group = Fixtures.smallGroup("Blissfully unaware group")
     session.save(group)
+
     val now = DateTime.now
-    DateTimeUtils.setCurrentMillisFixed(now.getMillis)
+    withFakeTime(now) {
+      session.save(staff)
+      session.save(student)
+      session.save(relationship)
+      session.save(meeting)
 
-    session.save(staff)
-    session.save(student)
-    session.save(relationship)
-    session.save(meeting)
+      for (i <- 1 to 1000) {
+        val notification = newHeronNotification(agent, meeting)
+        notification.created = now.minusMinutes(i)
+        notificationDao.save(notification)
+      }
 
-    for (i <- 1 to 1000) {
-      val notification = newHeronNotification(agent, meeting)
-      notification.created = now.minusMinutes(i)
-      notificationDao.save(notification)
+      session.flush()
+
+      val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
+      everything.size should be(1000)
+
+      val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq
+      oneHundred.size should be(100)
+
+      def noNewer(mins: Int)(n: Notification[_, _]) = n.created.isBefore(now.minusMinutes(mins))
+
+      val recent = notificationDao.recent(now.minusMonths(10)).takeWhile(noNewer(25)).toSeq
+      recent.size should be(975)
     }
-
-    session.flush()
-
-    val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
-    everything.size should be(1000)
-
-    val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq
-    oneHundred.size should be(100)
-
-    def noNewer(mins: Int)(n: Notification[_, _]) = n.created.isBefore(now.minusMinutes(mins))
-
-    val recent = notificationDao.recent(now.minusMonths(10)).takeWhile(noNewer(25)).toSeq
-    recent.size should be(975)
-
   }
 
   /**
@@ -246,41 +246,99 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
     val group = Fixtures.smallGroup("Blissfully unaware group")
     session.save(group)
     val now = DateTime.now
-    DateTimeUtils.setCurrentMillisFixed(now.getMillis)
+    withFakeTime(now) {
+      session.save(staff)
+      session.save(student)
+      session.save(relationship)
+      session.save(meeting)
 
-    session.save(staff)
-    session.save(student)
-    session.save(relationship)
-    session.save(meeting)
+      val notifications = (1 to 50).map(i => {
+        val notification = newHeronNotification(agent, meeting)
+        notification.created = now.minusMinutes(i)
+        notificationDao.save(notification)
+        notification
+      })
 
-    val notifications = (1 to 50).map(i => {
-      val notification = newHeronNotification(agent, meeting)
-      notification.created = now.minusMinutes(i)
-      notificationDao.save(notification)
-      notification
-    })
+      session.flush()
 
-    session.flush()
+      notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(50)
 
-    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(50)
+      // attempt to send 10 mails - only 5 actually go
+      for (
+        (n, i) <- notifications.take(10).zipWithIndex;
+        info <- n.recipientNotificationInfos.asScala
+      ) {
+        if (i % 2 == 0)
+          info.emailSent = true // half have been sent
+        info.attemptedAt = DateTime.now
+        notificationDao.save(n)
+      }
+      session.flush()
 
-    // attempt to send 10 mails - only 5 actually go
-    for (
-      (n, i) <- notifications.take(10).zipWithIndex;
-      info <- n.recipientNotificationInfos.asScala
-    ) {
-      if (i % 2 == 0)
-        info.emailSent = true // half have been sent
-      info.attemptedAt = DateTime.now
-      notificationDao.save(n)
+      // the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
+      notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(40)
     }
-    session.flush()
-
-    // the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
-    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(40)
 
     // go forward in time RETRY_DELAY_MINUTES +1  minutes - the 5 unsent mails show up again
-    DateTimeUtils.setCurrentMillisFixed(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1).getMillis)
-    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(45)
+    withFakeTime(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1)) {
+      notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(45)
+    }
+  }
+
+  @Test def unemailedRecipientsByNotificationType(): Unit = new Fixture {
+    val agent = Fixtures.user()
+    SSOUserType.userLookup.getUserByUserId(agent.getUserId) returns agent
+    val group = Fixtures.smallGroup("Blissfully unaware group")
+    session.save(group)
+    val now = DateTime.now
+    withFakeTime(now) {
+      session.save(staff)
+      session.save(student)
+      session.save(relationship)
+      session.save(meeting)
+
+      val notifications = (1 to 50).map(i => {
+        val notification = newHeronNotification(agent, meeting)
+        notification.created = now.minusMinutes(i)
+        notificationDao.save(notification)
+        notification
+      })
+
+      session.flush()
+
+      val unemailedRecipients = notificationDao.unemailedRecipientsByNotificationType(Integer.MAX_VALUE)
+      unemailedRecipients.size should be (1)
+      unemailedRecipients.head._1 should be (agent)
+      unemailedRecipients.head._2 should be ("HeronWarning")
+      unemailedRecipients.head._3 should be (now.minusMinutes(50))
+
+      // attempt to send 10 mails - only 5 actually go
+      for (
+        (n, i) <- notifications.reverse.take(10).zipWithIndex;
+        info <- n.recipientNotificationInfos.asScala
+      ) {
+        if (i % 2 == 0)
+          info.emailSent = true // half have been sent
+        info.attemptedAt = DateTime.now
+        notificationDao.save(n)
+      }
+      session.flush()
+
+      // the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
+      val unemailedRecipients2 = notificationDao.unemailedRecipientsByNotificationType(Integer.MAX_VALUE)
+      unemailedRecipients2.size should be (1)
+      unemailedRecipients2.head._1 should be (agent)
+      unemailedRecipients2.head._2 should be ("HeronWarning")
+      unemailedRecipients2.head._3 should be (now.minusMinutes(40))
+    }
+
+    // go forward in time RETRY_DELAY_MINUTES +1  minutes - the 5 unsent mails show up again
+    withFakeTime(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1)) {
+      val unemailedRecipients = notificationDao.unemailedRecipientsByNotificationType(Integer.MAX_VALUE)
+      unemailedRecipients.size should be (1)
+      unemailedRecipients.head._1 should be (agent)
+      unemailedRecipients.head._2 should be ("HeronWarning")
+      unemailedRecipients.head._3 should be (now.minusMinutes(49))
+    }
   }
 }

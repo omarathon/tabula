@@ -130,10 +130,9 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
         dao.update(notification)
         session.flush()
       } catch {
-        case throwable: Throwable => {
+        case throwable: Throwable =>
           // TAB-2238 Catch and log, so that the overall transaction can still commit
           logger.error("Exception handling notification listening:", throwable)
-        }
       }
     }
   }
@@ -144,12 +143,20 @@ object NotificationService {
   val ProcessListenersBatchSize = 100
 }
 
+@deprecated(
+  "NotificationListeners are no longer used, use RecipientNotificationListener instead (and consider using BatchingRecipientNotificationListener to support batching)",
+  since = "2020.1.2"
+)
 trait NotificationListener {
   def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit
 }
 
 trait RecipientNotificationListener {
   def listen(recipient: RecipientNotificationInfo): Unit
+}
+
+trait BatchingRecipientNotificationListener extends RecipientNotificationListener {
+  def listenBatch(recipients: Seq[RecipientNotificationInfo]): Unit
 }
 
 trait NotificationServiceComponent {

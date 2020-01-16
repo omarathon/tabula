@@ -107,8 +107,20 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 
 class ProjectedScalaCriteria[A, B](c: ScalaCriteria[A]) {
   // Helper to neaten up the above chainable methods - returns this instead of plain Criteria
-  @inline private def chainable(fn: => Unit) = {
+  @inline private def chainable(fn: => Unit): ProjectedScalaCriteria[A, B] = {
     fn; this
+  }
+
+  def addOrder(order: Order): ProjectedScalaCriteria[A, B] = chainable {
+    c.addOrder(order)
+  }
+
+  def setMaxResults(i: Int): ProjectedScalaCriteria[A, B] = chainable {
+    c.setMaxResults(i)
+  }
+
+  def setFirstResult(i: Int): ProjectedScalaCriteria[A, B] = chainable {
+    c.setFirstResult(i)
   }
 
   /** Returns a typed Seq of the results. */

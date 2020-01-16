@@ -4,10 +4,13 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, Submission}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ExtensionService, IncludeType, MembershipItem, UserLookupService}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-class SubmissionDueNotificationTest extends TestBase with Mockito {
+class SubmissionDueNotificationTest extends TestBase with Mockito with FreemarkerRendering {
+
+  val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 
   val users = Seq(
     Fixtures.user(universityId = "0123456", userId = "0123456"),
@@ -130,7 +133,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     MembershipItem(user, Some(uniId), Some(usercode), IncludeType, extraneous = false)
   }
 
-  @Test def titleDueGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def titleDueGeneral(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -139,7 +142,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     notification.title should be("CS118: Your submission for '5,000 word essay' is due tomorrow")
   }
 
-  @Test def titleLateGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+  @Test def titleLateGeneral(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -148,7 +151,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     notification.title should be("CS118: Your submission for '5,000 word essay' is 2 days late")
   }
 
-  @Test def titleDueExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def titleDueExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -162,7 +165,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     notification.title should be("CS118: Your submission for '5,000 word essay' is due today")
   }
 
-  @Test def titleLateExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+  @Test def titleLateExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -174,6 +177,143 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 
     val notification = Notification.init(new SubmissionDueWithExtensionNotification, new AnonymousUser, extension)
     notification.title should be("CS118: Your submission for '5,000 word essay' is 1 day late")
+  }
+
+  private[this] trait BatchedNotificationsDueFixture {
+    val assignment1 = Fixtures.assignment("5,000 word essay")
+    assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment1.closeDate = DateTime.now.plusDays(1).withTime(Assignment.closeTime)
+
+    val assignment2 = Fixtures.assignment("10,000 word essay")
+    assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment2.closeDate = DateTime.now.plusDays(1).withTime(Assignment.closeTime)
+
+    val assignment3 = Fixtures.assignment("5,000 word essay")
+    assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
+    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.closeTime)
+
+    val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
+    val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)
+    val notification3 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment3)
+
+    val batch = Seq(notification1, notification2, notification3)
+  }
+
+  private[this] trait BatchedNotificationsLateFixture {
+    val assignment1 = Fixtures.assignment("5,000 word essay")
+    assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+
+    val assignment2 = Fixtures.assignment("10,000 word essay")
+    assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment2.allowLateSubmissions = false
+    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+
+    val assignment3 = Fixtures.assignment("5,000 word essay")
+    assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
+    assignment3.closeDate = DateTime.now.minusDays(3).withTime(Assignment.closeTime)
+
+    val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
+    val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)
+    val notification3 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment3)
+
+    val batch = Seq(notification1, notification2, notification3)
+  }
+
+  private[this] trait BatchedNotificationsMixedFixture {
+    val assignment1 = Fixtures.assignment("5,000 word essay")
+    assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+
+    val assignment2 = Fixtures.assignment("10,000 word essay")
+    assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+    assignment2.allowLateSubmissions = false
+
+    val assignment3 = Fixtures.assignment("5,000 word essay")
+    assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
+    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.closeTime)
+
+    val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
+    val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)
+    val notification3 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment3)
+
+    val batch = Seq(notification1, notification2, notification3)
+  }
+
+  @Test def batchedTitleDue(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsDueFixture {
+      notification1.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are due tomorrow (+ 1 other)")
+    }
+  }
+
+  @Test def batchedTitleLate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsLateFixture {
+      notification1.titleForBatch(batch, new AnonymousUser) should be("CS123: Your submission for '5,000 word essay' is 3 days late (+ 2 others)")
+    }
+  }
+
+  @Test def batchedTitleMixed(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsMixedFixture {
+      notification1.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are 1 day late (+ 1 other)")
+    }
+  }
+
+  @Test def batchedContentDue(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsDueFixture {
+      val content = notification1.contentForBatch(batch)
+
+      renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
+        """
+          |Your submissions for 2 assignments are due tomorrow:
+          |
+          |* '10,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment is 19 September 2014 at 12:00:00.
+          |* '5,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment is 19 September 2014 at 12:00:00.
+          |
+          |Your submission for 1 assignment is due in 3 days:
+          |
+          |* '5,000 word essay' for CS123 Talking to Computer Scientists. Your deadline for this assignment is 21 September 2014 at 12:00:00.
+          |""".stripMargin
+      )
+    }
+  }
+
+  @Test def batchedContentLate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsLateFixture {
+      val content = notification1.contentForBatch(batch)
+
+      renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
+        """
+          |Your submission for 1 assignment is 3 days late:
+          |
+          |* '5,000 word essay' for CS123 Talking to Computer Scientists. Your deadline for this assignment was 15 September 2014 at 12:00:00.
+          |
+          |Your submissions for 2 assignments are 1 day late:
+          |
+          |* '10,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment was 17 September 2014 at 12:00:00. You can no longer submit this assignment via Tabula.
+          |* '5,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment was 17 September 2014 at 12:00:00.
+          |""".stripMargin
+      )
+    }
+  }
+
+  @Test def batchedContentMixed(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
+    new BatchedNotificationsMixedFixture {
+      val content = notification1.contentForBatch(batch)
+
+      renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
+        """
+          |Your submissions for 2 assignments are 1 day late:
+          |
+          |* '10,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment was 17 September 2014 at 12:00:00. You can no longer submit this assignment via Tabula.
+          |* '5,000 word essay' for CS118 Programming for Computer Scientists. Your deadline for this assignment was 17 September 2014 at 12:00:00.
+          |
+          |Your submission for 1 assignment is due in 3 days:
+          |
+          |* '5,000 word essay' for CS123 Talking to Computer Scientists. Your deadline for this assignment is 21 September 2014 at 12:00:00.
+          |""".stripMargin
+      )
+    }
   }
 
 }

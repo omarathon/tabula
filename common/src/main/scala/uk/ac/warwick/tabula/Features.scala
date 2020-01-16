@@ -151,6 +151,7 @@ abstract class Features {
   @Value("${features.mitCircs:true}") var mitCircs: Boolean = defaults.mitCircs
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
+  @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -299,6 +300,7 @@ class FeaturesMessage {
   @BeanProperty var mitCircs = true
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
+  @BeanProperty var notificationBatching = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
