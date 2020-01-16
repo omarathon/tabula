@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services.scheduling
 
 import java.lang.{Boolean => JBoolean, Integer => JInteger}
 import java.util.Properties
-import java.util.concurrent.TimeUnit
 
 import javax.sql.DataSource
 import org.quartz._
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.services.MaintenanceModeService
@@ -91,43 +91,6 @@ object SchedulingConfiguration {
     }
   }
 
-  /**
-   * Parses a duration string. If no units are specified in the string, it is
-   * assumed to be in milliseconds. The returned duration is in nanoseconds.
-   * The purpose of this function is to implement the duration-related methods
-   * in the ConfigObject interface.
-   *
-   * From Typesafe SimpleConfig
-   *
-   * @param input
-   *              the string to parse
-   * @return duration as a Scala FiniteDuration
-   */
-  private def parseDuration(input: String): FiniteDuration = {
-    val unitStringRaw: String = input.reverse.takeWhile(Character.isLetter).reverse
-    val numberString: String = input.substring(0, input.length - (unitStringRaw.length + 1))
-
-    require(numberString.length > 0, s"No number in period value '$input'")
-
-    val unitString =
-      if (unitStringRaw.length > 2 && !unitStringRaw.endsWith("s")) s"${unitStringRaw}s"
-      else unitStringRaw
-
-    // Note that this is deliberately case-sensitive
-    val unit: TimeUnit = unitString match {
-      case "" | "ms" | "millis" | "milliseconds" => TimeUnit.MILLISECONDS
-      case "us" | "micros" | "microseconds" => TimeUnit.MICROSECONDS
-      case "ns" | "nanos" | "nanoseconds" => TimeUnit.NANOSECONDS
-      case "d" | "days" => TimeUnit.DAYS
-      case "h" | "hours" => TimeUnit.HOURS
-      case "s" | "seconds" => TimeUnit.SECONDS
-      case "m" | "minutes" => TimeUnit.MINUTES
-      case _ => throw new IllegalArgumentException(s"Could not parse time unit '$unitStringRaw' (try ns, us, ms, s, m, h, d)")
-    }
-
-    Duration(numberString.toLong, unit)
-  }
-
   private def defaultJobName[J <: AutowiredJobBean : ClassTag]: String = classTag[J].runtimeClass.getSimpleName
 
   private def propertiesConfiguredScheduledJob[J <: AutowiredJobBean : ClassTag](configKey: String)(implicit properties: PropertyResolver): Option[ScheduledJob[J, _ <: Trigger]] =
@@ -142,7 +105,7 @@ object SchedulingConfiguration {
       ))
     } else if (properties.containsProperty(s"$configKey.repeat")) {
       Some(SimpleTriggerJob[J](
-        repeatInterval = parseDuration(properties.getRequiredProperty(s"$configKey.repeat")),
+        repeatInterval = FiniteDurationConverter.asDuration(properties.getRequiredProperty(s"$configKey.repeat")),
         name = properties.getProperty(s"$configKey.name", defaultJobName[J]),
         misfireInstruction = properties.getProperty[JInteger](s"$configKey.misfireInstruction", classOf[JInteger], SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT),
         requestsRecovery = properties.getProperty[JBoolean](s"$configKey.requestsRecovery", classOf[JBoolean], false)

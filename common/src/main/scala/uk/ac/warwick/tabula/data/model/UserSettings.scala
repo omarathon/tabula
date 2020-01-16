@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.apache.commons.codec.digest.DigestUtils
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
+import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-import scala.collection.immutable
 import scala.concurrent.duration._
 
 @Entity
@@ -80,13 +79,13 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> receiveStudentComments)
 
-  def batchedNotifications: BatchedNotificationsSetting =
+  def batchedNotifications: FiniteDuration =
     getStringSetting(Settings.BatchedNotifications)
-      .map(BatchedNotificationsSetting.withName)
+      .map(FiniteDurationConverter.asDuration)
       .getOrElse(DefaultBatchedNotificationsSetting)
 
-  def batchedNotifications_=(setting: BatchedNotificationsSetting): Unit =
-    settings += (Settings.BatchedNotifications -> setting.entryName)
+  def batchedNotifications_=(delay: FiniteDuration): Unit =
+    settings += (Settings.BatchedNotifications -> FiniteDurationConverter.asString(delay))
 
   def string(key: String): String = getStringSetting(key).orNull
 
@@ -113,18 +112,7 @@ object UserSettings {
   val DefaultCourseworkShowEmptyModules = true
   val DefaultReceiveStudentComments = true
 
-  val DefaultBatchedNotificationsSetting: BatchedNotificationsSetting = BatchedNotificationsSetting.SendImmediately
-
-  sealed abstract class BatchedNotificationsSetting(val description: String, val delay: FiniteDuration) extends EnumEntry
-  object BatchedNotificationsSetting extends Enum[BatchedNotificationsSetting] {
-    case object SendImmediately extends BatchedNotificationsSetting("Send me notifications immediately", Duration.Zero)
-    case object FiveMinutes extends BatchedNotificationsSetting("Receive notifications every 5 minutes", 5.minutes)
-    case object TenMinutes extends BatchedNotificationsSetting("Receive notifications every 10 minutes", 10.minutes)
-    case object ThirtyMinutes extends BatchedNotificationsSetting("Receive notifications every 30 minutes", 30.minutes)
-    case object OneHour extends BatchedNotificationsSetting("Receive notifications every hour", 1.hour)
-
-    override def values: immutable.IndexedSeq[BatchedNotificationsSetting] = findValues
-  }
+  val DefaultBatchedNotificationsSetting: FiniteDuration = Duration.Zero
 
   object Settings {
     val AlertsSubmission = "alertsSubmission"

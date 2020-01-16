@@ -4,13 +4,14 @@ import java.util.UUID
 
 import org.hibernate.Session
 import org.joda.time.{DateTime, DateTimeConstants}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{NotificationDao, NotificationDaoComponent, SessionComponent}
 import uk.ac.warwick.tabula.notifications.{EmailNotificationListenerComponent, MyWarwickNotificationListenerComponent}
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{HeronDefeatedNotification, HeronWarningNotification, MeetingRecord, Notification, UserSettings}
-import uk.ac.warwick.tabula.data.model.UserSettings.BatchedNotificationsSetting
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.userlookup.User
+
+import scala.concurrent.duration._
 
 class NotificationBatchingServiceTest extends TestBase with Mockito {
 
@@ -37,7 +38,7 @@ class NotificationBatchingServiceTest extends TestBase with Mockito {
 
     val recipient: User = Fixtures.user()
     val userSettings: UserSettings = new UserSettings
-    userSettings.batchedNotifications = BatchedNotificationsSetting.ThirtyMinutes
+    userSettings.batchedNotifications = 30.minutes
 
     notificationBatchingService.userSettingsService.getByUserId(recipient.getUserId) returns Some(userSettings)
 
@@ -115,7 +116,7 @@ class NotificationBatchingServiceTest extends TestBase with Mockito {
   }}
 
   @Test def batchingSendImmediately(): Unit = withFakeTime(referenceDate) { new BatchingFixture {
-    userSettings.batchedNotifications = BatchedNotificationsSetting.SendImmediately
+    userSettings.batchedNotifications = Duration.Zero
 
     notificationBatchingService.processNotifications()
 
@@ -126,7 +127,7 @@ class NotificationBatchingServiceTest extends TestBase with Mockito {
   }}
 
   @Test def batchingFeatureDisabled(): Unit = withFakeTime(referenceDate) { new BatchingFixture {
-    userSettings.batchedNotifications = BatchedNotificationsSetting.SendImmediately
+    notificationBatchingService.features.notificationBatching = false
 
     notificationBatchingService.processNotifications()
 
@@ -146,7 +147,7 @@ class NotificationBatchingServiceTest extends TestBase with Mockito {
   }}
 
   @Test def batchingWithinDelay(): Unit = withFakeTime(referenceDate) { new BatchingFixture {
-    userSettings.batchedNotifications = BatchedNotificationsSetting.OneHour
+    userSettings.batchedNotifications = 1.hour
 
     notificationBatchingService.processNotifications()
 

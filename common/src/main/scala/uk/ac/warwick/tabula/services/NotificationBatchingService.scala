@@ -60,7 +60,7 @@ abstract class AbstractNotificationBatchingService extends NotificationBatchingS
         }
 
         batchedNotificationsSetting match {
-          case setting if !canBeBatched || setting.delay == Duration.Zero =>
+          case settingDelay if !canBeBatched || settingDelay == Duration.Zero =>
             // Send each individually
             notificationDao.unemailedNotificationsFor(recipient, notificationType, retryBackoff = true).map { rni =>
               val id = rni.id
@@ -77,7 +77,7 @@ abstract class AbstractNotificationBatchingService extends NotificationBatchingS
               }
             }
 
-          case setting if delay >= setting.delay =>
+          case settingDelay if delay >= settingDelay =>
             // Send these as a batch
             val ids = notificationDao.unemailedNotificationsFor(recipient, notificationType, retryBackoff = false).map(_.id)
             Seq(Future {

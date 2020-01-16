@@ -3,19 +3,19 @@ package uk.ac.warwick.tabula.web.controllers.home
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{ModelAttribute, PostMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.home.UserSettingsCommand
 import uk.ac.warwick.tabula.data.model.UserSettings
-import uk.ac.warwick.tabula.data.model.UserSettings.BatchedNotificationsSetting
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.{BaseController, enumPropertyEditor}
+import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
+
+import scala.concurrent.duration._
 
 @Controller
 class UserSettingsController extends BaseController
@@ -37,11 +37,14 @@ class UserSettingsController extends BaseController
       case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
     }
 
-  override def binding[A](binder: WebDataBinder, target: A): Unit =
-    binder.registerCustomEditor(classOf[BatchedNotificationsSetting], enumPropertyEditor(BatchedNotificationsSetting))
-
   @ModelAttribute("batchedNotificationSettings")
-  def batchedNotificationSettings: Seq[BatchedNotificationsSetting] = BatchedNotificationsSetting.values
+  def batchedNotificationSettings: Seq[FiniteDuration] = Seq(
+    Duration.Zero,
+    5.minutes,
+    10.minutes,
+    30.minutes,
+    1.hour
+  )
 
   @RequestMapping(Array("/settings"))
   def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors: Errors, success: Boolean = false): Mav = {

@@ -71,13 +71,25 @@
     <h2>Notifications</h2>
 
     <#if features.notificationBatching>
-      <@bs3form.labelled_form_group path="batchedNotifications" labelText="Batching email notifications" help="By batching email notifications, you can reduce the number of emails you're getting from Tabula. Instead of sending emails immediately, we'll group emails of the same type together and send you a single summary email.">
+      <@bs3form.labelled_form_group path="batchedNotifications" labelText="Batching notifications" help="By batching notifications, you can reduce the number of emails and My Warwick alerts you're getting from Tabula. Instead of sending notifications immediately, we'll group notifications of the same type together and send you a single summary email or alert.">
         <#list batchedNotificationSettings as setting>
           <@bs3form.radio>
-            <@f.radiobutton path="batchedNotifications" value=setting.entryName />
-            ${setting.description}
+            <@f.radiobutton path="batchedNotifications" value=setting />
+            <#if setting.length() == 0>
+              Send me notifications immediately
+            <#else>
+              Receive notifications every ${setting}
+            </#if>
           </@bs3form.radio>
         </#list>
+
+        <#-- Allow an unusual setting (set in the db?) to be retained -->
+        <#if userSettingsCommand.batchedNotifications?? && !batchedNotificationSettings?seq_contains(userSettingsCommand.batchedNotifications)>
+          <@bs3form.radio>
+            <@f.radiobutton path="batchedNotifications" value=userSettingsCommand.batchedNotifications />
+            Receive notifications every ${userSettingsCommand.batchedNotifications}
+          </@bs3form.radio>
+        </#if>
       </@bs3form.labelled_form_group>
     </#if>
 

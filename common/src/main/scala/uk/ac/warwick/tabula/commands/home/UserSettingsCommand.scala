@@ -5,13 +5,14 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
-import uk.ac.warwick.tabula.data.model.UserSettings.BatchedNotificationsSetting
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringUserSettingsServiceComponent, UserSettingsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.concurrent.duration.FiniteDuration
 
 object UserSettingsCommand {
   type Command = Appliable[UserSettings] with SelfValidating
@@ -56,7 +57,7 @@ trait UserSettingsRequest {
   var weekNumberingSystem: String = settings.weekNumberingSystem
   var bulkEmailSeparator: String = settings.bulkEmailSeparator
   var deptAdminReceiveStudentComments: Boolean = settings.deptAdminReceiveStudentComments
-  var batchedNotifications: BatchedNotificationsSetting = settings.batchedNotifications
+  var batchedNotifications: FiniteDuration = settings.batchedNotifications
 
   lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
   var smallGroupEventAttendanceReminderEnabled: Boolean = smallGroupEventAttendanceReminderSettings.enabled.value
