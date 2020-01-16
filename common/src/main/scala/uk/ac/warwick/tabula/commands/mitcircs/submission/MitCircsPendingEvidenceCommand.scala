@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissio
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsPendingEvidenceReceivedNotification
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -40,16 +41,19 @@ object MitCircsPendingEvidenceCommand {
       with MitCircsSubmissionSchedulesNotifications
       with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringUploadedImageProcessorComponent
 }
 
 class MitCircsPendingEvidenceCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesSubmission] with MitCircsPendingEvidenceState with MitCircsPendingEvidenceValidation with BindListener {
 
-  self: MitCircsSubmissionServiceComponent =>
+  self: MitCircsSubmissionServiceComponent
+    with UploadedImageProcessorComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
     file.onBind(result)
+    uploadedImageProcessor.fixOrientation(file)
     result.popNestedPath()
   }
 
