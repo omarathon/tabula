@@ -59,7 +59,7 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
 
     val activity = new Activity(
       Set(recipient.getUserId).asJava,
-      notificationTitle,
+      notificationTitle.replaceAll("(\\.)+$", ""),
       notificationUrl match {
         case absolute if absolute.startsWith("https://") => absolute
         case relative => s"$toplevelUrl$relative"
