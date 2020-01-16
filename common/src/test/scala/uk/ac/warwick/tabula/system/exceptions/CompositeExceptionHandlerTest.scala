@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class CompositeExceptionHandlerTest extends TestBase with Mockito {
 
@@ -11,7 +11,7 @@ class CompositeExceptionHandlerTest extends TestBase with Mockito {
 
   val handler = new CompositeExceptionHandler(Seq(listener1, listener2).asJava)
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     val context = ExceptionContext("1", new RuntimeException("An egg cracked"), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 
     handler.exception(context)

@@ -25,7 +25,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     val command = new RevokePermissionsCommandInternal(department) with CommandTestSupport[Department] with RevokePermissionsCommandValidation
   }
 
-  @Test def nonExistingPermission {
+  @Test def nonExistingPermission: Unit = {
     new Fixture {
       command.permission = Permissions.Department.ManageExtensionSettings
       command.usercodes.add("cuscav")
@@ -41,7 +41,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def itWorksWithExisting {
+  @Test def itWorksWithExisting: Unit = {
     new Fixture {
       command.permission = Permissions.Department.ManageExtensionSettings
       command.usercodes.add("cuscav")
@@ -74,7 +74,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validatePasses {
+  @Test def validatePasses: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.permission = Permissions.Department.ManageExtensionSettings
@@ -98,7 +98,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noUsercodes {
+  @Test def noUsercodes: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.permission = Permissions.Department.ManageExtensionSettings
@@ -123,7 +123,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def usercodeNotInGroup {
+  @Test def usercodeNotInGroup: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.permission = Permissions.Department.ManageExtensionSettings
@@ -151,7 +151,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noPermission {
+  @Test def noPermission: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.usercodes.add("cuscav")
@@ -171,7 +171,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def cantRevokeWhatYouDontHave {
+  @Test def cantRevokeWhatYouDontHave: Unit = {
     withUser("cuscav", "0672089") {
       new Fixture {
         command.permission = Permissions.Department.ManageExtensionSettings
@@ -199,7 +199,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe {
+  def describe: Unit = {
     val department = Fixtures.department("in")
     department.id = "department-id"
 
@@ -225,7 +225,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
     ))
   }
 
-  @Test def gluesEverythingTogether {
+  @Test def gluesEverythingTogether: Unit = {
     val department = Fixtures.department("in")
     val command = RevokePermissionsCommand(department)
 

@@ -53,7 +53,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   }
 
 
-  def updateStudentCourseDetails(studentCourseDetails: StudentCourseDetails, isTransient: Boolean) {
+  def updateStudentCourseDetails(studentCourseDetails: StudentCourseDetails, isTransient: Boolean): Unit = {
     val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 
     val hasChanged =
@@ -85,7 +85,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
     updateRelationships(studentCourseDetails)
   }
 
-  def updateRelationships(studentCourseDetails: StudentCourseDetails) {
+  def updateRelationships(studentCourseDetails: StudentCourseDetails): Unit = {
     // Check the SPR (status on route) code to see if they are permanently withdrawn, and
     // end relationships if so.  The SCJ code may indicate that they are
     // permanently withdrawn from the course, but it may have the same route code as their
@@ -163,7 +163,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   }
 
 
-  def endRelationships() {
+  def endRelationships(): Unit = {
     if (courseRow.endDate != null) {
       val endDateFromSits = courseRow.endDate.toDateTimeAtCurrentTime
       val threeMonthsAgo = DateTime.now().minusMonths(3)

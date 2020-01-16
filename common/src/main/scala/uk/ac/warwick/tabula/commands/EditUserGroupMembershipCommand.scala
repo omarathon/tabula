@@ -189,7 +189,7 @@ trait EditUserGroupMembershipCommandState {
   // parse massAddUsers into a collection of individual tokens
   def massAddUsersEntries: Seq[String] =
     if (massAddUsers == null) Nil
-    else massAddUsers split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
+    else massAddUsers.split("(\\s|[^A-Za-z\\d\\-_.])+").map(_.trim).filterNot(_.isEmpty).toSeq
 
   var excludeIds: JList[String] = LazyLists.create()
   var resetStudentIds: JList[String] = LazyLists.create()

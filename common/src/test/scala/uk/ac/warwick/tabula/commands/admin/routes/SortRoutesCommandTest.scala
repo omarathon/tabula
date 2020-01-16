@@ -51,16 +51,16 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     val command = new SortRoutesCommandInternal(department) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new Fixture {
       command.department should be(department)
       command.departments.toSet should be(Set(department, ugDepartment, pgDepartment))
     }
   }
 
-  @Test def populateAndSort {
+  @Test def populateAndSort: Unit = {
     new Fixture {
-      command.mapping.asScala should be('empty)
+      command.mapping.asScala should be(Symbol("empty"))
 
       command.populate()
       command.mapping.asScala.view.mapValues(_.asScala.toSeq).toMap should be(Map(
@@ -78,9 +78,9 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def mappingByCode {
+  @Test def mappingByCode: Unit = {
     new Fixture {
-      command.mappingByCode should be('empty)
+      command.mappingByCode should be(Symbol("empty"))
 
       command.populate()
       command.sort()
@@ -94,7 +94,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new Fixture {
       command.populate()
       command.sort()
@@ -109,7 +109,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
       route1.adminDepartment should be(ugDepartment)
       route2.adminDepartment should be(pgDepartment)
 
-      department.routes.asScala should be('empty)
+      department.routes.asScala should be(Symbol("empty"))
       ugDepartment.routes.asScala.toSet should be(Set(route1, route3, route4, route5))
       pgDepartment.routes.asScala.toSet should be(Set(route2, route6, route7))
 
@@ -129,7 +129,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     command.sort()
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -138,7 +138,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectUnrelatedDepartments {
+  @Test def rejectUnrelatedDepartments: Unit = {
     new ValidationFixture {
       command.mapping.put(Fixtures.department("other"), JArrayList())
 
@@ -150,7 +150,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectUnrelatedRoutes {
+  @Test def rejectUnrelatedRoutes: Unit = {
     new ValidationFixture {
       command.mapping.get(department).add(Fixtures.route("cs205"))
 
@@ -162,7 +162,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def rejectOrphanRoutes {
+  @Test def rejectOrphanRoutes: Unit = {
     new ValidationFixture {
       command.mapping.get(department).remove(route1)
 
@@ -175,13 +175,13 @@ class SortRoutesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def permissionsRequireCreateRouteOnDepartment {
+  def permissionsRequireCreateRouteOnDepartment: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new SortRoutesCommandPermissions with CommandTestSupport {
       val department: Department = dept
 
-      def sort() {}
+      def sort(): Unit = {}
 
       def populate(): Unit = {}
     }
@@ -192,14 +192,14 @@ class SortRoutesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def describe {
+  def describe: Unit = {
     val dept = Fixtures.department("in")
 
     val command = new SortRoutesCommandDescription with CommandTestSupport {
       val eventName: String = "test"
       val department: Department = dept
 
-      def sort() {}
+      def sort(): Unit = {}
 
       def populate(): Unit = {}
     }
@@ -213,7 +213,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def glueEverythingTogether() {
+  def glueEverythingTogether(): Unit = {
     val department = Fixtures.department("in", "IT Services")
     val command = SortRoutesCommand(department)
 

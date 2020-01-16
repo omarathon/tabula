@@ -43,7 +43,7 @@ class MeetingRecordEventOccurrenceSourceComponentTest extends TestBase with Mock
   source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 
   @Test
-  def callsBothServicesAndGeneratesOccurrence() {
+  def callsBothServicesAndGeneratesOccurrence(): Unit = {
     source.eventOccurrenceSource.occurrencesFor(student, user, TimetableEvent.Context.Staff, start, end).futureValue.events should be(Seq(occurrence))
   }
 

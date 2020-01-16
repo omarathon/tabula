@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 class WeekRangeTest extends TestBase {
 
   @Test
-  def fromString {
+  def fromString: Unit = {
     WeekRange.fromString("3") should be(WeekRange(3))
     WeekRange.fromString("3-3") should be(WeekRange(3))
     WeekRange.fromString("3-10") should be(WeekRange(3, 10))
@@ -19,7 +19,7 @@ class WeekRangeTest extends TestBase {
   }
 
   @Test
-  def combine {
+  def combine: Unit = {
     WeekRange.combine(Seq()) should be(Seq())
     WeekRange.combine(Seq(1)) should be(Seq(WeekRange(1)))
     WeekRange.combine(Seq(1, 2)) should be(Seq(WeekRange(1, 2)))
@@ -29,7 +29,7 @@ class WeekRangeTest extends TestBase {
   }
 
   @Test
-  def termWeekRanges {
+  def termWeekRanges: Unit = {
     WeekRange.termWeekRanges(AcademicYear.parse("11/12")) should be(Seq(WeekRange(1, 10), WeekRange(15, 24), WeekRange(30, 39)))
     WeekRange.termWeekRanges(AcademicYear.parse("12/13")) should be(Seq(WeekRange(1, 10), WeekRange(15, 24), WeekRange(30, 39)))
     WeekRange.termWeekRanges(AcademicYear.parse("13/14")) should be(Seq(WeekRange(1, 10), WeekRange(15, 24), WeekRange(30, 39)))

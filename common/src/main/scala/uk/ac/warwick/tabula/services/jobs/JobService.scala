@@ -48,7 +48,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
   /** Spring should wire in all beans that extend Job */
   @Autowired var jobs: Array[Job] = Array()
 
-  def run()(implicit earlyRequestInfo: EarlyRequestInfo) {
+  def run()(implicit earlyRequestInfo: EarlyRequestInfo): Unit = {
     val runningJobs = jobDao.listRunningJobs
     if (runningJobs.size < RunBatchSize) {
       val jobsToRun = jobDao.findOutstandingInstances(RunBatchSize - runningJobs.size)
@@ -73,13 +73,13 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
       }
     }
 
-  def processInstance(instance: JobInstance, job: Job) {
+  def processInstance(instance: JobInstance, job: Job): Unit = {
     logger.info(s"Running job ${instance.id}")
     start(instance)
     run(instance, job)
   }
 
-  def kill(instance: JobInstance) {
+  def kill(instance: JobInstance): Unit = {
     /**
       * TODO no handle on thread to actually kill it if it's running
       * right now.
@@ -130,7 +130,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
     }
   }
 
-  def run(instance: JobInstance, job: Job) {
+  def run(instance: JobInstance, job: Job): Unit = {
     try job.run(instance)
     catch {
       case e: Exception if stopping =>
@@ -162,7 +162,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
     }
   }
 
-  private def start(instance: JobInstance) {
+  private def start(instance: JobInstance): Unit = {
     transactional() {
       instance.started = true
       instance.schedulerInstance = this.schedulerInstance
@@ -170,14 +170,14 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
     }
   }
 
-  private def finish(instance: JobInstance) {
+  private def finish(instance: JobInstance): Unit = {
     transactional() {
       instance.finished = true
       jobDao.update(instance)
     }
   }
 
-  private def fail(instance: JobInstance) {
+  private def fail(instance: JobInstance): Unit = {
     transactional() {
       instance.succeeded = false
       instance.finished = true

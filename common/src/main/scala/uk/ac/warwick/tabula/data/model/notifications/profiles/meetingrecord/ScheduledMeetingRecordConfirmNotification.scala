@@ -17,7 +17,7 @@ class ScheduledMeetingRecordConfirmNotification
 
   verbSetting.value = "confirm"
 
-  override final def onPreSave(newRecord: Boolean) {
+  override final def onPreSave(newRecord: Boolean): Unit = {
     priority = if (Days.daysBetween(meeting.meetingDate, created).getDays >= 5) {
       Critical
     } else {

@@ -10,7 +10,7 @@ trait Ordered extends org.springframework.core.Ordered {
 
   override def getOrder: Int = order
 
-  def setOrder(o: Int) {
+  def setOrder(o: Int): Unit = {
     order = o
   }
 }

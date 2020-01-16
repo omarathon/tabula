@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.TestBase
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports
 
 // scalastyle:off magic.number
 class LazyListsTest extends TestBase with JavaImports {
 
-  @Test def lazyList {
+  @Test def lazyList: Unit = {
     val list: JList[String] = LazyLists.create()
 
     list.get(3) should be("")

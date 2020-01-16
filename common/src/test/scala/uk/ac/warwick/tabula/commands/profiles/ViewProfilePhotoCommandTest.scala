@@ -10,12 +10,12 @@ class ViewProfilePhotoCommandTest extends TestBase with Mockito {
   val testConfig = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
 
   @Test(expected = classOf[ItemNotFoundException])
-  def memberDoesNotExist() {
+  def memberDoesNotExist(): Unit = {
     ViewProfilePhotoCommand(null: Member)
   }
 
   @Test
-  def memberPhoto() {
+  def memberPhoto(): Unit = {
     val member = new StudentMember()
     member.universityId = "1170836"
     val command = new ViewProfilePhotoCommand(member) with MemberPhotoUrlGeneratorComponent {

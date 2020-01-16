@@ -22,7 +22,7 @@ trait DepartmentSmallGroupSetsController extends GroupsController {
 
   @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-  override final def binding[A](binder: WebDataBinder, cmd: A) {
+  override final def binding[A](binder: WebDataBinder, cmd: A): Unit = {
     binder.registerCustomEditor(classOf[SmallGroupAllocationMethod], new AbstractPropertyEditor[SmallGroupAllocationMethod] {
       override def fromString(code: String): SmallGroupAllocationMethod = SmallGroupAllocationMethod.fromDatabase(code)
 

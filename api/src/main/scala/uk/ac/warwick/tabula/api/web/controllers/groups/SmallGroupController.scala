@@ -152,7 +152,7 @@ class ModifySmallGroupRequest extends JsonApiRequest[ModifySmallGroupCommand] {
   @BeanProperty var name: String = null
   @BeanProperty var maxGroupSize: JInteger = null
 
-  override def copyTo(state: ModifySmallGroupCommand, errors: Errors) {
+  override def copyTo(state: ModifySmallGroupCommand, errors: Errors): Unit = {
     Option(name).foreach(state.name = _)
     Option(maxGroupSize).foreach(state.maxGroupSize = _)
   }

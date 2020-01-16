@@ -31,7 +31,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
   }
 
   @Test
-  def noSchemes() {
+  def noSchemes(): Unit = {
     new Fixture {
       cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq()
       val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
@@ -41,7 +41,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
   }
 
   @Test
-  def sameStudentInMultipleSchemesInSameDept() {
+  def sameStudentInMultipleSchemesInSameDept(): Unit = {
     new Fixture {
       val dept: Department = Fixtures.department("its")
       val scheme1 = new AttendanceMonitoringScheme
@@ -70,7 +70,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
   }
 
   @Test
-  def sameStudentInMultipleSchemesInDifferentDept() {
+  def sameStudentInMultipleSchemesInDifferentDept(): Unit = {
     new Fixture {
       val dept1: Department = Fixtures.department("its")
       val dept2: Department = Fixtures.department("foo")

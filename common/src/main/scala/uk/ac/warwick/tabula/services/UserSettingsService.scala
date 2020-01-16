@@ -19,7 +19,7 @@ trait AutowiringUserSettingsServiceComponent extends UserSettingsServiceComponen
 trait UserSettingsService {
   def getByUserId(userId: String): Option[UserSettings]
 
-  def save(user: CurrentUser, usersettings: UserSettings)
+  def save(user: CurrentUser, usersettings: UserSettings): Unit
 }
 
 @Service(value = "userSettingsService")

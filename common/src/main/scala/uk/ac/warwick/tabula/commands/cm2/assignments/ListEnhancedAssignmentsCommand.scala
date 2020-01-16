@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.AssignmentInfoFilters.DueDa
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListEnhancedAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, MarkingWorkflowType}
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -265,7 +265,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
       if (progresses.nonEmpty) {
         Seq(AssignmentStage(
           stage,
-          progresses.groupBy(identity).mapValues(_.size).toSeq.map { case (p, c) => AssignmentStageProgress(p, c) }
+          progresses.groupBy(identity).view.mapValues(_.size).toSeq.map { case (p, c) => AssignmentStageProgress(p, c) }
         ))
       } else {
         Nil
@@ -277,7 +277,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
     }.filterNot(_.stages.isEmpty)
 
     val allNextStages =
-      results.students.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
+      results.students.flatMap(_.nextStage).groupBy(identity).view.mapValues(_.size)
 
     val nextStages =
       allStages.filter(allNextStages.contains).map { stage =>
@@ -502,14 +502,7 @@ object AssignmentInfoFilters {
   object NoWorkflow extends AssignmentInfoFilter {
     val description: String = "No workflow"
 
-    def apply(info: AssignmentInfo): Boolean = info.assignment.markingWorkflow == null && info.assignment.cm2MarkingWorkflow == null
-  }
-
-  case class WorkflowType(method: MarkingMethod) extends AssignmentInfoFilter {
-    val description: String = s"${method.description}-CM1"
-    override val getName: String = method.name
-
-    def apply(info: AssignmentInfo): Boolean = Option(info.assignment.markingWorkflow).map(_.markingMethod).contains(method)
+    def apply(info: AssignmentInfo): Boolean = info.assignment.cm2MarkingWorkflow == null
   }
 
   case class CM2WorkflowType(method: MarkingWorkflowType) extends AssignmentInfoFilter {
@@ -519,7 +512,7 @@ object AssignmentInfoFilters {
     def apply(info: AssignmentInfo): Boolean = Option(info.assignment.cm2MarkingWorkflow).map(_.workflowType).contains(method)
   }
 
-  def allWorkflowTypeFilters: Seq[AssignmentInfoFilter] = Seq(NoWorkflow) ++ MarkingMethod.values.toSeq.map(WorkflowType.apply) ++ MarkingWorkflowType.values.map(CM2WorkflowType.apply)
+  def allWorkflowTypeFilters: Seq[AssignmentInfoFilter] = Seq(NoWorkflow) ++ MarkingWorkflowType.values.map(CM2WorkflowType.apply)
 
   object Status {
 
@@ -579,7 +572,7 @@ object AssignmentInfoFilters {
     case object NotReleasedToMarkers extends AssignmentInfoFilter {
       val description = "Not released to markers"
 
-      def apply(info: AssignmentInfo): Boolean = (info.assignment.hasWorkflow || info.assignment.hasCM2Workflow) && info.assignment.allFeedback.flatMap(_.outstandingStages.asScala).isEmpty
+      def apply(info: AssignmentInfo): Boolean = info.assignment.hasWorkflow && info.assignment.allFeedback.flatMap(_.outstandingStages.asScala).isEmpty
     }
 
     case object BeingMarked extends AssignmentInfoFilter {

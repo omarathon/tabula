@@ -18,7 +18,7 @@ class ImportTier4ForStudentCommandTest extends TestBase with Mockito with Loggin
   }
 
   @Transactional
-  @Test def testVisaUpdatesAreApplied() {
+  @Test def testVisaUpdatesAreApplied(): Unit = {
     new Environment {
 
       val casUsageImporter: CasUsageImporter = smartMock[CasUsageImporter]
@@ -40,7 +40,7 @@ class ImportTier4ForStudentCommandTest extends TestBase with Mockito with Loggin
 
 
   @Transactional
-  @Test def testVisaUpdatesApplyGoingForward() {
+  @Test def testVisaUpdatesApplyGoingForward(): Unit = {
     new Environment {
       val scd: StudentCourseDetails = studentMember.mostSignificantCourse;
       val currentScyd: StudentCourseYearDetails = scd.latestStudentCourseYearDetails

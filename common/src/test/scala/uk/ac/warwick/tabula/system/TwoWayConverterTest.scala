@@ -10,13 +10,13 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat
 
 class TwoWayConverterTest extends TestBase {
 
-  @Test def converting {
+  @Test def converting: Unit = {
     val converter = new DaysConverter
     converter.convert("3", descriptor[String], descriptor[Days]) should be(Days.THREE)
     converter.convert(Days.FIVE, descriptor[Days], descriptor[String]) should be("5")
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val converter = new DaysConverter
     converter.parse("3", Locale.getDefault()) should be(Days.THREE)
     converter.print(Days.FIVE, Locale.getDefault()) should be("5")
@@ -26,7 +26,7 @@ class TwoWayConverterTest extends TestBase {
     * is a subclass of the converter's declared class. Checking that the
     * internal matching() method is doing the right thing.
     */
-  @Test def caseObjects {
+  @Test def caseObjects: Unit = {
     val converter = new MeetingFormatConverter
     val sourceValue = MeetingFormat.FaceToFace
     val sourceType = TypeDescriptor.valueOf(MeetingFormat.FaceToFace.getClass)

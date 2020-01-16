@@ -47,9 +47,8 @@ abstract class AbstractModuleHomeController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/{module}"))
+@RequestMapping(Array("/coursework/admin/{module}"))
 class ModuleHomeController extends AbstractModuleHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -58,9 +57,8 @@ class ModuleHomeController extends AbstractModuleHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}"))
+@RequestMapping(Array("/coursework/admin/{module}/{academicYear:\\d{4}}"))
 class ModuleHomeForYearController extends AbstractModuleHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -69,9 +67,8 @@ class ModuleHomeForYearController extends AbstractModuleHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}", "/${cm2.prefix}/admin/module/{module}/**"))
+@RequestMapping(Array("/coursework/admin/module/{module}", "/coursework/admin/module/{module}/**"))
 class ModuleHomeRedirectController extends CourseworkController
   with AcademicYearScopedController
   with AutowiringUserSettingsServiceComponent

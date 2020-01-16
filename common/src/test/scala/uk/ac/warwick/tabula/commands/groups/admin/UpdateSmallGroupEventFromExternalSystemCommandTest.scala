@@ -19,7 +19,7 @@ import scala.concurrent.Future
 
 class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with Mockito {
 
-  @Before def tidyUpContext() {
+  @Before def tidyUpContext(): Unit = {
     // TODO it would be better to find where this context is actually coming from
     SpringConfigurer.applicationContext = null
   }
@@ -147,13 +147,13 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
     )))
   }
 
-  @Test def init() {
+  @Test def init(): Unit = {
     new FixtureWithSingleSeminarForYear with CommandFixture {
       command.timetableEvents should be(Seq(tEventSeminar2, tEventSeminar1))
     }
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new FixtureWithSingleSeminarForYear with CommandFixture {
       command.index = 0
 
@@ -179,7 +179,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new PermissionsFixture {
       module.groupSets.add(set)
       set.module = module
@@ -197,7 +197,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def notLinked() {
+  @Test(expected = classOf[ItemNotFoundException]) def notLinked(): Unit = {
     new PermissionsFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -206,7 +206,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
     }
   }
 
-  @Test def description() {
+  @Test def description(): Unit = {
     val command = new UpdateSmallGroupEventFromExternalSystemDescription with UpdateSmallGroupEventFromExternalSystemCommandState with UpdateSmallGroupEventFromExternalSystemRequestState with MockServices {
       override val eventName: String = "test"
       val module: Module = Fixtures.module("in101")

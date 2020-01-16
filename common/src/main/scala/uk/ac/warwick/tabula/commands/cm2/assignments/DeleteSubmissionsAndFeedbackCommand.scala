@@ -85,7 +85,7 @@ trait DeleteSubmissionsAndFeedbackPermissions extends RequiresPermissionsCheckin
   self: DeleteSubmissionsAndFeedbackState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assignment))
     p.PermissionCheck(Permissions.Submission.Delete, mandatory(assignment))
   }
 

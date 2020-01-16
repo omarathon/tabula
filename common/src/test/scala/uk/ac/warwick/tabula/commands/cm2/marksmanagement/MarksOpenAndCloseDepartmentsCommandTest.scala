@@ -32,7 +32,7 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyUndergrads() {
+  def applyUndergrads(): Unit = {
     new Fixture {
       command.populate()
       command.applyInternal() should be(DegreeType.Undergraduate)
@@ -41,7 +41,7 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyPostgradsClosed() {
+  def applyPostgradsClosed(): Unit = {
     new Fixture {
       command.populate()
       command.pgMappings = Map(
@@ -55,7 +55,7 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def applyPostgradsOpenThisYearOnly() {
+  def applyPostgradsOpenThisYearOnly(): Unit = {
     new Fixture {
       command.populate()
       command.pgMappings = Map(
@@ -73,18 +73,18 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
     new Fixture {
       command.currentAcademicYear should be(currentYear)
       command.previousAcademicYear should be(currentYear.-(1))
-      command.ugMappings should be('empty)
-      command.pgMappings should be('empty)
+      command.ugMappings should be(Symbol("empty"))
+      command.pgMappings should be(Symbol("empty"))
       command.populate()
-      command.ugMappings should not be ('empty)
-      command.pgMappings should not be ('empty)
+      command.ugMappings should not be (Symbol("empty"))
+      command.pgMappings should not be (Symbol("empty"))
       command.ugMappings.size should be(1)
       command.pgMappings.size should be(1)
     }
   }
 
   @Test
-  def permssions {
+  def permssions: Unit = {
     val command = new MarksOpenAndCloseDepartmentsCommandPermissions with CommandTestSupport
     val checking = mock[PermissionsChecking]
     command.permissionsCheck(checking)
@@ -92,7 +92,7 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def glueEverythingTogether() {
+  def glueEverythingTogether(): Unit = {
     val command = MarksOpenAndCloseDepartmentsCommand()
     command should be(anInstanceOf[Appliable[DegreeType]])
     command should be(anInstanceOf[MarksOpenAndCloseDepartmentsCommandPermissions])

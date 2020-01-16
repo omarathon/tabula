@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.DegreeType._
 
 class DegreeTypeTest extends TestBase {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new DegreeTypeUserType
     t.convertToObject("UG") should be(Undergraduate)
     t.convertToObject("PG") should be(Postgraduate)
@@ -16,7 +16,7 @@ class DegreeTypeTest extends TestBase {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new DegreeTypeUserType
     t.convertToValue(Undergraduate) should be("UG")
     t.convertToValue(Postgraduate) should be("PG")

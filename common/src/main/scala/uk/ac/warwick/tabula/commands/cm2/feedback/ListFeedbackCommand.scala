@@ -99,6 +99,6 @@ trait ListFeedbackPermissions extends RequiresPermissionsChecking with Permissio
   self: ListFeedbackState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+    p.PermissionCheck(Permissions.Feedback.Read, assignment)
   }
 }

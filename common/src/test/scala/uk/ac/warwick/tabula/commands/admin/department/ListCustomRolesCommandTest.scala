@@ -20,7 +20,7 @@ class ListCustomRolesCommandTest extends TestBase with Mockito {
     val command = new ListCustomRolesCommandInternal(department) with CommandTestSupport
   }
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     new Fixture {
       val customRole1 = new CustomRoleDefinition
       val customRole2 = new CustomRoleDefinition
@@ -42,7 +42,7 @@ class ListCustomRolesCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     val command = new ListCustomRolesCommandPermissions with ListCustomRolesCommandState {
       override val department: Department = Fixtures.department("in")
     }
@@ -53,7 +53,7 @@ class ListCustomRolesCommandTest extends TestBase with Mockito {
     verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, command.department)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     val command = new ListCustomRolesCommandPermissions with ListCustomRolesCommandState {
       override val department = null
     }

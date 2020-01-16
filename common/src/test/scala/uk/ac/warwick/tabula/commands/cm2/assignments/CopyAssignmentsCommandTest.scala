@@ -50,7 +50,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandApply() {
+  def commandApply(): Unit = {
     new Fixture {
       val command = new CopyModuleAssignmentsCommandInternal(module, AcademicYear.parse("16/17")) with CommandTestSupport
       command.assignments = Seq(assignment).asJava
@@ -61,7 +61,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def copy() {
+  def copy(): Unit = {
     new Fixture with FindAssignmentFields {
       withFakeTime(fakeDate) {
         val command = new CopyModuleAssignmentsCommandInternal(module, AcademicYear.parse("16/17")) with CommandTestSupport
@@ -87,7 +87,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def guessSitsLinks() {
+  @Test def guessSitsLinks(): Unit = {
     new Fixture {
       val command = new CopyModuleAssignmentsCommandInternal(module, AcademicYear.parse("13/14")) with CommandTestSupport
       command.assignments = Seq(assignment).asJava
@@ -149,7 +149,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def copyDefaultFields() {
+  def copyDefaultFields(): Unit = {
     new Fixture with FindAssignmentFields {
       val command = new CopyModuleAssignmentsCommandInternal(module, AcademicYear.parse("16/17")) with CommandTestSupport
       command.assignments = Seq(assignment).asJava
@@ -167,7 +167,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def copyFieldValues() {
+  def copyFieldValues(): Unit = {
     new Fixture with FindAssignmentFields {
 
       val heronRant = "Words describing the evil nature of Herons will not count towards the final word count. Herons are scum. Hate them!"

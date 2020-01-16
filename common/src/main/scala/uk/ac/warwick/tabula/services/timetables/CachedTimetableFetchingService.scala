@@ -131,7 +131,7 @@ class CachedStaffAndStudentTimetableFetchingService(delegate: StudentTimetableFe
 class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
   extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with CompleteTimetableFetchingService
 
-@SerialVersionUID(3326840601345l) sealed trait TimetableCacheKey extends Serializable {
+@SerialVersionUID(3326840601345L) sealed trait TimetableCacheKey extends Serializable {
   val id: String
 }
 

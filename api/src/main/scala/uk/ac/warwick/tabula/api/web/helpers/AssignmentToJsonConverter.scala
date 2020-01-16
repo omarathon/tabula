@@ -26,20 +26,12 @@ trait AssignmentToJsonConverter {
       "collectMarks" -> assignment.collectMarks,
       "useMarkPoints" -> assignment.useMarkPoints,
       "markingWorkflow" -> {
-        if (assignment.cm2Assignment)
-          Option(assignment.cm2MarkingWorkflow).map { mw =>
-            Map(
-              "id" -> mw.id,
-              "name" -> mw.name
-            )
-          }.orNull
-        else
-          Option(assignment.markingWorkflow).map { mw =>
-            Map(
-              "id" -> mw.id,
-              "name" -> mw.name
-            )
-          }.orNull
+        Option(assignment.cm2MarkingWorkflow).map { mw =>
+          Map(
+            "id" -> mw.id,
+            "name" -> mw.name
+          )
+        }.orNull
       },
       "feedbackTemplate" -> Option(assignment.feedbackTemplate).map { ft =>
         Map(

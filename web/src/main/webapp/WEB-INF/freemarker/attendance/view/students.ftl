@@ -7,23 +7,23 @@
     <div class="pull-right send-to-sits">
       <#if features.attendanceMonitoringRealTimeReport>
         <#assign introText>
-          <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS e:Vision.
+          <p>When a monitoring point is recorded as ‘Missed (unauthorised)’, this is immediately uploaded to SITS.
             Only unauthorised missed points are uploaded; authorised missed points are not.</p>
 
           <p>If the attendance/fulfilment of the point is subsequently changed to anything other than ‘Missed (unauthorised)’,
-            the missed point is removed from SITS e:Vision.</p>
+            the missed point is removed from SITS.</p>
         </#assign>
         <a href="#"
            id="attendance-monitoring-realtime"
            class="use-introductory<#if showIntro("attendance-monitoring-realtime", "anywhere")> auto</#if>"
            data-hash="${introHash("attendance-monitoring-realtime", "anywhere")}"
-           data-title="Automatic upload of monitoring points to SITS e:Vision"
+           data-title="Automatic upload of monitoring points to SITS"
            data-placement="left"
            data-html="true"
            aria-label="Help"
            data-content="${introText}"><i class="fa fa-question-circle"></i></a>
       <#else>
-        <a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS e:Vision</a>
+        <a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS</a>
       </#if>
     </div>
   </#if>
@@ -37,7 +37,7 @@
   <#if reports?? && monitoringPeriod??>
     <div class="alert alert-info">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
-      Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS e:Vision.
+      Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS.
     </div>
   </#if>
 

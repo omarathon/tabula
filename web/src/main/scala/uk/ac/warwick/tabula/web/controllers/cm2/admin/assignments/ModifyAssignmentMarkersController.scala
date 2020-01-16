@@ -13,9 +13,8 @@ import uk.ac.warwick.tabula.web.Mav
 
 import scala.jdk.CollectionConverters._
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 
   type ListMarkerAllocationsCommand = Appliable[MarkerAllocations] with ListMarkerAllocationsState

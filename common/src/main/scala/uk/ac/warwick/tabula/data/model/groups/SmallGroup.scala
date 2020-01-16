@@ -71,7 +71,7 @@ class SmallGroup
 
   def name: String = Option(linkedDepartmentSmallGroup).map(_.name).getOrElse(_name)
 
-  def name_=(name: String) {
+  def name_=(name: String): Unit = {
     _name = name
   }
 
@@ -86,7 +86,7 @@ class SmallGroup
 
   def events: Seq[SmallGroupEvent] = _events.asScala.toSeq.sorted
 
-  private def events_=(e: Seq[SmallGroupEvent]) {
+  private def events_=(e: Seq[SmallGroupEvent]): Unit = {
     _events.clear()
     _events.addAll(e.asJava)
   }
@@ -125,7 +125,7 @@ class SmallGroup
     }
   }
 
-  def students_=(group: UserGroup) {
+  def students_=(group: UserGroup): Unit = {
     _studentsGroup = group
   }
 
@@ -170,7 +170,7 @@ class SmallGroup
     newGroup
   }
 
-  def postLoad {
+  def postLoad: Unit = {
     ensureSettings
   }
 

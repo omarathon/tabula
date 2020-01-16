@@ -23,7 +23,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 
   listener.afterPropertiesSet
 
-  @Test def maintenanceModeDisabled {
+  @Test def maintenanceModeDisabled: Unit = {
     maintenanceModeService.disable
 
     val event = Event(
@@ -41,7 +41,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
     verify(auditEventService, times(1)).save(event, "error")
   }
 
-  @Test def maintenanceMode {
+  @Test def maintenanceMode: Unit = {
     maintenanceModeService.enable
 
     val event = Event(

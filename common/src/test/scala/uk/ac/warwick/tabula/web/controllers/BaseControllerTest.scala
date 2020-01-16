@@ -14,7 +14,7 @@ import org.hibernate.Session
 
 class BaseControllerTest extends TestBase with Mockito {
 
-  @Test def bindingDefault {
+  @Test def bindingDefault: Unit = {
     val controller = new BaseController {}
 
     val binder = new WebDataBinder(new Object)
@@ -24,7 +24,7 @@ class BaseControllerTest extends TestBase with Mockito {
     binder.getDisallowedFields() should be(Array())
   }
 
-  @Test def bindingWithExistingValidator {
+  @Test def bindingWithExistingValidator: Unit = {
     val controller = new BaseController {}
 
     val binder = new WebDataBinder(new Object)
@@ -40,7 +40,7 @@ class BaseControllerTest extends TestBase with Mockito {
     binder.getDisallowedFields() should be(Array())
   }
 
-  @Test def selfValidates {
+  @Test def selfValidates: Unit = {
     val command = new SelfValidating {
       def validate(errors: Errors): Unit = {}
     }
@@ -73,7 +73,7 @@ class BaseControllerTest extends TestBase with Mockito {
     binder.getDisallowedFields() should be(Array())
   }
 
-  @Test def disallowedFields {
+  @Test def disallowedFields: Unit = {
     val controller = new BaseController {}
     controller.disallowedFields = List("steve", "yes")
 
@@ -83,7 +83,7 @@ class BaseControllerTest extends TestBase with Mockito {
     binder.getDisallowedFields() should be(Array("steve", "yes"))
   }
 
-  @Test def enableFilters {
+  @Test def enableFilters: Unit = {
     val mockSession = mock[Session]
     val controller = new BaseController {
       override protected def session: Session = mockSession

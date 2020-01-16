@@ -18,7 +18,7 @@ class ExceptionResolverTest extends TestBase {
   val resolver = new ExceptionResolver {
     defaultView = "defaultErrorView"
     exceptionHandler = new ExceptionHandler {
-      override def exception(context: ExceptionContext) {
+      override def exception(context: ExceptionContext): Unit = {
         // no special handling.
       }
     }
@@ -37,7 +37,7 @@ class ExceptionResolverTest extends TestBase {
     * a permission denied page.
     */
   @Test
-  def permDeniedNotLoggedIn() {
+  def permDeniedNotLoggedIn(): Unit = {
     withUser(null) {
       val requestInfo = RequestInfo.fromThread.get
       val user = requestInfo.user
@@ -53,7 +53,7 @@ class ExceptionResolverTest extends TestBase {
     * a special view but in this test it'll fall back to the default error view.
     */
   @Test
-  def permDeniedLoggedIn() {
+  def permDeniedLoggedIn(): Unit = {
     withUser("cusebr") {
       val requestInfo = RequestInfo.fromThread.get
       val user = requestInfo.user
@@ -64,7 +64,7 @@ class ExceptionResolverTest extends TestBase {
   }
 
   @Test
-  def notRenderingStacktraceIfFeatureDisabled() {
+  def notRenderingStacktraceIfFeatureDisabled(): Unit = {
     resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = false
     withUser("cusebr") {
@@ -82,7 +82,7 @@ class ExceptionResolverTest extends TestBase {
   }
 
   @Test
-  def renderingStacktraceIfFeatureEnabled() {
+  def renderingStacktraceIfFeatureEnabled(): Unit = {
     resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = true
     withUser("cusebr") {
@@ -100,7 +100,7 @@ class ExceptionResolverTest extends TestBase {
   }
 
   @Test
-  def renderingStacktraceForAdmin() {
+  def renderingStacktraceForAdmin(): Unit = {
     resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = false
     val systemAdminUser = new User("cusebr")
@@ -142,14 +142,14 @@ class ExceptionResolverTest extends TestBase {
     * view name it maps to rather than defaultView.
     */
   @Test
-  def viewMapping() {
+  def viewMapping(): Unit = {
     withUser("cusebr") {
       val modelAndView = resolver.doResolve(new ItemNotFoundException(), None)
       modelAndView.viewName should be("could-not-find")
     }
   }
 
-  @Test def callInterceptors() {
+  @Test def callInterceptors(): Unit = {
     var handled = 0
 
     resolver.userInterceptor = new CurrentUserInterceptor {

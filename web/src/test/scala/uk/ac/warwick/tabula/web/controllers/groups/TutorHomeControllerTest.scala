@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 class TutorHomeControllerTest extends TestBase {
 
-  @Test def controllerShowsYourGroups() {
+  @Test def controllerShowsYourGroups(): Unit = {
     val command = new Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]] {
       def apply() = Map()
     }

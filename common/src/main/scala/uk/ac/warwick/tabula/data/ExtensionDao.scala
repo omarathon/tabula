@@ -20,7 +20,7 @@ trait AutowiringExtensionDaoComponent extends ExtensionDaoComponent {
 trait ExtensionDao {
   def getExtensionById(id: String): Option[Extension]
 
-  def saveOrUpdate(extension: Extension)
+  def saveOrUpdate(extension: Extension): Unit
 
   def countExtensions(assignment: Assignment): Int
 

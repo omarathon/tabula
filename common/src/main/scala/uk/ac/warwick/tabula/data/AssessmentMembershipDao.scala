@@ -39,15 +39,15 @@ trait AssessmentMembershipDao {
 
   def save(assignment: AssessmentComponent): AssessmentComponent
 
-  def save(group: UpstreamAssessmentGroup)
+  def save(group: UpstreamAssessmentGroup): Unit
 
-  def save(member: UpstreamAssessmentGroupMember)
+  def save(member: UpstreamAssessmentGroupMember): Unit
 
   def delete(group: AssessmentGroup): Unit
 
   def delete(assessmentComponent: AssessmentComponent): Unit
 
-  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup)
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit
 
   def getAssessmentGroup(id: String): Option[AssessmentGroup]
 
@@ -149,7 +149,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           scd.statusOnCourse.code not like 'P%' and
           ${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
           ((a.resitAssessment = true and a.resitAssessment = uagms.resitExpected) or  a.resitAssessment = false) and
-          a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
+          a.deleted = false and a._hiddenFromStudents = false""")
         .setString("universityId", user.getWarwickId)
 
     academicYear.foreach { year => query.setParameter("academicYear", year) }
@@ -240,20 +240,19 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
   def getUpstreamAssessmentGroup(id: String): Option[UpstreamAssessmentGroup] = getById[UpstreamAssessmentGroup](id)
 
-  def delete(group: AssessmentGroup) {
+  def delete(group: AssessmentGroup): Unit = {
     if (group.assignment != null) group.assignment.assessmentGroups.remove(group)
-    if (group.exam != null) group.exam.assessmentGroups.remove(group)
     if (group.smallGroupSet != null) group.smallGroupSet.assessmentGroups.remove(group)
     session.delete(group)
     session.flush()
   }
 
-  def delete(assessmentComponent: AssessmentComponent) {
+  def delete(assessmentComponent: AssessmentComponent): Unit = {
     session.delete(assessmentComponent)
     session.flush()
   }
 
-  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup) {
+  def delete(upstreamAssessmentGroup: UpstreamAssessmentGroup): Unit = {
     session.delete(upstreamAssessmentGroup)
     session.flush()
   }

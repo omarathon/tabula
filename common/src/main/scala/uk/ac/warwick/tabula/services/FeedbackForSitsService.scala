@@ -20,7 +20,7 @@ case class ValidateAndPopulateFeedbackResult(
 )
 
 trait FeedbackForSitsService {
-  def saveOrUpdate(feedbackForSits: FeedbackForSits)
+  def saveOrUpdate(feedbackForSits: FeedbackForSits): Unit
 
   def feedbackToLoad: Seq[FeedbackForSits]
 
@@ -60,7 +60,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
     feedbackForSitsDao.getByFeedbacks(feedbacks)
 
   def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = transactional() {
-    val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), feedback.assessment, gradeGenerator)
+    val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), feedback.assignment, gradeGenerator)
     if (validatedFeedback.valid.nonEmpty || feedback.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
       val feedbackForSits = getByFeedback(feedback).getOrElse {
         // create a new object for this feedback in the queue

@@ -21,7 +21,7 @@ class DismissNotificationCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def dismissal() {
+  def dismissal(): Unit = {
     val cmd = new DismissNotificationCommandInternal(notifications, dismiss = true, recipient) with CommandTestSupport
     cmd.applyInternal()
     notifications.foreach(n =>

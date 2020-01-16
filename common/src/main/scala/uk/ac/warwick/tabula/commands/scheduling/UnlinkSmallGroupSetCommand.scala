@@ -59,7 +59,7 @@ trait UnlinkSmallGroupSetDescription extends Describable[Map[Department, Seq[Sma
 
   }
 
-  override def describeResult(d: Description, result: Map[Department, Seq[SmallGroupSet]]) {
+  override def describeResult(d: Description, result: Map[Department, Seq[SmallGroupSet]]): Unit = {
     d.property("updatedSets" -> result.map { case (dept, sets) => dept.code -> sets.map(_.id) })
   }
 }

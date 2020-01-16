@@ -96,16 +96,16 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
       this.marksCode != other.marksCode ||
       this.weighting != other.weighting
 
-  override def preSave(newRecord: Boolean) {
+  override def preSave(newRecord: Boolean): Unit = {
     ensureNotNull("name", name)
     ensureNotNull("moduleCode", moduleCode)
   }
 
-  private def ensureNotNull(name: String, value: Any) {
+  private def ensureNotNull(name: String, value: Any): Unit = {
     if (value == null) throw new IllegalStateException("null " + name + " not allowed")
   }
 
-  def copyFrom(other: AssessmentComponent) {
+  def copyFrom(other: AssessmentComponent): Unit = {
     moduleCode = other.moduleCode
     assessmentGroup = other.assessmentGroup
     sequence = other.sequence

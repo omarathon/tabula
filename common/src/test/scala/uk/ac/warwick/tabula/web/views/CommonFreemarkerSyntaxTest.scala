@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters._
   */
 class CommonFreemarkerSyntaxTest extends TestBase with Logging {
   @Test
-  def parseAll() {
+  def parseAll(): Unit = {
     val resolver = new PathMatchingResourcePatternResolver
     val resources = resolver.getResources("/WEB-INF/freemarker/**/*.ftl")
     val conf = newFreemarkerConfiguration()
@@ -51,10 +51,8 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
       "multiple_upload_help.ftl",
       "sysadmin/jobs/job-status-fragment.ftl",
       "cm2/admin/assignments/feedbackreport/job-status-fragment.ftl",
-      "coursework/admin/assignments/feedbackreport/job-status-fragment.ftl",
       "groups/admin/groups/import-spreadsheet/job-status-fragment.ftl",
       "cm2/submit/formfields/",
-      "coursework/submit/formfields/"
     )
 
     val badPaths: Seq[Path] = resources.toSeq.flatMap { resource =>

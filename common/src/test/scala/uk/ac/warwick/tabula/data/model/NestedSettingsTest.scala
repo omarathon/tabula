@@ -16,7 +16,7 @@ class NestedSettingsTest extends TestBase {
     )
   }
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     new TestSettingsMap with TestValues {
       val nested: NestedSettings = nestedSettings("int")
       nested.IntSetting("nested", 5).value should be(10)

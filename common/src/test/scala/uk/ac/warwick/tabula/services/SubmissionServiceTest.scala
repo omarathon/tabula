@@ -11,12 +11,12 @@ class SubmissionServiceTest extends PersistenceTestBase {
   val assessmentService = new AssessmentServiceImpl
   val submissionService = new SubmissionServiceImpl
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     submissionService.sessionFactory = sessionFactory
   }
 
   @Transactional
-  @Test def submissionsBetweenDates() {
+  @Test def submissionsBetweenDates(): Unit = {
     val universityId = "1234"
 
     val startDate = new DateTime(2018, 3, 1, 0, 0, 0)

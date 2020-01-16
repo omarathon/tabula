@@ -21,7 +21,6 @@ class ReleaseToMarkerNotificationHelperTest extends TestBase with Mockito {
     cm2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
     dept = Fixtures.department("in")
     assignment = Fixtures.assignment("demo")
-    assignment.cm2Assignment = true
   }
 
   val stu1: User = Fixtures.user("1111111", "1111111")

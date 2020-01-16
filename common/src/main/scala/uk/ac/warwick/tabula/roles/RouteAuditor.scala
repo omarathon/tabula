@@ -41,8 +41,7 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 
     // Can read Coursework info for any student on this Route
     Submission.Read,
-    AssignmentFeedback.Read,
-    ExamFeedback.Read,
+    Feedback.Read,
     Extension.Read,
 
     Profiles.Read.ModuleRegistration.Core,

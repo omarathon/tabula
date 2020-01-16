@@ -39,7 +39,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
   var feedbackForSitsService: FeedbackForSitsService = Wire[FeedbackForSitsService]
   var memberNoteService: MemberNoteService = Wire[MemberNoteService]
 
-  def applyInternal() {
+  def applyInternal(): Unit = {
     benchmarkTask("setupDepartmentAndModules") {
       setupDepartmentAndModules()
     }
@@ -97,7 +97,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
     session.save(upstreamAssessmentGroup)
   }
 
-  private def setupDepartmentAndModules() {
+  private def setupDepartmentAndModules(): Unit = {
     // Blitz members
     transactional() {
       sessionWithoutFreshFilters.newUpdateQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
@@ -144,7 +144,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
           session.delete(staff)
         }
 
-        def invalidateAndDeletePermissions[A <: PermissionsTarget : ClassTag](scope: A) {
+        def invalidateAndDeletePermissions[A <: PermissionsTarget : ClassTag](scope: A): Unit = {
           // Invalidate any permissions or roles set
           val usersToInvalidate =
             permissionsService.getAllGrantedRolesFor[A](scope).toSet.flatMap { role: GrantedRole[A] => role.users.users } ++
@@ -192,11 +192,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
         for (feedbackTemplate <- dept.feedbackTemplates.asScala) session.delete(feedbackTemplate)
         dept.feedbackTemplates.clear()
-
-        for (markingWorkflow <- dept.markingWorkflows) {
-          dept.removeMarkingWorkflow(markingWorkflow)
-          session.delete(markingWorkflow)
-        }
 
         for (cm2MarkingWorkflow <- dept.cm2MarkingWorkflows) {
           val markersForStage = cm2MarkingWorkflow.stageMarkers.asScala

@@ -32,9 +32,9 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
   }
 
   // don't care about handling this, but required for interface
-  override def headerFooter(text: String, isHeader: Boolean, tagName: String) {}
+  override def headerFooter(text: String, isHeader: Boolean, tagName: String): Unit = {}
 
-  override def startRow(row: Int) {
+  override def startRow(row: Int): Unit = {
     logger.debug("startRow: " + row.toString)
 
     isFirstRow = row == 0
@@ -42,7 +42,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
     foundStudentInRow = false
   }
 
-  override def cell(cellReference: String, formattedValue: String, comment: XSSFComment) {
+  override def cell(cellReference: String, formattedValue: String, comment: XSSFComment): Unit = {
     val col = new CellReference(cellReference).getCol
     if (isFirstRow) columnMap(col) = formattedValue
     else if (columnMap.asJava.containsKey(col)) {
@@ -62,7 +62,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
     }
   }
 
-  override def endRow(row: Int) {
+  override def endRow(row: Int): Unit = {
     if (!isFirstRow && foundStudentInRow) allocateStudentItems.add(currentAllocateStudentItem)
   }
 }

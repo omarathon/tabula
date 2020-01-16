@@ -31,7 +31,7 @@ abstract class FeedbackTemplateCommand(val department: Department)
     d.department(department)
   }
 
-  override def describeResult(d: Description, templates: Seq[FeedbackTemplate]) {
+  override def describeResult(d: Description, templates: Seq[FeedbackTemplate]): Unit = {
     d.department(department)
       .feedbackTemplates(templates)
       .fileAttachments(templates.map(_.attachment))

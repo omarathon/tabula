@@ -54,7 +54,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
   def department: Department = adminDepartment
 
   @deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-  def department_=(d: Department) {
+  def department_=(d: Department): Unit = {
     adminDepartment = d
   }
 
@@ -74,10 +74,6 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
   @BatchSize(size = 100)
   @OrderBy("closeDate")
   var assignments: JList[Assignment] = JArrayList()
-
-  @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-  @BatchSize(size = 100)
-  var exams: JList[Exam] = JArrayList()
 
   def hasLiveAssignments: Boolean = Option(assignments) match {
     case Some(a) => a.asScala.exists(_.isAlive)

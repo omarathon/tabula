@@ -2,20 +2,20 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 /**
-  * Sent when a moderator rejects the markers feedback
+  * Keep this so that activity streams containing this notification render properly
   */
 
 object ModeratorRejectedNotification {
   val templateLocation = "/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl"
 }
 
+@Deprecated
 @Entity
 @Proxy
 @DiscriminatorValue(value = "ModeratorRejected")
@@ -28,12 +28,7 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 
   def parentFeedback: Feedback = markerFeedback.feedback
 
-  def rejectedFeedback: MarkerFeedback = parentFeedback.firstMarkerFeedback
-
-  def assignment: Assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {
-    case assignmentFeedback: AssignmentFeedback => assignmentFeedback.assignment
-    case _ => throw new IllegalArgumentException("Exam feedback used in Assignment notification")
-  }
+  def assignment: Assignment = parentFeedback.assignment
 
   def verb = "Released"
 
@@ -45,15 +40,14 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
       "moderatorName" -> agent.getFullName,
       "studentId" -> parentFeedback.studentIdentifier,
       "assignment" -> assignment,
-      "rejectionComments" -> markerFeedback.rejectionComments,
+      "rejectionComments" -> "",
       "adjustedMark" -> markerFeedback.mark,
       "adjustedGrade" -> markerFeedback.grade
     ))
 
-  def url: String = Routes.admin.assignment.markerFeedback(assignment, recipients.head)
+  def url: String = Routes.admin.assignment.submissionsandfeedback.summary(assignment)
 
   def urlTitle = "update the feedback and submit it for moderation again"
 
-  // the recepient is the first marker
-  def recipients: Seq[User] = rejectedFeedback.getMarkerUser.toSeq
+  def recipients: Seq[User] = Seq()
 }

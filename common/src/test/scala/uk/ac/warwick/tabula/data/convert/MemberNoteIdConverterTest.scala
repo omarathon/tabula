@@ -11,19 +11,19 @@ class MemberNoteIdConverterTest extends TestBase with Mockito {
   var service: MemberNoteService = mock[MemberNoteService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val memberNote = new MemberNote
     memberNote.id = "12345"
     service.getNoteById("12345") returns (Some(memberNote))
     converter.convertRight("12345") should be(memberNote)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getNoteById("123") returns (None)
     converter.convertRight("123") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val memberNote = new MemberNote
     memberNote.id = "54321"
     converter.convertLeft(memberNote) should be("54321")

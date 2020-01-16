@@ -31,14 +31,14 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     val command = new AddCustomRoleOverrideCommandInternal(department, customRole) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new CommandFixture {
       command.department should be(department)
       command.customRoleDefinition should be(customRole)
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Allow
@@ -52,7 +52,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val d: Department = department
 
@@ -68,7 +68,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     new Fixture {
       val command = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
         override val department = null
@@ -89,7 +89,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Deny
@@ -101,7 +101,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoPermission {
+  @Test def validateNoPermission: Unit = {
     new ValidationFixture {
       command.overrideType = RoleOverride.Allow
 
@@ -115,7 +115,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateExistingOverride {
+  @Test def validateExistingOverride: Unit = {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Deny
@@ -136,7 +136,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyAllowed {
+  @Test def validateAlreadyAllowed: Unit = {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Allow
@@ -151,7 +151,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyNotAllowed {
+  @Test def validateAlreadyNotAllowed: Unit = {
     new ValidationFixture {
       command.permission = Permissions.ImportSystemData
       command.overrideType = RoleOverride.Deny
@@ -166,7 +166,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description {
+  @Test def description: Unit = {
     new Fixture {
       val dept: Department = department
 

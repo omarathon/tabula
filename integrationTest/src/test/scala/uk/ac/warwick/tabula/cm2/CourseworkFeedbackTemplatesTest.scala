@@ -31,7 +31,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
     var currCnt = currentCount()
 
-    def uploadNewTemplate(file: String) {
+    def uploadNewTemplate(file: String): Unit = {
       val currentCount =
         if (id("feedback-template-list").findElement.isEmpty) 0
         else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size

@@ -21,7 +21,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 
   def verb: String = "Release"
 
-  override def onPreSave(newRecord: Boolean) {
+  override def onPreSave(newRecord: Boolean): Unit = {
     if (entities.isEmpty) {
       throw new IllegalArgumentException("Attempted to create a ReleaseSmallGroupSetsNotification with no SmallGroups!")
     }
@@ -31,7 +31,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 
   def isStudent: Boolean = getBooleanSetting("isStudent", default = false)
 
-  def isStudent_=(b: Boolean) {
+  def isStudent_=(b: Boolean): Unit = {
     settings += ("isStudent" -> b)
   }
 

@@ -48,7 +48,7 @@ trait SortModulesCommandGrouping {
   }
 
   // Sort all the lists of modules by code.
-  def sort() {
+  def sort(): Unit = {
     // Because sortBy is not an in-place sort, we have to replace the lists entirely.
     // Alternative is Collections.sort or math.Sorting but these would be more code.
     for ((dept, modules) <- mapping.asScala) {

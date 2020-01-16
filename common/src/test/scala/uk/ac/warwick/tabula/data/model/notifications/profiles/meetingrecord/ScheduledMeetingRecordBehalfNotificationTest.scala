@@ -24,7 +24,7 @@ class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
   thirdParty.firstName = "Third"
   thirdParty.lastName = "Party"
 
-  @Test def title() {
+  @Test def title(): Unit = {
     val meeting = new ScheduledMeetingRecord(thirdParty, Seq(relationship))
 
     val notification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), thirdParty.asSsoUser, meeting)

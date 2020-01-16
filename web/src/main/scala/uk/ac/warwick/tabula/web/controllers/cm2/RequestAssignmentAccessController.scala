@@ -11,9 +11,8 @@ import uk.ac.warwick.tabula.web.Mav
 
 import scala.collection.mutable
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/request-access"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/request-access"))
 class RequestAssignmentAccessController extends CourseworkController {
 
   hideDeletedItems

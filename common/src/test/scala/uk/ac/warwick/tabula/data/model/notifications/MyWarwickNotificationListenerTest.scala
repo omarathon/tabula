@@ -34,14 +34,11 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
   }
 
   trait Fixture extends CurrentAcademicYear {
-    val cm2Prefix = "cm2"
-    Routes.cm2._cm2Prefix = Some(cm2Prefix)
-
     val user = new User("cusxad")
     user.setFoundUser(true)
 
     val currentUser = new CurrentUser(user, user)
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
 
     val module: Module = Fixtures.module(code = "ls101")
     val assignment: Assignment = Fixtures.assignment("test")
@@ -55,7 +52,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
     assignment.feedbacks.add(feedback)
   }
 
-  @Test def alertNotifcation() {
+  @Test def alertNotifcation(): Unit = {
     new Fixture {
       val fpn = new FeedbackPublishedNotification
       val rn = new RecipientNotificationInfo(fpn, user)
@@ -67,7 +64,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
   }
 
 
-  @Test def activitiyNotifcation() {
+  @Test def activitiyNotifcation(): Unit = {
     new Fixture {
       val sfan = new Cm2StudentFeedbackAdjustmentNotification
       val rn = new RecipientNotificationInfo(sfan, user)
@@ -78,7 +75,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def noDupes() {
+  @Test def noDupes(): Unit = {
     new Fixture {
       val notification = new SubmissionDueGeneralNotification
 

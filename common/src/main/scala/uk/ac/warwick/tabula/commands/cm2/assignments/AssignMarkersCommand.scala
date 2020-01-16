@@ -161,8 +161,8 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 trait ValidateConcurrentStages {
   self: SelfValidating =>
 
-  def validateConcurrentStages(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors) {
-    val noDupesAllowed = allocationMap.filterKeys(_.stageAllocation)
+  def validateConcurrentStages(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
+    val noDupesAllowed = allocationMap.view.filterKeys(_.stageAllocation)
     val allocations = noDupesAllowed.values.toSeq
 
     val markers = allocations.flatMap(_.keys).toSet
@@ -225,7 +225,7 @@ trait ValidateMarkerChanges extends FetchMarkerAllocations {
     // check if student  with finalised feedback has been moved to another marker for a particular workflow stage
     changedMarkerAllocationsWithFinalisedFeedback
       .groupBy { case (stage, marker, _) => (stage, marker) }
-      .mapValues(_.map({ case (_, _, student) => student }))
+      .view.mapValues(_.map({ case (_, _, student) => student }))
       .foreach {
         case ((stage, marker), students) =>
           val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))
@@ -266,7 +266,7 @@ trait ValidateMarkerChanges extends FetchMarkerAllocations {
     // check if student  with finalised feedback has been unallocated marker
     unallocatedMarkerWithFinalisedFeedback
       .groupBy { case (stage, marker, _) => (stage, marker) }
-      .mapValues(_.map({ case (_, _, student) => student }))
+      .view.mapValues(_.map({ case (_, _, student) => student }))
       .foreach {
         case ((stage, marker), students) =>
           val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))

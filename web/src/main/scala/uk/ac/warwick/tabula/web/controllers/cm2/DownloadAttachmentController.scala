@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
+
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}"))
 class DownloadAttachmentController extends CourseworkController {
 
   var submissionService: SubmissionService = Wire.auto[SubmissionService]
@@ -31,9 +31,9 @@ class DownloadAttachmentController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
+
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/{student}"))
 class DownloadAttachmentForStudentController extends CourseworkController {
 
   var submissionService: SubmissionService = Wire[SubmissionService]

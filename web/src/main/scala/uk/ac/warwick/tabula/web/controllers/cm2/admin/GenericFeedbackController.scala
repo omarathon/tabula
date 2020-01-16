@@ -12,9 +12,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/generic"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/generic"))
 class GenericFeedbackController extends CourseworkController {
 
   @ModelAttribute("command")

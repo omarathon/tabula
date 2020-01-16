@@ -167,7 +167,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
   }
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     dao.sessionFactory = sessionFactory
     assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
     assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach(_.clear())
@@ -298,7 +298,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 
   /** TAB-1824 if uniid appears twice in upstream group users, SQL sadness can result. */
-  @Test def duplicateImportedUser() {
+  @Test def duplicateImportedUser(): Unit = {
     transactional { _ =>
       new Fixture {
         // Add user again

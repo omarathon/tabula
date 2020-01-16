@@ -12,14 +12,14 @@ class JobTest extends TestBase with Mockito with JobTestHelp {
 
   override def createJobs: Array[Job] = Array[Job](testingJob)
 
-  @Before def setup() {
+  @Before def setup(): Unit = {
     dao.clear
     val realUser = new User("real")
     val fakeUser = new User("apparent")
     currentUser = new CurrentUser(realUser, fakeUser)
   }
 
-  @Test def testingJobTest() {
+  @Test def testingJobTest(): Unit = {
     Transactions.disable {
       dao.findOutstandingInstances(10).size should be(0)
       val id = service.add(Some(currentUser), TestingJob("Magic")).id

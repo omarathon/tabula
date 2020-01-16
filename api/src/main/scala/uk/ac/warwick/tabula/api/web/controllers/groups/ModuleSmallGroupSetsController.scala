@@ -115,7 +115,7 @@ trait SmallGroupSetPropertiesRequest[A <: ModifySmallGroupSetCommandState] exten
   @BeanProperty var collectAttendance: JBoolean = true
   @BeanProperty var allowSelfGroupSwitching: JBoolean = true
 
-  override def copyTo(state: A, errors: Errors) {
+  override def copyTo(state: A, errors: Errors): Unit = {
     Option(name).foreach(state.name = _)
     Option(format).foreach(state.format = _)
     Option(allocationMethod).foreach(state.allocationMethod = _)

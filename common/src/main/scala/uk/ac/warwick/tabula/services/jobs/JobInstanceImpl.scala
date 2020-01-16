@@ -74,7 +74,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
   override def json: JsonMap = _json
 
-  def json_=(map: JsonMap) {
+  def json_=(map: JsonMap): Unit = {
     _json = map
     if (jsonMapper != null) {
       data = jsonMapper.writeValueAsString(json)
@@ -85,11 +85,11 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
   override def propsMap: JsonMap = json
 
-  override def propsMap_=(map: JsonMap) {
+  override def propsMap_=(map: JsonMap): Unit = {
     json = map
   }
 
-  override def postLoad {
+  override def postLoad: Unit = {
     val map = jsonMapper.readValue(data, classOf[Map[String, Any]])
     json = map
 

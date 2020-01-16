@@ -41,7 +41,7 @@ abstract class EditAttendanceNoteCommand(
     absenceType = attendanceNote.absenceType
   }
 
-  def onBind(result: BindingResult) {
+  def onBind(result: BindingResult): Unit = {
     result.pushNestedPath("file")
     file.onBind(result)
     result.popNestedPath()

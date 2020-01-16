@@ -14,7 +14,7 @@ trait AutowiringUserGroupDaoComponent extends UserGroupDaoComponent {
 }
 
 trait UserGroupDao {
-  def saveOrUpdate(userGroup: UserGroup)
+  def saveOrUpdate(userGroup: UserGroup): Unit
 }
 
 @Repository

@@ -7,7 +7,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 class AllowedFieldsBindingTest extends TestBase {
 
   @Test
-  def annotatedClasses() {
+  def annotatedClasses(): Unit = {
     val cmd = new TestCommand
     val binder = new CustomDataBinder(cmd, "command") with AllowedFieldsBinding
 

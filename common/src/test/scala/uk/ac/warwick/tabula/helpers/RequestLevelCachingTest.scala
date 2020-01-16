@@ -7,7 +7,7 @@ class RequestLevelCachingTest extends TestBase {
 
   val cache = new RequestLevelCaching[String, String] {}
 
-  @Test def withoutRequest {
+  @Test def withoutRequest: Unit = {
     var timesRun = 0
 
     def expensiveOp = {
@@ -25,10 +25,10 @@ class RequestLevelCachingTest extends TestBase {
     } should be("solution")
     timesRun should be(2)
 
-    cache.cache should be('empty)
+    cache.cache should be(Symbol("empty"))
   }
 
-  @Test def withRequest {
+  @Test def withRequest: Unit = {
     var timesRun = 0
 
     def expensiveOp() = {
@@ -66,7 +66,7 @@ class RequestLevelCachingTest extends TestBase {
     }
 
     // Out of request, cache should be empty again
-    cache.cache should be('empty)
+    cache.cache should be(Symbol("empty"))
 
     cache.cachedBy("key") {
       expensiveOp

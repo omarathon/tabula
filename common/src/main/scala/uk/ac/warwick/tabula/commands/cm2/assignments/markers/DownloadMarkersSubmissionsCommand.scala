@@ -24,7 +24,6 @@ object DownloadMarkersSubmissionsCommand {
       with ComposableCommand[RenderableFile]
       with AutowiringZipServiceComponent
       with AutowiringAssessmentServiceComponent
-      with AutowiringStateServiceComponent
       with DownloadMarkersSubmissionsDescription
       with DownloadMarkersSubmissionsCommandState
       with DownloadMarkersSubmissionsPermissions
@@ -34,7 +33,7 @@ object DownloadMarkersSubmissionsCommand {
 class DownloadMarkersSubmissionsCommand(val assignment: Assignment, val marker: User, val submitter: CurrentUser)
   extends CommandInternal[RenderableFile] with DownloadMarkersSubmissionsCommandState with CanProxy {
 
-  self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
+  self: ZipServiceComponent with AssessmentServiceComponent =>
 
   override def applyInternal(): RenderableFile = {
     Await.result(zipService.getSomeSubmissionsZip(submissions), Duration.Inf)

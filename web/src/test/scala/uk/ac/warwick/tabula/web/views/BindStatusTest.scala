@@ -17,7 +17,7 @@ class MyCommand {
 
 class BindStatusTest extends TestBase {
 
-  @Test def bindList {
+  @Test def bindList: Unit = {
     val ctx = new GenericWebApplicationContext
 
     val req = new MockHttpServletRequest

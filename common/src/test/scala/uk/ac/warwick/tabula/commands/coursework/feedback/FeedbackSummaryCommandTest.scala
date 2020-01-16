@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
+import uk.ac.warwick.tabula.commands.cm2.feedback.{FeedbackSummaryCommandInternal, FeedbackSummaryState}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{FeedbackService, FeedbackServiceComponent}
-import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.userlookup.User
 
 class FeedbackSummaryCommandTest extends TestBase with Mockito {
 
-  trait CommandTestSupport extends FeedbackServiceComponent with FeedbackSummaryCommandState {
+  trait CommandTestSupport extends FeedbackServiceComponent with FeedbackSummaryState {
     val feedbackService: FeedbackService = mock[FeedbackService]
   }
 
@@ -16,25 +17,25 @@ class FeedbackSummaryCommandTest extends TestBase with Mockito {
     val student = new User {
       setUserId("student1")
     }
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
 
     val command = new FeedbackSummaryCommandInternal(assignment, student) with CommandTestSupport
   }
 
   @Test
-  def retunsNothingWhenNoUserId() {
+  def retunsNothingWhenNoUserId(): Unit = {
     new Fixture {
       student.setUserId(null)
       command.applyInternal()
-      verify(command.feedbackService, times(1)).getAssignmentFeedbackByUsercode(assignment, null)
+      verify(command.feedbackService, times(1)).getFeedbackByUsercode(assignment, null)
     }
   }
 
   @Test
-  def callsFeedbackServiceOnce() {
+  def callsFeedbackServiceOnce(): Unit = {
     new Fixture {
       command.applyInternal()
-      verify(command.feedbackService, times(1)).getAssignmentFeedbackByUsercode(assignment, "student1")
+      verify(command.feedbackService, times(1)).getFeedbackByUsercode(assignment, "student1")
     }
   }
 

@@ -47,13 +47,13 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
     And("I can see the dropdowns to filter by gender, year, and course")
 
     // the select options are determined by the test data we created when we set up the users
-    allocatePage.findFilterDropdown("fGender") should be('defined)
+    allocatePage.findFilterDropdown("fGender") should be(Symbol("defined"))
     allocatePage.findFilterDropdown("fGender").get.getOptions.size() should be(3) //M,F, All
 
-    allocatePage.findFilterDropdown("fYear") should be('defined)
+    allocatePage.findFilterDropdown("fYear") should be(Symbol("defined"))
     allocatePage.findFilterDropdown("fYear").get.getOptions.size() should be(4) //1,2,3, All
 
-    allocatePage.findFilterDropdown("fRoute") should be('defined)
+    allocatePage.findFilterDropdown("fRoute") should be(Symbol("defined"))
     allocatePage.findFilterDropdown("fRoute").get.getOptions.size() should be(3) //xx123,xx456 All
 
     When("I select the 'Female' option")

@@ -19,7 +19,7 @@ class XmlReturnValueHandlerTest extends TestBase {
     </xml>
   }
 
-  def returnsUnit() {}
+  def returnsUnit(): Unit = {}
 
   def returnsAny: Any = null
 
@@ -27,13 +27,13 @@ class XmlReturnValueHandlerTest extends TestBase {
   val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), -1)
   val anyMethod = new MethodParameter(getClass.getMethod("returnsAny"), -1)
 
-  @Test def supports() {
+  @Test def supports(): Unit = {
     handler.supportsReturnType(xmlMethod) should be(true)
     handler.supportsReturnType(unitMethod) should be(false)
     handler.supportsReturnType(anyMethod) should be(false)
   }
 
-  @Test def handle() {
+  @Test def handle(): Unit = {
     val mavContainer = new ModelAndViewContainer
     val req = new ServletWebRequest(new MockHttpServletRequest)
     handler.handleReturnValue(returnsXml, xmlMethod, mavContainer, req)

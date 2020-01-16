@@ -51,7 +51,7 @@ trait StudentCourseworkFullScreenCommandPermissions extends RequiresPermissionsC
     memberOrUser.asMember.foreach { member =>
       p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
       p.PermissionCheck(Permissions.Submission.Read, member)
-      p.PermissionCheck(Permissions.AssignmentFeedback.Read, member)
+      p.PermissionCheck(Permissions.Feedback.Read, member)
       p.PermissionCheck(Permissions.Extension.Read, member)
     }
   }

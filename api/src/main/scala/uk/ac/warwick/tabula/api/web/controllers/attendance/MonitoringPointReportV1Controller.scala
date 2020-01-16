@@ -69,7 +69,7 @@ class CreateMonitoringPointReportV1Request extends JsonApiRequest[CreateMonitori
   @BeanProperty var academicYear: AcademicYear = _
   @BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
 
-  override def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors) {
+  override def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors): Unit = {
     state.academicYear = academicYear
     state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
       profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {

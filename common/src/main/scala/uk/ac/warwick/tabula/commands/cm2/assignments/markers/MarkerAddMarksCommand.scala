@@ -72,7 +72,7 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
   self: MarkerAddMarksState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
     }

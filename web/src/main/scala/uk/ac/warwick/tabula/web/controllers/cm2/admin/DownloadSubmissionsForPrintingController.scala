@@ -45,9 +45,8 @@ trait DownloadSubmissionsForPrintingController extends CourseworkController with
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions.pdf"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/submissions.pdf"))
 class DownloadAdminSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
 
   @ModelAttribute("command")
@@ -56,9 +55,8 @@ class DownloadAdminSubmissionsForPrintingController extends DownloadSubmissionsF
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/submissions.pdf"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/marker/{marker}/submissions.pdf"))
 class DownloadMarkerSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
 
   @ModelAttribute("command")

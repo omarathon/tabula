@@ -109,8 +109,6 @@ abstract class AbstractCopyAssignmentsCommandInternal
     newAssignment.turnitinExcludeBibliography = assignment.turnitinExcludeBibliography
     newAssignment.turnitinExcludeQuoted = assignment.turnitinExcludeQuoted
     newAssignment.anonymity = assignment._anonymity
-    // all new assignments are now cm2 based
-    newAssignment.cm2Assignment = true
     newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow match {
       // None
       case null => null

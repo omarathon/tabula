@@ -78,7 +78,7 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
       def create() = new FormValue {
         val field = null
 
-        def persist(value: SavedFormValue) {}
+        def persist(value: SavedFormValue): Unit = {}
       }
     }).asInstanceOf[JMap[String, FormValue]]
   }

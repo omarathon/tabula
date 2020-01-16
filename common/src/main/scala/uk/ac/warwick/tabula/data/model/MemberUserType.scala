@@ -10,7 +10,7 @@ object MemberUserType {
 
   case object Staff extends MemberUserType("N", "Staff")
 
-  @deprecated(since = "2019.10.3", message = "Emeritus academics are now just being treated as Staff")
+  @deprecated(message = "Emeritus academics are now just being treated as Staff", since = "2019.10.3")
   case object Emeritus extends MemberUserType("A", "Emeritus Academic")
 
   case object Applicant extends MemberUserType("P", "Applicant")

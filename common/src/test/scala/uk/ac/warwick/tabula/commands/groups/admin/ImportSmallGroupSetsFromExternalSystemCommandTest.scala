@@ -20,7 +20,7 @@ import scala.concurrent.Future
 
 class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mockito {
 
-  @Before def tidyUpContext() {
+  @Before def tidyUpContext(): Unit = {
     // TODO it would be better to find where this context is actually coming from
     SpringConfigurer.applicationContext = null
   }
@@ -186,7 +186,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     )))
   }
 
-  @Test def init() {
+  @Test def init(): Unit = {
     new CommandFixture with FixtureWithSingleSeminarForYear {
       command.canManageDepartment should be (true)
       command.modules should be(Seq(module1, module2))
@@ -196,7 +196,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     }
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture with FixtureWithSingleSeminarForYear {
       val sets: Seq[SmallGroupSet] = command.applyInternal()
 
@@ -272,7 +272,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     command.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns Set.empty
   }
 
-  @Test def deptAdminPermissions() {
+  @Test def deptAdminPermissions(): Unit = {
     new PermissionsFixture with DepartmentalAdministratorPermissions {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -281,7 +281,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     }
   }
 
-  @Test def noPermissions() {
+  @Test def noPermissions(): Unit = {
     new PermissionsFixture with DepartmentalAdministratorPermissions {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -290,7 +290,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     }
   }
 
-  @Test def moduleManagerPermissions() {
+  @Test def moduleManagerPermissions(): Unit = {
     new PermissionsFixture with ModuleManagerPermissions {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -299,7 +299,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     }
   }
 
-  @Test def description() {
+  @Test def description(): Unit = {
     val command = new ImportSmallGroupSetsFromExternalSystemDescription with ImportSmallGroupSetsFromExternalSystemCommandState {
       override val eventName: String = "test"
       val department: Department = Fixtures.department("in")

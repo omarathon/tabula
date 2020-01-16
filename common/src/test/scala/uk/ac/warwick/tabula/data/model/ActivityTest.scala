@@ -17,7 +17,7 @@ class ActivityTest extends TestBase with Mockito {
   Activity.submissionService = submissionService
   Activity.userLookup = userLookup
 
-  @Test def fromEventNotSubmission {
+  @Test def fromEventNotSubmission: Unit = {
     val event = AuditEvent(
       eventId = "event", eventType = "AddAssignment", userId = "cuscav", eventDate = DateTime.now,
       eventStage = "after", data ="""{}"""
@@ -25,10 +25,10 @@ class ActivityTest extends TestBase with Mockito {
     event.related = Seq(event)
     event.parsedData = Some(json.readValue(event.data, classOf[Map[String, Any]]))
 
-    Activity(event) should be('empty)
+    Activity(event) should be(Symbol("empty"))
   }
 
-  @Test def fromSubmission {
+  @Test def fromSubmission: Unit = {
     val submission = Fixtures.submission()
     submissionService.getSubmission("submissionId") returns Some(submission)
 
@@ -39,7 +39,7 @@ class ActivityTest extends TestBase with Mockito {
     event.related = Seq(event)
     event.parsedData = Some(json.readValue(event.data, classOf[Map[String, Any]]))
 
-    Activity(event) should be('defined)
+    Activity(event) should be(Symbol("defined"))
     Activity(event) map { activity =>
       activity.title should be("New submission")
       activity.message should be("")
@@ -49,7 +49,7 @@ class ActivityTest extends TestBase with Mockito {
     }
   }
 
-  @Test def fromSubmissionNotFound {
+  @Test def fromSubmissionNotFound: Unit = {
     submissionService.getSubmission("submissionId") returns None
 
     val event = AuditEvent(
@@ -59,7 +59,7 @@ class ActivityTest extends TestBase with Mockito {
     event.related = Seq(event)
     event.parsedData = Some(json.readValue(event.data, classOf[Map[String, Any]]))
 
-    Activity(event) should be('defined)
+    Activity(event) should be(Symbol("defined"))
     Activity(event) map { activity =>
       activity.title should be("New submission (since deleted)")
       activity.message should be("")

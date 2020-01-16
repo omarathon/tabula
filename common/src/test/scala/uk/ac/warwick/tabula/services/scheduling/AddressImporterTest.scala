@@ -10,7 +10,7 @@ class AddressImporterTest extends TestBase with Mockito {
 
   val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-addresses.sql").build()
 
-  @After def fin() {
+  @After def fin(): Unit = {
     sits.shutdown()
   }
 

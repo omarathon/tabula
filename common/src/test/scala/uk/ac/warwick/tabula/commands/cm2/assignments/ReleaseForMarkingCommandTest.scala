@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 
-import uk.ac.warwick.tabula.data.model.AssignmentFeedback
+import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarker
 import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent}
@@ -14,15 +14,15 @@ class ReleaseForMarkingCommandTest extends TestBase with Mockito {
 
   trait MockCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
     val cm2MarkingWorkflowService: CM2MarkingWorkflowService = mock[CM2MarkingWorkflowService]
-    cm2MarkingWorkflowService.releaseForMarking(any[Seq[AssignmentFeedback]]) answers { f: Any =>
-      val released = f.asInstanceOf[Seq[AssignmentFeedback]]
+    cm2MarkingWorkflowService.releaseForMarking(any[Seq[Feedback]]) answers { f: Any =>
+      val released = f.asInstanceOf[Seq[Feedback]]
       released.foreach(_.outstandingStages.add(SingleMarker))
       released
     }
   }
 
   @Test
-  def cantReleaseIfNoMarkerAssigned() {
+  def cantReleaseIfNoMarkerAssigned(): Unit = {
     withUser("test") {
       val marker = Fixtures.user("1170836", "cuslaj")
       val assignment = newDeepAssignment()
@@ -34,7 +34,7 @@ class ReleaseForMarkingCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testStudentsAlreadyReleased() {
+  def testStudentsAlreadyReleased(): Unit = {
     withUser("test") {
       val marker = Fixtures.user("1170836", "cuslaj")
       val assignment = newDeepAssignment()
@@ -63,7 +63,7 @@ class ReleaseForMarkingCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testCanReleaseIfMarkerIsAssigned() {
+  def testCanReleaseIfMarkerIsAssigned(): Unit = {
     withUser("test") {
       val marker = Fixtures.user("1170836", "cuslaj")
       val assignment = newDeepAssignment()

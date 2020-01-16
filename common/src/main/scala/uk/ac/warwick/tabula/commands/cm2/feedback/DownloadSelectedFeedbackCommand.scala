@@ -21,7 +21,7 @@ import scala.concurrent.duration.Duration
 class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentUser)
   extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
 
-  PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+  PermissionCheck(Permissions.Feedback.Read, assignment)
 
   var assignmentService: AssessmentService = Wire[AssessmentService]
   var zipService: ZipService = Wire[ZipService]
@@ -33,14 +33,14 @@ class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentU
 
   var students: JList[String] = JArrayList()
 
-  var feedbacks: JList[AssignmentFeedback] = _
+  var feedbacks: JList[Feedback] = _
 
   override def applyInternal(): Either[RenderableFile, JobInstance] = {
     if (students.isEmpty) throw new ItemNotFoundException
 
     feedbacks = students.asScala
-      .flatMap(feedbackDao.getAssignmentFeedbackByUsercode(assignment, _))
-      .filter(f => !assignment.hasCM2Workflow || f.isMarkingCompleted)
+      .flatMap(feedbackDao.getFeedbackByUsercode(assignment, _))
+      .filter(f => !assignment.hasWorkflow || f.isMarkingCompleted)
       .asJava
 
     if (feedbacks.asScala.exists(_.assignment != assignment)) {

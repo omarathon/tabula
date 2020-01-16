@@ -17,7 +17,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
     service.assessmentMembershipService = assessmentMembershipService
     val module = new Module
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0123456") // matches a member in Fixtures.assessmentGroup
+    val feedback: Feedback = Fixtures.assignmentFeedback("0123456") // matches a member in Fixtures.assessmentGroup
     feedback.assignment = new Assignment
     feedback.assignment.module = module
     feedback.assignment.module.adminDepartment = Fixtures.department("xx")

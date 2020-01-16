@@ -12,7 +12,7 @@ class GeneratesTimetableIcalFeedTest extends TestBase with Mockito {
   }
 
   @Test
-  def emptyTimetableValidates() {
+  def emptyTimetableValidates(): Unit = {
     val ical = generator.getIcalFeed(Seq(), Fixtures.staff("1234"))
 
     new CalendarOutputter().output(ical, new MockHttpServletResponse().getWriter)

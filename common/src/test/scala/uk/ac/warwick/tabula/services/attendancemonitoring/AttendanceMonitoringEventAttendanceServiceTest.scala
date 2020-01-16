@@ -81,7 +81,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 
   @Test
-  def updatesCheckpoint() {
+  def updatesCheckpoint(): Unit = {
     new Fixture {
       service.getCheckpoints(Seq(attendance)).size should be(1)
       service.updateCheckpoints(Seq(attendance))
@@ -90,7 +90,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def updatesCheckpointQuantityMoreThanOne() {
+  def updatesCheckpointQuantityMoreThanOne(): Unit = {
     new Fixture {
       val otherAttendance = new SmallGroupEventAttendance
       otherAttendance.occurrence = new SmallGroupEventOccurrence
@@ -112,7 +112,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def updatesCheckpointSpecificModule() {
+  def updatesCheckpointSpecificModule(): Unit = {
     new Fixture {
       smallGroupPoint.smallGroupEventModules = Seq(module1)
       groupSet.module = module1
@@ -125,7 +125,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notAttended() {
+  def notAttended(): Unit = {
     new Fixture {
       attendance.state = AttendanceState.MissedAuthorised
       service.getCheckpoints(Seq(attendance)).size should be(0)
@@ -133,7 +133,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notAMember() {
+  def notAMember(): Unit = {
     new Fixture {
       val nonMember = "notamember"
       attendance.universityId = nonMember
@@ -143,7 +143,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def noPoints() {
+  def noPoints(): Unit = {
     new Fixture {
       service.attendanceMonitoringService.listStudentsPointsForDate(student, None, occurrence.date.get) returns Seq()
       service.getCheckpoints(Seq(attendance)).size should be(0)
@@ -151,7 +151,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def wrongPointType() {
+  def wrongPointType(): Unit = {
     new Fixture {
       smallGroupPoint.pointType = AttendanceMonitoringPointType.Meeting
       service.getCheckpoints(Seq(attendance)).size should be(0)
@@ -159,7 +159,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def wrongWeek() {
+  def wrongWeek(): Unit = {
     new Fixture {
       occurrence.week = 3
       service.attendanceMonitoringService.listStudentsPointsForDate(student, None, occurrence.date.get) returns Seq(smallGroupPoint)
@@ -169,7 +169,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 
   @Test
-  def wrongModule() {
+  def wrongModule(): Unit = {
     new Fixture {
       smallGroupPoint.smallGroupEventModules = Seq(module1)
       groupSet.module = module2
@@ -178,7 +178,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def checkpointAlreadyExists() {
+  def checkpointAlreadyExists(): Unit = {
     new Fixture {
       val checkpoints: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = Map(
         student -> Map(
@@ -193,7 +193,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def reportedToSITS() {
+  def reportedToSITS(): Unit = {
     new Fixture {
       service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns true
       service.getCheckpoints(Seq(attendance)).size should be(0)
@@ -201,7 +201,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notEnoughAttendanceCurrentNotPersisted() {
+  def notEnoughAttendanceCurrentNotPersisted(): Unit = {
     new Fixture {
       smallGroupPoint.smallGroupEventQuantity = 2
       service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
@@ -210,7 +210,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notEnoughAttendanceCurrentPersisted() {
+  def notEnoughAttendanceCurrentPersisted(): Unit = {
     new Fixture {
       smallGroupPoint.smallGroupEventQuantity = 2
       service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(attendance)
@@ -219,7 +219,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notEnoughAttendanceBeforeStart() {
+  def notEnoughAttendanceBeforeStart(): Unit = {
     new Fixture {
       // Start week on Monday before start date (Tuesday)
       val otherAttendance = new SmallGroupEventAttendance
@@ -238,7 +238,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
   }
 
   @Test
-  def notEnoughAttendanceAfterEnd() {
+  def notEnoughAttendanceAfterEnd(): Unit = {
     new Fixture {
       // End week on Friday after end date (Thursday)
       val otherAttendance = new SmallGroupEventAttendance

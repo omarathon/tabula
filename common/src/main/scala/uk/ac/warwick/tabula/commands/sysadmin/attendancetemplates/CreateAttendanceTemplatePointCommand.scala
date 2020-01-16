@@ -71,7 +71,7 @@ trait CreateAttendanceTemplatePointValidation extends SelfValidating {
     }
   }
 
-  protected def validateWeek(errors: Errors, week: Int, bindPoint: String) {
+  protected def validateWeek(errors: Errors, week: Int, bindPoint: String): Unit = {
     week match {
       case y if y < -9 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
       case y if y > 53 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
@@ -79,13 +79,13 @@ trait CreateAttendanceTemplatePointValidation extends SelfValidating {
     }
   }
 
-  protected def validateWeeks(errors: Errors, startWeek: Int, endWeek: Int) {
+  protected def validateWeeks(errors: Errors, startWeek: Int, endWeek: Int): Unit = {
     if (startWeek > endWeek) {
       errors.rejectValue("startWeek", "attendanceMonitoringPoint.weeks")
     }
   }
 
-  protected def validateDates(errors: Errors, startDate: LocalDate, endDate: LocalDate) {
+  protected def validateDates(errors: Errors, startDate: LocalDate, endDate: LocalDate): Unit = {
     if (startDate.isAfter(endDate)) {
       errors.rejectValue("startDate", "attendanceMonitoringPoint.dates")
     }

@@ -43,7 +43,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     val command = new EditSmallGroupSetCommandInternal(module, set) with CommandTestSupport
   }
 
-  @Test def create {
+  @Test def create: Unit = {
     new CreateCommandFixture {
       command.name = "Set name"
       command.academicYear = AcademicYear.now()
@@ -59,7 +59,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def createAutoLinkToSits {
+  @Test def createAutoLinkToSits: Unit = {
     new CreateCommandFixture {
       command.name = "Set name"
       command.academicYear = AcademicYear.now()
@@ -103,7 +103,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def edit {
+  @Test def edit: Unit = {
     new EditCommandFixture {
       command.name should be(set.name)
       command.academicYear should be(set.academicYear)
@@ -120,7 +120,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def createPermissions {
+  @Test def createPermissions: Unit = {
     new Fixture {
       val theDepartment: Module = module
       val command = new CreateSmallGroupSetPermissions with CreateSmallGroupSetCommandState {
@@ -134,7 +134,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def createNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def createNoDepartment: Unit = {
     val command = new CreateSmallGroupSetPermissions with CreateSmallGroupSetCommandState {
       val module = null
     }
@@ -143,7 +143,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def editPermissions {
+  @Test def editPermissions: Unit = {
     new ExistingSetFixture {
       val (m, s) = (module, set)
 
@@ -159,7 +159,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def editNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def editNoDepartment: Unit = {
     val command = new EditSmallGroupSetPermissions with EditSmallGroupSetCommandState {
       val module = null
       val set = new SmallGroupSet
@@ -169,7 +169,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def editNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def editNoSet: Unit = {
     val command = new EditSmallGroupSetPermissions with EditSmallGroupSetCommandState {
       val module: Module = Fixtures.module("in101")
       val set = null
@@ -179,7 +179,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def editUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def editUnlinkedSet: Unit = {
     val command = new EditSmallGroupSetPermissions with EditSmallGroupSetCommandState {
       val module: Module = Fixtures.module("in101")
       module.id = "set id"
@@ -207,7 +207,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationPasses {
+  @Test def validationPasses: Unit = {
     new ValidationFixture {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -221,7 +221,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoName {
+  @Test def validateNoName: Unit = {
     new ValidationFixture {
       command.name = "             "
       command.academicYear = AcademicYear.now()
@@ -238,7 +238,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateDuplicateName {
+  @Test def validateDuplicateName: Unit = {
     new ValidationFixture {
       command.name = "Test1"
       command.academicYear = AcademicYear.now()
@@ -259,7 +259,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
   }
 
 
-  @Test def validateNameTooLong {
+  @Test def validateNameTooLong: Unit = {
     new ValidationFixture {
       command.name = (1 to 300).map { _ => "a" }.mkString("")
       command.academicYear = AcademicYear.now()
@@ -276,7 +276,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoFormat {
+  @Test def validateNoFormat: Unit = {
     new ValidationFixture {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -292,7 +292,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoAllocationMethod {
+  @Test def validateNoAllocationMethod: Unit = {
     new ValidationFixture {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -309,7 +309,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantChangeAcademicYear {
+  @Test def validateCantChangeAcademicYear: Unit = {
     new ValidationFixtureExistingSet {
       set.academicYear = AcademicYear.now()
 
@@ -328,7 +328,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCanUnlinkIfNotReleased {
+  @Test def validateCanUnlinkIfNotReleased: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -344,7 +344,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCanChangeLinkIfNotReleased {
+  @Test def validateCanChangeLinkIfNotReleased: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -362,7 +362,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantChangeLinkIfAttendanceRecorded {
+  @Test def validateCantChangeLinkIfAttendanceRecorded: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -408,7 +408,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCanCreateLinkWhenAttendanceNotRecorded {
+  @Test def validateCanCreateLinkWhenAttendanceNotRecorded: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.academicYear = AcademicYear.now()
@@ -443,7 +443,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoChangesWhenReleased {
+  @Test def validateNoChangesWhenReleased: Unit = {
     new ValidationFixtureExistingSet {
       set.format = SmallGroupFormat.Seminar
       set.allocationMethod = SmallGroupAllocationMethod.Linked
@@ -467,7 +467,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantUnlinkIfReleased {
+  @Test def validateCantUnlinkIfReleased: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.academicYear = set.academicYear
@@ -488,7 +488,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantChangeLinkIfReleased {
+  @Test def validateCantChangeLinkIfReleased: Unit = {
     new ValidationFixtureExistingSet {
       command.name = "That's not my name"
       command.format = SmallGroupFormat.Seminar
@@ -512,7 +512,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def describeCreate {
+  @Test def describeCreate: Unit = {
     new Fixture {
       val mod: Module = module
       val command = new CreateSmallGroupSetDescription with CreateSmallGroupSetCommandState {
@@ -532,7 +532,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def describeEdit {
+  @Test def describeEdit: Unit = {
     new ExistingSetFixture {
       val (mod, s) = (module, set)
       val command = new EditSmallGroupSetDescription with EditSmallGroupSetCommandState {
@@ -551,7 +551,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wiresCreate {
+  @Test def wiresCreate: Unit = {
     new Fixture {
       val command: CreateCommand = ModifySmallGroupSetCommand.create(module)
 
@@ -563,7 +563,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wiresEdit {
+  @Test def wiresEdit: Unit = {
     new ExistingSetFixture {
       val command: Command = ModifySmallGroupSetCommand.edit(module, set)
 
@@ -575,7 +575,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def defaultWeekRanges {
+  @Test def defaultWeekRanges: Unit = {
     val generator = new GeneratesDefaultWeekRangesWithTermService {}
 
     generator.defaultWeekRanges(AcademicYear.parse("13/14")) should be(Seq(

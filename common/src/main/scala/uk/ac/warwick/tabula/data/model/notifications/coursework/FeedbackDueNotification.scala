@@ -37,7 +37,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 
   protected def dueToday: Boolean = deadline.contains(created.toLocalDate)
 
-  override final def onPreSave(newRecord: Boolean) {
+  override final def onPreSave(newRecord: Boolean): Unit = {
     priority = if (daysLeft == 1) {
       Warning
     } else if (daysLeft < 1) {

@@ -14,7 +14,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
   }
 
   @Test
-  def titleIncludesGroupFormats() {
+  def titleIncludesGroupFormats(): Unit = {
     new SmallGroupFixture {
       val n: OpenSmallGroupSetsStudentSignUpNotification = createNotification(Seq(groupSet1, groupSet2, groupSet3), actor, recipient)
       n.userLookup = userLookup
@@ -23,7 +23,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
   }
 
   @Test
-  def titleMakesSenseWithASingleGroup() {
+  def titleMakesSenseWithASingleGroup(): Unit = {
     new SmallGroupFixture {
       val n: OpenSmallGroupSetsStudentSignUpNotification = createNotification(Seq(groupSet1), actor, recipient)
       n.userLookup = userLookup

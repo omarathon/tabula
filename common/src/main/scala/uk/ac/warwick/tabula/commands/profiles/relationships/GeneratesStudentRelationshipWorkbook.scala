@@ -61,7 +61,7 @@ trait GeneratesStudentRelationshipWorkbook {
   }
 
   // attaches the data validation to the sheet
-  private def generateAgentDropdowns(sheet: Sheet, agents: Seq[_], allAllocations: Seq[_]) {
+  private def generateAgentDropdowns(sheet: Sheet, agents: Seq[_], allAllocations: Seq[_]): Unit = {
     if (agents.nonEmpty) {
       val dropdownRange = new CellRangeAddressList(1, allAllocations.length, 2, 2)
       val validation = getDataValidation(agents, sheet, dropdownRange)

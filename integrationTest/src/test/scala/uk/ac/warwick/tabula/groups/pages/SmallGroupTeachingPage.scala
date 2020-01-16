@@ -158,7 +158,7 @@ class BatchOpenPage(val departmentCode: String, val academicYear: AcademicYear)(
     findAll(tagName("input")).filter(_.underlying.getAttribute("value") == groupset.groupsetId).next().underlying
   }
 
-  def submit() {
+  def submit(): Unit = {
     findAll(tagName("input")).filter(_.underlying.getAttribute("type") == "submit").next().underlying.click()
   }
 }
@@ -171,7 +171,7 @@ trait GroupSetList {
     // wait for sets to load ajaxically
     eventually {
       Option(className("small-group-sets-list").webElement.findElement(By.className("mod-code"))
-        .getText.trim == s"${moduleCode.toUpperCase}") should be('defined)
+        .getText.trim == s"${moduleCode.toUpperCase}") should be(Symbol("defined"))
     }
 
     val setInfoElements = findAll(className("set-info")).filter { el =>

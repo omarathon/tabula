@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marks-template"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marks-template"))
 class AssignmentMarksTemplateController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -29,9 +28,8 @@ class AssignmentMarksTemplateController extends CourseworkController {
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks-template"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/marks-template"))
 class AssignmentMarkerMarksTemplateController extends CourseworkController {
 
   @ModelAttribute("command")
@@ -45,9 +43,8 @@ class AssignmentMarkerMarksTemplateController extends CourseworkController {
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks-template"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/marks-template"))
 class AssignmentCurrentMarkerMarksTemplateController extends CourseworkController {
 
   @RequestMapping

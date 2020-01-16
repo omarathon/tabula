@@ -162,7 +162,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
     }
 
     def viewableAdjustments(feedback: Feedback): Seq[Mark] = {
-      if (securityService.can(user, Permissions.AssignmentFeedback.Manage, feedback)) {
+      if (securityService.can(user, Permissions.Feedback.Manage, feedback)) {
         feedback.adminViewableAdjustments
       } else {
         feedback.studentViewableAdjustments
@@ -198,7 +198,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
                 submission.allAttachments,
                 assignment.findFeedback(student.userId)
                   .filter(_.released)
-                  .filter(securityService.can(user, Permissions.AssignmentFeedback.Read, _))
+                  .filter(securityService.can(user, Permissions.Feedback.Read, _))
                   .map(feedback =>
                     FeedbackData(
                       releasedDate = feedback.releasedDate.toString(ProfileExportSingleCommand.TimeFormat),

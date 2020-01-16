@@ -8,17 +8,17 @@ class SLF4JEventListener extends EventListener {
 
   val logger: Logger = LoggerFactory.getLogger("uk.ac.warwick.tabula.AUDIT")
 
-  override def beforeCommand(event: Event) {
+  override def beforeCommand(event: Event): Unit = {
     val s = generateMessage(event, "pre-event")
     logger.info(s.toString)
   }
 
-  override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event) {
+  override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
     val s = generateMessage(event)
     logger.info(s.toString)
   }
 
-  override def onException(event: Event, exception: Throwable) {
+  override def onException(event: Event, exception: Throwable): Unit = {
     val s = generateMessage(event, "failed-event")
     logger.info(s.toString)
   }

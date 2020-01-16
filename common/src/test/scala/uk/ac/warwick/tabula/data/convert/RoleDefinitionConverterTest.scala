@@ -20,11 +20,11 @@ class RoleDefinitionConverterTest extends TestBase with Mockito {
 
   converter.sessionFactory = sessionFactory
 
-  @Test def validBuiltInInput {
+  @Test def validBuiltInInput: Unit = {
     converter.convertRight("DepartmentalAdministratorRoleDefinition") should be(DepartmentalAdministratorRoleDefinition)
   }
 
-  @Test def validCustomInput {
+  @Test def validCustomInput: Unit = {
     val definition = new CustomRoleDefinition
     definition.id = "steve"
 
@@ -33,14 +33,14 @@ class RoleDefinitionConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(definition)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     session.get(classOf[CustomRoleDefinition].getName(), "20X6") returns (null)
 
     converter.convertRight("20X6") should be(null)
     converter.convertRight(null) should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val definition = new CustomRoleDefinition
     definition.id = "steve"
 

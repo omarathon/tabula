@@ -37,17 +37,24 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
   @Column(nullable = false)
   var name: String = _
 
-  @Column(nullable = true)
-  var date: DateTime = _
+  @Column(nullable = true, name = "date")
+  private var _date: DateTime = _
+  def date: Option[DateTime] = Option(_date)
+  def date_=(date: Option[DateTime]): Unit = _date = date.orNull
 
-  @Column(nullable = true)
-  var endDate: DateTime = _
+  @Column(nullable = true, name = "endDate")
+  private var _endDate: DateTime = _
+  def endDate: Option[DateTime] = Option(_endDate)
+  def endDate_=(date: Option[DateTime]): Unit = _endDate = date.orNull
 
-  def startTime: LocalTime = date.toLocalTime
-  def endTime: LocalTime = endDate.toLocalTime
+  def startTime: Option[LocalTime] = date.map(_.toLocalTime)
+  def endTime: Option[LocalTime] = endDate.map(_.toLocalTime)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
-  var location: Location = _
+  @Column(nullable = true, name = "location")
+  private var _location: Location = _
+  def location: Option[Location] = Option(_location)
+  def location_=(location: Option[Location]): Unit = _location = location.orNull
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
@@ -67,7 +74,7 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
     _submissions.asScala.toSet
   }
 
-  def addSubmission(submission: MitigatingCircumstancesSubmission) {
+  def addSubmission(submission: MitigatingCircumstancesSubmission): Unit = {
     submission.panel = this
     _submissions.add(submission)
   }
@@ -84,20 +91,26 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
   var permissionsService: PermissionsService = Wire[PermissionsService]
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  var chair: User = _
+  @Column(nullable = true, name = "chair")
+  private var _chair: User = _
+  def chair: Option[User] = Option(_chair)
+  def chair_=(user: Option[User]): Unit = _chair = user.orNull
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  var secretary: User = _
+  @Column(nullable = true, name = "secretary")
+  private var _secretary: User = _
+  def secretary: Option[User] = Option(_secretary)
+  def secretary_=(user: Option[User]): Unit = _secretary = user.orNull
 
   @transient
   private lazy val _viewers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(scope = this, MitigatingCircumstancesPanelMemberRoleDefinition)
   def viewers: Set[User] = _viewers.users
   def viewers_=(userIds: Set[String]): Unit = _viewers.knownType.includedUserIds = userIds
 
-  def members: Set[User] = viewers -- Set(chair, secretary)
+  def members: Set[User] = viewers -- Set(chair, secretary).flatten
 
   def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] =
-    if (Option(date).isEmpty || Option(endDate).isEmpty) None
+    if (date.isEmpty || endDate.isEmpty) None
     else Some(
       EventOccurrence(
         uid = id,
@@ -105,9 +118,9 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
         title = name,
         description = s"${submissions.size} submission${if (submissions.size != 1) "s" else ""}",
         eventType = TimetableEventType.Other("Panel"),
-        start = date.toLocalDateTime,
-        end = endDate.toLocalDateTime,
-        location = Option(location),
+        start = date.get.toLocalDateTime,
+        end = endDate.get.toLocalDateTime,
+        location = location,
         parent = TimetableEvent.Parent(department),
         comments = None,
         staff = viewers.toSeq,

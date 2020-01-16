@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.web.controllers.mitcircs
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.mitcircs.ReviewMitCircsSubmissionCommand
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import MitCircsReviewPanelSubmissionController._
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.web.controllers.mitcircs.MitCircsReviewPanelSubmissionController._
 
 abstract class AbstractMitCircsReviewSubmissionController extends BaseController {
   @ModelAttribute("command")
@@ -25,7 +25,7 @@ abstract class AbstractMitCircsReviewSubmissionController extends BaseController
       "formattedReasonableAdjustmentsNotes" -> FormattedHtml(result.reasonableAdjustmentsNotes),
       "otherMitigatingCircumstancesSubmissions" -> result.otherMitigatingCircumstancesSubmissions,
       "relevantExtensions" -> result.relevantExtensions,
-      "isPanelChair" -> submission.panel.exists(_.chair == currentUser.apparentUser)
+      "isPanelChair" -> submission.panel.exists(_.chair.contains(currentUser.apparentUser))
     ).crumbs(
       MitCircsBreadcrumbs.Admin.Home(submission.department),
       MitCircsBreadcrumbs.Admin.Review(submission, active = true)
@@ -59,7 +59,7 @@ class MitCircsReviewPanelSubmissionController extends AbstractMitCircsReviewSubm
 
     Pagination(
       current = submission,
-      index = (currentIndex + 1),
+      index = currentIndex + 1,
       total = allSubmissions.size,
       previous = if (currentIndex > 0) Some(allSubmissions(currentIndex - 1)) else None,
       next = if (currentIndex < (allSubmissions.size - 1)) Some(allSubmissions(currentIndex + 1)) else None,

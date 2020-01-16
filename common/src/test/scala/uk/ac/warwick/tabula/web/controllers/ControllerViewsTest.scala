@@ -8,7 +8,7 @@ import uk.ac.warwick.util.web.Uri
 
 class ControllerViewsTest extends TestBase {
 
-  @Test def redirect {
+  @Test def redirect: Unit = {
     val views = new ControllerViews {
       def requestInfo: Some[RequestInfo] = {
         val u = new User("cuscav")
@@ -24,7 +24,7 @@ class ControllerViewsTest extends TestBase {
     views.Redirect("/yes").viewName should be("redirect:/yes")
   }
 
-  @Test def redirectWithNoRequestInfo {
+  @Test def redirectWithNoRequestInfo: Unit = {
     val views = new ControllerViews {
       def requestInfo = None
     }
@@ -32,7 +32,7 @@ class ControllerViewsTest extends TestBase {
     views.Redirect("/yes").viewName should be("redirect:/yes")
   }
 
-  @Test def redirectWithReturnTo {
+  @Test def redirectWithReturnTo: Unit = {
     val views = new ControllerViews {
       def requestInfo: Some[RequestInfo] = {
         val u = new User("cuscav")

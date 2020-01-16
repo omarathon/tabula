@@ -19,7 +19,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 
   val userLookupService = new MockUserLookup
 
-  @Before def wire {
+  @Before def wire: Unit = {
     val departmentDao = new DepartmentDaoImpl
     departmentDao.sessionFactory = sessionFactory
     service.departmentDao = departmentDao
@@ -123,7 +123,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
   }
 
   @Test
-  def testStampMissingModules {
+  def testStampMissingModules: Unit = {
     // spurn persistence and everything that has gone before
     val module1 = Fixtures.module("one", "my name is one")
     val module2 = Fixtures.module("two", "my name is two")

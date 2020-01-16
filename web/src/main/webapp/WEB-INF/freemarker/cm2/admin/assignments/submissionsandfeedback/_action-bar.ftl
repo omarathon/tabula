@@ -166,7 +166,7 @@
         </div>
       </#if>
 
-      <#if (assignment.collectSubmissions || assignment.cm2Assignment) && features.markingWorkflows>
+      <#if features.markingWorkflows>
         <#if assignment.mustReleaseForMarking!false>
           <div class="btn-group">
             <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -186,29 +186,13 @@
                     Assign markers
                   </@fmt.permission_button>
                 </li>
-              <#elseif assignment.markingWorkflow??>
-                <li>
-                  <#assign markers_url><@routes.coursework.assignMarkers assignment /></#assign>
-                  <@fmt.permission_button
-                  permission='Assignment.Update'
-                  scope=assignment
-                  action_descr='assign markers'
-                  href=markers_url>
-                    Assign markers
-                  </@fmt.permission_button>
-                </li>
               <#else>
                 <li class="disabled"><a>Assign markers</a></li>
               </#if>
 
               <li class="must-have-selected">
-                <#if assignment.markingWorkflow??>
-                  <#assign releaseForMarking_url><@routes.coursework.releaseForMarking assignment /></#assign>
-                  <#assign releaseTooltip>Release the submissions for marking. First markers will be able to download their submissions.</#assign>
-                <#else>
-                  <#assign releaseForMarking_url><@routes.cm2.releaseForMarking assignment /></#assign>
-                  <#assign releaseTooltip>Release the students for marking. First markers will be able to start marking.</#assign>
-                </#if>
+                <#assign releaseForMarking_url><@routes.cm2.releaseForMarking assignment /></#assign>
+                <#assign releaseTooltip>Release the students for marking. First markers will be able to start marking.</#assign>
                 <@fmt.permission_button
                 permission='Submission.ReleaseForMarking'
                 scope=assignment
@@ -240,13 +224,8 @@
               </#if>
 
               <li class="must-have-selected">
-                <#if assignment.markingWorkflow??>
-                  <#assign returnForMarking_url><@routes.coursework.returnForMarking assignment /></#assign>
-                  <#assign tooltip_text>Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published.</#assign>
-                <#else>
-                  <#assign returnForMarking_url><@routes.cm2.returnToMarker assignment /></#assign>
-                  <#assign tooltip_text>Return the submissions for marking. You can only return feedback that has not been published.</#assign>
-                </#if>
+                <#assign returnForMarking_url><@routes.cm2.returnToMarker assignment /></#assign>
+                <#assign tooltip_text>Return the submissions for marking. You can only return feedback that has not been published.</#assign>
                 <@fmt.permission_button
                 permission='Submission.ReleaseForMarking'
                 scope=assignment
@@ -296,7 +275,7 @@
           <li>
             <#assign onlinefeedback_url><@routes.cm2.genericfeedback assignment /></#assign>
             <@fmt.permission_button
-            permission='AssignmentFeedback.Manage'
+            permission='Feedback.Manage'
             scope=assignment
             action_descr='add general feedback for all students'
             tooltip='Add general feedback that will be sent to all students'
@@ -304,7 +283,7 @@
               Generic feedback
             </@fmt.permission_button>
           </li>
-          <#if (!assignment.hasWorkflow && !assignment.hasCM2Workflow)>
+          <#if (!assignment.hasWorkflow)>
             <#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
               <li>
                 <a class="long-running use-tooltip"
@@ -318,7 +297,7 @@
             <li>
               <#assign marks_url><@routes.cm2.addMarks assignment /></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.Manage'
+              permission='Feedback.Manage'
               scope=assignment
               action_descr='add marks'
               href=marks_url>
@@ -328,7 +307,7 @@
             <li>
               <#assign onlinefeedback_url><@routes.cm2.onlinefeedback assignment /></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.Read'
+              permission='Feedback.Read'
               scope=assignment
               action_descr='manage online feedback'
               href=onlinefeedback_url>
@@ -338,7 +317,7 @@
             <li>
               <#assign feedback_url><@routes.cm2.addFeedback assignment /></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.Manage'
+              permission='Feedback.Manage'
               scope=assignment
               action_descr='upload feedback'
               classes='feedback-link'
@@ -351,7 +330,7 @@
             <li class="must-have-selected">
               <#assign onlinefeedback_url><@routes.cm2.feedbackAdjustment assignment /></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.Manage'
+              permission='Feedback.Manage'
               scope=assignment
               action_descr='make adjustments to feedback'
               classes='form-post'
@@ -369,7 +348,7 @@
           <li class="must-have-selected">
             <#assign download_url><@routes.cm2.assignmentFeedbackZip assignment/></#assign>
             <@fmt.permission_button
-            permission='AssignmentFeedback.Read'
+            permission='Feedback.Read'
             scope=assignment
             action_descr='download feedback'
             classes='form-post'
@@ -383,7 +362,7 @@
             <li class="must-have-selected">
               <#assign publishfeedbackurl><@routes.cm2.publishFeedback assignment/></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.Publish'
+              permission='Feedback.Publish'
               scope=assignment
               action_descr='publish feedback to students'
               classes='form-post'
@@ -401,7 +380,7 @@
             <li class="must-have-selected">
               <#assign unpublishfeedbackurl><@routes.cm2.unPublishFeedback assignment/></#assign>
               <@fmt.permission_button
-              permission='AssignmentFeedback.UnPublish'
+              permission='Feedback.UnPublish'
               scope=assignment
               action_descr='unpublish feedback'
               classes='form-post'
@@ -415,7 +394,7 @@
           <li class="must-have-selected">
             <#assign deletefeedback_url><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
             <@fmt.permission_button
-            permission='AssignmentFeedback.Manage'
+            permission='Feedback.Manage'
             scope=assignment
             action_descr='delete feedback'
             classes='form-post'
@@ -430,7 +409,7 @@
               <li class="must-have-selected">
                 <#assign uploadToSitsUrl><@routes.cm2.uploadToSits assignment /></#assign>
                 <@fmt.permission_button
-                permission='AssignmentFeedback.Publish'
+                permission='Feedback.Publish'
                 scope=assignment
                 action_descr='upload feedback to SITS'
                 classes='form-post'

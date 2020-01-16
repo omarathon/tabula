@@ -48,7 +48,7 @@ trait SortRoutesCommandGrouping {
   }
 
   // Sort all the lists of routes by code.
-  def sort() {
+  def sort(): Unit = {
     // Because sortBy is not an in-place sort, we have to replace the lists entirely.
     // Alternative is Collections.sort or math.Sorting but these would be more code.
     for ((dept, routes) <- mapping.asScala) {

@@ -18,10 +18,18 @@ import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features
 import scala.jdk.CollectionConverters._
 
 object EditAssignmentDetailsCommand {
-  def apply(assignment: Assignment) =
+  type Command =
+    Appliable[Assignment]
+      with EditAssignmentDetailsCommandState
+      with EditAssignmentDetailsRequest
+      with SelfValidating
+      with SchedulesNotifications[Assignment, Assignment]
+      with GeneratesTriggers[Assignment]
+
+  def apply(assignment: Assignment): Command =
     new EditAssignmentDetailsCommandInternal(assignment)
       with ComposableCommand[Assignment]
-      with BooleanAssignmentDetailProperties
+      with EditAssignmentDetailsRequest
       with EditAssignmentPermissions
       with EditAssignmentDetailsDescription
       with EditAssignmentDetailsValidation
@@ -34,43 +42,22 @@ object EditAssignmentDetailsCommand {
       with AutowiringFeaturesComponent
       with HibernateExtensionPersistenceComponent
       with ModifyAssignmentsDetailsTriggers
+      with PopulateEditAssignmentDetailsRequest
 }
 
-class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment]
-  with EditAssignmentDetailsCommandState
-  with SharedAssignmentDetailProperties
-  with AssignmentDetailsCopy
-  with CreatesMarkingWorkflow {
-  self: AssessmentServiceComponent
+abstract class EditAssignmentDetailsCommandInternal(override val assignment: Assignment)
+  extends CommandInternal[Assignment]
+    with EditAssignmentDetailsCommandState
+    with AssignmentDetailsCopy
+    with CreatesMarkingWorkflow {
+  self: EditAssignmentDetailsRequest
+    with AssessmentServiceComponent
     with UserLookupComponent
     with CM2MarkingWorkflowServiceComponent
     with FeaturesComponent
     with ExtensionPersistenceComponent =>
 
-  name = assignment.name
-  openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
-  openEnded = assignment.openEnded
-  resitAssessment = assignment.resitAssessment
-  openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
-  closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
-  workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
-  reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
-  anonymity = assignment._anonymity
-  workflow.foreach(w =>
-    if (w.workflowType == SelectedModeratedMarking) workflowType = ModeratedMarking // we don't show admin moderation as a separate option in the UI
-    else workflowType = w.workflowType
-  )
-  workflow.map(HibernateHelpers.initialiseAndUnproxy).collect { case w: ModeratedWorkflow => w }.foreach(w =>
-    sampler = w.moderationSampler
-  )
-  extractMarkers match {
-    case (a, b) =>
-      markersA = JArrayList(a)
-      markersB = JArrayList(b)
-  }
-
   override def applyInternal(): Assignment = {
-
     lazy val moderatedWorkflow = workflow.map(HibernateHelpers.initialiseAndUnproxy).collect { case w: ModeratedWorkflow => w }
 
     def moderationSelectorChanged: Boolean = features.moderationSelector && moderatedWorkflow.exists(w => w.moderationSampler != sampler)
@@ -121,26 +108,55 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 
 }
 
-
 trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState with EditMarkingWorkflowState {
-
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
+  self: UserLookupComponent
+    with CM2MarkingWorkflowServiceComponent =>
 
   def assignment: Assignment
-
   def academicYear: AcademicYear = assignment.academicYear
-
   def module: Module = assignment.module
-
   def workflow: Option[CM2MarkingWorkflow] = Option(assignment.cm2MarkingWorkflow)
 }
 
+trait EditAssignmentDetailsRequest extends ModifyAssignmentDetailsRequest {
+  def copyEditAssignmentDetailsRequestFrom(other: EditAssignmentDetailsRequest): Unit =
+    copyModifyAssignmentDetailsRequestFrom(other)
+}
 
-trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-  self: EditAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+trait PopulateEditAssignmentDetailsRequest {
+  self: EditAssignmentDetailsCommandState
+    with EditAssignmentDetailsRequest =>
+
+  name = assignment.name
+  openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
+  openEnded = assignment.openEnded
+  resitAssessment = assignment.resitAssessment
+  openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
+  closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+  workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
+  reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
+  anonymity = assignment._anonymity
+  workflow.foreach(w =>
+    if (w.workflowType == SelectedModeratedMarking) workflowType = ModeratedMarking // we don't show admin moderation as a separate option in the UI
+    else workflowType = w.workflowType
+  )
+  workflow.map(HibernateHelpers.initialiseAndUnproxy).collect { case w: ModeratedWorkflow => w }.foreach(w =>
+    sampler = w.moderationSampler
+  )
+  extractMarkers match {
+    case (a, b) =>
+      markersA = JArrayList(a)
+      markersB = JArrayList(b)
+  }
+}
+
+trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation {
+  self: EditAssignmentDetailsRequest
+    with EditAssignmentDetailsCommandState
+    with AssessmentServiceComponent
     with UserLookupComponent =>
 
-  override def validate(errors: Errors): Unit = {
+  def validateEditAssignmentDetails(errors: Errors): Unit = {
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive && !(existing eq assignment) }
       for (duplicate <- duplicates.headOption) {
@@ -166,7 +182,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
       errors.rejectValue("openEnded", "assignment.openEnded.hasExtensions")
     }
 
-    if (assignment.hasCM2Workflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
+    if (assignment.hasWorkflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
       val (existingMarkersA, existingMarkersB) = extractMarkers
 
       if (!existingMarkersA.forall(markersA.asScala.contains)) {
@@ -178,25 +194,27 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
       }
     }
   }
-}
 
+  // Don't add things here as a Command might mix in multiple validators, add to validateCreateAssignmentDetails
+  override def validate(errors: Errors): Unit = validateEditAssignmentDetails(errors)
+}
 
 trait EditAssignmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: EditAssignmentDetailsCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    notDeleted(assignment)
+    mustBeLinked(notDeleted(assignment), module)
     p.PermissionCheck(Permissions.Assignment.Update, module)
   }
 }
 
 trait EditAssignmentDetailsDescription extends Describable[Assignment] {
-
-  self: EditAssignmentDetailsCommandState =>
+  self: EditAssignmentDetailsRequest
+    with EditAssignmentDetailsCommandState =>
 
   override lazy val eventName = "EditAssignmentDetails"
 
-  override def describe(d: Description): Unit = {
+  override def describe(d: Description): Unit =
     d.assignment(assignment).properties(
       "name" -> name,
       "openDate" -> Option(openDate).map(_.toString()).orNull,
@@ -205,6 +223,4 @@ trait EditAssignmentDetailsDescription extends Describable[Assignment] {
       "workflowType" -> Option(workflowType).map(_.name).orNull,
       "anonymity" -> Option(anonymity).map(_.code).orNull
     )
-  }
-
 }

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department, Module, 
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class GenerateExamGridSetCoreRequiredModulesCommandTest extends TestBase with Mockito {
 

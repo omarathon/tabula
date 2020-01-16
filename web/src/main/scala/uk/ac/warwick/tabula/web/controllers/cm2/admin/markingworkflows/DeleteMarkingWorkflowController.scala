@@ -18,9 +18,8 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/delete"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/delete"))
 class DeleteMarkingWorkflowController extends CM2MarkingWorkflowController {
 
   type DeleteMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with DeleteMarkingWorkflowState

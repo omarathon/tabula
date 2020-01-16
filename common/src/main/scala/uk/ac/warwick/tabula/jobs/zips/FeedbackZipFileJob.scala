@@ -34,7 +34,7 @@ class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent w
   class Runner(job: JobInstance) {
     def run(): Unit = {
       transactional() {
-        val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getAssignmentFeedbackById)
+        val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getFeedbackById)
 
         updateProgress(0)(job)
         updateStatus("Initialising")(job)

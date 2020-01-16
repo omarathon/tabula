@@ -136,7 +136,7 @@ class SmallGroupEventsReportRequest extends Serializable {
 
   var events: JList[JMap[String, String]] = JArrayList()
 
-  def copyTo(state: SmallGroupEventsReportProcessorState) {
+  def copyTo(state: SmallGroupEventsReportProcessorState): Unit = {
     state.events = events
   }
 }

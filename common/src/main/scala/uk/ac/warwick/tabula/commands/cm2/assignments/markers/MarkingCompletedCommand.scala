@@ -20,7 +20,7 @@ import scala.jdk.CollectionConverters._
 object MarkingCompletedCommand {
   def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
     new MarkingCompletedCommandInternal(assignment, marker, submitter, stagePosition)
-      with ComposableCommand[Seq[AssignmentFeedback]]
+      with ComposableCommand[Seq[Feedback]]
       with WorkflowProgressValidation
       with WorkflowProgressPermissions
       with MarkingCompletedDescription
@@ -31,13 +31,13 @@ object MarkingCompletedCommand {
 }
 
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
-  extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with ReleasedState with WorkflowProgressValidation {
+  extends CommandInternal[Seq[Feedback]] with WorkflowProgressState with ReleasedState with WorkflowProgressValidation {
 
   self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
-  def applyInternal(): Seq[AssignmentFeedback] = transactional() {
+  def applyInternal(): Seq[Feedback] = transactional() {
 
-    val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect { case f: AssignmentFeedback => f }
+    val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect { case f: Feedback => f }
 
     val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
       .view
@@ -72,7 +72,7 @@ trait WorkflowProgressPermissions extends RequiresPermissionsChecking with Permi
   self: WorkflowProgressState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
     }
@@ -92,7 +92,7 @@ trait MarkingCompletedDescription extends WorkflowProgressDescription {
   override lazy val eventName: String = "MarkingCompleted"
 }
 
-trait WorkflowProgressDescription extends Describable[Seq[AssignmentFeedback]] {
+trait WorkflowProgressDescription extends Describable[Seq[Feedback]] {
 
   self: WorkflowProgressState =>
 
@@ -100,7 +100,7 @@ trait WorkflowProgressDescription extends Describable[Seq[AssignmentFeedback]] {
     d.assignment(assignment)
      .studentUsercodes(feedbackForRelease.map(_.feedback.usercode))
 
-  override def describeResult(d: Description, result: Seq[AssignmentFeedback]): Unit =
+  override def describeResult(d: Description, result: Seq[Feedback]): Unit =
     d.assignment(assignment)
      .feedbacks(result)
 }

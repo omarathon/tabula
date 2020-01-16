@@ -81,7 +81,7 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging with Task
     * servlet context. This then grabs that, so that we're using one shared
     * config (important because we set up a bunch of Scala conversions)
     */
-  override def init {
+  override def init(): Unit = {
     config = getServletConfig().getServletContext().getAttribute("freemarkerConfiguration") match {
       case c: Configuration => c
       case _ => throw new IllegalStateException(MISSING_CONFIG_MESSAGE)

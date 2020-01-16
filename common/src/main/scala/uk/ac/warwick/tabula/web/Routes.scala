@@ -13,8 +13,6 @@ object Routes {
   import uk.ac.warwick.tabula
 
   val cm2 = tabula.cm2.web.Routes
-  @deprecated("Always use CM2 Routes", since = "209")
-  val coursework = tabula.coursework.web.Routes
   val exams = tabula.exams.web.Routes
   val profiles = tabula.profiles.web.Routes
   val groups = tabula.groups.web.Routes

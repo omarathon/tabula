@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class ModuleRegistrationTest extends TestBase {
-  @Test def selectionStatus {
+  @Test def selectionStatus: Unit = {
     val stuMem = new StudentMember("0123456")
     stuMem.userId = "abcde"
 

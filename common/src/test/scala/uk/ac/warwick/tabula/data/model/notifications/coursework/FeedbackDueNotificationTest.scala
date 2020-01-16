@@ -187,7 +187,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     extension.usercode = "1234567"
     extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 0, 0, 0)
     extension.approve()
-    extension.feedbackDeadline should not be 'empty
+    extension.feedbackDeadline should not be Symbol("empty")
 
     val managers = UserGroup.ofUsercodes
     userLookup.registerUsers("cuscav", "cusebr")
@@ -200,8 +200,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.submissions.add(Fixtures.submission("1234567", "1234567"))
 
     val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
-    notification.deadline should not be 'empty
-    notification.recipients should not be 'empty
+    notification.deadline should not be Symbol("empty")
+    notification.recipients should not be Symbol("empty")
   }
 
   @Test def recipientsExtensionNoSubmissions() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
@@ -216,7 +216,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 
     val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
-    notification.recipients should be('empty)
+    notification.recipients should be(Symbol("empty"))
   }
 
   @Test def recipientsGeneralAlreadyReleased() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
@@ -243,27 +243,27 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
     val notification = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment)
-    notification.recipients should not be 'empty
+    notification.recipients should not be Symbol("empty")
 
     // Feedback added
     assignment.feedbacks.add(Fixtures.assignmentFeedback("0000001", "0000001").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
     assignment.feedbacks.add(Fixtures.assignmentFeedback("0000002", "0000002").tap { f => f.assignment = assignment; f.actualMark = Some(70) })
-    notification.recipients should not be 'empty
+    notification.recipients should not be Symbol("empty")
 
     // Feedback partially released
     assignment.feedbacks.get(0).released = true
-    notification.recipients should not be 'empty
+    notification.recipients should not be Symbol("empty")
 
     // Feedback released for all assignments without plagiarism investigation
     assignment.submissions.get(1).plagiarismInvestigation = SuspectPlagiarised
     assignment.needsFeedbackPublishing should be (false)
-    notification.recipients should be('empty)
+    notification.recipients should be(Symbol("empty"))
     assignment.submissions.get(1).plagiarismInvestigation = NotInvestigated
 
     // Feedback fully released
     assignment.feedbacks.get(1).released = true
     assignment.needsFeedbackPublishing should be (false)
-    notification.recipients should be('empty)
+    notification.recipients should be(Symbol("empty"))
   }
 
   @Test def recipientsExtensionAlreadyReleased() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
@@ -295,24 +295,24 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     extension.usercode = "1234567"
     extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
     extension.approve()
-    extension.feedbackDeadline should be('empty)
+    extension.feedbackDeadline should be(Symbol("empty"))
 
     val submission3 = Fixtures.submission("1234567", "1234567")
     submission3.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
     assignment.submissions.add(submission3)
 
     val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
-    notification.deadline should not be 'empty
-    notification.recipients should not be 'empty
+    notification.deadline should not be Symbol("empty")
+    notification.recipients should not be Symbol("empty")
 
     // Feedback added
     assignment.feedbacks.add(Fixtures.assignmentFeedback("1234567", "1234567").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
-    notification.recipients should not be 'empty
+    notification.recipients should not be Symbol("empty")
 
     // Feedback fully released
     assignment.feedbacks.get(0).released = true
     assignment.needsFeedbackPublishing should be (true) // We still haven't released the others
-    notification.recipients should be('empty)
+    notification.recipients should be(Symbol("empty"))
   }
 
 }

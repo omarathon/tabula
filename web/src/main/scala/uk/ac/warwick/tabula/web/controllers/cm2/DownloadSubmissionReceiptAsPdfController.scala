@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/submission-receipt.pdf"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/submission-receipt.pdf"))
 class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
   hideDeletedItems
@@ -40,9 +39,8 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}/submission-receipt.pdf"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/{student}/submission-receipt.pdf"))
 class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkController {
 
   hideDeletedItems

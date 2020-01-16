@@ -20,7 +20,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
   override lazy val eventName = "AddMarkerFeedback"
 
-  PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+  PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
   if (submitter.apparentUser != marker) {
     PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
   }
@@ -32,7 +32,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
   var markedStudents: JList[FeedbackItem] = LazyLists.create[FeedbackItem]()
 
 
-  def processStudents() {
+  def processStudents(): Unit = {
     //bring all feedbacks belonging to the current marker along with  completed marking. Completed marking records are displayed to the user at front end if marker did upload again
     val allMarkerFeedbacks = assignment.allFeedback.flatMap { feedback =>
       feedback.allMarkerFeedback.filter { mFeedback =>
@@ -85,7 +85,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
   }
 
 
-  override def validateExisting(item: FeedbackItem, errors: Errors) {
+  override def validateExisting(item: FeedbackItem, errors: Errors): Unit = {
     val usercode = item.student.map(_.getUserId)
     val feedback = usercode.flatMap(assignment.findFeedback)
 
@@ -105,7 +105,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
     }
   }
 
-  private def checkForDuplicateFiles(item: FeedbackItem, feedback: MarkerFeedback) {
+  private def checkForDuplicateFiles(item: FeedbackItem, feedback: MarkerFeedback): Unit = {
     val attachedFiles = item.file.attachedFileNames.toSet
     val feedbackFiles = feedback.attachments.asScala.map(file => file.getName).toSet
     item.duplicateFileNames = attachedFiles & feedbackFiles

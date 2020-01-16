@@ -228,7 +228,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
   }
 
   /** Matches on an UpstreamAssessmentGroup's module code. */
-  def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty('moduleCode, code)
+  def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty(Symbol("moduleCode"), code)
 
   behavior of "removeBlankFeedbackForDeregisteredStudents"
 
@@ -238,14 +238,13 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
     val user = new User
     user.setUserId("custrd")
 
-    val feedback = new AssignmentFeedback
+    val feedback = new Feedback
     val markerFeedback = new MarkerFeedback
     markerFeedback.feedback = feedback
     feedback.markerFeedback.add(markerFeedback)
     feedback.usercode = user.getUserId
 
     val assignment = new Assignment
-    assignment.cm2Assignment = true
     assignment.addFeedback(feedback)
 
     assignment.feedbackService = smartMock[FeedbackService]

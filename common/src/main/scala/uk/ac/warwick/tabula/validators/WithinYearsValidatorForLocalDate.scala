@@ -8,7 +8,7 @@ class WithinYearsValidatorForLocalDate extends ConstraintValidator[DateWithinYea
   var maxPast: Int = _
   var maxFuture: Int = _
 
-  override def initialize(annotation: DateWithinYears) {
+  override def initialize(annotation: DateWithinYears): Unit = {
     maxPast = annotation.maxPast()
     maxFuture = annotation.maxFuture()
   }

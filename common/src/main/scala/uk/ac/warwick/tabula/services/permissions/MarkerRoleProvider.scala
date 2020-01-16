@@ -5,8 +5,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.MutablePromise
 import uk.ac.warwick.tabula.helpers.Promises._
-import uk.ac.warwick.tabula.helpers.{MutablePromise, RequestLevelCaching}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{Marker, MarkerRoleDefinition, Role}
 import uk.ac.warwick.tabula.services.AssessmentService
@@ -24,14 +24,8 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
     }
 
     scope match {
-      case assignment: Assignment if assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).exists(_.allMarkers.contains(user.apparentUser)) =>
+      case assignment: Assignment if Option(assignment.cm2MarkingWorkflow).exists(_.allMarkers.contains(user.apparentUser)) =>
         getRoles(LazyList(assignment))
-
-      case assignment: Assignment if !assignment.cm2Assignment && assignment.isMarker(user.apparentUser) =>
-        getRoles(LazyList(assignment))
-
-      case exam: Exam if exam.isMarker(user.apparentUser) =>
-        getRoles(LazyList(exam))
 
       // We don't need to check for the marker role on any other scopes
       case _ => LazyList.empty

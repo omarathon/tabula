@@ -2,13 +2,20 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
-  <#macro studentIdentifier user><#compress>
-    <#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
+  <#--  use the university ID from feedback if possible  -->
+  <#macro studentIdentifier user enhancedFeedback={}><#compress>
+    <#if enhancedFeedback?? && enhancedFeedback.feedback??>
+        ${enhancedFeedback.feedback.studentIdentifier}
+    <#elseif user.warwickId??>
+        ${user.warwickId}
+    <#else>
+        ${user.userId!}
+    </#if>
   </#compress></#macro>
 
   <#function stage_incomplete markingStage enhancedFeedback="">
       <#if enhancedFeedback?has_content>
-          <#return enhancedFeedback.notReleasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
+          <#return !enhancedFeedback.releasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
       </#if>
       <#return false />
   </#function>
@@ -53,7 +60,7 @@
           <#if coursework.enhancedExtension??>
             <#local enhancedExtension=coursework.enhancedExtension />
           </#if>
-          <#local identifier><@studentIdentifier student.user /></#local>
+          <#local identifier><@studentIdentifier student.user coursework.enhancedFeedback /></#local>
           <#local lateness><@components.lateness submission /></#local>
 
           <div class="details">
@@ -125,7 +132,7 @@
           <#if coursework.enhancedExtension??>
             <#local enhancedExtension=coursework.enhancedExtension />
           </#if>
-          <#local identifier><@studentIdentifier student.user /></#local>
+          <#local identifier><@studentIdentifier student.user coursework.enhancedFeedback /></#local>
           <#local lateness><@components.lateness submission /></#local>
 
           <tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true"</#if>

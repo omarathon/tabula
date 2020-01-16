@@ -35,7 +35,7 @@ class ReasonableAdjustmentsUserType extends UserType {
       .orNull
   }
 
-  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor) {
+  final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor): Unit = {
     value match {
       case v: Set[ReasonableAdjustment] @unchecked =>
         val array = stmt.getConnection.createArrayOf("VARCHAR", v.toSeq.sortBy(_.id).map(ra => Json.stringify(Json.toJson(ra))).asJava.toArray)

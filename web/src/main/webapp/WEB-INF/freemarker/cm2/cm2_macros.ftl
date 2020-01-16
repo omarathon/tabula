@@ -152,11 +152,7 @@
             </@fmt.permission_button>
           </#if>
 
-          <#if assignment.cm2Assignment>
-            <#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-          <#else>
-            <#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
-          </#if>
+          <#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
           <@fmt.permission_button
           permission='Assignment.Update'
           scope=assignment

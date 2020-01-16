@@ -143,7 +143,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
         with PopulateAllocateStudentsToDepartmentalSmallGroupsCommand
   }
 
-  @Test def apply() {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.unallocated should be(JList())
       command.mapping should be(JMap(group1 -> JArrayList(), group2 -> JArrayList()))
@@ -179,7 +179,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
         with AllocateStudentsToDepartmentalSmallGroupsValidation
   }
 
-  @Test def validatePasses() {
+  @Test def validatePasses(): Unit = {
     new ValidationFixture {
       command.populate()
       command.sort()
@@ -191,7 +191,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test def validateCantSubmitUnrelatedGroup() {
+  @Test def validateCantSubmitUnrelatedGroup(): Unit = {
     new ValidationFixture {
       command.populate()
       command.sort()
@@ -226,7 +226,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     command.smallGroupService.getDepartmentSmallGroupById(group2.id) returns Some(group2)
   }
 
-  @Test def fileUploadSupport() {
+  @Test def fileUploadSupport(): Unit = {
     new FileUploadSupportFixture {
       command.populate()
       command.sort()
@@ -259,7 +259,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test def validateUploadedFilePasses() {
+  @Test def validateUploadedFilePasses(): Unit = {
     new FileUploadSupportFixture {
       val attachment = new FileAttachment
       attachment.id = "456"
@@ -281,7 +281,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test def validateUploadedFileWrongExtension() {
+  @Test def validateUploadedFileWrongExtension(): Unit = {
     new FileUploadSupportFixture {
       val attachment = new FileAttachment
       attachment.id = "789"
@@ -301,7 +301,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
@@ -317,7 +317,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -328,7 +328,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet(): Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -339,7 +339,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet(): Unit = {
     val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -352,7 +352,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     command.permissionsCheck(checking)
   }
 
-  @Test def describe() {
+  @Test def describe(): Unit = {
     new Fixture {
       val (dept, s) = (department, set)
       val command = new AllocateStudentsToDepartmentalSmallGroupsDescription with AllocateStudentsToDepartmentalSmallGroupsCommandState {
@@ -372,7 +372,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
     }
   }
 
-  @Test def wires() {
+  @Test def wires(): Unit = {
     new Fixture {
       withUser("cuscav") {
         val command = AllocateStudentsToDepartmentalSmallGroupsCommand(department, set, currentUser)

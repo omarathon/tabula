@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 
 trait DecodeDao {
-  def saveOrUpdate(modeOfAttendance: ModeOfAttendance)
+  def saveOrUpdate(modeOfAttendance: ModeOfAttendance): Unit
 
   def getByCode(code: String): Option[ModeOfAttendance]
 

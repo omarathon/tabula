@@ -25,7 +25,7 @@ trait DisabilityImporter extends Logging {
     disabilityMap(code)
   }
 
-  protected def updateDisabilityMap() {
+  protected def updateDisabilityMap(): Unit = {
     disabilityMap = slurpDisabilities()
   }
 

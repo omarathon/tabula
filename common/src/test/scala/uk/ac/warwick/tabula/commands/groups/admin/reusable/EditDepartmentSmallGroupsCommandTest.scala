@@ -61,7 +61,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     command.populate()
   }
 
-  @Test def create() {
+  @Test def create(): Unit = {
     new CommandFixture {
       command.groupNames.add("Group A")
       command.groupNames.add("Group B")
@@ -84,7 +84,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def edit() {
+  @Test def edit(): Unit = {
     new CommandWithExistingFixture {
       command.groupNames.asScala should be(Seq("Group A", "Group B", "Group C", "Group D"))
       command.groupIds.asScala should be(Seq("1", "2", "3", "4"))
@@ -113,7 +113,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions() {
+  @Test def permissions(): Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new EditDepartmentSmallGroupsPermissions with EditDepartmentSmallGroupsCommandState {
@@ -128,7 +128,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
     val command = new EditDepartmentSmallGroupsPermissions with EditDepartmentSmallGroupsCommandState {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -138,7 +138,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet(): Unit = {
     val command = new EditDepartmentSmallGroupsPermissions with EditDepartmentSmallGroupsCommandState {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -148,7 +148,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet(): Unit = {
     val command = new EditDepartmentSmallGroupsPermissions with EditDepartmentSmallGroupsCommandState {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -169,7 +169,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     command.populate()
   }
 
-  @Test def validationPasses() {
+  @Test def validationPasses(): Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -178,7 +178,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationAddNewPasses() {
+  @Test def validationAddNewPasses(): Unit = {
     new ValidationFixture {
       command.groupNames.add("Group E")
 
@@ -189,7 +189,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationEditPasses() {
+  @Test def validationEditPasses(): Unit = {
     new ValidationFixture {
       command.groupNames.set(1, "Edited group")
       command.groupNames.remove(3)
@@ -201,7 +201,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoName() {
+  @Test def validateNoName(): Unit = {
     new ValidationFixture {
       command.groupNames.set(1, "             ")
 
@@ -215,7 +215,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNameTooLong() {
+  @Test def validateNameTooLong(): Unit = {
     new ValidationFixture {
       command.groupNames.set(1, (1 to 300).map { _ => "a" }.mkString(""))
 
@@ -229,7 +229,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantRemoveNonEmpty() {
+  @Test def validateCantRemoveNonEmpty(): Unit = {
     new ValidationFixture {
       groupD.students.add(new User("cuscav") {
         {
@@ -248,7 +248,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCantRemoveWhenAttendanceRecorded() {
+  @Test def validateCantRemoveWhenAttendanceRecorded(): Unit = {
     new ValidationFixture {
       val event: SmallGroupEvent = Fixtures.smallGroupEvent("An Event")
       val linkedGroup: SmallGroup = Fixtures.smallGroup("Linked group")
@@ -278,7 +278,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateCanRemoveWhenAttendaneNotRecorded() {
+  @Test def validateCanRemoveWhenAttendaneNotRecorded(): Unit = {
     new ValidationFixture {
       val event: SmallGroupEvent = Fixtures.smallGroupEvent("An Event")
       val linkedGroup: SmallGroup = Fixtures.smallGroup("Linked group")
@@ -305,7 +305,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def describe() {
+  @Test def describe(): Unit = {
     new Fixture {
       val (dept, s) = (department, set)
       val command = new EditDepartmentSmallGroupsDescription with EditDepartmentSmallGroupsCommandState {
@@ -324,7 +324,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wires() {
+  @Test def wires(): Unit = {
     new Fixture {
       val command = EditDepartmentSmallGroupsCommand(department, set)
 

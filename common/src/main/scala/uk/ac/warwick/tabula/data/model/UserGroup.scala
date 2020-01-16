@@ -74,21 +74,21 @@ class UserGroup private(val universityIds: Boolean)
 
   def includedUserIds: Set[String] = includeUsers.asScala.toSet
 
-  def includedUserIds_=(userIds: Set[String]) {
+  def includedUserIds_=(userIds: Set[String]): Unit = {
     includeUsers.clear()
     includeUsers.addAll(userIds.asJava)
   }
 
   def staticUserIds: Set[String] = staticIncludeUsers.asScala.toSet
 
-  def staticUserIds_=(userIds: Set[String]) {
+  def staticUserIds_=(userIds: Set[String]): Unit = {
     staticIncludeUsers.clear()
     staticIncludeUsers.addAll(userIds.asJava)
   }
 
   def excludedUserIds: Set[String] = excludeUsers.asScala.toSet
 
-  def excludedUserIds_=(userIds: Set[String]) {
+  def excludedUserIds_=(userIds: Set[String]): Unit = {
     excludeUsers.clear()
     excludeUsers.addAll(userIds.asJava)
   }
@@ -198,7 +198,7 @@ class UserGroup private(val universityIds: Boolean)
     case _ => Set.empty
   }
 
-  def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
+  def copyFrom(otherGroup: UnspecifiedTypeUserGroup): Unit = {
     assert(this.universityIds == otherGroup.universityIds, "Can only copy from a group with same type of users")
 
     val other = otherGroup.knownType
@@ -317,15 +317,15 @@ trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 
   def staticUserIds: Set[String]
 
-  def staticUserIds_=(userIds: Set[String])
+  def staticUserIds_=(userIds: Set[String]): Unit
 
   def includedUserIds: Set[String]
 
-  def includedUserIds_=(userIds: Set[String])
+  def includedUserIds_=(userIds: Set[String]): Unit
 
   def excludedUserIds: Set[String]
 
-  def excludedUserIds_=(userIds: Set[String])
+  def excludedUserIds_=(userIds: Set[String]): Unit
 
   def includesUserId(userId: String): Boolean
 

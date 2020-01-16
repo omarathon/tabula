@@ -71,7 +71,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
   /**
     * Resolve an exception outside of a request. Doesn't return a model/view.
     */
-  def resolveException(e: Exception) {
+  def resolveException(e: Exception): Unit = {
     doResolve(e)
   }
 

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Notification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.helpers.Tap._
@@ -8,16 +8,16 @@ import uk.ac.warwick.tabula.helpers.Tap._
 class FinaliseFeedbackNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
   private trait Fixture {
-    val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration
+    val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 
     val assignment: Assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
   }
 
   private trait SingleItemFixture extends Fixture {
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0000001").tap(_.assignment = assignment)
+    val feedback: Feedback = Fixtures.assignmentFeedback("0000001").tap(_.assignment = assignment)
 
-    val notification: FinaliseFeedbackNotification = Notification.init(new FinaliseFeedbackNotification, currentUser.apparentUser, feedback.asInstanceOf[Feedback], assignment)
+    val notification: FinaliseFeedbackNotification = Notification.init(new FinaliseFeedbackNotification, currentUser.apparentUser, feedback, assignment)
   }
 
   private trait MultipleItemsFixture extends Fixture {

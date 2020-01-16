@@ -10,20 +10,18 @@ import scala.jdk.CollectionConverters._
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
 
-  @Test def associations() {
+  @Test def associations(): Unit = {
     transactional { t =>
 
       val thisAssignmentDao = new AssessmentDaoImpl
       thisAssignmentDao.sessionFactory = sessionFactory
 
       val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-        with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent {
+        with AssessmentServiceUserGroupHelpers with CM2MarkingWorkflowServiceComponent {
         val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
-        val firstMarkerHelper = null
-        val secondMarkerHelper = null
+
         val cm2MarkerHelper = null
-        val markingWorkflowService = null
-        val cm2MarkingWorkflowService = null
+        val cm2MarkingWorkflowService: CM2MarkingWorkflowService = null
       }
 
       val dao = new AssessmentMembershipDaoImpl

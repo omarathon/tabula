@@ -95,7 +95,7 @@ class SmallGroupSet
     }
   }
 
-  def releasedToStudents_=(releasedToStudents: Boolean) {
+  def releasedToStudents_=(releasedToStudents: Boolean): Unit = {
     _releasedToStudents = releasedToStudents
   }
 
@@ -182,7 +182,7 @@ class SmallGroupSet
     }
   }
 
-  def members_=(group: UserGroup) {
+  def members_=(group: UserGroup): Unit = {
     _membersGroup = group
   }
 
@@ -213,7 +213,7 @@ class SmallGroupSet
   private var _defaultTutors: UserGroup = UserGroup.ofUsercodes
 
   def defaultTutors: UnspecifiedTypeUserGroup = _defaultTutors // No need to wrap this in a cache
-  def defaultTutors_=(group: UserGroup) {
+  def defaultTutors_=(group: UserGroup): Unit = {
     _defaultTutors = group
   }
 
@@ -376,7 +376,7 @@ class SmallGroupSet
     newSet
   }
 
-  def postLoad() {
+  def postLoad(): Unit = {
     ensureSettings
   }
 

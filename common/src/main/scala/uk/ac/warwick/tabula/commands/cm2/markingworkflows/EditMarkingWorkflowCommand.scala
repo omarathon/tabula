@@ -108,8 +108,7 @@ trait EditMarkingWorkflowState extends ModifyMarkingWorkflowState {
 }
 
 trait ModifyMarkingWorkflowValidation extends SelfValidating {
-
-  self: ModifyMarkingWorkflowState with UserLookupComponent =>
+  self: ModifyMarkingWorkflowRequest with UserLookupComponent =>
 
   def hasDuplicates(usercodes: JList[String]): Boolean = {
     val trimmed = usercodes.asScala.filter(_.hasText).map(_.trim)
@@ -118,7 +117,6 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 
   // validation of the markers
   def markerValidation(errors: Errors, workflowType: MarkingWorkflowType): Unit = {
-
     val markerAValidator = new UsercodeListValidator(markersA, "markersA") {
       override def alreadyHasCode: Boolean = hasDuplicates(markersA)
     }
@@ -146,15 +144,18 @@ trait EditMarkingWorkflowDescription extends Describable[Option[CM2MarkingWorkfl
     workflow.foreach(d.markingWorkflow)
 }
 
-trait ModifyMarkingWorkflowState {
-
-  this: UserLookupComponent =>
-
-  type Usercode = String
+trait ModifyMarkingWorkflowState extends ModifyMarkingWorkflowRequest {
+  self: UserLookupComponent =>
 
   def department: Department
-
   def academicYear: AcademicYear
+
+  def markersAUsers: Seq[User] = userLookup.usersByUserIds(markersA.asScala.toSeq).values.toSeq
+  def markersBUsers: Seq[User] = userLookup.usersByUserIds(markersB.asScala.toSeq).values.toSeq
+}
+
+trait ModifyMarkingWorkflowRequest {
+  type Usercode = String
 
   // bindable
   var workflowName: String = _
@@ -165,7 +166,11 @@ trait ModifyMarkingWorkflowState {
 
   var sampler: ModerationSampler = _
 
-  def markersAUsers: Seq[User] = userLookup.usersByUserIds(markersA.asScala.toSeq).values.toSeq
-
-  def markersBUsers: Seq[User] = userLookup.usersByUserIds(markersB.asScala.toSeq).values.toSeq
+  def copyModifyMarkingWorkflowRequestFrom(other: ModifyMarkingWorkflowRequest): Unit = {
+    workflowName = other.workflowName
+    workflowType = other.workflowType
+    markersA = other.markersA
+    markersB = other.markersB
+    sampler = other.sampler
+  }
 }

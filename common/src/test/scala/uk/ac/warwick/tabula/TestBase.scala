@@ -215,7 +215,7 @@ trait TestHelpers extends TestFixtures {
    *
    * withUser("cusebr") { /* ... your code */  }
    */
-  def withUser(code: String, universityId: String = null, profile: Option[Member] = None)(fn: => Unit) {
+  def withUser(code: String, universityId: String = null, profile: Option[Member] = None)(fn: => Unit): Unit = {
     val user = if (code == null) {
       new AnonymousUser()
     } else {
@@ -234,7 +234,7 @@ trait TestHelpers extends TestFixtures {
       .getOrElse(throw new IllegalStateException("No RequestInfo active"))
       .requestLevelCache.shutdown() // withUser maintains a cache
 
-  def withCurrentUser(user: CurrentUser)(fn: => Unit) {
+  def withCurrentUser(user: CurrentUser)(fn: => Unit): Unit = {
     val requestInfo = RequestInfo.fromThread match {
       case Some(info) => throw new IllegalStateException("A RequestInfo is already open")
       case None => {
@@ -252,7 +252,7 @@ trait TestHelpers extends TestFixtures {
     }
   }
 
-  def withSSOConfig(ssoConfig: SSOConfiguration = newSSOConfiguration)(fn: => Unit) {
+  def withSSOConfig(ssoConfig: SSOConfiguration = newSSOConfiguration)(fn: => Unit): Unit = {
     try {
       SSOConfiguration.setConfig(ssoConfig)
       fn
@@ -283,10 +283,6 @@ trait TestHelpers extends TestFixtures {
         BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
     }
   }
-
-  @Before def setupCm1Prefix(): Unit = {
-    Routes.coursework._cm1Prefix = Some("coursework")
-  }
 }
 
 trait FreemarkerTestHelpers {
@@ -301,7 +297,7 @@ trait FreemarkerTestHelpers {
     val mockMethod: TemplateMethodModelEx = mock[TemplateMethodModelEx]
     val mockDirective: TemplateDirectiveModel = mock[TemplateDirectiveModel]
 
-    def execute(env: Environment, params: util.Map[_, _], loopVars: Array[TemplateModel], body: TemplateDirectiveBody) {
+    def execute(env: Environment, params: util.Map[_, _], loopVars: Array[TemplateModel], body: TemplateDirectiveBody): Unit = {
       mockDirective.execute(env, params, loopVars, body)
     }
 

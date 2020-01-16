@@ -11,7 +11,7 @@ class RouteDaoTest extends PersistenceTestBase {
   val route: Route = Fixtures.route("g553")
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     dao.sessionFactory = sessionFactory
   }
 

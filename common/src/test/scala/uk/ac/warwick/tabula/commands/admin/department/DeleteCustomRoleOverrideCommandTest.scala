@@ -39,7 +39,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     val command = new DeleteCustomRoleOverrideCommandInternal(department, customRole, roleOverride) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new CommandFixture {
       command.department should be(department)
       command.customRoleDefinition should be(customRole)
@@ -47,16 +47,16 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.applyInternal() should be(roleOverride)
-      customRole.overrides.asScala should be('empty)
+      customRole.overrides.asScala should be(Symbol("empty"))
 
       verify(command.permissionsService, times(1)).saveOrUpdate(customRole)
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val d: Department = department
       val o: RoleOverride = roleOverride
@@ -74,7 +74,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     new Fixture {
       val o: RoleOverride = roleOverride
 
@@ -100,7 +100,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -109,7 +109,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description {
+  @Test def description: Unit = {
     new Fixture {
       val dept: Department = department
       val o: RoleOverride = roleOverride

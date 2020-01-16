@@ -177,7 +177,7 @@ class StudentCourseDetails
 
   def equals(that: StudentCourseDetails): Boolean = this.scjCode == that.scjCode
 
-  def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
+  def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails): Unit = {
     studentCourseYearDetails.remove(yearDetailsToAdd)
     studentCourseYearDetails.add(yearDetailsToAdd)
 

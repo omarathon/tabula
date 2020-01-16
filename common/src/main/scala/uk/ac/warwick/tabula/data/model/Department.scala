@@ -97,17 +97,6 @@ class Department extends GeneratedId
 
   @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)
-  private val _markingWorkflows: JSet[MarkingWorkflow] = JHashSet()
-
-  def markingWorkflows: Seq[MarkingWorkflow] = _markingWorkflows.asScala.toSeq.sorted
-
-  def addMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.add(markingWorkflow)
-
-  def removeMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.remove(markingWorkflow)
-
-
-  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-  @BatchSize(size = 200)
   private val _cm2MarkingWorkflows: JSet[CM2MarkingWorkflow] = JHashSet()
 
   def cm2MarkingWorkflows: Seq[CM2MarkingWorkflow] = _cm2MarkingWorkflows.asScala.toSeq.sorted
@@ -152,25 +141,25 @@ class Department extends GeneratedId
 
   def autoGroupDeregistration: Boolean = getBooleanSetting(Settings.AutoGroupDeregistration, default = true)
 
-  def autoGroupDeregistration_=(dereg: Boolean) {
+  def autoGroupDeregistration_=(dereg: Boolean): Unit = {
     settings += (Settings.AutoGroupDeregistration -> dereg)
   }
 
   def studentsCanScheduleMeetings: Boolean = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 
-  def studentsCanScheduleMeetings_=(canDo: Boolean) {
+  def studentsCanScheduleMeetings_=(canDo: Boolean): Unit = {
     settings += (Settings.StudentsCanScheduleMeetings -> canDo)
   }
 
   def uploadCourseworkMarksToSits: Boolean = getBooleanSetting(Settings.UploadCourseworkMarksToSits, default = false)
 
-  def uploadCourseworkMarksToSits_=(enabled: Boolean) {
+  def uploadCourseworkMarksToSits_=(enabled: Boolean): Unit = {
     settings += (Settings.UploadCourseworkMarksToSits -> enabled)
   }
 
   def uploadExamMarksToSits: Boolean = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
 
-  def uploadExamMarksToSits_=(enabled: Boolean) {
+  def uploadExamMarksToSits_=(enabled: Boolean): Unit = {
     settings += (Settings.UploadExamMarksToSits -> enabled)
   }
 
@@ -280,7 +269,7 @@ class Department extends GeneratedId
 
   def autoMarkMissedMonitoringPoints: Boolean = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
 
-  def autoMarkMissedMonitoringPoints_=(enabled: Boolean) {
+  def autoMarkMissedMonitoringPoints_=(enabled: Boolean): Unit = {
     settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled)
   }
 
@@ -291,14 +280,14 @@ class Department extends GeneratedId
       getIntSetting(Settings.MissedMonitoringPointsNotificationLevelHigh, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.High)
     )
 
-  def missedMonitoringPointsNotificationLevels_=(levels: Department.Settings.MissedMonitoringPointsNotificationLevels) {
+  def missedMonitoringPointsNotificationLevels_=(levels: Department.Settings.MissedMonitoringPointsNotificationLevels): Unit = {
     settings += (Settings.MissedMonitoringPointsNotificationLevelLow -> levels.low)
     settings += (Settings.MissedMonitoringPointsNotificationLevelMedium -> levels.medium)
     settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
   }
 
   def enableMitCircs: Boolean = getBooleanSetting(Settings.EnableMitCircs, default = false)
-  def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
+  def enableMitCircs_=(enabled: Boolean): Unit = { settings += (Settings.EnableMitCircs -> enabled) }
 
   def mitCircsGuidance: String = getStringSetting(Settings.MitCircsGuidance).orNull
   def formattedMitCircsGuidance: TemplateHTMLOutputModel = FormattedHtml(mitCircsGuidance.maybeText)
@@ -344,7 +333,7 @@ class Department extends GeneratedId
 
   def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = false)
 
-  def enableLevelGrids_=(enabled: Boolean) {
+  def enableLevelGrids_=(enabled: Boolean): Unit = {
     settings += (Settings.EnableLevelGrids -> enabled)
   }
 
@@ -382,7 +371,7 @@ class Department extends GeneratedId
     extensionManagers.copyFrom(other.extensionManagers)
   }
 
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureSettings
   }
 

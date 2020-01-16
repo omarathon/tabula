@@ -43,7 +43,7 @@
       If you are trying to re-use this assignment, you should go back and create a separate assignment instead.
     </p>
 
-    <#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+    <#if assignment.cm2MarkingWorkflow??>
       <p>
         <strong>Warning:</strong>
         If you delete feedback for students who have been allocated to a marker and/or released for marking, all in-progress marking will be permanently deleted

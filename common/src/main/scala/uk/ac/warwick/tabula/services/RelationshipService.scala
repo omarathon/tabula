@@ -42,9 +42,9 @@ object SortableAgentIdentifier {
 trait RelationshipService {
   def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 
-  def saveOrUpdate(relationshipType: StudentRelationshipType)
+  def saveOrUpdate(relationshipType: StudentRelationshipType): Unit
 
-  def delete(relationshipType: StudentRelationshipType)
+  def delete(relationshipType: StudentRelationshipType): Unit
 
   def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
 
@@ -54,7 +54,7 @@ trait RelationshipService {
 
   def getStudentRelationshipById(id: String): Option[StudentRelationship]
 
-  def saveOrUpdate(relationship: StudentRelationship)
+  def saveOrUpdate(relationship: StudentRelationship): Unit
 
   def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 
@@ -121,9 +121,9 @@ trait RelationshipService {
 
   def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 
-  def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime)
+  def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime): Unit
 
-  def removeFutureStudentRelationships(relationships: Seq[StudentRelationship])
+  def removeFutureStudentRelationships(relationships: Seq[StudentRelationship]): Unit
 
   def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()): Seq[StudentAssociationData]
 
@@ -292,7 +292,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     }
   }
 
-  def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime) {
+  def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime): Unit = {
     relationships.foreach {
       rel => {
         rel.endDate = endDate

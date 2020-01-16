@@ -1,1 +1,1 @@
-The path to department LA is ${Routes.coursework.admin.department(department)}
+The path to department LA is ${Routes.cm2.admin.department.apply(department)}

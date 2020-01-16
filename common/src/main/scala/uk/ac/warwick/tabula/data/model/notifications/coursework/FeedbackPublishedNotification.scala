@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 @Proxy
 @DiscriminatorValue(value = "FeedbackPublished")
 class FeedbackPublishedNotification
-  extends NotificationWithTarget[AssignmentFeedback, Assignment]
+  extends NotificationWithTarget[Feedback, Assignment]
     with SingleRecipientNotification
-    with SingleItemNotification[AssignmentFeedback]
+    with SingleItemNotification[Feedback]
     with UniversityIdOrUserIdRecipientNotification
     with AutowiringUserLookupComponent
     with AllCompletedActionRequiredNotification {
 
-  def feedback: AssignmentFeedback = item.entity
+  def feedback: Feedback = item.entity
 
   def assignment: Assignment = feedback.assignment
 

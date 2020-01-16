@@ -29,7 +29,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     val command = new EditSmallGroupSetDefaultPropertiesCommandInternal(module, set) with CommandTestSupport
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.defaultWeekRanges = Seq(WeekRange(1, 10))
       command.defaultDay = DayOfWeek.Thursday
@@ -49,7 +49,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def resetExistingEvents {
+  @Test def resetExistingEvents: Unit = {
     new CommandFixture {
       command.defaultWeekRanges = Seq(WeekRange(1, 10))
       command.defaultDay = DayOfWeek.Thursday
@@ -106,7 +106,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theModule, theSet) = (module, set)
       val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
@@ -121,7 +121,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule: Unit = {
     val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
       val module = null
       val set = new SmallGroupSet
@@ -131,7 +131,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
       val module: Module = Fixtures.module("in101")
       val set = null
@@ -141,7 +141,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
       val module: Module = Fixtures.module("in101")
       module.id = "set id"
@@ -160,7 +160,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationPasses {
+  @Test def validationPasses: Unit = {
     new ValidationFixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -169,7 +169,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationInvalidLocation {
+  @Test def validationInvalidLocation: Unit = {
     new ValidationFixture {
       command.defaultLocation = "Location with | a pipe"
       command.useNamedLocation = true
@@ -184,7 +184,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationMissingLocationId {
+  @Test def validationMissingLocationId: Unit = {
     new ValidationFixture {
       command.defaultLocation = "Some location"
 
@@ -198,7 +198,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationEndTimeBeforeStart {
+  @Test def validationEndTimeBeforeStart: Unit = {
     new ValidationFixture {
       command.defaultStartTime = new LocalTime(14, 0)
       command.defaultEndTime = new LocalTime(13, 0)
@@ -213,7 +213,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def describe {
+  @Test def describe: Unit = {
     new Fixture {
       val (mod, s) = (module, set)
       val command = new EditSmallGroupSetDefaultPropertiesDescription with EditSmallGroupSetDefaultPropertiesCommandState {
@@ -232,7 +232,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = EditSmallGroupSetDefaultPropertiesCommand(module, set)
 

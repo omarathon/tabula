@@ -126,7 +126,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
   @BatchSize(size = 200)
   var attachments: JList[FileAttachment] = JArrayList()
 
-  def addAttachment(attachment: FileAttachment) {
+  def addAttachment(attachment: FileAttachment): Unit = {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.meetingRecord = this

@@ -17,9 +17,9 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 }
 
 trait StudentCourseDetailsDao {
-  def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
+  def saveOrUpdate(studentCourseDetails: StudentCourseDetails): Unit
 
-  def delete(studentCourseDetails: StudentCourseDetails)
+  def delete(studentCourseDetails: StudentCourseDetails): Unit
 
   def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 
@@ -41,9 +41,9 @@ trait StudentCourseDetailsDao {
 
   def getStaleScjCodesSince(from: DateTime): Seq[String]
 
-  def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime)
+  def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime): Unit
 
-  def unstampPresentInImport(notStaleScjCodes: Seq[String])
+  def unstampPresentInImport(notStaleScjCodes: Seq[String]): Unit
 
   def getCurrentStudents: Seq[StudentCourseDetails]
 }

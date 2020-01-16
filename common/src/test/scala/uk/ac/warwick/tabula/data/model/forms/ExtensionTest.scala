@@ -12,7 +12,7 @@ import scala.jdk.CollectionConverters._
 
 class ExtensionTest extends PersistenceTestBase with Mockito {
 
-  @Test def testExtension() {
+  @Test def testExtension(): Unit = {
     val assignment = new Assignment
     assignment.extensionService = smartMock[ExtensionService]
 
@@ -127,7 +127,7 @@ class ExtensionTest extends PersistenceTestBase with Mockito {
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i: Int): String = "%07d" format i
 
-  @Test def flags() {
+  @Test def flags(): Unit = {
     val extension = new Extension
 
     extension.isManual should be(true)
@@ -158,10 +158,10 @@ class ExtensionTest extends PersistenceTestBase with Mockito {
     extension.expiryDate = threeHoursInTheFuture
     extension.approve(null)
 
-    extension should not be 'expiryDateAdjusted
+    extension should not be Symbol("expiryDateAdjusted")
 
     extension.expiryDate = DateTime.now().plusHours(2)
 
-    extension shouldBe 'expiryDateAdjusted
+    extension shouldBe Symbol("expiryDateAdjusted")
   }
 }

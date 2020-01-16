@@ -26,7 +26,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     assignment.module.adminDepartment = Fixtures.department("cs")
 
     val submission: Submission = Fixtures.submission("1234567", "1234567").tap(_.assignment = assignment)
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567", "1234567").tap { f =>
+    val feedback: Feedback = Fixtures.assignmentFeedback("1234567", "1234567").tap { f =>
       f.assignment = assignment
       f.actualMark = Some(50)
     }
@@ -76,7 +76,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     controller.profileService.getMemberByUniversityId("1234567") returns None
   }
 
-  @Test def ugPenalty() {
+  @Test def ugPenalty(): Unit = {
     new UGStudentFixture {
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
       submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
@@ -90,7 +90,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def pgPenaltyPre2019() {
+  @Test def pgPenaltyPre2019(): Unit = {
     new PGStudentFixture {
       pgStudent.mostSignificantCourse.sprStartAcademicYear = AcademicYear.starting(2012)
 
@@ -106,7 +106,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def pgPenaltyPost2019() {
+  @Test def pgPenaltyPost2019(): Unit = {
     new PGStudentFixture {
       pgStudent.mostSignificantCourse.sprStartAcademicYear = AcademicYear.starting(2019)
 
@@ -122,7 +122,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def openEndedNoProposedPenalty() {
+  @Test def openEndedNoProposedPenalty(): Unit = {
     new PGStudentFixture {
       submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
       assignment.openEnded = true
@@ -136,7 +136,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def foundationCoursePenalty() {
+  @Test def foundationCoursePenalty(): Unit = {
     new FoundationStudentFixture {
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
       submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
@@ -150,7 +150,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
     }
   }
 
-  @Test def notFoundCoursePenalty() {
+  @Test def notFoundCoursePenalty(): Unit = {
     new NoStudentFoundFixture {
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
       submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)

@@ -49,7 +49,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
   }
 
   // SITS names come uppercased - check that we reformat various names correctly.
-  @Test def forenameFormatting() {
+  @Test def forenameFormatting(): Unit = {
     new Environment {
       val names = Seq("Mathew James", "Anna-Lee", "Nick", "Krist\u00EDn")
       val importer = new ProfileImporterImpl
@@ -70,7 +70,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
   }
 
   // SITS names come uppercased - check that we reformat various names correctly.
-  @Test def surnameFormatting() {
+  @Test def surnameFormatting(): Unit = {
     new Environment {
       val names = Seq("d'Haenens Johansson", "O'Toole", "Calvo-Bado", "Biggins", "MacCallum", "McCartney",
         "Mannion", "von Der Glockenspeil", "d'Howes", "di Stefano", "Mc Cauley", "J\u00F3hannesd\u00F3ttir")
@@ -92,7 +92,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
   }
 
   // Test that if we have name formatting from SSO, we use that as long as the names match
-  @Test def takesSuggestions() {
+  @Test def takesSuggestions(): Unit = {
     new Environment {
       val importer = new ProfileImporterImpl
 
@@ -115,7 +115,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def importStaff() {
+  @Test def importStaff(): Unit = {
     val mac = MembershipInformation(MembershipMember(
       universityId = "0672089",
       email = "M.Mannion@warwick.ac.uk",

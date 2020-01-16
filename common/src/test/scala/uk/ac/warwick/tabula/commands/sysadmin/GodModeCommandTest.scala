@@ -4,11 +4,11 @@ import uk.ac.warwick.tabula.{CurrentUser, TestBase}
 
 class GodModeCommandTest extends TestBase {
 
-  @Test def set {
+  @Test def set: Unit = {
     val cmd = new GodModeCommand
 
     val cookie = cmd.applyInternal
-    cookie should be('defined)
+    cookie should be(Symbol("defined"))
     cookie.map { cookie =>
       cookie.cookie.getName() should be(CurrentUser.godModeCookie)
       cookie.cookie.getValue() should be("true")
@@ -16,12 +16,12 @@ class GodModeCommandTest extends TestBase {
     }
   }
 
-  @Test def remove {
+  @Test def remove: Unit = {
     val cmd = new GodModeCommand
     cmd.action = "remove"
 
     val cookie = cmd.applyInternal
-    cookie should be('defined)
+    cookie should be(Symbol("defined"))
     cookie.map { cookie =>
       cookie.cookie.getName() should be(CurrentUser.godModeCookie)
       cookie.cookie.getValue() should be("false") // removal

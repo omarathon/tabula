@@ -31,14 +31,14 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     val command = new DeleteCustomRoleDefinitionCommandInternal(department, customRole) with CommandTestSupport
   }
 
-  @Test def init {
+  @Test def init: Unit = {
     new CommandFixture {
       command.department should be(department)
       command.customRoleDefinition should be(customRole)
     }
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       command.applyInternal() should be(customRole)
 
@@ -46,7 +46,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val command = new DeleteCustomRoleDefinitionCommandPermissions with DeleteCustomRoleDefinitionCommandState {
         override val department: Department = Fixtures.department("in")
@@ -60,7 +60,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
     new Fixture {
       val command = new DeleteCustomRoleDefinitionCommandPermissions with DeleteCustomRoleDefinitionCommandState {
         override val department = null
@@ -83,7 +83,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoErrors {
+  @Test def validateNoErrors: Unit = {
     new ValidationFixture {
       command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns (Nil)
       command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns (Nil)
@@ -95,7 +95,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateHasGrantedRole {
+  @Test def validateHasGrantedRole: Unit = {
     new ValidationFixture {
       command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns (Seq(GrantedRole(department, customRole)))
       command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns (Nil)
@@ -109,7 +109,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateHasDerivedRole {
+  @Test def validateHasDerivedRole: Unit = {
     new ValidationFixture {
       command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns (Nil)
       command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns (Seq(new CustomRoleDefinition))
@@ -123,7 +123,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description {
+  @Test def description: Unit = {
     val command = new DeleteCustomRoleDefinitionCommandDescription with DeleteCustomRoleDefinitionCommandState {
       override val eventName: String = "test"
       val department: Department = Fixtures.department("in")

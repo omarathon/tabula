@@ -41,7 +41,7 @@ trait ModifyAssignmentOptionsCommandState {
 
   def assignment: Assignment
 
-  def copyTo(assignment: Assignment) {
+  def copyTo(assignment: Assignment): Unit = {
     copySharedOptionsTo(assignment)
   }
 }

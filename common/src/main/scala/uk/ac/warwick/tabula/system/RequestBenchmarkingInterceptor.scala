@@ -34,7 +34,7 @@ class RequestBenchmarkingInterceptor extends HandlerInterceptorAdapter with Task
     true
   }
 
-  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
+  override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception): Unit = {
     if (Logging.benchmarking) {
       val stopwatch = Command.getOrInitStopwatch
       stopwatch.stop()

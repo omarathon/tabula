@@ -23,7 +23,7 @@ class SubmissionReceiptNotification extends SubmissionNotification
   with UniversityIdOrUserIdRecipientNotification
   with HasNotificationAttachment {
 
-  override def onPreSave(isNew: Boolean) {
+  override def onPreSave(isNew: Boolean): Unit = {
     recipientUniversityId = submission.usercode
   }
 

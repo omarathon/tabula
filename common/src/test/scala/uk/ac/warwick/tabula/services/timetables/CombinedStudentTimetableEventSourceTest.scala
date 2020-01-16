@@ -38,7 +38,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito {
   source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(groupEvents))
 
   @Test
-  def callsBothServicesAndAggregatesTheResult() {
+  def callsBothServicesAndAggregatesTheResult(): Unit = {
     val result = source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue
     result.events.sortBy(_.day.getAsInt) should be(timetableEvents ++ groupEvents)
   }

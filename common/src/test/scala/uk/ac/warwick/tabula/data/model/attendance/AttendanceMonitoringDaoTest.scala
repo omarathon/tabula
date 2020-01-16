@@ -78,11 +78,11 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
   point4.updatedDate = DateTime.now
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     attendanceMonitoringDao.sessionFactory = sessionFactory
   }
 
-  @Test def findRelevantPoints() {
+  @Test def findRelevantPoints(): Unit = {
     transactional { tx =>
       session.save(department)
       session.save(route)
@@ -104,7 +104,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def allCheckpoints() {
+  @Test def allCheckpoints(): Unit = {
     transactional { tx =>
       session.save(department)
       session.save(route)
@@ -137,7 +137,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def countCheckpointsForPoints() {
+  @Test def countCheckpointsForPoints(): Unit = {
     transactional { tx =>
       session.save(department)
       session.save(route)
@@ -170,7 +170,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
     }
   }
 
-  @Test def findNonReportedTerms() {
+  @Test def findNonReportedTerms(): Unit = {
     transactional { tx =>
       session.save(department)
       session.save(route)

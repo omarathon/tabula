@@ -9,7 +9,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 
   private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)
 
-  private def noNewUsersListed(parentElement: String, expectedCount: Int) {
+  private def noNewUsersListed(parentElement: String, expectedCount: Int): Unit = {
     usercodes(parentElement).size should be(expectedCount)
   }
 
@@ -21,7 +21,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
     filteredUsercodes.foreach(_.size should be(0))
   }
 
-  private def gotoPermissionsScreen(parentElement: String, preExistingCount: Int) {
+  private def gotoPermissionsScreen(parentElement: String, preExistingCount: Int): Unit = {
     When("I go the admin page")
     if (!currentUrl.contains("/department/xxx")) {
       click on linkText("Go to the Test Services admin page")
@@ -50,7 +50,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
     nowhereElse(parentElement)
   }
 
-  private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
+  private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int): Unit = {
     gotoPermissionsScreen(parentElement, preExistingCount)
 
     When("I enter a usercode in the picker")

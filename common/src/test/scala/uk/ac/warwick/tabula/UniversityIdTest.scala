@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula
 
 class UniversityIdTest extends TestBase {
 
-  @Test def isValid() {
+  @Test def isValid(): Unit = {
     UniversityId.isValid("0672089") should be(true)
     UniversityId.isValid("4072089") should be(true)
     UniversityId.isValid("672089") should be(false)
@@ -10,7 +10,7 @@ class UniversityIdTest extends TestBase {
     UniversityId.isValid("O672089") should be(false)
   }
 
-  @Test def zeroPad() {
+  @Test def zeroPad(): Unit = {
     UniversityId.zeroPad("12345678") should be("12345678")
     UniversityId.zeroPad("0123456") should be("0123456")
     UniversityId.zeroPad("123456") should be("0123456")

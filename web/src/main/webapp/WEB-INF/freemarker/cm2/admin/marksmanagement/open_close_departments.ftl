@@ -43,7 +43,7 @@
         <button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
           Save
         </button>
-        <a class="btn btn-default" href="<@routes.coursework.home />">Cancel</a>
+        <a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
       </div>
     </@f.form>
   </div>

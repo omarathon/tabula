@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import freemarker.template.TemplateMethodModelEx
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 

@@ -21,11 +21,11 @@ class MasqueradeControllerTest extends TestBase with Mockito {
     command should be(anInstanceOf[Describable[Option[Cookie]]])
   }
 
-  @Test def form {
+  @Test def form: Unit = {
     controller.form(mock[Appliable[Option[Cookie]]]).viewName should be("admin/masquerade/form")
   }
 
-  @Test def submit {
+  @Test def submit: Unit = {
     val cookie = mock[Cookie]
     val command = mock[Appliable[Option[Cookie]]]
     command.apply() returns (Some(cookie))

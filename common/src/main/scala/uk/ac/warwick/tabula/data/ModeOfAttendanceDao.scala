@@ -13,7 +13,7 @@ trait AutowiringModeOfAttendanceDaoComponent extends ModeOfAttendanceDaoComponen
 }
 
 trait ModeOfAttendanceDao {
-  def saveOrUpdate(modeOfAttendance: ModeOfAttendance)
+  def saveOrUpdate(modeOfAttendance: ModeOfAttendance): Unit
 
   def getByCode(code: String): Option[ModeOfAttendance]
 

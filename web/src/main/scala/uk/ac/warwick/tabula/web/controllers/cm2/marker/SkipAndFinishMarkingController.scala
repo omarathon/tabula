@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{SkipAndFinishMarkingCommand, WorkflowProgressState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
@@ -17,14 +17,13 @@ import uk.ac.warwick.userlookup.User
 /**
   * Sends the feedback straight to the admin and skips any intermediate stages
   */
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/skip-marking"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/skip-marking"))
 class SkipAndFinishMarkingController extends CourseworkController {
 
   validatesSelf[SelfValidating]
 
-  type Command = Appliable[Seq[AssignmentFeedback]] with WorkflowProgressState
+  type Command = Appliable[Seq[Feedback]] with WorkflowProgressState
 
   @ModelAttribute("command")
   def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =

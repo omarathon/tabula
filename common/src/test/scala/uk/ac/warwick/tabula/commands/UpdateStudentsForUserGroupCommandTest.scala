@@ -76,7 +76,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def linkToSits {
+  @Test def linkToSits: Unit = {
     new CommandFixture {
       department.autoGroupDeregistration = false
 
@@ -96,7 +96,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def dontLinkToSits {
+  @Test def dontLinkToSits: Unit = {
     new CommandFixture {
       department.autoGroupDeregistration = false
 
@@ -109,14 +109,14 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
       command.applyInternal() should be(set)
 
-      set.members.knownType.staticUserIds should be('empty)
+      set.members.knownType.staticUserIds should be(Symbol("empty"))
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
-      set.members.knownType.excludedUserIds should be('empty)
+      set.members.knownType.excludedUserIds should be(Symbol("empty"))
       set.memberQuery shouldBe null
     }
   }
 
-  @Test def autoDeregistration {
+  @Test def autoDeregistration: Unit = {
     new CommandFixture {
       department.autoGroupDeregistration = true
 
@@ -140,9 +140,9 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
       command.applyInternal() should be(set)
 
-      set.members.knownType.staticUserIds should be('empty)
+      set.members.knownType.staticUserIds should be(Symbol("empty"))
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
-      set.members.knownType.excludedUserIds should be('empty)
+      set.members.knownType.excludedUserIds should be(Symbol("empty"))
       set.memberQuery shouldBe null
 
       groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
@@ -150,7 +150,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
       val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
@@ -165,7 +165,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment: Unit = {
     val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -175,7 +175,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -185,7 +185,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -197,7 +197,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def describe {
+  @Test def describe: Unit = {
     new Fixture {
       val (dept, s) = (department, set)
       val command = new UpdateStudentsForDepartmentSmallGroupSetDescription with CommandTestSupport {
@@ -216,7 +216,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = UpdateStudentsForUserGroupCommand(department, set)
 

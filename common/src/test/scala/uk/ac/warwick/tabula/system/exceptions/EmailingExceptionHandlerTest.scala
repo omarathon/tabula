@@ -19,7 +19,7 @@ import org.hamcrest.Description
 
 class EmailingExceptionHandlerTest extends TestBase with Mockito {
 
-  @Test def renderEmail {
+  @Test def renderEmail: Unit = {
     val user = new User("cusebr")
     val uri = "https://tabula.warwick.ac.uk/web/power/flight?super=magic"
     val currentUser = new CurrentUser(user, user)

@@ -13,9 +13,8 @@ import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceCompon
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentController with AutowiringAssessmentMembershipServiceComponent {
 
   type AssignMarkersCommand = Appliable[Assignment] with AssignMarkersState
@@ -23,10 +22,10 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 
   @ModelAttribute("assignMarkersBySpreadsheetCommand")
   def assignMarkersBySpreadsheetCommand(@PathVariable assignment: Assignment) =
-    AssignMarkersBySpreadsheetCommand(mustBeCM2(mandatory(assignment)))
+    AssignMarkersBySpreadsheetCommand(mandatory(assignment))
 
   @ModelAttribute("templateCommand")
-  def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mustBeCM2(mandatory(assignment)))
+  def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mandatory(assignment))
 
   @RequestMapping(value = Array("new/markers/template/download", "edit/markers/template/download"))
   def downloadTemplate(@ModelAttribute("templateCommand") templateCommand: TemplateCommand): ExcelView = {

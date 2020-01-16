@@ -12,7 +12,7 @@ class SLF4JEventLoggingTest extends TestBase {
   val testLogger: Logger = TestLoggerFactory.getTestLogger("uk.ac.warwick.tabula.AUDIT")
   val listener = new SLF4JEventListener
 
-  @Test def writesLogs {
+  @Test def writesLogs: Unit = {
     val command = new NullCommand().describedAs { (d) =>
       d.properties("mykey" -> "jibberjabber")
     }

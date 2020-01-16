@@ -15,9 +15,8 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 import scala.jdk.CollectionConverters._
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/assignments"))
+@RequestMapping(value = Array("/coursework/admin/{module}/assignments"))
 class AssignmentSearchController extends CourseworkController {
   type SearchAssignmentsCommand = Appliable[Seq[Assignment]] with SearchAssignmentCommandState
 

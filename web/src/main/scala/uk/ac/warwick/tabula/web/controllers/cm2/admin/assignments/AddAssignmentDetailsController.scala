@@ -1,30 +1,31 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentDetailsCommand, CreateAssignmentDetailsCommandInternal, CreateAssignmentDetailsCommandState}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.cm2.assignments.CreateAssignmentDetailsCommand
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear}/assignments/new"))
+@RequestMapping(value = Array("/coursework/admin/{module}/{academicYear}/assignments/new"))
 class AddAssignmentDetailsController extends AbstractAssignmentController
-  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent
+  with AutowiringCM2MarkingWorkflowServiceComponent {
 
   import MarkingWorkflowType.ordering
 
-  type CreateAssignmentDetailsCommand = CreateAssignmentDetailsCommandInternal with Appliable[Assignment] with CreateAssignmentDetailsCommandState
+  type CreateAssignmentDetailsCommand = CreateAssignmentDetailsCommand.Command
 
   validatesSelf[SelfValidating]
 
@@ -33,7 +34,7 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
     retrieveActiveAcademicYear(Option(academicYear))
 
   @ModelAttribute("command")
-  def createAssignmentDetailsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
+  def createAssignmentDetailsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear): CreateAssignmentDetailsCommand =
     CreateAssignmentDetailsCommand(mandatory(module), mandatory(academicYear))
 
   @RequestMapping
@@ -56,8 +57,9 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
       "department" -> module.adminDepartment,
       "module" -> module,
       "academicYear" -> form.academicYear,
-      "reusableWorkflows" -> form.availableWorkflows,
+      "reusableWorkflows" -> cm2MarkingWorkflowService.getReusableWorkflows(module.adminDepartment, academicYear),
       "availableWorkflows" -> MarkingWorkflowType.values.sorted,
+      "allWorkflowCategories" -> WorkflowCategory.values,
       "canDeleteMarkers" -> true,
       "possibleAnonymityOptions" -> AssignmentAnonymity.values,
       "departmentAnonymity" -> (if (module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)

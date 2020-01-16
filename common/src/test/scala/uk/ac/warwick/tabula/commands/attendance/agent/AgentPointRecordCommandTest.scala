@@ -77,7 +77,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def studentPointMap() {
+  def studentPointMap(): Unit = {
     new StateFixture {
       state.templatePoint = scheme1point1
       val result: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = state.studentPointMap
@@ -139,7 +139,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
       result(student1)(scheme1point1) should be(null)
 
       // The user doesn't have permission to record attendance for student2, so none should be popluated
-      result(student2) should be('empty)
+      result(student2) should be(Symbol("empty"))
     }
   }
 
@@ -175,7 +175,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateInvalidPointNotMember() {
+  def validateInvalidPointNotMember(): Unit = {
     new ValidatorFixture {
       validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student2) returns true
       validator.checkpointMap = JHashMap(
@@ -187,7 +187,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateInvalidPointNoPermission() {
+  def validateInvalidPointNoPermission(): Unit = {
     new ValidatorFixture {
       validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student2) returns {
         false
@@ -201,7 +201,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateAlreadyReported() {
+  def validateAlreadyReported(): Unit = {
     new ValidatorFixture {
       validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {
         true
@@ -217,7 +217,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateTooSoon() {
+  def validateTooSoon(): Unit = {
     new ValidatorFixture {
       validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {
         true
@@ -234,7 +234,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def validateOk() {
+  def validateOk(): Unit = {
     new ValidatorFixture {
       validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {
         true

@@ -11,9 +11,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/resend-receipt"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/resend-receipt"))
 class ResendSubmissionEmailController extends CourseworkController {
 
   var submissionService: SubmissionService = Wire.auto[SubmissionService]

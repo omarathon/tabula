@@ -9,7 +9,7 @@ import scala.jdk.CollectionConverters._
 class CustomDataBinderTest extends TestBase {
 
   @Test
-  def customAutoGrowCollectionLimit {
+  def customAutoGrowCollectionLimit: Unit = {
     val cmd = new TestCommand
     val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
 
@@ -27,7 +27,7 @@ class CustomDataBinderTest extends TestBase {
   }
 
   @Test(expected = classOf[InvalidPropertyException])
-  def exceedsCustomAutoGrowCollectionLimit {
+  def exceedsCustomAutoGrowCollectionLimit: Unit = {
 
     val cmd = new TestCommand
     val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding

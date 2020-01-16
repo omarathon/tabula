@@ -13,7 +13,7 @@ class MavReturnValueHandlerTest extends TestBase {
 
   def returnsMav = Mav("mymav")
 
-  def returnsUnit {}
+  def returnsUnit: Unit = {}
 
   def returnsAny: Any = null
 
@@ -26,14 +26,14 @@ class MavReturnValueHandlerTest extends TestBase {
   val anyMethod = new MethodParameter(getClass.getMethod("returnsAny"), -1)
   val superMavMethod = new MethodParameter(getClass.getMethod("returnsMav"), -1)
 
-  @Test def supports {
+  @Test def supports: Unit = {
     handler.supportsReturnType(mavMethod) should be(true)
     handler.supportsReturnType(unitMethod) should be(false)
     handler.supportsReturnType(anyMethod) should be(false)
     handler.supportsReturnType(superMavMethod) should be(true)
   }
 
-  @Test def handle {
+  @Test def handle: Unit = {
     val mavContainer = new ModelAndViewContainer
     val req = new ServletWebRequest(new MockHttpServletRequest)
     handler.handleReturnValue(returnsMav, mavMethod, mavContainer, req)
@@ -42,7 +42,7 @@ class MavReturnValueHandlerTest extends TestBase {
     mavContainer.isRequestHandled() should be(false)
   }
 
-  @Test def handleSubtype {
+  @Test def handleSubtype: Unit = {
     val mavContainer = new ModelAndViewContainer
     val req = new ServletWebRequest(new MockHttpServletRequest)
     handler.handleReturnValue(returnsSuperMav, superMavMethod, mavContainer, req)

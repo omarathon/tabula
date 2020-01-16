@@ -6,7 +6,7 @@ import org.springframework.mock.web.MockHttpServletResponse
 
 class JSONViewTest extends TestBase {
 
-  @Test def itWorks {
+  @Test def itWorks: Unit = {
     val req = new MockHttpServletRequest
     val res = new MockHttpServletResponse
 

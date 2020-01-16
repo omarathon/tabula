@@ -7,18 +7,18 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentFeedbackCommand, ModifyAssignmentFeedbackCommandState}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyFeedbackCommand, ModifyFeedbackCommandState}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 
 abstract class AbstractAssignmentFeedbackController extends AbstractAssignmentController {
 
-  type ModifyAssignmentFeedbackCommand = Appliable[Assignment] with ModifyAssignmentFeedbackCommandState with PopulateOnForm
+  type ModifyAssignmentFeedbackCommand = Appliable[Assignment] with ModifyFeedbackCommandState with PopulateOnForm
 
   @ModelAttribute("command")
   def modifyAssignmentFeedbackCommand(@PathVariable assignment: Assignment) =
-    ModifyAssignmentFeedbackCommand(mandatory(assignment))
+    ModifyFeedbackCommand(mandatory(assignment))
 
   def showForm(form: ModifyAssignmentFeedbackCommand, mode: String): Mav = {
     val module = form.assignment.module
@@ -41,9 +41,8 @@ abstract class AbstractAssignmentFeedbackController extends AbstractAssignmentCo
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentFeedbackController extends AbstractAssignmentFeedbackController {
 
   @RequestMapping(method = Array(GET), value = Array("/new/feedback"))

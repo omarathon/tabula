@@ -22,7 +22,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   }
 
   @Test
-  def includesTheNameOfEachGroup {
+  def includesTheNameOfEachGroup: Unit = {
     new NotificationFixture {
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
@@ -33,7 +33,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   }
 
   @Test
-  def includesTheCountOfStudents {
+  def includesTheCountOfStudents: Unit = {
     new NotificationFixture {
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
@@ -43,7 +43,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   }
 
   @Test
-  def callsWeekRangeFormatterOncePerEvent() {
+  def callsWeekRangeFormatterOncePerEvent(): Unit = {
     new NotificationFixture {
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
@@ -53,7 +53,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   }
 
   @Test
-  def formatsTimeNicely() {
+  def formatsTimeNicely(): Unit = {
     new NotificationFixture {
       val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,

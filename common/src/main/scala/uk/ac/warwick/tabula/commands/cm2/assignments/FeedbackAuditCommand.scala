@@ -31,7 +31,7 @@ class FeedbackAuditCommandInternal(val assignment: Assignment, val student: User
   lazy val submission: Option[Submission] = submissionService.getSubmissionByUsercode(assignment, student.getUserId)
 
   def applyInternal(): FeedbackAuditData = {
-    val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
+    val feedback = feedbackService.getFeedbackByUsercode(assignment, student.getUserId)
     FeedbackAuditData(submission, feedback)
   }
 }
@@ -45,7 +45,7 @@ trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with P
   self: FeedbackAuditCommandState =>
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
-    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+    p.PermissionCheck(Permissions.Feedback.Read, mandatory(assignment))
   }
 }
 

@@ -34,7 +34,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     override def filterValidUsercodeForMasquerade(loggedInUser: User)(masqueradeUsercode: String): Boolean = true
   }
 
-  @Test def foundUser() {
+  @Test def foundUser(): Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -55,10 +55,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (false)
     currentUser.sysadmin should be (false)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def foundUserWithProfile() {
+  @Test def foundUserWithProfile(): Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -83,7 +83,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.profile should be(Some(member))
   }
 
-  @Test def notFoundUser() {
+  @Test def notFoundUser(): Unit = {
     val user = new User("cuscav")
     user.setFoundUser(false)
 
@@ -104,10 +104,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (false)
     currentUser.sysadmin should be (false)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def masquerading {
+  @Test def masquerading: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -135,10 +135,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (true)
     currentUser.sysadmin should be (false)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def masqueradeAttemptButNotMasquerader {
+  @Test def masqueradeAttemptButNotMasquerader: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -166,10 +166,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (false)
     currentUser.sysadmin should be (false)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def sysadmin {
+  @Test def sysadmin: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -192,10 +192,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (true)
     currentUser.sysadmin should be (true)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def god {
+  @Test def god: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -219,10 +219,10 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (true)
     currentUser.masquerader should be (true)
     currentUser.sysadmin should be (true)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
-  @Test def godNotSysadmin {
+  @Test def godNotSysadmin: Unit = {
     val user = new User("cuscav")
     user.setFoundUser(true)
 
@@ -246,7 +246,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
     currentUser.god should be (false)
     currentUser.masquerader should be (false)
     currentUser.sysadmin should be (false)
-    currentUser.profile should be('empty)
+    currentUser.profile should be(Symbol("empty"))
   }
 
 }

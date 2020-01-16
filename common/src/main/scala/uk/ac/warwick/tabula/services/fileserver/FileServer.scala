@@ -27,7 +27,7 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
 trait StreamsFiles {
   self: FeaturesComponent =>
 
-  def stream(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+  def stream(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse): Unit = {
     val detectedMimeType = MimeTypeDetector.detect(file)
     if (detectedMimeType.detected) {
       // If we've detected a mime type, add XCTO so it's used
@@ -98,7 +98,7 @@ trait StreamsFiles {
   }
 
   // Very simplistic cache headers - needs turbocharging with TAB-929
-  private def handleCaching(file: RenderableFile, request: HttpServletRequest, out: HttpServletResponse) {
+  private def handleCaching(file: RenderableFile, request: HttpServletRequest, out: HttpServletResponse): Unit = {
     out.setHeader("Cache-Control", "private")
     for (expires <- file.cachePolicy.expires) {
       out.setDateHeader("Expires", (DateTime.now plus expires).getMillis)

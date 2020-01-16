@@ -109,7 +109,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
   def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap(_.replacedRoleDefinitionFor(roleDefinition)).getOrElse(roleDefinition)
 
   // If hibernate sets users to null, make a new empty usergroup
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureUsers
   }
 

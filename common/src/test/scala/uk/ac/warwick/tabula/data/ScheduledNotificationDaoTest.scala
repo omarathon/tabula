@@ -35,7 +35,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
   }
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     dao.sessionFactory = sessionFactory
     SSOUserType.userLookup = smartMock[UserLookupService]
   }

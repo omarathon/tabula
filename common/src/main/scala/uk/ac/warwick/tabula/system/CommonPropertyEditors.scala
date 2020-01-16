@@ -16,7 +16,7 @@ class CommonPropertyEditors extends PropertyEditorRegistrar {
       registry.registerCustomEditor(tag.runtimeClass, editor)
   }
 
-  override def registerCustomEditors(registry: PropertyEditorRegistry) {
+  override def registerCustomEditors(registry: PropertyEditorRegistry): Unit = {
     registry.register[String](new TrimmedStringPropertyEditor)
   }
 

@@ -16,7 +16,7 @@ abstract class AbstractUserSearchController extends ApiController with Autowirin
   protected def getCommand(academicYear: Optional[AcademicYear]): Appliable[Seq[String]]
   protected def resultKey: String
 
-  final override def onPreRequest {
+  final override def onPreRequest: Unit = {
     session.enableFilter(Member.ActiveOnlyFilter)
     session.enableFilter(Member.FreshOnlyFilter)
   }

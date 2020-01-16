@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.Mav
 
 import scala.jdk.CollectionConverters._
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}"))
 class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentController {
 
   type SmallGroupCommand = Appliable[Assignment] with AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest with PopulateOnForm
@@ -24,7 +23,7 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
   validatesSelf[SelfValidating]
 
   @ModelAttribute("smallGroupCommand")
-  def smallGroupCommand(@PathVariable assignment: Assignment) = AssignMarkersSmallGroupsCommand(mustBeCM2(mandatory(assignment)))
+  def smallGroupCommand(@PathVariable assignment: Assignment) = AssignMarkersSmallGroupsCommand(mandatory(assignment))
 
   private def form(assignment: Assignment, smallGroupCommand: SmallGroupCommand, mode: String): Mav = {
     smallGroupCommand.populate()

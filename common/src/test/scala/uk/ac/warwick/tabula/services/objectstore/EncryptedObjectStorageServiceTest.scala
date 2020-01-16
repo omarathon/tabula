@@ -95,7 +95,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
 
     // Directly on the encrypted metadata
     val metadata: Option[ObjectStorageService.Metadata] = objectStorageService.fetch("encrypted").futureValue.metadata
-    metadata should be ('defined)
+    metadata should be (Symbol("defined"))
     metadata.get.contentLength should be (14960)
     metadata.get.contentType should be ("application/octet-stream")
   }

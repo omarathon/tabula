@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, XmlView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}"))
 class SubmissionAndFeedbackExportController extends CourseworkController {
 
   @ModelAttribute("submissionAndFeedbackCommand")

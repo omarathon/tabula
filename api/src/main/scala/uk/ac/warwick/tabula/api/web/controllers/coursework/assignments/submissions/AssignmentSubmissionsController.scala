@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.submissions
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.SubmissionToJsonConverter
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.assignments.AdminGetSingleSubmissionCommand
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, SubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.Mav
@@ -31,7 +29,7 @@ trait ListSubmissionsForAssignmentApi {
 
   @ModelAttribute("listCommand")
   def listCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-    SubmissionAndFeedbackCommand(module, assignment)
+    SubmissionAndFeedbackCommand(assignment)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def list(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
@@ -61,7 +59,7 @@ trait GetSubmissionApi {
 
   @ModelAttribute("listCommand")
   def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-    SubmissionAndFeedbackCommand(module, assignment)
+    SubmissionAndFeedbackCommand(assignment)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def get(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment, @PathVariable submission: Submission): Mav = {

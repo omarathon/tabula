@@ -21,7 +21,6 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 object AddSitsAssignmentsCommand {
   def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -98,7 +97,6 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
         assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
       }
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
-      assignment.cm2Assignment = true
 
       // validation should have verified that there is an options set for us to use
       val options = optionsMap.get(item.optionsId)
@@ -215,7 +213,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     if (!errors.hasErrors) checkPermissions()
   }
 
-  def validateNames(errors: Errors) {
+  def validateNames(errors: Errors): Unit = {
     val items = includedItems
     val modules = LazyMaps.create { (code: String) => moduleAndDepartmentService.getModuleByCode(code.toLowerCase).orNull }
 

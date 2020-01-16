@@ -82,7 +82,7 @@ abstract class DepartmentMandatoryPermissionsCommandInternal extends CommandInte
 
   override def applyInternal(): Seq[DepartmentMandatoryPermissionsInfo] = {
     val futures =
-      moduleAndDepartmentService.allRootDepartments
+      moduleAndDepartmentService.allDepartments.filterNot(_.hasParent)
         .map { department =>
           Future {
             calculateMandatoryPermissionInfo(department)

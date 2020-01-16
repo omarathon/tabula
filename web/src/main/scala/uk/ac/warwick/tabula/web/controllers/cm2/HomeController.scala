@@ -10,9 +10,8 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}"))
+@RequestMapping(Array("/coursework"))
 class HomeController extends CourseworkController with AutowiringUserSettingsServiceComponent {
 
   hideDeletedItems
@@ -63,9 +62,8 @@ abstract class AbstractMarkerHomeController extends CourseworkController
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/marker"))
+@RequestMapping(Array("/coursework/marker"))
 class MarkerHomeController extends AbstractMarkerHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -73,9 +71,8 @@ class MarkerHomeController extends AbstractMarkerHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/marker/{academicYear}"))
+@RequestMapping(Array("/coursework/marker/{academicYear}"))
 class MarkerHomeForYearController extends AbstractMarkerHomeController {
 
   @ModelAttribute("activeAcademicYear")
@@ -84,9 +81,8 @@ class MarkerHomeForYearController extends AbstractMarkerHomeController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/{academicYear:\\d{4}}", "/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department", "/${cm2.prefix}/submission", "/${cm2.prefix}/module/**"))
+@RequestMapping(Array("/coursework/{academicYear:\\d{4}}", "/coursework/admin", "/coursework/admin/department", "/coursework/submission", "/coursework/module/**"))
 class HomeRewritesController extends BaseController {
 
   @RequestMapping

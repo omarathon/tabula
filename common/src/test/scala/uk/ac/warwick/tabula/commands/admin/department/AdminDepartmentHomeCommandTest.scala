@@ -44,7 +44,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     val command = new AdminDepartmentHomeCommandInternal(department, user) with CommandTestSupport with AdminDepartmentHomeCommandPermissions
   }
 
-  @Test def init() {
+  @Test def init(): Unit = {
     new Fixture {
       // This is mostly to test that we don't eagerly do anything on command creation
       command.department should be(department)
@@ -77,15 +77,15 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns Set.empty
   }
 
-  @Test def applyNoPerms() {
+  @Test def applyNoPerms(): Unit = {
     new NoPermissionsFixture {
       val (modules, routes) = command.applyInternal()
-      modules should be('empty)
-      routes should be('empty)
+      modules should be(Symbol("empty"))
+      routes should be(Symbol("empty"))
     }
   }
 
-  @Test def applyForDeptAdmin() {
+  @Test def applyForDeptAdmin(): Unit = {
     new DeptAdminFixture {
       val (modules, routes) = command.applyInternal()
       modules should be(Seq(mod1, mod2, mod3))
@@ -93,23 +93,23 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def applyForModuleManager() {
+  @Test def applyForModuleManager(): Unit = {
     new ModuleManagerFixture {
       val (modules, routes) = command.applyInternal()
       modules should be(Seq(mod1, mod3))
-      routes should be('empty)
+      routes should be(Symbol("empty"))
     }
   }
 
-  @Test def applyForRouteManager() {
+  @Test def applyForRouteManager(): Unit = {
     new RouteManagerFixture {
       val (modules, routes) = command.applyInternal()
-      modules should be('empty)
+      modules should be(Symbol("empty"))
       routes should be(Seq(route1, route3))
     }
   }
 
-  @Test def applyForModuleAndRouteManager() {
+  @Test def applyForModuleAndRouteManager(): Unit = {
     new ModuleAndRouteManagerFixture {
       val (modules, routes) = command.applyInternal()
       modules should be(Seq(mod1, mod3))
@@ -117,7 +117,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def permissionsNoPerms() {
+  @Test def permissionsNoPerms(): Unit = {
     new NoPermissionsFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -126,7 +126,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def permissionsForDeptAdmin() {
+  @Test def permissionsForDeptAdmin(): Unit = {
     new DeptAdminFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -135,7 +135,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def permissionsForModuleManager() {
+  @Test def permissionsForModuleManager(): Unit = {
     new ModuleManagerFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -144,7 +144,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def permissionsForRouteManager() {
+  @Test def permissionsForRouteManager(): Unit = {
     new RouteManagerFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -153,7 +153,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
     }
   }
 
-  @Test def permissionsForModuleAndRouteManager() {
+  @Test def permissionsForModuleAndRouteManager(): Unit = {
     new ModuleAndRouteManagerFixture {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
@@ -165,7 +165,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
   import AdminDepartmentHomeCommandTest.MinimalCommandContext
 
   @Test
-  def glueEverythingTogether() {
+  def glueEverythingTogether(): Unit = {
     inContext[MinimalCommandContext] {
       val department = Fixtures.department("in", "IT Services")
       val user = mock[CurrentUser]

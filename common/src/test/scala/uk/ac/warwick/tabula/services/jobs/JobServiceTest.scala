@@ -10,7 +10,7 @@ class JobServiceTest extends TestBase with Mockito {
   val jobDao: JobDao = smartMock[JobDao]
   service.jobDao = jobDao
 
-  @Test def add() {
+  @Test def add(): Unit = {
     service.jobs = Array(new TestingJob)
     jobDao.findOutstandingInstance(any[JobInstanceImpl]) returns None
     val inst = service.add(None, TestingJob("job"))

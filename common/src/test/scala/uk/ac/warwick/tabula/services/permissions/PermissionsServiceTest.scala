@@ -115,15 +115,15 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
       val scope = Fixtures.userSettings("cuscav")
       session.save(scope)
 
-      service.getGrantedRolesFor(currentUser, scope) should be('empty)
-      service.getGrantedPermissionsFor(currentUser, scope) should be('empty)
+      service.getGrantedRolesFor(currentUser, scope) should be(Symbol("empty"))
+      service.getGrantedPermissionsFor(currentUser, scope) should be(Symbol("empty"))
 
       val crd = new CustomRoleDefinition
       session.save(crd)
 
-      service.getGrantedRole(scope, DepartmentalAdministratorRoleDefinition) should be('empty)
-      service.getGrantedRole(scope, crd) should be('empty)
-      service.getGrantedPermission(scope, Permissions.Module.Create, overrideType = true) should be('empty)
+      service.getGrantedRole(scope, DepartmentalAdministratorRoleDefinition) should be(Symbol("empty"))
+      service.getGrantedRole(scope, crd) should be(Symbol("empty"))
+      service.getGrantedPermission(scope, Permissions.Module.Create, overrideType = true) should be(Symbol("empty"))
     }
   }
 

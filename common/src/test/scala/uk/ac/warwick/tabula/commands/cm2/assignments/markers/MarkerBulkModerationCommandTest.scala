@@ -141,7 +141,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def commandState() {
+  def commandState(): Unit = {
     new TestFixture {
       withUser("1170836", "cuslaj") {
         cmd.skipReasons should be(Map(
@@ -160,7 +160,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def populateFeedback() {
+  def populateFeedback(): Unit = {
     new TestFixture {
       cmd.previousMarker = marker1
       cmd.direction = Down
@@ -174,7 +174,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def pointDown() {
+  def pointDown(): Unit = {
     new TestFixture {
       cmd.previousMarker = marker1
       cmd.direction = Down
@@ -204,7 +204,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
 
 
   @Test
-  def pointUp() {
+  def pointUp(): Unit = {
     new TestFixture {
       cmd.previousMarker = marker1
       cmd.direction = Up
@@ -231,7 +231,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def percentDown() {
+  def percentDown(): Unit = {
     new TestFixture {
       cmd.previousMarker = marker1
       cmd.direction = Down
@@ -262,7 +262,7 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def percentUp() {
+  def percentUp(): Unit = {
     new TestFixture {
       cmd.previousMarker = marker1
       cmd.direction = Up

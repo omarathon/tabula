@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/edit"))
+@RequestMapping(Array("/coursework/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/edit"))
 class EditMarkingWorkflowController extends CM2MarkingWorkflowController {
 
   type EditMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with EditMarkingWorkflowState

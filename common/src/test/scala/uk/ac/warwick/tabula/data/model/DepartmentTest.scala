@@ -13,7 +13,7 @@ class DepartmentTest extends TestBase with Mockito {
 
   val permissionsService: PermissionsService = mock[PermissionsService]
 
-  @Test def settings() {
+  @Test def settings(): Unit = {
     val department = Fixtures.department("in")
     department.collectFeedbackRatings should be (false)
     department.allowExtensionRequests should be (false)
@@ -49,7 +49,7 @@ class DepartmentTest extends TestBase with Mockito {
 
   }
 
-  @Test def groups() {
+  @Test def groups(): Unit = {
     val department = Fixtures.department("in")
     department.permissionsService = permissionsService
 
@@ -79,7 +79,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def filterRuleDefaultsToAll() {
+  def filterRuleDefaultsToAll(): Unit = {
     val department = Fixtures.department("in")
     department.filterRule should be(AllMembersFilterRule)
   }
@@ -118,7 +118,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def AllMembersFilterRuleLetsAnyoneIn() {
+  def AllMembersFilterRuleLetsAnyoneIn(): Unit = {
     new FilterRuleFixture {
       val rule = AllMembersFilterRule
       rule.matches(notStudentMember, None) should be (true)
@@ -132,7 +132,7 @@ class DepartmentTest extends TestBase with Mockito {
     * from the StudentCourseDetails to determine degree type.
     */
   @Test
-  def UGFilterRuleAllowsUndergrads() {
+  def UGFilterRuleAllowsUndergrads(): Unit = {
     new FilterRuleFixture {
       val rule = UndergraduateFilterRule
       rule.matches(notStudentMember, None) should be (false)
@@ -149,7 +149,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def PGFilterRuleAllowsPostgrads() {
+  def PGFilterRuleAllowsPostgrads(): Unit = {
     new FilterRuleFixture {
       val rule = PostgraduateFilterRule
       rule.matches(notStudentMember, None) should be (false)
@@ -167,7 +167,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def YearOfStudyRuleAllowsMatchingYear() {
+  def YearOfStudyRuleAllowsMatchingYear(): Unit = {
     new FilterRuleFixture {
       val firstYearRule = new InYearFilterRule(1)
       val secondYearRule = new InYearFilterRule(2)
@@ -183,7 +183,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def DepartmentRoutesRuleAllowsStudentInRoute() {
+  def DepartmentRoutesRuleAllowsStudentInRoute(): Unit = {
     new FilterRuleFixture {
       val deptRoutesRule = DepartmentRoutesFilterRule
       deptRoutesRule.matches(undergraduate, Option(department)) should be (true)
@@ -198,12 +198,12 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def replacedRoleDefinitionFor() {
+  def replacedRoleDefinitionFor(): Unit = {
     val department = Fixtures.department("in")
 
     val roleDefinition = DepartmentalAdministratorRoleDefinition
 
-    department.replacedRoleDefinitionFor(roleDefinition) should be('empty)
+    department.replacedRoleDefinitionFor(roleDefinition) should be(Symbol("empty"))
 
     val customDefinition = new CustomRoleDefinition
     customDefinition.baseRoleDefinition = roleDefinition
@@ -212,7 +212,7 @@ class DepartmentTest extends TestBase with Mockito {
 
     customDefinition.replacesBaseDefinition = false
 
-    department.replacedRoleDefinitionFor(roleDefinition) should be('empty)
+    department.replacedRoleDefinitionFor(roleDefinition) should be(Symbol("empty"))
 
     customDefinition.replacesBaseDefinition = true
 
@@ -220,7 +220,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def replacedRoleDefinitionForSelector() {
+  def replacedRoleDefinitionForSelector(): Unit = {
     val department = Fixtures.department("in")
 
     val selector = new StudentRelationshipType
@@ -235,8 +235,8 @@ class DepartmentTest extends TestBase with Mockito {
     customDefinition.replacesBaseDefinition = true
 
     department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be(Some(customDefinition))
-    department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be('empty)
-    department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be('empty)
+    department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be(Symbol("empty"))
+    department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be(Symbol("empty"))
 
     customDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)
 
@@ -246,7 +246,7 @@ class DepartmentTest extends TestBase with Mockito {
   }
 
   @Test
-  def testUploadMarksSettings: Unit = {
+  def testUploadMarksSettings(): Unit = {
     val department = Fixtures.department("in")
     val year = AcademicYear(2014)
     var degreeType = DegreeType.Undergraduate

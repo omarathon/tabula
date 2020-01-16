@@ -20,7 +20,7 @@ trait SyllabusPlusLocationDao {
 
   def getById(id: String): Option[SyllabusPlusLocation]
 
-  def saveOrUpdate(location: SyllabusPlusLocation)
+  def saveOrUpdate(location: SyllabusPlusLocation): Unit
 
   def delete(location: SyllabusPlusLocation): Unit
 }

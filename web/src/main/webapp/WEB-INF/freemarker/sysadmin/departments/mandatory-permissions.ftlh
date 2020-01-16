@@ -118,3 +118,9 @@
     $table.before($button);
   });
 </script>
+
+<#if features.schedulingDepartmentMandatoryPermissionsWarning>
+  <@f.form method="post" modelAttribute="">
+    <button type="submit" class="btn btn-primary">Notify #support-tabula of this</button>
+  </@f.form>
+</#if>

@@ -23,9 +23,9 @@ import uk.ac.warwick.userlookup.User
   * Service providing access to members and profiles.
   */
 trait ProfileService {
-  def save(member: Member)
+  def save(member: Member): Unit
 
-  def regenerateTimetableHash(member: Member)
+  def regenerateTimetableHash(member: Member): Unit
 
   def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 

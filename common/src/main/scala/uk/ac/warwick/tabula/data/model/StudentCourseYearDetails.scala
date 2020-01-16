@@ -167,7 +167,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
   @Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
   protected var overcatting: Map[String, Any] = Map()
 
-  protected def ensureOvercatting() {
+  protected def ensureOvercatting(): Unit = {
     if (overcatting == null) overcatting = Map()
   }
 
@@ -223,7 +223,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
   //Logic picked up from cognos -TAB-6397
   def yearAbroad: Boolean = modeOfAttendance != null && modeOfAttendance.yearAbroad && (blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
 
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureOvercatting()
   }
 }

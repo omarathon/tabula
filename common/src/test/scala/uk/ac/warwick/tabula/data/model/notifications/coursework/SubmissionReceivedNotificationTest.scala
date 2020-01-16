@@ -255,7 +255,6 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
 
       val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
-      assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava
       assignment.cm2MarkingWorkflow = workflow
 
       val submission = Fixtures.submission(userId = "7654321", universityId = "7654321")
@@ -266,7 +265,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       mockLookup.getUserByUserId(marker.getUserId) returns marker
       mockLookup.getUserByUserId(admin.getUserId) returns admin
 
-      val feedback: AssignmentFeedback = Fixtures.assignmentFeedback(student.getWarwickId)
+      val feedback: Feedback = Fixtures.assignmentFeedback(student.getWarwickId)
       assignment.feedbacks.add(feedback)
 
       val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
@@ -276,11 +275,8 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
       val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
 
-      val cm2Prefix = "cm2"
-      Routes.cm2._cm2Prefix = Some(cm2Prefix)
-
-      n.urlFor(admin) should be(s"/$cm2Prefix/admin/assignments/1234/list")
-      n.urlFor(marker) should be(s"/$cm2Prefix/admin/assignments/1234/marker/1234567")
+      n.urlFor(admin) should be("/coursework/admin/assignments/1234/list")
+      n.urlFor(marker) should be("/coursework/admin/assignments/1234/marker/1234567")
     }
   }
 

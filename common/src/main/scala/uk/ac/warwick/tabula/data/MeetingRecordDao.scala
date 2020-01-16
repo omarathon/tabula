@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 trait MeetingRecordDao {
-  def saveOrUpdate(meeting: MeetingRecord)
+  def saveOrUpdate(meeting: MeetingRecord): Unit
 
-  def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
+  def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord): Unit
 
-  def saveOrUpdate(meeting: AbstractMeetingRecord)
+  def saveOrUpdate(meeting: AbstractMeetingRecord): Unit
 
-  def saveOrUpdate(approval: MeetingRecordApproval)
+  def saveOrUpdate(approval: MeetingRecordApproval): Unit
 
   def listScheduled(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[ScheduledMeetingRecord]
 

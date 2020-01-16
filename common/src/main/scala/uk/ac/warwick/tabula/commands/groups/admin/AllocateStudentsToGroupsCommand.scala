@@ -70,7 +70,7 @@ trait AllocateStudentsToGroupsSorting extends GroupsObjects[User, SmallGroup] {
   implicit val defaultOrderingForUser: Ordering[User] = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
   // Sort all the lists of users by surname, firstname.
-  override def sort() {
+  override def sort(): Unit = {
     def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
     // Because sortBy is not an in-place sort, we have to replace the lists entirely.
@@ -86,7 +86,7 @@ trait AllocateStudentsToGroupsSorting extends GroupsObjects[User, SmallGroup] {
 trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpload[User, SmallGroup] {
   self: AllocateStudentsToGroupsCommandState with GroupsExtractorComponent with UserLookupComponent with SmallGroupServiceComponent =>
 
-  override def validateUploadedFile(result: BindingResult) {
+  override def validateUploadedFile(result: BindingResult): Unit = {
     val fileNames = file.fileNames map (_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
 

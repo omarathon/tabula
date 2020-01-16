@@ -16,14 +16,14 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
   val scdDao = new StudentCourseDetailsDaoImpl
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     memDao.sessionFactory = sessionFactory
     modRegDao.sessionFactory = sessionFactory
     moduleDao.sessionFactory = sessionFactory
     scdDao.sessionFactory = sessionFactory
   }
 
-  @Test def testModReg {
+  @Test def testModReg: Unit = {
     transactional { tx =>
       val stuMem = Fixtures.student("0123456", "abcde")
       memDao.saveOrUpdate(stuMem)
@@ -80,7 +80,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     }
   }
 
-  @Test def testGetByNotionalKey {
+  @Test def testGetByNotionalKey: Unit = {
     transactional { tx =>
       val stuMem = Fixtures.student("0123456", "abcde")
       memDao.saveOrUpdate(stuMem)

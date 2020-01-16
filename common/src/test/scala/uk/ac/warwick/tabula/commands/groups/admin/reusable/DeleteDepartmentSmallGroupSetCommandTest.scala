@@ -26,7 +26,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     val command = new DeleteDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
   }
 
-  @Test def apply {
+  @Test def apply: Unit = {
     new CommandFixture {
       set.deleted.booleanValue() should be(false)
       command.applyInternal() should be(set)
@@ -36,7 +36,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions {
+  @Test def permissions: Unit = {
     new Fixture {
       val (d, s) = (department, set)
 
@@ -52,7 +52,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment: Unit = {
     val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
       val department = null
       val set = new DepartmentSmallGroupSet
@@ -62,7 +62,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet: Unit = {
     val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
       val department: Department = Fixtures.department("in")
       val set = null
@@ -72,7 +72,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet: Unit = {
     val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
@@ -91,7 +91,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validationPasses {
+  @Test def validationPasses: Unit = {
     new ValidationFixture {
       command.confirm = true
 
@@ -102,7 +102,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNotConfirmed {
+  @Test def validateNotConfirmed: Unit = {
     new ValidationFixture {
       command.confirm = false
 
@@ -116,7 +116,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyDeleted {
+  @Test def validateAlreadyDeleted: Unit = {
     new ValidationFixture {
       command.confirm = true
       set.markDeleted()
@@ -130,7 +130,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateLinkedReleasedToStudents {
+  @Test def validateLinkedReleasedToStudents: Unit = {
     new ValidationFixture {
       command.confirm = true
 
@@ -147,7 +147,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def describe {
+  @Test def describe: Unit = {
     new Fixture {
       val (dept, s) = (department, set)
       val command = new DeleteDepartmentSmallGroupSetDescription with DeleteDepartmentSmallGroupSetCommandState {
@@ -166,7 +166,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def wires {
+  @Test def wires: Unit = {
     new Fixture {
       val command = DeleteDepartmentSmallGroupSetCommand(department, set)
 

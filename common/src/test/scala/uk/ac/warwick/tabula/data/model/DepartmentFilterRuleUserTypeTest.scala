@@ -7,26 +7,26 @@ import scala.util.{Failure, Try}
 class DepartmentFilterRuleUserTypeTest extends TestBase {
 
   @Test
-  def canSetFilterRuleFromCode() {
+  def canSetFilterRuleFromCode(): Unit = {
     val userType = new DepartmentFilterRuleUserType
     userType.convertToObject("UG") should be(UndergraduateFilterRule)
     userType.convertToObject("PG") should be(PostgraduateFilterRule)
   }
 
   @Test
-  def canStackFilters() {
+  def canStackFilters(): Unit = {
     val userType = new DepartmentFilterRuleUserType
     userType.convertToObject("UG,Y2") should be(CompositeFilterRule(Seq(UndergraduateFilterRule, InYearFilterRule(2))))
   }
 
   @Test
-  def invalidFilterCodeThrows() {
+  def invalidFilterCodeThrows(): Unit = {
     val userType = new DepartmentFilterRuleUserType
     Try(userType.convertToObject("Fribble")) should be(anInstanceOf[Failure[Any]])
   }
 
   @Test
-  def convertAndReconvertPreservesOrder() {
+  def convertAndReconvertPreservesOrder(): Unit = {
     val userType = new DepartmentFilterRuleUserType
     userType.convertToValue(userType.convertToObject("UG,Y2")) should be("UG,Y2")
   }

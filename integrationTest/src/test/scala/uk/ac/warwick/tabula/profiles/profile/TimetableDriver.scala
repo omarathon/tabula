@@ -14,7 +14,7 @@ import scala.xml.Elem
 
 trait TimetableDriver extends FixturesDriver {
 
-  def setTimetableFor(userId: String, year: AcademicYear, content: Elem) {
+  def setTimetableFor(userId: String, year: AcademicYear, content: Elem): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
 
     val req =

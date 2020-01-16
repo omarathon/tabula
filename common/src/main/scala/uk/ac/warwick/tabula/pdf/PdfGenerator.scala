@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.web.views.TextRendererComponent
 import scala.util.Try
 
 trait PdfGenerator {
-  def renderTemplate(templateId: String, model: Any, out: OutputStream)
+  def renderTemplate(templateId: String, model: Any, out: OutputStream): Unit
 }
 
 trait PDFGeneratorComponent {

@@ -12,7 +12,7 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 
   import DateBuilder._
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     withFakeTime(new DateTime(2012, 4, 12, 13, 36, 0)) {
 
       val anotherDay = new DateTime(2012, 3, 10, 12, 13, 14)
@@ -46,7 +46,7 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
     }
   }
 
-  @Test def ordinals() {
+  @Test def ordinals(): Unit = {
     for ((i, o) <- Seq(
       0 -> "ᵗʰ",
       1 -> "ˢᵗ",

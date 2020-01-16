@@ -61,7 +61,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
     val meeting = new ScheduledMeetingRecord(Fixtures.staff(), Seq(relationship))
   }
 
-  @Test def titleEditedByTutor() {
+  @Test def titleEditedByTutor(): Unit = {
     new TitleFixture {
       val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), agent.asSsoUser, meeting)
       notification.title should be("Meeting with Student Name and Tutor Name edited by Tutor Name")
@@ -70,7 +70,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
     }
   }
 
-  @Test def titleEditedByStudent() {
+  @Test def titleEditedByStudent(): Unit = {
     new TitleFixture {
       val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), student.asSsoUser, meeting)
       notification.title should be("Meeting with Student Name and Tutor Name edited by Student Name")
@@ -79,7 +79,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
     }
   }
 
-  @Test def titleEditedByThirdParty() {
+  @Test def titleEditedByThirdParty(): Unit = {
     new TitleFixture {
       val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), thirdParty.asSsoUser, meeting)
       notification.title should be("Meeting with Student Name and Tutor Name edited by Third Party")

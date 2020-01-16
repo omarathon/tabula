@@ -5,13 +5,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
-import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
-import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 import uk.ac.warwick.tabula.services.IncludeType
 
 import scala.jdk.CollectionConverters._
@@ -30,9 +28,7 @@ class CM2WorkflowProgressService extends RequestLevelCaching[Assignment, Seq[CM2
   def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = cachedBy(assignment) {
     val stages = Seq.newBuilder[CM2WorkflowStage]
 
-    val hasCM1MarkingWorkflow = features.markingWorkflows && assignment.markingWorkflow != null
-    val hasCM2MarkingWorkflow = features.markingWorkflows && assignment.cm2MarkingWorkflow != null
-    val hasMarkingWorkflow = hasCM1MarkingWorkflow || hasCM2MarkingWorkflow
+    val hasMarkingWorkflow = features.markingWorkflows && assignment.cm2MarkingWorkflow != null
 
     if (assignment.collectSubmissions) {
       stages += Submission
@@ -46,26 +42,10 @@ class CM2WorkflowProgressService extends RequestLevelCaching[Assignment, Seq[CM2
       }
     }
 
-    if (hasCM1MarkingWorkflow) {
-      stages ++= Seq(CM1ReleaseForMarking, CM1FirstMarking)
-
-      if (assignment.markingWorkflow.hasSecondMarker) {
-        if (assignment.markingWorkflow.markingMethod == ModeratedMarking) {
-          stages += CM1Moderation
-        } else {
-          stages += CM1SecondMarking
-        }
-      }
-
-      if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
-        stages += CM1FinaliseSeenSecondMarking
-      }
-    } else if (hasCM2MarkingWorkflow) {
+    if (hasMarkingWorkflow) {
       stages += CM2ReleaseForMarking
       stages ++= assignment.cm2MarkingWorkflow.allStages.map(CM2MarkingWorkflowStage.apply)
-    }
-
-    if (!hasMarkingWorkflow) {
+    } else {
       if (assignment.collectMarks) {
         stages += AddMarks
       }
@@ -210,7 +190,7 @@ object CM2WorkflowStages {
       case _ if assignment.isClosed && !assignment.allowLateSubmissions =>
         StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.failedToSubmit", health = Danger, completed = true)
 
-      case _ => StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.late", health = Danger, completed = false)
+      case _ => StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.late", health = Danger)
     }
 
     def route(assignment: Assignment): Option[Route] = None
@@ -257,145 +237,6 @@ object CM2WorkflowStages {
     def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submitToTurnitin(assignment)))
 
     val markingRelated = false
-  }
-
-  case object CM1ReleaseForMarking extends CM2WorkflowStage(Marking) {
-    def actionCode = "workflow.cm1.ReleaseForMarking.action"
-
-    def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-      if (assignment.isReleasedForMarking(coursework.student.getUserId)) {
-        StageProgress(CM1ReleaseForMarking, started = true, messageCode = "workflow.cm1.ReleaseForMarking.released", health = Good, completed = true)
-      } else {
-        StageProgress(CM1ReleaseForMarking, started = false, messageCode = "workflow.cm1.ReleaseForMarking.notReleased")
-      }
-    }
-
-    override def preconditions = Seq()
-
-    def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submissionsandfeedback(assignment)))
-
-    val markingRelated = true
-  }
-
-  case object CM1FirstMarking extends CM2WorkflowStage(Marking) {
-    def actionCode = "workflow.cm1.FirstMarking.action"
-
-    def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedFeedback match {
-      case Some(item) =>
-        if (item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
-          StageProgress(CM1FirstMarking, started = true, messageCode = "workflow.cm1.FirstMarking.marked", health = Good, completed = true)
-        else
-          StageProgress(CM1FirstMarking, started = true, messageCode = "workflow.cm1.FirstMarking.notMarked", health = Warning, completed = false)
-      case _ => StageProgress(CM1FirstMarking, started = false, messageCode = "workflow.cm1.FirstMarking.notMarked")
-    }
-
-    override def preconditions = Seq(Seq(CM1ReleaseForMarking))
-
-    def route(assignment: Assignment): Option[Route] = None
-
-    val markingRelated = true
-  }
-
-  case object CM1SecondMarking extends CM2WorkflowStage(Marking) {
-    def actionCode = "workflow.cm1.SecondMarking.action"
-
-    def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-      val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
-      coursework.enhancedFeedback match {
-        case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
-          if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
-            StageProgress(
-              CM1SecondMarking,
-              started = true,
-              messageCode = "workflow.cm1.SecondMarking.marked",
-              health = Good,
-              completed = true
-            )
-          else
-            StageProgress(
-              CM1SecondMarking,
-              started = item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted),
-              messageCode = "workflow.cm1.SecondMarking.notMarked",
-              health = Warning,
-              completed = false
-            )
-        case _ => StageProgress(CM1SecondMarking, started = false, messageCode = "workflow.cm1.SecondMarking.notMarked")
-      }
-    }
-
-    override def preconditions = Seq(Seq(CM1ReleaseForMarking, CM1FirstMarking))
-
-    def route(assignment: Assignment): Option[Route] = None
-
-    val markingRelated = true
-  }
-
-  case object CM1Moderation extends CM2WorkflowStage(Marking) {
-    def actionCode = "workflow.cm1.ModeratedMarking.action"
-
-    def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-      val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
-      coursework.enhancedFeedback match {
-        case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
-          if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
-            StageProgress(
-              CM1Moderation,
-              started = true,
-              messageCode = "workflow.cm1.ModeratedMarking.marked",
-              health = Good,
-              completed = true
-            )
-          else
-            StageProgress(
-              CM1Moderation,
-              started = item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted),
-              messageCode = "workflow.cm1.ModeratedMarking.notMarked",
-              health = Warning,
-              completed = false
-            )
-        case _ => StageProgress(CM1Moderation, started = false, messageCode = "workflow.cm1.ModeratedMarking.notMarked")
-      }
-    }
-
-    override def preconditions = Seq(Seq(CM1ReleaseForMarking, CM1FirstMarking))
-
-    def route(assignment: Assignment): Option[Route] = None
-
-    val markingRelated = true
-  }
-
-  case object CM1FinaliseSeenSecondMarking extends CM2WorkflowStage(Marking) {
-    def actionCode = "workflow.cm1.FinaliseSeenSecondMarking.action"
-
-    def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-      val released = assignment.isReleasedToThirdMarker(coursework.student.getUserId)
-      coursework.enhancedFeedback match {
-        case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
-          if (item.feedback.getThirdMarkerFeedback.exists(_.state == MarkingCompleted))
-            StageProgress(
-              CM1FinaliseSeenSecondMarking,
-              started = true,
-              messageCode = "workflow.cm1.FinaliseSeenSecondMarking.finalised",
-              health = Good,
-              completed = true
-            )
-          else
-            StageProgress(
-              CM1FinaliseSeenSecondMarking,
-              started = item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted),
-              messageCode = "workflow.cm1.FinaliseSeenSecondMarking.notFinalised",
-              health = Warning,
-              completed = false
-            )
-        case _ => StageProgress(CM1FinaliseSeenSecondMarking, started = false, messageCode = "workflow.cm1.FinaliseSeenSecondMarking.notFinalised")
-      }
-    }
-
-    override def preconditions = Seq(Seq(CM1ReleaseForMarking, CM1FirstMarking, CM1SecondMarking))
-
-    def route(assignment: Assignment): Option[Route] = None
-
-    val markingRelated = true
   }
 
   case object CM2ReleaseForMarking extends CM2WorkflowStage(Marking) {
@@ -480,7 +321,7 @@ object CM2WorkflowStages {
       coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
         case Some(item) if item.feedback.hasMarkOrGrade =>
           StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.marked", health = Good, completed = true)
-        case Some(_) => StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.notMarked", health = Warning, completed = false)
+        case Some(_) => StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.notMarked", health = Warning)
         case _ => StageProgress(AddMarks, started = false, messageCode = "workflow.AddMarks.notMarked")
       }
 
@@ -496,7 +337,7 @@ object CM2WorkflowStages {
       case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
         StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.uploaded", health = Good, completed = true)
       case Some(_) =>
-        StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.notUploaded", health = Warning, completed = false)
+        StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.notUploaded", health = Warning)
       case _ =>
         StageProgress(AddFeedback, started = false, messageCode = "workflow.AddFeedback.notUploaded")
     }
@@ -514,15 +355,13 @@ object CM2WorkflowStages {
         case Some(item) if item.feedback.released =>
           StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
         case Some(item) if item.feedback.hasContent =>
-          StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.notReleased", health = Warning, completed = false)
+          StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.notReleased", health = Warning)
         case _ => StageProgress(ReleaseFeedback, started = false, messageCode = "workflow.ReleaseFeedback.notReleased")
       }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(
       Seq(AddMarks), // Assignments with no marking workflow
       Seq(AddFeedback), // Assignments with no marking workflow
-      Seq(CM1FirstMarking, CM1SecondMarking, CM1FinaliseSeenSecondMarking), // CM1 seen second marking
-      Seq(CM1FirstMarking) // CM1 single marker
     ) ++ MarkingWorkflowStage.values.collect { case f: FinalStage =>
       f.previousStages.map(CM2MarkingWorkflowStage.apply)
     }
@@ -540,7 +379,7 @@ object CM2WorkflowStages {
         case Some(item) if item.feedback.released && item.onlineViewed =>
           StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.viewed", health = Good, completed = true)
         case Some(item) if item.feedback.released =>
-          StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.notViewed", health = Warning, completed = false)
+          StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.notViewed", health = Warning)
         case _ => StageProgress(ViewOnlineFeedback, started = false, messageCode = "workflow.ViewOnlineFeedback.notViewed")
       }
 
@@ -561,7 +400,7 @@ object CM2WorkflowStages {
         case Some(item) if item.downloaded || !item.feedback.hasAttachments =>
           StageProgress(DownloadFeedback, started = true, messageCode = "workflow.DownloadFeedback.downloaded", health = Good, completed = true)
         case Some(item) if item.feedback.released =>
-          StageProgress(DownloadFeedback, started = true, messageCode = "workflow.DownloadFeedback.notDownloaded", health = Warning, completed = false)
+          StageProgress(DownloadFeedback, started = true, messageCode = "workflow.DownloadFeedback.notDownloaded", health = Warning)
         case _ => StageProgress(DownloadFeedback, started = false, messageCode = "workflow.DownloadFeedback.notDownloaded")
       }
 
@@ -617,8 +456,6 @@ object CM2WorkflowStages {
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(
       Seq(AddMarks), // Assignments with no marking workflow
       Seq(AddFeedback), // Assignments with no marking workflow
-      Seq(CM1FirstMarking, CM1SecondMarking, CM1FinaliseSeenSecondMarking), // CM1 seen second marking
-      Seq(CM1FirstMarking) // CM1 single marker
     ) ++ MarkingWorkflowStage.values.collect { case f: FinalStage =>
       f.previousStages.map(CM2MarkingWorkflowStage.apply)
     }

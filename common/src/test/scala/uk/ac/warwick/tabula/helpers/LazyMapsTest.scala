@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.TestBase
 // scalastyle:off magic.number
 class LazyMapsTest extends TestBase {
 
-  @Test def lazyMap {
+  @Test def lazyMap: Unit = {
     var valuesCalculated = 0
     val map = LazyMaps.create { (i: Int) =>
       valuesCalculated += 1

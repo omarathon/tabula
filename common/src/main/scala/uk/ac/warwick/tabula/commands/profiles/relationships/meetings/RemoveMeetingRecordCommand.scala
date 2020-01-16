@@ -36,7 +36,7 @@ trait RemoveMeetingRecordDescription extends Describable[AbstractMeetingRecord] 
 trait RemoveMeetingRecordValidation {
   self: RemoveMeetingRecordState =>
 
-  def sharedValidation(errors: Errors) {
+  def sharedValidation(errors: Errors): Unit = {
     if (!meetingRecord.isScheduled && meetingRecord.asInstanceOf[MeetingRecord].isApproved) {
       errors.reject("meetingRecord.delete.approved")
     }

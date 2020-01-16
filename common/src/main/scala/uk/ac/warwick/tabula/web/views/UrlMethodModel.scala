@@ -68,7 +68,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
   override def execute(env: Environment,
     params: JMap[_, _],
     loopVars: Array[TemplateModel],
-    body: TemplateDirectiveBody) {
+    body: TemplateDirectiveBody): Unit = {
 
     val path: String = if (params.containsKey("page")) {
       val contextOverridden =

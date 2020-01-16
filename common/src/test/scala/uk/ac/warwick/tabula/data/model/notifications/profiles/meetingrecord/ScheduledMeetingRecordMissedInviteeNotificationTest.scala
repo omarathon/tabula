@@ -47,7 +47,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
     thirdParty.lastName = "Party"
   }
 
-  @Test def titleStudent() {
+  @Test def titleStudent(): Unit = {
     new TitleFixture {
       val meeting = new ScheduledMeetingRecord(agent, Seq(relationship))
 
@@ -57,7 +57,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
     }
   }
 
-  @Test def titleTutor() {
+  @Test def titleTutor(): Unit = {
     new TitleFixture {
       val meeting = new ScheduledMeetingRecord(student, Seq(relationship))
 

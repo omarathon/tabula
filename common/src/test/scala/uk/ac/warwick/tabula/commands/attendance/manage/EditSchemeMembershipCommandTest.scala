@@ -10,7 +10,7 @@ import scala.jdk.CollectionConverters._
 class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 
   @Test
-  def addUsers() {
+  def addUsers(): Unit = {
     withUser("cusfal") {
       val command = new AddsUsersToEditSchemeMembershipCommand with ProfileServiceComponent with UserLookupComponent
         with SecurityServiceComponent with EditSchemeMembershipCommandState {

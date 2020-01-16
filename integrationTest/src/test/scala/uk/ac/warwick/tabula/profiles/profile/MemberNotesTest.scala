@@ -18,7 +18,7 @@ class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver
     currentUrl should endWith(s"/profiles/view/${P.Student1.warwickId}")
 
     val memberNoteSection: Option[Element] = find(cssSelector("section.member-notes"))
-    memberNoteSection should be('defined)
+    memberNoteSection should be(Symbol("defined"))
     cssSelector("section.member-notes table tbody tr").findAllElements.size should be(1)
     cssSelector("section.member-notes a[title='Edit note']").findAllElements.size should be(0)
 
@@ -40,7 +40,7 @@ class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
     Then("They see the member note")
     val memberNoteSection: Option[Element] = find(cssSelector("section.member-notes"))
-    memberNoteSection should be('defined)
+    memberNoteSection should be(Symbol("defined"))
     cssSelector("section.member-notes table tbody tr").findAllElements.size should be(1)
 
     And("Can delete it")
@@ -66,7 +66,7 @@ class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
     Then("They see the member note")
     val memberNoteSection: Option[Element] = find(cssSelector("section.member-notes"))
-    memberNoteSection should be('defined)
+    memberNoteSection should be(Symbol("defined"))
     cssSelector("section.member-notes table tbody tr").findAllElements.size should be(1)
 
     And("Can delete it")

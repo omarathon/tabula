@@ -25,17 +25,11 @@ trait AutowiringAssessmentServiceComponent extends AssessmentServiceComponent {
 trait AssessmentService {
   def getAssignmentById(id: String): Option[Assignment]
 
-  def getExamById(id: String): Option[Exam]
-
   def save(assignment: Assignment): Unit
-
-  def save(exam: Exam): Unit
 
   def deleteFormField(field: FormField): Unit
 
   def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
-
-  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
 
   def getAssignmentsWithFeedback(usercode: String): Seq[Assignment]
 
@@ -50,12 +44,6 @@ trait AssessmentService {
   def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
   def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
-
-  def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-
-  def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-
-  def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
   def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
@@ -78,30 +66,20 @@ trait AssessmentService {
 
   def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment]
 
-  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
-
-  def getExamsWhereMarker(user: User): Seq[Exam]
-
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
-  self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent =>
+  self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with CM2MarkingWorkflowServiceComponent =>
 
   def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
 
-  def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
-
   def save(assignment: Assignment): Unit = assessmentDao.save(assignment)
 
-  def save(exam: Exam): Unit = assessmentDao.save(exam)
 
   def deleteFormField(field: FormField): Unit = assessmentDao.deleteFormField(field)
 
   def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
     assessmentDao.getAssignmentByNameYearModule(name, year, module)
-
-  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
-    assessmentDao.getExamByNameYearModule(name, year, module)
 
   def getAssignmentsWithFeedback(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(usercode).filter(_.isVisibleToStudentsHistoric)
 
@@ -125,19 +103,6 @@ abstract class AbstractAssessmentService extends AssessmentService {
 
   def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
     assessmentDao.getSubmissionsForAssignmentsBetweenDates(usercode, startInclusive, endExclusive)
-
-  def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
-    (firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
-      .distinct
-      .flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
-      .filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
-  }
-
-  def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module.adminDepartment == department)
-
-  def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module == module)
 
   def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
     val workflows = cm2MarkerHelper.findBy(user).map(_.workflow).distinct
@@ -177,29 +142,13 @@ abstract class AbstractAssessmentService extends AssessmentService {
   def getAssignmentsClosingBetween(start: DateTime, end: DateTime): Seq[Assignment] = assessmentDao.getAssignmentsClosingBetween(start, end)
 
   override def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment] = assessmentDao.getDepartmentAssignmentsClosingBetween(department, startDate, endExclusive)
-
-  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
-    assessmentDao.getExamsByModules(modules, academicYear)
-
-  def getExamsWhereMarker(user: User): Seq[Exam] = {
-    (firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
-      .distinct
-      .flatMap(markingWorkflowService.getExamsUsingMarkingWorkflow)
-      .filterNot { e => e.deleted }
-  }
 }
 
 trait AssessmentServiceUserGroupHelpers {
-  val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
-  val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
-
   val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHelpers {
-  val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
-  val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
-
   val cm2MarkerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
@@ -207,7 +156,6 @@ trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHe
 class AssessmentServiceImpl
   extends AbstractAssessmentService
     with AutowiringAssessmentDaoComponent
-    with AutowiringMarkingWorkflowServiceComponent
     with AutowiringCM2MarkingWorkflowServiceComponent
     with AssessmentServiceUserGroupHelpersImpl
 

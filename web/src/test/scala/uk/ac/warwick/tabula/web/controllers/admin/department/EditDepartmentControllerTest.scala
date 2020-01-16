@@ -11,7 +11,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
 
   val controller = new EditDepartmentController
 
-  @Test def createsCommand {
+  @Test def createsCommand(): Unit = {
     val department = Fixtures.department("in")
 
     val command = controller.command(department)
@@ -20,15 +20,15 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
     command should be(anInstanceOf[Appliable[Department]])
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment(): Unit = {
     controller.command(null)
   }
 
-  @Test def form {
+  @Test def form(): Unit = {
     controller.showForm().viewName should be("admin/department/edit/form")
   }
 
-  @Test def submit {
+  @Test def submit(): Unit = {
     val department = Fixtures.department("in-ug", isImportDepartment = false)
     val command = mock[Appliable[Department] with EditDepartmentCommandState]
     command.apply() returns (department)
@@ -40,7 +40,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
     verify(command, times(1)).apply()
   }
 
-  @Test def validation {
+  @Test def validation(): Unit = {
     val command = mock[Appliable[Department] with EditDepartmentCommandState]
     val errors = new BindException(command, "command")
     errors.reject("error")

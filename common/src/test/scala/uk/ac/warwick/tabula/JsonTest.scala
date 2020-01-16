@@ -18,7 +18,7 @@ class JsonTest extends TestBase {
 
   // Test DefaultScalaModule from https://github.com/FasterXML/jackson-module-scala
   // which teaches Jackson about Scala collections.
-  @Test def encodeMap {
+  @Test def encodeMap: Unit = {
     m.writeValueAsString(Map()) should be("{}")
 
     m.writeValueAsString(Map("animals" -> Array("cat", "dog"))) should be("""{"animals":["cat","dog"]}""")
@@ -27,7 +27,7 @@ class JsonTest extends TestBase {
     m.writeValueAsString(Map("animals" -> List("cat", "dog"))) should be("""{"animals":["cat","dog"]}""")
   }
 
-  @Test def parseArray() {
+  @Test def parseArray(): Unit = {
     val map = m.readValue("""{"numbers":[1,2,3]}""", classOf[Map[String, Any]])
     map should be(Map("numbers" -> Seq(1, 2, 3)))
     // test pattern matching - arrays match Seq[_]
@@ -36,7 +36,7 @@ class JsonTest extends TestBase {
     }
   }
 
-  @Test def parseNumbers {
+  @Test def parseNumbers(): Unit = {
     val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
     val map = m.readValue(new StringReader(props), classOf[Map[String, Any]])
     map("filetypes").asInstanceOf[Seq[_]] should equal(Seq("pdf", "doc", "docx"))
@@ -48,20 +48,20 @@ class JsonTest extends TestBase {
     var regularDate: DateTime = time
   }
 
-  @Test def datesBecomeTimestamps() {
+  @Test def datesBecomeTimestamps(): Unit = {
     m.writeValueAsString(now) should be("1375099200000")
     m.writeValueAsString(now.toDate) should be("1375099200000")
     m.readValue("1375099200000", classOf[DateTime]) should be(now)
   }
 
   // Local date format by default is array of nums [y,m,d]
-  @Test def localDatesBecomeIntArrays() {
+  @Test def localDatesBecomeIntArrays(): Unit = {
     m.writeValueAsString(now.toLocalDate) should be("[2013,7,29]")
     m.readValue("[2013,7,29]", classOf[LocalDate])
   }
 
   // was a bug in scala jackson module
-  @Test def mutableMapWorks {
+  @Test def mutableMapWorks(): Unit = {
     m.writeValueAsString(MutableMap()) should be("{}")
   }
 }

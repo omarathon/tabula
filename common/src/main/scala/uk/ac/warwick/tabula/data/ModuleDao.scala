@@ -9,11 +9,11 @@ import uk.ac.warwick.tabula.data.model._
 trait ModuleDao {
   def allModules: Seq[Module]
 
-  def saveOrUpdate(module: Module)
+  def saveOrUpdate(module: Module): Unit
 
-  def saveOrUpdate(teachingInfo: ModuleTeachingInformation)
+  def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit
 
-  def delete(teachingInfo: ModuleTeachingInformation)
+  def delete(teachingInfo: ModuleTeachingInformation): Unit
 
   def getByCode(code: String): Option[Module]
 
@@ -23,7 +23,7 @@ trait ModuleDao {
 
   def getById(id: String): Option[Module]
 
-  def stampMissingFromImport(newStaleModuleCodes: Seq[String])
+  def stampMissingFromImport(newStaleModuleCodes: Seq[String]): Unit
 
   def hasAssignments(module: Module): Boolean
 

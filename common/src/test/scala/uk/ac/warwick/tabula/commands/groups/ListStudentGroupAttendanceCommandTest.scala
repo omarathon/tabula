@@ -69,7 +69,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
     // user5 turned up to the first occurrence and then left
 
     // Recorded attendance for week 1 and both in 3 - rest haven't happened yet, 2 is missing
-    def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState) {
+    def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState): Unit = {
       val attendance = new SmallGroupEventAttendance
       attendance.occurrence = occurrence
       attendance.universityId = user.getWarwickId
@@ -124,10 +124,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
       ) returns Seq()
 
       val info: StudentGroupAttendance = command.applyInternal()
-      info.attendance should be('empty)
+      info.attendance should be(Symbol("empty"))
       info.missedCount should be(0)
-      info.missedCountByTerm should be('empty)
-      info.termWeeks should be('empty)
+      info.missedCountByTerm should be(Symbol("empty"))
+      info.termWeeks should be(Symbol("empty"))
     }
   }
 

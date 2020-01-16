@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceCo
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
   @Test
-  def describeShouldIncludeNewTutorAndStudent() {
+  def describeShouldIncludeNewTutorAndStudent(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -38,7 +38,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldCreateNotificationToTutee() {
+  def emitShouldCreateNotificationToTutee(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -63,7 +63,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldCreateNotificationToOldTutor() {
+  def emitShouldCreateNotificationToOldTutor(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -87,7 +87,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldCreateNotificationToNewTutor() {
+  def emitShouldCreateNotificationToNewTutor(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -111,7 +111,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldNotNotifyOldTutorIfTheyDontExist() {
+  def emitShouldNotNotifyOldTutorIfTheyDontExist(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -136,7 +136,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def emitShouldNotifyOnRemove() {
+  def emitShouldNotifyOnRemove(): Unit = {
     new TutorFixture {
       private val thisStudentCourseDetails = studentCourseDetails
       private val thisRelationshipType = tutorRelationshipType
@@ -163,7 +163,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyNoExistingRels() {
+  def testApplyNoExistingRels(): Unit = {
     withFakeTime(DateTime.now) {
       new TutorFixture {
         // apply should return all the modified relationships
@@ -186,7 +186,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyExistingRel() {
+  def testApplyExistingRel(): Unit = {
     withFakeTime(DateTime.now) {
       new TutorFixture {
         // an existing relationship with a different tutor:
@@ -207,7 +207,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyReplaceWithSelf() {
+  def testApplyReplaceWithSelf(): Unit = {
     new TutorFixture {
       // replace an agent with themselves, ie do nothing
       val command = new EditStudentRelationshipCommandInternal(studentCourseDetails, tutorRelationshipType, NoCurrentUser())
@@ -224,7 +224,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
   }
 
   @Test
-  def testApplyMultipleOldTutorsReplaceOne() {
+  def testApplyMultipleOldTutorsReplaceOne(): Unit = {
     withFakeTime(DateTime.now) {
       new TutorFixture {
         // multiple old tutors, just replace one

@@ -32,9 +32,8 @@ abstract class AbstractCopyAssignmentsController extends CourseworkController
 }
 
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}/copy-assignments"))
+@RequestMapping(value = Array("/coursework/admin/{module}/{academicYear:\\d{4}}/copy-assignments"))
 class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap {
 
   @ModelAttribute("activeAcademicYear")
@@ -102,18 +101,16 @@ trait AliveAssignmentsMap {
       .filter { case (_, assignments) => assignments.nonEmpty }
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
+@RequestMapping(value = Array("/coursework/admin/department/{department}/copy-assignments"))
 class CopyDepartmentAssignmentsController extends AbstractCopyDepartmentAssignmentsController {
   @ModelAttribute("activeAcademicYear")
   override def activeAcademicYear: Option[AcademicYear] =
     retrieveActiveAcademicYear(None)
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/copy-assignments"))
+@RequestMapping(value = Array("/coursework/admin/department/{department}/{academicYear:\\d{4}}/copy-assignments"))
 class CopyDepartmentAssignmentsForYearController extends AbstractCopyDepartmentAssignmentsController {
   @ModelAttribute("activeAcademicYear")
   override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =

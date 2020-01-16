@@ -86,7 +86,7 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
     searchResponse.totalHits should be(100)
     searchResponse.hits.hits(0).id should be("100")
     searchResponse.hits.hits(0).sourceAsMap("name") should be("item100")
-    Option(searchResponse.hits.hits(0).sourceAsMap("date")) should be('defined)
+    Option(searchResponse.hits.hits(0).sourceAsMap("date")) should be(Symbol("defined"))
 
     service.newestItemInIndexDate.futureValue should be(Some(fakeItems.last.date.withMillisOfSecond(0))) // millis are lost in indexing
   }

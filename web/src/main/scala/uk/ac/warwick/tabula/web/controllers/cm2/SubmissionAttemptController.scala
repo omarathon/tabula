@@ -9,9 +9,8 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/attempt"))
+@RequestMapping(value = Array("/coursework/submission/{assignment}/attempt"))
 class SubmissionAttemptController extends CourseworkController {
 
   @ModelAttribute("command")

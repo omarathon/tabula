@@ -37,7 +37,7 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 
   var routeRuleQuery: UpstreamRouteRuleQuery = _
 
-  override def afterPropertiesSet() {
+  override def afterPropertiesSet(): Unit = {
     routeRuleQuery = new UpstreamRouteRuleQuery(sits)
   }
 

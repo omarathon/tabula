@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 class PermissionUserTypeTest extends TestBase with Mockito {
 
-  @Test def convertToObject() {
+  @Test def convertToObject(): Unit = {
     val t = new PermissionUserType
     t.convertToObject("Department.Manage") should be(Permissions.Department.Manage)
     t.convertToObject("Profiles.Read.Core") should be(Permissions.Profiles.Read.Core)
@@ -18,14 +18,14 @@ class PermissionUserTypeTest extends TestBase with Mockito {
     }
   }
 
-  @Test def convertToValue() {
+  @Test def convertToValue(): Unit = {
     val t = new PermissionUserType
     t.convertToValue(Permissions.Department.Manage) should be("Department.Manage")
     t.convertToValue(Permissions.Profiles.Read.Core) should be("Profiles.Read.Core")
     t.convertToValue(Permissions.Masquerade) should be("Masquerade")
   }
 
-  @Test def selectorRoles() {
+  @Test def selectorRoles(): Unit = {
     val t = new PermissionUserType
 
     val tutorType = StudentRelationshipType("personalTutor", "tutor", "tutor", "tutee")

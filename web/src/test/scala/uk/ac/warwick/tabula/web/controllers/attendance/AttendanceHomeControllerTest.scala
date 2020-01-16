@@ -45,7 +45,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
 
 
   @Test
-  def onlyProfileRedirectedToProfileView() {
+  def onlyProfileRedirectedToProfileView(): Unit = {
     new Fixture {
       info = HomeInformation(
         hasProfile = true,
@@ -62,7 +62,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def onlyOneViewPermissionRedirectedToViewDepartment() {
+  def onlyOneViewPermissionRedirectedToViewDepartment(): Unit = {
     new Fixture {
       info = HomeInformation(
         hasProfile = false,
@@ -79,7 +79,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def onlyOneManagePermissionRedirectedToManageDepartment() {
+  def onlyOneManagePermissionRedirectedToManageDepartment(): Unit = {
     new Fixture {
       info = HomeInformation(
         hasProfile = false,
@@ -96,7 +96,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def noPermissions() {
+  def noPermissions(): Unit = {
     withUser("cusfal") {
       new Fixture {
         info = HomeInformation(
@@ -115,7 +115,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def viewPermissionsAndProfileShowHome() {
+  def viewPermissionsAndProfileShowHome(): Unit = {
     withUser("cusfal") {
       new Fixture {
         info = HomeInformation(
@@ -134,7 +134,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def managePermissionsAndProfileShowHome() {
+  def managePermissionsAndProfileShowHome(): Unit = {
     withUser("cusfal") {
       new Fixture {
         info = HomeInformation(
@@ -153,7 +153,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def relationshipsAndProfileShowHome() {
+  def relationshipsAndProfileShowHome(): Unit = {
     withUser("cusfal") {
       new Fixture {
         info = HomeInformation(

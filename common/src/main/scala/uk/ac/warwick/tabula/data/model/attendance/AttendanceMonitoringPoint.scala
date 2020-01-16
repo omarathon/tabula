@@ -33,7 +33,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
     _startWeek
   }
 
-  def startWeek_=(startWeek: Int) {
+  def startWeek_=(startWeek: Int): Unit = {
     _startWeek = startWeek
   }
 
@@ -47,7 +47,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
     _endWeek
   }
 
-  def endWeek_=(endWeek: Int) {
+  def endWeek_=(endWeek: Int): Unit = {
     _endWeek = endWeek
   }
 
@@ -249,7 +249,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 
   def assignmentSubmissionIsDisjunction_=(allow: Boolean): Unit = settings += (Settings.AssignmentSubmissionIsDisjunction -> allow)
 
-  override def postLoad() {
+  override def postLoad(): Unit = {
     ensureSettings
   }
 }

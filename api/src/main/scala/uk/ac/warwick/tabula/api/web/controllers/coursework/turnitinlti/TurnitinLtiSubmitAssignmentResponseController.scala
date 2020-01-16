@@ -73,7 +73,7 @@ class TurnitinLtiSubmitAssignmentResponseRequest extends JsonApiRequest[Turnitin
   @BeanProperty var assignmentid: String = _
   @BeanProperty var resource_link_id: String = _
 
-  override def copyTo(state: TurnitinLtiSubmitAssignmentResponseRequestState, errors: Errors) {
+  override def copyTo(state: TurnitinLtiSubmitAssignmentResponseRequestState, errors: Errors): Unit = {
     state.assignmentid = assignmentid
     state.resource_link_id = resource_link_id
   }

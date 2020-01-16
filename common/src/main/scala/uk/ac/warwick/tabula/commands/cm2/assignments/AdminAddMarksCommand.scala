@@ -4,9 +4,8 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{AddMarksCommandBindListener, AddMarksState}
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Notification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -43,7 +42,7 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
     def saveFeedback(markItem: MarkItem) = {
       markItem.user(assignment).map(u => {
         val feedback = markItem.currentFeedback(assignment).getOrElse {
-          val newFeedback = new AssignmentFeedback
+          val newFeedback = new Feedback
           newFeedback.assignment = assignment
           newFeedback.uploaderId = submitter.apparentId
           newFeedback.usercode = u.getUserId
@@ -72,7 +71,7 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
   self: AdminAddMarksState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+    p.PermissionCheck(Permissions.Feedback.Manage, assignment)
   }
 }
 
@@ -96,12 +95,7 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
   self: AdminAddMarksState =>
 
   def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = updatedReleasedFeedback.flatMap { feedback =>
-    HibernateHelpers.initialiseAndUnproxy(feedback) match {
-      case assignmentFeedback: AssignmentFeedback =>
-        Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-      case _ =>
-        None
-    }
+    Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, feedback.assignment))
   }
 }
 

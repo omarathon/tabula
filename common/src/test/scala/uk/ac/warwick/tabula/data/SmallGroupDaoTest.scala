@@ -21,7 +21,7 @@ class SmallGroupDaoTest extends PersistenceTestBase {
   mockUserLookup.registerUserObjects(new User("cusfal"), new User("cuscao"))
 
   @Before
-  def setup() {
+  def setup(): Unit = {
     smallGroupDao.sessionFactory = sessionFactory
     smallGroupDao.userLookup = mockUserLookup
     moduleDao.sessionFactory = sessionFactory

@@ -60,7 +60,7 @@ class CreateMonitoringPointReportRequest extends Serializable {
   @BeanProperty var academicYear: String = _
   @BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
 
-  def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors) {
+  def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors): Unit = {
     try {
       state.academicYear = AcademicYear.parse(academicYear)
     } catch {

@@ -14,7 +14,7 @@ trait AutowiringDisabilityDaoComponent extends DisabilityDaoComponent {
 }
 
 trait DisabilityDao {
-  def saveOrUpdate(disability: Disability)
+  def saveOrUpdate(disability: Disability): Unit
 
   def getByCode(code: String): Option[Disability]
 

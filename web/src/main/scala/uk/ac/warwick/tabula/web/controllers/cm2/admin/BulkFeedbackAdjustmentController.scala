@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.commands.cm2.assignments.{BulkAdjustmentCommand, BulkAdjustmentCommandState, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentCommandState, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, Mark}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
@@ -16,9 +15,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/bulk-adjustment"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/bulk-adjustment"))
 class BulkFeedbackAdjustmentController extends CourseworkController {
 
   type BulkAdjustmentCommand = Appliable[Seq[Mark]] with BulkAdjustmentCommandState
@@ -67,9 +65,8 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/bulk-adjustment/template"))
+@RequestMapping(Array("/coursework/admin/assignments/{assignment}/feedback/bulk-adjustment/template"))
 class BulkFeedbackAdjustmentTemplateController extends CourseworkController {
 
   @ModelAttribute("command")

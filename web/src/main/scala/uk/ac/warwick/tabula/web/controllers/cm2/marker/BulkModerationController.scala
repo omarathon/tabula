@@ -18,9 +18,8 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/bulk-moderation"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/marker/{marker}/{stage}/bulk-moderation"))
 class BulkModerationController extends CourseworkController {
   validatesSelf[SelfValidating]
 

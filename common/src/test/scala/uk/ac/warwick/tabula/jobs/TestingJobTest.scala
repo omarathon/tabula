@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 
 class TestingJobTest extends TestBase with Mockito {
 
-  @Test def run {
+  @Test def run: Unit = {
     val instance = JobInstanceImpl.fromPrototype(TestingJob("test job"))
 
     withClue("Succeeded") {

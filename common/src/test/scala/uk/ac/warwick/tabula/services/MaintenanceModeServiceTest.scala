@@ -8,7 +8,7 @@ class MaintenanceModeServiceTest extends TestBase {
 
   val service = new MaintenanceModeServiceImpl
 
-  @Test def enable {
+  @Test def enable: Unit = {
     service._enabled = false
 
     var called = false
@@ -31,7 +31,7 @@ class MaintenanceModeServiceTest extends TestBase {
     called should be(true)
   }
 
-  @Test def disable {
+  @Test def disable: Unit = {
     service._enabled = true
 
     var called = false

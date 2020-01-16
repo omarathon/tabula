@@ -28,7 +28,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
       group
     })
 
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1000006")
+    val feedback: Feedback = Fixtures.assignmentFeedback("1000006")
     feedback.assignment = assignment
 
     val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)

@@ -11,7 +11,7 @@ class SubmissionIdConverterTest extends TestBase with Mockito {
   val service: SubmissionService = mock[SubmissionService]
   converter.service = service
 
-  @Test def validInput {
+  @Test def validInput: Unit = {
     val submission = new Submission
     submission.id = "steve"
 
@@ -20,13 +20,13 @@ class SubmissionIdConverterTest extends TestBase with Mockito {
     converter.convertRight("steve") should be(submission)
   }
 
-  @Test def invalidInput {
+  @Test def invalidInput: Unit = {
     service.getSubmission("20X6") returns (None)
 
     converter.convertRight("20X6") should be(null)
   }
 
-  @Test def formatting {
+  @Test def formatting: Unit = {
     val submission = new Submission
     submission.id = "steve"
 

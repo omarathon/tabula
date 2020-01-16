@@ -40,7 +40,7 @@ trait WebsignonMethods extends Matchers with Eventually {
 
     case class SigningInPhase(details: LoginDetails) {
 
-      def to(url: String) {
+      def to(url: String): Unit = {
         // Sets session cookies if this user's logged in once before.
         //WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
 

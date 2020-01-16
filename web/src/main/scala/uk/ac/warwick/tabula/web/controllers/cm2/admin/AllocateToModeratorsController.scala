@@ -14,9 +14,8 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.Sele
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.{AdminSelectionAction, CourseworkController}
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/moderator-sampling"))
+@RequestMapping(value = Array("/coursework/admin/assignments/{assignment}/moderator-sampling"))
 class AllocateToModeratorsController extends CourseworkController with AdminSelectionAction {
 
   validatesSelf[SelfValidating]

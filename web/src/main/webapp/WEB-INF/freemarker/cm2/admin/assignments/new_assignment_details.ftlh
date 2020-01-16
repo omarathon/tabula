@@ -10,9 +10,6 @@ the comments textarea needs to maintain newlines.
 <div class="fix-area">
   <#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>
   <@f.form cssClass="double-submit-protection" method="post" action=actionUrl?markup_string>
-    <#if !features.redirectCM1>
-      <#include "_oldversion_redirect_banner.ftl" />
-    </#if>
     <@components.assignment_wizard 'details' module />
     <#if command.prefilled>
       <div class="alert alert-info">

@@ -117,7 +117,7 @@ trait AddStudentsToSchemeDescription extends Describable[AttendanceMonitoringSch
       .property("membershipCount" -> ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).size)
   }
 
-  override def describeResult(d: Description) {
+  override def describeResult(d: Description): Unit = {
     d.attendanceMonitoringScheme(scheme)
       .property("membershipCount" -> membershipItems.size)
   }

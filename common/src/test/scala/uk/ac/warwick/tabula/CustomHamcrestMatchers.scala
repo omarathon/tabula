@@ -24,7 +24,7 @@ trait CustomHamcrestMatchers {
       name(value).apply(obj).matches
     }
 
-    def describeTo(d: Description) {
+    def describeTo(d: Description): Unit = {
       d.appendText("Has property ").appendValue(name.name).appendText(" with value ").appendValue(value)
     }
   }
