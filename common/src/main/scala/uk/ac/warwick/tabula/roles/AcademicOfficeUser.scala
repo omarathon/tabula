@@ -6,7 +6,7 @@ case class AcademicOfficeUser() extends BuiltInRole(AcademicOfficeRoleDefinition
 
 case object AcademicOfficeRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-  override def description = "Academic office administrator"
+  override def description = "Student Administrative Services administrator"
 
   GrantsGlobalPermission(
     Department.ViewManualMembershipSummary

@@ -52,7 +52,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
   private def saveAttachment(file: FileAttachment) = {
     session.saveOrUpdate(file)
 
-    if (!file.hasData && file.uploadedData != null) {
+    if ((!file.hasData || file.overwrite) && file.uploadedData != null) {
       file.hash = fileHasher.hash(file.uploadedData.openStream())
       session.saveOrUpdate(file)
 

@@ -161,8 +161,8 @@ trait ModifyMarkingWorkflowRequest {
   var workflowName: String = _
   var workflowType: MarkingWorkflowType = _
   // all the current workflows have at most 2 sets of markers
-  var markersA: JList[Usercode] = JArrayList()
-  var markersB: JList[Usercode] = JArrayList()
+  var markersA: JList[Usercode] = _
+  var markersB: JList[Usercode] = _
 
   var sampler: ModerationSampler = _
 

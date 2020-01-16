@@ -5,14 +5,16 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsSubmissionCommand._
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -21,7 +23,6 @@ import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
-import CreateMitCircsSubmissionCommand._
 
 object CreateMitCircsSubmissionCommand {
   type Result = MitigatingCircumstancesSubmission
@@ -50,6 +51,7 @@ object CreateMitCircsSubmissionCommand {
       with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringUploadedImageProcessorComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
@@ -59,11 +61,13 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 
   self: MitCircsSubmissionRequest
     with MitCircsSubmissionServiceComponent
-    with ModuleAndDepartmentServiceComponent =>
+    with ModuleAndDepartmentServiceComponent
+    with UploadedImageProcessorComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
     file.onBind(result)
+    uploadedImageProcessor.fixOrientation(file)
     result.popNestedPath()
 
     affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
