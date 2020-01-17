@@ -38,7 +38,7 @@ trait ModuleRegistrationDao {
 
   def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration]
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
@@ -72,13 +72,13 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
   def getByUsercodesAndYear(userCodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
-				select distinct mr
-					from ModuleRegistration mr
-					where academicYear = :academicYear
-					and studentCourseDetails.missingFromImportSince is null
-					and studentCourseDetails.student.userId in :usercodes
+        select distinct mr
+          from ModuleRegistration mr
+          where academicYear = :academicYear
+          and studentCourseDetails.missingFromImportSince is null
+          and studentCourseDetails.student.userId in :usercodes
           and mr.deleted is false
-				""")
+        """)
       .setParameter("academicYear", academicYear)
       .setParameterList("usercodes", userCodes)
       .seq
@@ -100,16 +100,17 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     }, "academicYear", academicYears)
   }
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
+  def getByUniversityIds(universityIds: Seq[String], includedDeleted: Boolean): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
          select distinct mr
          from ModuleRegistration mr
          where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
-          and mr.deleted is false
+          and (mr.deleted is false or :includeDeleted)
       """)
       .setParameterList("universityIds", universityIds)
+      .setBoolean("includedDeleted", includedDeleted)
       .seq
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {
