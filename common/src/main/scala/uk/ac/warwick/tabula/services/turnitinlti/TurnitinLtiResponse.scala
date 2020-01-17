@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
 import uk.ac.warwick.tabula.helpers.Logging
+
 import scala.util.parsing.json.JSON
 import scala.xml.Elem
 
@@ -83,8 +84,7 @@ case class TurnitinLtiResponse(
     *
     */
   def submissionInfo(): SubmissionResults = {
-
-    val results = new SubmissionResults()
+    val results = SubmissionResults()
 
     JSON.parseFull(json.get) match {
       case Some(theJson: Map[String, Any]@unchecked) =>
@@ -93,29 +93,29 @@ case class TurnitinLtiResponse(
             reports.get("breakdown") match {
               case Some(breakdowns: Map[String, Double]@unchecked) =>
                 breakdowns.get("publications_score") match {
-                  case publicationsScore if publicationsScore.get != null =>
+                  case publicationsScore if publicationsScore.nonEmpty =>
                     results.publication_overlap = publicationsScore
-                  case _ => Nil
+                  case _ =>
                 }
                 breakdowns.get("internet_score") match {
-                  case internetScore if internetScore.get != null =>
+                  case internetScore if internetScore.nonEmpty =>
                     results.web_overlap = internetScore
-                  case _ => Nil
+                  case _ =>
                 }
                 breakdowns.get("submitted_works_score") match {
-                  case submittedWorksScore if submittedWorksScore.get != null =>
+                  case submittedWorksScore if submittedWorksScore.nonEmpty =>
                     results.student_overlap = submittedWorksScore
-                  case _ => Nil
+                  case _ =>
                 }
-              case _ => Nil
+              case _ =>
             }
             reports.get("numeric") match {
               case Some(numerics: Map[String, Double]@unchecked) =>
                 numerics.get("score") match {
-                  case score if score.get != null => results.overlap = score
-                  case _ => Nil
+                  case score if score.nonEmpty => results.overlap = score
+                  case _ =>
                 }
-              case _ => Nil
+              case _ =>
             }
           case _ => Nil
         }
