@@ -107,7 +107,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
          from ModuleRegistration mr
          where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
-          and and mr.deleted is false
+          and mr.deleted is false
       """)
       .setParameterList("universityIds", universityIds)
       .seq
