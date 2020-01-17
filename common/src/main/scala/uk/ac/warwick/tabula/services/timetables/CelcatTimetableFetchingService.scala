@@ -213,7 +213,7 @@ object CelcatHttpTimetableFetchingService {
     else new DateTime(property.getDate, getTimeZone(property)).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
 
   def getTimeZone(property: DateProperty): DateTimeZone =
-    if (property.getParameter(Parameter.VALUE) != null && (property.getParameter(Parameter.VALUE) == Value.DATE)) DateTimeZone.UTC
+    if (property.getParameter(Parameter.VALUE) != null && (property.getParameter[Value](Parameter.VALUE) == Value.DATE)) DateTimeZone.UTC
     else if (property.getTimeZone != null) DateTimeZone.forTimeZone(property.getTimeZone)
     else DateTimeZone.forID("Europe/London")
 

@@ -34,19 +34,19 @@ class SchedulingConfigurationTest extends AppContextTestBase {
     processScheduledNotificationsJob.repeatInterval should be (20.seconds)
 
     val manualMembershipWarningJobs =
-      jobs.filter(_.name == "ManualMembershipWarningJob").collect { case c: CronTriggerJob[ManualMembershipWarningJob] => c }
+      jobs.filter(_.name == "ManualMembershipWarningJob").collect { case c: CronTriggerJob[ManualMembershipWarningJob @unchecked] => c }
 
     manualMembershipWarningJobs.size should be (2)
     manualMembershipWarningJobs.map(_.cronExpression).sorted should be (Seq("0 0 9 ? 1/1 MON#1 *", "0 0 9 ? 1/1 MON#3 *"))
 
     val importProfilesSingleDepartmentJob =
-      jobs.filter(_.name == "ImportProfilesSingleDepartmentJob").collectFirst { case j: SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob] => j }
+      jobs.filter(_.name == "ImportProfilesSingleDepartmentJob").collectFirst { case j: SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob @unchecked] => j }
 
     importProfilesSingleDepartmentJob should not be Symbol("empty")
 
     // This job is actively unscheduled in test/resources/tabula.properties
     val importModuleMembershipDataJob =
-      jobs.filter(_.name == "ImportModuleMembershipDataJob").collectFirst { case j: SimpleUnscheduledJob[ImportModuleMembershipDataJob] => j }
+      jobs.filter(_.name == "ImportModuleMembershipDataJob").collectFirst { case j: SimpleUnscheduledJob[ImportModuleMembershipDataJob @unchecked] => j }
 
     importProfilesSingleDepartmentJob should not be Symbol("empty")
   }
