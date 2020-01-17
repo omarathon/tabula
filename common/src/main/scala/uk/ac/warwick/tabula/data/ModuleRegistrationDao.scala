@@ -77,6 +77,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 					where academicYear = :academicYear
 					and studentCourseDetails.missingFromImportSince is null
 					and studentCourseDetails.student.userId in :usercodes
+          and mr.deleted is false
 				""")
       .setParameter("academicYear", academicYear)
       .setParameterList("usercodes", userCodes)
@@ -86,6 +87,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     session.newCriteria[ModuleRegistration]
       .add(is("module", module))
       .add(is("academicYear", academicYear))
+      .add(is("deleted", false))
       .addOrder(asc("_scjCode"))
       .seq
   }
@@ -94,6 +96,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     safeInSeq(() => {
       session.newCriteria[ModuleRegistration]
         .addOrder(asc("_scjCode"))
+        .add(is("deleted", false))
     }, "academicYear", academicYears)
   }
 
@@ -104,6 +107,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
          from ModuleRegistration mr
          where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
+          and and mr.deleted is false
       """)
       .setParameterList("universityIds", universityIds)
       .seq
@@ -122,6 +126,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
         .createAlias("studentCourseDetails", "studentCourseDetails")
         .createAlias("studentCourseDetails.student", "student")
         .add(is("module", module))
+        .add(is("deleted", false))
       occurrence.map(o =>
         c.add(is("occurrence", o))
       )
