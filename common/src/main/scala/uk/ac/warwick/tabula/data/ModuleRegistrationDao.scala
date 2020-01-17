@@ -36,7 +36,7 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration]
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
 
@@ -92,11 +92,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .seq
   }
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration] = {
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] = {
     safeInSeq(() => {
-      session.newCriteria[ModuleRegistration]
+      val criteria = session.newCriteria[ModuleRegistration]
         .addOrder(asc("_scjCode"))
-        .add(is("deleted", false))
+      if (!includeDeleted) {
+        criteria.add(is("deleted", false))
+      }
+      criteria
     }, "academicYear", academicYears)
   }
 
