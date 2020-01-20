@@ -128,9 +128,7 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
       )
     } catch {
       // referenced entity probably missing, oh well.
-      case t: ObjectNotFoundException =>
-        logger.warn(s"Couldn't send email for Notification because object no longer exists: $batch", t)
-        None
+      case _: ObjectNotFoundException => None
     }
 
   def postActivity(allRecipients: Seq[RecipientNotificationInfo]): Unit = {
