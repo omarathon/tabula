@@ -254,7 +254,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
       if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("relatedUrl", "smallGroupEvent.url.invalid")
     }
 
-    if (relatedUrlTitle != null && relatedUrlTitle.length > SmallGroupEvent.RelatedUrlTitleMaxLength) {
+    if (relatedUrlTitle.safeLength > SmallGroupEvent.RelatedUrlTitleMaxLength) {
       errors.rejectValue("relatedUrlTitle", "smallGroupEvent.urlTitle.tooLong", Array(SmallGroupEvent.RelatedUrlTitleMaxLength: java.lang.Integer), "")
     }
 
