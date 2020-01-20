@@ -30,9 +30,9 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration]
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   /**
     * Gets the weighted mean mark for the given module registrations.
@@ -88,11 +88,11 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration] =
-    moduleRegistrationDao.getByYears(academicYears)
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByYears(academicYears, includeDeleted)
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
-    moduleRegistrationDao.getByUniversityIds(universityIds)
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
   private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
