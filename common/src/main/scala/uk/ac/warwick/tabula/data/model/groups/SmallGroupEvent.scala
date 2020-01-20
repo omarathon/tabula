@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 object SmallGroupEvent {
 
+  val RelatedUrlTitleMaxLength = 255
+
   // Companion object is one of the places searched for an implicit Ordering, so
   // this will be the default when ordering a list of small group events.
   implicit val defaultOrdering = new Ordering[SmallGroupEvent] {
