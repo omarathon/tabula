@@ -32,8 +32,8 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
       state.entities.map(entity => entity -> {
         def globalRecommendations(s: MitigatingCircumstancesSubmission) =  s.globalRecommendations.map(r => s"${r.description} (all assessments)")
         def affectedAssessmentsByRecommendation(s: MitigatingCircumstancesSubmission) = s.affectedAssessmentsByRecommendation.toSeq
-          .map{case (r, a) => s"${r.description} ${a.map(_.module.code.toUpperCase).distinct.mkString("(", ", ", ")")}"}
-        def modulesWithAcuteOutcomes(s: MitigatingCircumstancesSubmission) = s.assessmentsWithAcuteOutcome.map(_.module.code.toUpperCase).distinct
+          .map{case (r, a) => s"${r.description} ${a.map(aa => aa.module.map(_.code.toUpperCase).getOrElse(aa.moduleCode)).distinct.mkString("(", ", ", ")")}"}
+        def modulesWithAcuteOutcomes(s: MitigatingCircumstancesSubmission) = s.assessmentsWithAcuteOutcome.map(aa => aa.module.map(_.code.toUpperCase).getOrElse(aa.moduleCode)).distinct
 
         val mitCircsCodesString = entity.mitigatingCircumstances.map(s => {
           val header = s"MIT-${s.key} Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})\n"

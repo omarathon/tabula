@@ -25,13 +25,12 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   with PermissionsTarget
   with Serializable {
 
-
   def this(_submission: MitigatingCircumstancesSubmission, item: AffectedAssessmentItem) {
     this()
     this.mitigatingCircumstancesSubmission = _submission
     this.moduleCode = item.moduleCode
     this.sequence = item.sequence
-    this.module = item.module
+    this.module = Option(item.module)
     this.academicYear = item.academicYear
     this.name = item.name
     this.deadline = item.deadline
@@ -58,14 +57,17 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     */
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "module_id")
-  var module: Module = _
+  private var _module: Module = _
+  def module: Option[Module] = Option(_module)
+  def module_=(module: Option[Module]): Unit = _module = module.orNull
 
   @ManyToOne(fetch = FetchType.EAGER, optional = true)
   @JoinColumns(value = Array(
     new JoinColumn(name = "moduleCode", referencedColumnName="moduleCode", insertable = false, updatable = false),
     new JoinColumn(name = "sequence", referencedColumnName="sequence", insertable = false, updatable = false)
   ))
-  var assessmentComponent: AssessmentComponent = _
+  private val _assessmentComponent: AssessmentComponent = null
+  def assessmentComponent: Option[AssessmentComponent] = Option(_assessmentComponent)
 
   @Basic
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
@@ -75,10 +77,10 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   @Column(name = "name")
   private var _name: String = _
   // use the name of the assessment component if this matches one - use the locally held name otherwise
-  def name: String = Option(assessmentComponent).map(_.name).getOrElse(_name)
+  def name: String = assessmentComponent.map(_.name).getOrElse(_name)
   def name_=(n: String): Unit = _name = n
 
-  def assessmentType: AssessmentType = Option(assessmentComponent).map(_.assessmentType).getOrElse(AssessmentType.Other)
+  def assessmentType: AssessmentType = assessmentComponent.map(_.assessmentType).getOrElse(AssessmentType.Other)
 
   @Column(nullable = false)
   var deadline: LocalDate = _
@@ -99,7 +101,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   def extensionDeadline_=(d: DateTime): Unit = _extensionDeadline = d
 
   def matches(assignment: Assignment): Boolean = {
-    assignment.module == module && assignment.academicYear == academicYear && assignment.assessmentGroups.asScala.exists { ag =>
+    module.contains(assignment.module) && assignment.academicYear == academicYear && assignment.assessmentGroups.asScala.exists { ag =>
       ag.assessmentComponent.sequence == sequence
     }
   }
