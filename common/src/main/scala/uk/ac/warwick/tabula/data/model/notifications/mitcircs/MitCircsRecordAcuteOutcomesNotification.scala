@@ -68,7 +68,8 @@ class MitCircsRecordAcuteOutcomesNotification
       if (settings.notifyExtensionManagers.value && (users.isEmpty || notifyAllGroups)) {
         users ++= submission.affectedAssessments.asScala
           .filter(_.acuteOutcome == MitigatingCircumstancesAcuteOutcome.Extension)
-          .map(_.module.adminDepartment)
+          .flatMap(_.module)
+          .map(_.adminDepartment)
           .distinct
           .flatMap(_.extensionManagers.users)
           .distinct
@@ -78,7 +79,7 @@ class MitCircsRecordAcuteOutcomesNotification
       if (settings.notifyDepartmentAdministrators.value && (users.isEmpty || notifyAllGroups)) {
         users ++= submission.affectedAssessments.asScala
           .filter(a => Option(a.acuteOutcome).isDefined)
-          .flatMap(a => Option(a.module))
+          .flatMap(_.module)
           .map(_.adminDepartment)
           .distinct
           .flatMap(_.owners.users)
