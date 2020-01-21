@@ -89,7 +89,7 @@
           <#-- Hide the exam components at the end so they don't mess with the checkbox styles -->
           <#list command.affectedAssessments as assessment>
             <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-              <#if assessment.assessmentType.code != "A">
+              <#if assessment.assessmentType.code == "E">
                 <@f.hidden path="name" />
                 <@f.hidden path="module" />
                 <@f.hidden path="moduleCode" />
