@@ -260,7 +260,7 @@ class AffectedAssessmentItem {
   def this(assessment: MitigatingCircumstancesAffectedAssessment) {
     this()
     this.moduleCode = assessment.moduleCode
-    this.module = assessment.module
+    this.module = assessment.module.orNull
     this.sequence = assessment.sequence
     this.academicYear = assessment.academicYear
     this.name = assessment.name
