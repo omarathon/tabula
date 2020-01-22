@@ -20,9 +20,29 @@ import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
+import org.apache.commons.io.FilenameUtils._
 
 import scala.concurrent.Future
 import scala.util.Try
+
+object TurnitinTcaService {
+
+  /**
+   * File formats and maximum filesize allowed by TCA listed at https://developers.turnitin.com/docs/tca/faq
+   * Turnitin has requested we restrict file formats from being uploaded - see https://developers.turnitin.com/docs/tca/certification-review
+   */
+  val validExtensions: Seq[String] = Seq("pdf", "doc", "ppt", "pps", "xls", "docx", "pptx", "ppsx", "xlsx", "ps", "rtf", "htm", "html", "wpd", "odt", "txt")
+  val maxFileSizeInMegabytes = 100
+  val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024 // 100M
+
+  def validFileType(file: FileAttachment): Boolean =
+    validExtensions contains getExtension(file.name).toLowerCase
+
+  def validFileSize(file: FileAttachment): Boolean =
+    file.actualDataLength < maxFileSize
+
+  def validFile(file: FileAttachment): Boolean = validFileType(file) && validFileSize(file)
+}
 
 case class TcaError(
   status: Int,
