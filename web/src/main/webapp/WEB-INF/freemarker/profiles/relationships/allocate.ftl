@@ -77,8 +77,8 @@
             edit the spreadsheet.
             <br /><br />
             <div class="alert alert-info">
-              <p>This will include any changes made in the manually allocate tab. You can also <a
-                        href="<@routes.profiles.relationship_template department relationshipType />">download a template without these changes</a>.</p>
+              <p>This will include any changes made in the manually allocate tab. You can also what
+                <a href="<@routes.profiles.relationship_template department relationshipType />" class="dirty-check-ignore">download a template without these changes</a>.</p>
             </div>
           </li>
           <li><strong>Allocate students</strong> to ${relationshipType.agentRole}s using the dropdown menu in the
