@@ -316,8 +316,20 @@ class MitCircsForm {
             value: academicYear,
           }));
       }
-      const $checkbox = $('<input />').attr('type', 'checkbox').prop('checked', !!assessmentComponent.selected);
+
+      const $checkbox = $('<input />').attr({
+        type: 'checkbox',
+        name: 'selected',
+      }).prop('checked', !!assessmentComponent.selected);
+
       $checkboxCell.append($checkbox);
+
+      // For Spring checkbox binding
+      $checkboxCell.append($('<input />').attr({
+        type: 'hidden',
+        name: '_selected',
+        value: 'on',
+      }));
 
       const $moduleCell = $('<td />').addClass('mitcircs-form__fields__section__assessments-table__module');
       $tr.append($moduleCell);
@@ -370,13 +382,9 @@ class MitCircsForm {
     let count = 0;
     $rows.each((i, tr) => {
       const $tr = $(tr);
-      const isChecked = $tr.children('td').first().find('input[type="checkbox"]').is(':checked');
-      if (!isChecked) {
-        // Remove the names from all the inputs so they don't get submitted
-        $tr.find(':input').removeAttr('name').prop('disabled', true);
-        return;
-      }
 
+      $tr.find('input[name$="selected"]:not([name^="_"])').attr('name', `affectedAssessments[${count}].selected`);
+      $tr.find('input[name$="selected"][name^="_"]').attr('name', `_affectedAssessments[${count}].selected`);
       $tr.find('input[name$="moduleCode"]').attr('name', `affectedAssessments[${count}].moduleCode`);
       $tr.find('input[name$="sequence"]').attr('name', `affectedAssessments[${count}].sequence`);
       $tr.find('input[name$="assessmentType"]').attr('name', `affectedAssessments[${count}].assessmentType`);

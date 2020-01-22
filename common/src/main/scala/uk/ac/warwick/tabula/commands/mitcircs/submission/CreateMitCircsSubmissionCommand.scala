@@ -97,7 +97,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     submission.pendingEvidence = pendingEvidence
     submission.pendingEvidenceDue = pendingEvidenceDue
     submission.hasSensitiveEvidence = hasSensitiveEvidence
-    affectedAssessments.asScala.foreach { item =>
+    affectedAssessments.asScala.filter(_.selected).foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
     }
@@ -148,15 +148,15 @@ trait MitCircsSubmissionValidation extends SelfValidating {
         errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
 
       // validate affected assessments
-      affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+      affectedAssessments.asScala.zipWithIndex.filter { case (item, _) => item.selected }.foreach { case (item, index) =>
         errors.pushNestedPath(s"affectedAssessments[$index]")
 
         if (!item.moduleCode.hasText)
           errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
         else if (
           item.moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode &&
-            item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
-            moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
+          item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
+          moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
         ) errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
 
         if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
@@ -168,7 +168,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
         errors.popNestedPath()
       }
 
-      if (affectedAssessments.isEmpty)
+      if (!affectedAssessments.asScala.exists(_.selected))
         errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
 
       // validate contact
@@ -263,6 +263,7 @@ trait MitCircsSubmissionState {
 class AffectedAssessmentItem {
   def this(assessment: MitigatingCircumstancesAffectedAssessment) {
     this()
+    this.selected = true
     this.moduleCode = assessment.moduleCode
     this.module = assessment.module.orNull
     this.sequence = assessment.sequence
@@ -275,6 +276,7 @@ class AffectedAssessmentItem {
     this.extensionDeadline = assessment.extensionDeadline.orNull
   }
 
+  var selected: Boolean = _
   var moduleCode: String = _
   var module: Module = _
   var sequence: String = _
