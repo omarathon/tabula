@@ -43,7 +43,10 @@ class TurnitinTcaRetrySubmissionCommandInternal(val assignment: Assignment, val 
               turnitinTcaService.requestSimilarityReport(tcaSubmission, Some(attachment)).map(
                 _ => Right(tcaSubmission)
               )
-            } else Future.successful(Right(tcaSubmission))
+            } else {
+              turnitinTcaService.persistMetadataToOriginalityReport(tcaSubmission, Some(attachment))
+              Future.successful(Right(tcaSubmission))
+            }
         ))
       , Duration.Inf)
   }

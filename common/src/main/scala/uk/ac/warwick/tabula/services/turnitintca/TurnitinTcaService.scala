@@ -50,6 +50,7 @@ trait TurnitinTcaService {
   def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment] = None): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport, fileAttachment: Option[FileAttachment] = None): Option[OriginalityReport]
+  def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
   def listWebhooks: Future[Seq[TcaWebhook]]
   def registerWebhook(webhook: TcaWebhook): Future[Unit]
@@ -369,7 +370,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     originalityReport
   }
 
-  private def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {
+  def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {
 
     val originalityReport = fileAttachment.map(_.originalityReport).orElse(
       originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
