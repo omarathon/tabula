@@ -171,7 +171,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
     }.map { response => toAuditEvents(response.result.hits.hits) }
 
   private def eventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] = {
-    val eventTypeQuery = termQuery("eventType", eventType)
+    val eventTypeQuery = termQuery("eventType.keyword", eventType)
 
     val searchQuery =
       if (restrictions.nonEmpty) boolQuery().must(restrictions :+ eventTypeQuery)
@@ -215,7 +215,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
   }
 
   private def latestEventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] = {
-    val eventTypeQuery = termQuery("eventType", eventType)
+    val eventTypeQuery = termQuery("eventType.keyword", eventType)
 
     val searchQuery =
       if (restrictions.nonEmpty) boolQuery().must(restrictions :+ eventTypeQuery)
@@ -252,10 +252,10 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
   private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]): Query = referenceDate match {
     case Some(createdDate) => must(
-      termQuery("assignment", assignment.id),
+      termQuery("assignment.keyword", assignment.id),
       rangeQuery("eventDate") gte DateFormats.IsoDateTime.print(createdDate)
     )
-    case _ => termQuery("assignment", assignment.id)
+    case _ => termQuery("assignment.keyword", assignment.id)
   }
 
   def adminDownloadedSubmissions(assignment: Assignment, submissions: Seq[Submission]): Future[Seq[Submission]] = {
@@ -268,7 +268,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
           .query(
             boolQuery()
               .must(
-                termQuery("eventType", "DownloadAllSubmissions"),
+                termQuery("eventType.keyword", "DownloadAllSubmissions"),
                 assignmentTerm
               )
           )
@@ -292,7 +292,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
           .query(
             boolQuery()
               .must(
-                termQuery("eventType", "DownloadSubmissions"),
+                termQuery("eventType.keyword", "DownloadSubmissions"),
                 assignmentTerm
               )
           )
@@ -325,7 +325,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
           .query(
             boolQuery()
               .must(
-                termQuery("eventType", "AdminGetSingleSubmission"),
+                termQuery("eventType.keyword", "AdminGetSingleSubmission"),
                 assignmentTerm
               )
           )
@@ -432,7 +432,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
   }
 
   private def submissionEventsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int, restrictions: Query*): Future[PagedAuditEvents] = {
-    val eventTypeQuery = termQuery("eventType", "SubmitAssignment")
+    val eventTypeQuery = termQuery("eventType.keyword", "SubmitAssignment")
 
     val queries: Seq[Query] = lastUpdatedDate match {
       case None => restrictions :+ eventTypeQuery
@@ -444,7 +444,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
         .query(
           boolQuery()
             .must(queries)
-            .should(modules.map { module => termQuery("module", module.id) })
+            .should(modules.map { module => termQuery("module.keyword", module.id) })
         )
         .limit(max)
         .sortBy(fieldSort("eventDate").order(SortOrder.Desc))
