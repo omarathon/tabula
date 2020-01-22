@@ -270,6 +270,8 @@ $(() => {
 
       prependClearLink($list);
     });
+
+    $(this).closest('form').submit();
   });
 
   $clearAllButtons.each(function each() {
