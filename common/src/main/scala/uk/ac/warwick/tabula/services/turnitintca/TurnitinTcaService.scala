@@ -20,7 +20,6 @@ import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
-import org.apache.commons.io.FilenameUtils._
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -36,7 +35,7 @@ object TurnitinTcaService {
   val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024 // 100M
 
   def validFileType(file: FileAttachment): Boolean =
-    validExtensions contains getExtension(file.name).toLowerCase
+    validExtensions contains file.fileExt.toLowerCase
 
   def validFileSize(file: FileAttachment): Boolean =
     file.actualDataLength < maxFileSize
