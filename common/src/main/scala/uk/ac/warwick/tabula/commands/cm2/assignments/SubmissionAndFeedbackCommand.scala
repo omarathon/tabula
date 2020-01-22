@@ -69,11 +69,10 @@ trait SubmissionAndFeedbackEnhancer {
 trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer {
   self: SubmissionAndFeedbackState =>
 
-  val enhancedSubmissionsCommand = ListSubmissionsCommand(assignment)
-  val enhancedFeedbacksCommand = ListFeedbackCommand(assignment)
+  val enhancedSubmissionsCommand: ListSubmissionsCommand.CommandType = ListSubmissionsCommand(assignment)
+  val enhancedFeedbacksCommand: ListFeedbackCommand.CommandType = ListFeedbackCommand(assignment)
 
   override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
-
   override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
 }
 

@@ -16,6 +16,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object ListFeedbackCommand {
+  type CommandType = Appliable[ListFeedbackResult]
 
   case class ListFeedbackResult(
     downloads: Seq[(User, DateTime)],
@@ -24,7 +25,7 @@ object ListFeedbackCommand {
     latestGenericFeedback: Option[DateTime]
   )
 
-  def apply(assignment: Assignment) =
+  def apply(assignment: Assignment): CommandType =
     new ListFeedbackCommandInternal(assignment)
       with ComposableCommand[ListFeedbackResult]
       with ListFeedbackRequest
