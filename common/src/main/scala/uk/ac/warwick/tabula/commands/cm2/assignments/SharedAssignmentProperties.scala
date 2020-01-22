@@ -119,7 +119,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 
   val maxFileAttachments: Int = 20
 
-  val validAttachmentTypePattern: Regex = "^[a-z][a-z_0-9]*$".r
+  val validAttachmentTypePattern: Regex = "^[a-z][a-z_\\.0-9]*$".r
 
   var fileAttachmentTypes: JList[String] = JArrayList()
 

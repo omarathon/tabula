@@ -16,7 +16,7 @@ class SharedAssignmentOptionsPropertiesTest extends TestBase {
 
   @Test def validateValidFileTypes(): Unit = {
     properties.fileAttachmentTypes.addAll(Seq(
-      "txt", "docx", "c", "x_t", "m4a", "", "mp4"
+      "txt", "docx", "c", "x_t", "m4a", "", "mp4", "tar.gz"
     ).asJava)
 
     val errors = new BindException(properties, "properties")
