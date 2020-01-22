@@ -33,12 +33,18 @@ object AssessmentType extends Enum[AssessmentType] {
 
   case object SummerExam extends ExamType("E")
   case object JanuaryExam extends ExamType("EJ")
+  case object FebruaryExam extends ExamType("EF") // NOTE not in Module Approval 2020-01-22
   case object MarchExam extends ExamType("EM")
   case object AprilExam extends ExamType("EA")
   case object MayExam extends ExamType("EY")
+  case object JulyExam extends ExamType("EL") // NOTE not in Module Approval 2020-01-22
   case object SeptemberExam extends ExamType("ES")
   case object DecemberExam extends ExamType("ED")
   case object LocalExamination extends ExamType("LX")
+
+  case object Assignment extends AssignmentType("A") // NOTE not in Module Approval 2020-01-22
+  case object AssignmentBestSubsetGroup extends AssignmentType("AN") // NOTE not in Module Approval 2020-01-22 - don't rely on this name being what you think it is
+  case object AssignmentBestSubsetIndividual extends AssignmentType("AV") // NOTE not in Module Approval 2020-01-22 - don't rely on this name being what you think it is
 
   case object Abstract extends AssignmentType("AB")
   case object Curation extends AssignmentType("C")
@@ -84,6 +90,7 @@ object AssessmentType extends Enum[AssessmentType] {
   case object Worksheet extends AssignmentType("WS")
   case object Oral extends AssignmentType("OE")
   case object TakeHome extends AssignmentType("HE")
+  case object InClassTest extends AssignmentType("T") // NOTE not in Module Approval 2020-01-22
   case object InClassTestMultipleChoice extends AssignmentType("TMC")
   case object InClassTestShortAnswer extends AssignmentType("TSA")
   case object InClassTestOther extends AssignmentType("TO")
