@@ -6,11 +6,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, WordCountField}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 
 import scala.jdk.CollectionConverters._
 import scala.util.matching.Regex
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
   * Bound as the value of a Map on a parent form object, to store multiple sets of
