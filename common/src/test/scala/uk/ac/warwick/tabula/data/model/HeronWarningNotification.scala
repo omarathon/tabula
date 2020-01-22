@@ -6,6 +6,7 @@ import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
   val templateLocation = "/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl"
+  val batchTemplateLocation = "/WEB-INF/freemarker/notifications/i_really_hate_herons_batch.ftl"
   val heronRant = "They are after your delicious eye jelly. Throw rocks at them!"
 }
 
@@ -13,8 +14,10 @@ object HeronWarningNotification {
 @Proxy
 @DiscriminatorValue(value = "HeronWarning")
 class HeronWarningNotification extends Notification[MeetingRecord, Unit]
-  with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
-  with MyWarwickActivity {
+  with SingleItemNotification[MeetingRecord]
+  with SingleRecipientNotification
+  with MyWarwickActivity
+  with BatchedNotification[HeronWarningNotification] {
 
   import HeronWarningNotification._
 
@@ -30,6 +33,17 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 
   def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
+  override def titleForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
+    s"Oh no, ${notifications.size} herons are coming to kill you in your sleep."
+
+  override def contentForBatchInternal(notifications: Seq[HeronWarningNotification]): FreemarkerModel =
+    FreemarkerModel(batchTemplateLocation, Map("herons" -> notifications.map(_.item), "rant" -> heronRant))
+
+  override def urlForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
+    "/beware/herons/multiple"
+
+  override def urlTitleForBatchInternal(notifications: Seq[HeronWarningNotification]): String =
+    "see all your incoming herons"
 }
 
 @Entity

@@ -10,7 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.EmailNotificationService
+import uk.ac.warwick.tabula.services.NotificationBatchingService
 import uk.ac.warwick.util.core.DateTimeUtils
 import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
@@ -33,7 +33,7 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider(EmailU
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   def run(): Unit = transactional(readOnly = true) {
     // Number of unsent emails in queue
-    val unsentEmailCount = Wire[EmailNotificationService].unemailedRecipientCount.intValue()
+    val unsentEmailCount = Wire[NotificationBatchingService].unemailedRecipientCount.intValue()
 
     val status =
       if (unsentEmailCount >= EmailUnsentEmailCountHealthcheck.ErrorThreshold) ServiceHealthcheck.Status.Error
@@ -69,14 +69,14 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider(EmailO
   def run(): Unit = transactional(readOnly = true) {
     // How old is the oldest item in the queue?
     val oldestUnsentEmail: Duration =
-      Wire[EmailNotificationService].oldestUnemailedRecipient
+      Wire[NotificationBatchingService].oldestUnemailedRecipient
         .map { recipient: RecipientNotificationInfo =>
           Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes.minutes.toCoarsest
         }.getOrElse(Zero)
 
     // How new is the latest item in the queue?
     val recentSentEmail: Duration =
-      Wire[EmailNotificationService].recentEmailedRecipient
+      Wire[NotificationBatchingService].recentEmailedRecipient
         .filter(_.attemptedAt != null) // See TAB-6033 for details
         .map { recipient: RecipientNotificationInfo =>
         Minutes.minutesBetween(recipient.attemptedAt, DateTime.now).getMinutes.minutes.toCoarsest

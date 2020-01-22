@@ -144,7 +144,7 @@
             <@f.hidden path="assessmentType" />
             <@f.hidden path="acuteOutcomeApplies" />
             <@f.hidden path="extensionDeadline" />
-            <input type="checkbox" checked>
+            <@f.checkbox path="selected" />
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__module">
             <@components.assessmentModule item />

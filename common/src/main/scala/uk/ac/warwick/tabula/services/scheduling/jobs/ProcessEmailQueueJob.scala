@@ -6,7 +6,7 @@ import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.EarlyRequestInfo
-import uk.ac.warwick.tabula.services.EmailNotificationService
+import uk.ac.warwick.tabula.services.NotificationBatchingService
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 @Component
@@ -15,13 +15,13 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ProcessEmailQueueJob extends AutowiredJobBean {
 
-  @Autowired var emailNotificationService: EmailNotificationService = _
+  @Autowired var notificationBatchingService: NotificationBatchingService = _
 
   override def executeInternal(context: JobExecutionContext): Unit = {
     if (features.schedulingNotificationEmails)
       exceptionResolver.reportExceptions {
         EarlyRequestInfo.wrap() {
-          emailNotificationService.processNotifications()
+          notificationBatchingService.processNotifications()
         }
       }
   }

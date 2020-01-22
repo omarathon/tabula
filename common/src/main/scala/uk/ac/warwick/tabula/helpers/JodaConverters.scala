@@ -19,6 +19,11 @@ trait JodaAsJavaExtensions {
     def asJava: javatime.LocalDateTime =
       javatime.LocalDateTime.of(i.getYear, i.getMonthOfYear, i.getDayOfMonth, i.getHourOfDay, i.getMinuteOfHour, i.getSecondOfMinute, i.getMillisOfSecond)
   }
+
+  implicit class JodaDateTimeAsJava(i: jodatime.DateTime) {
+    def asJava: javatime.ZonedDateTime =
+      javatime.ZonedDateTime.of(i.toLocalDateTime.asJava, i.getZone.toTimeZone.toZoneId)
+  }
 }
 
 trait JavaAsJodaExtensions {
@@ -30,5 +35,10 @@ trait JavaAsJodaExtensions {
   implicit class JavaLocalDateTimeAsJoda(i: javatime.LocalDateTime) {
     def asJoda: jodatime.LocalDateTime =
       new jodatime.LocalDateTime(i.getYear, i.getMonthValue, i.getDayOfMonth, i.getHour, i.getMinute, i.getSecond, i.get(JChronoField.MILLI_OF_SECOND))
+  }
+
+  implicit class JavaZonedDateTimeAsJoda(i: javatime.ZonedDateTime) {
+    def asJoda: jodatime.DateTime =
+      new jodatime.DateTime(i.getYear, i.getMonthValue, i.getDayOfMonth, i.getHour, i.getMinute, i.getSecond, i.get(JChronoField.MILLI_OF_SECOND), jodatime.DateTimeZone.forTimeZone(java.util.TimeZone.getTimeZone(i.getZone)))
   }
 }

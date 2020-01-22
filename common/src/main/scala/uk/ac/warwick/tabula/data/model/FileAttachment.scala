@@ -192,6 +192,7 @@ class FileAttachment extends GeneratedId {
   def hasData: Boolean = id.hasText && Await.result(objectStorageService.keyExists(id), Duration.Inf)
 
   @transient var uploadedData: ByteSource = _
+  @transient var overwrite: Boolean = false
 
   def isDataEqual(other: Any): Boolean = other match {
     case that: FileAttachment =>

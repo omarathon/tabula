@@ -3,17 +3,12 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class NotificationPriority(val dbValue: String) {
+sealed abstract class NotificationPriority(val dbValue: String) extends Ordered[NotificationPriority] {
   // When transforming notifications to activity streams priority is represented by a numerical value between 0 and 1
   def toNumericalValue: Double
 
-  def <(other: NotificationPriority): Boolean = toNumericalValue < other.toNumericalValue
-
-  def <=(other: NotificationPriority): Boolean = toNumericalValue <= other.toNumericalValue
-
-  def >(other: NotificationPriority): Boolean = toNumericalValue > other.toNumericalValue
-
-  def >=(other: NotificationPriority): Boolean = toNumericalValue >= other.toNumericalValue
+  override def compare(other: NotificationPriority): Int =
+    toNumericalValue.compare(other.toNumericalValue)
 }
 
 object NotificationPriority {
