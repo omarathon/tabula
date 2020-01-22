@@ -33,6 +33,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.module = Option(item.module)
     this.academicYear = item.academicYear
     this.name = item.name
+    this.assessmentType = item.assessmentType
     this.deadline = item.deadline
     this.boardRecommendations = item.boardRecommendations.asScala.toSeq
     this.extensionDeadline = item.extensionDeadline
@@ -80,7 +81,11 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   def name: String = assessmentComponent.map(_.name).getOrElse(_name)
   def name_=(n: String): Unit = _name = n
 
-  def assessmentType: AssessmentType = assessmentComponent.map(_.assessmentType).getOrElse(AssessmentType.Other)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
+  @Column(name = "assessmentType")
+  private var _assessmentType: AssessmentType = _
+  def assessmentType: AssessmentType = assessmentComponent.map(_.assessmentType).orElse(Option(_assessmentType)).getOrElse(AssessmentType.Other)
+  def assessmentType_=(assessmentType: AssessmentType): Unit = _assessmentType = assessmentType
 
   @Column(nullable = false)
   var deadline: LocalDate = _
