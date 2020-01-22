@@ -26,7 +26,7 @@ object UpstreamAffectedAssessment {
     "name" -> o.name,
   )
 
-  private def maybeType(a: AssessmentComponent): String = Option(a.assessmentType).getOrElse(AssessmentType.Other).code
+  private def maybeType(a: AssessmentComponent): String = Option(a.assessmentType).getOrElse(AssessmentType.Other).subtype.code
 
   implicit val writesAssessmentComponent: Writes[AssessmentComponent] = o => Json.obj(
     "cats" -> o.cats,
