@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.files.hash.HashString
 import uk.ac.warwick.util.files.imageresize.{ImageResizer, JAIImageResizer}
 
@@ -20,7 +21,7 @@ trait UploadedImageProcessor {
   def fixOrientation(file: UploadedFile): Unit
 }
 
-abstract class AbstractUploadedImageProcessor extends UploadedImageProcessor {
+abstract class AbstractUploadedImageProcessor extends UploadedImageProcessor with Logging {
   self: ImageResizerComponent
     with FileDaoComponent =>
 
@@ -28,11 +29,17 @@ abstract class AbstractUploadedImageProcessor extends UploadedImageProcessor {
     // For jpegs with EXIF orientation, transform and remove the EXIF data
     file.attached.asScala
       .filter { a =>
-        a.temporary && a.mimeType == "image/jpeg" && Using.resource(a.asByteSource.openStream()) { is =>
-          JAIImageResizer.getOrientation(is, ImageResizer.FileType.jpg) != ImageResizer.Orientation.Normal
-        }
+        a.temporary && a.mimeType == "image/jpeg"
       }
-      .foreach { a =>
+      .map { a =>
+        (a, Using.resource(a.asByteSource.openStream()) { is =>
+          JAIImageResizer.getOrientation(is, ImageResizer.FileType.jpg)
+        })
+      }
+      .filter { case (_, orientation) => orientation != ImageResizer.Orientation.Normal }
+      .foreach { case (a, orientation) =>
+        logger.info(s"Fixing the orientation of $a ($orientation)")
+
         // Stream the re-oriented image to the file system
         val file = File.createTempFile(a.name, ".tmp")
         val outputSink = Files.asByteSink(file)
