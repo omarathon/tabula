@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleBlindMarking, DoubleMarking, ModeratedMarking, SelectedModeratedMarking, SingleMarking}
 import uk.ac.warwick.tabula.helpers.UserOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheManager}
@@ -21,6 +22,27 @@ object CM2MarkingWorkflow {
   implicit val defaultOrdering: Ordering[CM2MarkingWorkflow] = Ordering.by {
     workflow: CM2MarkingWorkflow => workflow.name.toLowerCase
   }
+
+  case class MarkingWorkflowData(
+    department: Department,
+    workflowName: String,
+    markersAUsers: Seq[User],
+    markersBUsers: Seq[User],
+    workflowType: MarkingWorkflowType,
+    moderationSampler: Option[ModerationSampler]
+  )
+
+  def apply(data: MarkingWorkflowData): CM2MarkingWorkflow =
+    data.workflowType match {
+      case DoubleMarking => DoubleWorkflow(data.workflowName, data.department, data.markersAUsers, data.markersBUsers)
+      case SingleMarking => SingleMarkerWorkflow(data.workflowName, data.department, data.markersAUsers)
+      case DoubleBlindMarking => DoubleBlindWorkflow(data.workflowName, data.department, data.markersAUsers, data.markersBUsers)
+      case ModeratedMarking | SelectedModeratedMarking =>
+        val sampler = data.moderationSampler.getOrElse(ModerationSampler.Moderator)
+        if (sampler == ModerationSampler.Admin) SelectedModeratedWorkflow(data.workflowName, data.department, sampler, data.markersAUsers, data.markersBUsers)
+        else ModeratedWorkflow(data.workflowName, data.department, sampler, data.markersAUsers, data.markersBUsers)
+      case _ => throw new UnsupportedOperationException(data.workflowType + " not specified")
+    }
 }
 
 @Entity
