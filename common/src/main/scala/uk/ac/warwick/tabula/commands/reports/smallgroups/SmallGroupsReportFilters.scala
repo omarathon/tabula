@@ -38,9 +38,9 @@ object SmallGroupsReportFilters {
     )
   }
 
-  def missed(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
+  def byStates(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult)(filteredStates: Set[AttendanceState]): AllSmallGroupsReportCommandResult = {
     val missedMap: Map[User, Map[SmallGroupEventWeek, AttendanceState]] = result.attendance.map { case (studentData, eventMap) =>
-      studentData -> eventMap.filter { case (_, state) => state == AttendanceState.MissedUnauthorised || state == AttendanceState.MissedAuthorised }
+      studentData -> eventMap.filter { case (_, state) => filteredStates.contains(state) }
     }.filter { case (_, eventMap) => eventMap.nonEmpty }
 
     AllSmallGroupsReportCommandResult(
@@ -52,4 +52,10 @@ object SmallGroupsReportFilters {
       result.reportRangeEndDate
     )
   }
+
+  def missedAuthorisedOrUnauthorised(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult =
+    byStates(academicYear)(result)(Set(AttendanceState.MissedAuthorised, AttendanceState.MissedUnauthorised))
+
+  def missedUnauthorised(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult =
+    byStates(academicYear)(result)(Set(AttendanceState.MissedUnauthorised))
 }
