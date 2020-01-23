@@ -21,6 +21,8 @@ case class FilterMonitoringPointsCommandResult(
 )
 
 object FilterMonitoringPointsCommand {
+  type Command = Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase
+
   def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
     new FilterMonitoringPointsCommandInternal(department, academicYear, user)
       with AutowiringAttendanceMonitoringServiceComponent
