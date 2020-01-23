@@ -1374,6 +1374,12 @@
       </p>
     <#elseif r.tcaSubmissionProcessing>
         Turnitin submission created <@fmt.date date=r.createdDate /> is being processed by Turnitin.
+        <#if user.sysadmin>
+            <#assign submitUrl><@routes.cm2.turnitinTcaResubmit assignment attachment /></#assign>
+            <@f.form id="turnitinTcaResubmit" method="post" action=submitUrl>
+              <input type="submit" value="Resubmit" class="btn btn-primary" data-loading-text="Resubmitting&hellip;" autocomplete="off">
+            </@f.form>
+        </#if>
     <#elseif r.tcaUploadComplete>
       Turnitin submission created <@fmt.date date=r.createdDate /> has been sent to Turnitin, and we are awaiting the report.
       <#if user.sysadmin>
