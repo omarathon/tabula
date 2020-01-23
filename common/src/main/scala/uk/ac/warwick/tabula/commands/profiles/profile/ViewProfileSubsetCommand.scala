@@ -1,42 +1,47 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.UserPicker
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 object ViewProfileSubsetCommand {
-  def apply(student: User, profileService: ProfileService) =
-    new ViewProfileSubsetCommandInternal(student, profileService)
+  type Command = Appliable[ProfileSubset]
+
+  def apply(student: User): Command =
+    new ViewProfileSubsetCommandInternal(student)
       with ComposableCommand[ProfileSubset]
+      with AutowiringProfileServiceComponent
       with ViewProfileSubsetCommandPermissions
-      with Unaudited
-      with ReadOnly
+      with Unaudited with ReadOnly {
+
+      override val studentMember: Option[StudentMember] = student.getWarwickId.maybeText
+        .map(uid => profileService.getMemberByUniversityId(uid))
+        .collect { case Some(sm: StudentMember) => sm }
+
+      // only try to get the user via lookup if no student member is found
+      override val user: Option[User] = studentMember match {
+        case Some(_) => None
+        case None => Option(student).filter(_.isFoundUser)
+      }
+
+    }
 }
 
-abstract class ViewProfileSubsetCommandInternal(student: User, profileService: ProfileService)
+abstract class ViewProfileSubsetCommandInternal(student: User)
   extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
 
-  val studentMember: Option[StudentMember] = Option(student.getWarwickId)
-    .map(uid => profileService.getMemberByUniversityId(uid))
-    .collect { case Some(sm: StudentMember) => sm }
-
-  // only try to get the user via lookup if no student member is found
-  val user: Option[User] = studentMember match {
-    case Some(_) => None
-    case None => Option(student).filter(_.isFoundUser)
-  }
-
-  def applyInternal(): ProfileSubset = {
-    if (studentMember.isDefined || user.isDefined)
-      ProfileSubset(studentMember.isDefined, user, studentMember, studentMember.flatMap(_.mostSignificantCourseDetails))
-    else
-      throw new ItemNotFoundException()
-  }
+  override def applyInternal(): ProfileSubset =
+    ProfileSubset(
+      studentMember.nonEmpty,
+      user,
+      studentMember,
+      studentMember.flatMap(_.mostSignificantCourseDetails)
+    )
 }
 
 trait ViewProfileSubsetCommandState {
@@ -45,15 +50,13 @@ trait ViewProfileSubsetCommandState {
 }
 
 trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
   self: ViewProfileSubsetCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking): Unit = {
-    studentMember.foreach(p.PermissionCheck(Permissions.Profiles.Read.Core, _))
-    user.foreach(_ => p.PermissionCheck(UserPicker))
-
-    if (studentMember.isEmpty && user.isEmpty) throw new ItemNotFoundException()
-  }
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    studentMember match {
+      case Some(student) => p.PermissionCheck(Permissions.Profiles.Read.Core, mandatory(student))
+      case _ => p.PermissionCheck(UserPicker)
+    }
 }
 
 case class ProfileSubset(
