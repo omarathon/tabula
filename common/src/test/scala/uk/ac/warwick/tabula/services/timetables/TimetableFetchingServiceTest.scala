@@ -79,6 +79,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
     events(1).location should be(Some(MapLocation("MS.02", "40879", Some("MS.02"))))
     events(1).comments should be(Some("Some comments"))
     events(1).students should be(Seq(student))
+    events(1).eventType should be (TimetableEventType.Lecture)
   }
 
   val TimetableEvents =
@@ -111,7 +112,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
          <end>11:00</end>
          <weeks>31</weeks>
          <day>2</day>
-         <type>LEC</type>
+         <type>LEC ALLOCATE IN TABULA</type>
          <comments>Some comments</comments>
          <rooms>
             <room>MS.02</room>
