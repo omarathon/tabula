@@ -1,27 +1,12 @@
 <#import "*/modal_macros.ftlh" as modal />
+<#import "*/profiles_macros.ftl" as profiles />
 
 <#import "../../attendance/attendance_variables.ftl" as attendance_variables />
 <#import "../../attendance/attendance_macros.ftl" as attendance_macros />
 
 <#escape x as x?html>
 
-  <#if !isSelf>
-    <details class="indent">
-      <summary>${student.fullName}</summary>
-      <#if student.userId??>
-        ${student.userId}<br />
-      </#if>
-      <#if student.email??>
-        <a href="mailto:${student.email}">${student.email}</a><br />
-      </#if>
-      <#if student.phoneNumber??>
-        ${phoneNumberFormatter(student.phoneNumber)}<br />
-      </#if>
-      <#if student.mobileNumber??>
-        ${phoneNumberFormatter(student.mobileNumber)}<br />
-      </#if>
-    </details>
-  </#if>
+  <@profiles.profile_header student isSelf />
 
   <h1>Attendance</h1>
 

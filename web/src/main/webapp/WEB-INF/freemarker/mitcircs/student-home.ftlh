@@ -1,21 +1,7 @@
 <#import "*/mitcircs_components.ftlh" as components />
-<#if !isSelf>
-  <details class="indent">
-    <summary>${student.fullName}</summary>
-    <#if student.userId??>
-      ${student.userId}<br />
-    </#if>
-    <#if student.email??>
-      <a href="mailto:${student.email}">${student.email}</a><br />
-    </#if>
-    <#if student.phoneNumber??>
-      ${phoneNumberFormatter(student.phoneNumber)}<br />
-    </#if>
-    <#if student.mobileNumber??>
-      ${phoneNumberFormatter(student.mobileNumber)}<br />
-    </#if>
-  </details>
-</#if>
+<#import "../profiles/profiles_macros.ftl" as profiles />
+
+<@profiles.profile_header student isSelf />
 
 <h1>Personal Circumstances</h1>
 
