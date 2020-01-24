@@ -49,7 +49,8 @@
           <ul class="list-unstyled attachments">
             <#list command.attachedFiles as attachment>
               <li id="attachment-${attachment.id}" class="attachment">
-                <span>${attachment.name}</span>&nbsp;<a href="#" class="remove-attachment">Remove</a>
+                <a href="<@routes.cm2.feedbackSingleFileDownload command.feedback attachment />">${attachment.name}</a>
+                <a href="#" class="btn btn-danger btn-xs remove-attachment">Remove</a>
                 <@f.hidden path="attachedFiles" value="${attachment.id}" />
               </li>
             </#list>
