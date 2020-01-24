@@ -103,17 +103,17 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     }, "academicYear", academicYears)
   }
 
-  def getByUniversityIds(universityIds: Seq[String], includedDeleted: Boolean): Seq[ModuleRegistration] =
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
          select distinct mr
          from ModuleRegistration mr
          where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
-          and (mr.deleted is false or :includeDeleted)
+          and (mr.deleted is false or :includeDeleted is true)
       """)
       .setParameterList("universityIds", universityIds)
-      .setBoolean("includedDeleted", includedDeleted)
+      .setBoolean("includeDeleted", includeDeleted)
       .seq
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {
