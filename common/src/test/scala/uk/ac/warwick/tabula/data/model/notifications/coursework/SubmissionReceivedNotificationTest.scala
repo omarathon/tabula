@@ -2,24 +2,27 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarkingCompleted
 import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
-class SubmissionReceivedNotificationTest extends TestBase with Mockito {
+class SubmissionReceivedNotificationTest extends TestBase with Mockito with FreemarkerRendering {
+
+  val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 
   val userLookup = new MockUserLookup
 
-  @Test def titleOnTime() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def titleOnTime(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
       assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
@@ -37,7 +40,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def titleOnTimeBeforeExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def titleOnTimeBeforeExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
       assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
@@ -64,7 +67,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def titleLate() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
+  @Test def titleLate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
       assignment.extensionService = smartMock[ExtensionService]
@@ -85,7 +88,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def titleLateWithinExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
+  @Test def titleLateWithinExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
       assignment.extensionService = smartMock[ExtensionService]
@@ -115,7 +118,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def titleLateAfterExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def titleLateAfterExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
       assignment.extensionService = smartMock[ExtensionService]
@@ -145,7 +148,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def recipientsForLateNotificationWithNoAdminForSubDept() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def recipientsForLateNotificationWithNoAdminForSubDept(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val securityService = mock[SecurityService]
       val permissionsService = mock[PermissionsService]
@@ -191,11 +194,11 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       department.permissionsService = permissionsService
       module.permissionsService = permissionsService
 
-      val assignmentWithParents = Fixtures.withParents(assignment);
-      val targetAssignment = assignmentWithParents(0);
-      val targetModule = assignmentWithParents(1);
-      val targetDept = assignmentWithParents(2);
-      val targetParentDept = assignmentWithParents(3);
+      val assignmentWithParents = Fixtures.withParents(assignment)
+      val targetAssignment = assignmentWithParents.head
+      val targetModule = assignmentWithParents(1)
+      val targetDept = assignmentWithParents(2)
+      val targetParentDept = assignmentWithParents(3)
 
       val moduleGrantedRole = GrantedRole(module, ModuleManagerRoleDefinition)
       moduleGrantedRole.users.add(moduleManager)
@@ -207,29 +210,29 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
       permissionsService.getAllGrantedRolesFor(targetAssignment) returns Nil
       permissionsService.getAllGrantedRolesFor(targetDept) returns Nil
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (LazyList(moduleGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
-      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (LazyList(deptGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]])
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns LazyList(moduleGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]]
+      permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns LazyList(deptGrantedRole).asInstanceOf[LazyList[GrantedRole[PermissionsTarget]]]
 
-      val existing = GrantedPermission(targetDept, Permissions.Submission.Delete, true)
+      val existing = GrantedPermission(targetDept, Permissions.Submission.Delete, RoleOverride.Allow)
       existing.users.knownType.addUserId("admin3")
 
-      permissionsService.getGrantedPermission(targetAssignment, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-      permissionsService.getGrantedPermission(targetDept, Permissions.Submission.Delete, true) returns (Some(existing))
-      permissionsService.getGrantedPermission(targetModule, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-      permissionsService.getGrantedPermission(targetDept, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-      permissionsService.getGrantedPermission(targetParentDept, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+      permissionsService.getGrantedPermission(targetAssignment, Permissions.Submission.Delete, RoleOverride.Allow) returns None
+      permissionsService.getGrantedPermission(targetDept, Permissions.Submission.Delete, RoleOverride.Allow) returns Some(existing)
+      permissionsService.getGrantedPermission(targetModule, Permissions.Submission.Delete, RoleOverride.Allow) returns None
+      permissionsService.getGrantedPermission(targetDept, Permissions.Submission.Delete, RoleOverride.Allow) returns None
+      permissionsService.getGrantedPermission(targetParentDept, Permissions.Submission.Delete, RoleOverride.Allow) returns None
 
       val subNotification = new SubmissionReceivedNotification
       subNotification.permissionsService = permissionsService
       subNotification.securityService = securityService
 
-      securityService.can(isA[CurrentUser], isEq(Permissions.Submission.Delete), isA[PermissionsTarget]) returns (true)
+      securityService.can(isA[CurrentUser], isEq(Permissions.Submission.Delete), isA[PermissionsTarget]) returns true
 
       val settings = new UserSettings("userId")
       subNotification.userSettings = service
 
-      service.getByUserId("admin3") returns (None)
-      service.getByUserId("admin2") returns (None)
+      service.getByUserId("admin3") returns None
+      service.getByUserId("admin2") returns None
 
       val n = Notification.init(subNotification, currentUser.apparentUser, submission, assignment)
 
@@ -237,7 +240,7 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
     }
   }
 
-  @Test def lateNotificationUrlsDifferForMarkersAndAdmins() = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
+  @Test def lateNotificationUrlsDifferForMarkersAndAdmins(): Unit = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
     withUser("cusca", "55556666") {
 
       val admin: User = Fixtures.user("admin", "admin")
@@ -277,6 +280,68 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
 
       n.urlFor(admin) should be("/coursework/admin/assignments/1234/list")
       n.urlFor(marker) should be("/coursework/admin/assignments/1234/marker/1234567")
+    }
+  }
+
+  @Test def notificationContent(): Unit = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
+    withUser("cusca", "55556666") {
+      val marker: User = Fixtures.user("1234567", "1234567")
+      val student: User = Fixtures.user("7654321", "7654321")
+
+      val department = Fixtures.department("ch")
+      val assignment = Fixtures.assignment("Another 5,000 word essay")
+      val module = Fixtures.module("cs118", "Programming for Computer Scientists")
+      assignment.module = module
+      assignment.closeDate = new DateTime(2018, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+      assignment.id = "1234"
+
+      assignment.feedbackService = smartMock[FeedbackService]
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
+
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
+      val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
+      assignment.cm2MarkingWorkflow = workflow
+
+      val submission = Fixtures.submission(userId = "7654321", universityId = "7654321")
+      submission.id = "28334"
+      submission.assignment = assignment
+      submission.submittedDate = DateTime.now
+
+      val a = new FileAttachment
+      a.name = "Essay.docx"
+      submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
+
+      val mockLookup: UserLookupService = mock[UserLookupService]
+      mockLookup.getUserByUserId(marker.getUserId) returns marker
+
+      val feedback: Feedback = Fixtures.assignmentFeedback(student.getWarwickId)
+      assignment.feedbacks.add(feedback)
+
+      val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
+      markerFeedback.marker = marker
+      markerFeedback.stage = SingleMarkingCompleted
+      markerFeedback.userLookup = mockLookup
+
+      val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+      n.userLookup = mockLookup
+
+      val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(n.content.template), n.content.model)
+      notificationContent should be(
+        """A submission for the assignment 'Another 5,000 word essay' for CS118, Programming for Computer Scientists has been received.
+          |
+          |- Submission date: 1 September 2018 at 12:39:00
+          |- Submission ID: 28334
+          |
+          |Uploaded attachments:
+          |
+          |- Essay.docx
+          |
+          |Student feedback is due for this submission on 12 October 2018.
+          |
+          |""".stripMargin
+      )
     }
   }
 

@@ -25,6 +25,7 @@ abstract class SubmissionNotification
   def content = FreemarkerModel(templateLocation, Map(
     "submission" -> submission,
     "submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
+    "feedbackDeadlineDate" -> submission.feedbackDeadline.map(dateOnlyFormatter.print),
     "assignment" -> assignment,
     "module" -> module,
     "user" -> userLookup.getUserByUserId(submission.usercode))
