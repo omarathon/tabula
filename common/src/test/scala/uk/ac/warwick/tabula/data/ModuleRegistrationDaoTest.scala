@@ -1,13 +1,9 @@
 package uk.ac.warwick.tabula.data
 
 import org.junit.Before
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.ModuleSelectionStatus
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 
 class ModuleRegistrationDaoTest extends PersistenceTestBase {
   val memDao = new AutowiringMemberDaoImpl
@@ -23,7 +19,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     scdDao.sessionFactory = sessionFactory
   }
 
-  @Test def testModReg: Unit = {
+  @Test def modReg(): Unit = {
     transactional { tx =>
       val stuMem = Fixtures.student("0123456", "abcde")
       memDao.saveOrUpdate(stuMem)
@@ -80,7 +76,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     }
   }
 
-  @Test def testGetByNotionalKey: Unit = {
+  @Test def testGetByNotionalKey(): Unit = {
     transactional { tx =>
       val stuMem = Fixtures.student("0123456", "abcde")
       memDao.saveOrUpdate(stuMem)
@@ -114,5 +110,43 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       retrievedModReg.assessmentGroup should be("D")
       retrievedModReg.selectionStatus should be(ModuleSelectionStatus.OptionalCore)
     }
+  }
+
+  @Test def testGetByUniversityIds(): Unit = transactional { _ =>
+    val stuMem = Fixtures.student("0123456", "abcde")
+    memDao.saveOrUpdate(stuMem)
+
+    val scd = stuMem.mostSignificantCourse
+
+    val year = AcademicYear(2012)
+    val nonexistantModReg = modRegDao.getByUsercodesAndYear(Seq("abcde"), year)
+    nonexistantModReg should be(Seq())
+
+    val module = new Module
+    module.code = "ab123"
+    moduleDao.saveOrUpdate(module)
+
+    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+    modReg.assessmentGroup = "D"
+    modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
+    modRegDao.saveOrUpdate(modReg)
+
+    // now try adding a second module for the same person
+    val module2 = new Module
+    module2.code = "cd456"
+    moduleDao.saveOrUpdate(module2)
+
+    val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A")
+    modReg2.assessmentGroup = "E"
+    modReg2.selectionStatus = ModuleSelectionStatus.Core
+    modRegDao.saveOrUpdate(modReg2)
+
+    modRegDao.getByUniversityIds(Seq("0123456"), includeDeleted = false).toSet should be (Set(modReg, modReg2))
+
+    modReg.deleted = true
+    modRegDao.saveOrUpdate(modReg)
+
+    modRegDao.getByUniversityIds(Seq("0123456"), includeDeleted = false).toSet should be (Set(modReg2))
+    modRegDao.getByUniversityIds(Seq("0123456"), includeDeleted = true).toSet should be (Set(modReg, modReg2))
   }
 }
