@@ -1,23 +1,8 @@
 <#import "../../groups/group_components.ftlh" as group_components />
+<#import "*/profiles_macros.ftl" as profiles />
 <#escape x as x?html>
 
-  <#if !isSelf>
-    <details class="indent">
-      <summary>${member.fullName}</summary>
-      <#if member.userId??>
-        ${member.userId}<br />
-      </#if>
-      <#if member.email??>
-        <a href="mailto:${member.email}">${member.email}</a><br />
-      </#if>
-      <#if member.phoneNumber??>
-        ${phoneNumberFormatter(member.phoneNumber)}<br />
-      </#if>
-      <#if member.mobileNumber??>
-        ${phoneNumberFormatter(member.mobileNumber)}<br />
-      </#if>
-    </details>
-  </#if>
+  <@profiles.profile_header member isSelf />
 
   <h1>Small group events</h1>
 

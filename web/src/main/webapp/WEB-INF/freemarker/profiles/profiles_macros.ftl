@@ -20,4 +20,30 @@
     </h4>
   </#macro>
 
+  <#macro profile_header member isSelf>
+    <#if !isSelf>
+      <#if member.deceased>
+        <div class="alert alert-danger" role="alert">
+          <p class="lead"><i class="fas fa-exclamation-triangle"></i> This student is recorded as deceased in SITS</p>
+        </div>
+      </#if>
+
+      <details class="indent">
+        <summary>${member.fullName}</summary>
+        <#if member.userId??>
+          ${member.userId}<br />
+        </#if>
+        <#if member.email??>
+          <a href="mailto:${member.email}">${member.email}</a><br />
+        </#if>
+        <#if member.phoneNumber??>
+          ${phoneNumberFormatter(member.phoneNumber)}<br />
+        </#if>
+        <#if member.mobileNumber??>
+          ${phoneNumberFormatter(member.mobileNumber)}<br />
+        </#if>
+      </details>
+    </#if>
+  </#macro>
+
 </#escape>
