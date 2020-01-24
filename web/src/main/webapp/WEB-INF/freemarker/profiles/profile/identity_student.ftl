@@ -9,6 +9,12 @@
 
   <h1>Identity</h1>
 
+  <#if member.deceased>
+    <div class="alert alert-danger" role="alert">
+      <p class="lead"><i class="fas fa-exclamation-triangle"></i> This student is recorded as deceased in SITS</p>
+    </div>
+  </#if>
+
   <section class="identity">
     <div class="row">
       <div class="col-md-6">
