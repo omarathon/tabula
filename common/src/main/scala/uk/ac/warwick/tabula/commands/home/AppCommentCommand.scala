@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, RedirectingMailSender, UserSettingsService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 object AppCommentCommand {
@@ -48,18 +47,20 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
 
   self: AppCommentCommandRequest with AppCommentCommandState with ModuleAndDepartmentServiceComponent =>
 
-  if (user != null && user.loggedIn) {
-    name = user.apparentUser.getFullName
-    email = user.apparentUser.getEmail
-    usercode = user.apparentUser.getUserId
+  if (user.loggedIn) {
+    name = user.fullName
+    email = user.email
+    usercode = user.apparentId
   }
 
   override def applyInternal(): Future[JBoolean] = {
+    if (user.loggedIn) usercode = user.apparentId
+
     val mail = createMessage(mailSender, multipart = false) { mail =>
       if (recipient == AppCommentCommand.Recipients.DeptAdmin) {
         val userEmails = Option(user)
           .filter(_.loggedIn)
-          .flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode))
+          .flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.departmentCode))
           .map(_.owners.users)
           .getOrElse(throw new IllegalArgumentException)
           .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
