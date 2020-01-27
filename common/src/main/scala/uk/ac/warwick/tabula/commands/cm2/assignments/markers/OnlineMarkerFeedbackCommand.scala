@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFor
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -20,7 +21,13 @@ import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
 
 object OnlineMarkerFeedbackCommand {
-  def apply(assignment: Assignment, stage: MarkingWorkflowStage, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+  type Command =
+    Appliable[MarkerFeedback]
+      with OnlineMarkerFeedbackState
+      with SelfValidating
+      with BindListener
+
+  def apply(assignment: Assignment, stage: MarkingWorkflowStage, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Command =
     new OnlineMarkerFeedbackCommandInternal(assignment, stage, student, marker, submitter, gradeGenerator)
       with ComposableCommand[MarkerFeedback]
       with OnlineMarkerFeedbackPermissions
