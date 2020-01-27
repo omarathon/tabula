@@ -80,11 +80,29 @@
 
         $row.tabulaAjaxForm({
           successCallback: function ($container) {
-            var $row = $container.closest('tr').prev();
-            var $next = $container.closest('tr').next();
-            $row.addClass('ready-next-stage');
-            $('input.collection-checkbox').trigger('change');
-            $next.trigger('click');
+            // Reload the filter to get updates
+            var nextTarget = $container.closest('tr').next().data('target');
+            if (nextTarget) {
+              var onFilterResultsChanged;
+              onFilterResultsChanged = function () {
+                var $target = $(nextTarget);
+                $target.collapse(); // opens
+
+                var $source = $('[data-target="' + nextTarget + '"]');
+                if ($source.length) {
+                  // Scroll to the right location
+                  $('html, body').animate({
+                    scrollTop: $source.offset().top - 150
+                  }, 300);
+                }
+
+                $(document).off('tabula.filterResultsChanged', onFilterResultsChanged);
+              };
+
+              $(document).on('tabula.filterResultsChanged', onFilterResultsChanged);
+            }
+
+            $('.filter').trigger('change');
           }
         });
       });
