@@ -478,7 +478,7 @@ object ProfileImporter extends Logging {
 			stu.stu_caem as email_address,
 			stu.stu_udf3 as user_code,
 			stu.stu_dob as date_of_birth,
-			case when stu.stu_endd < sysdate then 'Inactive' else 'Active' end as in_use_flag,
+			case when coalesce(stu.stu_endd, scj.scj_endd) + 56 < sysdate then 'Inactive' else 'Active' end as in_use_flag,
 			stu.stu_haem as alternative_email_address,
 			stu.stu_cat3 as mobile_number,
 			stu.stu_dsbc as disability,
