@@ -2,9 +2,11 @@ package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import java.io.{ByteArrayOutputStream, OutputStreamWriter, StringWriter}
 
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblFinalMarker, DblFirstMarker, DblSecondMarker}
+import uk.ac.warwick.tabula.services.ExtensionService
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -26,6 +28,9 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     dept = Fixtures.department("in")
 
     assignment = Fixtures.assignment("demo")
+    assignment.closeDate = new LocalDate(2018, DateTimeConstants.SEPTEMBER, 11).toDateTime(Assignment.closeTime)
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
     feedback = Fixtures.assignmentFeedback("9999991", "9999992")
     feedback.assignment = assignment
@@ -88,6 +93,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |- 13 students have submitted work that can be marked
         |- 4 students have not submitted but they have an extension
         |- 3 students have not submitted work and have not yet requested an extension
+        |
+        |Student feedback is due on 9 October 2018.
       """.stripMargin.trim)
   }
 
@@ -126,6 +133,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |- 13 students have submitted work that can be marked
         |- 4 students have not submitted but they have an extension
         |- 3 students have not submitted work and have not yet requested an extension
+        |
+        |Student feedback is due on 9 October 2018.
       """.stripMargin.trim)
   }
 
@@ -164,6 +173,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |- 1 student has submitted work that can be marked
         |- 1 student has not submitted but they have an extension
         |- 1 student has not submitted work and has not yet requested an extension
+        |
+        |Student feedback is due on 9 October 2018.
       """.stripMargin.trim)
   }
 
@@ -201,6 +212,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |No students allocated to you have been released for marking as the assignment has been set to automatically release when the end date and time have been reached but no students have yet submitted.
         |
         |Please check the assignment regularly as students with extensions may submit at any time.
+        |
+        |Student feedback is due on 9 October 2018.
       """.stripMargin.trim)
   }
 }

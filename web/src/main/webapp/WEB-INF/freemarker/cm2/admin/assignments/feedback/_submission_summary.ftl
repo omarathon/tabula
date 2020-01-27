@@ -30,7 +30,7 @@
   </div>
 
   <div>
-    <@spring.message code=command.submissionState /><@components.submission_details command.submission />
+    <@spring.message code=command.submissionState /> <@components.submission_details command.submission />
 
     <#list submission.allAttachments as attachment>
       <!-- Checking originality report for ${attachment.name} ... -->

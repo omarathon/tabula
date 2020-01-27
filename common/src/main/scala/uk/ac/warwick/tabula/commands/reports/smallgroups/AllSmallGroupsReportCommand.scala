@@ -123,7 +123,28 @@ class AllSmallGroupsReportCommandInternal(
       membersOfSet ++ groupMembersNotInSet ++ otherAttendanceRecordedUsers
     }.distinct.sortBy(s => (s.getLastName, s.getFirstName))
 
-    val studentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), academicYear)
+    val foundStudentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), academicYear)
+    val notFoundStudentDatas: Seq[AttendanceMonitoringStudentData] =
+      students.filterNot(u => foundStudentDatas.exists(_.universityId == u.getWarwickId))
+        .map { user =>
+          AttendanceMonitoringStudentData(
+            firstName = user.getFirstName,
+            lastName = user.getLastName,
+            universityId = user.getWarwickId,
+            userId = user.getUserId,
+            scdBeginDate = null,
+            scdEndDate = None,
+            routeCode = null,
+            routeName = null,
+            yearOfStudy = null,
+            sprCode = null,
+            tier4Requirements = false, // TODO this is "Unknown"
+            email = user.getEmail,
+            tutorEmail = None
+          )
+        }
+
+    val studentDatas: Seq[AttendanceMonitoringStudentData] = foundStudentDatas ++ notFoundStudentDatas
 
     val studentInGroup: Map[SmallGroup, Map[User, Boolean]] = benchmarkTask("studentInGroup") {
       sets.flatMap(_.groups.asScala).map(group => group -> students.map(student => student -> group.students.includesUser(student)).toMap).toMap

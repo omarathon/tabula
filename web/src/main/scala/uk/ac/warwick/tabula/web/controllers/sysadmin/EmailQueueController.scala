@@ -5,13 +5,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.services.EmailNotificationService
+import uk.ac.warwick.tabula.services.NotificationBatchingService
 
 @Controller
 @RequestMapping(Array("/sysadmin/emails", "/sysadmin/emails/list"))
 class EmailQueueController extends BaseController {
 
-  var emailNotificationService: EmailNotificationService = Wire[EmailNotificationService]
+  var emailNotificationService: NotificationBatchingService = Wire[NotificationBatchingService]
 
   val pageSize = 100
 

@@ -15,9 +15,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 import scala.util.matching.Regex
 
@@ -157,7 +157,6 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
   self: SmallGroupDaoComponent
     with AssessmentMembershipDaoComponent
     with SmallGroupMembershipHelpers
-    with UserLookupComponent
     with UserGroupDaoComponent
     with SecurityServiceComponent
     with Logging with TaskBenchmarking =>
@@ -328,20 +327,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
   def removeFromSmallGroups(modReg: ModuleRegistration): Unit = {
     if (modReg.module.adminDepartment.autoGroupDeregistration) {
-      val userId = modReg.studentCourseDetails.student.userId
-      val user = userLookup.getUserByUserId(userId)
+      val user = modReg.studentCourseDetails.student.asSsoUser
 
       for {
         smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
         if smallGroup.students.includesUser(user)
       } {
-        logger.info(s"Removing $userId from small group $smallGroup due to removed registration $modReg")
-
-        // Wrap this in a sub-command so that we can do auditing
-        userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply() match {
-          case group: UserGroupCacheManager => group.underlying.asInstanceOf[UserGroup]
-          case group: UnspecifiedTypeUserGroup => group.asInstanceOf[UserGroup]
-        })
+        logger.info(s"Removing ${user.getUserId} from small group $smallGroup due to removed registration $modReg")
+        removeUserFromGroup(user, smallGroup)
       }
     }
   }
@@ -569,8 +562,6 @@ class SmallGroupServiceImpl
     with AutowiringSmallGroupDaoComponent
     with AutowiringAssessmentMembershipDaoComponent
     with SmallGroupMembershipHelpersImpl
-    with AutowiringUserLookupComponent
-    with UserLookupComponent
     with AutowiringUserGroupDaoComponent
     with AutowiringSecurityServiceComponent
     with Logging with TaskBenchmarking

@@ -5,14 +5,16 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsSubmissionCommand._
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -21,7 +23,6 @@ import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters._
-import CreateMitCircsSubmissionCommand._
 
 object CreateMitCircsSubmissionCommand {
   type Result = MitigatingCircumstancesSubmission
@@ -50,6 +51,7 @@ object CreateMitCircsSubmissionCommand {
       with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringUploadedImageProcessorComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
@@ -59,11 +61,13 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 
   self: MitCircsSubmissionRequest
     with MitCircsSubmissionServiceComponent
-    with ModuleAndDepartmentServiceComponent =>
+    with ModuleAndDepartmentServiceComponent
+    with UploadedImageProcessorComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
     file.onBind(result)
+    uploadedImageProcessor.fixOrientation(file)
     result.popNestedPath()
 
     affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
@@ -93,7 +97,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     submission.pendingEvidence = pendingEvidence
     submission.pendingEvidenceDue = pendingEvidenceDue
     submission.hasSensitiveEvidence = hasSensitiveEvidence
-    affectedAssessments.asScala.foreach { item =>
+    affectedAssessments.asScala.filter(_.selected).foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
     }
@@ -144,15 +148,15 @@ trait MitCircsSubmissionValidation extends SelfValidating {
         errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
 
       // validate affected assessments
-      affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+      affectedAssessments.asScala.zipWithIndex.filter { case (item, _) => item.selected }.foreach { case (item, index) =>
         errors.pushNestedPath(s"affectedAssessments[$index]")
 
         if (!item.moduleCode.hasText)
           errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
         else if (
           item.moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode &&
-            item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
-            moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
+          item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
+          moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
         ) errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
 
         if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
@@ -164,7 +168,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
         errors.popNestedPath()
       }
 
-      if (affectedAssessments.isEmpty)
+      if (!affectedAssessments.asScala.exists(_.selected))
         errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
 
       // validate contact
@@ -259,8 +263,9 @@ trait MitCircsSubmissionState {
 class AffectedAssessmentItem {
   def this(assessment: MitigatingCircumstancesAffectedAssessment) {
     this()
+    this.selected = true
     this.moduleCode = assessment.moduleCode
-    this.module = assessment.module
+    this.module = assessment.module.orNull
     this.sequence = assessment.sequence
     this.academicYear = assessment.academicYear
     this.name = assessment.name
@@ -271,6 +276,7 @@ class AffectedAssessmentItem {
     this.extensionDeadline = assessment.extensionDeadline.orNull
   }
 
+  var selected: Boolean = _
   var moduleCode: String = _
   var module: Module = _
   var sequence: String = _

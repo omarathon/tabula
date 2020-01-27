@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.markingworkflows
 
 import javax.validation.Valid
-
 import org.springframework.context.MessageSource
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -17,7 +15,6 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 import scala.jdk.CollectionConverters._
 
-
 @Controller
 @RequestMapping(Array("/coursework/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/copy"))
 class CopyMarkingWorkflowController extends CM2MarkingWorkflowController {
@@ -29,7 +26,7 @@ class CopyMarkingWorkflowController extends CM2MarkingWorkflowController {
   validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
-  def command(@PathVariable department: Department, @PathVariable workflow: CM2MarkingWorkflow) =
+  def command(@PathVariable department: Department, @PathVariable workflow: CM2MarkingWorkflow): CopyMarkingWorkflowCommand =
     CopyMarkingWorkflowCommand(mandatory(department), mandatory(workflow))
 
   @RequestMapping

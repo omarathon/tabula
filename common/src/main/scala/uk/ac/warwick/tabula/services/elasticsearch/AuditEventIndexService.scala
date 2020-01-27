@@ -39,7 +39,7 @@ object AuditEventIndexService {
 
       var fields = mutable.Map[String, Any]()
 
-      fields += (
+      fields ++= Seq(
         "eventType" -> item.eventType,
         "eventDate" -> DateFormats.IsoDateTime.print(item.eventDate)
       )

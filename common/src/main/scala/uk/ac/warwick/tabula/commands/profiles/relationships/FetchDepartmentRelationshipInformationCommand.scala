@@ -79,12 +79,13 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
   }
 
   private def processUnallocated(unallocated: Seq[StudentAssociationData]): Seq[StudentAssociationData] = {
-    val newlyAllocatedUniIds = additions.asScala.mapValues(_.asScala).values.flatten.toSeq
+    val newlyAllocatedUniIds = additions.asScala.view.mapValues(_.asScala).values.flatten.toSeq
     unallocated
       .filterNot(student => newlyAllocatedUniIds.contains(student.universityId))
       .filter(student => routes.isEmpty || routes.asScala.map(_.code).contains(student.routeCode))
       .filter(student => yearsOfStudy.isEmpty || yearsOfStudy.asScala.contains(student.yearOfStudy))
       .filter(studentQueryFilter)
+      .sortBy(d => (d.lastName, d.firstName, d.universityId))
   }
 
   private def studentQueryFilter(student: StudentAssociationData): Boolean = {

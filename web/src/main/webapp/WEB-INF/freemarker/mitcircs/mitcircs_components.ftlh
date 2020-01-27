@@ -218,7 +218,7 @@
       </@detail>
     </#if>
     <@detail label="Date" condensed=true>
-        <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime /><#else><span class="very-subtle">TBC</span></#if>
+      <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false /><#if panel.startTime??>: <@fmt.time panel.startTime /><#if panel.endTime??> &mdash; <@fmt.time panel.endTime /></#if></#if><#else><span class="very-subtle">TBC</span></#if>
     </@detail>
     <#if panel.location??><@detail label="Location" condensed=true><@fmt.location panel.location /></@detail></#if>
     <@detail label="Panel chair" condensed=true>
@@ -255,7 +255,7 @@
           <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
           <td data-sortby="${(panel.date.toString("yyyy-MM-dd HH:mm"))!'1970-01-01 00:00'}">
             <#if panel.date??>
-              <@fmt.date date=panel.date includeTime=false relative=false shortMonth=true excludeCurrentYear=true />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
+              <@fmt.date date=panel.date includeTime=false relative=false shortMonth=true excludeCurrentYear=true /><#if panel.startTime??>: <@fmt.time panel.startTime /><#if panel.endTime??> &mdash; <@fmt.time panel.endTime /></#if></#if>
             <#else>
               <span class="very-subtle">TBC</span>
             </#if>

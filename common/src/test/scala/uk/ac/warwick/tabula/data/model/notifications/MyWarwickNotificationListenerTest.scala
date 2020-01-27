@@ -6,32 +6,33 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.Cm2StudentFeedbackAdjustmentNotification
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, SubmissionDueGeneralNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishedNotification
 import uk.ac.warwick.tabula.notifications.{MyWarwickNotificationListener, MyWarwickServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.SchedulerComponent
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.services.{NotificationService, NotificationServiceComponent}
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.Activity
 
-import scala.jdk.CollectionConverters._
-
 class MyWarwickNotificationListenerTest extends TestBase with Mockito {
 
-  var listener: MyWarwickNotificationListener with TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent with SchedulerComponent =
-    new MyWarwickNotificationListener with TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent with SchedulerComponent {
-
-    def textRenderer: TextRenderer = smartMock[TextRenderer]
-
-    def features: Features = emptyFeatures
-
-    var myWarwickService: MyWarwickService = smartMock[MyWarwickService]
-
-    var scheduler: Scheduler = smartMock[Scheduler]
-
-    def toplevelUrl: String = ""
+  trait TestSupport
+    extends TextRendererComponent
+      with FeaturesComponent
+      with MyWarwickServiceComponent
+      with TopLevelUrlComponent
+      with SchedulerComponent
+      with NotificationServiceComponent {
+    val textRenderer: TextRenderer = smartMock[TextRenderer]
+    val features: Features = emptyFeatures
+    val myWarwickService: MyWarwickService = smartMock[MyWarwickService]
+    val scheduler: Scheduler = smartMock[Scheduler]
+    val toplevelUrl: String = ""
+    val notificationService: NotificationService = smartMock[NotificationService]
   }
+
+  val listener = new MyWarwickNotificationListener with TestSupport
 
   trait Fixture extends CurrentAcademicYear {
     val user = new User("cusxad")
@@ -58,7 +59,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       val rn = new RecipientNotificationInfo(fpn, user)
       fpn.recipientNotificationInfos.add(rn)
       val n: FeedbackPublishedNotification = Notification.init(fpn, currentUser.apparentUser, Seq(feedback), feedback.assignment)
-      listener.listen(n)
+      listener.listen(rn)
       verify(listener.myWarwickService, times(1)).queueNotification(any[Activity], isEq(listener.scheduler))
     }
   }
@@ -70,33 +71,8 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       val rn = new RecipientNotificationInfo(sfan, user)
       sfan.recipientNotificationInfos.add(rn)
       val n: Cm2StudentFeedbackAdjustmentNotification = Notification.init(sfan, currentUser.apparentUser, Seq(feedback), feedback.assignment)
-      listener.listen(n)
+      listener.listen(rn)
       verify(listener.myWarwickService, times(1)).queueActivity(any[Activity], isEq(listener.scheduler))
-    }
-  }
-
-  @Test def noDupes(): Unit = {
-    new Fixture {
-      val notification = new SubmissionDueGeneralNotification
-
-      val user2 = new User("cuslaj")
-      user2.setFoundUser(true)
-      val user3 = new User("cuscav")
-      user3.setFoundUser(true)
-
-      val rn = new RecipientNotificationInfo(notification, user)
-      val rn2 = new RecipientNotificationInfo(notification, user2)
-      val rn3 = new RecipientNotificationInfo(notification, user3)
-
-      notification.recipientNotificationInfos.addAll(Seq(rn, rn2, rn3).asJava)
-      val n: SubmissionDueGeneralNotification = Notification.init(notification, new AnonymousUser, assignment)
-
-      val activities: Seq[Activity] = listener.toMyWarwickActivities(n)
-      val recipients: Seq[String] = activities.flatMap(_.getRecipients.getUsers.asScala.toSeq)
-      recipients.size should be (recipients.toSet.size)
-
-      listener.listen(n)
-      verify(listener.myWarwickService, times(3)).queueNotification(any[Activity], isEq(listener.scheduler))
     }
   }
 

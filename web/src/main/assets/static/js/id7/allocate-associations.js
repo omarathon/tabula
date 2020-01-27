@@ -270,6 +270,8 @@ $(() => {
 
       prependClearLink($list);
     });
+
+    $(this).closest('form').submit();
   });
 
   $clearAllButtons.each(function each() {
@@ -330,7 +332,7 @@ $(() => {
   $uploadForm.on('submit', () => {
     $previewForm.removeClass('dirty');
   });
-  $uploadForm.find('.btn.dirty-check-ignore').on('click', () => {
+  $uploadForm.find('.dirty-check-ignore').on('click', () => {
     if ($previewForm.is('.dirty')) {
       $previewForm.removeClass('dirty');
       window.setTimeout(() => { // Wait for the unload event for the file request

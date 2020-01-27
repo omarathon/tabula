@@ -144,7 +144,7 @@
             <@f.hidden path="assessmentType" />
             <@f.hidden path="acuteOutcomeApplies" />
             <@f.hidden path="extensionDeadline" />
-            <input type="checkbox" checked>
+            <@f.checkbox path="selected" />
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__module">
             <@components.assessmentModule item />
@@ -270,7 +270,8 @@
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
 >
-  <#if command.attachedFiles?has_content >
+  <#if command.attachedFiles?has_content>
+    <@f.hidden name="_attachedFiles" value="on" />
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
         <#list command.attachedFiles as attachment>

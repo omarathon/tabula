@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.io.{ByteArrayInputStream, InputStream, OutputStream}
-
-import javax.activation.DataSource
 import javax.persistence._
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -14,6 +11,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.convert.FetchByUniIdOrUsercode
+import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -28,7 +26,7 @@ object Notification {
   /**
     * By default, the priority that a notification must be at or above in order to generate an email.
     */
-  val PriorityEmailThreshold = NotificationPriority.Info
+  val PriorityEmailThreshold: NotificationPriority = NotificationPriority.Info
 
   /**
     * A little explanation...
@@ -170,16 +168,18 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
   def isDismissed(user: User): Boolean = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
 
+  @deprecated("NotificationListener is going away", since = "2020.1.2")
   @Column(name = "listeners_processed")
   private var _listenersProcessed: Boolean = false
 
+  @deprecated("NotificationListener is going away", since = "2020.1.2")
   def markListenersProcessed(): Unit = {
     _listenersProcessed = true
   }
 
   // Not persisted, null for transient instances
   @Column(name = "notification_type", insertable = false, updatable = false)
-  private var _notificationType: String = _
+  private val _notificationType: String = null
 
   def notificationType: String = _notificationType.maybeText.getOrElse(getClass.getAnnotation(classOf[DiscriminatorValue]).value)
 
@@ -259,7 +259,12 @@ abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null 
   @OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
   def getTarget: EntityReference[B] = _target
 
-  def target: EntityReference[B] = getTarget
+  def target: EntityReference[B] =
+    try {
+      Option(getTarget).filter(_.entity != null).head
+    } catch {
+      case _@(_: IndexOutOfBoundsException | _: NoSuchElementException) => throw new ObjectNotFoundException("", "")
+    }
 
   def setTarget(target: EntityReference[B]): Unit = _target = target
 
@@ -333,7 +338,7 @@ trait UniversityIdOrUserIdRecipientNotification extends SingleRecipientNotificat
 
   this: UserLookupComponent =>
 
-  var recipientUniversityId: String = null
+  var recipientUniversityId: String = _
 
   def recipient: User = fetchUser(recipientUniversityId)
 
@@ -355,7 +360,7 @@ trait HasNotificationAttachment {
 }
 
 trait NotificationSettings extends NestedSettings {
-  def enabled = BooleanSetting("enabled", default = true)
+  def enabled: BooleanSetting = BooleanSetting("enabled", default = true)
 }
 
 trait HasNotificationSettings {
@@ -376,9 +381,7 @@ trait ConfigurableNotification {
 
   private def enabledForDepartment: Boolean = departmentSettings.enabled.value
 
-  private def enabledForUser(u: User): Boolean = userSettings(u).fold(true) {
-    _.enabled.value
-  }
+  private def enabledForUser(u: User): Boolean = userSettings(u).fold(true)(_.enabled.value)
 
   // The department related to the notification's entity - i.e. the one that configures this notification
   def configuringDepartment: Department
@@ -466,4 +469,28 @@ trait MyWarwickNotification extends MyWarwickDiscriminator {
 
 trait MyWarwickActivity extends MyWarwickDiscriminator {
   self: Notification[_, _] =>
+}
+
+trait BatchedNotification[A <: BatchedNotification[A]] {
+  self: Notification[_, _] =>
+
+  final def titleForBatch(notifications: Seq[_ <: BatchedNotification[_]], user: User): String =
+    titleForBatchInternal(notifications.collect { case n: A @unchecked => n }, user)
+
+  def titleForBatchInternal(notifications: Seq[A], user: User): String
+
+  final def contentForBatch(notifications: Seq[_ <: BatchedNotification[_]]): FreemarkerModel =
+    contentForBatchInternal(notifications.collect { case n: A @unchecked => n })
+
+  def contentForBatchInternal(notifications: Seq[A]): FreemarkerModel
+
+  final def urlForBatch(notifications: Seq[_ <: BatchedNotification[_]], user: User): String =
+    urlForBatchInternal(notifications.collect { case n: A @unchecked => n }, user)
+
+  def urlForBatchInternal(notifications: Seq[A], user: User): String
+
+  final def urlTitleForBatch(notifications: Seq[_ <: BatchedNotification[_]]): String =
+    urlTitleForBatchInternal(notifications.collect { case n: A @unchecked => n })
+
+  def urlTitleForBatchInternal(notifications: Seq[A]): String
 }

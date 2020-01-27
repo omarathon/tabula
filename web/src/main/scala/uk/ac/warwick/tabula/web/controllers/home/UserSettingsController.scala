@@ -3,53 +3,58 @@ package uk.ac.warwick.tabula.web.controllers.home
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.spring.Wire
+import org.springframework.web.bind.annotation.{ModelAttribute, PostMapping}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.home.UserSettingsCommand
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserSettingsService}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
 
-@Controller
-class UserSettingsController extends BaseController {
+import scala.concurrent.duration._
 
-  type UserSettingsCommand = Appliable[UserSettings]
+@Controller
+class UserSettingsController extends BaseController
+  with AutowiringUserSettingsServiceComponent
+  with AutowiringModuleAndDepartmentServiceComponent {
+
+  type UserSettingsCommand = UserSettingsCommand.Command
 
   validatesSelf[SelfValidating]
-
   hideDeletedItems
 
-  var userSettingsService: UserSettingsService = Wire.auto[UserSettingsService]
-  var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-
-  private def getUserSettings(user: CurrentUser) =
+  private def getUserSettings(user: CurrentUser): Option[UserSettings] =
     userSettingsService.getByUserId(user.apparentId)
 
-
   @ModelAttribute("userSettingsCommand")
-  def command(user: CurrentUser): UserSettingsCommand = {
-    val usersettings = getUserSettings(user)
-    usersettings match {
+  def command(user: CurrentUser): UserSettingsCommand =
+    getUserSettings(user) match {
       case Some(setting) => UserSettingsCommand(user, setting)
       case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
     }
-  }
 
-  @RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
+  @ModelAttribute("batchedNotificationSettings")
+  def batchedNotificationSettings: Seq[FiniteDuration] = Seq(
+    Duration.Zero,
+    5.minutes,
+    10.minutes,
+    30.minutes,
+    1.hour
+  )
+
+  @RequestMapping(Array("/settings"))
   def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors: Errors, success: Boolean = false): Mav = {
-    val deptsUserIsAdminOn = moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+    val deptsUserIsAdminOn = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
     val mustNotBeCurrentUser: User => Boolean = u => u.getUserId != user.userId
 
     val deptsWithNoOtherContacts = deptsUserIsAdminOn.map(d => {
       (d.name, d.owners.users.filter(mustNotBeCurrentUser))
     }).map { case (departmentName, otherAdmins) =>
-    (
+      (
         departmentName,
         otherAdmins.map(u => userSettingsService
           .getByUserId(u.getUserId)
@@ -59,25 +64,23 @@ class UserSettingsController extends BaseController {
     }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
 
     Mav("usersettings/form",
-      "isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+      "isCourseworkModuleManager" -> moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
       "isDepartmentalAdmin" -> deptsUserIsAdminOn.nonEmpty,
       "deptsWithNoOtherContacts" -> deptsWithNoOtherContacts,
       "success" -> success
     )
   }
 
-  @RequestMapping(value = Array("/settings"), method = Array(POST))
-  def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav = {
+  @PostMapping(Array("/settings"))
+  def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav =
     if (errors.hasErrors) {
       viewSettings(user, command, errors)
-    }
-    else {
+    } else {
       command.apply()
       viewSettings(user, command, errors, success = true)
     }
-  }
 
-  @RequestMapping(value = Array("/settings.json"), method = Array(GET, HEAD))
+  @RequestMapping(Array("/settings.json"))
   def viewSettingsJson(user: CurrentUser): Mav = {
     val usersettings =
       getUserSettings(user) match {
@@ -88,7 +91,7 @@ class UserSettingsController extends BaseController {
     Mav(new JSONView(usersettings))
   }
 
-  @RequestMapping(value = Array("/settings.json"), method = Array(POST))
+  @PostMapping(Array("/settings.json"))
   def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav = {
     if (!errors.hasErrors) command.apply()
 
@@ -101,7 +104,6 @@ case class JSONUserSettings(
   newAssignmentSettings: String,
   weekNumberingSystem: String,
   bulkEmailSeparator: String,
-  profilesDefaultView: String
 )
 
 object JSONUserSettings {
@@ -111,7 +113,6 @@ object JSONUserSettings {
       newAssignmentSettings = u.newAssignmentSettings,
       weekNumberingSystem = u.weekNumberingSystem,
       bulkEmailSeparator = u.bulkEmailSeparator,
-      profilesDefaultView = u.profilesDefaultView
     )
   }
 }

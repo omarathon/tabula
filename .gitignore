@@ -60,7 +60,6 @@ ${*
 !/.idea/codeStyleSettings.xml
 !/.idea/fileTemplates/*
 !/.idea/gradle.xml
-!/.idea/compiler.xml
 !/.idea/encodings.xml
 !/.idea/misc.xml
 

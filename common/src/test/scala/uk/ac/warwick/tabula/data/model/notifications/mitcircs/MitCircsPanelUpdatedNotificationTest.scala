@@ -18,9 +18,9 @@ class MitCircsPanelUpdatedNotificationTest extends TestBase with Mockito with Fr
 
     val panel: MitigatingCircumstancesPanel = Fixtures.mitigatingCircumstancesPanel()
     panel.name = "Heron panel"
-    panel.date = DateTime.now
-    panel.date = DateTime.now.plusHours(3)
-    panel.location = NamedLocation("Heron lake")
+    panel.date = Some(DateTime.now)
+    panel.date = Some(DateTime.now.plusHours(3))
+    panel.location = Some(NamedLocation("Heron lake"))
   }
 
   @Test

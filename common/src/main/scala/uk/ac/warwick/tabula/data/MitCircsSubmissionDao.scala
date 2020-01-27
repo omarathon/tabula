@@ -94,7 +94,7 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
 
     if (filter.affectedAssessmentModules.nonEmpty) {
       c.createAlias("affectedAssessments", "affectedAssessment")
-        .add(safeIn("affectedAssessment.module", filter.affectedAssessmentModules.toSeq))
+        .add(safeIn("affectedAssessment._module", filter.affectedAssessmentModules.toSeq))
     }
 
     filter.includesStartDate.foreach { d =>

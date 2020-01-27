@@ -19,6 +19,8 @@ No students allocated to you have been released for marking as the assignment ha
 Please check the assignment regularly as students with extensions may submit at any time.
       </#if>
   </#if>
+
+<#if feedbackDeadlineDate??>Student feedback is due on ${feedbackDeadlineDate}.</#if>
 <#else>
 <@fmt.p number=feedbacksCount!0 singular="student" plural="students" /> <@fmt.p number=feedbacksCount!0 singular="is" plural="are" shownumber=false /> allocated to you for marking.
 - This assignment does not require students to submit work to Tabula

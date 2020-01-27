@@ -67,23 +67,48 @@
     </@bs3form.radio>
   </@bs3form.labelled_form_group>
 
-  <@bs3form.labelled_form_group labelText="Notifications">
-    <p>Send me notifications about:</p>
+  <fieldset>
+    <h2>Notifications</h2>
 
-    <@bs3form.checkbox>
-      <@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
-      Small group attendance
-    </@bs3form.checkbox>
+    <#if features.notificationBatching>
+      <@bs3form.labelled_form_group path="batchedNotifications" labelText="Batching notifications" help="By batching notifications, you can reduce the number of emails and My Warwick alerts you're getting from Tabula. Instead of sending notifications immediately, we'll group notifications of the same type together and send you a single summary email or alert.">
+        <#list batchedNotificationSettings as setting>
+          <@bs3form.radio>
+            <@f.radiobutton path="batchedNotifications" value=setting />
+            <#if setting.length() == 0>
+              Send me notifications immediately
+            <#else>
+              Receive notifications every ${setting}
+            </#if>
+          </@bs3form.radio>
+        </#list>
 
-    <@bs3form.checkbox>
-      <@f.checkbox path="finaliseFeedbackNotificationEnabled" />
-      Coursework submissions which have been marked
-    </@bs3form.checkbox>
-    <#if isDepartmentalAdmin>
-        <p></p>
+        <#-- Allow an unusual setting (set in the db?) to be retained -->
+        <#if userSettingsCommand.batchedNotifications?? && !batchedNotificationSettings?seq_contains(userSettingsCommand.batchedNotifications)>
+          <@bs3form.radio>
+            <@f.radiobutton path="batchedNotifications" value=userSettingsCommand.batchedNotifications />
+            Receive notifications every ${userSettingsCommand.batchedNotifications}
+          </@bs3form.radio>
+        </#if>
+      </@bs3form.labelled_form_group>
+    </#if>
+
+    <@bs3form.labelled_form_group>
+      <p>Send me notifications about:</p>
+
+      <@bs3form.checkbox>
+        <@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
+        Small group attendance
+      </@bs3form.checkbox>
+
+      <@bs3form.checkbox>
+        <@f.checkbox path="finaliseFeedbackNotificationEnabled" />
+        Coursework submissions which have been marked
+      </@bs3form.checkbox>
+      <#if isDepartmentalAdmin>
         <@bs3form.checkbox>
-            <@f.checkbox path="deptAdminReceiveStudentComments" />
-            Student requests for assistance from a Departmental Administrator
+          <@f.checkbox path="deptAdminReceiveStudentComments" />
+          Student requests for assistance from a Departmental Administrator
         </@bs3form.checkbox>
 
         <#list deptsWithNoOtherContacts as item>
@@ -92,9 +117,9 @@
             If you opt out, students will be unable to request departmental assistance from within Tabula.
           </div>
         </#list>
-    </#if>
-
-  </@bs3form.labelled_form_group>
+      </#if>
+    </@bs3form.labelled_form_group>
+  </fieldset>
 
   <@bs3form.labelled_form_group>
     <input type="submit" value="Save" class="btn btn-primary">

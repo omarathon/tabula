@@ -6,10 +6,11 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
+import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-import scala.collection._
+import scala.concurrent.duration._
 
 @Entity
 @Proxy
@@ -29,7 +30,7 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def newAssignmentSettings: String = getStringSetting(Settings.NewAssignmentSettings).getOrElse(NewAssignmentPrefill)
 
-  def newAssignmentSettings_=(prefill: String): Unit = settings += (Settings.NewAssignmentSettings) -> prefill
+  def newAssignmentSettings_=(prefill: String): Unit = settings += (Settings.NewAssignmentSettings -> prefill)
 
   def hiddenIntros: Seq[String] = getStringSeqSetting(Settings.HiddenIntros).getOrElse(Nil)
 
@@ -43,10 +44,6 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
   def bulkEmailSeparator: String = getStringSetting(Settings.BulkEmailSeparator).getOrElse(DefaultBulkEmailSeparator)
 
   def bulkEmailSeparator_=(separator: String): Unit = settings += (Settings.BulkEmailSeparator -> separator)
-
-  def profilesDefaultView: String = getStringSetting(Settings.ProfilesDefaultView).getOrElse(DefaultProfilesDefaultView)
-
-  def profilesDefaultView_=(view: String): Unit = settings += (Settings.ProfilesDefaultView -> view)
 
   // Active department should be Optional; if the user has chosen one yet they must pick the initial value
   def activeDepartment: Option[Department] = getStringSetting(Settings.ActiveDepartment).flatMap(moduleAndDepartmentService.getDepartmentByCode)
@@ -82,6 +79,14 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def deptAdminReceiveStudentComments_=(receiveStudentComments: Boolean): Unit = settings += (Settings.ReceiveStudentComments -> receiveStudentComments)
 
+  def batchedNotifications: FiniteDuration =
+    getStringSetting(Settings.BatchedNotifications)
+      .map(FiniteDurationConverter.asDuration)
+      .getOrElse(DefaultBatchedNotificationsSetting)
+
+  def batchedNotifications_=(delay: FiniteDuration): Unit =
+    settings += (Settings.BatchedNotifications -> FiniteDurationConverter.asString(delay))
+
   def string(key: String): String = getStringSetting(key).orNull
 
   def this(userId: String) = {
@@ -95,8 +100,6 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 }
 
 object UserSettings {
-
-
   val AlertsAllSubmissions = "allSubmissions"
   val AlertsNoteworthySubmissions = "lateSubmissions"
   val AlertsNoSubmissions = "none"
@@ -106,10 +109,10 @@ object UserSettings {
 
   val DefaultBulkEmailSeparator = ";"
 
-  val DefaultProfilesDefaultView = "gadget"
-
   val DefaultCourseworkShowEmptyModules = true
   val DefaultReceiveStudentComments = true
+
+  val DefaultBatchedNotificationsSetting: FiniteDuration = Duration.Zero
 
   object Settings {
     val AlertsSubmission = "alertsSubmission"
@@ -117,11 +120,11 @@ object UserSettings {
     val HiddenIntros = "hiddenIntros"
     val WeekNumberingSystem = "weekNumberSystem"
     val BulkEmailSeparator = "bulkEmailSeparator"
-    val ProfilesDefaultView = "profilesDefaultView"
     val ActiveDepartment = "activeDepartment"
     val ActiveAcademicYear = "activeAcademicYear"
     val CourseworkShowEmptyModules = "courseworkShowEmptyModules"
     val ReceiveStudentComments = "receiveStudentComments"
+    val BatchedNotifications = "batchedNotifications"
 
     object RegisterPdf {
       val ShowPhotos = "registerPdfShowPhotos"
@@ -132,7 +135,7 @@ object UserSettings {
 
     def hiddenIntroHash(mappedPage: String, setting: String): String = {
       val popover = mappedPage + ":" + setting
-      val shaHash = DigestUtils.shaHex(popover)
+      val shaHash = DigestUtils.sha1Hex(popover)
 
       shaHash
     }
@@ -143,10 +146,7 @@ object UserSettings {
     val StringForcedFalse = "f"
 
     @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
-    def forceBooleanString(value: Boolean): String = value match {
-      case true => StringForcedTrue
-      case false => StringForcedFalse
-    }
+    def forceBooleanString(value: Boolean): String = if (value) StringForcedTrue else StringForcedFalse
 
     @deprecated("Do not use for new settings, use a proper Boolean instead", since = "2019.12.3")
     def fromForceBooleanString(value: String): Boolean = value match {

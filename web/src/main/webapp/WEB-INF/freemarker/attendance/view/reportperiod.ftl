@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-  <h1>Upload missed monitoring points to SITS e:Vision</h1>
+  <h1>Upload missed monitoring points to SITS</h1>
 
   <@f.form modelAttribute="command" action="" method="POST">
 

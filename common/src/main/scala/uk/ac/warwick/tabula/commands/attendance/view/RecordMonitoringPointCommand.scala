@@ -17,9 +17,12 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.jdk.CollectionConverters._
 
 object RecordMonitoringPointCommand {
-  def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, user: CurrentUser) =
+  type Result = (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
+  type Command = Appliable[Result] with SelfValidating with PopulateOnForm with SetFilterPointsResultOnRecordMonitoringPointCommand
+
+  def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, user: CurrentUser): Command =
     new RecordMonitoringPointCommandInternal(department, academicYear, templatePoint, user)
-      with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
+      with ComposableCommand[Result]
       with AutowiringAttendanceMonitoringServiceComponent
       with AutowiringProfileServiceComponent
       with AutowiringSecurityServiceComponent

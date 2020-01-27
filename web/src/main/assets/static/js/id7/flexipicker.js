@@ -66,7 +66,9 @@
     // Twitter typeahead doesn't work for Tabula, so the replaced Bootstrap typeahead is aliased as bootstrap3Typeahead
     var mergedOptions = $.extend({}, $.fn.typeahead.defaults, {
       source: options.source,
-      item: options.item
+      item: options.item,
+      minLength: options.minLength || 3,
+      items: options.items || 10
     });
     var $typeahead = options.element.typeahead(mergedOptions).data('typeahead');
 
@@ -198,13 +200,13 @@
     $typeahead.render = function (items) {
       var that = this;
       var withIcons = $(items).filter(function (i, item) {
-        return item != undefined && item.type != undefined;
+        return item !== undefined && item.type !== undefined;
       });
       var useIcons = withIcons.filter(function (i, item) {
-        return item.type != withIcons.get(0).type;
+        return item.type !== withIcons.get(0).type;
       }).length > 0;
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-value', item.value);
           i.attr('data-type', item.type);
@@ -215,7 +217,7 @@
             i.find('i').addClass(self.iconMappings[item.type]);
           }
           var desc = i.find('.description');
-          if (desc && desc != '') {
+          if (desc && desc !== '') {
             desc.html(item.description).show();
           } else {
             desc.hide();
@@ -283,7 +285,7 @@
 
 // Extract the value from a chosen value with type.
   FlexiPicker.prototype.getValue = function (value, type) {
-    if (type == 'group') {
+    if (type === 'group') {
       value = this.prefixGroups + value;
     }
     return value;
@@ -292,20 +294,20 @@
 // Turn value into something we can query on.
   FlexiPicker.prototype.getQuery = function (value) {
     // If we prefixed something onto a group name, remove it first
-    if (this.prefixGroups && value.indexOf(this.prefixGroups) == 0) {
+    if (this.prefixGroups && value.indexOf(this.prefixGroups) === 0) {
       value = value.substring(this.prefixGroups.length);
     }
     return value;
   };
 
   FlexiPicker.prototype.transformItem = function (item) {
-    if (item.type == 'user') {
+    if (item.type === 'user') {
       item.title = item.name;
       item.description = item.value + ', ' + ((item.isStaff === 'true') ? 'Staff' : 'Student') + ', ' + item.department; // usercode, staff/student, department
-    } else if (item.type == 'group') {
+    } else if (item.type === 'group') {
       item.description = item.title;
       item.title = item.value;
-    } else if (item.type == 'email') {
+    } else if (item.type === 'email') {
       item.title = item.name;
       item.description = item.address;
     }
@@ -346,7 +348,12 @@
           // Resolve the deferred result, triggering any handlers
           // that may have been registered against it.
           d.resolve(results);
+        } else {
+          d.resolve([]);
         }
+      },
+      error: function () {
+        d.resolve([]);
       }
     });
     // unset the search when it's done
@@ -390,7 +397,7 @@
     $('.flexi-picker').flexiPicker({});
 
     var emptyValue = function () {
-      return (this.value || "").trim() == "";
+      return (this.value || "").trim() === "";
     };
 
     /*
@@ -417,8 +424,8 @@
 
           // if last picker is nonempty OR focused, append an blank picker.
           var $last = $inputs.last();
-          var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
-          if (lastFocused || $last.val().trim() != '') {
+          var lastFocused = (ev.type === 'focusin' && ev.target === $last[0]);
+          if (lastFocused || $last.val().trim() !== '') {
             var input = $blankInput.clone();
             $collection.append(input);
             input.find('input').first().flexiPicker({});
@@ -488,7 +495,7 @@
       var that = this;
 
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-moduleid', item.id);
           i.attr('data-modulecode', item.code);
@@ -624,7 +631,7 @@
       var that = this;
 
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-assignmentid', item.id);
           i.find('div.name').html(that.highlighter(item.module.toUpperCase() + ' ' + item.name + ' (' + item.academicYear + ')'));
@@ -736,7 +743,7 @@
       var that = this;
 
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-routecode', item.code);
           i.find('div.name').html(that.highlighter(item.code.toUpperCase() + ' ' + item.name));
@@ -855,7 +862,7 @@
       var that = this;
 
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-lid', item.w2gid);
           i.find('div.name').html(that.highlighter(item.value));
@@ -992,13 +999,13 @@
     $typeahead.render = function (items) {
       var that = this;
       var withIcons = $(items).filter(function (i, item) {
-        return item != undefined && item.type != undefined;
+        return item !== undefined && item.type !== undefined;
       });
       var useIcons = withIcons.filter(function (i, item) {
-        return item.type != withIcons.get(0).type;
+        return item.type !== withIcons.get(0).type;
       }).length > 0;
       items = $(items).map(function (i, item) {
-        if (item != undefined) {
+        if (item !== undefined) {
           i = $(that.options.item);
           i.attr('data-value', item.value);
           i.attr('data-type', item.type);
@@ -1009,7 +1016,7 @@
             i.find('i').addClass(self.iconMappings[item.type]);
           }
           var desc = i.find('.description');
-          if (desc && desc != '') {
+          if (desc && desc !== '') {
             desc.html(item.description).show();
           } else {
             desc.hide();
@@ -1140,7 +1147,7 @@
     $('.profile-picker').profilePicker({});
 
     var emptyValue = function () {
-      return (this.value || "").trim() == "";
+      return (this.value || "").trim() === "";
     };
 
     var $collections = $('.profile-picker-collection');
@@ -1162,8 +1169,8 @@
 
           // if last picker is nonempty OR focused, append an blank picker.
           var $last = $inputs.last();
-          var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
-          if (lastFocused || $last.val().trim() != '') {
+          var lastFocused = (ev.type === 'focusin' && ev.target === $last[0]);
+          if (lastFocused || $last.val().trim() !== '') {
             var input = $blankInput.clone();
             $collection.append(input);
             input.find('input').first().profilePicker({});

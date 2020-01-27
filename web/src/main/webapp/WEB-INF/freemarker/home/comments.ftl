@@ -11,7 +11,7 @@
     </@bs3form.labelled_form_group>
 
     <@bs3form.labelled_form_group path="usercode" labelText="Usercode">
-      <@f.input path="usercode" cssClass="form-control"/>
+      <@f.input path="usercode" cssClass="form-control" readonly=user.loggedIn/>
     </@bs3form.labelled_form_group>
 
     <@bs3form.labelled_form_group path="url" labelText="URL (where did you encounter a problem?)">
@@ -19,7 +19,7 @@
     </@bs3form.labelled_form_group>
 
     <@bs3form.labelled_form_group path="message" labelText="Your message">
-      <@f.textarea path="message" cssClass="form-control"/>
+      <@f.textarea path="message" cssClass="form-control" rows="5"/>
     </@bs3form.labelled_form_group>
 
     <input type="hidden" name="browser" value="" />
@@ -114,11 +114,11 @@
                 </@bs3form.labelled_form_group>
 
                 <@bs3form.labelled_form_group path="usercode" labelText="Usercode">
-                    <@f.input path="usercode" cssClass="form-control"/>
+                    <@f.input path="usercode" cssClass="form-control" readonly=user.loggedIn/>
                 </@bs3form.labelled_form_group>
 
                 <@bs3form.labelled_form_group path="message" labelText="Your message">
-                    <@f.textarea path="message" cssClass="form-control"/>
+                    <@f.textarea path="message" cssClass="form-control" rows="5"/>
                 </@bs3form.labelled_form_group>
 
               <input type="hidden" name="url" value="" />

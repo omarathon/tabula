@@ -44,7 +44,7 @@ class MissedSmallGroupsReportController extends AbstractSmallGroupsReportControl
 
   @ModelAttribute("command")
   def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-    AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.missed(academicYear))
+    AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.missedAuthorisedOrUnauthorised(academicYear))
 
   val pageRenderPath = "missed"
   val filePrefix = "missed-small-group-attendance"

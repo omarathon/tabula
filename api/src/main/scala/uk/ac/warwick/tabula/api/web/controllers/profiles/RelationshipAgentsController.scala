@@ -41,8 +41,8 @@ class RelationshipAgentsController extends ApiController {
     PermissionCheck(permission, permissionsTarget)
 
     override def applyInternal(): Seq[Array[Object]] = permissionsTarget match {
-      case dept: Department => relationshipsService.listCurrentStudentRelationshipsByDepartment(relationshipType, dept).groupBy(_.agent).map(sr =>
-        Seq(sr._1, sr._2.head.agentName, sr._2.head.agentLastName).toArray.asInstanceOf[Array[Object]]
+      case dept: Department => relationshipsService.listCurrentStudentRelationshipsByDepartment(relationshipType, dept).groupBy(_.agent).filter(sr => sr._2.head.agentMember.isDefined).map(sr =>
+        Seq(sr._1, sr._2.head.agentMember.map(am => am.firstName).orNull, sr._2.head.agentLastName).toArray.asInstanceOf[Array[Object]]
       ).toSeq
       case PermissionsTarget.Global => relationshipsService.listCurrentRelationshipsGlobally(relationshipType)
       case _ => throw new IllegalArgumentException("Unsupported permissionsTarget")

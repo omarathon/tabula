@@ -20,9 +20,9 @@ class MitCircsEditPanelNotificationsTest extends TestBase with Mockito {
 
     val panel: MitigatingCircumstancesPanel = Fixtures.mitigatingCircumstancesPanel(userA, userB)
     panel.name = "Heron panel"
-    panel.date = DateTime.now
-    panel.date = DateTime.now.plusHours(3)
-    panel.location = NamedLocation("Heron lake")
+    panel.date = Some(DateTime.now)
+    panel.date = Some(DateTime.now.plusHours(3))
+    panel.location = Some(NamedLocation("Heron lake"))
 
     class TestNotifier(val user: User, val panel: MitigatingCircumstancesPanel)
       extends EditMitCircsPanelNotifications with EditMitCircsPanelState with EditMitCircsPanelRequest
@@ -32,9 +32,9 @@ class MitCircsEditPanelNotificationsTest extends TestBase with Mockito {
     val updatedPanel = Fixtures.mitigatingCircumstancesPanel(userB, userC).tap(p => {
       p.name = "Heron panel"
       p.addSubmission(Fixtures.mitigatingCircumstancesSubmission("heron", "terrifiedStudent"))
-      p.location = NamedLocation("A dank heron infested swamp")
-      p.date = DateTime.now.plusDays(7)
-      p.endDate = DateTime.now.plusDays(7).plusHours(1)
+      p.location = Some(NamedLocation("A dank heron infested swamp"))
+      p.date = Some(DateTime.now.plusDays(7))
+      p.endDate = Some(DateTime.now.plusDays(7).plusHours(1))
     })
 
     val n  = notifications.emit(updatedPanel)

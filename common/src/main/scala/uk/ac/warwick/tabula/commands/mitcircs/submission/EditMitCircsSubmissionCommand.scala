@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, Mit
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification, MitCircsUpdateOnBehalfNotification}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -31,6 +32,7 @@ object EditMitCircsSubmissionCommand {
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with HibernateExtensionPersistenceComponent
+      with AutowiringUploadedImageProcessorComponent
 }
 
 class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
@@ -40,11 +42,13 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   self: EditMitCircsSubmissionRequest
     with MitCircsSubmissionServiceComponent
     with ModuleAndDepartmentServiceComponent
-    with ExtensionPersistenceComponent =>
+    with ExtensionPersistenceComponent
+    with UploadedImageProcessorComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
     file.onBind(result)
+    uploadedImageProcessor.fixOrientation(file)
     result.popNestedPath()
 
     affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
@@ -74,7 +78,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
     // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
     submission.affectedAssessments.clear()
-    affectedAssessments.asScala.foreach { item =>
+    affectedAssessments.asScala.filter(_.selected).foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
     }

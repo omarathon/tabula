@@ -30,7 +30,7 @@ class MitCircsApproveOutcomesCommandInternal(val submission: MitigatingCircumsta
   self: MitCircsSubmissionServiceComponent =>
 
   def applyInternal(): Result = transactional() {
-    require(submission.panel.exists(_.chair == currentUser), "You must be the panel chair in order approve outcomes")
+    require(submission.panel.exists(_.chair.contains(currentUser)), "You must be the panel chair in order approve outcomes")
     submission.lastModifiedBy = currentUser
     submission.lastModified = DateTime.now
     if(approve) submission.approvedByChair(currentUser)

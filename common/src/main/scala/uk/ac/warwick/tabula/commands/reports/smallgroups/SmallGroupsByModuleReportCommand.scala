@@ -44,7 +44,7 @@ class SmallGroupsByModuleReportCommandInternal(val department: Department, val a
     SmallGroupsByModuleReportCommandResult(
       byModule,
       filteredAttendance.studentDatas,
-      byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted,
+      byModule.flatMap(_._2.keys).toSeq.distinct.sorted,
       startDate, endDate
     )
   }

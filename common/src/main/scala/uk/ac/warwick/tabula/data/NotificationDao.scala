@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion._
+import org.hibernate.criterion.Projections._
+import org.hibernate.criterion.Order._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, Notification, ToEntityReference}
+import uk.ac.warwick.userlookup.User
 
 import scala.reflect.ClassTag
 
@@ -33,6 +35,14 @@ trait NotificationDao {
 
   def unemailedRecipientIds(count: Int): Seq[String]
 
+  /**
+   * @return tuple of recipient, notification type, earliest creation date;
+   *         sorted by earliest creation date
+   */
+  def unemailedRecipientsByNotificationType(count: Int): Seq[(User, String, DateTime)]
+
+  def unemailedNotificationsFor(recipient: User, notificationType: String, retryBackoff: Boolean): Seq[RecipientNotificationInfo]
+
   def oldestUnemailedRecipient: Option[RecipientNotificationInfo]
 
   def recentEmailedRecipient: Option[RecipientNotificationInfo]
@@ -51,43 +61,65 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
     */
   def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference, _]] = {
     val scrollable = session.newCriteria[Notification[_ >: Null <: ToEntityReference, _]]
-      .add(Restrictions.ge("created", start))
-      .addOrder(Order.asc("created"))
+      .add(ge("created", start))
+      .addOrder(asc("created"))
       .scroll()
     Scrollable(scrollable, session)
   }
 
-  private def unemailedRecipientCriteria = {
-    val notAttemptedRecently = disjunction()
-      .add(isNull("attemptedAt"))
-      .add(lt("attemptedAt", DateTime.now.minusMinutes(NotificationDao.RETRY_DELAY_MINUTES)))
+  private def unemailedRecipientCriteria(retryBackoff: Boolean): ScalaCriteria[RecipientNotificationInfo] = {
+    val c =
+      session.newCriteria[RecipientNotificationInfo]
+        .createAlias("notification", "notification")
+        .add(is("emailSent", false))
+        .add(is("dismissed", false))
 
-    session.newCriteria[RecipientNotificationInfo]
-      .createAlias("notification", "notification")
-      .add(is("emailSent", false))
-      .add(is("dismissed", false))
-      .add(notAttemptedRecently)
+    if (retryBackoff)
+      c.add(or(
+        isNull("attemptedAt"),
+        lt("attemptedAt", DateTime.now.minusMinutes(NotificationDao.RETRY_DELAY_MINUTES))
+      ))
+
+    c
   }
 
   def unemailedRecipientCount: Number =
-    unemailedRecipientCriteria.count
+    unemailedRecipientCriteria(retryBackoff = false).count
 
   def unemailedRecipientIds(count: Int): Seq[String] =
-    unemailedRecipientCriteria
-      .addOrder(Order.asc("notification.created"))
+    unemailedRecipientCriteria(retryBackoff = true)
+      .addOrder(asc("notification.created"))
       .setMaxResults(count)
-      .project[String](Projections.id())
+      .project[String](id())
       .seq
 
-  def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = {
-    session.newCriteria[RecipientNotificationInfo]
-      .createAlias("notification", "notification")
-      .add(is("emailSent", false))
-      .add(is("dismissed", false))
-      .addOrder(Order.asc("notification.created"))
+  def unemailedRecipientsByNotificationType(count: Int): Seq[(User, String, DateTime)] =
+    unemailedRecipientCriteria(retryBackoff = true)
+      .project[Array[Object]](
+        projectionList()
+          .add(groupProperty("recipient"))
+          .add(groupProperty("notification._notificationType"))
+          .add(alias(min("notification.created"), "created"))
+      )
+      .addOrder(asc("created"))
+      .setMaxResults(count)
+      .seq.collect {
+        case Array(recipient: User, notificationType: String, earliestCreated: DateTime) =>
+          (recipient, notificationType, earliestCreated)
+      }
+
+  def unemailedNotificationsFor(recipient: User, notificationType: String, retryBackoff: Boolean): Seq[RecipientNotificationInfo] =
+    unemailedRecipientCriteria(retryBackoff)
+      .add(is("recipient", recipient))
+      .add(is("notification._notificationType", notificationType))
+      .addOrder(asc("notification.created"))
+      .seq
+
+  def oldestUnemailedRecipient: Option[RecipientNotificationInfo] =
+    unemailedRecipientCriteria(retryBackoff = false)
+      .addOrder(asc("notification.created"))
       .setMaxResults(1)
       .seq.headOption
-  }
 
   def recentEmailedRecipient: Option[RecipientNotificationInfo] = {
     session.newCriteria[RecipientNotificationInfo]
@@ -95,7 +127,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
       .add(is("emailSent", true))
       .add(is("dismissed", false))
       .add(gt("attemptedAt", DateTime.now.minusDays(1)))
-      .addOrder(Order.desc("notification.created"))
+      .addOrder(desc("notification.created"))
       .setMaxResults(1)
       .seq.headOption
   }
@@ -104,9 +136,9 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
     session.newCriteria[RecipientNotificationInfo]
       .createAlias("notification", "notification")
       .setFetchMode("notification", FetchMode.JOIN)
-      .add(Restrictions.disjunction(is("emailSent", true), is("dismissed", false)))
-      .addOrder(Order.asc("emailSent"))
-      .addOrder(Order.desc("notification.created"))
+      .add(or(is("emailSent", true), is("dismissed", false)))
+      .addOrder(asc("emailSent"))
+      .addOrder(desc("notification.created"))
       .setFirstResult(start)
       .setMaxResults(count)
       .seq
@@ -158,7 +190,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 
   def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]] = {
     val scrollable = unprocessedNotificationCriteria
-      .addOrder(Order.asc("created"))
+      .addOrder(asc("created"))
       .scroll()
     Scrollable(scrollable, session)
   }

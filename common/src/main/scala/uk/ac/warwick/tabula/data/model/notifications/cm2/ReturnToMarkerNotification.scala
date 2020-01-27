@@ -47,6 +47,7 @@ class ReturnToMarkerNotification
   def content = FreemarkerModel(ReturnToMarkerNotification.templateLocation,
     Map(
       "assignment" -> assignment,
+      "feedbackDeadlineDate" -> assignment.feedbackDeadline.map(dateOnlyFormatter.print),
       "numReleasedFeedbacks" -> items.size,
       "workflowVerb" -> workflowVerb,
       "comment" -> comment.value
