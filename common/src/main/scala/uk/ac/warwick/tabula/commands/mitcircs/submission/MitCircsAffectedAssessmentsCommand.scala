@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.DateWithinYears
 
 import scala.jdk.CollectionConverters._
 
@@ -76,7 +77,10 @@ object MitCircsAffectedAssessmentsCommand {
 }
 
 trait MitCircsAffectedAssessmentsRequest {
+  @DateWithinYears(maxPast = 3, maxFuture = 1)
   var startDate: LocalDate = _
+
+  @DateWithinYears(maxPast = 3, maxFuture = 1)
   var endDate: LocalDate = _ // May be null
 
   def academicYears: Seq[AcademicYear] = {
