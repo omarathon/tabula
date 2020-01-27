@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
-import uk.ac.warwick.tabula.data.model.HeronWarningNotification.batchTemplateLocation
 import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
@@ -12,11 +11,13 @@ object HeronWarningNotification {
 }
 
 object HeronWarningBatchedNotificationHandler extends BatchedNotificationHandler[HeronWarningNotification] {
+  import HeronWarningNotification._
+
   override def titleForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
     s"Oh no, ${notifications.size} herons are coming to kill you in your sleep."
 
   override def contentForBatchInternal(notifications: Seq[HeronWarningNotification]): FreemarkerModel =
-    FreemarkerModel(batchTemplateLocation, Map("herons" -> notifications.map(_.item), "rant" -> HeronWarningNotification.heronRant))
+    FreemarkerModel(batchTemplateLocation, Map("herons" -> notifications.map(_.item), "rant" -> heronRant))
 
   override def urlForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
     "/beware/herons/multiple"
