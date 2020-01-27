@@ -23,7 +23,7 @@ class JobInstanceTest extends TestBase with Mockito {
   currentUserFinder.departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns Set()
 
   currentUserFinder.userNavigationGenerator = new UserNavigationGenerator {
-    override def apply(user: User, forceUpdate: Boolean): UserNavigation = UserNavigation("", "")
+    override def apply(usercode: String, forceUpdate: Boolean): UserNavigation = UserNavigation("", "")
   }
 
   @Test def onLoad(): Unit = {

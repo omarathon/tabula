@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyCompone
 import uk.ac.warwick.tabula.services.{AssessmentService, CourseAndRouteService, ModuleAndDepartmentService, ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, Features}
-import uk.ac.warwick.userlookup.{User, UserLookupInterface}
+import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 
 import scala.jdk.CollectionConverters._
@@ -121,4 +121,12 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     }
   }
 
+}
+
+trait UserNavigationGeneratorComponent {
+  def userNavigationGenerator: UserNavigationGenerator
+}
+
+trait DefaultUserNavigationGeneratorComponent extends UserNavigationGeneratorComponent{
+  def userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
 }

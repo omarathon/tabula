@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesViewerRoleDefinition, 
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.DefaultUserNavigationGeneratorComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -43,7 +44,8 @@ object MitCircsShareSubmissionCommand {
       with MitCircsShareSubmissionAddNotifications
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
-      with AutowiringUserLookupComponent {
+      with AutowiringUserLookupComponent
+      with DefaultUserNavigationGeneratorComponent {
       override val allowUnassignableRoles: Boolean = true
       override val roleDefinition: RoleDefinition = MitCircsShareSubmissionCommand.this.roleDefinition
       override val currentUser: User = creator
@@ -61,7 +63,8 @@ object MitCircsShareSubmissionCommand {
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
-      with AutowiringMitCircsSubmissionServiceComponent {
+      with AutowiringMitCircsSubmissionServiceComponent
+      with DefaultUserNavigationGeneratorComponent {
       override val allowUnassignableRoles: Boolean = true
       override val roleDefinition: RoleDefinition = MitCircsShareSubmissionCommand.this.roleDefinition
       override val currentUser: User = creator

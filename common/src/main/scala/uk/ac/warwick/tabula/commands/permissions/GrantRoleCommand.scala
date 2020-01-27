@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.system.UserNavigationGeneratorImpl
+import uk.ac.warwick.tabula.system.{DefaultUserNavigationGeneratorComponent, UserNavigation, UserNavigationGenerator, UserNavigationGeneratorComponent, UserNavigationGeneratorImpl}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
@@ -32,6 +32,7 @@ object GrantRoleCommand {
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
+      with DefaultUserNavigationGeneratorComponent
 
   def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Command[A] =
     new GrantRoleCommandInternal(scope)
@@ -42,7 +43,8 @@ object GrantRoleCommand {
       with GrantRoleCommandDescription[A]
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
-      with AutowiringUserLookupComponent {
+      with AutowiringUserLookupComponent
+      with DefaultUserNavigationGeneratorComponent {
       override val roleDefinition: RoleDefinition = defin
     }
 }
@@ -50,7 +52,8 @@ object GrantRoleCommand {
 abstract class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with RoleCommandState[A] {
   self: RoleCommandRequest
     with PermissionsServiceComponent
-    with UserLookupComponent =>
+    with UserLookupComponent
+    with UserNavigationGeneratorComponent =>
 
   lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -65,7 +68,7 @@ abstract class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val s
     usercodes.asScala.foreach { usercode =>
       permissionsService.clearCachesForUser((usercode, classTag[A]))
       // clear the users navigation cache as well
-      UserNavigationGeneratorImpl(usercode, forceUpdate = true)
+      userNavigationGenerator(usercode, forceUpdate = true)
     }
 
     role

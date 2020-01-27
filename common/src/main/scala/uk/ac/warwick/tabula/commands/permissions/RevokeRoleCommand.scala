@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesOfficerRoleDefinition,
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.system.UserNavigationGeneratorImpl
+import uk.ac.warwick.tabula.system.{DefaultUserNavigationGeneratorComponent, UserNavigationGeneratorComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
@@ -30,7 +30,8 @@ object RevokeRoleCommand {
       with AutowiringPermissionsServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
-      with AutowiringMitCircsSubmissionServiceComponent {
+      with AutowiringMitCircsSubmissionServiceComponent
+      with DefaultUserNavigationGeneratorComponent {
     self: RoleCommandState[A] with RoleCommandRequest =>
   }
 
@@ -52,7 +53,8 @@ object RevokeRoleCommand {
 abstract class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[Option[GrantedRole[A]]] with RoleCommandState[A] {
   self: RoleCommandRequest
     with PermissionsServiceComponent
-    with UserLookupComponent =>
+    with UserLookupComponent
+    with UserNavigationGeneratorComponent =>
 
   lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -72,7 +74,7 @@ abstract class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val 
       usercodes.asScala.foreach(usercode => {
         permissionsService.clearCachesForUser((usercode, classTag[A]))
         // clear the users navigation cache as well
-        UserNavigationGeneratorImpl(usercode, forceUpdate = true)
+        userNavigationGenerator(usercode, forceUpdate = true)
       })
       result
     }

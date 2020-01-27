@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.{UserNavigation, UserNavigationGenerator, UserNavigationGeneratorComponent}
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 
 import scala.reflect._
@@ -36,7 +37,9 @@ class GrantRoleCommandTest extends TestBase with Mockito {
   trait Fixture {
     val department: Department = Fixtures.department("in", "IT Services")
 
-    val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
+    val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation with UserNavigationGeneratorComponent {
+      override val userNavigationGenerator: UserNavigationGenerator = (_: String, _: Boolean) => UserNavigation("", "")
+    }
   }
 
   @Test def itWorksForNewRole(): Unit = {
