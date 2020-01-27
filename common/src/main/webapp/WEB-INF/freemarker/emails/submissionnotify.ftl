@@ -4,12 +4,15 @@ A submission for the assignment '${assignment.name}' for ${module.code?upper_cas
 - Submission ID: ${submission.id}
 
 <#if submission.allAttachments??>
-
 Uploaded attachments:
 
 <#list submission.allAttachments as attachment>
 - ${attachment.name}
 </#list>
+</#if>
+
+<#if feedbackDeadlineDate??>
+Student feedback is due for this submission on ${feedbackDeadlineDate}.
 </#if>
 
 <#-- Only show these links if it's an email. -->
