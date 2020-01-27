@@ -234,26 +234,33 @@
                     </#if>
                   </#if>
 
-                  <li <#if set.fullyReleased>
-                    class="disabled use-tooltip" title="Already published"
+                  <#if set.fullyReleased>
+                    <li class="disabled use-tooltip" title="Already published">
+                        <@fmt.permission_button
+                        permission='SmallGroups.Update'
+                        scope=set
+                        action_descr='publish groups to students and staff'
+                        href='#'
+                        classes='notify-group-link fully-released'
+                        >
+                          Publish
+                        </@fmt.permission_button>
+                    </li>
+                  <#else>
+                    <#local notifyset_url><@routes.groups.releaseset set /></#local>
+                    <li>
+                        <@fmt.permission_button
+                        permission='SmallGroups.Update'
+                        scope=set
+                        action_descr='publish groups to students and staff'
+                        href=notifyset_url
+                        classes='notify-group-link'
+                        data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+                        >
+                          Publish
+                        </@fmt.permission_button>
+                    </li>
                   </#if>
-                  >
-                    <#if set.fullyReleased>
-                        <#local notifyset_url>#</#local>
-                    <#else>
-                        <#local notifyset_url><@routes.groups.releaseset set /></#local>
-                    </#if>
-                    <@fmt.permission_button
-                    permission='SmallGroups.Update'
-                    scope=set
-                    action_descr='publish groups to students and staff'
-                    href=notifyset_url
-                    classes='notify-group-link'
-                    data_attr='data-toggle=modal data-target=#modal-container data-container=body'
-                    >
-                      Publish
-                    </@fmt.permission_button>
-                  </li>
 
                   <li class="divider"></li>
 
@@ -917,26 +924,33 @@
                       Allocate students
                     </@fmt.permission_button>
                   </li>
-                  <li <#if groupSet.fullyReleased>
-                    class="disabled use-tooltip" title="Already published"
+                  <#if groupSet.fullyReleased>
+                    <li class="disabled use-tooltip" title="Already published">
+                        <@fmt.permission_button
+                        permission='SmallGroups.Update'
+                        scope=groupSet
+                        action_descr='publish groups to students and staff'
+                        href='#'
+                        classes='notify-group-link fully-released'
+                        >
+                          Publish
+                        </@fmt.permission_button>
+                    </li>
+                  <#else>
+                    <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
+                    <li class="disabled use-tooltip" title="Already published">
+                        <@fmt.permission_button
+                        permission='SmallGroups.Update'
+                        scope=groupSet
+                        action_descr='publish groups to students and staff'
+                        href=notifyset_url
+                        classes='notify-group-link'
+                        data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+                        >
+                          Publish
+                        </@fmt.permission_button>
+                    </li>
                   </#if>
-                  >
-                    <#if groupSet.fullyReleased>
-                        <#local notifyset_url>#</#local>
-                    <#else>
-                        <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
-                    </#if>
-                    <@fmt.permission_button
-                    permission='SmallGroups.Update'
-                    scope=groupSet
-                    action_descr='publish groups to students and staff'
-                    href=notifyset_url
-                    classes='notify-group-link'
-                    data_attr='data-toggle=modal data-target=#modal-container data-container=body'
-                    >
-                      Publish
-                    </@fmt.permission_button>
-                  </li>
 
                   <#if groupSet.collectAttendance>
                     <#local set_attendance_url><@routes.groups.setAttendance groupSet /></#local>
