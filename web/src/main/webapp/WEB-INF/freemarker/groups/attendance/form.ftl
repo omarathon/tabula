@@ -347,7 +347,12 @@
                     </button>
                   </div>
                   <#if features.attendanceMonitoringNote>
-                    <a style="visibility: hidden" class="btn btn-default"><i class="fa fa-pencil-square-o"></i></a>
+                    <a class="btn btn-default use-tooltip attendance-note bulk-attendance-note"
+                       title="Add an attendance note for all students"
+                       aria-label="Add an attendance note for all students"
+                       href="<@routes.groups.bulkEditNote command.occurrence />">
+                      <i class="fa fa-pencil-square-o"></i>
+                    </a>
                   </#if>
                 </div>
               </th>

@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
 import javax.validation.Valid
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.groups.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.commands.groups.{AttendanceNoteAttachmentCommand, BulkAttendanceNoteCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, Member}
@@ -133,5 +132,51 @@ class EditGroupsAttendanceNoteController extends GroupsController {
       Redirect(Routes.tutor.mygroups)
     }
   }
+
+}
+
+@Controller
+@RequestMapping(Array("/groups/note/bulk/{occurrence}/edit"))
+class EditGroupsBulkAttendanceNoteController extends GroupsController {
+
+  validatesSelf[SelfValidating]
+
+  @ModelAttribute("command")
+  def command(@PathVariable occurrence: SmallGroupEventOccurrence): BulkAttendanceNoteCommand.Command =
+    BulkAttendanceNoteCommand(occurrence, user)
+
+  @ModelAttribute("allAbsenceTypes")
+  def allAbsenceTypes: Seq[AbsenceType] = AbsenceType.values
+
+  @ModelAttribute("isModal")
+  def isModal: Boolean = ajax
+
+  private def form(
+    cmd: BulkAttendanceNoteCommand.Command
+  ): Mav = {
+    val mav = Mav("groups/attendance/bulk_note")
+    if (ajax)
+      mav.noLayout()
+    else
+      mav.noNavigation()
+  }
+
+  @RequestMapping
+  def getIframe(@ModelAttribute("command") cmd: BulkAttendanceNoteCommand.Command): Mav = {
+    cmd.populate()
+    form(cmd)
+  }
+
+  @PostMapping(params = Array("isSave"))
+  def submitIframe(
+    @Valid @ModelAttribute("command") cmd: BulkAttendanceNoteCommand.Command,
+    errors: Errors
+  ): Mav =
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      cmd.apply()
+      Mav("groups/attendance/bulk_note", "success" -> true)
+    }
 
 }
