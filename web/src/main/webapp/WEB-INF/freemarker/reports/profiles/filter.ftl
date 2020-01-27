@@ -5,7 +5,7 @@
   <#assign submitUrl><@routes.reports.profileExport department academicYear /></#assign>
   <#assign filterCommand = command />
   <#assign filterCommandName = "command" />
-  <#assign filterResultsPath = "/WEB-INF/freemarker/reports/profiles/_filter.ftl" />
+  <#assign filterResultsPath = "/WEB-INF/freemarker/reports/profiles/_filter.ftlh" />
   <#assign filterFormAddOn = "/WEB-INF/freemarker/reports/profiles/_filter-form-addon.ftl" />
 
   <#include "/WEB-INF/freemarker/filter_bar.ftl" />
