@@ -5,22 +5,8 @@
   <#assign submitUrl><@routes.reports.profileExport department academicYear /></#assign>
   <#assign filterCommand = command />
   <#assign filterCommandName = "command" />
-  <#assign filterResultsPath = "/WEB-INF/freemarker/reports/profiles/_filter.ftl" />
+  <#assign filterResultsPath = "/WEB-INF/freemarker/reports/profiles/_filter.ftlh" />
   <#assign filterFormAddOn = "/WEB-INF/freemarker/reports/profiles/_filter-form-addon.ftl" />
 
   <#include "/WEB-INF/freemarker/filter_bar.ftl" />
-
-  <script nonce="${nonce()}">
-    jQuery(function ($) {
-      var updateButton = function () {
-        if ($('input[name="students"]:checked').length > 0) {
-          $('input.generate').attr('disabled', false);
-        } else {
-          $('input.generate').attr('disabled', true);
-        }
-      };
-      $(document).on('click', 'input[name="students"]', updateButton);
-      updateButton();
-    });
-  </script>
 </#escape>

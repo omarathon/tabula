@@ -20,24 +20,6 @@
           <@f.hidden path="sortOrder" />
         </#if>
 
-      <#-- cross-app singleton introductory text -->
-        <#if showIntro("tier4-filtering", "anywhere")>
-          <#assign introText>
-            <p>You can now filter to view only those students who may have Tier 4 monitoring/reporting requirements by checking 'Tier 4 only' under the 'Other'
-              tab.</p>
-          </#assign>
-          <a href="#"
-             id="tier4-intro"
-             class="use-introductory<#if showIntro("tier4-filtering", "anywhere")> auto</#if>"
-             data-hash="${introHash("tier4-filtering", "anywhere")}"
-             data-title="Tier 4 Filtering"
-             data-placement="bottom"
-             data-html="true"
-             aria-label="Help"
-             data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
-        </#if>
-
-
         <div class="student-filter btn-group-group well well-small well-sm">
           <button aria-label="Clear all filters" type="button" class="clear-all-filters btn btn-link">
 						<span class="icon-stack fa-stack">
@@ -189,6 +171,23 @@
               >
               ${criterion}
             </@filter>
+
+            <#-- cross-app singleton introductory text -->
+            <#if showIntro("tier4-filtering", "anywhere")>
+                <#assign introText>
+                  <p>You can now filter to view only those students who may have Tier 4 monitoring/reporting requirements by checking 'Tier 4 only' under the 'Other'
+                    tab.</p>
+                </#assign>
+              <a href="#"
+                 id="tier4-intro"
+                 class="use-introductory<#if showIntro("tier4-filtering", "anywhere")> auto</#if>"
+                 data-hash="${introHash("tier4-filtering", "anywhere")}"
+                 data-title="Tier 4 Filtering"
+                 data-placement="bottom"
+                 data-html="true"
+                 aria-label="Help"
+                 data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
+            </#if>
           </#if>
 
         </div>
