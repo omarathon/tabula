@@ -10,28 +10,8 @@ object HeronWarningNotification {
   val heronRant = "They are after your delicious eye jelly. Throw rocks at them!"
 }
 
-@Entity
-@Proxy
-@DiscriminatorValue(value = "HeronWarning")
-class HeronWarningNotification extends Notification[MeetingRecord, Unit]
-  with SingleItemNotification[MeetingRecord]
-  with SingleRecipientNotification
-  with MyWarwickActivity
-  with BatchedNotification[HeronWarningNotification] {
-
+object HeronWarningBatchedNotificationHandler extends BatchedNotificationHandler[HeronWarningNotification] {
   import HeronWarningNotification._
-
-  @transient val verb: String = "Heron"
-
-  def title: String = "You all need to know. Herons would love to kill you in your sleep"
-
-  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
-
-  def url: String = "/beware/herons"
-
-  def urlTitle = "see how evil herons really are"
-
-  def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
   override def titleForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
     s"Oh no, ${notifications.size} herons are coming to kill you in your sleep."
@@ -48,6 +28,30 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 
 @Entity
 @Proxy
+@DiscriminatorValue(value = "HeronWarning")
+class HeronWarningNotification
+  extends BatchedNotification[MeetingRecord, Unit, HeronWarningNotification](HeronWarningBatchedNotificationHandler)
+    with SingleItemNotification[MeetingRecord]
+    with SingleRecipientNotification
+    with MyWarwickActivity {
+
+  import HeronWarningNotification._
+
+  @transient val verb: String = "Heron"
+
+  def title: String = "You all need to know. Herons would love to kill you in your sleep"
+
+  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+
+  def url: String = "/beware/herons"
+
+  def urlTitle = "see how evil herons really are"
+
+  def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
+}
+
+@Entity
+@Proxy
 @DiscriminatorValue(value = "HeronDefeat")
 class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
   with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
@@ -59,7 +63,7 @@ class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
 
   def title: String = "A heron has been defeated. Rejoice"
 
-  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 
   def url: String = "/beware/herons"
 

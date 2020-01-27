@@ -471,26 +471,44 @@ trait MyWarwickActivity extends MyWarwickDiscriminator {
   self: Notification[_, _] =>
 }
 
-trait BatchedNotification[A <: BatchedNotification[A]] {
-  self: Notification[_, _] =>
+trait BatchedNotificationHandler[A <: Notification[_, _]] {
+  final def groupBatch(notifications: Seq[_ <: BaseBatchedNotification[_, _, _]]): Seq[Seq[A]] =
+    groupBatchInternal(notifications.collect { case n: A @unchecked => n })
 
-  final def titleForBatch(notifications: Seq[_ <: BatchedNotification[_]], user: User): String =
+  // By default, group all notifications into a single batch
+  def groupBatchInternal(notifications: Seq[A]): Seq[Seq[A]] = Seq(notifications)
+
+  final def titleForBatch(notifications: Seq[_ <: BaseBatchedNotification[_, _, _]], user: User): String =
     titleForBatchInternal(notifications.collect { case n: A @unchecked => n }, user)
 
   def titleForBatchInternal(notifications: Seq[A], user: User): String
 
-  final def contentForBatch(notifications: Seq[_ <: BatchedNotification[_]]): FreemarkerModel =
+  final def contentForBatch(notifications: Seq[_ <: BaseBatchedNotification[_, _, _]]): FreemarkerModel =
     contentForBatchInternal(notifications.collect { case n: A @unchecked => n })
 
   def contentForBatchInternal(notifications: Seq[A]): FreemarkerModel
 
-  final def urlForBatch(notifications: Seq[_ <: BatchedNotification[_]], user: User): String =
+  final def urlForBatch(notifications: Seq[_ <: BaseBatchedNotification[_, _, _]], user: User): String =
     urlForBatchInternal(notifications.collect { case n: A @unchecked => n }, user)
 
   def urlForBatchInternal(notifications: Seq[A], user: User): String
 
-  final def urlTitleForBatch(notifications: Seq[_ <: BatchedNotification[_]]): String =
+  final def urlTitleForBatch(notifications: Seq[_ <: BaseBatchedNotification[_, _, _]]): String =
     urlTitleForBatchInternal(notifications.collect { case n: A @unchecked => n })
 
   def urlTitleForBatchInternal(notifications: Seq[A]): String
 }
+
+trait BaseBatchedNotification[A >: Null <: ToEntityReference, B, C <: Notification[_, _]] {
+  self: Notification[A, B] =>
+
+  def batchedNotificationHandler: BatchedNotificationHandler[C]
+}
+
+abstract class BatchedNotification[A >: Null <: ToEntityReference, B, C <: Notification[_, _]](@transient val batchedNotificationHandler: BatchedNotificationHandler[C])
+  extends Notification[A, B]
+    with BaseBatchedNotification[A, B, C] { self: MyWarwickDiscriminator => }
+
+abstract class BatchedNotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference, C <: NotificationWithTarget[_, _]](@transient val batchedNotificationHandler: BatchedNotificationHandler[C])
+  extends NotificationWithTarget[A, B]
+    with BaseBatchedNotification[A, B, C] { self: MyWarwickDiscriminator => }

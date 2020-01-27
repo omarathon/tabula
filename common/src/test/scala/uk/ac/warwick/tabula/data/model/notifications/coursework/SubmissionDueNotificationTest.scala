@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, Submission}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ExtensionService, IncludeType, MembershipItem, UserLookupService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
@@ -243,25 +243,25 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
 
   @Test def batchedTitleDue(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsDueFixture {
-      notification1.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are due tomorrow (+ 1 other)")
+      SubmissionReminderBatchedNotificationHandler.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are due tomorrow (+ 1 other)")
     }
   }
 
   @Test def batchedTitleLate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsLateFixture {
-      notification1.titleForBatch(batch, new AnonymousUser) should be("CS123: Your submission for '5,000 word essay' is 3 days late (+ 2 others)")
+      SubmissionReminderBatchedNotificationHandler.titleForBatch(batch, new AnonymousUser) should be("CS123: Your submission for '5,000 word essay' is 3 days late (+ 2 others)")
     }
   }
 
   @Test def batchedTitleMixed(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsMixedFixture {
-      notification1.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are 1 day late (+ 1 other)")
+      SubmissionReminderBatchedNotificationHandler.titleForBatch(batch, new AnonymousUser) should be("Your submissions for 2 assignments are 1 day late (+ 1 other)")
     }
   }
 
   @Test def batchedContentDue(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsDueFixture {
-      val content = notification1.contentForBatch(batch)
+      val content = SubmissionReminderBatchedNotificationHandler.contentForBatch(batch)
 
       renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
         """
@@ -280,7 +280,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
 
   @Test def batchedContentLate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsLateFixture {
-      val content = notification1.contentForBatch(batch)
+      val content = SubmissionReminderBatchedNotificationHandler.contentForBatch(batch)
 
       renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
         """
@@ -299,7 +299,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
 
   @Test def batchedContentMixed(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
     new BatchedNotificationsMixedFixture {
-      val content = notification1.contentForBatch(batch)
+      val content = SubmissionReminderBatchedNotificationHandler.contentForBatch(batch)
 
       renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
         """

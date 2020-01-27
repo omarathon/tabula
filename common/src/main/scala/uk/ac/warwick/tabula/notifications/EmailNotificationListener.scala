@@ -99,6 +99,16 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
       val notification = recipientInfo.notification
       val recipient = recipientInfo.recipient
 
+      generateMessage(recipient, notification)
+    } catch {
+      // referenced entity probably missing, oh well.
+      case t: ObjectNotFoundException =>
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $recipientInfo", t)
+        None
+    }
+
+  private def generateMessage(recipient: User, notification: Notification[_, _]): Option[MimeMessage] =
+    try {
       Some(
         generateMessage(
           recipient = recipient,
@@ -118,11 +128,11 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
     } catch {
       // referenced entity probably missing, oh well.
       case t: ObjectNotFoundException =>
-        logger.warn(s"Couldn't send email for Notification because object no longer exists: $recipientInfo", t)
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $notification", t)
         None
     }
 
-  private def generateMessageForBatch(batch: Seq[RecipientNotificationInfo]): Option[MimeMessage] =
+  private def generateMessagesForBatch(batch: Seq[RecipientNotificationInfo]): Seq[MimeMessage] =
     try {
       require(batch.size > 1, "The batch must include 2 or more notifications")
 
@@ -132,18 +142,37 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
         recipientInfo.recipient == recipient && recipientInfo.notification.notificationType == batch.head.notification.notificationType
       }, "All notifications in the batch must have the same recipient and be of the same type")
 
-      require(batch.map(_.notification).forall(_.isInstanceOf[BatchedNotification[_]]), "Notification must have the BatchedNotification trait")
+      require(batch.map(_.notification).forall(_.isInstanceOf[BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]]), "Notification must have the BatchedNotification trait")
 
-      val notifications = batch.map(_.notification.asInstanceOf[Notification[_, _] with BatchedNotification[_]])
-      val referenceNotification = notifications.head
+      def cast(notification: Notification[_, _]): Notification[_, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _] =
+        notification.asInstanceOf[Notification[_, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]]
+
+      val notifications = batch.map(rni => cast(rni.notification))
+      val handler = notifications.head.batchedNotificationHandler.asInstanceOf[BatchedNotificationHandler[_ <: Notification[_, _]]]
+
+      handler.groupBatch(notifications).flatMap {
+        case Nil => None
+        case Seq(notification) => generateMessage(recipient, notification)
+        case group => generateMessageForBatch(recipient, group.map(cast), handler)
+      }
+    } catch {
+      // referenced entity probably missing, oh well.
+      case t: ObjectNotFoundException =>
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $batch", t)
+        Nil
+    }
+
+  private def generateMessageForBatch(recipient: User, notifications: Seq[Notification[_, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]], handler: BatchedNotificationHandler[_]): Option[MimeMessage] =
+    try {
+      require(notifications.size > 1, "The batch must include 2 or more notifications")
 
       Some(
         generateMessage(
           recipient = recipient,
-          notificationTitle = referenceNotification.titleForBatch(notifications, recipient),
-          notificationBody = referenceNotification.contentForBatch(notifications),
-          notificationUrl = referenceNotification.urlForBatch(notifications, recipient),
-          notificationUrlTitle = referenceNotification.urlTitleForBatch(notifications),
+          notificationTitle = handler.titleForBatch(notifications, recipient),
+          notificationBody = handler.contentForBatch(notifications),
+          notificationUrl = handler.urlForBatch(notifications, recipient),
+          notificationUrlTitle = handler.urlTitleForBatch(notifications),
           notificationPriority = notifications.map(_.priority).max,
           actionRequired = notifications.exists(_.isInstanceOf[ActionRequiredNotification])
         ) { message =>
@@ -156,7 +185,7 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
     } catch {
       // referenced entity probably missing, oh well.
       case t: ObjectNotFoundException =>
-        logger.warn(s"Couldn't send email for Notification because object no longer exists: $batch", t)
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $notifications", t)
         None
     }
 
@@ -199,25 +228,27 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
 
       invalidRecipients.foreach(cancelSendingEmail)
 
-      val generatedMessage: Option[MimeMessage] =
-        if (validRecipients.isEmpty) None
-        else if (validRecipients.size == 1) generateMessage(validRecipients.head)
-        else generateMessageForBatch(validRecipients)
+      val generatedMessage: Seq[MimeMessage] =
+        if (validRecipients.isEmpty) Nil
+        else if (validRecipients.size == 1) generateMessage(validRecipients.head).toSeq
+        else generateMessagesForBatch(validRecipients)
 
       generatedMessage match {
-        case Some(message) =>
-          val future = mailSender.send(message)
+        case Nil =>
+          validRecipients.foreach(cancelSendingEmail)
+        case messages =>
+          val futures = messages.map(mailSender.send)
           try {
-            val successful = future.get(30, TimeUnit.SECONDS)
+            val successful = futures.forall(_.get(30, TimeUnit.SECONDS))
             if (successful) {
               validRecipients.foreach(_.emailSent = true)
             }
           } catch {
             case e: TimeoutException =>
-              logger.info(s"Timeout waiting for message $message to be sent; cancelling to try again later", e)
-              future.cancel(true)
+              logger.info(s"Timeout waiting for message $messages to be sent; cancelling to try again later", e)
+              futures.foreach(_.cancel(true))
             case e@(_: ExecutionException | _: InterruptedException) =>
-              logger.warn(s"Could not send email $message, will try later", e)
+              logger.warn(s"Could not send email $messages, will try later", e)
           } finally {
             /* TAB-4544 log the time at which we tried to send this notification and save
              *
@@ -231,8 +262,6 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
               service.save(recipientInfo)
             }
           }
-        case None =>
-          validRecipients.foreach(cancelSendingEmail)
       }
     }
   }
