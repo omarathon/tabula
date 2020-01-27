@@ -93,6 +93,8 @@ abstract class ModerationStage(name: String, order: Int) extends MarkingWorkflow
 
   override def summarisePreviousFeedback: Boolean = true
 
+  override def summariseCurrentFeedback: Boolean = true
+
   override def allowsBulkAdjustments: Boolean = true
 
   override def actionCompletedKey(feedback: Option[Feedback]): String = feedback match {

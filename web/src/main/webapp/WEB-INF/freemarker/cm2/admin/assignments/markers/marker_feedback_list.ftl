@@ -84,14 +84,14 @@
               <th class="student-col sortable">First name</th>
               <th class="student-col sortable">Last name</th>
             </#if>
-            <#if order.headerStage.summariseCurrentFeedback>
-              <th class="sortable">Mark</th>
-            </#if>
             <#if order.headerStage.summarisePreviousFeedback>
               <#list order.headerStage.previousStages as prevStage>
                 <th class="sortable">${prevStage.allocationName}</th>
                 <th class="sortable">${prevStage.allocationName} Mark</th>
               </#list>
+            </#if>
+            <#if order.headerStage.summariseCurrentFeedback>
+              <th class="sortable">Mark</th>
             </#if>
             <th colspan="2">Progress</th>
           </tr>
@@ -131,10 +131,6 @@
                 <td class="student-col">${student.lastName}
                   &nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
               </#if>
-              <#if mf.stage.summariseCurrentFeedback>
-                <td><#if mf.mark??>${mf.mark}</#if></td>
-                <#assign colspan = colspan + 1>
-              </#if>
               <#if mf.stage.summarisePreviousFeedback>
                 <#if emf.previousMarkerFeedback?has_content>
                   <#list emf.previousMarkerFeedback as prevMf>
@@ -146,6 +142,10 @@
                 <#elseif order.numPreviousMarkers gt 0>
                   <td colspan="${order.numPreviousMarkers * 2}"></td>
                 </#if>
+              </#if>
+              <#if mf.stage.summariseCurrentFeedback>
+                <td><#if mf.mark??>${mf.mark}</#if></td>
+                <#assign colspan = colspan + 1>
               </#if>
               <td class="progress-col">
                 <@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />
