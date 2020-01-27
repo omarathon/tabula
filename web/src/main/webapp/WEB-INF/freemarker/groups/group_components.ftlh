@@ -241,7 +241,7 @@
                         scope=set
                         action_descr='publish groups to students and staff'
                         href='#'
-                        classes='notify-group-link fully-released'
+                        classes='notify-group-link'
                         >
                           Publish
                         </@fmt.permission_button>
@@ -931,14 +931,14 @@
                         scope=groupSet
                         action_descr='publish groups to students and staff'
                         href='#'
-                        classes='notify-group-link fully-released'
+                        classes='notify-group-link'
                         >
                           Publish
                         </@fmt.permission_button>
                     </li>
                   <#else>
                     <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
-                    <li class="disabled use-tooltip" title="Already published">
+                    <li>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
                         scope=groupSet

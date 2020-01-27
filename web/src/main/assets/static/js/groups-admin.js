@@ -82,7 +82,7 @@
         });
       }
     });
-    $('body').on('click', 'a.nosignup a.fully-released', (e) => {
+    $('body').on('click', 'li.disabled', (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
     });
