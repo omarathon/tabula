@@ -8,8 +8,12 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.home.UserSettingsCommand
 import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
+import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -20,7 +24,9 @@ import scala.concurrent.duration._
 @Controller
 class UserSettingsController extends BaseController
   with AutowiringUserSettingsServiceComponent
-  with AutowiringModuleAndDepartmentServiceComponent {
+  with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringSmallGroupServiceComponent
+  with AutowiringPermissionsServiceComponent {
 
   type UserSettingsCommand = UserSettingsCommand.Command
 
@@ -51,22 +57,55 @@ class UserSettingsController extends BaseController
     val deptsUserIsAdminOn = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
     val mustNotBeCurrentUser: User => Boolean = u => u.getUserId != user.userId
 
-    val deptsWithNoOtherContacts = deptsUserIsAdminOn.map(d => {
-      (d.name, d.owners.users.filter(mustNotBeCurrentUser))
-    }).map { case (departmentName, otherAdmins) =>
-      (
-        departmentName,
+    val deptsWithNoOtherContacts = deptsUserIsAdminOn.map { department =>
+      val otherAdmins = department.owners.users.filter(mustNotBeCurrentUser)
+
+      val hasAtLeastOneOtherContact =
         otherAdmins.map(u => userSettingsService
           .getByUserId(u.getUserId)
           .map(_.deptAdminReceiveStudentComments))
           .map(_.getOrElse(true)).exists(identity[Boolean])
-      )
+
+      department.name -> hasAtLeastOneOtherContact
     }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
+
+    lazy val allDepartments = moduleAndDepartmentService.allDepartments
+    lazy val grantedRoles = permissionsService.getAllGrantedRolesFor(user)
+
+    val canReceiveSmallGroupAttendanceReminders: Boolean = (
+      // Is a named user on a department's notification settings
+      allDepartments.exists(d => new SmallGroupEventAttendanceReminderNotificationSettings(d.notificationSettings("SmallGroupEventAttendanceReminder")).namedUsers.value.contains(user.apparentUser)) ||
+
+      // Is a tutor on a small group event
+      smallGroupService.findSmallGroupEventsByTutor(user.apparentUser).nonEmpty ||
+
+      // Is a module assistant
+      grantedRoles.exists(_.roleDefinition == ModuleAssistantRoleDefinition) ||
+
+      // Is a module manager
+      grantedRoles.exists(_.roleDefinition == ModuleManagerRoleDefinition) ||
+
+      // Is a departmental administrator
+      grantedRoles.exists(_.roleDefinition == DepartmentalAdministratorRoleDefinition)
+    )
+
+    val canReceiveFinaliseFeedbackNotifications: Boolean = (
+      // Is a named user on a department's notification settings
+      allDepartments.exists(d => new FinaliseFeedbackNotificationSettings(d.notificationSettings("FinaliseFeedback")).namedUsers.value.contains(user.apparentUser)) ||
+
+      // Is a module manager
+      grantedRoles.exists(_.roleDefinition == ModuleManagerRoleDefinition) ||
+
+      // Is a departmental administrator
+      grantedRoles.exists(_.roleDefinition == DepartmentalAdministratorRoleDefinition)
+    )
 
     Mav("usersettings/form",
       "isCourseworkModuleManager" -> moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
       "isDepartmentalAdmin" -> deptsUserIsAdminOn.nonEmpty,
       "deptsWithNoOtherContacts" -> deptsWithNoOtherContacts,
+      "canReceiveSmallGroupAttendanceReminders" -> canReceiveSmallGroupAttendanceReminders,
+      "canReceiveFinaliseFeedbackNotifications" -> canReceiveFinaliseFeedbackNotifications,
       "success" -> success
     )
   }
