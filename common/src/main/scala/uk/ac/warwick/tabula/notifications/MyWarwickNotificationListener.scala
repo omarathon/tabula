@@ -86,6 +86,14 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
       val notification = recipientInfo.notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]]
       val recipient = recipientInfo.recipient
 
+      generateActivity(recipient, notification)
+    } catch {
+      // referenced entity probably missing, oh well.
+      case _: ObjectNotFoundException => None
+    }
+
+  private def generateActivity(recipient: User, notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] =
+    try {
       Some(
         generateActivity(
           recipient = recipient,
@@ -101,7 +109,7 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
       case _: ObjectNotFoundException => None
     }
 
-  private def generateActivityForBatch(batch: Seq[RecipientNotificationInfo]): Option[Activity] =
+  private def generateActivitiesForBatch(batch: Seq[RecipientNotificationInfo]): Seq[Activity] =
     try {
       require(batch.size > 1, "The batch must include 2 or more notifications")
 
@@ -111,25 +119,44 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
         recipientInfo.recipient == recipient && recipientInfo.notification.notificationType == batch.head.notification.notificationType
       }, "All notifications in the batch must have the same recipient and be of the same type")
 
-      require(batch.map(_.notification).forall(_.isInstanceOf[BatchedNotification[_]]), "Notification must have the BatchedNotification trait")
+      require(batch.map(_.notification).forall(_.isInstanceOf[BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]]), "Notification must have the BatchedNotification trait")
 
-      val notifications = batch.map(_.notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _] with BatchedNotification[_]])
-      val referenceNotification = notifications.head
+      def cast(notification: Notification[_, _]): Notification[_ >: Null <: ToEntityReference, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _] =
+        notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]]
+
+      val notifications = batch.map(rni => cast(rni.notification))
+      val handler = notifications.head.batchedNotificationHandler.asInstanceOf[BatchedNotificationHandler[_ <: Notification[_ >: Null <: ToEntityReference, _]]]
+
+      handler.groupBatch(notifications).flatMap {
+        case Nil => None
+        case Seq(notification) => generateActivity(recipient, notification)
+        case group => generateActivityForBatch(recipient, group.map(cast), handler)
+      }
+    } catch {
+      // referenced entity probably missing, oh well.
+      case t: ObjectNotFoundException =>
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $batch", t)
+        Nil
+    }
+
+  private def generateActivityForBatch(recipient: User, notifications: Seq[Notification[_ >: Null <: ToEntityReference, _] with BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]], handler: BatchedNotificationHandler[_]): Option[Activity] =
+    try {
+      require(notifications.size > 1, "The batch must include 2 or more notifications")
 
       Some(
         generateActivity(
           recipient = recipient,
-          notificationTitle = referenceNotification.titleForBatch(notifications, recipient),
-          notificationBody = referenceNotification.contentForBatch(notifications),
-          notificationUrl = referenceNotification.urlForBatch(notifications, recipient),
-          notificationType = referenceNotification.notificationType,
+          notificationTitle = handler.titleForBatch(notifications, recipient),
+          notificationBody = handler.contentForBatch(notifications),
+          notificationUrl = handler.urlForBatch(notifications, recipient),
+          notificationType = notifications.head.notificationType,
           entities = notifications.flatMap(allEntities)
         )
       )
     } catch {
       // referenced entity probably missing, oh well.
       case t: ObjectNotFoundException =>
-        logger.warn(s"Couldn't send email for Notification because object no longer exists: $batch", t)
+        logger.warn(s"Couldn't send email for Notification because object no longer exists: $notifications", t)
         None
     }
 
@@ -161,12 +188,12 @@ trait MyWarwickNotificationListener extends BatchingRecipientNotificationListene
 
       invalidRecipients.foreach(cancelSendingActivity)
 
-      val generatedActivity: Option[Activity] =
-        if (validRecipients.isEmpty) None
-        else if (validRecipients.size == 1) generateActivity(validRecipients.head)
-        else generateActivityForBatch(validRecipients)
+      val generatedActivities: Seq[Activity] =
+        if (validRecipients.isEmpty) Nil
+        else if (validRecipients.size == 1) generateActivity(validRecipients.head).toSeq
+        else generateActivitiesForBatch(validRecipients)
 
-      generatedActivity.foreach { activity =>
+      generatedActivities.foreach { activity =>
         if (validRecipients.head.notification.isInstanceOf[MyWarwickNotification]) {
           logger.info(s"Sending MyWarwick notification - ${activity.getTitle} to ${activity.getRecipients.getUsers.asScala.mkString(", ")}")
           myWarwickService.queueNotification(activity, scheduler)

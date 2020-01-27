@@ -1,9 +1,5 @@
+${submissions?size} submissions for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} have been marked as plagiarised.
 
-The following submissions have been marked as plagiarised.
-
-<#list batches as batch>
-For assignment "${batch.assignmentName}":
-
-<#list batch.submissions as item>
-* Submission by ${item.usercode}
-</#list></#list>
+<#list submissions as submission>
+- ${submission.studentIdentifier}
+</#list>

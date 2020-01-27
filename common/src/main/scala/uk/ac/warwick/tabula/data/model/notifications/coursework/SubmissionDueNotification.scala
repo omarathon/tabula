@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
-trait SubmissionReminder extends RecipientCompletedActionRequiredNotification with BatchedNotification[Notification[_, Unit] with SubmissionReminder] {
+trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
   self: Notification[_, Unit]
     with NotificationPreSaveBehaviour =>
 
@@ -77,6 +77,9 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification wi
   def verb = "Remind"
 
   def shouldSend: Boolean = assignment.collectSubmissions && !assignment.openEnded && assignment.isVisibleToStudents
+}
+
+object SubmissionReminderBatchedNotificationHandler extends BatchedNotificationHandler[Notification[_, Unit] with SubmissionReminder] {
 
   private def daysLeftTimeStatementForBatch(daysLeft: Int, batchSize: Int): String =
     if (batchSize > 1) {
@@ -148,13 +151,14 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification wi
 
   override def urlTitleForBatchInternal(notifications: Seq[Notification[_, Unit] with SubmissionReminder]): String =
     "view your assignments"
+
 }
 
 @Entity
 @Proxy
 @DiscriminatorValue("SubmissionDueGeneral")
 class SubmissionDueGeneralNotification
-  extends Notification[Assignment, Unit]
+  extends BatchedNotification[Assignment, Unit, Notification[_, Unit] with SubmissionReminder](SubmissionReminderBatchedNotificationHandler)
     with SingleItemNotification[Assignment]
     with SubmissionReminder {
 
@@ -181,8 +185,11 @@ class SubmissionDueGeneralNotification
 @Entity
 @Proxy
 @DiscriminatorValue("SubmissionDueExtension")
-class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
-  with SubmissionReminder with AutowiringUserLookupComponent {
+class SubmissionDueWithExtensionNotification
+  extends BatchedNotification[Extension, Unit, Notification[_, Unit] with SubmissionReminder](SubmissionReminderBatchedNotificationHandler)
+    with SingleItemNotification[Extension]
+    with SubmissionReminder
+    with AutowiringUserLookupComponent {
 
   def extension: Extension = item.entity
 

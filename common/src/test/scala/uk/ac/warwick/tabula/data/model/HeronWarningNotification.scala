@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
+import uk.ac.warwick.tabula.data.model.HeronWarningNotification.batchTemplateLocation
 import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
@@ -10,14 +11,28 @@ object HeronWarningNotification {
   val heronRant = "They are after your delicious eye jelly. Throw rocks at them!"
 }
 
+object HeronWarningBatchedNotificationHandler extends BatchedNotificationHandler[HeronWarningNotification] {
+  override def titleForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
+    s"Oh no, ${notifications.size} herons are coming to kill you in your sleep."
+
+  override def contentForBatchInternal(notifications: Seq[HeronWarningNotification]): FreemarkerModel =
+    FreemarkerModel(batchTemplateLocation, Map("herons" -> notifications.map(_.item), "rant" -> HeronWarningNotification.heronRant))
+
+  override def urlForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
+    "/beware/herons/multiple"
+
+  override def urlTitleForBatchInternal(notifications: Seq[HeronWarningNotification]): String =
+    "see all your incoming herons"
+}
+
 @Entity
 @Proxy
 @DiscriminatorValue(value = "HeronWarning")
-class HeronWarningNotification extends Notification[MeetingRecord, Unit]
-  with SingleItemNotification[MeetingRecord]
-  with SingleRecipientNotification
-  with MyWarwickActivity
-  with BatchedNotification[HeronWarningNotification] {
+class HeronWarningNotification
+  extends BatchedNotification[MeetingRecord, Unit, HeronWarningNotification](HeronWarningBatchedNotificationHandler)
+    with SingleItemNotification[MeetingRecord]
+    with SingleRecipientNotification
+    with MyWarwickActivity {
 
   import HeronWarningNotification._
 
@@ -25,25 +40,13 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 
   def title: String = "You all need to know. Herons would love to kill you in your sleep"
 
-  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 
   def url: String = "/beware/herons"
 
   def urlTitle = "see how evil herons really are"
 
   def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
-
-  override def titleForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
-    s"Oh no, ${notifications.size} herons are coming to kill you in your sleep."
-
-  override def contentForBatchInternal(notifications: Seq[HeronWarningNotification]): FreemarkerModel =
-    FreemarkerModel(batchTemplateLocation, Map("herons" -> notifications.map(_.item), "rant" -> heronRant))
-
-  override def urlForBatchInternal(notifications: Seq[HeronWarningNotification], user: User): String =
-    "/beware/herons/multiple"
-
-  override def urlTitleForBatchInternal(notifications: Seq[HeronWarningNotification]): String =
-    "see all your incoming herons"
 }
 
 @Entity
@@ -59,7 +62,7 @@ class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
 
   def title: String = "A heron has been defeated. Rejoice"
 
-  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 
   def url: String = "/beware/herons"
 

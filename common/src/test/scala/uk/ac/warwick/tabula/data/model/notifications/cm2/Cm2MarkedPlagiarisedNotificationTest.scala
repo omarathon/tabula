@@ -43,16 +43,13 @@ class Cm2MarkedPlagiarisedNotificationTest extends TestBase with Mockito with Fr
 
     val batch = Seq(notification1, notification2)
 
-    notification1.titleForBatch(batch, currentUser.apparentUser) should be("2 assignment submissions are suspected of plagiarism")
-    val content = notification1.contentForBatch(batch)
+    Cm2MarkedPlagiarisedBatchedNotificationHandler.titleForBatch(batch, currentUser.apparentUser) should be("CS118: 2 submissions for \"5,000 word essay\" are suspected of plagiarism")
+    val content = Cm2MarkedPlagiarisedBatchedNotificationHandler.contentForBatch(batch)
     renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
-      """
-        |The following submissions have been marked as plagiarised.
+      """2 submissions for the assignment '5,000 word essay' for CS118, Programming for Computer Scientists have been marked as plagiarised.
         |
-        |For assignment "5,000 word essay":
-        |
-        |* Submission by 1412345
-        |* Submission by 1673477
+        |- 1412345
+        |- 1673477
         |""".stripMargin
     )
 
