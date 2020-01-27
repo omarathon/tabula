@@ -131,7 +131,18 @@
             <td><@components.assessmentType assessment /></td>
             <td><@components.assessmentModule assessment /></td>
             <td>${assessment.name}</td>
-            <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
+            <td>
+              <#if assessment.deadline??>
+                <@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true />
+                <#if submission.startDate?? && assessment.deadline.isBefore(submission.startDate)>
+                  <span tabindex="0" class="tabula-tooltip" data-title="Before start date"><i class="far fa-exclamation-triangle text-warning"></i></span>
+                <#elseif submission.endDate?? && assessment.deadline.isAfter(submission.endDate)>
+                  <span tabindex="0" class="tabula-tooltip" data-title="After end date"><i class="far fa-exclamation-triangle text-warning"></i></span>
+                </#if>
+              <#else>
+                <span class="very-subtle">Unknown</span>
+              </#if>
+            </td>
           </tr>
         </#list>
         </tbody>
