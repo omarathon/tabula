@@ -234,12 +234,15 @@
                     </#if>
                   </#if>
 
-
                   <li <#if set.fullyReleased>
                     class="disabled use-tooltip" title="Already published"
                   </#if>
                   >
-                    <#local notifyset_url><@routes.groups.releaseset set /></#local>
+                    <#if set.fullyReleased>
+                        <#local notifyset_url>#</#local>
+                    <#else>
+                        <#local notifyset_url><@routes.groups.releaseset set /></#local>
+                    </#if>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
                     scope=set
@@ -271,7 +274,11 @@
                   </li>
 
                   <li tabindex="0" <#if !set.canBeDeleted> class="disabled use-tooltip" data-container="body" title="Can't delete smallgroups that have been published to <#if set.allocationMethod.dbValue != 'StudentSignUp'>students or </#if>tutors"</#if>>
-                    <#local delete_url><@routes.groups.deleteset set /></#local>
+                    <#if set.canBeDeleted>
+                       <#local delete_url><@routes.groups.deleteset set /></#local>
+                    <#else>
+                       <#local delete_url>#</#local>
+                    </#if>
                     <@fmt.permission_button
                     permission='SmallGroups.Delete'
                     scope=set
@@ -914,7 +921,11 @@
                     class="disabled use-tooltip" title="Already published"
                   </#if>
                   >
-                    <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
+                    <#if groupSet.fullyReleased>
+                        <#local notifyset_url>#</#local>
+                    <#else>
+                        <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
+                    </#if>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
                     scope=groupSet
