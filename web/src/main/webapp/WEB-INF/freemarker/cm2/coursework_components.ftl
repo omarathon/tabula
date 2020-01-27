@@ -1187,7 +1187,8 @@
             <ul class="feedback-attachments hide">
               <#list feedback.attachments as attachment>
                 <li id="attachment-${attachment.id}" class="attachment">
-                  <span>${attachment.name}</span>&nbsp;<a href="#" class="remove-attachment">Remove</a>
+                  <a href="<@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment />">${attachment.name}</a>
+                  <a href="#" class="btn btn-danger btn-xs remove-attachment">Remove</a>
                   <input type="hidden" name="attachedFiles" value="${attachment.id}" />
                 </li>
               </#list>
