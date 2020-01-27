@@ -5,11 +5,11 @@
   <@cm2.assignmentHeader "Marking" assignment />
 
   <#if assignment.feedbackDeadline??>
-    <div>
+    <p>
       <strong>Student feedback due:</strong>
       <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />"
             data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span>
-    </div>
+    </p>
   </#if>
 
   <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
