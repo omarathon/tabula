@@ -131,7 +131,7 @@ trait BulkImportModuleRegistrationsForAcademicYearRequest extends BulkImportModu
   lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForAcademicYears(yearsToImport)
 
   lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
-    moduleRegistrationService.getByYears(yearsToImport)
+    moduleRegistrationService.getByYears(yearsToImport, includeDeleted = true)
   }
 }
 
@@ -144,7 +144,7 @@ trait BulkImportModuleRegistrationsForUniversityIdsRequest extends BulkImportMod
   lazy val allRows: Seq[ModuleRegistrationRow] = moduleRegistrationImporter.getModuleRegistrationRowsForUniversityIds(universityIds)
 
   lazy val existingRegistrations: Seq[ModuleRegistration] =  benchmarkTask("Fetching existing module registrations") {
-    moduleRegistrationService.getByUniversityIds(universityIds)
+    moduleRegistrationService.getByUniversityIds(universityIds, includeDeleted = true)
   }
 }
 

@@ -36,9 +36,9 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration]
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration]
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
@@ -72,12 +72,13 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
   def getByUsercodesAndYear(userCodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
-				select distinct mr
-					from ModuleRegistration mr
-					where academicYear = :academicYear
-					and studentCourseDetails.missingFromImportSince is null
-					and studentCourseDetails.student.userId in :usercodes
-				""")
+        select distinct mr
+          from ModuleRegistration mr
+          where academicYear = :academicYear
+          and studentCourseDetails.missingFromImportSince is null
+          and studentCourseDetails.student.userId in :usercodes
+          and mr.deleted is false
+        """)
       .setParameter("academicYear", academicYear)
       .setParameterList("usercodes", userCodes)
       .seq
@@ -86,26 +87,33 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     session.newCriteria[ModuleRegistration]
       .add(is("module", module))
       .add(is("academicYear", academicYear))
+      .add(is("deleted", false))
       .addOrder(asc("_scjCode"))
       .seq
   }
 
-  def getByYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistration] = {
+  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] = {
     safeInSeq(() => {
-      session.newCriteria[ModuleRegistration]
+      val criteria = session.newCriteria[ModuleRegistration]
         .addOrder(asc("_scjCode"))
+      if (!includeDeleted) {
+        criteria.add(is("deleted", false))
+      }
+      criteria
     }, "academicYear", academicYears)
   }
 
-  def getByUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistration] =
+  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
          select distinct mr
          from ModuleRegistration mr
          where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
+          and (mr.deleted is false or :includeDeleted is true)
       """)
       .setParameterList("universityIds", universityIds)
+      .setBoolean("includeDeleted", includeDeleted)
       .seq
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {
@@ -122,6 +130,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
         .createAlias("studentCourseDetails", "studentCourseDetails")
         .createAlias("studentCourseDetails.student", "student")
         .add(is("module", module))
+        .add(is("deleted", false))
       occurrence.map(o =>
         c.add(is("occurrence", o))
       )

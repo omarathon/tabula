@@ -168,7 +168,6 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       group.students.add(test)
 
       val tutor: User = group.events.head.tutors.users.head
-      println(tutor)
       command.hasAffectedTutorsEvents(tutor) should be (true)
       // should return false for an arbitrary user (worryingly this failed pre TAB-2728)
       command.hasAffectedTutorsEvents(new User()) should be (false)

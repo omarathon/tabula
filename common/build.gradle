@@ -108,7 +108,8 @@ dependencies {
   compile "org.apache.tiles:tiles-servlet:${tilesVersion}"
   compile "org.apache.tiles:tiles-template:${tilesVersion}"
 
-  compile 'net.spy:spymemcached:2.12.3'
+  // TAB-7936 Use Amazon's elasticache cluster client instead of spymemcached
+  compile 'com.amazonaws:elasticache-java-cluster-client:1.1.1'
 
   compile "org.springframework.scala:spring-scala_${scalaMajorVersion}:1.0.0.RC1"
 

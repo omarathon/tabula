@@ -259,7 +259,12 @@ abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null 
   @OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
   def getTarget: EntityReference[B] = _target
 
-  def target: EntityReference[B] = getTarget
+  def target: EntityReference[B] =
+    try {
+      Option(getTarget).filter(_.entity != null).head
+    } catch {
+      case _@(_: IndexOutOfBoundsException | _: NoSuchElementException) => throw new ObjectNotFoundException("", "")
+    }
 
   def setTarget(target: EntityReference[B]): Unit = _target = target
 

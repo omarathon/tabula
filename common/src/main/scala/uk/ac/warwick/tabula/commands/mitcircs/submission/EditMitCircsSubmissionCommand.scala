@@ -78,7 +78,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
     // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
     submission.affectedAssessments.clear()
-    affectedAssessments.asScala.foreach { item =>
+    affectedAssessments.asScala.filter(_.selected).foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
     }

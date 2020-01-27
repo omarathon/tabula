@@ -38,6 +38,7 @@ object ExceptionHandler {
   private val ClientAbortException = "org.apache.catalina.connector.ClientAbortException"
 
   def isClientAbortException(e: IOException): Boolean = e.getClass.getName == ClientAbortException
+  def isAlreadyHandledException(e: IllegalStateException): Boolean = e.getMessage == "getOutputStream() has already been called for this response"
 }
 
 trait ExceptionHandler {
@@ -71,6 +72,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
     case _: UserError =>
     case _: HandledException =>
     case e: IOException if ExceptionHandler.isClientAbortException(e) => // cancelled download.
+    case e: IllegalStateException if ExceptionHandler.isAlreadyHandledException(e) => // error page already displayed.
     case e: ExceptionConverter if e.getException.isInstanceOf[IOException] && ExceptionHandler.isClientAbortException(e.getException.asInstanceOf[IOException]) => // cancelled PDF download
     case _ =>
       try {

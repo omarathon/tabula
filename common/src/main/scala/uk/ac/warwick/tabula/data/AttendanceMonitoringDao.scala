@@ -699,7 +699,6 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
     )
   }
 
-
   def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
     def setupProjection(withEndDate: Boolean = false): ProjectionList = {
       val projections = projectionList()

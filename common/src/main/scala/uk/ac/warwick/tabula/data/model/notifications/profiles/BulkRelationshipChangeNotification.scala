@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
@@ -19,7 +20,12 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 
   @(transient@getter) val templateLocation: String
 
-  def relationshipType: StudentRelationshipType = entities.head.relationshipType
+  def relationshipType: StudentRelationshipType =
+    try {
+      entities.filter(_ != null).head.relationshipType
+    } catch {
+      case _ @ (_: IndexOutOfBoundsException | _: NoSuchElementException) => throw new ObjectNotFoundException("", "")
+    }
 
   var relationshipService: RelationshipService = Wire[RelationshipService]
   var profileService: ProfileService = Wire[ProfileService]

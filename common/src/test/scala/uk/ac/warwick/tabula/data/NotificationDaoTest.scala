@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import javax.persistence.DiscriminatorValue
 import org.hibernate.ObjectNotFoundException
-import org.joda.time.{DateTime, DateTimeUtils}
+import org.joda.time.{DateTime, DateTimeUtils, DateTimeZone}
 import org.junit.{After, Before}
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model._
@@ -290,7 +290,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
     SSOUserType.userLookup.getUserByUserId(agent.getUserId) returns agent
     val group = Fixtures.smallGroup("Blissfully unaware group")
     session.save(group)
-    val now = DateTime.now
+    val now = DateTime.now.withZoneRetainFields(DateTimeZone.forID("Europe/London"))
     withFakeTime(now) {
       session.save(staff)
       session.save(student)

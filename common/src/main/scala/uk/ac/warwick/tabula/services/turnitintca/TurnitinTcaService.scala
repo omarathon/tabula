@@ -24,6 +24,25 @@ import uk.ac.warwick.util.web.Uri
 import scala.concurrent.Future
 import scala.util.Try
 
+object TurnitinTcaService {
+
+  /**
+   * File formats and maximum filesize allowed by TCA listed at https://developers.turnitin.com/docs/tca/faq
+   * Turnitin has requested we restrict file formats from being uploaded - see https://developers.turnitin.com/docs/tca/certification-review
+   */
+  val validExtensions: Seq[String] = Seq("pdf", "doc", "ppt", "pps", "xls", "docx", "pptx", "ppsx", "xlsx", "ps", "rtf", "htm", "html", "wpd", "odt", "txt")
+  val maxFileSizeInMegabytes = 100
+  val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024 // 100M
+
+  def validFileType(file: FileAttachment): Boolean =
+    validExtensions contains file.fileExt.toLowerCase
+
+  def validFileSize(file: FileAttachment): Boolean =
+    file.actualDataLength < maxFileSize
+
+  def validFile(file: FileAttachment): Boolean = validFileType(file) && validFileSize(file)
+}
+
 case class TcaError(
   status: Int,
   message: String
@@ -50,6 +69,7 @@ trait TurnitinTcaService {
   def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment] = None): Future[Unit]
   def saveSimilarityReportScores(tcaSimilarityReport: TcaSimilarityReport, fileAttachment: Option[FileAttachment] = None): Option[OriginalityReport]
+  def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport]
   def similarityReportUrl(originalityReport: OriginalityReport, user: CurrentUser): Future[Either[String, Uri]]
   def listWebhooks: Future[Seq[TcaWebhook]]
   def registerWebhook(webhook: TcaWebhook): Future[Unit]
@@ -369,7 +389,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     originalityReport
   }
 
-  private def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {
+  def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {
 
     val originalityReport = fileAttachment.map(_.originalityReport).orElse(
       originalityReportService.getOriginalityReportByTcaSubmissionId(tcaSubmission.id)
