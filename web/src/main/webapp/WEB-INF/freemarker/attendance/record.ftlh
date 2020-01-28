@@ -84,7 +84,7 @@
           <#local point = pointCheckpointPair._1() />
         <@spring.bind path="command.checkpointMap[${point.id}]">
         <#if status.error>
-          <div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>
+          <div class="text-error"><@f.errors path="checkpointMap[${point.id}]" cssClass="error"/></div>
         </#if>
         </@spring.bind>
           <script nonce="${nonce()}">
