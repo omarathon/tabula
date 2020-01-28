@@ -1,102 +1,54 @@
 package uk.ac.warwick.tabula.commands.cm2.marksmanagement
 
-import org.joda.time.DateTime
+import org.springframework.transaction.annotation.Propagation
 import uk.ac.warwick.tabula.commands.{Appliable, Describable}
+import uk.ac.warwick.tabula.data.TransactionalComponent
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
-import scala.jdk.CollectionConverters._
-
 class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 
-  trait CommandTestSupport extends MarksOpenAndCloseDepartmentsCommandState
-    with ModuleAndDepartmentServiceComponent
-    with MarksPopulateOpenAndCloseDepartmentsCommand {
-    val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
-    moduleAndDepartmentService.allRootDepartments returns Seq()
+  trait CommandTestSupport extends MarksOpenAndCloseDepartmentsRequest with ModuleAndDepartmentServiceComponent with TransactionalComponent {
+    override val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+    override def transactional[A](readOnly: Boolean, propagation: Propagation)(f: => A): A = f
   }
 
   trait OpenAndCloseDepartmentsWorld {
     val department: Department = Fixtures.department("in", "IT Services")
+    department.modules.add(Fixtures.module("in101"))
   }
 
   trait Fixture extends OpenAndCloseDepartmentsWorld {
-    val now = new DateTime
-    val command = new MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport
+    val command: MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport =
+      new MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport {}
+
     command.moduleAndDepartmentService.allRootDepartments returns Seq(department)
     command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
-    val currentYear: AcademicYear = AcademicYear.forDate(now)
+
+    command.populate()
   }
 
   @Test
-  def applyUndergrads(): Unit = {
-    new Fixture {
-      command.populate()
-      command.applyInternal() should be(DegreeType.Undergraduate)
-      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate) should be(true)
-    }
+  def apply(): Unit = new Fixture {
+    command.state.get("in").uploadCourseworkMarksToSits = true
+    command.state.get("in").openForCurrentYearUG = true
+
+    command.applyInternal() should be(Seq(department))
+
+    department.uploadCourseworkMarksToSits should be (true)
+    department.canUploadMarksToSitsForYear(AcademicYear.now(), DegreeType.Undergraduate) should be (true)
+
+    verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(department)
   }
 
   @Test
-  def applyPostgradsClosed(): Unit = {
-    new Fixture {
-      command.populate()
-      command.pgMappings = Map(
-        department.code -> DepartmentMarksStateClosed.value
-      ).asJava
-      command.updatePostgrads = true
-      command.applyInternal() should be(DegreeType.Postgraduate)
-      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be(false)
-      department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
-    }
-  }
-
-  @Test
-  def applyPostgradsOpenThisYearOnly(): Unit = {
-    new Fixture {
-      command.populate()
-      command.pgMappings = Map(
-        department.code -> DepartmentMarksStateThisYearOnly.value
-      ).asJava
-      command.updatePostgrads = true
-      command.applyInternal() should be(DegreeType.Postgraduate)
-      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be(true)
-      department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
-    }
-  }
-
-  @Test
-  def populate(): Unit = {
-    new Fixture {
-      command.currentAcademicYear should be(currentYear)
-      command.previousAcademicYear should be(currentYear.-(1))
-      command.ugMappings should be(Symbol("empty"))
-      command.pgMappings should be(Symbol("empty"))
-      command.populate()
-      command.ugMappings should not be (Symbol("empty"))
-      command.pgMappings should not be (Symbol("empty"))
-      command.ugMappings.size should be(1)
-      command.pgMappings.size should be(1)
-    }
-  }
-
-  @Test
-  def permssions: Unit = {
-    val command = new MarksOpenAndCloseDepartmentsCommandPermissions with CommandTestSupport
-    val checking = mock[PermissionsChecking]
+  def permssions(): Unit = {
+    val command = new MarksOpenAndCloseDepartmentsCommandPermissions {}
+    val checking = smartMock[PermissionsChecking]
     command.permissionsCheck(checking)
     verify(checking, times(1)).PermissionCheck(Permissions.Marks.MarksManagement)
-  }
-
-  @Test
-  def glueEverythingTogether(): Unit = {
-    val command = MarksOpenAndCloseDepartmentsCommand()
-    command should be(anInstanceOf[Appliable[DegreeType]])
-    command should be(anInstanceOf[MarksOpenAndCloseDepartmentsCommandPermissions])
-    command should be(anInstanceOf[MarksOpenAndCloseDepartmentsCommandState])
-    command should be(anInstanceOf[Describable[DegreeType]])
   }
 }

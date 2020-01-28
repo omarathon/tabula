@@ -26,7 +26,7 @@
       }
 
       var checkboxClass = options.checkboxClass || 'collection-checkbox';
-      var checkboxAllClass = options.checkboxClass || 'collection-check-all';
+      var checkboxAllClass = options.checkboxAllClass || 'collection-check-all';
 
       var $checkboxes = $this.find('input.' + checkboxClass);
       var $selectAll = $this.find('input.' + checkboxAllClass);

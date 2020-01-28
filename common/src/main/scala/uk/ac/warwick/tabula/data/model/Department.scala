@@ -157,12 +157,6 @@ class Department extends GeneratedId
     settings += (Settings.UploadCourseworkMarksToSits -> enabled)
   }
 
-  def uploadExamMarksToSits: Boolean = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
-
-  def uploadExamMarksToSits_=(enabled: Boolean): Unit = {
-    settings += (Settings.UploadExamMarksToSits -> enabled)
-  }
-
   def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
 
   def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
@@ -577,7 +571,6 @@ object Department {
     val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
     val UploadCourseworkMarksToSits = "uploadMarksToSits"
-    val UploadExamMarksToSits = "uploadExamMarksToSits"
     val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
     val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
 

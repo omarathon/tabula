@@ -4,109 +4,110 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department}
+import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
+import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
 
-sealed abstract class DepartmentMarksState(val value: String)
-
-case object DepartmentMarksStateClosed extends DepartmentMarksState("closed")
-
-case object DepartmentMarksStateThisYearOnly extends DepartmentMarksState("openCurrent")
-
-case object DepartmentMarksStateThisYearAndLastYear extends DepartmentMarksState("openCurrentAndPrevious")
-
 object MarksOpenAndCloseDepartmentsCommand {
-  def apply() =
+  type Command = Appliable[Seq[Department]] with PopulateOnForm
+
+  def apply(): Command =
     new MarksOpenAndCloseDepartmentsCommandInternal
-      with ComposableCommand[DegreeType]
+      with ComposableCommand[Seq[Department]]
       with AutowiringModuleAndDepartmentServiceComponent
-      with MarksPopulateOpenAndCloseDepartmentsCommand
-      with MarksOpenAndCloseDepartmentsCommandState
+      with MarksOpenAndCloseDepartmentsRequest
       with MarksOpenAndCloseDepartmentsCommandPermissions
       with MarksOpenAndCloseDepartmentsCommandDescription
+      with AutowiringTransactionalComponent
 }
 
-class MarksOpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType] {
+abstract class MarksOpenAndCloseDepartmentsCommandInternal extends CommandInternal[Seq[Department]] {
+  self: MarksOpenAndCloseDepartmentsRequest
+    with ModuleAndDepartmentServiceComponent
+    with TransactionalComponent =>
 
-  self: MarksOpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
+  override def applyInternal(): Seq[Department] = transactional() {
+    departments.map { department =>
+      val settings = state.asScala.get(department.code)
+      settings.foreach { s =>
+        val currentYear = AcademicYear.now()
+        val previousYear = currentYear - 1
 
-  def applyInternal(): DegreeType =
-    if (updatePostgrads) {
-      updateDepartments(pgMappings, DegreeType.Postgraduate)
-      DegreeType.Postgraduate
-    } else {
-      updateDepartments(ugMappings, DegreeType.Undergraduate)
-      DegreeType.Undergraduate
+        def update(department: Department): Unit = {
+          department.uploadCourseworkMarksToSits = s.uploadCourseworkMarksToSits
+          department.setUploadMarksToSitsForYear(previousYear, DegreeType.Undergraduate, canUpload = s.openForPreviousYearUG)
+          department.setUploadMarksToSitsForYear(previousYear, DegreeType.Postgraduate, canUpload = s.openForPreviousYearPG)
+          department.setUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate, canUpload = s.openForCurrentYearUG)
+          department.setUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate, canUpload = s.openForCurrentYearPG)
+
+          moduleAndDepartmentService.saveOrUpdate(department)
+
+          department.children.asScala.foreach(update)
+        }
+
+        update(department)
+      }
+
+      department
     }
-
-  private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType): Unit =
-    mapping.asScala.foreach {
-      case (key, value) =>
-        val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).get
-        dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
-        dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
-    }
-
-  private def thisYearOpen(deptStateValue: String): Boolean = deptStateValue != DepartmentMarksStateClosed.value
-  private def lastYearOpen(deptStateValue: String): Boolean = deptStateValue == DepartmentMarksStateThisYearAndLastYear.value
+  }
 
 }
 
 trait MarksOpenAndCloseDepartmentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Marks.MarksManagement)
   }
 }
 
-trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] {
-  self: MarksOpenAndCloseDepartmentsCommandState =>
-
+trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[Seq[Department]] {
   override lazy val eventName: String = "MarksOpenAndCloseDepartments"
 
-  def describe(d: Description): Unit = d.properties(
-    "degreeType" -> {
-      if (updatePostgrads) DegreeType.Postgraduate.dbValue
-      else DegreeType.Undergraduate.dbValue
-    }
-  )
+  override def describe(d: Description): Unit = {}
 }
 
-trait MarksOpenAndCloseDepartmentsCommandState {
+trait MarksOpenAndCloseDepartmentsRequest extends PopulateOnForm {
   self: ModuleAndDepartmentServiceComponent =>
 
-  lazy val currentAcademicYear: AcademicYear = AcademicYear.now()
-  lazy val previousAcademicYear: AcademicYear = currentAcademicYear.previous
+  lazy val departments: Seq[Department] =
+    moduleAndDepartmentService.allRootDepartments.filter { department =>
+      def hasModule(d: Department): Boolean =
+        d.modules.asScala.nonEmpty || d.children.asScala.exists(hasModule)
 
-  lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments
-  var ugMappings: JMap[String, String] = JHashMap()
-  var pgMappings: JMap[String, String] = JHashMap()
+      hasModule(department)
+    }
 
-  var updatePostgrads: Boolean = _
-}
-
-trait MarksPopulateOpenAndCloseDepartmentsCommand extends PopulateOnForm {
-  self: MarksOpenAndCloseDepartmentsCommandState =>
+  var state: JMap[String, DepartmentMarkStateItem] =
+    LazyMaps.create { _: String => new DepartmentMarkStateItem }.asJava
 
   override def populate(): Unit = {
-    ugMappings = departments.map { d =>
-      d.code -> getState(d, DegreeType.Undergraduate).value
-    }.toMap.asJava
+    departments.foreach { department =>
+      state.put(department.code, new DepartmentMarkStateItem(department))
+    }
+  }
+}
 
-    pgMappings = departments.map { d =>
-      d.code -> getState(d, DegreeType.Postgraduate).value
-    }.toMap.asJava
+class DepartmentMarkStateItem {
+  def this(department: Department) {
+    this()
+    this.uploadCourseworkMarksToSits = department.uploadCourseworkMarksToSits
+
+    val currentYear = AcademicYear.now()
+    val previousYear = currentYear - 1
+
+    this.openForPreviousYearUG = department.canUploadMarksToSitsForYear(previousYear, DegreeType.Undergraduate)
+    this.openForPreviousYearPG = department.canUploadMarksToSitsForYear(previousYear, DegreeType.Postgraduate)
+    this.openForCurrentYearUG = department.canUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate)
+    this.openForCurrentYearPG = department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate)
   }
 
-  def getState(department: Department, degreeType: DegreeType): DepartmentMarksState = {
-    val canUploadThisYear = department.canUploadMarksToSitsForYear(currentAcademicYear, degreeType)
-    val canUploadLastYear = department.canUploadMarksToSitsForYear(previousAcademicYear, degreeType)
-
-    if (canUploadThisYear && canUploadLastYear) DepartmentMarksStateThisYearAndLastYear
-    else if (canUploadThisYear) DepartmentMarksStateThisYearOnly
-    else DepartmentMarksStateClosed
-  }
+  var uploadCourseworkMarksToSits: Boolean = _
+  var openForPreviousYearUG: Boolean = _
+  var openForPreviousYearPG: Boolean = _
+  var openForCurrentYearUG: Boolean = _
+  var openForCurrentYearPG: Boolean = _
 }

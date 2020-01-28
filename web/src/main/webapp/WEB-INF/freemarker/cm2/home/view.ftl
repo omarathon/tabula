@@ -47,7 +47,7 @@
     <#include "_admin.ftl" />
   </#if>
 
-  <#include "_marks_management_admin.ftl" />
+  <#include "_marks_management_admin.ftlh" />
 
   <#if !is_student && !is_marker && !is_admin>
     <h1>Coursework Management</h1>
