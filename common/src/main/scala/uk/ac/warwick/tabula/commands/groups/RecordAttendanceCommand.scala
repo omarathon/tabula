@@ -160,9 +160,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 
   def attendanceMetadata(uniId: UniversityId): Option[String] = {
     occurrence.attendance.asScala
-      .find {
-        _.universityId == uniId
-      }
+      .find(_.universityId == uniId)
       .map(attendance => {
         val userString = userLookup.getUserByUserId(attendance.updatedBy) match {
           case FoundUser(u) => s"by ${u.getFullName}, "
@@ -177,9 +175,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
     studentsState = members.map { member =>
       member.universityId ->
         occurrence.attendance.asScala
-          .find {
-            _.universityId == member.universityId
-          }
+          .find(_.universityId == member.universityId)
           .flatMap { a => Option(a.state) }.orNull
     }.toMap.asJava
   }

@@ -66,7 +66,6 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro createseteventsediteventimport event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}/import" /></#macro>
 <#macro editseteventsediteventimport event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}/import" /></#macro>
 
-<#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>
 <#macro registerPdf event><@_u page="/event/${event.id}/register.pdf" /></#macro>
 <#macro addAdditionalStudent event week><@_u page="/event/${event.id}/register/additional?week=${week?c}" /></#macro>
@@ -81,6 +80,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
   <#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
   <@_u page="/note/${student.universityId}/${occurrence.id}/edit${returnTo}" />
 </#macro>
+<#macro bulkEditNote occurrence><@_u page="/note/bulk/${occurrence.id}/edit" /></#macro>
 
 <#macro signup_to_group set><@_u page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@_u page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
