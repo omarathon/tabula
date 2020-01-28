@@ -45,7 +45,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
       sysadmin = sysadmin,
       masquerader = masquerader,
       god = god,
-      navigation = userNavigationGenerator(apparentUser)
+      navigation = userNavigationGenerator(apparentUser.getUserId)
     )
   }
 
