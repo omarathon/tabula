@@ -278,4 +278,6 @@ object Routes {
 
   }
 
+  def openCloseDepartments: String = "/coursework/admin/marksmanagement/departments"
+
 }
