@@ -182,7 +182,7 @@
                         </#if>
                         <@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
                           <#if status.error>
-                            <div class="text-error"><@f.errors path="command.checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
+                            <div class="text-error"><@f.errors path="checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
                           </#if>
                         </@spring.bind>
                       </div>
