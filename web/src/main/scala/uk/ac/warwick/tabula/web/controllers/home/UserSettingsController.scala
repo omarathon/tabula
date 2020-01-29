@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PostMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.home.UserSettingsCommand
-import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -54,7 +53,10 @@ class UserSettingsController extends BaseController
 
   @RequestMapping(Array("/settings"))
   def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors: Errors, success: Boolean = false): Mav = {
-    val deptsUserIsAdminOn = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+    lazy val allDepartments = moduleAndDepartmentService.allDepartments
+    lazy val grantedRoles = permissionsService.getAllGrantedRolesFor(user)
+
+    val deptsUserIsAdminOn = grantedRoles.filter(_.roleDefinition == DepartmentalAdministratorRoleDefinition).map(_.scope).collect { case d: Department => d }
     val mustNotBeCurrentUser: User => Boolean = u => u.getUserId != user.userId
 
     val deptsWithNoOtherContacts = deptsUserIsAdminOn.map { department =>
@@ -68,9 +70,6 @@ class UserSettingsController extends BaseController
 
       department.name -> hasAtLeastOneOtherContact
     }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
-
-    lazy val allDepartments = moduleAndDepartmentService.allDepartments
-    lazy val grantedRoles = permissionsService.getAllGrantedRolesFor(user)
 
     val canReceiveSmallGroupAttendanceReminders: Boolean = (
       // Is a named user on a department's notification settings
@@ -101,7 +100,7 @@ class UserSettingsController extends BaseController
     )
 
     Mav("usersettings/form",
-      "isCourseworkModuleManager" -> moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+      "isCourseworkModuleManager" -> grantedRoles.exists(_.roleDefinition == ModuleManagerRoleDefinition),
       "isDepartmentalAdmin" -> deptsUserIsAdminOn.nonEmpty,
       "deptsWithNoOtherContacts" -> deptsWithNoOtherContacts,
       "canReceiveSmallGroupAttendanceReminders" -> canReceiveSmallGroupAttendanceReminders,
