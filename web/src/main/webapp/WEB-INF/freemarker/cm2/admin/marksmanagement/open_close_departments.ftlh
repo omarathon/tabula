@@ -34,8 +34,16 @@
       <tbody>
         <#list command.departments as department>
           <tr>
-            <td>${department.code?upper_case}</td>
-            <td>${department.name}</td>
+            <td>
+              <#if department.hasParent>┗</#if>
+              ${department.code?upper_case}
+            </td>
+            <td>
+              ${department.name}
+              <#if department.hasParent>
+                <div class="help-block">Filter: ${department.filterRule.name}</div>
+              </#if>
+            </td>
             <td><@f.checkbox path="state[${department.code}].uploadCourseworkMarksToSits" /></td>
             <td><@f.checkbox path="state[${department.code}].openForPreviousYearUG" cssClass="collection-openForPreviousYearUG" /></td>
             <td><@f.checkbox path="state[${department.code}].openForPreviousYearPG" cssClass="collection-openForPreviousYearPG" /></td>
