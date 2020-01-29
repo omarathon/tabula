@@ -63,8 +63,10 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
           .flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.departmentCode))
           .map(_.owners.users)
           .getOrElse(throw new IllegalArgumentException)
+          .filter(_.isFoundUser)
           .filter(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
           .map(_.getEmail)
+          .filter(_.hasText)
 
         require(userEmails.nonEmpty) // User should not have submitted form if no dept. admins approve
 

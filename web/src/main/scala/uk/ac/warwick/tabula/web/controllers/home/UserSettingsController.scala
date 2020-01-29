@@ -60,11 +60,11 @@ class UserSettingsController extends BaseController
     val deptsWithNoOtherContacts = deptsUserIsAdminOn.map { department =>
       val otherAdmins = department.owners.users.filter(mustNotBeCurrentUser)
 
-      val hasAtLeastOneOtherContact =
-        otherAdmins.map(u => userSettingsService
-          .getByUserId(u.getUserId)
-          .map(_.deptAdminReceiveStudentComments))
-          .map(_.getOrElse(true)).exists(identity[Boolean])
+      val hasAtLeastOneOtherContact = otherAdmins.exists { u =>
+        u.isFoundUser &&
+        u.getEmail.hasText &&
+        userSettingsService.getByUserId(u.getUserId).forall(_.deptAdminReceiveStudentComments)
+      }
 
       department.name -> hasAtLeastOneOtherContact
     }.filter { case (_, hasAtLeastOneOtherContact) => !hasAtLeastOneOtherContact }.map { case (departmentName, _) => departmentName }
