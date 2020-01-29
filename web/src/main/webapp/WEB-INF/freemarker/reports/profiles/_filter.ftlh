@@ -23,7 +23,7 @@
     </div>
   </#if>
   <#assign profileExportReportAction><@routes.reports.profileExportReport department academicYear /></#assign>
-  <@f.form action=profileExportReportAction method="post">
+  <@f.form action=profileExportReportAction?markup_string method="post">
     <div class="pull-right">
       <input type="submit" class="btn btn-primary generate" disabled title="Use the checkboxes to select students"
              value="Generate reports on selected students" />

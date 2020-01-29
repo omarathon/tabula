@@ -34,7 +34,7 @@ class AppCommentsController extends BaseController with AutowiringModuleAndDepar
   def form(@ModelAttribute("command") cmd: Appliable[Future[JBoolean]]): Mav = {
     val maybeUser = Option(user).toSeq.filter(_.loggedIn)
     val deptAdmins = maybeUser.flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode).toSeq.flatMap(_.owners.users))
-    val atLeastOneEmailableDeptAdmin = deptAdmins.exists(da => settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
+    val atLeastOneEmailableDeptAdmin = deptAdmins.exists(da => da.isFoundUser && da.getEmail.hasText && settingsService.getByUserId(da.getUserId).exists(_.deptAdminReceiveStudentComments))
     val homeDept = maybeUser.flatMap(u => moduleAndDepartmentService.getDepartmentByCode(u.apparentUser.getDepartmentCode).toSeq.map(d => d.name)).headOption
 
     Mav("home/comments",
