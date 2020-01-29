@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.DateWithinYears
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
@@ -222,8 +223,12 @@ trait CreateMitCircsSubmissionDescription extends Describable[Result] {
 trait MitCircsSubmissionRequest {
   self: MitCircsSubmissionState =>
 
+  @DateWithinYears(maxPast = 3, maxFuture = 1)
   var startDate: LocalDate = _
+
+  @DateWithinYears(maxPast = 3, maxFuture = 1)
   var endDate: LocalDate = _
+
   var noEndDate: Boolean = _
 
   @BeanProperty var issueTypes: JList[IssueType] = JArrayList()
