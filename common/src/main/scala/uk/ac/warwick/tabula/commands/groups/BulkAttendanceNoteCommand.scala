@@ -5,7 +5,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
-import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, Member, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, Member}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
@@ -119,7 +119,7 @@ trait BulkAttendanceNoteRequest extends BindListener {
     result.popNestedPath()
   }
 
-  var student: StudentMember = _ // used for attachment url
+  var member: Member = _ // used for attachment url
   var overwrite: Boolean = _
 
   var note: String = _
@@ -143,7 +143,7 @@ trait BulkAttendanceNoteRequestPopulateOnForm extends PopulateOnForm {
       absenceType = n.absenceType
     }
 
-    members.collectFirst { case s: StudentMember => s }.foreach(student = _)
+    members.foreach(member = _)
     isNew = firstNote.isEmpty
   }
 }
