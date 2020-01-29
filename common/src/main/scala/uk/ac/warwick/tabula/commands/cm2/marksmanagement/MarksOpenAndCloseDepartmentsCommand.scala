@@ -37,19 +37,13 @@ abstract class MarksOpenAndCloseDepartmentsCommandInternal extends CommandIntern
         val currentYear = AcademicYear.now()
         val previousYear = currentYear - 1
 
-        def update(department: Department): Unit = {
-          department.uploadCourseworkMarksToSits = s.uploadCourseworkMarksToSits
-          department.setUploadMarksToSitsForYear(previousYear, DegreeType.Undergraduate, canUpload = s.openForPreviousYearUG)
-          department.setUploadMarksToSitsForYear(previousYear, DegreeType.Postgraduate, canUpload = s.openForPreviousYearPG)
-          department.setUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate, canUpload = s.openForCurrentYearUG)
-          department.setUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate, canUpload = s.openForCurrentYearPG)
+        department.uploadCourseworkMarksToSits = s.uploadCourseworkMarksToSits
+        department.setUploadMarksToSitsForYear(previousYear, DegreeType.Undergraduate, canUpload = s.openForPreviousYearUG)
+        department.setUploadMarksToSitsForYear(previousYear, DegreeType.Postgraduate, canUpload = s.openForPreviousYearPG)
+        department.setUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate, canUpload = s.openForCurrentYearUG)
+        department.setUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate, canUpload = s.openForCurrentYearPG)
 
-          moduleAndDepartmentService.saveOrUpdate(department)
-
-          department.children.asScala.foreach(update)
-        }
-
-        update(department)
+        moduleAndDepartmentService.saveOrUpdate(department)
       }
 
       department
@@ -73,13 +67,12 @@ trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[Seq[Dep
 trait MarksOpenAndCloseDepartmentsRequest extends PopulateOnForm {
   self: ModuleAndDepartmentServiceComponent =>
 
-  lazy val departments: Seq[Department] =
-    moduleAndDepartmentService.allRootDepartments.filter { department =>
-      def hasModule(d: Department): Boolean =
-        d.modules.asScala.nonEmpty || d.children.asScala.exists(hasModule)
+  private def withSubDepartments(d: Department): Seq[Department] =
+    Seq(d) ++ d.children.asScala.filterNot(_.isImportDepartment).toSeq.flatMap(withSubDepartments)
 
-      hasModule(department)
-    }
+  lazy val departments: Seq[Department] =
+    moduleAndDepartmentService.allRootDepartments.flatMap(withSubDepartments)
+      .filter(_.modules.asScala.nonEmpty)
 
   var state: JMap[String, DepartmentMarkStateItem] =
     LazyMaps.create { _: String => new DepartmentMarkStateItem }.asJava
