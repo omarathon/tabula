@@ -184,11 +184,15 @@ class MitCircsForm {
     this.lastEndDate = endDate;
 
     if (startDate && (endDate || noEndDate)) {
-      $.post(
-        this.$assessmentsTable.data('endpoint'),
-        { startDate, endDate },
-        this.updateAssessmentsTable.bind(this),
-      );
+      $.ajax({
+        type: 'POST',
+        url: this.$assessmentsTable.data('endpoint'),
+        data: { startDate, endDate },
+        success: this.updateAssessmentsTable.bind(this),
+        error: () => this.updateAssessmentsTable([]),
+        global: false, // Suppress the global error handler
+        dataType: 'json',
+      });
     } else {
       this.updateAssessmentsTable([]);
     }
