@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, Seconds}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.data.model.{BatchedNotification, Notification, ToEntityReference, UserSettings}
+import uk.ac.warwick.tabula.data.model.{BaseBatchedNotification, Notification, ToEntityReference, UserSettings}
 import uk.ac.warwick.tabula.data.{AutowiringNotificationDaoComponent, Daoisms, NotificationDaoComponent, SessionComponent}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.email
 import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
@@ -56,7 +56,7 @@ abstract class AbstractNotificationBatchingService extends NotificationBatchingS
         lazy val canBeBatched: Boolean = features.notificationBatching && {
           val notificationClass = notificationMap(notificationType)
           val baseNotification: Notification[ToEntityReference, Unit] = notificationClass.newInstance()
-          baseNotification.isInstanceOf[BatchedNotification[_]]
+          baseNotification.isInstanceOf[BaseBatchedNotification[_ >: Null <: ToEntityReference, _, _]]
         }
 
         batchedNotificationsSetting match {

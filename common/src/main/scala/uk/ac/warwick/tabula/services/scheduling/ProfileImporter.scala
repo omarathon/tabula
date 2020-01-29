@@ -26,10 +26,10 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object MembershipInformation {
@@ -466,6 +466,14 @@ object ProfileImporter extends Logging {
   val applicantDepartmentCode: String = "sl"
   val sitsSchema: String = Wire.property("${schema.sits}")
 
+  /**
+   * The length of time after a student's end date for which their account
+   * retains full access rights (i.e. that of a student). We treat them as
+   * inactive after this time, although they will probably still be able to
+   * login as a recent leaver account for an additional year.
+   */
+  val accountInactivationGracePeriod: Int = 7 * 8 // 8 weeks
+
   private def GetStudentInformation =
     f"""
 			select
@@ -478,7 +486,7 @@ object ProfileImporter extends Logging {
 			stu.stu_caem as email_address,
 			stu.stu_udf3 as user_code,
 			stu.stu_dob as date_of_birth,
-			case when stu.stu_endd < sysdate then 'Inactive' else 'Active' end as in_use_flag,
+			case when coalesce(stu.stu_endd, scj.scj_endd) + $accountInactivationGracePeriod < sysdate then 'Inactive' else 'Active' end as in_use_flag,
 			stu.stu_haem as alternative_email_address,
 			stu.stu_cat3 as mobile_number,
 			stu.stu_dsbc as disability,

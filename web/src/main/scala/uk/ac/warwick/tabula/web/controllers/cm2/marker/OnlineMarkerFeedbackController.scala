@@ -22,8 +22,6 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 
   validatesSelf[SelfValidating]
 
-  type Command = Appliable[MarkerFeedback] with OnlineMarkerFeedbackState
-
   @ModelAttribute("command")
   def command(
     @PathVariable assignment: Assignment,
@@ -31,7 +29,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
     @PathVariable student: User,
     @PathVariable marker: User,
     submitter: CurrentUser
-  ) = OnlineMarkerFeedbackCommand(
+  ): OnlineMarkerFeedbackCommand.Command = OnlineMarkerFeedbackCommand(
     mandatory(assignment),
     mandatory(stage),
     mandatory(student),
@@ -41,7 +39,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
   )
 
   @RequestMapping
-  def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
+  def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackCommand.Command, errors: Errors): Mav = {
     Mav("cm2/admin/assignments/markers/marker_online_feedback",
       "isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
       "command" -> command
@@ -49,13 +47,12 @@ class OnlineMarkerFeedbackController extends CourseworkController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
+  def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: OnlineMarkerFeedbackCommand.Command, errors: Errors): Mav =
     if (errors.hasErrors) {
       showForm(command, errors)
     } else {
       command.apply()
       Mav("ajax_success").noLayout()
     }
-  }
 
 }

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers._
 
   @RequestMapping(Array("/")) def home(user: CurrentUser): Mav = {
     Mav("home/view",
-      "userNavigation" -> UserNavigationGeneratorImpl(user.apparentUser, forceUpdate = true),
+      "userNavigation" -> UserNavigationGeneratorImpl(user.apparentUser.getUserId, forceUpdate = true),
       "jumbotron" -> true
     ).noLayoutIf(ajax) // All hail our new Jumbotron overlords
   }

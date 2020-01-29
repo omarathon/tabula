@@ -270,7 +270,8 @@
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
 >
-  <#if command.attachedFiles?has_content >
+  <#if command.attachedFiles?has_content>
+    <@f.hidden name="_attachedFiles" value="on" />
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
         <#list command.attachedFiles as attachment>

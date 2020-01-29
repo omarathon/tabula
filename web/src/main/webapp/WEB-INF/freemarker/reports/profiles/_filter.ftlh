@@ -23,7 +23,7 @@
     </div>
   </#if>
   <#assign profileExportReportAction><@routes.reports.profileExportReport department academicYear /></#assign>
-  <@f.form action=profileExportReportAction method="post">
+  <@f.form action=profileExportReportAction?markup_string method="post">
     <div class="pull-right">
       <input type="submit" class="btn btn-primary generate" disabled title="Use the checkboxes to select students"
              value="Generate reports on selected students" />
@@ -39,7 +39,7 @@
     <table class="table table-condensed table-striped students">
       <thead>
       <tr>
-        <th></th>
+        <th class="for-check-all"><input type="checkbox" class="collection-check-all" title="Select all/none" /></th>
         <th class="sortable">First name</th>
         <th class="sortable">Last name</th>
         <th class="sortable">ID</th>
@@ -49,7 +49,7 @@
       <tbody>
       <#list results as student>
         <tr>
-          <td><input name="students" value="${student.universityId}" type="checkbox" <#if command.searchSingle || command.searchMulti >checked</#if>/></td>
+          <td><input class="collection-checkbox" name="students" value="${student.universityId}" type="checkbox" <#if command.searchSingle || command.searchMulti >checked</#if>/></td>
           <td>${student.firstName}</td>
           <td>${student.lastName}</td>
           <td>${student.universityId}</td>
@@ -61,7 +61,14 @@
   </@f.form>
   <script nonce="${nonce()}">
     jQuery(function ($) {
-      $('table.students').sortableTable();
+      $('table.students').sortableTable().bigList({
+        onSomeChecked: function() {
+          $('input.generate').prop('disabled', false);
+        },
+        onNoneChecked: function() {
+          $('input.generate').prop('disabled', true);
+        }
+      });
     });
   </script>
 </#if>

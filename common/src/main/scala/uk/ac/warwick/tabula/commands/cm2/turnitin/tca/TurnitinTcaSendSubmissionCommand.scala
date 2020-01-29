@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionC
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TurnitinTcaServiceComponent}
+import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TurnitinTcaService, TurnitinTcaServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -49,7 +49,9 @@ extends CommandInternal[Result] {
 trait TurnitinTcaSendSubmissionState {
   def assignment: Assignment
   def user: User
-  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments).filter(_.originalityReport == null)
+  def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments)
+    .filter(attachment =>
+      attachment.originalityReport == null && TurnitinTcaService.validFile(attachment))
 }
 
 trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {

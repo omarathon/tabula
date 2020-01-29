@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, RoleDefinition}
+import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.web.Mav
 
 import scala.jdk.CollectionConverters._

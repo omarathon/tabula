@@ -79,13 +79,11 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 }
 
 trait ProfileExportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
   self: ProfileExportCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.Department.Reports, department)
+    p.PermissionCheck(Permissions.Department.Reports, mandatory(department))
   }
-
 }
 
 trait ProfileExportCommandState extends FiltersStudents {

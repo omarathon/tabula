@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyCompone
 import uk.ac.warwick.tabula.services.{AssessmentService, CourseAndRouteService, ModuleAndDepartmentService, ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, Features}
-import uk.ac.warwick.userlookup.{User, UserLookupInterface}
+import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 
 import scala.jdk.CollectionConverters._
@@ -22,7 +22,7 @@ case class UserNavigation(
 ) extends java.io.Serializable
 
 trait UserNavigationGenerator {
-  def apply(user: User, forceUpdate: Boolean = false): UserNavigation
+  def apply(usercode: String, forceUpdate: Boolean = false): UserNavigation
 }
 
 object UserNavigationGeneratorImpl extends UserNavigationGenerator with AutowiredTextRendererComponent with AutowiringCacheStrategyComponent {
@@ -112,13 +112,21 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
       .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
-  def apply(user: User, forceUpdate: Boolean = false): UserNavigation = {
+  def apply(usercode: String, forceUpdate: Boolean = false): UserNavigation = {
     if (forceUpdate) {
-      navigationCache.remove(user.getUserId)
-      navigationCache.get(user.getUserId)
+      navigationCache.remove(usercode)
+      navigationCache.get(usercode)
     } else {
-      navigationCache.get(user.getUserId)
+      navigationCache.get(usercode)
     }
   }
 
+}
+
+trait UserNavigationGeneratorComponent {
+  def userNavigationGenerator: UserNavigationGenerator
+}
+
+trait DefaultUserNavigationGeneratorComponent extends UserNavigationGeneratorComponent{
+  def userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
 }

@@ -28,7 +28,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
   departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns Set()
 
-  interceptor.userNavigationGenerator = (_: User, _: Boolean) => UserNavigation("", "")
+  interceptor.userNavigationGenerator = (_: String, _: Boolean) => UserNavigation("", "")
 
   interceptor.masqueradeUsercodeValidator = new MasqueradeUsercodeValidator {
     override def filterValidUsercodeForMasquerade(loggedInUser: User)(masqueradeUsercode: String): Boolean = true

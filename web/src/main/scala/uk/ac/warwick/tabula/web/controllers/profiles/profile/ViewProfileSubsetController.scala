@@ -13,12 +13,11 @@ import uk.ac.warwick.userlookup.User
 class ViewProfileSubsetController extends ProfilesController {
 
   @ModelAttribute("command")
-  def getViewProfileSubsetCommand(@PathVariable student: User) =
-    ViewProfileSubsetCommand(student, profileService)
+  def getViewProfileSubsetCommand(@PathVariable student: User): ViewProfileSubsetCommand.Command =
+    ViewProfileSubsetCommand(student)
 
   @RequestMapping
-  def viewProfile(@ModelAttribute("command") command: Appliable[ProfileSubset]): Mav = {
-
+  def viewProfile(@ModelAttribute("command") command: ViewProfileSubsetCommand.Command): Mav = {
     val profileSubset = command.apply()
 
     Mav("profiles/profile/view_subset",

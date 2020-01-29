@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.marker
 
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser

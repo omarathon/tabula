@@ -38,10 +38,11 @@ abstract class UserSettingsCommand(val user: CurrentUser, val settings: UserSett
     settings.newAssignmentSettings = newAssignmentSettings
     settings.weekNumberingSystem = weekNumberingSystem.maybeText.orNull
     settings.bulkEmailSeparator = bulkEmailSeparator
-    settings.deptAdminReceiveStudentComments = deptAdminReceiveStudentComments
     settings.batchedNotifications = batchedNotifications
+
     smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
     finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
+    settings.deptAdminReceiveStudentComments = deptAdminReceiveStudentComments
 
     userSettingsService.save(user, settings)
     settings

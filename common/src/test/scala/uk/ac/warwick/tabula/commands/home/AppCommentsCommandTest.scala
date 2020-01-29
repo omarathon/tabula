@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.{FreemarkerTestHelpers, MockUserLookup, Mockito, Tes
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
-
 class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHelpers {
 
   val mockMailSender: WarwickMailSender = smartMock[WarwickMailSender]
@@ -35,6 +34,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   val adminEmail = "stabula@warwick.ac.uk"
 
   val owner = new User("owner")
+  owner.setFoundUser(true)
   owner.setEmail("owner@warwick.ac.uk")
   mockUserLookup.registerUserObjects(owner)
   val dept = new Department {
@@ -72,7 +72,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def populateFromNoUser(): Unit = {
+  def populateFromNoUser(): Unit = withUser(code = null) {
     new Fixture {
       cmd.usercode should be(null)
       cmd.name should be(null)
@@ -92,7 +92,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def validatePasses(): Unit = {
+  def validatePasses(): Unit = withUser(code = null) {
     new Fixture {
       validator.message = "I'm coming for you"
       validator.recipient = AppCommentCommand.Recipients.WebTeam
@@ -105,7 +105,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def validateNoMessage(): Unit = {
+  def validateNoMessage(): Unit = withUser(code = null) {
     new Fixture {
       validator.message = "   "
       validator.recipient = AppCommentCommand.Recipients.WebTeam
@@ -120,7 +120,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToDeptAdminWithNothing(): Unit = {
+  def sendToDeptAdminWithNothing(): Unit = withUser(code = null) {
     new Fixture {
       // As they aren't signed in, this should throw (checked by validation)
       cmd.message = "I'm coming for you"
@@ -133,44 +133,42 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToDeptAdminFullyPopulated(): Unit = {
-    withUser("cuscav") {
-      currentUser.apparentUser.setFullName("Billy Bob")
-      currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
-      currentUser.apparentUser.setDepartmentCode(dept.code)
+  def sendToDeptAdminFullyPopulated(): Unit = withUser("cuscav") {
+    currentUser.apparentUser.setFullName("Billy Bob")
+    currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
+    currentUser.apparentUser.setDepartmentCode(dept.code)
 
-      new Fixture {
-        cmd.message = "I'm coming for you"
-        cmd.url = "http://stabula.warwick.ac.uk/my/page"
-        cmd.browser = "Chrome"
-        cmd.ipAddress = "137.205.194.132"
-        cmd.os = "Window"
-        cmd.resolution = "New years"
-        cmd.recipient = AppCommentCommand.Recipients.DeptAdmin
+    new Fixture {
+      cmd.message = "I'm coming for you"
+      cmd.url = "http://stabula.warwick.ac.uk/my/page"
+      cmd.browser = "Chrome"
+      cmd.ipAddress = "137.205.194.132"
+      cmd.os = "Window"
+      cmd.resolution = "New years"
+      cmd.recipient = AppCommentCommand.Recipients.DeptAdmin
 
-        cmd.applyInternal()
-        verify(mockMailSender, times(1)).send(mimeMessage)
+      cmd.applyInternal()
+      verify(mockMailSender, times(1)).send(mimeMessage)
 
-        mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(owner.getEmail))
-        mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
-        mimeMessage.getSubject should be("Tabula help")
+      mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(owner.getEmail))
+      mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
+      mimeMessage.getSubject should be("Tabula help")
 
-        // Check properties have been set
-        val text: String = mimeMessage.getContent match {
-          case string: String => string
-          case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
-        }
-
-        text should include("I'm coming for you")
-        text should include("Name: Billy Bob")
-        text should include("Email: billybob@warwick.ac.uk")
-        text should include("Usercode: cuscav")
+      // Check properties have been set
+      val text: String = mimeMessage.getContent match {
+        case string: String => string
+        case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
       }
+
+      text should include("I'm coming for you")
+      text should include("Name: Billy Bob")
+      text should include("Email: billybob@warwick.ac.uk")
+      text should include("Usercode: cuscav")
     }
   }
 
   @Test
-  def sendToWebTeamWithNothing(): Unit = {
+  def sendToWebTeamWithNothing(): Unit = withUser(code = null) {
     new Fixture {
       // Only message is required, so this should work even if the user doesn't fill anything out
       cmd.message = "I'm coming for you"
@@ -195,44 +193,42 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   }
 
   @Test
-  def sendToWebTeamFullyPopulated(): Unit = {
-    withUser("cuscav") {
-      currentUser.apparentUser.setFullName("Billy Bob")
-      currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
-      currentUser.apparentUser.setDepartmentCode(dept.code)
+  def sendToWebTeamFullyPopulated(): Unit = withUser("cuscav") {
+    currentUser.apparentUser.setFullName("Billy Bob")
+    currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
+    currentUser.apparentUser.setDepartmentCode(dept.code)
 
-      new Fixture {
-        cmd.message = "I'm coming for you"
-        cmd.url = "http://stabula.warwick.ac.uk/my/page"
-        cmd.browser = "Chrome"
-        cmd.ipAddress = "137.205.194.132"
-        cmd.os = "Window"
-        cmd.resolution = "New years"
-        cmd.recipient = AppCommentCommand.Recipients.WebTeam
+    new Fixture {
+      cmd.message = "I'm coming for you"
+      cmd.url = "http://stabula.warwick.ac.uk/my/page"
+      cmd.browser = "Chrome"
+      cmd.ipAddress = "137.205.194.132"
+      cmd.os = "Window"
+      cmd.resolution = "New years"
+      cmd.recipient = AppCommentCommand.Recipients.WebTeam
 
-        cmd.applyInternal()
-        verify(mockMailSender, times(1)).send(mimeMessage)
+      cmd.applyInternal()
+      verify(mockMailSender, times(1)).send(mimeMessage)
 
-        mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(adminEmail))
-        mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
-        mimeMessage.getSubject should be("Tabula support")
+      mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(adminEmail))
+      mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
+      mimeMessage.getSubject should be("Tabula support")
 
-        // Check properties have been set
-        val text: String = mimeMessage.getContent match {
-          case string: String => string
-          case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
-        }
-
-        text should include("I'm coming for you")
-        text should include("Name: Billy Bob")
-        text should include("Email: billybob@warwick.ac.uk")
-        text should include("Usercode: cuscav")
-        text should include("Current page: http://stabula.warwick.ac.uk/my/page")
-        text should include("Browser: Chrome")
-        text should include("OS: Window")
-        text should include("Screen resolution: New years")
-        text should include("IP address: 137.205.194.132")
+      // Check properties have been set
+      val text: String = mimeMessage.getContent match {
+        case string: String => string
+        case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
       }
+
+      text should include("I'm coming for you")
+      text should include("Name: Billy Bob")
+      text should include("Email: billybob@warwick.ac.uk")
+      text should include("Usercode: cuscav")
+      text should include("Current page: http://stabula.warwick.ac.uk/my/page")
+      text should include("Browser: Chrome")
+      text should include("OS: Window")
+      text should include("Screen resolution: New years")
+      text should include("IP address: 137.205.194.132")
     }
   }
 
