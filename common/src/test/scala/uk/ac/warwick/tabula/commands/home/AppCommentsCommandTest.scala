@@ -34,6 +34,7 @@ class AppCommentsCommandTest extends TestBase with Mockito with FreemarkerTestHe
   val adminEmail = "stabula@warwick.ac.uk"
 
   val owner = new User("owner")
+  owner.setFoundUser(true)
   owner.setEmail("owner@warwick.ac.uk")
   mockUserLookup.registerUserObjects(owner)
   val dept = new Department {
