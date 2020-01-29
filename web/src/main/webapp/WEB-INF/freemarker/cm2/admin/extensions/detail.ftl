@@ -67,6 +67,7 @@
 
 <@f.form
 method="post"
+enctype="multipart/form-data"
 class="modify-extension double-submit-protection"
 action="${formAction}"
 modelAttribute="modifyExtensionCommand"
@@ -82,6 +83,43 @@ modelAttribute="modifyExtensionCommand"
   <@bs3form.labelled_form_group "reviewerComments" "Comments">
     <@f.textarea path="reviewerComments" cssClass="form-control text big-textarea" maxlength=4000/>
   </@bs3form.labelled_form_group>
+
+  <@bs3form.filewidget
+    basename="file"
+    labelText="Supporting documentation"
+    types=[]
+    multiple=true
+  />
+
+  <#if modifyExtensionCommand.attachedFiles?has_content>
+    <@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
+      <ul class="unstyled">
+        <#list modifyExtensionCommand.attachedFiles as attachment>
+          <#assign url></#assign>
+          <li id="attachment-${attachment.id}" class="attachment">
+            <i class="fa fa-file-o"></i>
+            <a href="<@routes.cm2.extensionAttachment detail.extension attachment.name />"><#compress>
+                ${attachment.name}
+              </#compress></a>&nbsp;
+            <@f.hidden path="attachedFiles" value="${attachment.id}" />
+            <i class="fa fa-times-circle remove-attachment"></i>
+          </li>
+        </#list>
+      </ul>
+      <script nonce="${nonce()}">
+        jQuery(function ($) {
+          $(".remove-attachment").on("click", function (e) {
+            e.preventDefault();
+            $(this).closest("li.attachment").remove();
+          });
+        });
+      </script>
+      <div class="help-block">
+        This is a list of all supporting documents that have been attached to this extension request.
+        Click the remove link next to a document to delete it.
+      </div>
+    </@bs3form.labelled_form_group>
+  </#if>
 
   <@bs3form.errors "state"/>
 

@@ -2,17 +2,22 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.{Assignment, Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+
+import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 
 object ModifyExtensionCommand {
@@ -28,17 +33,34 @@ object ModifyExtensionCommand {
 }
 
 class ModifyExtensionCommandInternal(val extension: Extension, val submitter: CurrentUser) extends CommandInternal[Extension]
-  with ModifyExtensionState with ModifyExtensionValidation with TaskBenchmarking {
+  with ModifyExtensionState with ModifyExtensionValidation with BindListener {
 
-  this: ExtensionPersistenceComponent =>
+  self: ExtensionPersistenceComponent =>
+
+  override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
+    file.onBind(result)
+    result.popNestedPath()
+  }
 
   expiryDate = extension.expiryDate.orElse(extension.requestedExpiryDate).orNull
   reviewerComments = extension.reviewerComments
   state = extension.state
+  attachedFiles = JHashSet(extension.attachments)
 
   def copyTo(extension: Extension): Unit = {
     extension.expiryDate = expiryDate
     extension.updateState(state, reviewerComments)
+
+    if (extension.attachments != null) {
+      // delete attachments that have been removed
+      val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments.asScala -- attachedFiles.asScala
+      matchingAttachments.foreach(delete)
+    }
+
+    for (attachment <- file.attached.asScala) {
+      extension.addAttachment(attachment)
+    }
   }
 
   def applyInternal(): Extension = transactional() {
@@ -65,6 +87,9 @@ trait ModifyExtensionState {
   var expiryDate: DateTime = _
   var reviewerComments: String = _
   var state: ExtensionState = _
+
+  var file: UploadedFile = new UploadedFile
+  var attachedFiles: JSet[FileAttachment] = JSet()
 }
 
 trait ModifyExtensionValidation extends SelfValidating {
@@ -92,13 +117,9 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 
   override lazy val eventName: String = "ModifyExtension"
 
-  def describe(d: Description): Unit = {
-    d.assignment(extension.assignment)
-    d.module(extension.assignment.module)
-    d.studentIds(extension.universityId.toSeq)
-    d.studentUsercodes(extension.usercode)
-    d.extensionState(state)
-  }
+  def describe(d: Description): Unit =
+    d.extension(extension)
+     .fileAttachments(attachedFiles.asScala.toSeq)
 }
 
 trait ModifyExtensionNotification extends Notifies[Extension, Option[Extension]] {
