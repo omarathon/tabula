@@ -67,15 +67,20 @@ abstract class BulkAttendanceNoteCommand(
         })
 
         attendanceNote.note = note
-        if (attendanceNote.attachment != null && attachedFile == null) {
+
+        if (attendanceNote.attachment != null) {
           fileAttachmentService.deleteAttachments(Seq(attendanceNote.attachment))
           attendanceNote.attachment = null
         }
 
-        if (file.hasAttachments) {
+        if (attachedFile != null) {
+          attendanceNote.attachment = attachedFile.duplicate()
+          attendanceNote.attachment.temporary = false
+        } else if (file.hasAttachments) {
           attendanceNote.attachment = file.attached.iterator.next.duplicate()
           attendanceNote.attachment.temporary = false
         }
+
         attendanceNote.absenceType = absenceType
         attendanceNote.updatedBy = user.apparentId
         attendanceNote.updatedDate = DateTime.now
