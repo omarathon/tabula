@@ -10,23 +10,25 @@
     <div class="help-block"><a href="<@routes.cm2.feedbacktemplates department />">Create new feedback template</a></div>
   </@bs3form.labelled_form_group>
 
-  <@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated release for marking">
-    <@bs3form.checkbox path="automaticallyReleaseToMarkers">
-      <#assign automaticallyReleaseToMarkersPopoverContent>
-        <p>
-          When using a marking workflow, automatically release students to markers when the assignment closes. Students who do not submit work by the deadline
-          or have an extension are still released automatically on the closing date. Ensure you assign markers to students before the assignment closes.
-        </p>
-      </#assign>
+  <#if !assignment?? || assignment.hasWorkflow>
+    <@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated release for marking">
+      <@bs3form.checkbox path="automaticallyReleaseToMarkers">
+        <#assign automaticallyReleaseToMarkersPopoverContent>
+          <p>
+            When using a marking workflow, automatically release students to markers when the assignment closes. Students who do not submit work by the deadline
+            or have an extension are still released automatically on the closing date. Ensure you assign markers to students before the assignment closes.
+          </p>
+        </#assign>
 
-      <@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
-      Automatically release assignment to markers on the assignment closing date
-      <@fmt.help_popover id="help-automaticallyReleaseToMarkers" content=automaticallyReleaseToMarkersPopoverContent html=true />
-    </@bs3form.checkbox>
-    <div class="help-block">
-      Markers are notified of all students allocated to them, including students who have not submitted work.
-    </div>
-  </@bs3form.labelled_form_group>
+        <@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
+        Automatically release assignment to markers on the assignment closing date
+        <@fmt.help_popover id="help-automaticallyReleaseToMarkers" content=automaticallyReleaseToMarkersPopoverContent html=true />
+      </@bs3form.checkbox>
+      <div class="help-block">
+        Markers are notified of all students allocated to them, including students who have not submitted work.
+      </div>
+    </@bs3form.labelled_form_group>
+  </#if>
 
   <@bs3form.labelled_form_group path="collectMarks" labelText="Marks">
     <@bs3form.checkbox path="collectMarks">
@@ -59,7 +61,7 @@
 
   <@bs3form.labelled_form_group path="publishFeedback" labelText="Publish feedback to students">
     <@bs3form.checkbox path="publishFeedback">
-      <@f.checkbox path="publishFeedback" id="publishFeedback" />
+      <@f.checkbox path="publishFeedback" id="publishFeedback" data\-selector="#dissertation-checkbox" />
       Allow feedback to be published to students for this assignment
     </@bs3form.checkbox>
     <div class="help-block">
@@ -67,7 +69,7 @@
     </div>
   </@bs3form.labelled_form_group>
 
-  <fieldset id="dissertation-checkbox" <#if !command.publishFeedback>disabled</#if>>
+  <fieldset id="dissertation-checkbox">
     <@bs3form.labelled_form_group path="dissertation" labelText="Feedback turnaround time">
       <@bs3form.checkbox path="dissertation">
         <@f.checkbox path="dissertation" id="dissertation" />

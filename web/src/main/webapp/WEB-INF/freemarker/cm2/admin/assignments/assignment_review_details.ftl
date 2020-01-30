@@ -58,7 +58,9 @@
 
       <#assign feedbackTemplateName>${(assignment.feedbackTemplate.name)!'None'}</#assign>
       <@review_details 'Feedback template' feedbackTemplateName />
-      <@review_details 'Automatically release submissions to markers' sharedPropertiesForm.automaticallyReleaseToMarkers?string('Yes','No') />
+      <#if assignment.hasWorkflow>
+        <@review_details 'Automatically release submissions to markers' sharedPropertiesForm.automaticallyReleaseToMarkers?string('Yes','No') />
+      </#if>
       <@review_details 'Collect marks' sharedPropertiesForm.collectMarks?string('Yes','No') />
       <@review_details 'Credit bearing' sharedPropertiesForm.summative?string('Summative','Formative') />
       <@review_details 'Publish feedback to students' sharedPropertiesForm.publishFeedback?string('Yes','No') />
