@@ -96,6 +96,7 @@
                     <thead>
                     <tr>
                       <th>Sequence</th>
+                      <th>Type</th>
                       <th>Name</th>
                       <th>Weighting</th>
                       <th>Mark</th>
@@ -106,6 +107,7 @@
                     <#list moduleRegistrationAndComponent.components as component>
                       <tr>
                         <td>${component.upstreamGroup.sequence}</td>
+                        <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
                         <td>${component.upstreamGroup.name}</td>
                         <td>${component.upstreamGroup.assessmentComponent.weighting!0}%</td>
                         <td>${component.member.firstAgreedMark!}</td>
@@ -120,6 +122,41 @@
           </div>
         </div>
       </#list>
+
+      <h2>Examinations</h2>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Paper code and title</th>
+            <th>Section</th>
+            <th>Length</th>
+            <th>Reading time</th>
+            <th>Open book</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
+            <#list moduleRegistrationAndComponent.components as component>
+              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E'>
+                <tr>
+                  <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}</td>
+                  <td>??? (${component.upstreamGroup.name})</td>
+                  <td>???</td>
+                  <td>???</td>
+                  <td>???</td>
+                  <td>???</td>
+                  <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
+                </tr>
+              </#if>
+            </#list>
+          </#list>
+        </tbody>
+      </table>
+
+
 
     <#else>
 

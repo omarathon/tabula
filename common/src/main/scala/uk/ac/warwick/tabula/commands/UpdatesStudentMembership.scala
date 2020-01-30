@@ -211,7 +211,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
   val cats: Option[String] = assessmentComponent.cats
   val occurrence: String = group.occurrence
   val sequence: String = assessmentComponent.sequence
-  val assessmentType: String = Option(assessmentComponent.assessmentType).map(_.value).orNull // TAB-1174 remove Option wrap when non-null is in place
+  val assessmentType: String = assessmentComponent.assessmentType.value
 
   def resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.resitExpected.exists(identity))
 
