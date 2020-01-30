@@ -34,7 +34,7 @@
   </#macro>
 
   <#macro coursework_sits_groups command >
-    <#if command.availableUpstreamGroups?has_content>
+    <#if command.availableUpstreamGroups?has_content || command.notInUseUpstreamGroups?has_content >
       <div class="assessment-component form-group">
         <table id="sits-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
           <thead>
