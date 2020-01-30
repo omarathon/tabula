@@ -2,19 +2,24 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.{Assignment, Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object EditExtensionCommand {
   def apply(assignment: Assignment, student: User, currentUser: CurrentUser) =
@@ -31,9 +36,15 @@ object EditExtensionCommand {
 }
 
 class EditExtensionCommandInternal(val assignment: Assignment, val student: User, val submitter: CurrentUser) extends CommandInternal[Extension]
-  with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
+  with EditExtensionCommandState with EditExtensionCommandValidation with BindListener {
 
   self: ExtensionPersistenceComponent with UserLookupComponent =>
+
+  override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
+    file.onBind(result)
+    result.popNestedPath()
+  }
 
   val e: Option[Extension] = assignment.requestedOrApprovedExtensions.get(student.getUserId)
   e match {
@@ -60,12 +71,23 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
     extension.assignment = assignment
     extension.expiryDate = expiryDate
     extension.updateState(state, reviewerComments)
+
+    if (extension.attachments != null) {
+      // delete attachments that have been removed
+      val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments.asScala -- attachedFiles.asScala
+      matchingAttachments.foreach(delete)
+    }
+
+    for (attachment <- file.attached.asScala) {
+      extension.addAttachment(attachment)
+    }
   }
 
   def copyFrom(extension: Extension): Unit = {
     expiryDate = extension.expiryDate.orNull
     state = extension.state
     reviewerComments = extension.reviewerComments
+    attachedFiles = JHashSet(extension.attachments)
   }
 
 }
@@ -85,6 +107,9 @@ trait EditExtensionCommandState {
   var expiryDate: DateTime = _
   var reviewerComments: String = _
   var state: ExtensionState = ExtensionState.Unreviewed
+
+  var file: UploadedFile = new UploadedFile
+  var attachedFiles: JSet[FileAttachment] = JSet()
 
   var extension: Extension = _
 
@@ -227,11 +252,14 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
   override lazy val eventName: String = "EditExtension"
 
   def describe(d: Description): Unit = {
-    d.assignment(assignment)
-    d.module(assignment.module)
-    d.studentIds(Option(student.getWarwickId).toSeq)
-    d.studentUsercodes(student.getUserId)
-    d.extensionState(state)
+    if (isNew) {
+      d.assignment(assignment)
+       .studentIds(Option(student.getWarwickId).toSeq)
+       .studentUsercodes(student.getUserId)
+       .extensionState(state)
+    } else d.extension(extension)
+
+    d.fileAttachments(attachedFiles.asScala.toSeq)
   }
 }
 

@@ -372,6 +372,7 @@ abstract class Description {
     studentUsercodes(extension.usercode)
     studentIds(extension.universityId.toSeq)
     property("extension" -> extension.id)
+    extensionState(extension.state)
     if (extension.assignment != null) assignment(extension.assignment)
     this
   }
