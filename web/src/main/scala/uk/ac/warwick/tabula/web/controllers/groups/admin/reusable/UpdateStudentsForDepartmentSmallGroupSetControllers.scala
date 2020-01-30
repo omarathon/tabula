@@ -7,6 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.manage.FindStudentsForSchemeCommandResult
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.groups.web.Routes
@@ -20,7 +21,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   validatesSelf[SelfValidating]
 
   type UpdateStudentsForUserGroupCommand = Appliable[DepartmentSmallGroupSet]
-  type FindStudentsForUserGroupCommand = Appliable[FindStudentsForUserGroupCommandResult] with PopulateOnForm with FindStudentsForUserGroupCommandState with UpdatesFindStudentsForUserGroupCommand
+  type FindStudentsForUserGroupCommand = Appliable[FindStudentsForUserGroupCommandResult] with PopulateOnForm with FindStudentsForUserGroupCommandState with UpdatesFindStudentsForUserGroupCommand with DeserializesFilter
   type EditUserGroupMembershipCommand = Appliable[EditUserGroupMembershipCommandResult] with PopulateOnForm with AddsUsersToEditUserGroupMembershipCommand with RemovesUsersFromEditUserGroupMembershipCommand with ResetsMembershipInEditUserGroupMembershipCommand
 
   @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters")
@@ -84,7 +85,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
       "expandFind" -> expandFind,
       "expandManual" -> expandManual,
       "SITSInFlux" -> set.academicYear.isSITSInFlux(LocalDate.now),
-      "returnTo" -> getReturnTo("")
+      "returnTo" -> getReturnTo(""),
+      "ManageDepartmentSmallGroupsMappingParameters" -> ManageDepartmentSmallGroupsMappingParameters
     ).crumbs(
       Breadcrumbs.Department(set.department, set.academicYear),
       Breadcrumbs.Reusable(set.department, set.academicYear)
@@ -173,6 +175,19 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
     findCommand.update(editMembershipCommandResult)
     val findStudentsCommandResult = findCommand.apply()
     render(set, findStudentsCommandResult, editMembershipCommandResult, expandManual = true)
+  }
+
+  @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.resetFilters))
+  def resetFilters(
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
+    @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+  ): Mav = {
+    findCommand.deserializeFilter("")
+    findCommand.staticStudentIds.clear()
+    findCommand.doFind = false
+    val editMembershipCommandResult = editMembershipCommand.apply()
+    render(set, FindStudentsForUserGroupCommandResult(findCommand.staticStudentIds, Seq()), editMembershipCommandResult, expandFind = true)
   }
 
   protected def submit(
