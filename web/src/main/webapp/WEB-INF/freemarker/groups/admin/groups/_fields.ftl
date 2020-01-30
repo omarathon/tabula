@@ -29,7 +29,7 @@
       </@bs3form.radio>
       <#if features.smallGroupTeachingStudentSignUp>
         <@bs3form.radio>
-          <@f.radiobutton path="allocationMethod" value="StudentSignUp" selector=".student-sign-up-options" />
+          <@f.radiobutton path="allocationMethod" value="StudentSignUp" data\-selector=".student-sign-up-options" />
           Self sign-up
           <@fmt.help_popover id="allocationMethod-ssu" content="Allow students to sign up for groups (you can edit the group allocation later)" />
         </@bs3form.radio>
@@ -37,7 +37,7 @@
       <#if features.smallGroupCrossModules>
         <#if departmentSmallGroupSets?size gt 0>
           <@bs3form.radio>
-            <@f.radiobutton path="allocationMethod" value="Linked" selector=".linked-options" />
+            <@f.radiobutton path="allocationMethod" value="Linked" data\-selector=".linked-options" />
             Linked to
             <span class="linked-options" style="display: inline-block;">
 							<@f.select path="linkedDepartmentSmallGroupSet" id="linkedDepartmentSmallGroupSet" cssClass="form-control">
@@ -66,6 +66,7 @@
     </@bs3form.labelled_form_group>
   </#if>
 
+  <div class="membership-style-options">
     <@bs3form.labelled_form_group path="membershipStyle" labelText="Students linked by">
         <@bs3form.radio>
             <@f.radiobutton path="membershipStyle" value="SitsQuery" />
@@ -77,24 +78,25 @@
         </@bs3form.radio>
     </@bs3form.labelled_form_group>
 
-  <div class="alert alert-danger hide" id="changeMembershipStyleWarning">
-    If you change how students are linked to this small group set,
-    any existing students are removed and group allocations are reset.
-  </div>
+    <div class="alert alert-danger hide" id="changeMembershipStyleWarning">
+      If you change how students are linked to this small group set,
+      any existing students are removed and group allocations are reset.
+    </div>
 
-  <script nonce="${nonce()}">
-    jQuery(function($) {
-      function getSelectedMembershipStyle() {
-        return $('input[name=membershipStyle]:checked').val();
-      }
+    <script nonce="${nonce()}">
+      jQuery(function($) {
+        function getSelectedMembershipStyle() {
+          return $('input[name=membershipStyle]:checked').val();
+        }
 
-      var originalStyle = getSelectedMembershipStyle();
+        var originalStyle = getSelectedMembershipStyle();
 
-      $('input[name=membershipStyle]').on('change', function () {
-        $('#changeMembershipStyleWarning').toggleClass('hide', getSelectedMembershipStyle() === originalStyle);
+        $('input[name=membershipStyle]').on('change', function () {
+          $('#changeMembershipStyleWarning').toggleClass('hide', getSelectedMembershipStyle() === originalStyle);
+        });
       });
-    });
-  </script>
+    </script>
+  </div>
 
   <#if features.smallGroupTeachingStudentSignUp>
     <@bs3form.checkbox path="studentsCanSeeTutorName">
@@ -131,8 +133,21 @@
 
   <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
+      function showHideMembershipMethod() {
+        var value = $("input:radio[name='allocationMethod']:checked").val();
+        if (value === 'Linked') {
+          $('.membership-style-options').hide();
+        } else {
+          $('.membership-style-options').show();
+        }
+      }
+
       // Set up radios to show/hide self-sign up options fields.
-      $("input:radio[name='allocationMethod']").radioControlled({mode: 'hidden'});
+      $("input:radio[name='allocationMethod']")
+        .on('input change', showHideMembershipMethod)
+        .radioControlled({mode: 'hidden'});
+
+      showHideMembershipMethod();
     });
   </script>
 </#escape>
