@@ -220,6 +220,8 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
     "meetingDate" -> meetingDate,
     "relationships" -> relationships
   )
+
+  override def humanReadableId: String = s"Meeting between $allParticipantNames on $meetingDate"
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {
