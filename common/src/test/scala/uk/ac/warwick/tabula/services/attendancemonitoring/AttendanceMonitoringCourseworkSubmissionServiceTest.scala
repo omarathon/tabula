@@ -131,6 +131,17 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
     }
   }
 
+
+  @Test
+  def submissionToOpenEndedOutsidePointPeriod(): Unit = {
+    new Fixture {
+      assignment.openEnded = true
+      submission.submittedDate = assignmentPoint.startDate.minusDays(1).toDateTimeAtStartOfDay()
+      mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
+      service.getCheckpoints(submission).size should be(0)
+    }
+  }
+
   @Test
   def noPoints(): Unit = {
     new Fixture {
