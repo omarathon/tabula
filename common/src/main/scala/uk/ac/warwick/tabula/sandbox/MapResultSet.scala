@@ -10,9 +10,9 @@ class MapResultSet(map: Map[String, _]) extends AbstractResultSet {
 
   override def getInt(columnLabel: String): Int = getObject(columnLabel, classOf[Int])
 
-  override def getDate(columnLabel: String) = new java.sql.Date(getObject(columnLabel, classOf[DateTime]).getMillis)
+  override def getDate(columnLabel: String) = Option(getObject(columnLabel, classOf[DateTime])).map(dt => new java.sql.Date(dt.getMillis)).orNull
 
-  override def getBigDecimal(columnLabel: String): _root_.uk.ac.warwick.tabula.JavaImports.JBigDecimal = getObject(columnLabel, classOf[JBigDecimal])
+  override def getBigDecimal(columnLabel: String): JBigDecimal = getObject(columnLabel, classOf[JBigDecimal])
 
   override def getObject[A](columnLabel: String, objectType: Class[A]): A = map(columnLabel).asInstanceOf[A]
 
