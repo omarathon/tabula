@@ -38,7 +38,7 @@ class ImportStudentRowCommandInternal(
   rows: Seq[SitsStudentRow],
   reasonableAdjustmentsObject: Option[ReasonableAdjustments],
   importCommandFactory: ImportCommandFactory
-) extends ImportMemberCommand(member, ssoUser, None, rows.headOption)
+) extends ImportMemberCommand(member, ssoUser, None, rows.sorted.lastOption)
   with Describable[Member]
   with ImportStudentRowCommandState
   with PropertyCopying
@@ -46,7 +46,7 @@ class ImportStudentRowCommandInternal(
 
   self: ProfileServiceComponent =>
 
-  val studentRow: Option[SitsStudentRow] = rows.headOption
+  val studentRow: Option[SitsStudentRow] = rows.sorted.lastOption
 
   studentRow.foreach { row =>
     // these properties are from membership but may be overwritten by the SITS data (working theory)
