@@ -29,6 +29,7 @@ trait JavaImports {
   type JConcurrentMap[K, V] = java.util.concurrent.ConcurrentMap[K, V] with ScalaConcurrentMapHelpers[K, V]
   type JSet[A] = java.util.Set[A]
   type JInteger = java.lang.Integer
+  type JDouble = java.lang.Double
   type JLong = java.lang.Long
   type JBigDecimal = java.math.BigDecimal
   type JBigInteger = java.math.BigInteger

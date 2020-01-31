@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 
 import scala.util.parsing.json.JSON
@@ -91,35 +92,35 @@ case class TurnitinLtiResponse(
         theJson.get("outcome_originalityreport") match {
           case Some(reports: Map[String, Any]@unchecked) =>
             reports.get("breakdown") match {
-              case Some(breakdowns: Map[String, Double]@unchecked) =>
+              case Some(breakdowns: Map[String, JDouble]@unchecked) =>
                 breakdowns.get("publications_score") match {
-                  case publicationsScore if publicationsScore.nonEmpty =>
-                    results.publication_overlap = publicationsScore
+                  case publicationsScore if publicationsScore.flatMap(Option.apply).nonEmpty =>
+                    results.publication_overlap = Some(publicationsScore.get)
                   case _ =>
                 }
                 breakdowns.get("internet_score") match {
-                  case internetScore if internetScore.nonEmpty =>
-                    results.web_overlap = internetScore
+                  case internetScore if internetScore.flatMap(Option.apply).nonEmpty =>
+                    results.web_overlap = Some(internetScore.get)
                   case _ =>
                 }
                 breakdowns.get("submitted_works_score") match {
-                  case submittedWorksScore if submittedWorksScore.nonEmpty =>
-                    results.student_overlap = submittedWorksScore
+                  case submittedWorksScore if submittedWorksScore.flatMap(Option.apply).nonEmpty =>
+                    results.student_overlap = Some(submittedWorksScore.get)
                   case _ =>
                 }
               case _ =>
             }
             reports.get("numeric") match {
-              case Some(numerics: Map[String, Double]@unchecked) =>
+              case Some(numerics: Map[String, JDouble]@unchecked) =>
                 numerics.get("score") match {
-                  case score if score.nonEmpty => results.overlap = score
+                  case score if score.flatMap(Option.apply).nonEmpty => results.overlap = Some(score.get)
                   case _ =>
                 }
               case _ =>
             }
-          case _ => Nil
+          case _ =>
         }
-      case _ => Nil
+      case _ =>
     }
     results
   }
