@@ -146,7 +146,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
     report.lastReportRequest = DateTime.now
 
     turnitinLtiService.getSubmissionDetails(report.turnitinId) match {
-      case response if response.success && response.submissionInfo().overlap.isDefined =>
+      case response if response.success && response.submissionInfo().overlap.nonEmpty =>
         val result = response.submissionInfo()
         report.overlap = result.overlap.map(_.toInt)
         report.publicationOverlap = result.publication_overlap.map(_.toInt)
