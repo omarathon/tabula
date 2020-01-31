@@ -223,7 +223,7 @@
 							</span>
           </button>
 
-          <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
+          <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
             <@spring.bind path=path>
               <div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
                 <a class="btn btn-xs btn-default dropdown-toggle" href="#" data-toggle="dropdown">
@@ -234,6 +234,9 @@
                 <div tabindex="-1" class="dropdown-menu filter-list">
                   <button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
                   <ul>
+                    <#if customPicker?has_content>
+                      <li><#noescape>${customPicker}</#noescape></li>
+                    </#if>
                     <#if allItems?has_content>
                       <#list allItems as item>
                         <#local isValid = (allItems?size == validItems?size)!true />
@@ -281,8 +284,15 @@
           </#function>
 
           <#assign placeholder = "All modules" />
+          <#assign modulesCustomPicker>
+            <div class="module-search input-group">
+              <input class="module-search-query module-picker module prevent-reload form-control" type="text" value="" placeholder="Search for a module"
+                     data-department="${department.code}" data-name="moduleFilters" data-wrap="true" />
+              <span class="input-group-addon"><i class="fa fa-search"></i></span>
+            </div>
+          </#assign>
           <#assign currentfilter><@current_filter_value "moduleFilters" placeholder; f>${f.module.code?upper_case}</@current_filter_value></#assign>
-          <@filter "moduleFilters" placeholder currentfilter allModuleFilters; f>
+          <@filter path="moduleFilters" placeholder=placeholder currentFilter=currentfilter allItems=allModuleFilters customPicker=modulesCustomPicker; f>
             <input type="checkbox" name="${status.expression}"
                    value="${f.name}"
                    data-short-value="${f.description}"
@@ -462,6 +472,8 @@
         $('#adminCommand input').on('change', function (e) {
           // Load the new results
           var $checkbox = $(this);
+          if ($checkbox.is('.prevent-reload')) return;
+
           var $form = $checkbox.closest('form');
 
           doRequest($form);
@@ -507,6 +519,49 @@
           });
 
           doRequest($('#adminCommand'));
+        });
+
+        var updateFilterFromPicker = function ($picker, name, value, shortValue) {
+          if (value === undefined || value.length === 0)
+            return;
+
+          shortValue = shortValue || value;
+
+          var $ul = $picker.closest('ul');
+
+          var $li = $ul.find('input[value="' + value + '"]').closest('li');
+          if ($li.length) {
+            $li.find('input').prop('checked', true);
+            if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+              $li.insertBefore($ul.find('li.check-list-item:first'));
+            }
+          } else {
+            $li = $('<li/>').addClass('check-list-item').append(
+              $('<label/>').addClass('checkbox').append(
+                $('<input/>').attr({
+                  'type': 'checkbox',
+                  'name': name,
+                  'value': value,
+                  'checked': true
+                }).data('short-value', shortValue)
+              ).append(
+                $picker.val()
+              )
+            ).insertBefore($ul.find('li.check-list-item:first'));
+          }
+
+          doRequest($('#adminCommand'));
+          updateFilter($picker);
+        };
+
+        $('.module-search-query').on('change', function () {
+          var $picker = $(this);
+          if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+            return;
+
+          updateFilterFromPicker($picker, 'moduleFilters', 'Module(' + $picker.data('modulecode') + ')', $picker.data('modulecode').toUpperCase());
+
+          $picker.data('modulecode', '').val('');
         });
 
         doRequest($('#adminCommand'));
