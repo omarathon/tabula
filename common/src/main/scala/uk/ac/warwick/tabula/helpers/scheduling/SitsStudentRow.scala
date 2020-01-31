@@ -13,6 +13,17 @@ import scala.util.Try
 
 object SitsStudentRow {
   def apply(rs: ResultSet): SitsStudentRow = new SitsStudentRow(rs)
+
+  /**
+   * Order by (ascending)
+   *
+   * - SPR significance (least significant first)
+   * - SPR code
+   * - SCE sequence number
+   */
+  implicit val defaultOrdering: Ordering[SitsStudentRow] = Ordering.by { row =>
+    (row.mostSignificant, row.sprCode, row.sceSequenceNumber)
+  }
 }
 
 /**
