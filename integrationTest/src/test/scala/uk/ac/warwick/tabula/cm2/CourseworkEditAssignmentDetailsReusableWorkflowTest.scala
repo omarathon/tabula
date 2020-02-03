@@ -119,10 +119,11 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
     withAssignment("xxx02", "Moderated marking-1A") { _ =>
       editAssignment(moderatedworkflowId)
-      val checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", true), ("collectMarks", false), ("dissertation", false))
+      // TAB-5692 We no longer show 'Automated release for marking' on assignments without a marking workflow
+      val relevantCheckboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("collectMarks", false), ("dissertation", false))
 
       amendAssignmentDetails(modifiedAssignmentTitle, "", confirmModal = false)
-      amendAssignmentFeedback(checkboxFeedbackFieldDetails)
+      amendAssignmentFeedback(relevantCheckboxFeedbackFieldDetails)
       assigmentStudentDetails(studentList)
 
       val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
@@ -140,7 +141,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
         ++ textFieldOptionFieldDetails
         ++ textAreaFieldOptionFieldDetails
         ++ singleSelOptionFieldDetails
-        ++ checkboxFeedbackFieldDetails.map { case (field, v) => field -> v.toString }
+        ++ relevantCheckboxFeedbackFieldDetails.map { case (field, v) => field -> v.toString }
         ++ Seq(("title", modifiedAssignmentTitle), ("workflowName", moderatedWorkflowName), ("workflowType", "Reusable"))
         ++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
         ++ Seq(("studentList", studentList.size.toString))
@@ -228,7 +229,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
   }
 
   def amendAssignmentFeedback(checkboxFieldDetails: Seq[(String, Boolean)]): Unit = {
-    When("I go to feedback assignemnt page")
+    When("I go to feedback assignment page")
     eventually(currentUrl should include("/feedback"))
     checkboxFieldDetails.foreach { case (fieldName, checked) =>
       And(s"I amend checkbox $fieldName on feedback details form")
@@ -325,7 +326,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
   }
 
   def checkUnallocatedStudents(studentCount: Int, studentListId: Seq[String]): Unit = {
-    When("I go to marker assignemnt page")
+    When("I go to marker assignment page")
     eventually(currentUrl should include("/markers"))
     val form = webDriver.findElement(By.id("command"))
     And("I check unallocated student list")
@@ -423,7 +424,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       case None => pageSource contains "Marking workflow" should be(false)
     }
     //assignment feedback page details
-    checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+    if (workflowType.isDefined){
+      checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+    }
     checkReviewTabRow(labels, "Collect marks", getFieldValue("collectMarks", fieldDetails))
 
     //students page
