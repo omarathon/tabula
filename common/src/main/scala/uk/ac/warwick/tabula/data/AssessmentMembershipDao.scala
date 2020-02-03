@@ -105,7 +105,7 @@ trait AssessmentMembershipDao {
   /**
     * Get SITS enrolled assignments/small group sets *only* - doesn't include any assignments where someone
     * has modified the members group. Also doesn't take into account assignments where the
-    * user has been manually excluded. AssignmentMembershipService.getEnrolledAssignemnts
+    * user has been manually excluded. AssignmentMembershipService.getEnrolledAssignments
     * takes this into account.
     */
   def getSITSEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment]
