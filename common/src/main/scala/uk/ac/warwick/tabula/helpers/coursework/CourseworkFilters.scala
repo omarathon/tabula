@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
   * state of a single student's submission workflow on an assignment, containing the
   * submission, extension and feedback where available). Provides a predicate for
   * filtering Student objects, and an applies() method to see whether it is even relevant
-  * for an assigment (for example, if an assignment doesn't take submissions, there's no
+  * for an assignment (for example, if an assignment doesn't take submissions, there's no
   * point offering a filter for Unsubmitted students).
   */
 sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[CourseworkFilter] {
