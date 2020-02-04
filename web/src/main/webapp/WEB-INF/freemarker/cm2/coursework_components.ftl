@@ -8,6 +8,47 @@
 
 <#import "*/modal_macros.ftlh" as modal />
 
+<#macro all_student_assignment_lists studentInformation>
+    <#if !studentInformation.empty>
+      <@student_assignment_list
+        id="student-action"
+        title="Awaiting submission"
+        assignments=studentInformation.actionRequiredAssignments
+        empty_message="You have no assignments that you need to submit in Tabula."
+        expand_by_default=true
+        show_submission_progress=true
+        hide_late_formative=true
+      />
+
+      <@student_assignment_list
+        id="student-noaction"
+        title="Awaiting feedback"
+        assignments=studentInformation.noActionRequiredAssignments
+        empty_message="You have no assignments awaiting feedback in Tabula."
+        expand_by_default=(!studentInformation.actionRequiredAssignments?has_content)
+      />
+
+      <@student_assignment_list
+        id="student-upcoming"
+        title="Upcoming"
+        assignments=studentInformation.upcomingAssignments
+        empty_message="You have no upcoming assignments in Tabula."
+        show_submission_progress=true
+        expand_by_default=(!studentInformation.actionRequiredAssignments?has_content && !studentInformation.noActionRequiredAssignments?has_content)
+      />
+
+      <@student_assignment_list
+        id="student-completed"
+        title="Feedback available"
+        assignments=studentInformation.completedAssignments
+        empty_message="You have no assignments with feedback available in Tabula."
+        expand_by_default=(!studentInformation.actionRequiredAssignments?has_content && !studentInformation.noActionRequiredAssignments?has_content && !studentInformation.upcomingAssignments?has_content)
+      />
+    <#else>
+      You do not currently have any assignments in Tabula.
+    </#if>
+</#macro>
+
 <#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
   <span id="${id}-container">
     <#local has_late_formative = false />
