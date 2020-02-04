@@ -16,11 +16,12 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/groups/student/{member}/attendance/{academicYear}"))
 class StudentGroupAttendanceController extends GroupsController {
 
-  @ModelAttribute("command") def command(@PathVariable member: Member, @PathVariable academicYear: AcademicYear) =
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable academicYear: AcademicYear): ListStudentGroupAttendanceCommand.Command =
     ListStudentGroupAttendanceCommand(member, academicYear)
 
   @RequestMapping
-  def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance], @PathVariable member: Member): Mav = {
+  def showAttendance(@ModelAttribute("command") cmd: ListStudentGroupAttendanceCommand.Command, @PathVariable member: Member): Mav = {
     val info = cmd.apply()
     Mav("groups/students_group_attendance",
       "seminarAttendanceCommandResult" -> info,

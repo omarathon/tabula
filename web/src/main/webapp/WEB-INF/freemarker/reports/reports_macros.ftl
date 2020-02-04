@@ -412,3 +412,76 @@
     });
   </script>
 </#macro>
+
+<#macro smallGroupAttendanceRegisterReportScript>
+  <script nonce="${nonce()}">
+    jQuery(function ($) {
+      if (window.ReportBuilder === undefined)
+        return false;
+
+      window.ReportBuilder.rowKey = 'events';
+
+      window.ReportBuilder.buildHeader = function () {
+        var container = $('<tr/>');
+        container.append(
+          $('<th/>').addClass('sortable').text('Module code')
+        ).append(
+          $('<th/>').addClass('sortable').text('Small group set')
+        ).append(
+          $('<th/>').addClass('sortable').text('Small group')
+        ).append(
+          $('<th/>').addClass('sortable').text('Tutor(s)')
+        ).append(
+          $('<th/>').addClass('sortable').text('Event date')
+        ).append(
+          $('<th/>').addClass('sortable').text('Latest recorded attendance')
+        ).append(
+          $('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').attr('title', 'Unrecorded'))
+        );
+
+        return container;
+      };
+
+      window.ReportBuilder.buildRow = function (event) {
+        var container = $('<tr/>');
+        container.append(
+          $('<td/>').text(event.moduleCode)
+        ).append(
+          $('<td/>').text(event.setName)
+        ).append(
+          $('<td/>').text(event.groupName)
+        ).append(
+          $('<td/>').text(event.tutors)
+        ).append(
+          $('<td/>').text(event.eventDate).data('sortby', event.eventDateISO)
+        );
+
+        if (event.latestRecordedAttendance) {
+          var cell = $('<td/>').text(event.latestRecordedAttendance).data('sortby', event.latestRecordedAttendanceISO);
+
+          if (event.latestRecordedAttendanceISO > event.eventDateISO) {
+            cell.append(
+              $('<i />').addClass('fal fa-exclamation-triangle text-warning')
+            );
+          }
+
+          container.append(cell);
+        } else {
+          container.append($('<td />').data('sortby', '1970-01-01'));
+        }
+
+        if (event.late === "true") {
+          container.append(
+            $('<td/>').addClass('unrecorded').append(
+              $('<span/>').addClass('badge progress-bar-' + ((event.unrecorded > 0) ? 'warning' : 'success')).text(event.unrecorded)
+            )
+          );
+        } else {
+          container.append($('<td/>').append($('<i/>').addClass('fa fa-fw fa-minus unrecorded')));
+        }
+
+        return container;
+      };
+    });
+  </script>
+</#macro>

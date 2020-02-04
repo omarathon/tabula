@@ -1,40 +1,35 @@
 package uk.ac.warwick.tabula.commands.groups
 
+import enumeratum.{Enum, EnumEntry}
 import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.SortedMap
-import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
-sealed abstract class SmallGroupAttendanceState {
-  def getName: String = toString
+sealed abstract class SmallGroupAttendanceState extends EnumEntry {
+  def getName: String = entryName
 }
 
-object SmallGroupAttendanceState {
-
+object SmallGroupAttendanceState extends Enum[SmallGroupAttendanceState] {
   case object Attended extends SmallGroupAttendanceState
-
   case object MissedAuthorised extends SmallGroupAttendanceState
-
   case object MissedUnauthorised extends SmallGroupAttendanceState
-
   case object NotRecorded extends SmallGroupAttendanceState
-
   case object Late extends SmallGroupAttendanceState
-
   case object NotExpected extends SmallGroupAttendanceState // The user is no longer in the group so is not expected to attend
-
   case object NotExpectedPast extends SmallGroupAttendanceState // The user wasn't in the group when this event took place
+
+  override def values: IndexedSeq[SmallGroupAttendanceState] = findValues
 
   def from(attendance: Option[SmallGroupEventAttendance]): SmallGroupAttendanceState = attendance.map(_.state) match {
     case Some(AttendanceState.Attended) => Attended
@@ -47,7 +42,7 @@ object SmallGroupAttendanceState {
 
 object ViewSmallGroupAttendanceCommand {
   type EventInstance = (SmallGroupEvent, SmallGroupEventOccurrence.WeekNumber)
-  type PerUserAttendance = SortedMap[User, SortedMap[EventInstance, SmallGroupAttendanceState]]
+  type PerUserAttendance = SortedMap[User, SortedMap[EventInstance, (SmallGroupAttendanceState, Option[SmallGroupEventAttendance])]]
   type PerUserAttendanceNotes = Map[User, Map[EventInstance, SmallGroupEventAttendanceNote]]
 
   case class SmallGroupAttendanceInformation(
@@ -56,7 +51,9 @@ object ViewSmallGroupAttendanceCommand {
     notes: PerUserAttendanceNotes
   )
 
-  def apply(group: SmallGroup) =
+  type Command = Appliable[SmallGroupAttendanceInformation]
+
+  def apply(group: SmallGroup): Command =
     new ViewSmallGroupAttendanceCommand(group)
       with ComposableCommand[SmallGroupAttendanceInformation]
       with ViewSmallGroupAttendancePermissions
@@ -97,29 +94,23 @@ object ViewSmallGroupAttendanceCommand {
   def attendanceForStudent(
     allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])],
     isLate: EventInstance => Boolean
-  )(user: User): SortedMap[(SmallGroupEvent, WeekNumber), SmallGroupAttendanceState] = {
+  )(user: User): SortedMap[(SmallGroupEvent, WeekNumber), (SmallGroupAttendanceState, Option[SmallGroupEventAttendance])] = {
     val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
       val instance = (event, week)
-      val attendance =
-        SmallGroupAttendanceState.from(
-          occurrence.flatMap {
-            _.attendance.asScala.find {
-              _.universityId == user.getWarwickId
-            }
-          }
-        )
+      val attendance = occurrence.flatMap(_.attendance.asScala.find(_.universityId == user.getWarwickId))
+      val attendanceState = SmallGroupAttendanceState.from(attendance)
 
       val state =
-        if (attendance == SmallGroupAttendanceState.NotRecorded)
+        if (attendanceState == SmallGroupAttendanceState.NotRecorded)
           if (!event.group.students.includesUser(user))
             SmallGroupAttendanceState.NotExpected
           else if (isLate(event, week))
             SmallGroupAttendanceState.Late
           else
-            attendance
-        else attendance
+            attendanceState
+        else attendanceState
 
-      instance -> state
+      instance -> (state, attendance)
     }
 
     SortedMap(userAttendance: _*)

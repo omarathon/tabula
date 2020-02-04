@@ -69,12 +69,13 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
     // user5 turned up to the first occurrence and then left
 
     // Recorded attendance for week 1 and both in 3 - rest haven't happened yet, 2 is missing
-    def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState): Unit = {
+    def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState): SmallGroupEventAttendance = {
       val attendance = new SmallGroupEventAttendance
       attendance.occurrence = occurrence
       attendance.universityId = user.getWarwickId
       attendance.state = state
       occurrence.attendance.add(attendance)
+      attendance
     }
 
     // Everyone turned up for week 1
@@ -82,32 +83,32 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
     occurrence1.id = "occurrence1"
     occurrence1.event = event2
     occurrence1.week = 1
-    attendance(occurrence1, user1, AttendanceState.Attended)
-    attendance(occurrence1, user2, AttendanceState.Attended)
-    attendance(occurrence1, user3, AttendanceState.Attended)
-    attendance(occurrence1, user4, AttendanceState.Attended)
-    attendance(occurrence1, user5, AttendanceState.Attended)
+    val attendanceO1U1: SmallGroupEventAttendance = attendance(occurrence1, user1, AttendanceState.Attended)
+    val attendanceO1U2: SmallGroupEventAttendance = attendance(occurrence1, user2, AttendanceState.Attended)
+    val attendanceO1U3: SmallGroupEventAttendance = attendance(occurrence1, user3, AttendanceState.Attended)
+    val attendanceO1U4: SmallGroupEventAttendance = attendance(occurrence1, user4, AttendanceState.Attended)
+    val attendanceO1U5: SmallGroupEventAttendance = attendance(occurrence1, user5, AttendanceState.Attended)
 
     // User3 missed the first seminar in week 3, user4 missed the second
     val occurrence2 = new SmallGroupEventOccurrence
     occurrence2.id = "occurrence2"
     occurrence2.event = event1
     occurrence2.week = 3
-    attendance(occurrence2, user1, AttendanceState.Attended)
-    attendance(occurrence2, user2, AttendanceState.Attended)
-    attendance(occurrence2, user3, AttendanceState.MissedUnauthorised)
-    attendance(occurrence2, user4, AttendanceState.Attended)
-    attendance(occurrence2, user5, AttendanceState.MissedUnauthorised)
+    val attendanceO2U1: SmallGroupEventAttendance = attendance(occurrence2, user1, AttendanceState.Attended)
+    val attendanceO2U2: SmallGroupEventAttendance = attendance(occurrence2, user2, AttendanceState.Attended)
+    val attendanceO2U3: SmallGroupEventAttendance = attendance(occurrence2, user3, AttendanceState.MissedUnauthorised)
+    val attendanceO2U4: SmallGroupEventAttendance = attendance(occurrence2, user4, AttendanceState.Attended)
+    val attendanceO2U5: SmallGroupEventAttendance = attendance(occurrence2, user5, AttendanceState.MissedUnauthorised)
 
     val occurrence3 = new SmallGroupEventOccurrence
     occurrence3.id = "occurrence3"
     occurrence3.event = event2
     occurrence3.week = 3
-    attendance(occurrence3, user1, AttendanceState.Attended)
-    attendance(occurrence3, user2, AttendanceState.Attended)
-    attendance(occurrence3, user3, AttendanceState.Attended)
-    attendance(occurrence3, user4, AttendanceState.MissedUnauthorised)
-    attendance(occurrence3, user5, AttendanceState.MissedUnauthorised)
+    val attendanceO3U1: SmallGroupEventAttendance = attendance(occurrence3, user1, AttendanceState.Attended)
+    val attendanceO3U2: SmallGroupEventAttendance = attendance(occurrence3, user2, AttendanceState.Attended)
+    val attendanceO3U3: SmallGroupEventAttendance = attendance(occurrence3, user3, AttendanceState.Attended)
+    val attendanceO3U4: SmallGroupEventAttendance = attendance(occurrence3, user4, AttendanceState.MissedUnauthorised)
+    val attendanceO3U5: SmallGroupEventAttendance = attendance(occurrence3, user5, AttendanceState.MissedUnauthorised)
   }
 
   @Test
@@ -165,11 +166,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
         attendanceSeqs should be(Seq(
           (autumnTerm, Seq(
             (group, Seq(
-              (1, Seq(((event2, 1), Attended))),
-              (2, Seq(((event1, 2), Late))),
-              (3, Seq(((event1, 3), Attended), ((event2, 3), Attended))),
-              (4, Seq(((event1, 4), NotRecorded))),
-              (7, Seq(((event2, 7), NotRecorded)))
+              (1, Seq(((event2, 1), (Attended, Some(attendanceO1U1))))),
+              (2, Seq(((event1, 2), (Late, None)))),
+              (3, Seq(((event1, 3), (Attended, Some(attendanceO2U1))), ((event2, 3), (Attended, Some(attendanceO3U1))))),
+              (4, Seq(((event1, 4), (NotRecorded, None)))),
+              (7, Seq(((event2, 7), (NotRecorded, None))))
             ))
           ))
         ))
@@ -211,11 +212,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
         attendanceSeqs should be(Seq(
           (autumnTerm, Seq(
             (group, Seq(
-              (1, Seq(((event2, 1), Attended))),
-              (2, Seq(((event1, 2), Late))),
-              (3, Seq(((event1, 3), MissedUnauthorised), ((event2, 3), Attended))),
-              (4, Seq(((event1, 4), NotRecorded))),
-              (7, Seq(((event2, 7), NotRecorded)))
+              (1, Seq(((event2, 1), (Attended, Some(attendanceO1U3))))),
+              (2, Seq(((event1, 2), (Late, None)))),
+              (3, Seq(((event1, 3), (MissedUnauthorised, Some(attendanceO2U3))), ((event2, 3), (Attended, Some(attendanceO3U3))))),
+              (4, Seq(((event1, 4), (NotRecorded, None)))),
+              (7, Seq(((event2, 7), (NotRecorded, None))))
             ))
           ))
         ))
@@ -257,11 +258,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
         attendanceSeqs should be(Seq(
           (autumnTerm, Seq(
             (group, Seq(
-              (1, Seq(((event2, 1), Attended))),
-              (2, Seq(((event1, 2), NotExpected))),
-              (3, Seq(((event1, 3), MissedUnauthorised), ((event2, 3), MissedUnauthorised))),
-              (4, Seq(((event1, 4), NotExpected))),
-              (7, Seq(((event2, 7), NotExpected)))
+              (1, Seq(((event2, 1), (Attended, Some(attendanceO1U5))))),
+              (2, Seq(((event1, 2), (NotExpected, None)))),
+              (3, Seq(((event1, 3), (MissedUnauthorised, Some(attendanceO2U5))), ((event2, 3), (MissedUnauthorised, Some(attendanceO3U5))))),
+              (4, Seq(((event1, 4), (NotExpected, None)))),
+              (7, Seq(((event2, 7), (NotExpected, None))))
             ))
           ))
         ))
