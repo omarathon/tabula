@@ -1131,13 +1131,15 @@
           <#if fv.name == field.name>
             <#assign formValue = fv>
             <#break>
+          <#else>
+            <#assign formValue = {}>
           </#if>
         </#list>
 
         <@bs3form.form_group>
-          <label for="form-value-${formValue.id}">${field.label}</label>
-          <#if formValue?? && formValue.value?has_content>
-            <textarea id="form-value-${formValue.id}" class="form-control feedback-comments" readonly="readonly"
+          <label for="form-value-${formValue.id!''}">${field.label}</label>
+          <#if formValue.value?has_content>
+            <textarea id="form-value-${formValue.id!''}" class="form-control feedback-comments" readonly="readonly"
                       data-form-value-name="${formValue.name}">${formValue.value!""}</textarea>
           <#else>
             <p>No comments added.</p>

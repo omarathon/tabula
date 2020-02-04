@@ -18,6 +18,8 @@
               <#if fv.name == field.name>
                 <#assign formValue = fv>
                 <#break>
+              <#else>
+                <#assign formValue = {}>
               </#if>
             </#list>
 
