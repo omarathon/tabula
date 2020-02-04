@@ -39,6 +39,7 @@ case class SmallGroupEventWeek(
   id: String, // These are needed so the object can be used as a key in the JSON
   event: SmallGroupEvent,
   week: Int,
+  date: LocalDate,
   late: Boolean
 )
 
@@ -94,7 +95,7 @@ class AllSmallGroupsReportCommandInternal(
     // so generate case classes to represent each occurrence (a combination of event and week)
     val eventWeeks: Seq[SmallGroupEventWeek] = benchmarkTask("eventWeeks") {
       sets.flatMap(_.groups.asScala.flatMap(_.events).filter(!_.isUnscheduled).flatMap(sge => {
-        sge.allWeeks.map(week => SmallGroupEventWeek(s"${sge.id}-$week", sge, week, {
+        sge.allWeeks.map(week => SmallGroupEventWeek(s"${sge.id}-$week", sge, week, sge.dateForWeek(week).get, {
           week < thisWeek || week == thisWeek && sge.day.getAsInt < thisDay
         }))
       })).filter { sgew =>

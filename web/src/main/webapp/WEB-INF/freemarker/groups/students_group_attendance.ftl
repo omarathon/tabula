@@ -58,61 +58,7 @@
                         <#list weekMap?keys as instance>
                           <#local state = mapGet(weekMap, instance) />
 
-                          <#local title><@components.instanceFormat instance academicYear department /></#local>
-
-                          <#if state.name == 'Attended'>
-                            <#local class = "fa fa-check attended" />
-                            <#local title = "${student.fullName} attended: " + title />
-                          <#elseif state.name == 'MissedAuthorised'>
-                            <#local class = "fa fa-times-circle-o authorised" />
-                            <#local title = "${student.fullName} did not attend (authorised absence): " + title />
-                          <#elseif state.name == 'MissedUnauthorised'>
-                            <#local class = "fa fa-times unauthorised" />
-                            <#local title = "${student.fullName} did not attend (unauthorised): " + title />
-                            <#local missedCount = missedCount + 1 />
-                          <#elseif state.name == 'Late'>
-                            <#local class = "fa fa-exclamation-triangle late" />
-                            <#local title = "No data: " + title />
-                          <#elseif state.name == 'NotExpected'>
-                            <#local class = "fal fa-user-slash" />
-                            <#local title = "No longer in group" />
-                          <#elseif state.name == 'NotExpectedPast'>
-                            <#local class = "fal fa-user-slash" />
-                            <#local title = "Wasn't a member of this group" />
-                          <#else>
-                            <#local class = "fa fa-minus" />
-                          </#if>
-
-                          <#local titles = [title] />
-                          <#if mapGet(seminarAttendanceCommandResult.notes, instance)??>
-                            <#local studentNote = mapGet(seminarAttendanceCommandResult.notes, instance) />
-                            <#local note>
-                              ${studentNote.absenceType.description}<br />
-                              ${studentNote.truncatedNote}
-                              <#if (studentNote.truncatedNote?length > 0)>
-                                <br />
-                              </#if>
-                              <a class='attendance-note-modal' href='<@routes.groups.viewNote studentNote.student studentNote.occurrence />'>View attendance
-                                note</a>
-                            </#local>
-                            <#local titles = titles + [note] />
-                          </#if>
-
-                          <#local renderedTitle>
-                            <#list titles as t>
-                              <#if (titles?size > 1)>
-                                <p>${t}</p>
-                              <#else>
-                                ${t}
-                              </#if>
-                            </#list>
-                          </#local>
-
-                          <span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="<#noescape>${renderedTitle}</#noescape>"
-                                data-html="true">
-															<i class="fa-fw fa-stack-2x ${class}"></i>
-															<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
-														</span>
+                          <@components.studentAttendance student instance state mapGet(seminarAttendanceCommandResult.notes, instance) />
                         </#list>
                       </td>
                     <#else>

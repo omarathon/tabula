@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.groups
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.web.Mav
@@ -12,11 +11,12 @@ import uk.ac.warwick.tabula.web.Mav
 class ViewSmallGroupAttendanceController extends GroupsController {
 
   @ModelAttribute("command")
-  def command(@PathVariable group: SmallGroup) = ViewSmallGroupAttendanceCommand(mandatory(group))
+  def command(@PathVariable group: SmallGroup): ViewSmallGroupAttendanceCommand.Command =
+    ViewSmallGroupAttendanceCommand(mandatory(group))
 
   @RequestMapping
   def show(
-    @ModelAttribute("command") command: Appliable[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation],
+    @ModelAttribute("command") command: ViewSmallGroupAttendanceCommand.Command,
     @PathVariable group: SmallGroup
   ): Mav = {
     val attendanceInfo = command.apply()

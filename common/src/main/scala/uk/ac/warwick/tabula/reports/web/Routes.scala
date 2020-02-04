@@ -53,6 +53,17 @@ object Routes {
 
     def events(department: Department, academicYear: AcademicYear): String =
       context + "/%s/%s/groups/events" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
+    object AttendanceRegisters {
+      def all(department: Department, academicYear: AcademicYear): String =
+        s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/groups/attendance/all"
+
+      def unrecorded(department: Department, academicYear: AcademicYear): String =
+        s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/groups/attendance/unrecorded"
+
+      def recordedLate(department: Department, academicYear: AcademicYear): String =
+        s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/groups/attendance/recorded-late"
+    }
   }
 
   object Profiles {

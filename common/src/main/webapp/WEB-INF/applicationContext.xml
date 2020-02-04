@@ -551,6 +551,9 @@
         <entry key="attendanceMonitoringCheckpointFormatter">
           <bean class="uk.ac.warwick.tabula.helpers.AttendanceMonitoringCheckpointFormatter"/>
         </entry>
+        <entry key="smallGroupAttendanceFormatter">
+          <bean class="uk.ac.warwick.tabula.helpers.SmallGroupAttendanceFormatter"/>
+        </entry>
         <entry key="phoneNumberFormatter">
           <bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter"/>
         </entry>
