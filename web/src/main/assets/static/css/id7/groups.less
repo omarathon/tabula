@@ -306,4 +306,25 @@ table.week-selector {
   margin-bottom: 0;
 }
 
-@import "record-attendance.less";
+/* Hide the confusing dates in the header of the time picker */
+.datetimepicker-hours thead i {
+  display: none !important;
+}
+
+.datetimepicker-hours thead {
+  .prev, .switch, .next {
+    visibility: hidden !important;
+  }
+}
+
+  .datetimepicker-hours thead th {
+    height: 0px;
+  }
+
+  .datetimepicker-minutes thead {
+    .prev, .switch, .next {
+      visibility: hidden !important;
+    }
+  }
+
+  @import "record-attendance.less";
