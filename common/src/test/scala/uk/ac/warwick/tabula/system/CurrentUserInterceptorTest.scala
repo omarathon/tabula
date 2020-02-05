@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.system
 
 import javax.servlet.http
-
 import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Features, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.{Masquerader, Sysadmin}
@@ -25,6 +24,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
   interceptor.userLookup = userLookup
   interceptor.profileService = profileService
   interceptor.departmentService = departmentService
+  interceptor.features = Features.empty
 
   departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns Set()
 
