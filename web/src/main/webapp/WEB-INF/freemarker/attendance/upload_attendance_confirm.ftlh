@@ -73,7 +73,7 @@
 
     <div class="striped-section-contents">
       <div class="item-info">
-        <p><@fmt.p number=invalid?size singular="student was" plural="students were" /> ignored as they were not valid.</p>
+        <p><@fmt.p number=invalid?size singular="student was" plural="students were" /> ignored as they are not a member of any monitoring scheme related to this point.</p>
         <table class="sortable table table-striped">
           <thead>
           <tr>
