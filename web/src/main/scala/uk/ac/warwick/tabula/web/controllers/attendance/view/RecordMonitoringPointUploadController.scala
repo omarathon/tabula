@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JHashMap, JMap}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.view.{RecordMonitoringPointCommandState, SetFilterPointsResultOnRecordMonitoringPointCommand, _}
-import uk.ac.warwick.tabula.commands.attendance.{CSVAttendanceExtractor, CSVAttendanceExtractorInternal}
+import uk.ac.warwick.tabula.commands.attendance.{AttendanceExtractor, AttendanceExtractorInternal}
 import uk.ac.warwick.tabula.commands.{Appliable, FiltersStudentsBase, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
@@ -21,7 +21,7 @@ import scala.jdk.CollectionConverters._
 class RecordMonitoringPointUploadController extends AttendanceController {
 
   @ModelAttribute("extractor")
-  def extractor = CSVAttendanceExtractor()
+  def extractor = AttendanceExtractor()
 
   @ModelAttribute("filterCommand")
   def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -45,6 +45,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
   ): Mav = {
     Mav("attendance/upload_attendance",
       "uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
+      "templateUrl" -> Routes.View.pointRecordTemplate(department, academicYear, templatePoint, filterCommand.serializeFilter),
       "ajax" -> ajax,
       "errors" -> errors
     ).crumbs(
@@ -56,7 +57,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
 
   @RequestMapping(method = Array(POST), params = Array("!confirm"))
   def preview(
-    @ModelAttribute("extractor") extractor: CSVAttendanceExtractorInternal,
+    @ModelAttribute("extractor") extractor: AttendanceExtractorInternal,
     @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
     @ModelAttribute("command") cmd: RecordMonitoringPointCommand,
     errors: Errors,

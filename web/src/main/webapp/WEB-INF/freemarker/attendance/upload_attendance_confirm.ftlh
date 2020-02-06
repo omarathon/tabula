@@ -1,5 +1,5 @@
 <div class="deptheader">
-  <h1>Upload attendance from CSV</h1>
+  <h1>Upload attendance</h1>
   <h5 class="with-related"><span class="muted">for</span> ${command.templatePoint.name}</h5>
 </div>
 
