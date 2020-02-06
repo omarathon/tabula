@@ -306,4 +306,13 @@ table.week-selector {
   margin-bottom: 0;
 }
 
+/* Hide the confusing dates in the header of the time picker */
+.datetimepicker-hours, .datetimepicker-minutes {
+  thead {
+    .prev, .switch, .next {
+      visibility: hidden !important;
+    }
+  }
+}
+
 @import "record-attendance.less";
