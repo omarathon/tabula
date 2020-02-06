@@ -81,9 +81,8 @@ class RequestExtensionController extends CourseworkController {
 
 }
 
-@Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension/supporting-file/{filename}"))
+@RequestMapping(value = Array("/coursework/assignment/{assignment}/extension/supporting-file/{filename}"))
 class RequestExtensionSupportingFileController extends CourseworkController {
 
   type DownloadAttachmentCommand = Appliable[Option[RenderableAttachment]] with DownloadExtensionAttachmentState
