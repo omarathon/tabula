@@ -13,12 +13,10 @@ import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 import uk.ac.warwick.tabula.{NoCurrentUser, RequestInfo}
 import uk.ac.warwick.userlookup.User
 
-import scala.concurrent.duration._
-
 case class SmallGroupAttendanceFormatterResult(
   iconClass: String,
   status: TemplateHTMLOutputModel,
-  metadata: TemplateHTMLOutputModel,
+  metadata: Option[TemplateHTMLOutputModel],
   wasRecordedLate: Boolean, // Whether the recorded attendance was outside of the 24 hour period that allows it to be used as evidence
 )
 
@@ -51,7 +49,7 @@ class SmallGroupAttendanceFormatter extends BaseTemplateMethodModelEx
     val result = SmallGroupAttendanceFormatterResult(
       iconClass = "fa fa-minus",
       status = FormattedHtml(formatEvent(event, week)),
-      metadata = FormattedHtml(metadata(event, week, user, attendance)),
+      metadata = Some(FormattedHtml(metadata(event, week, user, attendance))),
 
       // TAB-7814 The auditors would like to see attendance recorded on the same day as the event
       wasRecordedLate = attendance.exists { sgea =>
@@ -90,14 +88,18 @@ class SmallGroupAttendanceFormatter extends BaseTemplateMethodModelEx
       case SmallGroupAttendanceState.NotExpected =>
         result.copy(
           iconClass = "fal fa-user-slash",
-          status = FormattedHtml("No longer in group"),
+          status = FormattedHtml(s"${user.fullName.getOrElse(user.universityId)} is no longer in this group"),
+          metadata = None,
+          wasRecordedLate = false
         )
 
       // The user wasn't in the group when this event took place
       case SmallGroupAttendanceState.NotExpectedPast =>
         result.copy(
           iconClass = "fal fa-user-slash",
-          status = FormattedHtml("Wasn't a member of this group"),
+          status = FormattedHtml(s"${user.fullName.getOrElse(user.universityId)} wasn't a member of this group before ${DateBuilder.format(attendance.get.joinedOn)}"),
+          metadata = None,
+          wasRecordedLate = false
         )
 
       case _ => result
