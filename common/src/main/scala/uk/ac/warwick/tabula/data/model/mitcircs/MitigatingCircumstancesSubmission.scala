@@ -350,10 +350,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def outcomesRecorded(): Unit = {
-    require(Seq(Submitted, ReadyForPanel, OutcomesRecorded).contains(_state), "Cannot record outcomes until this has been submitted by the student")
+    require(Seq(Submitted, ReadyForPanel, OutcomesRecorded, ApprovedByChair).contains(_state), "Cannot record outcomes until this has been submitted by the student")
 
     // Only trigger this the first time that outcomes are submitted
-    if (_state != OutcomesRecorded) {
+    if (_state != OutcomesRecorded && _state != ApprovedByChair) {
       outcomesSubmittedOn = DateTime.now
     }
 
@@ -402,7 +402,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isEvidencePending: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state) && pendingEvidenceDue != null
   def isAcute: Boolean = Option(acuteOutcome).isDefined
   def canConfirmSensitiveEvidence: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
-  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
+  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || state == ApprovedByChair || panel.nonEmpty) && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || !isAcute)
   def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || isAcute)
   def canWithdraw: Boolean = !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canApproveOutcomes: Boolean = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
