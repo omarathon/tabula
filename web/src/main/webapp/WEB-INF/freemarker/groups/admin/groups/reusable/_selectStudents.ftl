@@ -195,14 +195,16 @@
                 Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
               </p>
             </div>
-
+            <p>
+              <button class="btn btn-danger" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.resetFilters}" value="true">Remove all students</button>
+            </p>
             <@components.manageStudentTable
-            membershipItems=findCommandResult.membershipItems
-            doSorting=true
-            command=findCommand
-            checkboxName="excludeIds"
-            onlyShowCheckboxForStatic=true
-            showRemoveButton=true
+              membershipItems=findCommandResult.membershipItems
+              doSorting=true
+              command=findCommand
+              checkboxName="excludeIds"
+              onlyShowCheckboxForStatic=true
+              showRemoveButton=true
             />
           </#if>
         </div>

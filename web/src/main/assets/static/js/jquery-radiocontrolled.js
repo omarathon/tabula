@@ -52,19 +52,19 @@
     // Set items "on" or "off", with varying behaviour depending on `mode`.
     function toggle($container, checked) {
       var eventName = (checked ? 'enable' : 'disable') + ".radiocontrolled";
-      if (mode == 'disabled') {
+      if (mode === 'disabled') {
         $container.find('label,input,select').toggleClass('disabled', !checked);
         $container.find('input,select').attr({disabled: !checked});
         if (fireEvents) {
           $container.find('input,select').trigger(eventName);
         }
-      } else if (mode == 'readonly') {
+      } else if (mode === 'readonly') {
         $container.find('input').attr({readonly: !checked});
         // select not supported yet
         if (fireEvents) {
           $container.find('input').trigger(eventName);
         }
-      } else if (mode == 'hidden') {
+      } else if (mode === 'hidden') {
         $container.toggle(checked);
         if (fireEvents) {
           $container.trigger(eventName);

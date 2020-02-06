@@ -5,6 +5,12 @@
 <head>
   <style type="text/css">
     @page {
+      @top-left {
+        content: "${student.fullName} - ${student.universityId}";
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 8px;
+      }
+
       @bottom-center {
         content: "Page " counter(page);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;

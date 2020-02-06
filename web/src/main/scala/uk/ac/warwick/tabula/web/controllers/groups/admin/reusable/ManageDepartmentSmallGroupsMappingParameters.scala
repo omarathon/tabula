@@ -13,5 +13,6 @@ object ManageDepartmentSmallGroupsMappingParameters {
   final val manuallyAddForm = "manuallyAddForm"
   final val manuallyAddSubmit = "manuallyAddSubmit"
   final val resetMembership = "resetMembership"
+  final val resetFilters = "resetFilters"
   final val manuallyExclude = "manuallyExclude"
 }

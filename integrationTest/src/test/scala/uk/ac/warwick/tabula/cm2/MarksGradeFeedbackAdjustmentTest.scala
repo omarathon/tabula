@@ -73,7 +73,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
     val confirmBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
     click on confirmBtn
 
-    Then("The user assignemnt should be updated")
+    Then("The user assignment should be updated")
     eventually(id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing"))
 
   }

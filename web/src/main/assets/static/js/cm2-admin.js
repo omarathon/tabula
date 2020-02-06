@@ -204,16 +204,18 @@ $(function () {
     e.preventDefault();
     var $form = $(e.target);
     var $detailRow = $form.closest('.content-container, .detailrow-container');
-    var formData = $form.serializeArray();
+
+    const formData = new FormData(e.target);
 
     var buttonClicked = $form.data('buttonClicked');
     if (buttonClicked) {
-      formData.push(buttonClicked);
+      formData.append(buttonClicked.name, buttonClicked.value);
       $form.data('buttonClicked', null);
     }
 
-    $.post({
+    $.ajax({
       url: $form.attr('action'),
+      type: 'POST',
       data: formData,
       success: function (data) {
         if (data.success) {
@@ -228,7 +230,10 @@ $(function () {
       },
       complete: function () {
         $body.find('.expanding-table').trigger('tabula.expandingTable.repositionContent');
-      }
+      },
+      cache: false,
+      contentType: false,
+      processData: false,
     });
   });
 
@@ -314,9 +319,7 @@ $(function () {
       $('#open-reminder-dt').prop("disabled", true);
     }
   });
-  $('input#publishFeedback').change(function () {
-    $('#dissertation-checkbox').prop('disabled', !$(this).is(':checked'));
-  });
+  $('input#publishFeedback').radioControlled({mode: 'disabled'});
   // check that the extension UI elements are present
   if ($('input#allowExtensionRequests').length > 0) {
     $('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);

@@ -998,6 +998,49 @@
   <#if event.title?has_content>${event.title} </#if>${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department false/>
 </#compress></#macro>
 
+<#function formatResult event week user state attendance="">
+  <#if attendance?has_content>
+    <#return smallGroupAttendanceFormatter(event, week, user, state, attendance) />
+  <#else>
+    <#return smallGroupAttendanceFormatter(event, week, user, state) />
+  </#if>
+</#function>
+
+<#macro studentAttendance student instance state studentNote="">
+  <#local formatResult = formatResult(instance._1(), instance._2(), student, state._1(), state._2()) />
+
+  <#local titles = [formatResult.status, formatResult.metadata] />
+
+  <#if studentNote?has_content>
+    <#local note>
+      ${studentNote.absenceType.description}<br />
+      ${studentNote.truncatedNote}
+      <#if (studentNote.truncatedNote?length > 0)>
+        <br />
+      </#if>
+      <a class='attendance-note-modal' href='<@routes.groups.viewNote studentNote.student studentNote.occurrence />'>View attendance note</a>
+    </#local>
+    <#local titles = titles + [note] />
+  </#if>
+
+  <#local renderedTitle>
+    <#list titles as t>
+      <#if t?has_content>
+        ${t}
+      </#if>
+    </#list>
+  </#local>
+
+  <span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle}" data-html="true">
+    <i class="fa-fw fa-stack-2x ${formatResult.iconClass}"></i>
+    <#if studentNote?has_content>
+      <i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i>
+    <#elseif formatResult.wasRecordedLate>
+      <i class="fal fa-fw fa-stack-1x fa-clock"></i>
+    </#if>
+  </span>
+</#macro>
+
 <#macro studentAttendanceRow student attendance notes instances group>
   <#local set = group.groupSet />
   <#local module = set.module />
@@ -1007,60 +1050,9 @@
   <tr>
     <#list instances as instance>
       <#local state = mapGet(attendance, instance) />
-      <#local title><@instanceFormat instance academicYear department /></#local>
-
-      <#if state.name == 'Attended'>
-        <#local class = "fa fa-check attended" />
-        <#local title = "${student.fullName} attended: " + title />
-      <#elseif state.name == 'MissedAuthorised'>
-        <#local class = "fa fa-times-circle-o authorised" />
-        <#local title = "${student.fullName} did not attend (authorised absence): " + title />
-      <#elseif state.name == 'MissedUnauthorised'>
-        <#local class = "fa fa-times unauthorised" />
-        <#local title = "${student.fullName} did not attend (unauthorised): " + title />
-      <#elseif state.name == 'Late'>
-        <#local class = "fa fa-exclamation-triangle late" />
-        <#local title = "No data: " + title />
-      <#elseif state.name == 'NotExpected'>
-        <#local class = "fal fa-user-slash" />
-        <#local title = "No longer in group" />
-      <#elseif state.name == 'NotExpectedPast'>
-        <#local class = "fal fa-user-slash" />
-        <#local title = "Wasn't a member of this group" />
-      <#else>
-        <#local class = "fa fa-minus" />
-      </#if>
-
-      <#local titles = [title] />
-
-      <#if mapGet(notes, instance)??>
-        <#local studentNote = mapGet(notes, instance) />
-        <#local note>
-          ${studentNote.absenceType.description}<br />
-          ${studentNote.truncatedNote}
-          <#if (studentNote.truncatedNote?length > 0)>
-            <br />
-          </#if>
-          <a class='attendance-note-modal' href='<@routes.groups.viewNote studentNote.student studentNote.occurrence />'>View attendance note</a>
-        </#local>
-        <#local titles = titles + [note] />
-      </#if>
-
-      <#local renderedTitle>
-        <#list titles as t>
-          <#if (titles?size > 1)>
-            <p>${t}</p>
-          <#else>
-            ${t}
-          </#if>
-        </#list>
-      </#local>
 
       <td>
-				<span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string}" data-html="true">
-					<i class="fa-fw fa-stack-2x ${class}"></i>
-					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
-				</span>
+        <@studentAttendance student instance state mapGet(notes, instance) />
       </td>
     </#list>
   </tr>
@@ -1127,7 +1119,8 @@
               <#local attendance = mapGet(studentAttendance, student) />
               <#local missedCount = 0 />
               <#list instances as instance>
-                <#local state = mapGet(attendance, instance) />
+                <#local stateAttendance = mapGet(attendance, instance) />
+                <#local state = stateAttendance._1() />
                 <#if state.name == 'MissedUnauthorised'>
                   <#local missedCount = missedCount + 1 />
                 </#if>

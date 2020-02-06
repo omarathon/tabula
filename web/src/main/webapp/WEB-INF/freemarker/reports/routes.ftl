@@ -61,6 +61,21 @@
 <#macro eventsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events/download.xlsx" /></#macro>
 <#macro eventsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events/download.xml" /></#macro>
 
+<#macro allSmallGroupAttendanceRegisters department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/all" /></#macro>
+<#macro allSmallGroupAttendanceRegistersDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/all/download.csv" /></#macro>
+<#macro allSmallGroupAttendanceRegistersDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/all/download.xlsx" /></#macro>
+<#macro allSmallGroupAttendanceRegistersDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/all/download.xml" /></#macro>
+
+<#macro unrecordedSmallGroupAttendanceRegisters department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/unrecorded" /></#macro>
+<#macro unrecordedSmallGroupAttendanceRegistersDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/unrecorded/download.csv" /></#macro>
+<#macro unrecordedSmallGroupAttendanceRegistersDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/unrecorded/download.xlsx" /></#macro>
+<#macro unrecordedSmallGroupAttendanceRegistersDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/unrecorded/download.xml" /></#macro>
+
+<#macro recordedLateSmallGroupAttendanceRegisters department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/recorded-late" /></#macro>
+<#macro recordedLateSmallGroupAttendanceRegistersDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/recorded-late/download.csv" /></#macro>
+<#macro recordedLateSmallGroupAttendanceRegistersDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/recorded-late/download.xlsx" /></#macro>
+<#macro recordedLateSmallGroupAttendanceRegistersDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/attendance/recorded-late/download.xml" /></#macro>
+
 <#macro profileExport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export" /></#macro>
 <#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
 <#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>
