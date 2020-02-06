@@ -39,7 +39,6 @@
             The spreadsheet must be saved in CSV format with two columns. Put the student's University ID in the first column and
             record their attendance in the second. The value for attendance must be one of the following:
           </p>
-
           <ul>
             <li><code>attended</code> </li>
             <li><code>authorised</code> – you can only set this attendance value if you have created an attendance note in advance for those students with authorisation to miss this point</li>
@@ -52,8 +51,8 @@
             You can <strong><a href="${templateUrl}">download a template spreadsheet</a></strong> which is correctly formatted, ready for completion.
             <br /> <br />
             In Excel you may need to <a href="https://support.office.com/en-us/article/what-is-protected-view-d6f09ac7-e6b9-4495-8e43-2bbcdbcb6653#bm2">exit protected view</a> to
-          edit the spreadsheet.
-        </p>
+            edit the spreadsheet.
+          </p>
 
           <@bs3form.labelled_form_group "" "File">
             <input type="file" name="file.upload" />
