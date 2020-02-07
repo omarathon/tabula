@@ -64,8 +64,17 @@ trait ViewProfilePermissionsRestriction extends RequiresPermissionsChecking with
 
     lazy val canSeeOtherDepartments: Boolean = profile.isMember && securityService.can(viewer, Permissions.Profiles.Read.CoreCrossDepartment, mandatory(profile.asMember))
 
-    if (!viewer.god && !viewingOwnProfile && (viewer.isStudent || profile.isStaff && !canSeeOtherDepartments && !viewerInSameDepartment)) {
-      logger.info("Denying access for user " + viewer + " to view profile " + profile)
+    /*
+     * Deny access over and above permissions if:
+     * - You're not a god user
+     * - You're not viewing your own profile
+     * - You're not a member of staff
+     * - The profile is for a student or staff member
+     * - You don't explicitly have Profiles.Read.CoreCrossDepartment
+     * - The profile's touchedDepartments doesn't include the user's department code
+     */
+    if (!viewer.god && !viewingOwnProfile && !viewer.isStaff && profile.asMember.exists(m => m.isStudent || m.isApplicant) && !canSeeOtherDepartments && !viewerInSameDepartment) {
+      logger.info(s"Denying access for $viewer to view a student or applicant profile in a different department: $profile")
       throw PermissionDeniedException(viewer, permission, profile)
     }
   }
