@@ -153,6 +153,11 @@
               <td>
                 <#if emf.workflowStudent.nextAction?has_content>
                   <@components.workflowMessage emf.workflowStudent.nextAction assignment student />
+                <#elseif mf.feedback.released>
+                  Feedback published
+                  <#if mf.feedback.releasedDate??>
+                    <@fmt.date date=mf.feedback.releasedDate seconds=true capitalise=true shortMonth=true />
+                  </#if>
                 </#if>
               </td>
             </tr>
