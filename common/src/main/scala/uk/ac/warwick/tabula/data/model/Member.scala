@@ -198,6 +198,8 @@ abstract class Member
 
   def isStudent: Boolean = userType == MemberUserType.Student
 
+  def isApplicant: Boolean = userType == MemberUserType.Applicant
+
   def isRelationshipAgent(relationshipType: StudentRelationshipType): Boolean = {
     relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, this).nonEmpty
   }

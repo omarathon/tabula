@@ -148,13 +148,13 @@ abstract class AbstractViewProfileController extends ProfilesController
   protected def viewProfileCommand(@PathVariable pvs: JMap[String, String]): Any = {
     val pathVariables = pvs.asScala
     if (pathVariables.contains("member")) {
-      new ViewProfileCommand(user, notStale(mandatory(
+      ViewProfileCommand(notStale(mandatory(
         convertOrNull(pathVariables("member"), classOf[Member])
-      )))
+      )), user)
     } else if (pathVariables.contains("studentCourseDetails")) {
-      new ViewProfileCommand(user, notStale(mandatory(
+      ViewProfileCommand(notStale(mandatory(
         convertOrNull(pathVariables("studentCourseDetails"), classOf[StudentCourseDetails])
-      )).student)
+      )).student, user)
     }
   }
 
