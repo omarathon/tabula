@@ -127,13 +127,13 @@
         </#if>
 
         <h2>Technical support</h2>
-        <p>If you're experiencing technical issues with Tabula, please <a href="#comment-modal" data-toggle="modal">contact the IT Services Web Team</a>.</p>
+        <p>If you're experiencing technical issues with Tabula, please <a href="#comment-modal" data-toggle="modal">contact us</a>.</p>
 
         <@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
 
           <@modal.modal id="comment-modal">
             <@modal.wrapper>
-              <@modal.header><h3 class="modal-title">Email the Web Team</h3></@modal.header>
+              <@modal.header><h3 class="modal-title">Contact us</h3></@modal.header>
               <@modal.body>
 
                 <@webTeamForm />
@@ -150,7 +150,7 @@
 
       <#else>
         <h2>Technical support</h2>
-        <p>If you're experiencing technical issues with Tabula, please contact the web team who can help with your query.</p>
+        <p>If you're experiencing technical issues with Tabula, please contact us and we can help with your query.</p>
         <@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
           <@webTeamForm />
           <button type="submit" class="btn btn-primary" name="recipient" value="${Recipients.WebTeam}">Send</button>
