@@ -368,6 +368,13 @@
                 Review extension request
               </a>
             </p>
+          <#elseif info.extended>
+            <#-- A manual extension has been granted  -->
+            <p>
+              <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+                Review extension
+              </a>
+            </p>
           <#elseif !info.extended && assignment.newExtensionsCanBeRequested>
             <p>
               <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
