@@ -596,7 +596,7 @@ object AssignmentInfoFilters {
     case object LateFeedback extends AssignmentInfoFilter {
       val description = "Late feedback"
 
-      def apply(info: AssignmentInfo): Boolean = info.assignment.feedbackDeadline.exists(_.isBefore(LocalDate.now)) && info.assignment.hasOutstandingFeedback
+      def apply(info: AssignmentInfo): Boolean = info.assignment.hasOutstandingFeedbackDueBefore(LocalDate.now)
     }
 
     case object FeedbackUnreleased extends AssignmentInfoFilter {
