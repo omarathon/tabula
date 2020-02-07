@@ -14,8 +14,10 @@ import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.roles.MitigatingCircumstancesOfficerRoleDefinition
 import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -53,6 +55,7 @@ object CreateMitCircsSubmissionCommand {
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringUploadedImageProcessorComponent
+      with AutowiringPermissionsServiceComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
@@ -63,7 +66,12 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
   self: MitCircsSubmissionRequest
     with MitCircsSubmissionServiceComponent
     with ModuleAndDepartmentServiceComponent
-    with UploadedImageProcessorComponent =>
+    with UploadedImageProcessorComponent
+    with PermissionsServiceComponent =>
+
+  if(permissionsService.getGrantedRole(department, MitigatingCircumstancesOfficerRoleDefinition).forall(_.users.users.isEmpty)) {
+    throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have any named MCOs")
+  }
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
