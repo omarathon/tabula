@@ -1,29 +1,86 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
-import uk.ac.warwick.tabula.permissions.Permissions._
 
-class ViewProfileCommand(user: CurrentUser, val profile: Member)
-  extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with AutowiringSecurityServiceComponent with Logging {
+object ViewProfileCommand {
+  type Command = Appliable[Member] with ViewProfilePermissionsRestriction
 
-  private val viewingOwnProfile = user.apparentUser.getWarwickId == profile.universityId
-  private val viewerInSameDepartment = Option(user.apparentUser.getDepartmentCode)
-    .map(_.toLowerCase)
-    .exists(deptCode => profile.touchedDepartments.map(_.code).contains(deptCode))
+  def apply(profile: Member, viewer: CurrentUser): Command =
+    new ViewProfileCommandInternal(MemberOrUser(profile), viewer)
+      with ViewProfilePermissions
+      with ViewProfilePermissionsRestriction
+      with AutowiringSecurityServiceComponent
+      with ComposableCommand[Member] // Init late, PermissionsChecking needs the autowired services
+      with Unaudited with ReadOnly
 
-  private def canSeeOtherDepartments: Boolean = securityService.can(user, Profiles.Read.CoreCrossDepartment, profile)
+  def stale(profile: Member, viewer: CurrentUser): Command =
+    new ViewProfileCommandInternal(MemberOrUser(profile), viewer)
+      with ViewStaleProfilePermissions
+      with ViewProfilePermissionsRestriction
+      with AutowiringSecurityServiceComponent
+      with ComposableCommand[Member] // Init late, PermissionsChecking needs the autowired services
+      with Unaudited with ReadOnly
+}
 
-  if (!user.god && !viewingOwnProfile && (user.isStudent || profile.isStaff && !canSeeOtherDepartments && !viewerInSameDepartment)) {
-    logger.info("Denying access for user " + user + " to view profile " + profile)
-    throw PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
+abstract class ViewProfileCommandInternal(val profile: MemberOrUser, val viewer: CurrentUser)
+  extends CommandInternal[Member]
+    with PermissionsCheckingMethods
+    with ViewProfileCommandState {
+
+  override def applyInternal(): Member = mandatory(profile.asMember)
+}
+
+trait ViewProfileCommandState {
+  def profile: MemberOrUser
+  def viewer: CurrentUser
+}
+
+trait ViewProfilePermissionsRestriction extends RequiresPermissionsChecking with PermissionsCheckingMethods with Logging {
+  self: ViewProfileCommandState
+    with SecurityServiceComponent =>
+
+  def permission: Permission
+
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    if (profile.isMember) {
+      p.PermissionCheck(permission, mandatory(profile.asMember))
+    } else {
+      p.PermissionCheck(Permissions.UserPicker)
+    }
+
+    lazy val viewingOwnProfile = viewer.apparentUser.getWarwickId == profile.universityId
+    lazy val viewerInSameDepartment = Option(viewer.apparentUser.getDepartmentCode)
+      .map(_.toLowerCase)
+      .exists { deptCode =>
+        if (profile.isMember) mandatory(profile.asMember).touchedDepartments.map(_.code).contains(deptCode)
+        else profile.departmentCode == deptCode
+      }
+
+    lazy val canSeeOtherDepartments: Boolean = profile.isMember && securityService.can(viewer, Permissions.Profiles.Read.CoreCrossDepartment, mandatory(profile.asMember))
+
+    if (!viewer.god && !viewingOwnProfile && (viewer.isStudent || profile.isStaff && !canSeeOtherDepartments && !viewerInSameDepartment)) {
+      logger.info("Denying access for user " + viewer + " to view profile " + profile)
+      throw PermissionDeniedException(viewer, permission, profile)
+    }
   }
 }
 
-class ViewStaleProfileCommand(user: CurrentUser, profile: Member) extends ViewProfileCommand(user, profile) {
-  PermissionCheck(Permissions.Profiles.Read.CoreStale, profile)
+trait ViewProfilePermissions extends ViewProfilePermissionsRestriction {
+  self: ViewProfileCommandState
+    with SecurityServiceComponent =>
+
+  val permission: Permission = Permissions.Profiles.Read.Core
+}
+
+trait ViewStaleProfilePermissions extends ViewProfilePermissionsRestriction {
+  self: ViewProfileCommandState
+    with SecurityServiceComponent =>
+
+  val permission: Permission = Permissions.Profiles.Read.CoreStale
 }

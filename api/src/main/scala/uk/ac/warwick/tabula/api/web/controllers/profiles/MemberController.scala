@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.commands.profiles.profile.{ViewProfileCommand, ViewStaleProfileCommand}
+import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
@@ -53,10 +53,10 @@ trait GetMemberApi {
 
   def checkMember(m: Member): Member
 
-  def getCommand(m: Member): ViewProfileCommand
+  def getCommand(m: Member): ViewProfileCommand.Command
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "member") fields: String): Mav =
+  def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
@@ -70,8 +70,8 @@ trait FreshMemberApi extends GetMemberApi {
   def checkMember(m: Member): Member = notStale(mandatory(m))
 
   @ModelAttribute("getCommand")
-  def getCommand(@PathVariable member: Member): ViewProfileCommand =
-    new ViewProfileCommand(user, member)
+  def getCommand(@PathVariable member: Member): ViewProfileCommand.Command =
+    ViewProfileCommand(member, user)
 }
 
 trait StaleMemberApi extends GetMemberApi {
@@ -80,19 +80,19 @@ trait StaleMemberApi extends GetMemberApi {
   def checkMember(m: Member): Member = mandatory(m)
 
   @ModelAttribute("getCommand")
-  def getCommand(@PathVariable member: Member): ViewProfileCommand =
-    new ViewStaleProfileCommand(user, member)
+  def getCommand(@PathVariable member: Member): ViewProfileCommand.Command =
+    ViewProfileCommand.stale(member, user)
 }
 
 trait GetAllMemberCoursesApi {
   self: ApiController with StudentCourseDetailsToJsonConverter =>
 
   @ModelAttribute("getCommand")
-  def getCommand(@PathVariable member: Member): ViewProfileCommand =
-    new ViewProfileCommand(user, notStale(mandatory(member)))
+  def getCommand(@PathVariable member: Member): ViewProfileCommand.Command =
+    ViewProfileCommand(notStale(mandatory(member)), user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getCourses(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "studentCourseDetails") fields: String): Mav = {
+  def getCourses(@ModelAttribute("getCommand") command: ViewProfileCommand.Command, @RequestParam(defaultValue = "studentCourseDetails") fields: String): Mav = {
     val member = notStale(mandatory(command.apply()))
     val studentCourseDetails = member match {
       case student: StudentMember if canViewProperty(student, "freshStudentCourseDetails") =>
