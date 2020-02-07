@@ -1009,7 +1009,10 @@
 <#macro studentAttendance student instance state studentNote="">
   <#local formatResult = formatResult(instance._1(), instance._2(), student, state._1(), state._2()) />
 
-  <#local titles = [formatResult.status, formatResult.metadata] />
+  <#local titles = [formatResult.status] />
+  <#if formatResult.metadata?has_content>
+    <#local titles = titles + [formatResult.metadata] />
+  </#if>
 
   <#if studentNote?has_content>
     <#local note>
