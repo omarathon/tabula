@@ -353,7 +353,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     require(Seq(Submitted, ReadyForPanel, OutcomesRecorded, ApprovedByChair).contains(_state), "Cannot record outcomes until this has been submitted by the student")
 
     // Only trigger this the first time that outcomes are submitted
-    if (_state != OutcomesRecorded && _state != ApprovedByChair) {
+    if (_state != OutcomesRecorded) {
       outcomesSubmittedOn = DateTime.now
     }
 
