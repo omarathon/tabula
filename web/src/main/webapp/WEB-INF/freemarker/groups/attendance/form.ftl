@@ -189,6 +189,9 @@
                 </tbody>
               </table>
             </@modal.body>
+            <@modal.footer>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </@modal.footer>
           </@modal.wrapper>
         </@modal.modal>
       </#if>
