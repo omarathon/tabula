@@ -191,6 +191,8 @@ class SubmissionDueWithExtensionNotification
     with SubmissionReminder
     with AutowiringUserLookupComponent {
 
+  @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+
   def extension: Extension = item.entity
 
   def deadline: Option[DateTime] = extension.expiryDate
@@ -204,11 +206,14 @@ class SubmissionDueWithExtensionNotification
       val hasSubmitted = assignment.submissions.asScala.exists(_.usercode == extension.usercode)
 
       // Get the latest extended deadline if a student has multiple.
-      val isTheLatestApprovedExtension = assignment.approvedExtensions.get(extension.usercode).contains(extension)
+      lazy val isTheLatestApprovedExtension = assignment.approvedExtensions.get(extension.usercode).contains(extension)
+
+      lazy val isAMemberOfTheAssignment = membershipService.determineMembershipUsers(assignment).exists(_.getUserId == extension.usercode)
 
       // Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
       // or if there is an extension with a later extended deadline for this user or if the extension deadline is earlier than the assignment's close date
-      if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || !isTheLatestApprovedExtension || !extension.relevant) {
+      // or if the student is no longer a member of the assignment
+      if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || !isTheLatestApprovedExtension || !extension.relevant || !isAMemberOfTheAssignment) {
         Nil
       } else {
         Seq(userLookup.getUserByUserId(extension.usercode))
