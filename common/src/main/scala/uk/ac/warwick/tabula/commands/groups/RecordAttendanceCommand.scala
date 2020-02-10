@@ -18,15 +18,25 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object RecordAttendanceCommand {
   type UniversityId = String
 
-  def apply(event: SmallGroupEvent, week: Int, user: CurrentUser) =
+  type Result = (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])
+  type Command = Appliable[Result]
+    with RecordAttendanceState
+    with SmallGroupEventInFutureCheck
+    with PopulateOnForm
+    with AddAdditionalStudent
+    with RemoveAdditionalStudent
+    with SelfValidating
+    with CompletesNotifications[Result]
+
+  def apply(event: SmallGroupEvent, week: Int, user: CurrentUser): Command =
     new RecordAttendanceCommand(event, week, user)
-      with ComposableCommand[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])]
+      with ComposableCommand[Result]
       with SmallGroupEventInFutureCheck
       with RecordAttendanceCommandPermissions
       with RecordAttendanceDescription
@@ -36,9 +46,7 @@ object RecordAttendanceCommand {
       with AutowiringProfileServiceComponent
       with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
       with RecordAttendanceNotificationCompletion
-      with AutowiringFeaturesComponent {
-      override lazy val eventName = "RecordAttendance"
-    }
+      with AutowiringFeaturesComponent
 }
 
 trait AddAdditionalStudent {
@@ -264,14 +272,17 @@ trait SmallGroupEventInFutureCheck {
 }
 
 trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {
-  this: RecordAttendanceState =>
+  self: RecordAttendanceState =>
+
+  override lazy val eventName = "RecordAttendance"
+
   def describe(d: Description): Unit = {
     d.smallGroupEvent(event)
      .property("week", week)
   }
 
   override def describeResult(d: Description, result: (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])): Unit = {
-    d.smallGroupAttendaceState(result._2)
+    d.smallGroupAttendanceState(result._2)
      .studentIds(result._2.map(_.universityId))
   }
 }

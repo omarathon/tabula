@@ -128,6 +128,71 @@
         </#if>
       </h6>
 
+      <#if recordAttendanceHistory?has_content>
+        <p>
+          <strong>Attendance last updated</strong>: <@fmt.date date=(recordAttendanceHistory?last).recorded />
+          <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#small-group-register-history-modal"><i class="fal fa-history"></i> View history</button>
+        </p>
+
+        <@modal.modal id="small-group-register-history-modal">
+          <@modal.wrapper cssClass="modal-lg">
+            <@modal.header>
+              <h3 class="modal-title">Attendance history</h3>
+            </@modal.header>
+            <@modal.body>
+              <table class="table table-condensed table-striped">
+                <thead>
+                  <tr>
+                    <th class="col-sm-4">Date</th>
+                    <th class="col-sm-3">User</th>
+                    <th class="col-sm-5">Changes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <#list recordAttendanceHistory as history>
+                    <tr>
+                      <td>
+                        <@fmt.date date=history.recorded />
+                        <#if history.wasRecordedLate>
+                          <i class="fal fa-clock" aria-label="Recorded after the day of the event"></i>
+                        </#if>
+                      </td>
+                      <td>${history.user.fullName!(history.user.userId)}</td>
+                      <td>
+                        <#if history.changes??>
+                          <#if history.changes?has_content>
+                            <ul class="fa-ul">
+                              <#list history.changes as change>
+                                <li>
+                                  <span class="fa-li">
+                                    <#if change.state.dbValue == 'attended'>
+                                      <i class="fa fa-check attended" aria-label="Attended"></i>
+                                    <#elseif change.state.dbValue == 'authorised'>
+                                      <i class="fa fa-times-circle-o authorised" aria-label="Missed (authorised)"></i>
+                                    <#elseif change.state.dbValue == 'unauthorised'>
+                                      <i class="fa fa-times unauthorised" aria-label="Missed (unauthorised)"></i>
+                                    <#else>
+                                      <i class="fa fa-minus" aria-label="Not recorded"></i>
+                                    </#if>
+                                  </span>
+                                  ${change.student.fullName} (${change.student.universityId})
+                                </li>
+                              </#list>
+                            </ul>
+                          </#if>
+                        <#else>
+                          <em>Unknown</em>
+                        </#if>
+                      </td>
+                    </tr>
+                  </#list>
+                </tbody>
+              </table>
+            </@modal.body>
+          </@modal.wrapper>
+        </@modal.modal>
+      </#if>
+
       <#if !studentMembers?has_content>
         <p><em>There are no students allocated to this group.</em></p>
       </#if>

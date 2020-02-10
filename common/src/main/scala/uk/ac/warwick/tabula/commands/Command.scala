@@ -459,7 +459,9 @@ abstract class Description {
     this
   }
 
-  def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
+  def smallGroupAttendanceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
+    // Warning: If you change the format that this is logged in, you may also need to check code
+    // parsing it back out (see AuditEventQueryService)
     property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
   }
 
