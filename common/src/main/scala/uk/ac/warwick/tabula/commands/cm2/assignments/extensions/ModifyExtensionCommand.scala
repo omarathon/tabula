@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
-
 object ModifyExtensionCommand {
   def apply(extension: Extension, submitter: CurrentUser) = new ModifyExtensionCommandInternal(extension, submitter)
     with ComposableCommand[Extension]
@@ -29,6 +28,7 @@ object ModifyExtensionCommand {
     with ModifyExtensionNotification
     with ModifyExtensionScheduledNotification
     with ModifyExtensionNotificationCompletion
+    with ExtensionTriggers
     with HibernateExtensionPersistenceComponent
 }
 

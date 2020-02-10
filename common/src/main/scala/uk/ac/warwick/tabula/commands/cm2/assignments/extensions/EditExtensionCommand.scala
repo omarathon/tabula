@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Notification, ScheduledNotification}
-import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.data.model.triggers.{ExtensionExpiredTrigger, Trigger}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Notification, ScheduledNotification, ToEntityReference}
+import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -31,6 +32,7 @@ object EditExtensionCommand {
       with EditExtensionCommandNotification
       with EditExtensionCommandScheduledNotification
       with EditExtensionCommandNotificationCompletion
+      with ExtensionTriggers
       with AutowiringUserLookupComponent
       with HibernateExtensionPersistenceComponent
 }
@@ -263,3 +265,16 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
   }
 }
 
+trait ExtensionTriggers extends GeneratesTriggers[Extension] {
+  self: TriggerHandling =>
+
+  override def generateTriggers(extension: Extension): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+    if (extension.approved) {
+      extension.expiryDate.toSeq.map { expiryDate =>
+        ExtensionExpiredTrigger(expiryDate, extension)
+      }
+    } else {
+      Seq.empty
+    }
+  }
+}
