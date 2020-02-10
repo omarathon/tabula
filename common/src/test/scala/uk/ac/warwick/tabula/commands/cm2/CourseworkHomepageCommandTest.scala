@@ -114,7 +114,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
   private trait AdminCommandFixture {
     val command = new CourseworkHomepageAdminDepartments with CourseworkHomepageCommandState with ModuleAndDepartmentServiceComponent {
       val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-      val currentUser: CurrentUser = currentUser
+      val currentUser: CurrentUser = RequestInfo.fromThread.map(_.user).get
     }
   }
 
