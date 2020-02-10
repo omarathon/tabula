@@ -102,6 +102,7 @@ class RequestExtensionSupportingFileController extends CourseworkController {
 
   @RequestMapping
   def supportingFile(@ModelAttribute("downloadAttachmentCommand") attachmentCommand: DownloadAttachmentCommand): RenderableFile =
-    attachmentCommand.apply().getOrElse(throw new ItemNotFoundException)
+    attachmentCommand.apply()
+      .getOrElse(throw new ItemNotFoundException)
 
 }

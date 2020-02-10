@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportSingleCommand
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipFileItem}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
@@ -46,6 +46,6 @@ class DownloadProfileController extends AbstractViewProfileController with Autow
 
     Await.result(zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
       ZipFileItem.apply(if (index == 0) a.name else s"${a.id}-${a.name}", a.asByteSource, a.actualDataLength)
-    }).map(_.withSuggestedFilename(s"$academicYear.zip")), Duration.Inf)
+    }).map(_.withContentDisposition(ContentDisposition.Attachment).withSuggestedFilename(s"$academicYear.zip")), Duration.Inf)
   }
 }

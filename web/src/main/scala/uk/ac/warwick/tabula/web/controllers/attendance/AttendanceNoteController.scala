@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.attendance
 
 import javax.validation.Valid
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -15,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
@@ -61,11 +60,9 @@ class AttendanceNoteAttachmentController extends AttendanceController {
     AttendanceNoteAttachmentCommand(mandatory(student), mandatory(point), user)
 
   @RequestMapping
-  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile = {
-    cmd.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
-  }
+  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile =
+    cmd.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
 
 }
 

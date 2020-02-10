@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.modules
 
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{ItemNotFoundException}
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.cm2.feedback.DownloadFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Member}
 import uk.ac.warwick.tabula.services.FeedbackService
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Controller
@@ -18,7 +17,7 @@ class DownloadFeedbackInProfileController extends CourseworkController {
   var feedbackService: FeedbackService = Wire[FeedbackService]
 
   @ModelAttribute("downloadFeedbackCommand")
-  def command(@PathVariable assignment: Assignment, @PathVariable student: Member) =
+  def command(@PathVariable assignment: Assignment, @PathVariable student: Member): DownloadFeedbackCommand.Command =
     DownloadFeedbackCommand(assignment, mandatory(feedbackService.getFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
 
   @RequestMapping(value = Array("/all/feedback.zip"))
@@ -27,9 +26,8 @@ class DownloadFeedbackInProfileController extends CourseworkController {
 
   @RequestMapping(value = Array("/get/{filename}"))
   def getOne(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command): RenderableFile =
-    command.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
+    command.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
 
 }
 

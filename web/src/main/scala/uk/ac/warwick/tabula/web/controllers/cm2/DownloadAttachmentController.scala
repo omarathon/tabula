@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadAttachmentCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Member}
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.services.{ProfileService, SubmissionService}
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
-
 
 @Controller
 @RequestMapping(value = Array("/coursework/submission/{assignment}"))
@@ -19,15 +17,13 @@ class DownloadAttachmentController extends CourseworkController {
 
   var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
-  @ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]]
-  = new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId)), optionalCurrentMember)
+  @ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]] =
+    new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId)), optionalCurrentMember)
 
   @RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-  def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
-    command.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
-  }
+  def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile =
+    command.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
 
 }
 
@@ -46,9 +42,8 @@ class DownloadAttachmentForStudentController extends CourseworkController {
 
   @RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
   def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
-    command.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
+    command.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
   }
 
 }

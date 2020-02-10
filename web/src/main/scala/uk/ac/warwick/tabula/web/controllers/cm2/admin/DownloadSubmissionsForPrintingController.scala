@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.assignments.{DownloadAdminSubmissionsForPrintingCommand, DownloadMarkerSubmissionsForPrintingCommand, DownloadSubmissionsForPrintingCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.services.fileserver.ContentDisposition
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
@@ -40,7 +41,7 @@ trait DownloadSubmissionsForPrintingController extends CourseworkController with
 
   @RequestMapping(params = Array("download"))
   def download(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command): Mav = {
-    Mav(new RenderableFileView(cmd.apply()))
+    Mav(new RenderableFileView(cmd.apply().withContentDisposition(ContentDisposition.Attachment)))
   }
 
 }
