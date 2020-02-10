@@ -130,6 +130,13 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
     )
   }
 
+  lazy val initialState: Map[String, AttendanceState] = members.map { member =>
+    member.universityId ->
+      occurrence.attendance.asScala
+        .find(_.universityId == member.universityId)
+        .flatMap { a => Option(a.state) }.orNull
+  }.toMap
+
   var studentsState: JMap[UniversityId, AttendanceState] =
     LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
 
@@ -172,16 +179,16 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
   }
 
   def populate(): Unit = {
-    studentsState = members.map { member =>
-      member.universityId ->
-        occurrence.attendance.asScala
-          .find(_.universityId == member.universityId)
-          .flatMap { a => Option(a.state) }.orNull
-    }.toMap.asJava
+    studentsState = initialState.asJava
   }
 
   def applyInternal(): (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance]) = {
-    val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
+
+    val changes = studentsState.asScala.filter { case (studentId, state) =>
+      initialState.get(studentId).orNull != state
+    }
+
+    val attendances = changes.flatMap { case (studentId, state) =>
       if (state == null) {
         smallGroupService.deleteAttendance(studentId, event, week)
         None
