@@ -5,6 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.NotRecorded
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendance, _}
@@ -459,8 +460,10 @@ abstract class Description {
     this
   }
 
-  def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
-    property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
+  def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance], deletions: Seq[String]): Description = {
+    property("smallGroupAttendanceState" ->
+      (attendanceStates.map(s => s"${s.universityId} - ${s.state.description}") ++ deletions.map(id => s"$id - ${NotRecorded.description}"))
+    )
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {
