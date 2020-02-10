@@ -3,8 +3,10 @@ package uk.ac.warwick.tabula.api.commands.attendance
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.api.commands.attendance.SynchroniseAttendanceToSitsBySequenceCommand.{RequiredPermission, Result}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringSynchroniseAttendanceToSitsServiceComponent, SynchroniseAttendanceToSitsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -25,6 +27,7 @@ object SynchroniseAttendanceToSitsBySequenceCommand {
       with SynchroniseAttendanceToSitsBySequenceRequest
       with AutowiringSynchroniseAttendanceToSitsServiceComponent
       with AutowiringSecurityServiceComponent
+      with AutowiringAttendanceMonitoringServiceComponent
       with SynchroniseAttendanceToSitsBySequencePermissions
       with SynchroniseAttendanceToSitsBySequenceValidation
       with SynchroniseAttendanceToSitsBySequenceDescription
@@ -57,7 +60,8 @@ trait SynchroniseAttendanceToSitsBySequenceRequest {
 trait SynchroniseAttendanceToSitsBySequenceValidation extends SelfValidating {
   self: SynchroniseAttendanceToSitsBySequenceRequest
     with SynchroniseAttendanceToSitsBySequenceState
-    with SecurityServiceComponent =>
+    with SecurityServiceComponent
+    with AttendanceMonitoringServiceComponent =>
 
   override def validate(errors: Errors): Unit = {
     val allStudents = missedPoints.keySet.toSeq
@@ -80,6 +84,35 @@ trait SynchroniseAttendanceToSitsBySequenceValidation extends SelfValidating {
 
         if (!securityService.can(currentUser, Permissions.MonitoringPoints.Report, student)) {
           errors.rejectValue("missedPoints", "monitoringPointReport.student.noPermission", Array(student.universityId), "")
+        }
+
+        // Is the student a member of any Tabula monitoring schemes?
+        val points = attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
+        if (points.nonEmpty) {
+          val schemes = points.groupBy(_.scheme).keys.toSeq.sortBy(s => (s.department.code, s.displayName))
+          errors.rejectValue("missedPoints", "monitoringPointReport.onTabulaScheme", Array(student.universityId, schemes.map(s => s"${s.department.name}: ${s.displayName}").mkString(", ")), "")
+        }
+
+        // Does the student have any monitoring checkpoints already reported?
+        val checkpoints = attendanceMonitoringService.getCheckpoints(points, student).values.toSeq
+        val nonActiveCheckpoints = attendanceMonitoringService.getNonActiveCheckpoints(student, None, academicYear, checkpoints)
+
+        val allCheckpoints = checkpoints ++ nonActiveCheckpoints
+        val synchronisedCheckpoints = allCheckpoints.filter { cp =>
+          Option(cp.lastSynchronisedToSits).nonEmpty &&
+          cp.state == AttendanceState.MissedUnauthorised
+        }
+
+        if (synchronisedCheckpoints.nonEmpty) {
+          errors.rejectValue(
+            "missedPoints",
+            "monitoringPointReport.reportedTabulaCheckpoints",
+            Array(
+              student.universityId,
+              synchronisedCheckpoints.map(cp => s"${cp.point.scheme.department.name}: ${cp.point.scheme.displayName}, ${cp.point.name}, ${cp.state.description}").mkString(", ")
+            ),
+            ""
+          )
         }
       }
     }
