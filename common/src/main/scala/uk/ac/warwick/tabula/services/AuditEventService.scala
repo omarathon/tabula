@@ -4,9 +4,9 @@ import java.io.StringWriter
 import java.sql.Clob
 import java.util.TimeZone
 
-import javax.annotation.Resource
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
+import javax.annotation.Resource
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.dialect.Dialect
 import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
@@ -40,6 +40,8 @@ trait AuditEventService {
   def save(auditevent: AuditEvent): Unit
 
   def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent]
+
+  def listWithEventTypeNewerThan(eventType: String)(date: DateTime, max: Int): Seq[AuditEvent]
 
   def listRecent(start: Int, count: Int): Seq[AuditEvent]
 
@@ -95,8 +97,13 @@ class AuditEventServiceImpl extends AuditEventService {
   // for getting events newer than a certain date, for indexing
   private val indexListSql = baseSelect +
     """
-					where eventdate > :eventdate and eventstage = 'before'
-					order by eventdate asc """
+       where eventdate > :eventdate and eventstage = 'before'
+       order by eventdate asc """
+
+  private val indexListByEventTypeSql = baseSelect +
+    """
+       where eventdate > :eventdate and eventtype = :eventtype and eventstage = 'before'
+       order by eventdate asc """
 
   private val timestampColumnMapper = {
     val mapper = new TimestampColumnDateTimeMapper
@@ -233,6 +240,14 @@ class AuditEventServiceImpl extends AuditEventService {
   def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent] = {
     val query = session.createSQLQuery(indexListSql)
     query.setTimestamp("eventdate", timestampColumnMapper.toNonNullValue(date))
+    query.setMaxResults(max)
+    query.list().asInstanceOf[JList[Array[Object]]].asScala.toSeq.map(mapListToObject)
+  }
+
+  def listWithEventTypeNewerThan(eventType: String)(date: DateTime, max: Int): Seq[AuditEvent] = {
+    val query = session.createSQLQuery(indexListByEventTypeSql)
+    query.setTimestamp("eventdate", timestampColumnMapper.toNonNullValue(date))
+    query.setParameter("eventtype", eventType)
     query.setMaxResults(max)
     query.list().asInstanceOf[JList[Array[Object]]].asScala.toSeq.map(mapListToObject)
   }
