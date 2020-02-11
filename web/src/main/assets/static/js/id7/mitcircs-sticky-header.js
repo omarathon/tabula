@@ -1,3 +1,3 @@
 import $ from 'jquery';
 
-$(() => $('.id7-main-content').fixHeaderFooter());
+$(() => $('.mitcircs-review.fix-area').fixHeaderFooter());

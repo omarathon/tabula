@@ -4,8 +4,8 @@
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
 <#assign isSelf = submission.student.universityId == user.universityId!'' />
 
-
-<div class="fix-header pad-when-fixed scroll-to-fixed-fixed">
+<div class="mitcircs-review fix-area">
+<div class="fix-header pad-when-fixed">
   <div class="btn-toolbar dept-toolbar mitcircs-pagination">
     <#if canManage>
         <#if pagination?? && panel??>
@@ -18,14 +18,14 @@
     <div class="btn-group">
       <span class="mitcircs-pagination__count">${pagination.index} of ${pagination.total}</span>
       <#if pagination.previous??>
-        <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.previous />" title="Previous submission 'MIT-${pagination.previous.key}' (type 'k')" data-container="body" data-pagination="previous"><i class="fal fa-chevron-up"></i></a>
+        <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.previous />" title="Previous submission 'MIT-${pagination.previous.key}' (type 'k')" data-container="body" data-placement="bottom" data-pagination="previous"><i class="fal fa-chevron-up"></i></a>
       <#else>
-        <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-up"></i></a>
+        <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body" data-placement="bottom"><i class="fal fa-chevron-up"></i></a>
       </#if>
       <#if pagination.next??>
-        <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.next />" title="Next submission 'MIT-${pagination.next.key}' (type 'j')" data-container="body" data-pagination="next"><i class="fal fa-chevron-down"></i></a>
+        <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.next />" title="Next submission 'MIT-${pagination.next.key}' (type 'j')" data-container="body" data-placement="bottom" data-pagination="next"><i class="fal fa-chevron-down"></i></a>
       <#else>
-        <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
+        <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body" data-placement="bottom"><i class="fal fa-chevron-down"></i></a>
       </#if>
     </div>
     </#if>
@@ -347,3 +347,4 @@
     </#if>
   </#if>
 </section>
+</div>
