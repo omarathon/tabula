@@ -89,7 +89,7 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
           user = user,
           changes = changes.map(_.map { case (student, s) => RecordAttendanceHistoryChange(student, s) })
         )
-      }
+      }.reverse // Most recent first
     }
   }
 
