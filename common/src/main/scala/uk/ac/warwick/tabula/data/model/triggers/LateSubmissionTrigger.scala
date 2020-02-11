@@ -6,9 +6,9 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission, ToEntityReference}
 
-object SubmissionAfterCloseDateTrigger {
-  def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): SubmissionAfterCloseDateTrigger = {
-    val result = new SubmissionAfterCloseDateTrigger
+object LateSubmissionTrigger {
+  def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): LateSubmissionTrigger = {
+    val result = new LateSubmissionTrigger
     result.scheduledDate = thisScheduledDate
     result.updateTarget(thisTargetEntity)
     result
@@ -19,14 +19,14 @@ object SubmissionAfterCloseDateTrigger {
 @Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "SubmissionAfterCloseDate")
-class SubmissionAfterCloseDateTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
+class LateSubmissionTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
 
   def submission: Submission = target.entity
 
   override def assignment: Assignment = submission.assignment
 
   override def apply(): Unit = transactional() {
-    if (assignment.isClosed && (submission.isLate || submission.isAuthorisedLate)) {
+    if (assignment.isClosed && submission.isLate) {
       handleAssignment(Seq(submission.usercode))
     }
   }
