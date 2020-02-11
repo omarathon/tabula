@@ -154,7 +154,7 @@
                       <td>
                         <@fmt.date date=history.recorded />
                         <#if history.wasRecordedLate>
-                          <i class="fal fa-clock" aria-label="Recorded after the day of the event"></i>
+                          <span tabindex="0" class="tabula-tooltip" data-title="Recorded after the day of the event"><i class="fal fa-clock" aria-label="Recorded after the day of the event"></i></span>
                         </#if>
                       </td>
                       <td>${history.user.fullName!(history.user.userId)}</td>
