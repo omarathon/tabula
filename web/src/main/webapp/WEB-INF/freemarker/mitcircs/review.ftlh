@@ -4,8 +4,17 @@
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
 <#assign isSelf = submission.student.universityId == user.universityId!'' />
 
-<#if pagination??>
+
+<div class="fix-header pad-when-fixed scroll-to-fixed-fixed">
   <div class="btn-toolbar dept-toolbar mitcircs-pagination">
+    <#if canManage>
+        <#if pagination?? && panel??>
+          <a href="<@routes.mitcircs.viewPanel submission.panel />" class="mitcircs-return-link"> Return to panel</a>
+        <#else>
+          <a href="<@routes.mitcircs.adminhome submission.department />" class="mitcircs-return-link"></i> Return to list of submissions</a>
+        </#if>
+    </#if>
+    <#if pagination??>
     <div class="btn-group">
       <span class="mitcircs-pagination__count">${pagination.index} of ${pagination.total}</span>
       <#if pagination.previous??>
@@ -19,14 +28,13 @@
         <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
       </#if>
     </div>
+    </#if>
   </div>
 
   <div class="deptheader">
     <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
   </div>
-<#else>
-  <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
-</#if>
+</div>
 
 <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <section class="mitcircs-details">
@@ -71,11 +79,6 @@
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
             <#if canManage>
-              <#if pagination?? && panel??>
-                <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
-              <#else>
-                <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
-              </#if>
 
               <#if submission.canConfirmSensitiveEvidence>
                 <p><a href="<@routes.mitcircs.sensitiveEvidence submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
@@ -321,6 +324,14 @@
               </@components.detail>
             </#if>
           </#if>
+        </#if>
+        <#if isPanelChair>
+            <@modal.modal id="approveModal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
+            <#if submission.canApproveOutcomes>
+              <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default" data-toggle="modal" data-target="#approveModal">Approve outcomes</a></p>
+            <#elseif submission.state.entryName == "Approved By Chair">
+              <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default" data-toggle="modal" data-target="#approveModal">Unapprove outcomes</a></p>
+            </#if>
         </#if>
       </@components.section>
     </#if>
