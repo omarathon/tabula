@@ -13,8 +13,8 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
   val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 
   val users = Seq(
-    Fixtures.user(universityId = "0123456", userId = "0123456"),
-    Fixtures.user(universityId = "0133454", userId = "0133454")
+    Fixtures.user(universityId = "0123456", userId = "u0123456"),
+    Fixtures.user(universityId = "0133454", userId = "u0133454")
   )
 
   val assignment = new Assignment
@@ -41,7 +41,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
     withClue("Shouldn't notify user who has submitted") {
       val submission = new Submission
       submission._universityId = "0133454"
-      submission.usercode = "0133454"
+      submission.usercode = "u0133454"
       assignment.addSubmission(submission)
       notification.recipients should be(Seq(users.head))
     }
@@ -49,12 +49,12 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
     withClue("Shouldn't notify user with extension") { // A different class handles individual extensions
       val extension = new Extension
       extension._universityId = "0123456"
-      extension.usercode = "0123456"
+      extension.usercode = "u0123456"
       extension.approve()
       assignment.addExtension(extension)
 
       assignment.extensionService = smartMock[ExtensionService]
-      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("0123456" -> extension)
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("u0123456" -> extension)
 
       notification.recipients should be(Seq())
     }
@@ -71,6 +71,11 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
     }
     notification.userLookup = mock[UserLookupService]
     notification.userLookup.getUserByUserId("u0133454") returns users(1)
+
+    val membershipService = smartMock[AssessmentMembershipService]
+    membershipService.determineMembershipUsers(assignment) returns users
+    notification.membershipService = membershipService
+
     assignment.addExtension(anExtension)
 
     assignment.extensionService = smartMock[ExtensionService]
