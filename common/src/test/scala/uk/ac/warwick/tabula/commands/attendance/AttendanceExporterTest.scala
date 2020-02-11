@@ -11,10 +11,10 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 import scala.concurrent.Future
 
-class CSVAttendanceExporterTest extends TestBase with Mockito {
+class AttendanceExporterTest extends TestBase with Mockito {
 
   trait Fixture {
-    val exporter = new CSVAttendanceExtractorInternal with ProfileServiceComponent {
+    val exporter = new AttendanceExtractorInternal with ProfileServiceComponent {
       override val profileService: ProfileService = smartMock[ProfileService]
     }
     val errors = new BindException(exporter, "command")

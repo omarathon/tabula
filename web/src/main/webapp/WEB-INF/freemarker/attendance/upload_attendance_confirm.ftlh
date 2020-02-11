@@ -1,5 +1,5 @@
 <div class="deptheader">
-  <h1>Upload attendance from CSV</h1>
+  <h1>Upload attendance</h1>
   <h5 class="with-related"><span class="muted">for</span> ${command.templatePoint.name}</h5>
 </div>
 
@@ -73,7 +73,7 @@
 
     <div class="striped-section-contents">
       <div class="item-info">
-        <p><@fmt.p number=invalid?size singular="student was" plural="students were" /> ignored as they were not valid.</p>
+        <p><@fmt.p number=invalid?size singular="student was" plural="students were" /> ignored as they are not a member of any monitoring scheme related to this point.</p>
         <table class="sortable table table-striped">
           <thead>
           <tr>
