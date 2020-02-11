@@ -69,10 +69,6 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     with UploadedImageProcessorComponent
     with PermissionsServiceComponent =>
 
-  if(permissionsService.getGrantedRole(department, MitigatingCircumstancesOfficerRoleDefinition).forall(_.users.users.isEmpty)) {
-    throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have any named MCOs")
-  }
-
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
     file.onBind(result)
@@ -263,14 +259,25 @@ trait MitCircsSubmissionRequest {
 }
 
 trait MitCircsSubmissionState {
+  self: PermissionsServiceComponent =>
+
   val student: StudentMember
   val currentUser: User
+
   lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
-  lazy val department: Department = Option(student.homeDepartment)
-    .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
-    .getOrElse(
-      throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have mit circs enabled")
-    )
+  lazy val department: Department = {
+    val subDepartmentWithMitCircsEnabled = Option(student.homeDepartment)
+      .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
+      .getOrElse(
+        throw new IllegalArgumentException(s"Unable to create a mit circs submission for a student (${student.universityId}) whose department (${Option(student.homeDepartment).map(_.code).getOrElse("")}) doesn't have mit circs enabled")
+      )
+
+    if (permissionsService.getGrantedRole(subDepartmentWithMitCircsEnabled, MitigatingCircumstancesOfficerRoleDefinition).forall(_.users.users.isEmpty)) {
+      throw new IllegalArgumentException(s"Unable to create a mit circs submission for a student (${student.universityId}) whose department (${subDepartmentWithMitCircsEnabled.code}) doesn't have any named MCOs")
+    }
+
+    subDepartmentWithMitCircsEnabled
+  }
 }
 
 class AffectedAssessmentItem {
