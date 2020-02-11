@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
@@ -35,7 +35,9 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 
   @RequestMapping(value = Array("/attachment/{filename}"))
   def getOne(@ModelAttribute command: Command, @PathVariable filename: String): Mav = {
-    val file = command.apply().getOrElse(throw new ItemNotFoundException())
+    val file = command.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
+
     Mav(new RenderableFileView(file))
   }
 }
@@ -53,7 +55,7 @@ class DownloadAllFeedbackController extends CourseworkController {
   def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
     command.apply() match {
       case Left(renderable) =>
-        Mav(new RenderableFileView(renderable))
+        Mav(new RenderableFileView(renderable.withContentDisposition(ContentDisposition.Attachment)))
       case Right(jobInstance) =>
         Redirect(Routes.zipFileJob(jobInstance), "returnTo" -> Routes.admin.assignment.submissionsandfeedback(assignment))
     }
@@ -75,7 +77,7 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 
   @RequestMapping(method = Array(GET), value = Array("/{filename}.zip"))
   def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
-    Mav(new RenderableFileView(cmd.apply()))
+    Mav(new RenderableFileView(cmd.apply().withContentDisposition(ContentDisposition.Attachment)))
   }
 
   @RequestMapping(value = Array("/attachments/*"))
@@ -98,9 +100,9 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 
   @RequestMapping(method = Array(GET), value = Array("/{filename}", "/attachment/{filename}"))
   def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
-    val renderable = cmd.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
+    val renderable = cmd.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
+
     Mav(new RenderableFileView(renderable))
   }
 }
@@ -130,6 +132,7 @@ class DownloadMarkerFeedbackForStageController extends CourseworkController {
     DownloadMarkerFeedbackForStageCommand(mandatory(assignment), mandatory(marker), mandatory(stage), user)
 
   @RequestMapping
-  def download(@ModelAttribute("command") command: DownloadMarkerFeedbackForStageCommand.Command): RenderableFile = command.apply()
+  def download(@ModelAttribute("command") command: DownloadMarkerFeedbackForStageCommand.Command): RenderableFile =
+    command.apply().withContentDisposition(ContentDisposition.Attachment)
 
 }

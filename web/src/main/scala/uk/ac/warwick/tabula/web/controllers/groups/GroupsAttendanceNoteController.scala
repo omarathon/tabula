@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, Sm
 import uk.ac.warwick.tabula.data.model.{AbsenceType, Member}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.services.{ProfileService, SmallGroupService}
 import uk.ac.warwick.tabula.web.Mav
 
@@ -50,11 +50,9 @@ class GroupsAttendanceNoteAttachmentController extends GroupsController {
     AttendanceNoteAttachmentCommand(mandatory(member), mandatory(occurrence), user)
 
   @RequestMapping
-  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile = {
-    cmd.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
-  }
+  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile =
+    cmd.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
 
 }
 
