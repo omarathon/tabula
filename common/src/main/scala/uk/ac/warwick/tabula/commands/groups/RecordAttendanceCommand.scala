@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyMaps}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringEventAttendanceServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.mutable
@@ -40,6 +40,7 @@ object RecordAttendanceCommand {
     with CompletesNotifications[RecordAttendanceResult]
 
   def apply(event: SmallGroupEvent, week: Int, user: CurrentUser): Command =
+    new RecordAttendanceCommand(event, week, user)
       with ComposableCommand[RecordAttendanceResult]
       with SmallGroupEventInFutureCheck
       with RecordAttendanceCommandPermissions
