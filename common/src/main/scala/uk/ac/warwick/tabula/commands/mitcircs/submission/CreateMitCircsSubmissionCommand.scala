@@ -31,7 +31,7 @@ object CreateMitCircsSubmissionCommand {
   type Result = MitigatingCircumstancesSubmission
   type Command =
     Appliable[Result]
-      with MitCircsSubmissionState
+      with CreateMitCircsSubmissionState
       with MitCircsSubmissionRequest
       with SelfValidating
       with BindListener
@@ -60,7 +60,7 @@ object CreateMitCircsSubmissionCommand {
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
   extends CommandInternal[Result]
-    with MitCircsSubmissionState
+    with CreateMitCircsSubmissionState
     with BindListener {
 
   self: MitCircsSubmissionRequest
@@ -215,18 +215,16 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 }
 
 trait CreateMitCircsSubmissionDescription extends Describable[Result] {
-  self: MitCircsSubmissionState =>
+  self: CreateMitCircsSubmissionState =>
 
   override lazy val eventName: String = "CreateMitCircsSubmission"
 
-  def describe(d: Description): Unit = {
+  def describe(d: Description): Unit =
     d.member(student)
-  }
+     .department(department)
 }
 
 trait MitCircsSubmissionRequest {
-  self: MitCircsSubmissionState =>
-
   @DateWithinYears(maxPast = 3, maxFuture = 1)
   var startDate: LocalDate = _
 
@@ -258,13 +256,9 @@ trait MitCircsSubmissionRequest {
   var approve: Boolean = _ // set this to true when a user is approving a draft submission or one made on their behalf
 }
 
-trait MitCircsSubmissionState {
+trait CreateMitCircsSubmissionState extends MitCircsSubmissionState {
   self: PermissionsServiceComponent =>
 
-  val student: StudentMember
-  val currentUser: User
-
-  lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
   lazy val department: Department = {
     val subDepartmentWithMitCircsEnabled = Option(student.homeDepartment)
       .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
@@ -278,6 +272,13 @@ trait MitCircsSubmissionState {
 
     subDepartmentWithMitCircsEnabled
   }
+}
+
+trait MitCircsSubmissionState {
+  val student: StudentMember
+  val currentUser: User
+
+  lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
 }
 
 class AffectedAssessmentItem {
@@ -319,8 +320,7 @@ class AffectedAssessmentItem {
 }
 
 trait NewMitCircsSubmissionNotifications extends Notifies[Result, MitigatingCircumstancesSubmission] {
-
-  self: MitCircsSubmissionRequest with MitCircsSubmissionState =>
+  self: MitCircsSubmissionRequest with CreateMitCircsSubmissionState =>
 
   def emit(submission: Result): Seq[Notification[Result, MitigatingCircumstancesSubmission]] = {
 
