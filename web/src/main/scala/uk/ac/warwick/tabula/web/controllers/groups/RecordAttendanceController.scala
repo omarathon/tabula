@@ -23,7 +23,7 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 
   validatesSelf[SelfValidating]
 
-  type RecordAttendanceCommand = Appliable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])]
+  type RecordAttendanceCommand = Appliable[RecordAttendanceCommand.RecordAttendanceResult]
     with PopulateOnForm with SmallGroupEventInFutureCheck with RecordAttendanceState
     with AddAdditionalStudent with RemoveAdditionalStudent
 
@@ -59,8 +59,8 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
     if (errors.hasErrors) {
       form(command)
     } else {
-      val (occurrence, _) = command.apply()
-      Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> occurrence.id)
+      val result = command.apply()
+      Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> result.occurrence.id)
     }
   }
 
