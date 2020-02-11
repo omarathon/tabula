@@ -26,7 +26,7 @@
   <#else>
 
     <div class="pull-right">
-      <a href="${uploadUrl}" class="btn btn-default upload-attendance">Upload attendance from CSV</a>
+      <a href="${uploadUrl}" class="btn btn-default upload-attendance">Upload attendance</a>
     </div>
 
     <#noescape>${titleHeader}</#noescape>

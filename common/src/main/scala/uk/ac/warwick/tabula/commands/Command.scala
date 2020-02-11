@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.commands
 
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.NotRecorded
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendance, _}
@@ -459,10 +459,12 @@ abstract class Description {
     this
   }
 
-  def smallGroupAttendanceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
+  def smallGroupAttendanceState(attendanceStates: Seq[SmallGroupEventAttendance], deletions: Seq[String]): Description = {
     // Warning: If you change the format that this is logged in, you may also need to check code
     // parsing it back out (see AuditEventQueryService)
-    property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
+    property("smallGroupAttendanceState" ->
+      (attendanceStates.map(s => s"${s.universityId} - ${s.state.description}") ++ deletions.map(id => s"$id - ${NotRecorded.description}"))
+    )
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {

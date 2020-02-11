@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyMaps}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringEventAttendanceServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.mutable
@@ -24,19 +24,23 @@ import scala.jdk.CollectionConverters._
 object RecordAttendanceCommand {
   type UniversityId = String
 
-  type Result = (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])
-  type Command = Appliable[Result]
+  case class RecordAttendanceResult (
+    occurrence: SmallGroupEventOccurrence,
+    attendance: Seq[SmallGroupEventAttendance],
+    deletions: Seq[UniversityId] // any students that had an attendance state set that have been returned to unrecorded
+  )
+
+  type Command = Appliable[RecordAttendanceResult]
     with RecordAttendanceState
     with SmallGroupEventInFutureCheck
     with PopulateOnForm
     with AddAdditionalStudent
     with RemoveAdditionalStudent
     with SelfValidating
-    with CompletesNotifications[Result]
+    with CompletesNotifications[RecordAttendanceResult]
 
   def apply(event: SmallGroupEvent, week: Int, user: CurrentUser): Command =
-    new RecordAttendanceCommand(event, week, user)
-      with ComposableCommand[Result]
+      with ComposableCommand[RecordAttendanceResult]
       with SmallGroupEventInFutureCheck
       with RecordAttendanceCommandPermissions
       with RecordAttendanceDescription
@@ -120,7 +124,7 @@ trait RemoveAdditionalStudent {
 }
 
 abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int, val user: CurrentUser)
-  extends CommandInternal[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])]
+  extends CommandInternal[RecordAttendanceResult]
     with RecordAttendanceState
     with AddAdditionalStudent
     with RemoveAdditionalStudent
@@ -137,6 +141,13 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
       throw new ItemNotFoundException
     )
   }
+
+  lazy val initialState: Map[String, AttendanceState] = members.map { member =>
+    member.universityId ->
+      occurrence.attendance.asScala
+        .find(_.universityId == member.universityId)
+        .flatMap { a => Option(a.state) }.orNull
+  }.toMap
 
   var studentsState: JMap[UniversityId, AttendanceState] =
     LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
@@ -180,30 +191,25 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
   }
 
   def populate(): Unit = {
-    studentsState = members.map { member =>
-      member.universityId ->
-        occurrence.attendance.asScala
-          .find(_.universityId == member.universityId)
-          .flatMap { a => Option(a.state) }.orNull
-    }.toMap.asJava
+    studentsState = initialState.asJava
   }
 
-  def applyInternal(): (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance]) = {
-    val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
-      if (state == null) {
-        smallGroupService.deleteAttendance(studentId, event, week)
-        None
-      } else {
-        Some(smallGroupService.saveOrUpdateAttendance(studentId, event, week, state, user))
-      }
-    }.toSeq
+  def applyInternal(): RecordAttendanceResult = {
+
+    val changes = studentsState.asScala.filter { case (studentId, state) =>
+      initialState.get(studentId).orNull != state
+    }
+
+    val (deletes, updates) = changes.partition { case (_, state) => state == null }
+    deletes.foreach { case (studentId, _) => smallGroupService.deleteAttendance(studentId, event, week) }
+    val attendances = updates.map { case (studentId, state) => smallGroupService.saveOrUpdateAttendance(studentId, event, week, state, user) }.toSeq
 
     attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
     if (occurrence.department.autoMarkMissedMonitoringPoints) {
       attendanceMonitoringEventAttendanceService.updateMissedCheckpoints(attendances, user)
     }
 
-    (occurrence, attendances)
+    RecordAttendanceResult(occurrence, attendances, deletes.keys.toSeq)
   }
 }
 
@@ -271,7 +277,7 @@ trait SmallGroupEventInFutureCheck {
   }
 }
 
-trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {
+trait RecordAttendanceDescription extends Describable[RecordAttendanceResult] {
   self: RecordAttendanceState =>
 
   override lazy val eventName = "RecordAttendance"
@@ -281,22 +287,22 @@ trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence
      .property("week", week)
   }
 
-  override def describeResult(d: Description, result: (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])): Unit = {
-    d.smallGroupAttendanceState(result._2)
-     .studentIds(result._2.map(_.universityId))
+  override def describeResult(d: Description, result: RecordAttendanceResult): Unit = {
+    d.smallGroupAttendanceState(result.attendance, result.deletions)
+     .studentIds(result.attendance.map(_.universityId) ++ result.deletions)
   }
 }
 
-trait RecordAttendanceNotificationCompletion extends CompletesNotifications[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {
+trait RecordAttendanceNotificationCompletion extends CompletesNotifications[RecordAttendanceResult] {
 
   self: RecordAttendanceState with NotificationHandling =>
 
-  def notificationsToComplete(commandResult: (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])): CompletesNotificationsResult = {
-    val event = commandResult._1.event
-    val attendanceIds = commandResult._1.attendance.asScala.map(_.universityId)
+  def notificationsToComplete(commandResult: RecordAttendanceResult): CompletesNotificationsResult = {
+    val event = commandResult.occurrence.event
+    val attendanceIds = commandResult.occurrence.attendance.asScala.map(_.universityId)
     if (event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
       CompletesNotificationsResult(
-        notificationService.findActionRequiredNotificationsByEntityAndType[SmallGroupEventAttendanceReminderNotification](commandResult._1),
+        notificationService.findActionRequiredNotificationsByEntityAndType[SmallGroupEventAttendanceReminderNotification](commandResult.occurrence),
         user.apparentUser
       )
     } else {

@@ -86,7 +86,7 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
           wasRecordedLate = event.endDateTimeForWeek(week).exists { endTime =>
             endTime.toLocalDate.isBefore(dateTime.toLocalDate)
           },
-          user = user, 
+          user = user,
           changes = changes.map(_.map { case (student, s) => RecordAttendanceHistoryChange(student, s) })
         )
       }
@@ -119,8 +119,8 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
     if (errors.hasErrors) {
       form(command)
     } else {
-      val (occurrence, _) = command.apply()
-      Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> occurrence.id)
+      val result = command.apply()
+      Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> result.occurrence.id)
     }
 
 }

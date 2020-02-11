@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.objectstore.{AutowiringObjectStorageServiceComponent, ObjectStorageServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.Mav
@@ -45,7 +45,7 @@ class ObjectStorageSysadminDownloadController extends BaseSysadminController {
 
   @GetMapping
   def download(@ModelAttribute("command") command: ObjectStorageSysadminDownloadCommand.Command): RenderableFile =
-    command.apply()
+    command.apply().withContentDisposition(ContentDisposition.Attachment)
 
 }
 

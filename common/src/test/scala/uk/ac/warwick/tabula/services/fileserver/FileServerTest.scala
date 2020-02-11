@@ -23,9 +23,9 @@ class FileServerTest extends TestBase with Mockito {
   val tmpFile: File = File.createTempFile("fileservertest", ".txt")
   FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
 
-  @Test def streamEmptyAttachment: Unit = {
-    implicit val req = new MockHttpServletRequest
-    implicit val res = new MockHttpServletResponse
+  @Test def streamEmptyAttachment(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
+    implicit val res: MockHttpServletResponse = new MockHttpServletResponse
 
     val a = new FileAttachment
     a.id = "123"
@@ -37,14 +37,14 @@ class FileServerTest extends TestBase with Mockito {
 
     server.stream(file)
 
-    res.getContentLength() should be(0)
-    res.getContentType() should be(MediaType.OCTET_STREAM.toString)
-    res.getContentAsByteArray().length should be(0)
+    res.getContentLength should be(0)
+    res.getContentType should be(MediaType.OCTET_STREAM.toString)
+    res.getContentAsByteArray.length should be(0)
   }
 
-  @Test def streamAttachment: Unit = {
-    implicit val req = new MockHttpServletRequest
-    implicit val res = new MockHttpServletResponse
+  @Test def streamAttachment(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
+    implicit val res: MockHttpServletResponse = new MockHttpServletResponse
 
     val a = new FileAttachment
     a.id = "123"
@@ -56,16 +56,16 @@ class FileServerTest extends TestBase with Mockito {
 
     server.stream(file)
 
-    res.getContentLength() should be(content.length)
+    res.getContentLength should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
-    res.getContentType() should be("text/plain")
+    res.getContentType should be("text/plain")
     res.getHeader("Content-Disposition") should be("inline")
     res.getContentAsString() should be(content)
   }
 
-  @Test def serveAttachment: Unit = {
-    implicit val req = new MockHttpServletRequest
-    implicit val res = new MockHttpServletResponse
+  @Test def serveAttachment(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
+    implicit val res: MockHttpServletResponse = new MockHttpServletResponse
 
     val a = new FileAttachment
     a.id = "123"
@@ -77,18 +77,18 @@ class FileServerTest extends TestBase with Mockito {
 
     server.serve(file, "steven")
 
-    res.getContentLength() should be(content.length)
+    res.getContentLength should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
-    res.getContentType() should be("text/plain")
+    res.getContentType should be("text/plain")
     res.getHeader("Content-Disposition") should be("inline; filename=\"steven\"")
     res.getContentAsString() should be(content)
   }
 
-  @Test def streamHead: Unit = {
-    implicit val req = new MockHttpServletRequest
+  @Test def streamHead(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
     req.setMethod("HEAD")
 
-    implicit val res = new MockHttpServletResponse
+    implicit val res: MockHttpServletResponse = new MockHttpServletResponse
 
     val a = new FileAttachment
     a.id = "123"
@@ -100,18 +100,18 @@ class FileServerTest extends TestBase with Mockito {
 
     server.stream(file)
 
-    res.getContentLength() should be(content.length)
+    res.getContentLength should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
-    res.getContentType() should be("text/plain")
+    res.getContentType should be("text/plain")
     res.getHeader("Content-Disposition") should be("inline")
-    res.getContentAsByteArray().length should be(0)
+    res.getContentAsByteArray.length should be(0)
   }
 
-  @Test def serveHead: Unit = {
-    implicit val req = new MockHttpServletRequest
+  @Test def serveHead(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
     req.setMethod("HEAD")
 
-    implicit val res = new MockHttpServletResponse
+    implicit val res: MockHttpServletResponse = new MockHttpServletResponse
 
     val a = new FileAttachment
     a.id = "123"
@@ -123,25 +123,26 @@ class FileServerTest extends TestBase with Mockito {
 
     server.serve(file, "steven.zip")
 
-    res.getContentLength() should be(content.length)
+    res.getContentLength should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
-    res.getContentType() should be("application/zip")
+    res.getContentType should be("application/zip")
     res.getHeader("Content-Disposition") should be("attachment; filename=\"steven.zip\"")
-    res.getContentAsByteArray().length should be(0)
+    res.getContentAsByteArray.length should be(0)
   }
 
-  @Test def expiresHeader: Unit = {
-    implicit val req = new MockHttpServletRequest
-    implicit val res = mock[MockHttpServletResponse]
+  @Test def expiresHeader(): Unit = {
+    implicit val req: MockHttpServletRequest = new MockHttpServletRequest
+    implicit val res: MockHttpServletResponse = mock[MockHttpServletResponse]
 
     val time = new DateTime(2012, 6, 7, 8, 9, 10, 0)
     val period = Hours.THREE
 
     val file = mock[RenderableFile]
-    file.cachePolicy returns (CachePolicy(expires = Some(period)))
+    file.cachePolicy returns CachePolicy(expires = Some(period))
     file.contentLength returns None
     file.contentType returns "application/octet-stream"
     file.suggestedFilename returns None
+    file.contentDisposition returns ContentDisposition.Default
 
     withFakeTime(time) {
       server.serve(file, "steven")(req, res)

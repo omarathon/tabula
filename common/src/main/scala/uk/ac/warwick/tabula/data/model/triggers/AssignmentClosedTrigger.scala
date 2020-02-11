@@ -27,7 +27,8 @@ class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssi
 
   override def apply(): Unit = transactional() {
     if (assignment.isClosed) {
-      handleAssignment(assignment.feedbacks.asScala.toSeq.map(_.usercode))
+      // TAB-6796 Don't include anyone who has an approved extension, they'll get caught by ExtensionExpiredTrigger
+      handleAssignment(assignment.feedbacks.asScala.toSeq.map(_.usercode).diff(assignment.approvedExtensions.keys.toSeq))
     }
   }
 }
