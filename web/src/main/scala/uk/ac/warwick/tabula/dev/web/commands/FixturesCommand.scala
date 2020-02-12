@@ -100,6 +100,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
   private def setupDepartmentAndModules(): Unit = {
     // Blitz members
     transactional() {
+      sessionWithoutFreshFilters.newUpdateQuery("delete from FileAttachment where mitigatingCircumstancesSubmission.id in (select id from MitigatingCircumstancesSubmission where student.universityId like '3000%')").executeUpdate()
+      sessionWithoutFreshFilters.newUpdateQuery("delete from MitigatingCircumstancesAffectedAssessment where mitigatingCircumstancesSubmission.id in (select id from MitigatingCircumstancesSubmission where student.universityId like '3000%')").executeUpdate()
       sessionWithoutFreshFilters.newUpdateQuery("delete from MitigatingCircumstancesSubmission where student.universityId like '3000%'").executeUpdate()
       sessionWithoutFreshFilters.newUpdateQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
       sessionWithoutFreshFilters.newUpdateQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()

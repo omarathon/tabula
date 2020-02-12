@@ -1,9 +1,13 @@
 package uk.ac.warwick.tabula.mitcircs
 
 import org.joda.time.DateTimeConstants
+import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.Select
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, DateFormats}
+
+import scala.jdk.CollectionConverters._
 
 class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCircsFixture {
 
@@ -35,7 +39,7 @@ class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCirc
 
     And("I fill in affected dates")
     textField("startDate").value = DateFormats.DatePickerFormatter.print(AcademicYear.now().firstDay)
-    textField("endDate").value = DateFormats.DatePickerFormatter.print(AcademicYear.now().lastDay)
+    textField("endDate").value = DateFormats.DatePickerFormatter.print(AcademicYear.now().next.firstDay.minusDays(1))
 
     Then("The affected assessments table should load")
     eventually {
@@ -91,16 +95,80 @@ class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCirc
     find(cssSelector("input[type=file]")).get.underlying.sendKeys(getClass.getResource("/file2.txt").getFile)
 
     And("I save the submission as a draft")
-    click on xpath("//button[@type='submit'][contains(text(), 'Save draft')")
+    click on xpath("//button[@type='submit'][contains(text(), 'Save draft')]")
 
     Then("I should be redirected to the mit circs details page")
     val heading = find(cssSelector(".id7-main-content h1")).get
     heading.text should startWith("Mitigating circumstances submission MIT-")
 
     val submissionKey = heading.text.trim().substring("Mitigating circumstances submission MIT-".length)
-    currentUrl should endWith(s"personalcircs/mitcircs/view/$submissionKey")
+    currentUrl.split('?').head should endWith(s"personalcircs/mitcircs/view/$submissionKey")
 
-    fail("Is this thing on?")
+    def fieldValue(field: String): String =
+      find(xpath("//div[contains(@class, 'row form-horizontal')]/div[contains(@class, 'control-label')][contains(text(), '" + field.replace("'", "\\'") + "')]/..//div[contains(@class, 'form-control-static')]")).get.text
+
+    And("The submission details should be visible")
+    fieldValue("State") should include ("Draft")
+    fieldValue("Issue type") should (include("Serious accident") and include("Serious accident or illness of someone close") and include("Other (The Night Heron calls me)"))
+    fieldValue("Start date") should be (DateBuilder.format(AcademicYear.now().firstDay.toDateTimeAtStartOfDay, includeTime = false))
+    fieldValue("End date") should be (DateBuilder.format(AcademicYear.now().next.firstDay.minusDays(1).toDateTimeAtStartOfDay, includeTime = false))
+    fieldValue("Discussed submission with") should (include("Doctor / NHS services") and include("Other (The Night Heron)"))
+    fieldValue("Details") should include("I was called by the Night Heron to a meet of the society.")
+
+    case class AffectedAssessment(assessmentType: String, moduleCode: String, name: String, deadline: String)
+    val affectedAssessments: Seq[AffectedAssessment] =
+      findAll(xpath("//div[contains(@class, 'row form-horizontal')]/div[contains(@class, 'control-label')][contains(text(), 'Affected assessments')]/..//div[contains(@class, 'form-control-static')]/table/tbody/tr")).map { element =>
+        element.underlying.findElements(By.tagName("td")).asScala.toArray match {
+          case Array(assType, module, name, deadline) =>
+            AffectedAssessment(
+              assessmentType = assType.getText.trim(),
+              moduleCode = module.findElement(By.className("mod-code")).getText.trim(),
+              name = name.getText.trim(),
+              deadline = deadline.getText.trim()
+            )
+        }
+      }.toSeq
+
+    affectedAssessments should (
+      contain (AffectedAssessment("Assignment", "XXX01", "Cool essay", DateBuilder.format(AcademicYear.now().weeks(9).firstDay.withDayOfWeek(DateTimeConstants.THURSDAY).toDateTimeAtStartOfDay, includeTime = false, shortMonth = true, excludeCurrentYear = true))) and
+      contain (AffectedAssessment("Exam", "XXX01", "Summer exam", DateBuilder.format(AcademicYear.now().weeks(40).firstDay.toDateTimeAtStartOfDay, includeTime = false, shortMonth = true, excludeCurrentYear = true))) and
+      contain (AffectedAssessment("Other", "O", "Night Heron worship", "Unknown"))
+    )
+
+    click on linkText("file2.txt")
+
+    val iframe = frame(find(cssSelector(".modal-body iframe")).get)
+    switch to iframe
+
+    // Checks it's been displayed inline
+    pageSource should include ("Here is another sample text file. You can use it for whatever you want, it's a magical mystery tour.")
+
+    switch to defaultContent
+    eventually {
+      val closeButton = xpath("//div[@class='modal-footer']/button[contains(text(), 'Close')]")
+      if (closeButton.webElement.isDisplayed) {
+        click on closeButton
+      }
+
+      id("mitcircs-details-attachment-modal").webElement.isDisplayed should be (false)
+    }
+
+    When("I submit the draft")
+    click on linkText("Edit & submit submission")
+    click on xpath("//button[@type='button'][contains(text(), 'Submit')]")
+
+    // Need to wait for the modal
+    eventually {
+      val confirmButton = xpath("//button[@type='submit'][contains(text(), 'Confirm')]")
+      confirmButton.webElement.isDisplayed should be (true)
+      click on confirmButton
+    }
+
+    Then("I should be redirected to the mit circs details page")
+    find(cssSelector(".id7-main-content h1")).get.text should startWith(s"Mitigating circumstances submission MIT-$submissionKey")
+    currentUrl.split('?').head should endWith(s"personalcircs/mitcircs/view/$submissionKey")
+
+    fieldValue("State") should include ("Submitted")
   }
 
 }
