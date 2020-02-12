@@ -48,7 +48,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
   @ModelAttribute("includeEngagementCriteria")
   def includeEngagementCriteria(@PathVariable student: StudentMember): Boolean =
-    student.mostSignificantCourse.award.code == "MBCHB"
+    Option(student.mostSignificantCourse).flatMap(scd => Option(scd.award)).map(_.code).contains("MBCHB")
 
   @ModelAttribute("previousSubmissions")
   def previousSubmissions(
