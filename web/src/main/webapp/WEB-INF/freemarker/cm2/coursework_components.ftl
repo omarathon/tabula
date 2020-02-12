@@ -368,14 +368,14 @@
                 Review extension request
               </a>
             </p>
-          <#elseif info.extended>
-            <#-- A manual extension has been granted  -->
+          <#-- TAB-8125 - A manual extension has been granted but the department also allows requests so allow the request of additional extensions in Tabula as usual -->
+          <#elseif info.extended && assignment.module.adminDepartment.allowExtensionRequests>
             <p>
               <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
                 Review extension
               </a>
             </p>
-          <#elseif !info.extended && assignment.newExtensionsCanBeRequested>
+          <#elseif assignment.newExtensionsCanBeRequested>
             <p>
               <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
                 Request extension
