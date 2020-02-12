@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula
 
 import org.openqa.selenium.WebDriver
-import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.Eventually
-import org.scalatest.selenium.WebBrowser
-import org.scalatest.selenium.WebBrowser.cssSelector
 import org.scalatest.time.SpanSugar._
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{Assertions, Matchers}
+import org.scalatestplus.selenium.WebBrowser
 import uk.ac.warwick.tabula.WebsignonMethods._
 
 import scala.util.matching.Regex
@@ -139,7 +138,7 @@ trait WebsignonMethods extends Matchers with Eventually {
 
       }
 
-      private def login(url: String) = {
+      private def login(url: String): Unit = {
         // wait for the page to load
         eventually(timeout(10.seconds), interval(200.millis))(
           pageTitle should include("Sign in")
@@ -147,6 +146,10 @@ trait WebsignonMethods extends Matchers with Eventually {
         textField("userName").value = details.usercode
         pwdField("password").value = details.password
         submit()
+
+        if (currentUrl.startsWith("https://websignon")) {
+          fail("Should've been signed in but aren't - credentials error?")
+        }
 
         // Sign-out operations redirect you to the context root, so we may now be on the wrong page...
         if (currentUrl != url) {

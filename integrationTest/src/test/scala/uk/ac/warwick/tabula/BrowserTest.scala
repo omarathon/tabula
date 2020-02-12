@@ -15,9 +15,9 @@ import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.junit._
-import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span, SpanSugar}
+import org.scalatestplus.junit._
+import org.scalatestplus.selenium.WebBrowser
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.util.core.ExceptionUtils
@@ -141,12 +141,16 @@ case class LoginDetails(usercode: String, password: String, description: String,
 object FunctionalTestProperties {
   private val properties = loadOptionalProps()
 
-  System.setProperty("ssoclient.cache.strategy", "InMemoryOnly")
-  private val userLookup = new UserLookup
-  // hardcode the service URLs; if they ever change, it's as
-  // easy to change them here as it is in a properties file.
-  userLookup.setSsosUrl("https://websignon.warwick.ac.uk")
-  userLookup.setGroupServiceLocation("https://websignon.warwick.ac.uk")
+  // You can define .universityId properties in tabula-functionaltest.properties and this won't be used at all
+  private lazy val userLookup = {
+    System.setProperty("ssoclient.cache.strategy", "InMemoryOnly")
+    val ul = new UserLookup
+    // hardcode the service URLs; if they ever change, it's as
+    // easy to change them here as it is in a properties file.
+    ul.setSsosUrl("https://websignon.warwick.ac.uk")
+    ul.setGroupServiceLocation("https://websignon.warwick.ac.uk")
+    ul
+  }
 
   val SiteRoot: String = prop("toplevel.url")
   val Browser: String = prop("browser")
@@ -201,17 +205,20 @@ object FunctionalTestProperties {
   }
 
   private def userDetails(identifier: String, description: String) = {
-    val usercodeKey = "user." + identifier + ".usercode"
+    val usercodeKey = s"user.$identifier.usercode"
 
     if (properties.containsKey(usercodeKey)) {
-      val warwickId = Try(userLookup.getUserByUserId(fileProp(usercodeKey))) match {
-        case Success(user) => user.getWarwickId
-        case _ => "UNKNOWN"
-      }
+      val universityIdKey = s"user.$identifier.universityId"
+      val warwickId =
+        if (properties.containsKey(universityIdKey)) fileProp(universityIdKey)
+        else Try(userLookup.getUserByUserId(fileProp(usercodeKey))) match {
+          case Success(user) => user.getWarwickId
+          case _ => "UNKNOWN"
+        }
 
       LoginDetails(
         fileProp(usercodeKey),
-        fileProp("user." + identifier + ".password"),
+        fileProp(s"user.$identifier.password"),
         description,
         warwickId
       )
