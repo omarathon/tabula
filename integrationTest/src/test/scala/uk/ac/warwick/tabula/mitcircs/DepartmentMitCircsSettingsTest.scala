@@ -5,6 +5,10 @@ import uk.ac.warwick.tabula.BrowserTest
 
 class DepartmentMitCircsSettingsTest extends BrowserTest with GivenWhenThen with MitCircsFixture {
 
+  before {
+    setupTestData()
+  }
+
   "Department admin" should "be able to enable mit circs for a department" in as(P.Admin2) {
     openDepartmentSettings()
 
@@ -35,7 +39,7 @@ class DepartmentMitCircsSettingsTest extends BrowserTest with GivenWhenThen with
     submit()
 
     Then("I should be redirected back to the admin page")
-    currentUrl should endWith ("/department/xxx")
+    currentUrl should (endWith ("/department/xxx") or endWith("/department/xxx/"))
 
     // Open the page again to make sure the settings have persisted
     openDepartmentSettings()

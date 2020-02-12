@@ -12,7 +12,7 @@ trait MitCircsFixture extends FixturesDriver with GivenWhenThen {
   val TEST_DEPARTMENT_CODE = "xxx"
   val TEST_COURSE_CODE = "Ux123"
 
-  before {
+  def setupTestData(): Unit = {
     Given("The test department exists")
     go to Path("/fixtures/setup")
     pageSource should include("Fixture setup successful")
@@ -27,6 +27,15 @@ trait MitCircsFixture extends FixturesDriver with GivenWhenThen {
       deptCode = TEST_DEPARTMENT_CODE,
       academicYear = AcademicYear.now().startYear.toString
     )
+
+    And("There is an assessment component for module xxx01")
+    createAssessmentComponent("XXX", "XXX01-16", "Cool essay")
+
+    And("There is an upstream assessment group for xxx01 with students1-4 in it")
+    createUpstreamAssessmentGroup("XXX01-16", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
+
+    And("There is a module registration for xxx01")
+    registerStudentsOnModule(Seq(P.Student1, P.Student2, P.Student3, P.Student4), "xxx01", Some(AcademicYear.now().startYear.toString))
   }
 
   def enableMitCircsAndSetUpMCO(): Unit = as(P.Admin1) {
@@ -73,7 +82,7 @@ trait MitCircsFixture extends FixturesDriver with GivenWhenThen {
 
     // Just in case we weren't redirected
     if (!currentUrl.contains("/department/xxx")) {
-      click on linkText("Test Services")
+      click on partialLinkText("Test Services")
     }
   }
 
