@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.turnitin.tca
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -19,7 +18,7 @@ class TurnitinTcaSendSubmissionController extends CourseworkController with Logg
   type TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand.CommandType
 
   @ModelAttribute("command")
-  def command(@PathVariable assignment:Assignment, user: CurrentUser): TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand(assignment, user.apparentUser)
+  def command(@PathVariable assignment:Assignment): TurnitinTcaSendSubmissionCommand = TurnitinTcaSendSubmissionCommand(assignment)
 
   @RequestMapping(method = Array(POST))
   def submissionComplete(@PathVariable assignment:Assignment, @ModelAttribute("command") command: TurnitinTcaSendSubmissionCommand): Mav = {
