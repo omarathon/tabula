@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.analyzers.{AnalyzerDefinition, WhitespaceAnalyzer}
+import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.json.XContentBuilder
 import com.sksamuel.elastic4s.mappings.FieldDefinition
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent}
 
 import scala.collection.mutable
+import scala.concurrent.Future
 
 object AuditEventIndexService {
   /**
@@ -27,7 +28,11 @@ object AuditEventIndexService {
     "submissionIsNoteworthy",
     "students",
     "studentUsercodes",
-    "attachments"
+    "attachments",
+    "smallGroupSet",
+    "smallGroup",
+    "smallGroupEvent",
+    "week"
   )
 
   def auditEventIndexable(auditEventService: AuditEventService): ElasticsearchIndexable[AuditEvent] = new ElasticsearchIndexable[AuditEvent] {
@@ -84,7 +89,7 @@ class AuditEventIndexService
     * The name of the index that this service writes to
     */
   @Value("${elasticsearch.index.audit.name}") var indexName: String = _
-  lazy val index = Index(indexName)
+  lazy val index: Index = Index(indexName)
 
   @Autowired var auditEventService: AuditEventService = _
 
@@ -92,6 +97,13 @@ class AuditEventIndexService
   final override val IncrementalBatchSize = 1000
 
   override val UpdatedDateField = "eventDate"
+
+  def indexByEventTypeFrom(eventType: String)(from: DateTime): Future[ElasticsearchIndexingResult] = {
+    def query(startDate: DateTime, batchSize: Int): Seq[AuditEvent] =
+      auditEventService.listWithEventTypeNewerThan(eventType)(startDate, batchSize)
+
+    indexByQueryFrom(query)(from)
+  }
 
   override def listNewerThan(startDate: DateTime, batchSize: Int): Seq[AuditEvent] =
     auditEventService.listNewerThan(startDate, batchSize)

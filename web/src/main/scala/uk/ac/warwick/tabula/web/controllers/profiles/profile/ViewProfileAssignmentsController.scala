@@ -47,7 +47,7 @@ class ViewProfileAssignmentsController extends AbstractViewProfileController {
       "member" -> studentCourseDetails.student,
       "hasPermission" -> command.nonEmpty,
       "command" -> command,
-      "result" -> command.map(_.apply()).orNull,
+      "studentInformation" -> command.map(_.apply()).orNull,
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
     ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.AssignmentsIdentifier): _*)
       .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.assignments(scyd)): _*)

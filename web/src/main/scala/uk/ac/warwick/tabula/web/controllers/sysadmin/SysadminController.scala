@@ -34,6 +34,7 @@ class BlankForm {
   @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   var from: DateTime = _
   var deptCode: String = _
+  var eventType: String = _
 }
 
 @Controller

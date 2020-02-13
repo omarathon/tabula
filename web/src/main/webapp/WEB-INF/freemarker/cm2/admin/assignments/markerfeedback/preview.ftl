@@ -27,7 +27,7 @@
           You need to correct these problems with the .zip file and try again.
         </#if>
       <#else>
-        Your ${noun_verb_passive} but there are no files that look like feedback items.
+        Your ${noun_verb_passive} but none of the file names contain the University ID of a student on this assignment, so they do not look like feedback items.
       </#if>
       </p>
     </@spring.bind>
@@ -37,7 +37,7 @@
     <#else>
       <#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
         <div class="unrecognised-files alert alert-info">
-          <div>The following files are not recognised and will be ignored:</div>
+          <div>The following files have names that do not contain the University ID of a student on this assignment and will be ignored:</div>
           <ul class="file-list">
             <#list addMarkerFeedbackCommand.unrecognisedFiles as unrecognisedFile>
               <li>

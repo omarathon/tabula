@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.services.fileserver
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.apache.tika.detect.DefaultDetector
-import org.apache.tika.mime.{MediaType, MimeTypes}
+import org.apache.tika.mime.MediaType
 import org.joda.time.DateTime
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -36,16 +35,7 @@ trait StreamsFiles {
 
     val mimeType: MediaType = detectedMimeType.mediaType
     out.setHeader("Content-Type", mimeType.toString)
-
-    val builder = new StringBuilder
-    builder.append(if (detectedMimeType.serveInline) "inline" else "attachment")
-
-    file.suggestedFilename.orElse(fileName).orElse(Option(file.filename).filter(_.hasText)).foreach { filename =>
-      builder.append("; ")
-      HttpHeaderParameterEncoding.encodeToBuilder("filename", filename, builder)
-    }
-
-    out.setHeader("Content-Disposition", builder.toString)
+    out.setHeader("Content-Disposition", file.contentDisposition.headerValue(detectedMimeType, file.suggestedFilename.orElse(fileName).orElse(Option(file.filename))))
 
     // Restrictive CSP, just enough for viewing inline
     out.setHeader("Content-Security-Policy",

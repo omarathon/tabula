@@ -153,6 +153,9 @@
         <#if name = 'profiles'>
           For department
           <@f.input id="index-${name}-dept" path="deptCode" cssClass="form-control" placeholder="Dept code (optional)" />
+        <#elseif name = 'audit'>
+          For event type
+          <@f.input id="index-${name}-eventType" path="eventType" cssClass="form-control" placeholder="Event type (optional)" />
         </#if>
       </@f.form>
       </p>

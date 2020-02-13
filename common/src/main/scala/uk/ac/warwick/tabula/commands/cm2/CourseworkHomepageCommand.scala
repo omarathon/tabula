@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.Module
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
@@ -33,7 +34,7 @@ object CourseworkHomepageCommand {
     lateFormative: Boolean
   )
 
-  case class CourseworkHomepageStudentInformation(
+  case class StudentAssignmentSummaryInformation(
     upcomingAssignments: Seq[StudentAssignmentInformation],
     actionRequiredAssignments: Seq[StudentAssignmentInformation],
     noActionRequiredAssignments: Seq[StudentAssignmentInformation],
@@ -57,7 +58,7 @@ object CourseworkHomepageCommand {
 
   case class CourseworkHomepageInformation(
     homeDepartment: Option[Department],
-    studentInformation: CourseworkHomepageStudentInformation,
+    studentInformation: StudentAssignmentSummaryInformation,
     markingAcademicYears: Seq[AcademicYear],
     adminInformation: CourseworkHomepageAdminInformation
   )
@@ -78,13 +79,14 @@ object CourseworkHomepageCommand {
 }
 
 trait CourseworkHomepageCommandState {
-  def user: CurrentUser
+  def currentUser: CurrentUser
+  lazy val user: User = currentUser.apparentUser
 }
 
-class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandInternal[Result]
+class CourseworkHomepageCommandInternal(val currentUser: CurrentUser) extends CommandInternal[Result]
   with CourseworkHomepageCommandState
   with CourseworkHomepageHomeDepartment
-  with CourseworkHomepageStudentAssignments
+  with StudentAssignmentsSummary
   with MarkingSummaryCommandState
   with MarkingSummaryMarkerAssignmentList
   with CourseworkHomepageAdminDepartments
@@ -94,7 +96,7 @@ class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandIn
     with AssessmentMembershipServiceComponent
     with CM2MarkingWorkflowServiceComponent =>
 
-  val target: MarkingSummaryCommandTarget = MarkingSummaryCurrentUserCommandTarget(user, None)
+  val target: MarkingSummaryCommandTarget = MarkingSummaryCurrentUserCommandTarget(currentUser, None)
 
   override def applyInternal(): Result =
     CourseworkHomepageInformation(
@@ -111,7 +113,7 @@ trait CourseworkHomepageHomeDepartment extends TaskBenchmarking {
     with ModuleAndDepartmentServiceComponent =>
 
   lazy val homeDepartment: Option[Department] = benchmarkTask("Get user's home department") {
-    user.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+    currentUser.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
   }
 }
 
@@ -128,7 +130,7 @@ trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
 
   lazy val moduleManagerDepartments: Seq[Department] = benchmarkTask("Get module manager departments") {
     val ownedModules = benchmarkTask("Get owned modules") {
-      moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
+      moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments)
     }
 
     ownedModules.map(_.adminDepartment).toSeq.sortBy(_.name)
@@ -136,7 +138,7 @@ trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
 
   lazy val adminDepartments: Seq[Department] = benchmarkTask("Get admin departments") {
     val ownedDepartments = benchmarkTask("Get owned departments") {
-      moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+      moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments)
     }
 
     ownedDepartments.toSeq.sortBy(_.name)
@@ -144,13 +146,14 @@ trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
 
 }
 
-trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
-  self: CourseworkHomepageCommandState
-    with AssessmentServiceComponent
-    with AssessmentMembershipServiceComponent =>
+trait StudentAssignmentsSummary extends TaskBenchmarking {
+  self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-  lazy val studentInformation: CourseworkHomepageStudentInformation = benchmarkTask("Get student information") {
-    CourseworkHomepageStudentInformation(
+  def user: User
+  def academicYear: Option[AcademicYear]
+
+  lazy val studentInformation: StudentAssignmentSummaryInformation = benchmarkTask("Get student information") {
+    StudentAssignmentSummaryInformation(
       studentUpcomingAssignments,
       studentActionRequiredAssignments,
       studentNoActionRequiredAssignments,
@@ -159,29 +162,29 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
   }
 
   private lazy val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") {
-    assessmentService.getAssignmentsWithFeedback(user.userId, None).filter(_.publishFeedback) // Any academic year
+    assessmentService.getAssignmentsWithFeedback(user.getUserId, academicYear).filter(_.publishFeedback) // Any academic year
   }
 
   private lazy val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
-    assessmentService.getAssignmentsWithSubmission(user.userId, None) // Any academic year
+    assessmentService.getAssignmentsWithSubmission(user.getUserId, academicYear) // Any academic year
   }
 
   private lazy val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
-    assessmentMembershipService.getEnrolledAssignments(user.apparentUser, None) // Any academic year
+    assessmentMembershipService.getEnrolledAssignments(user, academicYear) // Any academic year
   }
 
   private def lateFormative(assignment: Assignment) = !assignment.summative && assignment.isClosed
 
   // Public for testing
   def enhance(assignment: Assignment): StudentAssignmentInformation = {
-    val extension = assignment.approvedExtensions.get(user.userId)
+    val extension = assignment.approvedExtensions.get(user.getUserId)
     // isExtended: is within an approved extension
-    val isExtended = assignment.isWithinExtension(user.apparentUser)
+    val isExtended = assignment.isWithinExtension(user)
     // hasActiveExtension: active = approved
     val hasActiveExtension = extension.nonEmpty
-    val extensionRequested = assignment.allExtensions.get(user.userId).exists(_.exists(!_.isManual))
-    val submission = assignment.submissions.asScala.find(_.isForUser(user.apparentUser))
-    val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user.apparentUser))
+    val extensionRequested = assignment.allExtensions.get(user.getUserId).exists(_.exists(!_.isManual))
+    val submission = assignment.submissions.asScala.find(_.isForUser(user))
+    val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user))
     val feedbackDeadline =
       if (assignment.collectSubmissions) submission.flatMap(assignment.feedbackDeadlineForSubmission)
       else assignment.feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -196,9 +199,9 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
       extended = isExtended,
       hasActiveExtension = hasActiveExtension,
       extensionRequested = extensionRequested,
-      studentDeadline = assignment.submissionDeadline(user.apparentUser),
-      submittable = assignment.submittable(user.apparentUser),
-      resubmittable = assignment.resubmittable(user.apparentUser),
+      studentDeadline = assignment.submissionDeadline(user),
+      submittable = assignment.submittable(user),
+      resubmittable = assignment.resubmittable(user),
       feedback = feedback,
       feedbackDeadline = feedbackDeadline,
       feedbackLate = feedbackDeadline.exists(_.isBefore(LocalDate.now)),
@@ -213,8 +216,8 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
     else if (ass1.openEnded && !ass2.openEnded) false
     else {
       def timeToDeadline(ass: Assignment) = {
-        val extension = ass.approvedExtensions.get(user.userId)
-        val isExtended = ass.isWithinExtension(user.apparentUser)
+        val extension = ass.approvedExtensions.get(user.getUserId)
+        val isExtended = ass.isWithinExtension(user)
 
         if (ass.openEnded) ass.openDate
         else if (isExtended) extension.flatMap(_.expiryDate).getOrElse(ass.closeDate)

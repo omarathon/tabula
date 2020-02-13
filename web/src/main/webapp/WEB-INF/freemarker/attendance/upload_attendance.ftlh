@@ -5,10 +5,10 @@
     <@modal.wrapper ajax>
         <#if ajax>
             <@modal.header>
-              <h3 class="modal-title">Upload attendance from CSV</h3>
+              <h3 class="modal-title">Upload attendance</h3>
             </@modal.header>
         <#else>
-          <h1>Upload attendance from CSV</h1>
+          <h1>Upload attendance</h1>
           <h5><span class="muted">for</span> ${command.templatePoint.name}</h5>
         </#if>
 
@@ -45,6 +45,14 @@
             <li><code>unauthorised</code> </li>
             <li><code>not-recorded</code> </li>
           </ul>
+
+          <p class="alert alert-info">You can also record attendance using an Excel spreadsheet. The spreadsheet must be in <samp>.xlsx</samp> format
+            (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application).
+            You can <strong><a href="${templateUrl}">download a template spreadsheet</a></strong> which is correctly formatted, ready for completion.
+            <br /> <br />
+            In Excel you may need to <a href="https://support.office.com/en-us/article/what-is-protected-view-d6f09ac7-e6b9-4495-8e43-2bbcdbcb6653#bm2">exit protected view</a> to
+            edit the spreadsheet.
+          </p>
 
           <@bs3form.labelled_form_group "" "File">
             <input type="file" name="file.upload" />

@@ -5,12 +5,13 @@ import org.quartz.Scheduler
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, RecheckMissingRowsCommand, StampMissingRowsCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
@@ -36,9 +37,16 @@ class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] wit
   @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   var from: DateTime = _
 
-  def applyInternal(): ElasticsearchIndexingResult = {
-    Await.result(indexer.indexFrom(from), Duration.Inf)
-  }
+  var eventType: String = _
+
+  def applyInternal(): ElasticsearchIndexingResult =
+    Await.result(
+      Option(eventType).filter(_.hasText) match {
+        case Some(e) => indexer.indexByEventTypeFrom(e)(from)
+        case None => indexer.indexFrom(from)
+      },
+      Duration.Inf
+    )
 
   override def describe(d: Description): Unit = d.property("from" -> from)
 

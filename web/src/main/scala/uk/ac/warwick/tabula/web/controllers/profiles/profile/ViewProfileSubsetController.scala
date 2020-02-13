@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.profiles.profile.{ProfileSubset, ViewProfileSubsetCommand}
+import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileSubsetCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.userlookup.User
@@ -14,7 +13,7 @@ class ViewProfileSubsetController extends ProfilesController {
 
   @ModelAttribute("command")
   def getViewProfileSubsetCommand(@PathVariable student: User): ViewProfileSubsetCommand.Command =
-    ViewProfileSubsetCommand(student)
+    ViewProfileSubsetCommand(student, user)
 
   @RequestMapping
   def viewProfile(@ModelAttribute("command") command: ViewProfileSubsetCommand.Command): Mav = {

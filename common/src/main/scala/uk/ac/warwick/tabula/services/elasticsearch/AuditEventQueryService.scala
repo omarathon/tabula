@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import java.util.regex.Pattern
+
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.http.search.{SearchResponse, TopHit}
 import com.sksamuel.elastic4s.http.{Response, SourceAsContentBuilder}
@@ -12,15 +14,27 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Futures
 import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService.RecordAttendanceEvent
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
+
+object AuditEventQueryService {
+  case class RecordAttendanceEvent(
+    dateTime: DateTime,
+    user: User,
+    attendance: Option[Map[UniversityId, AttendanceState]],
+    onlyIncludesChanges: Boolean
+  )
+}
 
 trait AuditEventQueryService
   extends AuditEventQueryMethods
@@ -82,6 +96,16 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
     * A list of audit events for publishing feedback that includes a particular student
     */
   def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode, uniId: Option[UniversityId]): Future[Seq[AuditEvent]]
+
+  /**
+   * A list of recorded attendance events for a small group event in a particular week.
+   *
+   * @return a tuple of
+   * - The date-time that the register was updated
+   * - The user who took the register
+   * - (optionally) A Map of UniversityId to AttendanceState - may be None for audit events before TAB-7756 (Tabula 2019.10.5)
+   */
+  def smallGroupEventAttendanceRegisterEvents(smallGroupEvent: SmallGroupEvent, week: SmallGroupEventOccurrence.WeekNumber): Future[Seq[RecordAttendanceEvent]]
 }
 
 @Service
@@ -465,6 +489,34 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
   def noteworthySubmissionsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int = DefaultMaxEvents): Future[PagedAuditEvents] =
     submissionEventsForModules(modules, lastUpdatedDate, max, termQuery("submissionIsNoteworthy", true))
+
+  def smallGroupEventAttendanceRegisterEvents(smallGroupEvent: SmallGroupEvent, week: SmallGroupEventOccurrence.WeekNumber): Future[Seq[RecordAttendanceEvent]] = {
+    parsedEventsOfType(
+      "RecordAttendance",
+      termQuery("smallGroupEvent.keyword", smallGroupEvent.id),
+      termQuery("week", week)
+    ).map { events =>
+      val userIds = events.map(_.masqueradeUserId).distinct
+      val userIdToUser = batchedUsersByUserId(userIds)
+
+      events.sortBy(_.eventDate).map { auditEvent =>
+        val attendance: Option[Map[UniversityId, AttendanceState]] = auditEvent.combinedParsedData.get("smallGroupAttendanceState").collect {
+          case s: Seq[String @unchecked] => s.filter(_.contains(" - ")).flatMap { str =>
+            str.split(Pattern.quote(" - "), 2) match {
+              case Array(universityId, description) =>
+                AttendanceState.values.find(_.description == description).map { state =>
+                  universityId -> state
+                }
+              case _ => None
+            }
+          }.toMap
+        }
+
+        val onlyIncludesChanges = auditEvent.combinedParsedData.get("onlyIncludesChanges").collect { case b: Boolean => b }.getOrElse(false)
+        RecordAttendanceEvent(auditEvent.eventDate, userIdToUser(auditEvent.masqueradeUserId), attendance, onlyIncludesChanges)
+      }
+    }
+  }
 
 }
 

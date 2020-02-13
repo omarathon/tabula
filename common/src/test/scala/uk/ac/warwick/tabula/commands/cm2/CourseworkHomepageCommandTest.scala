@@ -6,25 +6,25 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2WorkflowProgressServiceComponent}
 
 // scalastyle:off public.methods.have.type
 // scalastyle:off public.property.type.annotation
 
 class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
-  private trait StudentCommandFixture {
-    val command = new CourseworkHomepageStudentAssignments with CourseworkHomepageCommandState with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
+  private abstract class StudentCommandFixture(val cu: CurrentUser) {
+    val command = new StudentAssignmentsSummary with CourseworkHomepageCommandState with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
       val assessmentService: AssessmentService = smartMock[AssessmentService]
       val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 
-      val user: CurrentUser = currentUser
+      val currentUser: CurrentUser = cu
+      val academicYear: Option[AcademicYear] = None
     }
   }
 
   @Test
   def studentInfo(): Unit = withUser("cuscav") {
-    new StudentCommandFixture {
+    new StudentCommandFixture(currentUser) {
       val extensionService: ExtensionService = smartMock[ExtensionService]
 
       val enrolled1: Assignment = Fixtures.assignment("Enrolled assignment 1")
@@ -53,14 +53,14 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
       submitted2.extensionService = extensionService
       submitted2.closeDate = new DateTime(2016, DateTimeConstants.MAY, 4, 14, 0, 0, 0)
 
-      command.assessmentMembershipService.getEnrolledAssignments(command.user.apparentUser, None) returns Seq(enrolled1, enrolled2)
+      command.assessmentMembershipService.getEnrolledAssignments(command.user, None) returns Seq(enrolled1, enrolled2)
       command.assessmentService.getAssignmentsWithFeedback("cuscav", None) returns Seq(feedback1, feedback2)
       command.assessmentService.getAssignmentsWithSubmission("cuscav", None) returns Seq(submitted1, submitted2)
 
       extensionService.getApprovedExtensionsByUserId(any[Assignment]) returns Map.empty
       extensionService.getAllExtensionsByUserId(any[Assignment]) returns Map.empty
 
-      val info: CourseworkHomepageCommand.CourseworkHomepageStudentInformation = command.studentInformation
+      val info: CourseworkHomepageCommand.StudentAssignmentSummaryInformation = command.studentInformation
       info.actionRequiredAssignments should have size 2
       info.noActionRequiredAssignments should have size 2
       info.completedAssignments should have size 2
@@ -71,7 +71,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
   @Test
   def enhanceAssignment(): Unit = withUser("cuscav", "0672089") {
     withFakeTime(new DateTime(2016, DateTimeConstants.JULY, 10, 14, 0, 0, 0)) {
-      new StudentCommandFixture {
+      new StudentCommandFixture(currentUser) {
         val assignment: Assignment = Fixtures.assignment("Essay")
         assignment.extensionService = smartMock[ExtensionService]
         assignment.openDate = new DateTime(2010, DateTimeConstants.JULY, 4, 14, 0, 0, 0)
@@ -114,7 +114,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
   private trait AdminCommandFixture {
     val command = new CourseworkHomepageAdminDepartments with CourseworkHomepageCommandState with ModuleAndDepartmentServiceComponent {
       val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-      val user: CurrentUser = currentUser
+      val currentUser: CurrentUser = RequestInfo.fromThread.map(_.user).get
     }
   }
 
@@ -134,8 +134,8 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
       val po101: Module = Fixtures.module("po101")
       po101.adminDepartment = po
 
-      command.moduleAndDepartmentService.modulesWithPermission(command.user, Permissions.Module.ManageAssignments) returns Set(cs120, po101, cs118)
-      command.moduleAndDepartmentService.departmentsWithPermission(command.user, Permissions.Module.ManageAssignments) returns Set(po, es)
+      command.moduleAndDepartmentService.modulesWithPermission(command.currentUser, Permissions.Module.ManageAssignments) returns Set(cs120, po101, cs118)
+      command.moduleAndDepartmentService.departmentsWithPermission(command.currentUser, Permissions.Module.ManageAssignments) returns Set(po, es)
 
       command.moduleManagerDepartments should be(Seq(cs, po))
       command.adminDepartments should be(Seq(es, po))

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, SubmissionBeforeCloseDateTrigger, Trigger}
+import uk.ac.warwick.tabula.data.model.triggers.{LateSubmissionTrigger, SubmissionBeforeDeadlineTrigger, Trigger}
 import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
@@ -296,10 +296,10 @@ trait SubmitAssignmentTriggers extends GeneratesTriggers[Submission] {
   self: TriggerHandling =>
 
   override def generateTriggers(commandResult: Submission): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
-    if (commandResult.isLate || commandResult.isAuthorisedLate) {
-      Seq(SubmissionAfterCloseDateTrigger(DateTime.now, commandResult))
-    } else {
-      Seq(SubmissionBeforeCloseDateTrigger(DateTime.now, commandResult))
+    if (commandResult.isLate) {
+      Seq(LateSubmissionTrigger(DateTime.now, commandResult))
+    } else { // Treat authorised-late as being before the close date
+      Seq(SubmissionBeforeDeadlineTrigger(DateTime.now, commandResult))
     }
   }
 }

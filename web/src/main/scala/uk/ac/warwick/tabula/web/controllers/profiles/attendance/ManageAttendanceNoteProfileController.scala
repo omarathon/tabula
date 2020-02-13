@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.attendance
 
 import javax.validation.Valid
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.note.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
@@ -58,11 +57,9 @@ class AttendanceNoteProfileAttachmentController extends ProfilesController {
     AttendanceNoteAttachmentCommand(mandatory(student), mandatory(point), user)
 
   @RequestMapping
-  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile = {
-    cmd.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
-  }
+  def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile =
+    cmd.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
 
 }
 

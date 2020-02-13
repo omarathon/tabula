@@ -6,7 +6,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
-import org.joda.time.{DateTime, DateTimeConstants, Duration, LocalDate, LocalTime}
+import org.joda.time._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
@@ -320,6 +320,16 @@ class Assignment
         submission.feedbackDeadline.nonEmpty &&
           !feedbackService.getFeedbackByUsercode(this, submission.usercode).exists(_.released)
       }
+
+  /**
+   * An Assignment has outstanding late feedback if there is a submission with no released feedback and
+   * a submission feedback deadline (accounting for extensions) before the date specified.
+   */
+  def hasOutstandingFeedbackDueBefore(dueBefore: LocalDate): Boolean =
+    submissionService.getSubmissionsByAssignment(this).exists { submission =>
+      submission.feedbackDeadline.exists(_.isBefore(dueBefore)) &&
+      !feedbackService.getFeedbackByUsercode(this, submission.usercode).exists(_.released)
+    }
 
   // if any feedback exists that has outstanding stages marking has begun (when marking is finished there is a completed stage)
   override def isReleasedForMarking: Boolean = hasWorkflow && allFeedback.exists(_.outstandingStages.asScala.nonEmpty)

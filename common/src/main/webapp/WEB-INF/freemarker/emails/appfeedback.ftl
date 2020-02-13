@@ -1,4 +1,4 @@
-The following message was submitted via the 'Email the Web Team' form at https://tabula.warwick.ac.uk/help.
+The following message was submitted via the form at https://tabula.warwick.ac.uk/help.
 
 Name: ${info.name!"Not provided"}
 Email: ${info.email!"Not provided"}
