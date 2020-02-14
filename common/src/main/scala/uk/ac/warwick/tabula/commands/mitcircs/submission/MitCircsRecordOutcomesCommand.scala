@@ -82,7 +82,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
     }
 
     if (confirm) {
-      submission.outcomesRecorded()
+      submission.outcomesRecorded(Some(user))
     }
 
     submission.lastModifiedBy = user

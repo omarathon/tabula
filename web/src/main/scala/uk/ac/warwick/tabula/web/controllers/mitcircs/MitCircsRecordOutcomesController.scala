@@ -29,6 +29,7 @@ class MitCircsRecordOutcomesController extends BaseController {
       "outcomeGrading" -> MitigatingCircumstancesGrading.values,
       "rejectionReasons" -> MitigatingCircumstancesRejectionReason.values,
       "fromPanel" -> fromPanel,
+      "isPanelChair" -> submission.panel.exists(_.chair.contains(currentUser.apparentUser))
     ))
 
     if (fromPanel && submission.panel.nonEmpty)

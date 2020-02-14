@@ -1,3 +1,4 @@
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
 <#import "*/mitcircs_components.ftlh" as components />
 
@@ -98,7 +99,28 @@
           <#if submission.state.entryName != "Outcomes Recorded">
             <button type="submit" class="btn btn-primary" name="confirm" value="false">Save as draft</button>
           </#if>
-          <button type="submit" class="btn btn-primary" name="confirm" value="true">Submit</button>
+            <#if isPanelChair>
+              <@modal.modal id="approveModal" role="dialog"><@modal.wrapper>
+                  <@modal.header>
+                    <h3 class="modal-title">Approve outcomes for MIT-${submission.key}</h3>
+                  </@modal.header>
+                  <@modal.body>
+                    <p>
+                      Please check that the outcomes are correct and that the reasons given are appropriate.
+                      In particular, please ensure that accurate minutes have been recorded that contain sufficient detail for any future appeals or OIA investigations.
+                    </p>
+                  </@modal.body>
+                  <@modal.footer>
+                    <button type="submit" class="btn btn-primary" name="confirm" value="true">Confirm</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  </@modal.footer>
+              </@modal.wrapper></@modal.modal>
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#approveModal">Submit and approve</button>
+            <#else>
+              <button type="submit" class="btn btn-primary" name="confirm" value="true">
+                Submit
+              </button>
+            </#if>
           <a class="btn btn-default dirty-check-ignore" href="<#if fromPanel && submission.panel??><@routes.mitcircs.reviewSubmissionPanel submission /><#else><@routes.mitcircs.reviewSubmission submission /></#if>">Cancel</a>
         </div>
       </@f.form>
