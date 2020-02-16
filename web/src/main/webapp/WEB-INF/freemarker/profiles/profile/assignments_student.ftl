@@ -8,7 +8,7 @@
   <h1>Assignments</h1>
 
   <#if hasPermission>
-    <@components.all_student_assignment_lists studentInformation />
+    <@components.all_student_assignment_lists studentInformation isSelf />
   <#else>
     <div class="alert alert-info">
       You do not have permission to see the assignments for this course.
