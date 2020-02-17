@@ -3,6 +3,6 @@
 
   <h1>Assignments</h1>
 
-  <@components.all_student_assignment_lists studentInformation />
+  <@components.all_student_assignment_lists studentInformation=studentInformation isSelf=true />
 
 </#escape>
