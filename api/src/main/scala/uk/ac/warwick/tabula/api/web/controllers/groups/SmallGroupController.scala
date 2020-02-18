@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.api.web.controllers.groups
 
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.groups.SmallGroupController.{DeleteSmallGroupCommand, ModifySmallGroupCommand}
+import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
 import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.commands.groups.admin._
 import uk.ac.warwick.tabula.data.model._
@@ -49,6 +49,33 @@ trait GetSmallGroupApi {
         "success" -> true,
         "status" -> "ok",
         "group" -> jsonSmallGroupObject(result)
+      )))
+    }
+  }
+}
+
+@Controller
+@RequestMapping(Array("/v1/groups/{smallGroup}/attendance"))
+class SmallGroupAttendanceController extends SmallGroupSetController with ViewSmallGroupAttendanceApi
+
+trait ViewSmallGroupAttendanceApi {
+  self: SmallGroupSetController =>
+
+  @ModelAttribute("getCommand")
+  def getCommand(@PathVariable smallGroup: SmallGroup): ViewSmallGroupAttendanceCommand.Command =
+    ViewSmallGroupAttendanceCommand(mandatory(smallGroup))
+
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getIt(@Valid @ModelAttribute("getCommand") command: ViewSmallGroupAttendanceCommand.Command, errors: Errors, @PathVariable smallGroup: SmallGroup): Mav = {
+    // Return the GET representation
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val result = command.apply()
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "attendance" -> jsonSmallGroupAttendanceObject(result)
       )))
     }
   }
