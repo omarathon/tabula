@@ -177,6 +177,12 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
         }
         session.flush()
 
+        transactional() {
+          session.newUpdateQuery("delete from MitigatingCircumstancesAffectedAssessment where moduleCode like :codePrefix")
+            .setString("codePrefix", "XXX%")
+            .executeUpdate()
+        }
+
         for (module <- modules.asScala) {
           for (assignment <- module.assignments.asScala) {
             session.delete(assignment)
