@@ -50,20 +50,23 @@ trait SmallGroupAttendanceToJsonConverter {
   }
 
   def jsonSmallGroupAttendanceObject(group: SmallGroupAttendanceInformation): Map[String, Any] = {
-    val events: SortedMap[String, Any] = SortedMap(group.instances.map{ case (event, _) =>
-      event.id -> jsonSmallGroupEventObject(event)} : _*);
-    val notes: Map[String, Map[(String, WeekNumber), Map[String, Any]]] = group.notes.map{ case (user, userNotes) =>
-      user.getWarwickId -> userNotes.map{ case (eventWithWeek, note) =>
-        (eventWithWeek._1.id, eventWithWeek._2) -> jsonSmallGroupEventAttendanceNoteObject(note) }};
-    var instances: mutable.Map[String, mutable.Set[WeekNumber]] = mutable.Map();
+    val events = SortedMap(group.instances.map { case (event, _) =>
+      event.id -> jsonSmallGroupEventObject(event)
+    }: _*)
+    val notes = group.notes.map { case (user, userNotes) =>
+      user.getWarwickId -> userNotes.map { case (eventWithWeek, note) =>
+        (eventWithWeek._1.id, eventWithWeek._2) -> jsonSmallGroupEventAttendanceNoteObject(note)
+      }
+    };
+    val instances: mutable.Map[String, mutable.Set[WeekNumber]] = mutable.Map()
 
-    group.instances.foreach { case (event, weekNumber) => {
-        val set: Option[mutable.Set[WeekNumber]] = instances.get(event.id);
-        set match {
-          case None => instances.addOne(event.id, mutable.Set(weekNumber))
-          case Some(v) => v.addOne(weekNumber)
-        }
-    }};
+    group.instances.foreach { case (event, weekNumber) =>
+      val set = instances.get(event.id)
+      set match {
+        case None => instances.addOne(event.id, mutable.Set(weekNumber))
+        case Some(v) => v.addOne(weekNumber)
+      }
+    }
 
     Map(
       "events" -> events,
@@ -79,7 +82,8 @@ trait SmallGroupAttendanceToJsonConverter {
               "note" -> notes.get(user.getWarwickId).map(userNotes =>
                 userNotes.get((eventWithWeek._1.id, eventWithWeek._2)).orNull).orNull
             )
-          ) })
+          )
+          })
       }
     )
   }
