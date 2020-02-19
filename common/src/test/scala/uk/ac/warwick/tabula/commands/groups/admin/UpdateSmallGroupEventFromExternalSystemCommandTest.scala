@@ -234,6 +234,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 
     d.allProperties should be(Map(
       "module" -> "moduleId",
+      "moduleCode" -> "in101",
       "smallGroupSet" -> "setId",
       "smallGroup" -> "groupId",
       "smallGroupEvent" -> "eventId"

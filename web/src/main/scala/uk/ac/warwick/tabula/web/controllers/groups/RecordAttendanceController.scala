@@ -57,9 +57,9 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
       // Update the changes map so it only includes members and only ones that haven't changed
       var state: mutable.Map[MemberOrUser, AttendanceState] = mutable.Map(command.members.map(_ -> AttendanceState.NotRecorded): _*)
 
-      events.map { case (dateTime, user, attendance) =>
-        val changes = attendance.map { a =>
-          // Because we don't log when something's NotRecorded, add those in so we know the transition
+      events.map { auditEvent =>
+        val changes = auditEvent.attendance.map { a =>
+
           val recorded: Map[MemberOrUser, AttendanceState] =
             a.flatMap { case (universityId, s) =>
               command.members.find(_.universityId == universityId).map { student =>
@@ -67,10 +67,12 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
               }
             }
 
-          val notRecorded: Map[MemberOrUser, AttendanceState] =
+          // For events created before TAB-8131 was implemented we didn't log when something's NotRecorded - add those in so we know the transition
+          val notRecorded: Map[MemberOrUser, AttendanceState] = if (!auditEvent.onlyIncludesChanges) {
             command.members.filterNot(recorded.contains)
               .map(_ -> AttendanceState.NotRecorded)
               .toMap
+          } else Map()
 
           (recorded ++ notRecorded).filter { case (student, s) => !state.get(student).contains(s) }
             .toSeq
@@ -82,11 +84,11 @@ class RecordAttendanceController extends GroupsController with AutowiringAuditEv
         })
 
         RecordAttendanceHistory(
-          recorded = dateTime,
+          recorded = auditEvent.dateTime,
           wasRecordedLate = event.endDateTimeForWeek(week).exists { endTime =>
-            endTime.toLocalDate.isBefore(dateTime.toLocalDate)
+            endTime.toLocalDate.isBefore(auditEvent.dateTime.toLocalDate)
           },
-          user = user,
+          user = auditEvent.user,
           changes = changes.map(_.map { case (student, s) => RecordAttendanceHistoryChange(student, s) })
         )
       }.reverse // Most recent first

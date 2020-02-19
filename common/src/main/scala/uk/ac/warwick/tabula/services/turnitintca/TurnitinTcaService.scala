@@ -63,7 +63,7 @@ case class TurnitinTcaConfiguration(
 )
 
 trait TurnitinTcaService {
-  def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
+  def createSubmission(fileAttachment: FileAttachment): Future[Either[String, TcaSubmission]]
   def getSubmissionInfo(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
   def getSimilarityReportInfo(fileAttachment: FileAttachment): Future[Either[String, TcaSimilarityReport]]
   def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
@@ -96,7 +96,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     "version"-> "v1beta"
   )
 
-  override def createSubmission(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]] = {
+  override def createSubmission(fileAttachment: FileAttachment): Future[Either[String, TcaSubmission]] = {
 
     Future {
       val tabulaSubmission: Submission = fileAttachment.submissionValue.submission

@@ -465,6 +465,8 @@ abstract class Description {
     property("smallGroupAttendanceState" ->
       (attendanceStates.map(s => s"${s.universityId} - ${s.state.description}") ++ deletions.map(id => s"$id - ${NotRecorded.description}"))
     )
+    // Allows us to distinguish between those events that only log changes in state and those that list the full state
+    property("onlyIncludesChanges", true)
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {

@@ -8,13 +8,14 @@
 
 <#import "*/modal_macros.ftlh" as modal />
 
-<#macro all_student_assignment_lists studentInformation>
+<#macro all_student_assignment_lists studentInformation isSelf>
     <#if !studentInformation.empty>
       <@student_assignment_list
         id="student-action"
         title="Awaiting submission"
         assignments=studentInformation.actionRequiredAssignments
         empty_message="You have no assignments that you need to submit in Tabula."
+        isSelf=isSelf
         expand_by_default=true
         show_submission_progress=true
         hide_late_formative=true
@@ -25,6 +26,7 @@
         title="Awaiting feedback"
         assignments=studentInformation.noActionRequiredAssignments
         empty_message="You have no assignments awaiting feedback in Tabula."
+        isSelf=isSelf
         expand_by_default=(!studentInformation.actionRequiredAssignments?has_content)
       />
 
@@ -33,6 +35,7 @@
         title="Upcoming"
         assignments=studentInformation.upcomingAssignments
         empty_message="You have no upcoming assignments in Tabula."
+        isSelf=isSelf
         show_submission_progress=true
         expand_by_default=(!studentInformation.actionRequiredAssignments?has_content && !studentInformation.noActionRequiredAssignments?has_content)
       />
@@ -42,6 +45,7 @@
         title="Feedback available"
         assignments=studentInformation.completedAssignments
         empty_message="You have no assignments with feedback available in Tabula."
+        isSelf=isSelf
         expand_by_default=(!studentInformation.actionRequiredAssignments?has_content && !studentInformation.noActionRequiredAssignments?has_content && !studentInformation.upcomingAssignments?has_content)
       />
     <#else>
@@ -49,7 +53,7 @@
     </#if>
 </#macro>
 
-<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
+<#macro student_assignment_list id title assignments empty_message isSelf expand_by_default=true show_submission_progress=false hide_late_formative=false>
   <span id="${id}-container">
     <#local has_late_formative = false />
     <#if hide_late_formative><#list assignments as info><#if info.lateFormative><#local has_late_formative = true /><#break></#if></#list></#if>
@@ -88,7 +92,7 @@
           </#if>
           <#list assignments as info>
             <span id="assignment-container-${info.assignment.id}" class="<#if hide_late_formative && info.lateFormative>late_formative hidden</#if>">
-              <@student_assignment_info info show_submission_progress />
+              <@student_assignment_info info isSelf show_submission_progress />
             </span>
           </#list>
         </div>
@@ -254,7 +258,7 @@
   </div>
 </#macro>
 
-<#macro student_assignment_info info show_submission_progress=false>
+<#macro student_assignment_info info isSelf show_submission_progress=false>
   <#local assignment = info.assignment />
   <div class="item-info row assignment-${assignment.id}">
     <div class="col-md-3">
@@ -343,7 +347,7 @@
           <#local feedbackStatus>
             <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                                                                                   data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
-            <#if info.feedbackLate>
+            <#if info.feedbackLate && isSelf>
               <br />
               Please contact your Departmental Administrator with any queries
             </#if>
@@ -369,58 +373,71 @@
       <div class="feedback-status">${feedbackStatus}</div>
     </div>
     <div class="col-md-3">
-      <#if info.feedback??>
-      <#-- View feedback -->
-        <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-          View feedback
-        </a>
-      <#elseif info.submission?? && info.resubmittable>
-      <#-- Resubmission allowed -->
-        <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-          View receipt
-        </a>
+      <#if isSelf>
+        <#if info.feedback??>
+        <#-- View feedback -->
+          <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+            View feedback
+          </a>
+        <#elseif info.submission?? && info.resubmittable>
+        <#-- Resubmission allowed -->
+          <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+            View receipt
+          </a>
 
-        <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
-          Resubmit assignment
-        </a>
-      <#elseif info.submission??>
-      <#-- View receipt -->
-        <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-          View receipt
-        </a>
-      <#elseif info.submittable || (!assignment.collectSubmissions && assignment.extensionsPossible)>
-        <p>
-          <#if info.submittable>
-          <#-- First submission allowed -->
-            <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-              Submit assignment
-            </a>
-          <#else>
-            <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
-              View details
-            </a>
-          </#if>
-        </p>
+          <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
+            Resubmit assignment
+          </a>
+        <#elseif info.submission??>
+        <#-- View receipt -->
+          <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+            View receipt
+          </a>
+        <#elseif info.submittable || (!assignment.collectSubmissions && assignment.extensionsPossible)>
+          <p>
+              <#if info.submittable>
+              <#-- First submission allowed -->
+                <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+                  Submit assignment
+                </a>
+              <#else>
+                <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
+                  View details
+                </a>
+              </#if>
+          </p>
 
-        <#if assignment.extensionsPossible>
-          <#if info.extensionRequested>
-            <p>
-              <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
-                Review extension request
-              </a>
-            </p>
-          <#elseif !info.extended && assignment.newExtensionsCanBeRequested>
-            <p>
-              <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
-                Request extension
-              </a>
-            </p>
-          </#if>
+            <#if assignment.extensionsPossible>
+                <#if info.extensionRequested>
+                  <p>
+                    <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+                      Review extension request
+                    </a>
+                  </p>
+                <#-- TAB-8125 - A manual extension has been granted but the department also allows requests so allow the request of additional extensions in Tabula as usual -->
+                <#elseif info.extended && assignment.module.adminDepartment.allowExtensionRequests>
+                  <p>
+                    <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+                      Review extension
+                    </a>
+                  </p>
+                <#elseif assignment.newExtensionsCanBeRequested>
+                  <p>
+                    <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+                      Request extension
+                    </a>
+                  </p>
+                </#if>
+            </#if>
+        <#else>
+        <#-- Assume formative, so just show info -->
+          <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
+            View details
+          </a>
         </#if>
-      <#else>
-      <#-- Assume formative, so just show info -->
-        <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
-          View details
+      <#elseif info.feedback??>
+        <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment_in_profile assignment member />">
+          View feedback
         </a>
       </#if>
     </div>

@@ -179,6 +179,8 @@
                                 </li>
                               </#list>
                             </ul>
+                          <#else>
+                            <em>No attendance changes</em>
                           </#if>
                         <#else>
                           <em>Unknown</em>

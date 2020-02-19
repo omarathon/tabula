@@ -4,6 +4,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.TurnitinTcaSendSubmissionCommand
 import uk.ac.warwick.tabula.commands.cm2.turnitin.{SubmitToTurnitinCommand => CM2SubmitToTurnitinCommand}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
@@ -41,7 +42,11 @@ trait HandlesAssignmentTrigger extends Logging {
     if (assignment.automaticallySubmitToTurnitin && features.turnitinSubmissions) {
       // TAB-4718
       val freshAssignment = assessmentService.getAssignmentById(assignment.id).get
-      CM2SubmitToTurnitinCommand(freshAssignment).apply()
+      if (features.turnitinTca) {
+        TurnitinTcaSendSubmissionCommand(freshAssignment).apply()
+      } else {
+        CM2SubmitToTurnitinCommand(freshAssignment).apply()
+      }
     }
   }
 }
