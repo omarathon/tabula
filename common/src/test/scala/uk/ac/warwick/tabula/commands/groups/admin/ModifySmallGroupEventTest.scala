@@ -21,8 +21,8 @@ class ModifySmallGroupEventTest extends TestBase  {
 
       // pre-populate with valid values
       day = Tuesday
-      startTime = LocalTime.now().minusHours(1)
-      endTime = LocalTime.now()
+      startTime = LocalTime.parse("13:00:00")
+      endTime = LocalTime.parse("14:00:00")
       weekRanges = Seq(WeekRange(1,1))
     }
   }
