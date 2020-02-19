@@ -31,9 +31,8 @@ class DepartmentMitCircsSettingsTest extends BrowserTest with GivenWhenThen with
     Then("I should see a preview of the HTML version of the markdown guidance")
     eventually {
       id("mitCircsGuidance-preview").webElement.isDisplayed should be (true)
+      pageSource should include ("<li>Spit at the herons</li>")
     }
-
-    pageSource should include ("<li>Spit at the herons</li>")
 
     When("I click Save")
     submit()
@@ -53,9 +52,13 @@ class DepartmentMitCircsSettingsTest extends BrowserTest with GivenWhenThen with
   "User access manager" should "be able to set the MCO" in {
     enableMitCircsAndSetUpMCO()
 
-    // This signs in to the homepage so we don't hit TAB-8007
     as(P.ExtensionManager1) {
-      linkText("Mitigating Circumstances").webElement should not be null
+      go to Path("/mitcircs")
+      linkText("Go to the Test Services admin page").findElement.isDefined should be (true)
+    }
+    as(P.Marker1) {
+      go to Path("/mitcircs")
+      linkText("Go to the Test Services admin page").findElement.isDefined should be (false)
     }
   }
 
