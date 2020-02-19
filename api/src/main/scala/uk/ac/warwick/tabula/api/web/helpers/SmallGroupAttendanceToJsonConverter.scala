@@ -57,7 +57,7 @@ trait SmallGroupAttendanceToJsonConverter {
       user.getWarwickId -> userNotes.map { case (eventWithWeek, note) =>
         (eventWithWeek._1.id, eventWithWeek._2) -> jsonSmallGroupEventAttendanceNoteObject(note)
       }
-    };
+    }
     val instances: mutable.Map[String, mutable.Set[WeekNumber]] = mutable.Map()
 
     group.instances.foreach { case (event, weekNumber) =>
