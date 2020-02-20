@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.api.web.controllers.profiles
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.api.web.helpers.FileAttachmentToJsonConverter
+import uk.ac.warwick.tabula.api.web.helpers.{FileAttachmentToJsonConverter, SmallGroupEventAttendanceNoteToJsonConverter, SmallGroupEventToJsonConverter}
 import uk.ac.warwick.tabula.commands.attendance.profile.{AttendanceProfileCommand, AttendanceProfileCommandResult}
 import uk.ac.warwick.tabula.commands.groups.{ListStudentGroupAttendanceCommand, StudentGroupAttendance}
 import uk.ac.warwick.tabula.data.model._
@@ -22,7 +22,9 @@ class MemberAttendanceController extends ApiController
   with GetMemberAttendanceApi
   with MonitoringPointsResultToJsonConverter
   with StudentGroupAttendanceToJsonConverter
-  with FileAttachmentToJsonConverter {
+  with FileAttachmentToJsonConverter
+  with SmallGroupEventAttendanceNoteToJsonConverter
+  with SmallGroupEventToJsonConverter {
 
   @ModelAttribute("student")
   def student(@PathVariable member: Member): StudentMember =
@@ -47,7 +49,9 @@ class MemberAttendanceForCourseYearController extends ApiController
   with GetMemberAttendanceApi
   with MonitoringPointsResultToJsonConverter
   with StudentGroupAttendanceToJsonConverter
-  with FileAttachmentToJsonConverter {
+  with FileAttachmentToJsonConverter
+  with SmallGroupEventAttendanceNoteToJsonConverter
+  with SmallGroupEventToJsonConverter {
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def getAttendanceForCourseYear(@PathVariable member: Member, @PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): Mav = {
@@ -128,7 +132,7 @@ trait MonitoringPointsResultToJsonConverter {
 }
 
 trait StudentGroupAttendanceToJsonConverter {
-  self: FileAttachmentToJsonConverter =>
+  self: FileAttachmentToJsonConverter with SmallGroupEventAttendanceNoteToJsonConverter with SmallGroupEventToJsonConverter =>
 
   def studentGroupAttendanceAsJson(result: StudentGroupAttendance): Seq[Map[String, Any]] =
     result.attendance
@@ -165,36 +169,12 @@ trait StudentGroupAttendanceToJsonConverter {
                   val noteJson =
                     result.notes.get((event, weekNumber)).map { note =>
                       Map(
-                        "note" -> (Map(
-                          "absenceType" -> note.absenceType.dbValue,
-                          "contents" -> note.note,
-                          "updatedDate" -> DateFormats.IsoDateTime.print(note.updatedDate),
-                          "updatedBy" -> note.updatedBy
-                        ) ++ (if (Option(note.attachment).nonEmpty) Map("attachment" -> "attachment" -> jsonFileAttachmentObject(note.attachment)) else Map()))
+                        "note" -> jsonSmallGroupEventAttendanceNoteObject(note)
                       )
                     }.getOrElse(Map())
 
                   Map(
-                    "event" -> Map(
-                      "id" -> event.id,
-                      "title" -> event.title,
-                      "day" -> Option(event.day).map(_.name).orNull,
-                      "startTime" -> Option(event.startTime).map(_.toString("HH:mm")).orNull,
-                      "endTime" -> Option(event.endTime).map(_.toString("HH:mm")).orNull,
-                      "location" -> Option(event.location).map {
-                        case NamedLocation(name) => Map("name" -> name)
-                        case MapLocation(name, locationId, syllabusPlusName) =>
-                          Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
-                        case AliasedMapLocation(name, MapLocation(_, locationId, syllabusPlusName)) =>
-                          Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
-                      }.orNull,
-                      "tutors" -> event.tutors.users.map { user =>
-                        Seq(
-                          user.getUserId.maybeText.map("userId" -> _),
-                          user.getWarwickId.maybeText.map("universityId" -> _)
-                        ).flatten.toMap
-                      }
-                    ),
+                    "event" -> jsonSmallGroupEventObject(event),
                     "weekNumber" -> weekNumber,
                     "state" -> state.getName
                   ) ++ noteJson

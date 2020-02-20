@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventA
 import scala.collection.{SortedMap, mutable}
 
 trait SmallGroupAttendanceToJsonConverter {
-  self: SmallGroupEventToJsonConverter =>
+  self: SmallGroupEventToJsonConverter with SmallGroupEventAttendanceNoteToJsonConverter =>
 
   def jsonSmallGroupEventWithWeekObject(eventWithWeek: (SmallGroupEvent, SmallGroupEventOccurrence.WeekNumber)): (String, Map[String, Any]) = {
     eventWithWeek match {
@@ -34,18 +34,9 @@ trait SmallGroupAttendanceToJsonConverter {
       "joinedOn" -> Option(attendance.joinedOn).map(DateFormats.IsoDate.print).orNull,
       "expectedToAttend" -> attendance.expectedToAttend,
       "addedManually" -> attendance.addedManually,
-      "replacesAttendance" -> Option(attendance.replacesAttendance).map(jsonSmallGroupEventAttendanceObject).orNull,
+      "replacesAttendance" -> Option(attendance.replacesAttendance).map(replaced =>
+        jsonSmallGroupEventWithWeekRefObject((replaced.occurrence.event, replaced.occurrence.week))).orNull,
       "replacedBy" -> attendance.replacedBy.asScala.map(jsonSmallGroupEventAttendanceObject)
-    )
-  }
-
-  def jsonSmallGroupEventAttendanceNoteObject(note: SmallGroupEventAttendanceNote): Map[String, Any] = {
-    Map(
-      "comment" -> note.note,
-      "updatedBy" -> note.updatedBy,
-      "updatedDate" -> DateFormats.IsoDateTime.print(note.updatedDate),
-      "attachment" -> Option(note.attachment).map(_.id).orNull,
-      "absenceType" -> note.absenceType.description
     )
   }
 
@@ -76,12 +67,10 @@ trait SmallGroupAttendanceToJsonConverter {
           "student" -> user.getWarwickId,
           "events" -> events.map { case (eventWithWeek, attendanceStatus) => Map(
             "event" -> jsonSmallGroupEventWithWeekRefObject(eventWithWeek),
-            "status" -> Map(
-              "state" -> attendanceStatus._1.getName,
-              "details" -> attendanceStatus._2.map(jsonSmallGroupEventAttendanceObject).orNull,
-              "note" -> notes.get(user.getWarwickId).map(userNotes =>
-                userNotes.get((eventWithWeek._1.id, eventWithWeek._2)).orNull).orNull
-            )
+            "state" -> attendanceStatus._1.getName,
+            "details" -> attendanceStatus._2.map(jsonSmallGroupEventAttendanceObject).orNull,
+            "note" -> notes.get(user.getWarwickId).map(userNotes =>
+              userNotes.get((eventWithWeek._1.id, eventWithWeek._2)).orNull).orNull
           )
           })
       }
