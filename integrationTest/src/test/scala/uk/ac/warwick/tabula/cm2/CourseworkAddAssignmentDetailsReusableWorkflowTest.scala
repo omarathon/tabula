@@ -35,7 +35,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
   }
 
-  private def createReusableAssigmentDetails(assignmentName: String, reusableWorkflowName: String): Unit = {
+  private def createReusableAssignmentDetails(assignmentName: String, reusableWorkflowName: String): Unit = {
     When("I go to assignment creation page")
     currentUrl should include("/assignments/new")
 
@@ -64,8 +64,8 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     submitAndContinueClick()
   }
 
-  private def assigmentFeedbackDetails(): Unit = {
-    When("I go to feedback assignemnt page")
+  private def assignmentFeedbackDetails(): Unit = {
+    When("I go to feedback assignment page")
     currentUrl should include("/feedback")
 
     And("I uncheck automaticallyReleaseToMarkers on feedback details form")
@@ -77,7 +77,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     submitAndContinueClick()
   }
 
-  private def assigmentStudentDetails(): Unit = {
+  private def assignmentStudentDetails(): Unit = {
     When("I go to student  assignment students page")
     currentUrl should include("/students")
 
@@ -100,11 +100,11 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
   }
 
 
-  private def assigmentMarkerDetails(): Unit = {
-    When("I go to marker assignemnt page")
+  private def assignmentMarkerDetails(): Unit = {
+    When("I go to marker assignment page")
     currentUrl should include("/markers")
 
-    And("I check unalloacted student list")
+    And("I check unallocated student list")
     val form = webDriver.findElement(By.id("command"))
     val markerStudentUnallocatedList = form.findElement(By.id("markerStudentsList"))
 
@@ -124,7 +124,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
 
   private def assignmentSubmissionDetails(): Unit = {
-    When("I go to assignment submissions assignemnt page")
+    When("I go to assignment submissions assignment page")
     currentUrl should include("/submissions")
 
     And("I  check collect submissions")
@@ -144,7 +144,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
   }
 
-  private def assigmentOptions(): Unit = {
+  private def assignmentOptions(): Unit = {
     When("I go to assignment options page")
     currentUrl should include("/options")
 
@@ -166,7 +166,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     submitAndContinueClick()
   }
 
-  private def assigmentReview(assignmentName: String, reusableWorkflowName: String): Unit = {
+  private def assignmentReview(assignmentName: String, reusableWorkflowName: String): Unit = {
     When("I go to assignment review page")
     currentUrl should include("/review")
 
@@ -225,13 +225,13 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     val reusableWorkflowName = "Single marker workflow"
     openAdminPage()
     openCreateAssignmentDetails("xxx02")
-    createReusableAssigmentDetails(assignmentName, reusableWorkflowName)
-    assigmentFeedbackDetails()
-    assigmentStudentDetails()
-    assigmentMarkerDetails()
+    createReusableAssignmentDetails(assignmentName, reusableWorkflowName)
+    assignmentFeedbackDetails()
+    assignmentStudentDetails()
+    assignmentMarkerDetails()
     assignmentSubmissionDetails()
-    assigmentOptions()
-    assigmentReview(assignmentName, reusableWorkflowName)
+    assignmentOptions()
+    assignmentReview(assignmentName, reusableWorkflowName)
   }
 
 }

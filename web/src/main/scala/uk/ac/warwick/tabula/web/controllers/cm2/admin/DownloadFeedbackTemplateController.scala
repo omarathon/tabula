@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.cm2.departments.DownloadFeedbackTemplateCommand
 import uk.ac.warwick.tabula.data.model.{Department, FeedbackTemplate}
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
@@ -22,9 +22,8 @@ class DownloadFeedbackTemplateController extends CourseworkController {
 
   @RequestMapping(method = Array(GET, HEAD))
   def getAttachment(command: DownloadFeedbackTemplateCommand, user: CurrentUser): RenderableFile = {
-    command.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
+    command.apply().map(_.withContentDisposition(ContentDisposition.Attachment))
+      .getOrElse(throw new ItemNotFoundException)
   }
 
 }

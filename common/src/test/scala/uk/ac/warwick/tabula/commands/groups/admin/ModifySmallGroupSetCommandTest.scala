@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.groups.admin.ModifySmallGroupSetCommand.{Command, CreateCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -527,6 +526,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
       d.allProperties should be(Map(
         "module" -> "moduleId",
+        "moduleCode" -> "in101",
         "name" -> "new name"
       ))
     }
@@ -546,6 +546,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
       d.allProperties should be(Map(
         "module" -> "moduleId",
+        "moduleCode" -> "in101",
         "smallGroupSet" -> "existingId"
       ))
     }

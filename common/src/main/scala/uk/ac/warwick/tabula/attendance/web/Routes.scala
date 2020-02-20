@@ -103,6 +103,9 @@ object Routes {
     def pointRecordUpload(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, args: String = ""): String =
       context + "/view/%s/%s/points/%s/record/upload%s" format(encoded(department.code), encoded(academicYear.startYear.toString), encoded(templatePoint.id), if (args.length > 0) "?" + args else "")
 
+    def pointRecordTemplate(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, args: String = ""): String =
+      context + "/view/%s/%s/points/%s/record/upload/template%s" format(encoded(department.code), encoded(academicYear.startYear.toString), encoded(templatePoint.id), if (args.length > 0) "?" + args else "")
+
     def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType): String =
       context + "/view/%s/%s/agents/%s" format(
         encoded(department.code),

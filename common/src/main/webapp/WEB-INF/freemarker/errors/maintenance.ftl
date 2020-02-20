@@ -20,7 +20,7 @@
       <h2>Assignment submissions</h2>
 
       <p>Don't worry if you're trying to submit an assignment. Any assignment deadlines which occur while Tabula is unavailable will be extended, or alternative
-        provision made, so you can submit your assignment without being penalised. Either the Web Team or you Assignment Tutor will contact you via email to
+        provision made, so you can submit your assignment without being penalised. Either the Tabula support team or you Assignment Tutor will contact you via email to
         explain what you should do next.</p>
 
       <#if exception.messageOrEmpty != "">

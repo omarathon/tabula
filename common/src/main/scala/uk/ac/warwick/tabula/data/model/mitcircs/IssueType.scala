@@ -82,7 +82,7 @@ object IssueType extends Enum[IssueType] {
   def validIssueTypes(student: StudentMember): Seq[IssueType] = {
     // TODO - Make it possible for TQ to enable this (we could also just manage this in code)
     val invalidTypes =
-      if (student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") Seq(IndustrialAction)
+      if (Option(student.mostSignificantCourse).flatMap(scd => Option(scd.latestStudentCourseYearDetails)).flatMap(scyd => Option(scyd.modeOfAttendance)).map(_.code).contains("P")) Seq(IndustrialAction)
       else Seq(Employment, IndustrialAction)
 
     IssueType.values.filterNot(invalidTypes.contains)

@@ -1,62 +1,46 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.permissions.Permissions.UserPicker
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 object ViewProfileSubsetCommand {
   type Command = Appliable[ProfileSubset]
 
-  def apply(student: User): Command =
-    new ViewProfileSubsetCommandInternal(student)
-      with ComposableCommand[ProfileSubset]
+  def apply(student: User, viewer: CurrentUser): Command =
+    new ViewProfileSubsetCommandInternal(student, viewer)
+      with ViewProfilePermissions
       with AutowiringProfileServiceComponent
-      with ViewProfileSubsetCommandPermissions
-      with Unaudited with ReadOnly {
-
-      override val studentMember: Option[StudentMember] = student.getWarwickId.maybeText
-        .map(uid => profileService.getMemberByUniversityId(uid))
-        .collect { case Some(sm: StudentMember) => sm }
-
-      // only try to get the user via lookup if no student member is found
-      override val user: Option[User] = studentMember match {
-        case Some(_) => None
-        case None => Option(student).filter(_.isFoundUser)
-      }
-
-    }
+      with AutowiringSecurityServiceComponent
+      with ComposableCommand[ProfileSubset] // Init late, PermissionsChecking needs the autowired services
+      with Unaudited with ReadOnly
 }
 
-abstract class ViewProfileSubsetCommandInternal(student: User)
-  extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
+abstract class ViewProfileSubsetCommandInternal(student: User, val viewer: CurrentUser)
+  extends CommandInternal[ProfileSubset]
+    with ViewProfileCommandState {
+  self: ProfileServiceComponent =>
 
-  override def applyInternal(): ProfileSubset =
+  override lazy val profile: MemberOrUser = MemberOrUser(
+    member = student.getWarwickId.maybeText
+      .flatMap(profileService.getMemberByUniversityId(_))
+      .collect { case sm: StudentMember => sm },
+    user = student
+  )
+
+  override def applyInternal(): ProfileSubset = {
+    val studentMember: Option[StudentMember] = profile.asMember.collect { case sm: StudentMember => sm }
+
     ProfileSubset(
-      studentMember.nonEmpty,
-      user,
+      profile.isMember,
+      Option(profile.asUser).filter(_.isFoundUser),
       studentMember,
       studentMember.flatMap(_.mostSignificantCourseDetails)
     )
-}
-
-trait ViewProfileSubsetCommandState {
-  val studentMember: Option[StudentMember]
-  val user: Option[User]
-}
-
-trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: ViewProfileSubsetCommandState =>
-
-  override def permissionsCheck(p: PermissionsChecking): Unit =
-    studentMember match {
-      case Some(student) => p.PermissionCheck(Permissions.Profiles.Read.Core, mandatory(student))
-      case _ => p.PermissionCheck(UserPicker)
-    }
+  }
 }
 
 case class ProfileSubset(

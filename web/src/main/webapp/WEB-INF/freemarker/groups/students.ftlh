@@ -6,14 +6,15 @@
   <@modal.header>
     <#if command.group??>
       <h3 class="modal-title">Students in ${command.group.name}</h3>
+
+      <#assign submitUrl><@routes.profiles.department_timetables command.group.groupSet.department /></#assign>
+      <@f.form method="GET" action="${submitUrl?markup_string}">
+        <#list students as student><input type="hidden" name="students" value="${student.universityId}"/></#list>
+        <button type="submit" class="btn btn-link" >See a timetable for these students</button>
+      </@f.form>
     <#else>
       <h3 class="modal-title">Students <#if unallocated!false>not </#if>in ${command.smallGroupSet.name}</h3>
     </#if>
-    <#assign submitUrl><@routes.profiles.department_timetables command.group.groupSet.department /></#assign>
-    <@f.form method="GET" action="${submitUrl?markup_string}">
-      <#list students as student><input type="hidden" name="students" value="${student.universityId}"/></#list>
-      <button type="submit" class="btn btn-link" >See a timetable for these students</button>
-    </@f.form>
   </@modal.header>
 
   <@modal.body>

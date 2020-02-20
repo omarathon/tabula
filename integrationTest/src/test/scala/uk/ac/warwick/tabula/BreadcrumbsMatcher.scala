@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula
 
-import org.openqa.selenium.{WebDriver, By}
-import org.scalatest.selenium.WebBrowser
+import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
+import org.scalatestplus.selenium.WebBrowser
 
 trait BreadcrumbsMatcher extends Matchers {
 

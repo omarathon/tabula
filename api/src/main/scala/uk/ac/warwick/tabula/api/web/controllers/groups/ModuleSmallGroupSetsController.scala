@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.api.web.controllers.groups
 
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-
 import org.joda.time.DateTime
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
@@ -12,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.groups.ModuleSmallGroupSetsController._
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupAttendanceToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, _}
 import uk.ac.warwick.tabula.data.model._
@@ -36,6 +35,7 @@ abstract class ModuleSmallGroupSetsController extends ApiController
   with SmallGroupSetToJsonConverter
   with SmallGroupToJsonConverter
   with SmallGroupEventToJsonConverter
+  with SmallGroupAttendanceToJsonConverter
   with AssessmentMembershipInfoToJsonConverter {
 
   hideDeletedItems

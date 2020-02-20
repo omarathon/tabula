@@ -6,9 +6,9 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission, ToEntityReference}
 
-object SubmissionBeforeCloseDateTrigger {
-  def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): SubmissionBeforeCloseDateTrigger = {
-    val result = new SubmissionBeforeCloseDateTrigger
+object SubmissionBeforeDeadlineTrigger {
+  def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): SubmissionBeforeDeadlineTrigger = {
+    val result = new SubmissionBeforeDeadlineTrigger
     result.scheduledDate = thisScheduledDate
     result.updateTarget(thisTargetEntity)
     result
@@ -19,13 +19,13 @@ object SubmissionBeforeCloseDateTrigger {
 @Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "SubmissionBeforeCloseDate")
-class SubmissionBeforeCloseDateTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
+class SubmissionBeforeDeadlineTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
 
   def submission: Submission = target.entity
 
   override def assignment: Assignment = submission.assignment
 
   override def apply(): Unit = transactional() {
-      handleTurnitinSubmission()
+    handleTurnitinSubmission()
   }
 }

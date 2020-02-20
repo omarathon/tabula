@@ -258,7 +258,7 @@ object SubmissionAndFeedbackInfoFilters {
       def description = "Not released to markers"
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-        item.assignment.hasWorkflow && !item.coursework.enhancedFeedback.head.feedback.releasedToMarkers
+        item.assignment.hasWorkflow && item.coursework.enhancedFeedback.forall(!_.feedback.releasedToMarkers)
 
       def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.hasWorkflow
     }

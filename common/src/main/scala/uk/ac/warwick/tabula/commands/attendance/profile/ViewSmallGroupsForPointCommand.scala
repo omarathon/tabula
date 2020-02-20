@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.{AcademicWeek, AcademicYear}
 import scala.collection.immutable.SortedMap
 
 object ViewSmallGroupsForPointCommandResult {
-
   case class Course(
     name: String,
     route: String,
@@ -40,7 +39,6 @@ object ViewSmallGroupsForPointCommandResult {
   case class GroupData(terms: Seq[GroupData.Term])
 
   object GroupData {
-
     case class Term(
       name: String,
       weeks: Seq[(Int, Boolean)],
@@ -48,19 +46,13 @@ object ViewSmallGroupsForPointCommandResult {
     )
 
     object Term {
-
       case class Group(name: String, relevant: Boolean, attendance: Map[Int, Seq[Group.Attendance]])
 
       object Group {
-
-        case class Attendance(instance: EventInstance, state: SmallGroupAttendanceState, note: Option[AttendanceNote], reason: String, relevant: Boolean)
-
+        case class Attendance(instance: EventInstance, state: SmallGroupAttendanceState, attendance: Option[SmallGroupEventAttendance], note: Option[AttendanceNote], reason: String, relevant: Boolean)
       }
-
     }
-
   }
-
 }
 
 case class ViewSmallGroupsForPointCommandResult(
@@ -152,7 +144,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
               point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(group.groupSet.module),
               termWeeks.map { week =>
                 week -> (attendanceMap.get(week) match {
-                  case None => Seq(GroupData.Term.Group.Attendance(null, null, None, "No event in this week", relevant = false))
+                  case None => Seq(GroupData.Term.Group.Attendance(null, null, None, None, "No event in this week", relevant = false))
                   case Some(instanceMap) => checkRelevance(instanceMap, group.groupSet.academicYear, attendance.notes)
                 })
               }.toMap
@@ -164,29 +156,29 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
   }
 
   private def checkRelevance(
-    instanceMap: SortedMap[EventInstance, SmallGroupAttendanceState],
+    instanceMap: SortedMap[EventInstance, (SmallGroupAttendanceState, Option[SmallGroupEventAttendance])],
     academicYear: AcademicYear,
     notes: Map[EventInstance, SmallGroupEventAttendanceNote]
   ): Seq[GroupData.Term.Group.Attendance] = {
     // Check each possible reason for not counting for each instance
     instanceMap.keys.map { case (event, week) =>
       val instance = (event, week)
-      val state = instanceMap(instance)
+      val (state, attendance) = instanceMap(instance)
       val instanceDate = weekNumberToDate(week, event.day)
       if (instanceDate.isBefore(point.startDate)) {
-        GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "This event took place before the monitoring period", relevant = false)
+        GroupData.Term.Group.Attendance(instance, state, attendance, notes.get(instance), "This event took place before the monitoring period", relevant = false)
       } else if (instanceDate.isAfter(point.endDate)) {
-        GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "This event took place after the monitoring period", relevant = false)
+        GroupData.Term.Group.Attendance(instance, state, attendance, notes.get(instance), "This event took place after the monitoring period", relevant = false)
       } else {
         state match {
           case MissedUnauthorised =>
-            GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "Marked absent (unauthorised) for this event", relevant = true)
+            GroupData.Term.Group.Attendance(instance, state, attendance, notes.get(instance), "Marked absent (unauthorised) for this event", relevant = true)
           case MissedAuthorised =>
-            GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "Marked absent (authorised) for this event", relevant = true)
+            GroupData.Term.Group.Attendance(instance, state, attendance, notes.get(instance), "Marked absent (authorised) for this event", relevant = true)
           case NotRecorded | Late =>
-            GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "Attendance has not been recorded for this event", relevant = true)
+            GroupData.Term.Group.Attendance(instance, state, attendance, notes.get(instance), "Attendance has not been recorded for this event", relevant = true)
           case _ =>
-            GroupData.Term.Group.Attendance((event, week), state, notes.get(instance), "", relevant = true)
+            GroupData.Term.Group.Attendance((event, week), state, attendance, notes.get(instance), "", relevant = true)
         }
       }
     }.toSeq

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.roles.{Masquerader, Sysadmin}
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.web.Cookies._
-import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser}
+import uk.ac.warwick.tabula.{CurrentUser, Features, NoCurrentUser}
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
@@ -22,6 +22,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
   var userLookup: UserLookupInterface = Wire[UserLookupInterface]
   var profileService: ProfileService = Wire[ProfileService]
   var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var features: Features = Wire[Features]
   var userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
   var masqueradeUsercodeValidator: MasqueradeUsercodeValidator = MasqueradeCommandUsercodeValidator
 
@@ -59,10 +60,10 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
         // If someone has passed a masquerade user as a query parameter rather than a Cookie, set the equivalent Cookie
         // and use that value instead
         val extractionMethod: MasqueradeRequestUsercodeExtractor =
-          if (extractMasqueradeUsercodeFromCookie.isEmpty && request.getParameter(CurrentUser.masqueradeCookie).maybeText.exists(masqueradeUsercodeValidator.filterValidUsercodeForMasquerade(user))) transactional(readOnly = true) {
+          if (extractMasqueradeUsercodeFromCookie.isEmpty && features.masqueradeByQueryParam && request.getParameter(CurrentUser.masqueradeQueryParam).maybeText.exists(masqueradeUsercodeValidator.filterValidUsercodeForMasquerade(user))) transactional(readOnly = true) {
             // For auditability
             val cmd = MasqueradeCommand(new CurrentUser(user, user))
-            cmd.usercode = request.getParameter(CurrentUser.masqueradeCookie)
+            cmd.usercode = request.getParameter(CurrentUser.masqueradeQueryParam)
 
             val cookie = cmd.apply()
             cookie.foreach { c =>

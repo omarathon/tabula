@@ -26,13 +26,14 @@ case class StudentGroupAttendance(
 )
 
 object ListStudentGroupAttendanceCommand {
-
-  type PerInstanceAttendance = SortedMap[EventInstance, SmallGroupAttendanceState]
+  type PerInstanceAttendance = SortedMap[EventInstance, (SmallGroupAttendanceState, Option[SmallGroupEventAttendance])]
   type PerWeekAttendance = SortedMap[SmallGroupEventOccurrence.WeekNumber, PerInstanceAttendance]
   type PerGroupAttendance = SortedMap[SmallGroup, PerWeekAttendance]
   type PerTermAttendance = SortedMap[AcademicPeriod, PerGroupAttendance]
 
-  def apply(member: Member, academicYear: AcademicYear) =
+  type Command = Appliable[StudentGroupAttendance] with PermissionsChecking
+
+  def apply(member: Member, academicYear: AcademicYear): Command =
     new ListStudentGroupAttendanceCommandInternal(member, academicYear)
       with ComposableCommand[StudentGroupAttendance]
       with ListStudentGroupAttendanceCommandPermissions
@@ -67,7 +68,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
     def hasExpectedAttendanceForWeek(kv: (SmallGroupEventOccurrence.WeekNumber, PerInstanceAttendance)) = kv match {
       case (_, attendance) =>
-        attendance.exists { case (_, state) => state != SmallGroupAttendanceState.NotExpected }
+        attendance.exists { case (_, (state, _)) => state != SmallGroupAttendanceState.NotExpected }
     }
 
     def hasExpectedAttendanceForGroup(kv: (SmallGroup, PerWeekAttendance)) = kv match {
@@ -75,21 +76,21 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
         weekAttendance.exists(hasExpectedAttendanceForWeek)
     }
 
-    val attendance = (groupByTerm(allInstances).view.mapValues { instances =>
+    val attendance = groupByTerm(allInstances).view.mapValues { instances =>
       val groups = SortedMap(instances.groupBy { case ((event, _), _) => event.group }.toSeq: _*)
       groups.view.filterKeys { smallGroup => smallGroup.groupSet.visibleToStudents }.mapValues { instances =>
         SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq: _*).view.mapValues { instances =>
           attendanceForStudent(instances, isLate(user))(user)
         }.to(SortedMap)
       }.filter(hasExpectedAttendanceForGroup).to(SortedMap)
-    }).filterNot { case (_, attendance) => attendance.isEmpty }.to(SortedMap)
+    }.filterNot { case (_, attendance) => attendance.isEmpty }.to(SortedMap)
 
     val missedCountByTerm = attendance.view.mapValues { groups =>
       val count = groups.map { case (_, attendanceByInstance) =>
-        attendanceByInstance.values.flatMap(_.values).count(_ == SmallGroupAttendanceState.MissedUnauthorised)
+        attendanceByInstance.values.flatMap(_.values.map(_._1)).count(_ == SmallGroupAttendanceState.MissedUnauthorised)
       }
 
-      count.foldLeft(0) { (acc, missedCount) => acc + missedCount }
+      count.sum
     }.toMap
 
     val termWeeks = SortedMap(attendance.keySet.map { term =>
@@ -130,7 +131,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
         event.endDateTimeForWeek(week).exists(_.isBefore(LocalDateTime.now))
   }
 
-  private def groupTitle(attendance: PerTermAttendance) = {
+  private def groupTitle(attendance: PerTermAttendance): String = {
     val title = {
       val smallGroupSets = attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
 

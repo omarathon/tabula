@@ -22,6 +22,7 @@ object ModifyAssignmentStudentsCommand {
       with ModifyAssignmentStudentsValidation
       with AutowiringAssessmentServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringFeedbackServiceComponent
       with ModifiesAssignmentMembership
       with SharedAssignmentStudentProperties {
       copyMembers(assignment)
@@ -55,7 +56,7 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 
 trait ModifyAssignmentStudentsCommandState extends EditAssignmentMembershipCommandState with UpdatesStudentMembership {
   self: AssessmentServiceComponent with UserLookupComponent with SpecifiesGroupType with SharedAssignmentStudentProperties
-    with AssessmentMembershipServiceComponent =>
+    with AssessmentMembershipServiceComponent with FeedbackServiceComponent =>
 
   val updateStudentMembershipGroupIsUniversityIds: Boolean = false
 
@@ -67,6 +68,27 @@ trait ModifyAssignmentStudentsCommandState extends EditAssignmentMembershipComma
     for (group <- assignment.assessmentGroups.asScala if group.assignment == null) {
       group.assignment = assignment
     }
+
+    // remove marker allocations from manually added students that have been removed from the assignment
+    val studentsFromSITS = {
+      val info = assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala.toSeq, academicYear)
+      val memberInfo = if(assignment.resitAssessment) info.flatMap(_.resitMembers) else info.flatMap(_.allMembers)
+      memberInfo.map(_.universityId)
+    }
+
+    // all manual users that are being removed - ignore any that are included in the users that will be linked from SITS after this edit
+    val removedUsers = (assignment.members.users -- members.users)
+      .filterNot(u => studentsFromSITS.contains(u.getWarwickId))
+      .flatMap(u => Option(u.getWarwickId).orElse(Option(u.getUserId)))
+
+    assignment.allFeedback
+      .filter(f => removedUsers.contains(f.studentIdentifier))
+      .flatMap(_.markerFeedback.asScala)
+      .foreach(mf => {
+        mf.marker = null
+        feedbackService.save(mf)
+      })
+
     assignment.members.copyFrom(members)
   }
 

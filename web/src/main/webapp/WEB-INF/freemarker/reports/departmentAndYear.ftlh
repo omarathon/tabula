@@ -28,6 +28,9 @@
   <li><h3><a href="<@routes.reports.missedSmallGroups department academicYear />">Missed event attendance</a></h3></li>
   <li><h3><a href="<@routes.reports.missedSmallGroupsByModule department academicYear />">Missed event attendance by module</a></h3></li>
   <li><h3><a href="<@routes.reports.events department academicYear />">All events</a></h3></li>
+  <li><h3><a href="<@routes.reports.allSmallGroupAttendanceRegisters department academicYear />">All event registers</a></h3></li>
+  <li><h3><a href="<@routes.reports.unrecordedSmallGroupAttendanceRegisters department academicYear />">Unrecorded event registers</a></h3></li>
+  <li><h3><a href="<@routes.reports.recordedLateSmallGroupAttendanceRegisters department academicYear />">Recorded late event registers</a></h3></li>
 </ul>
 
 <h2>Coursework management</h2>

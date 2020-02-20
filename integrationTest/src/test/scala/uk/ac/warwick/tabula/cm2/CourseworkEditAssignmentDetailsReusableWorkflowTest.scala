@@ -34,9 +34,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
       amendAssignmentDetails(modifiedAssignmentTitle, moderatedWorkflowId)
       amendAssignmentFeedback(checkboxFeedbackFieldDetails)
-      assigmentStudentDetails(studentList)
+      assignmentStudentDetails(studentList)
 
-      assigmentMarkerDetails(studentList.size, ModeratedMarking)
+      assignmentMarkerDetails(studentList.size, ModeratedMarking)
 
       val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", true), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
       val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
@@ -47,7 +47,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       val singleSelOptionFieldDetails: Seq[(String, String)] = Seq(("minimumFileAttachmentLimit", "1"), ("fileAttachmentLimit", "3"))
 
       val fileTypes = Seq("pdf", "doc")
-      assigmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
+      assignmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
 
       val allFields: Map[String, String] = (checkboxSubmissionFieldDetails.map { case (field, v) => field -> v.toString }
         ++ textFieldOptionFieldDetails
@@ -59,7 +59,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
         ++ Seq(("studentList", studentList.size.toString))
         ).toMap
 
-      assigmentReview(Some(ModeratedMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
+      assignmentReview(Some(ModeratedMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
     }
 
   }
@@ -80,9 +80,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
       amendAssignmentDetails(modifiedAssignmentTitle, doubleWorkflowId)
       amendAssignmentFeedback(checkboxFeedbackFieldDetails)
-      assigmentStudentDetails(studentList)
+      assignmentStudentDetails(studentList)
 
-      assigmentMarkerDetails(studentList.size, DoubleMarking)
+      assignmentMarkerDetails(studentList.size, DoubleMarking)
 
       val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
       val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
@@ -93,7 +93,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       val singleSelOptionFieldDetails: Seq[(String, String)] = Seq(("minimumFileAttachmentLimit", "1"), ("fileAttachmentLimit", "2"))
 
       val fileTypes = Seq("pdf", "txt")
-      assigmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
+      assignmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
 
       val allFields: Map[String, String] = (checkboxSubmissionFieldDetails.map { case (field, v) => field -> v.toString }
         ++ textFieldOptionFieldDetails
@@ -104,7 +104,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
         ++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
         ++ Seq(("studentList", studentList.size.toString))
         ).toMap
-      assigmentReview(Some(DoubleMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
+      assignmentReview(Some(DoubleMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
     }
 
   }
@@ -119,11 +119,12 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
     withAssignment("xxx02", "Moderated marking-1A") { _ =>
       editAssignment(moderatedworkflowId)
-      val checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", true), ("collectMarks", false), ("dissertation", false))
+      // TAB-5692 We no longer show 'Automated release for marking' on assignments without a marking workflow
+      val relevantCheckboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("collectMarks", false), ("dissertation", false))
 
       amendAssignmentDetails(modifiedAssignmentTitle, "", confirmModal = false)
-      amendAssignmentFeedback(checkboxFeedbackFieldDetails)
-      assigmentStudentDetails(studentList)
+      amendAssignmentFeedback(relevantCheckboxFeedbackFieldDetails)
+      assignmentStudentDetails(studentList)
 
       val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
       val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
@@ -134,19 +135,19 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       val singleSelOptionFieldDetails: Seq[(String, String)] = Seq(("minimumFileAttachmentLimit", "1"), ("fileAttachmentLimit", "2"))
 
       val fileTypes = Seq("pdf", "txt")
-      assigmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
+      assignmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
 
       val allFields: Map[String, String] = (checkboxSubmissionFieldDetails.map { case (field, v) => field -> v.toString }
         ++ textFieldOptionFieldDetails
         ++ textAreaFieldOptionFieldDetails
         ++ singleSelOptionFieldDetails
-        ++ checkboxFeedbackFieldDetails.map { case (field, v) => field -> v.toString }
+        ++ relevantCheckboxFeedbackFieldDetails.map { case (field, v) => field -> v.toString }
         ++ Seq(("title", modifiedAssignmentTitle), ("workflowName", moderatedWorkflowName), ("workflowType", "Reusable"))
         ++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
         ++ Seq(("studentList", studentList.size.toString))
         ).toMap
 
-      assigmentReview(None, allFields)
+      assignmentReview(None, allFields)
     }
 
   }
@@ -166,9 +167,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
       amendAssignmentDetails(modifiedAssignmentTitle, singleWorkflowId)
       amendAssignmentFeedback(checkboxFeedbackFieldDetails)
-      assigmentStudentDetails(studentList)
+      assignmentStudentDetails(studentList)
 
-      assigmentMarkerDetails(studentList.size, SingleMarking)
+      assignmentMarkerDetails(studentList.size, SingleMarking)
 
       val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", true), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
       val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
@@ -179,7 +180,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       val singleSelOptionFieldDetails: Seq[(String, String)] = Seq(("minimumFileAttachmentLimit", "1"), ("fileAttachmentLimit", "3"))
 
       val fileTypes = Seq("pdf", "doc")
-      assigmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
+      assignmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
 
       val allFields: Map[String, String] = (checkboxSubmissionFieldDetails.map { case (field, v) => field -> v.toString }
         ++ textFieldOptionFieldDetails
@@ -191,7 +192,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
         ++ Seq(("studentList", studentList.size.toString))
         ).toMap
 
-      assigmentReview(Some(SingleMarking), allFields, Seq(P.Marker1, P.Marker2, P.Marker3))
+      assignmentReview(Some(SingleMarking), allFields, Seq(P.Marker1, P.Marker2, P.Marker3))
     }
 
   }
@@ -228,7 +229,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
   }
 
   def amendAssignmentFeedback(checkboxFieldDetails: Seq[(String, Boolean)]): Unit = {
-    When("I go to feedback assignemnt page")
+    When("I go to feedback assignment page")
     eventually(currentUrl should include("/feedback"))
     checkboxFieldDetails.foreach { case (fieldName, checked) =>
       And(s"I amend checkbox $fieldName on feedback details form")
@@ -241,7 +242,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
     submitAndContinueClick()
   }
 
-  def assigmentStudentDetails(users: Seq[String]): Unit = {
+  def assignmentStudentDetails(users: Seq[String]): Unit = {
     When("I go to student  assignment students page")
     eventually {
       currentUrl should include("/students")
@@ -281,7 +282,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
     submitAndContinueClick()
   }
 
-  def assigmentOptions(textFieldDetails: Seq[(String, String)], textAreaFieldDetails: Seq[(String, String)], singleSelFieldDetails: Seq[(String, String)], fileExtList: Seq[String]): Unit = {
+  def assignmentOptions(textFieldDetails: Seq[(String, String)], textAreaFieldDetails: Seq[(String, String)], singleSelFieldDetails: Seq[(String, String)], fileExtList: Seq[String]): Unit = {
     When("I go to assignment options page")
     eventually(currentUrl should include("/options"))
 
@@ -309,7 +310,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
     submitAndContinueClick()
   }
 
-  def assigmentMarkerDetails(studentCount: Int, workflowType: MarkingWorkflowType): Unit = {
+  def assignmentMarkerDetails(studentCount: Int, workflowType: MarkingWorkflowType): Unit = {
     workflowType match {
       case ModeratedMarking =>
         checkUnallocatedStudents(studentCount, Seq("markerStudentsList", "moderatorStudentsList"))
@@ -325,7 +326,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
   }
 
   def checkUnallocatedStudents(studentCount: Int, studentListId: Seq[String]): Unit = {
-    When("I go to marker assignemnt page")
+    When("I go to marker assignment page")
     eventually(currentUrl should include("/markers"))
     val form = webDriver.findElement(By.id("command"))
     And("I check unallocated student list")
@@ -374,7 +375,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
     }
   }
 
-  def assigmentReview(workflowType: Option[MarkingWorkflowType], fieldDetails: Map[String, String], markers: Seq[LoginDetails]*): Unit = {
+  def assignmentReview(workflowType: Option[MarkingWorkflowType], fieldDetails: Map[String, String], markers: Seq[LoginDetails]*): Unit = {
     When("I go to assignment review page")
     eventually(currentUrl should include("/review"))
 
@@ -423,7 +424,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       case None => pageSource contains "Marking workflow" should be(false)
     }
     //assignment feedback page details
-    checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+    if (workflowType.isDefined){
+      checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+    }
     checkReviewTabRow(labels, "Collect marks", getFieldValue("collectMarks", fieldDetails))
 
     //students page

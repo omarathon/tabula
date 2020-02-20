@@ -112,8 +112,9 @@ class CurrentUser(
 
 object CurrentUser {
   val keyName = "CurrentUser"
-  val masqueradeCookie = "tabulaMasqueradeAs"
-  val godModeCookie = "tabulaGodMode"
+  val masqueradeCookie = "__Host-tabulaMasqueradeAs"
+  val masqueradeQueryParam = "tabulaMasqueradeAs"
+  val godModeCookie = "__Host-tabulaGodMode"
 
   def studentIdentifier(user: User): String = Option(user.getWarwickId).getOrElse(user.getUserId)
 }

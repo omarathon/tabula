@@ -161,7 +161,7 @@ trait StudentGroupAttendanceToJsonConverter {
                 "name" -> group.name
               ),
               "attendance" -> attendance.flatten.flatMap { case (_, instanceAttendance) =>
-                instanceAttendance.toSeq.map { case ((event, weekNumber), state) =>
+                instanceAttendance.toSeq.map { case ((event, weekNumber), (state, _)) => // TODO use SmallGroupEventAttendance to include recordedOn/recordedBy
                   val noteJson =
                     result.notes.get((event, weekNumber)).map { note =>
                       Map(

@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.groups.pages
 
 import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.scalatest.Matchers
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatestplus.selenium.{Page, WebBrowser}
 import uk.ac.warwick.tabula.{AcademicYear, BreadcrumbsMatcher, FunctionalTestProperties}
-import org.scalatest.selenium.Page
-import org.scalatest.selenium.WebBrowser
 
 import scala.jdk.CollectionConverters._
-import org.scalatest.concurrent.Eventually
-import org.scalatest.Matchers
-import org.scalatest.time.{Millis, Seconds, Span}
-
 
 class SmallGroupTeachingPage(val departmentCode: String, val academicYear: String)(implicit val webDriver: WebDriver)
   extends Page with WebBrowser with BreadcrumbsMatcher with Eventually with Matchers with GroupSetList {
@@ -200,7 +198,7 @@ trait GroupSetList {
 trait ModuleAndGroupSetList {
   this: WebBrowser with Eventually with Matchers =>
 
-  override implicit val patienceConfig =
+  override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
   def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver: WebDriver): Option[ModuleGroupSetInfoSummarySection] = {

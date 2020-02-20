@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.api.web.helpers.SubmissionToJsonConverter
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, SubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{ContentDisposition, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
@@ -93,5 +93,5 @@ trait DownloadSingleSubmissionAttachmentApi {
 
   @RequestMapping(method = Array(GET))
   def download(@ModelAttribute("downloadAttachmentCommand") command: AdminGetSingleSubmissionCommand.Command): RenderableFile =
-    command.apply()
+    command.apply().withContentDisposition(ContentDisposition.Attachment)
 }

@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpStatus
-import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.util.EntityUtils
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
 import scala.concurrent.Future
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
@@ -46,7 +46,8 @@ trait AutowiringExamTimetableConfigurationComponent extends ExamTimetableConfigu
 trait ExamTimetableHttpTimetableFetchingServiceComponent extends StaffAndStudentTimetableFetchingServiceComponent {
   self: ExamTimetableConfigurationComponent =>
 
-  lazy val timetableFetchingService = ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
+  lazy val timetableFetchingService: StudentTimetableFetchingService with StaffTimetableFetchingService =
+    ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
 }
 
 private class ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration: ExamTimetableConfiguration)
@@ -130,27 +131,34 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
     val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml)
     val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
-    timetable.exams.map { timetableExam =>
+    timetable.exams.flatMap { timetableExam =>
       val uid = DigestUtils.md5Hex(Seq(examProfile, timetableExam.paper).mkString)
-      TimetableEvent(
-        uid = uid,
-        name = "Exam",
-        title = "Exam",
-        description = "",
-        eventType = TimetableEventType.Exam,
-        weekRanges = Seq(WeekRange(timetableExam.academicYear.weekForDate(timetableExam.startDateTime.toLocalDate).weekNumber)),
-        day = DayOfWeek(timetableExam.startDateTime.dayOfWeek.get),
-        startTime = timetableExam.startDateTime.toLocalTime,
-        endTime = timetableExam.endDateTime.toLocalTime,
-        location = None,
-        comments = Some(s"""More information available on the <a href="$topLevelUrl${Routes.Profile.examTimetable(universityId)}">exam timetable</a>"""),
-        parent = TimetableEvent.Parent(),
-        staff = Nil,
-        students = Nil,
-        year = timetableExam.academicYear,
-        relatedUrl = None,
-        attendance = Map()
-      )
+      Try(timetableExam.academicYear.weekForDate(timetableExam.startDateTime.toLocalDate).weekNumber) match {
+        case Success(weekNumber) =>
+          Some(TimetableEvent(
+            uid = uid,
+            name = "Exam",
+            title = "Exam",
+            description = "",
+            eventType = TimetableEventType.Exam,
+            weekRanges = Seq(WeekRange(weekNumber)),
+            day = DayOfWeek(timetableExam.startDateTime.dayOfWeek.get),
+            startTime = timetableExam.startDateTime.toLocalTime,
+            endTime = timetableExam.endDateTime.toLocalTime,
+            location = None,
+            comments = Some(s"""More information available on the <a href="$topLevelUrl${Routes.Profile.examTimetable(universityId)}">exam timetable</a>"""),
+            parent = TimetableEvent.Parent(),
+            staff = Nil,
+            students = Nil,
+            year = timetableExam.academicYear,
+            relatedUrl = None,
+            attendance = Map()
+          ))
+
+        case Failure(t) =>
+          logger.error(s"Failed to get a week number for ${timetableExam.startDateTime.toLocalDate} during academic year ${timetableExam.academicYear}", t)
+          None
+      }
     }
   }
 }

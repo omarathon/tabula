@@ -160,16 +160,16 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
     }
   }
 
-  def indexFrom(startDate: DateTime): Future[ElasticsearchIndexingResult] = {
+  protected def indexByQueryFrom(query: (DateTime, Int) => TraversableOnce[A])(startDate: DateTime): Future[ElasticsearchIndexingResult] =
     guardMultipleIndexes {
       ensureIndexExists().flatMap { _ =>
         // Keep going until we run out
 
         /**
-          * Index a batch of items and return the max date returned
-          */
+         * Index a batch of items and return the max date returned
+         */
         def indexBatch(newerThan: DateTime, acc: ElasticsearchIndexingResult): Future[ElasticsearchIndexingResult] = {
-          val itemsToIndex = listNewerThan(newerThan, IncrementalBatchSize)
+          val itemsToIndex = query(newerThan, IncrementalBatchSize)
 
           doIndexItems(itemsToIndex)
             .andThen { case _ => // basically what you'd expect a finally block to do
@@ -194,7 +194,9 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
         indexBatch(startDate, ElasticsearchIndexingResult.empty)
       }
     }
-  }
+
+  def indexFrom(startDate: DateTime): Future[ElasticsearchIndexingResult] =
+    indexByQueryFrom(listNewerThan)(startDate)
 
   protected def doIndexItems(in: TraversableOnce[A]): Future[ElasticsearchIndexingResult] = {
     if (in.isEmpty) {

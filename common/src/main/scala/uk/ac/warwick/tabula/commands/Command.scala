@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.commands
 
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.NotRecorded
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendance, _}
@@ -459,8 +459,14 @@ abstract class Description {
     this
   }
 
-  def smallGroupAttendaceState(attendanceStates: Seq[SmallGroupEventAttendance]): Description = {
-    property("smallGroupAttendanceState" -> attendanceStates.map(s => s"${s.universityId} - ${s.state.description}"))
+  def smallGroupAttendanceState(attendanceStates: Seq[SmallGroupEventAttendance], deletions: Seq[String]): Description = {
+    // Warning: If you change the format that this is logged in, you may also need to check code
+    // parsing it back out (see AuditEventQueryService)
+    property("smallGroupAttendanceState" ->
+      (attendanceStates.map(s => s"${s.universityId} - ${s.state.description}") ++ deletions.map(id => s"$id - ${NotRecorded.description}"))
+    )
+    // Allows us to distinguish between those events that only log changes in state and those that list the full state
+    property("onlyIncludesChanges", true)
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {
@@ -482,6 +488,7 @@ abstract class Description {
   def module(module: Module): Description = {
     if (module.adminDepartment != null) department(module.adminDepartment)
     property("module" -> module.id)
+    property("moduleCode" -> module.code)
   }
 
   def department(department: Department): Description = {

@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TurnitinTcaService, TurnitinTcaServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.Duration
@@ -19,8 +18,8 @@ object TurnitinTcaSendSubmissionCommand {
   type CommandType = Appliable[Result]
   val RequiredPermission: Permission = Permissions.Submission.CheckForPlagiarism
 
-  def apply(assignment: Assignment, user: User) =
-    new TurnitinTcaSendSubmissionCommandInternal(assignment, user)
+  def apply(assignment: Assignment) =
+    new TurnitinTcaSendSubmissionCommandInternal(assignment)
     with ComposableCommand[Result]
     with TurnitinTcaSendSubmissionCommandPermissions
     with TurnitinTcaSendSubmissionState
@@ -28,13 +27,13 @@ object TurnitinTcaSendSubmissionCommand {
     with AutowiringTurnitinTcaServiceComponent
 }
 
-class TurnitinTcaSendSubmissionCommandInternal(val assignment: Assignment, val user: User)
+class TurnitinTcaSendSubmissionCommandInternal(val assignment: Assignment)
 extends CommandInternal[Result] {
   self: TurnitinTcaServiceComponent with TurnitinTcaSendSubmissionState  =>
   override def applyInternal(): Result = {
     Await.result(Future.sequence(
       attachments
-        .map(a => turnitinTcaService.createSubmission(a, user)
+        .map(a => turnitinTcaService.createSubmission(a)
           .flatMap(_.fold(
             error => Future.successful(Left(error)),
             tcaSubmission => turnitinTcaService.uploadSubmissionFile(a, tcaSubmission)
@@ -48,7 +47,6 @@ extends CommandInternal[Result] {
 
 trait TurnitinTcaSendSubmissionState {
   def assignment: Assignment
-  def user: User
   def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments)
     .filter(attachment =>
       attachment.originalityReport == null && TurnitinTcaService.validFile(attachment))

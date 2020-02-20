@@ -14,8 +14,10 @@ import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.roles.MitigatingCircumstancesOfficerRoleDefinition
 import uk.ac.warwick.tabula.services.fileserver.{AutowiringUploadedImageProcessorComponent, UploadedImageProcessorComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -29,7 +31,7 @@ object CreateMitCircsSubmissionCommand {
   type Result = MitigatingCircumstancesSubmission
   type Command =
     Appliable[Result]
-      with MitCircsSubmissionState
+      with CreateMitCircsSubmissionState
       with MitCircsSubmissionRequest
       with SelfValidating
       with BindListener
@@ -53,17 +55,19 @@ object CreateMitCircsSubmissionCommand {
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringUploadedImageProcessorComponent
+      with AutowiringPermissionsServiceComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
   extends CommandInternal[Result]
-    with MitCircsSubmissionState
+    with CreateMitCircsSubmissionState
     with BindListener {
 
   self: MitCircsSubmissionRequest
     with MitCircsSubmissionServiceComponent
     with ModuleAndDepartmentServiceComponent
-    with UploadedImageProcessorComponent =>
+    with UploadedImageProcessorComponent
+    with PermissionsServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     result.pushNestedPath("file")
@@ -211,18 +215,16 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 }
 
 trait CreateMitCircsSubmissionDescription extends Describable[Result] {
-  self: MitCircsSubmissionState =>
+  self: CreateMitCircsSubmissionState =>
 
   override lazy val eventName: String = "CreateMitCircsSubmission"
 
-  def describe(d: Description): Unit = {
+  def describe(d: Description): Unit =
     d.member(student)
-  }
+     .department(department)
 }
 
 trait MitCircsSubmissionRequest {
-  self: MitCircsSubmissionState =>
-
   @DateWithinYears(maxPast = 3, maxFuture = 1)
   var startDate: LocalDate = _
 
@@ -254,15 +256,29 @@ trait MitCircsSubmissionRequest {
   var approve: Boolean = _ // set this to true when a user is approving a draft submission or one made on their behalf
 }
 
+trait CreateMitCircsSubmissionState extends MitCircsSubmissionState {
+  self: PermissionsServiceComponent =>
+
+  lazy val department: Department = {
+    val subDepartmentWithMitCircsEnabled = Option(student.homeDepartment)
+      .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
+      .getOrElse(
+        throw new IllegalArgumentException(s"Unable to create a mit circs submission for a student (${student.universityId}) whose department (${Option(student.homeDepartment).map(_.code).getOrElse("")}) doesn't have mit circs enabled")
+      )
+
+    if (permissionsService.getGrantedRole(subDepartmentWithMitCircsEnabled, MitigatingCircumstancesOfficerRoleDefinition).forall(_.users.users.isEmpty)) {
+      throw new IllegalArgumentException(s"Unable to create a mit circs submission for a student (${student.universityId}) whose department (${subDepartmentWithMitCircsEnabled.code}) doesn't have any named MCOs")
+    }
+
+    subDepartmentWithMitCircsEnabled
+  }
+}
+
 trait MitCircsSubmissionState {
   val student: StudentMember
   val currentUser: User
+
   lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
-  lazy val department: Department = Option(student.homeDepartment)
-    .flatMap(_.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption)
-    .getOrElse(
-      throw new IllegalArgumentException("Unable to create a mit circs submission for a student whose department doesn't have mit circs enabled")
-    )
 }
 
 class AffectedAssessmentItem {
@@ -304,8 +320,7 @@ class AffectedAssessmentItem {
 }
 
 trait NewMitCircsSubmissionNotifications extends Notifies[Result, MitigatingCircumstancesSubmission] {
-
-  self: MitCircsSubmissionRequest with MitCircsSubmissionState =>
+  self: MitCircsSubmissionRequest with CreateMitCircsSubmissionState =>
 
   def emit(submission: Result): Seq[Notification[Result, MitigatingCircumstancesSubmission]] = {
 

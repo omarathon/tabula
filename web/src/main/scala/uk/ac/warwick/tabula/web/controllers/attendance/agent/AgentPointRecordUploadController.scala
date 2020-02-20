@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.agent.{AgentPointRecordCommand, AgentPointRecordCommandState}
-import uk.ac.warwick.tabula.commands.attendance.{CSVAttendanceExtractor, CSVAttendanceExtractorInternal}
+import uk.ac.warwick.tabula.commands.attendance.{AttendanceExtractor, AttendanceExtractorInternal}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
@@ -24,7 +24,7 @@ class AgentPointRecordUploadController extends AttendanceController with HasMont
     with AgentPointRecordCommandState with PopulateOnForm
 
   @ModelAttribute("extractor")
-  def extractor = CSVAttendanceExtractor()
+  def extractor = AttendanceExtractor()
 
   @ModelAttribute("command")
   def command(
@@ -50,7 +50,7 @@ class AgentPointRecordUploadController extends AttendanceController with HasMont
 
   @RequestMapping(method = Array(POST))
   def post(
-    @ModelAttribute("extractor") extractor: CSVAttendanceExtractorInternal,
+    @ModelAttribute("extractor") extractor: AttendanceExtractorInternal,
     @ModelAttribute("command") cmd: AgentPointRecordCommand,
     errors: Errors,
     @PathVariable relationshipType: StudentRelationshipType,

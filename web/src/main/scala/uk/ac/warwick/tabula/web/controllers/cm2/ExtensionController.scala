@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.cm2
 import com.fasterxml.jackson.databind.ObjectMapper
 import javax.validation.Valid
 import org.joda.time.DateTime
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, _}
@@ -167,9 +166,8 @@ class DownloadExtensionAttachmentController extends CourseworkController {
     @ModelAttribute("downloadAttachmentCommand") attachmentCommand: DownloadAttachmentCommand,
     @PathVariable filename: String
   ): RenderableFile = {
-    attachmentCommand.apply().getOrElse {
-      throw new ItemNotFoundException()
-    }
+    attachmentCommand.apply()
+      .getOrElse(throw new ItemNotFoundException)
   }
 }
 

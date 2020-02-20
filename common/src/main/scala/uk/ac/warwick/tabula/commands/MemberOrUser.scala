@@ -40,6 +40,8 @@ sealed trait MemberOrUser {
 
   def shortDepartment: String
 
+  def departmentCode: String
+
   def email: String
 
   def asUser: User
@@ -55,49 +57,53 @@ sealed trait MemberOrUser {
 }
 
 private case class WrappedUser(user: User) extends MemberOrUser {
-  def isMember = false
+  override val isMember = false
 
-  def isStaff = user.isStaff
+  override def isStaff: Boolean = user.isStaff
 
-  def fullName = Some(user.getFullName)
+  override def fullName: Option[String] = Some(user.getFullName)
 
-  def firstName: String = user.getFirstName
+  override def firstName: String = user.getFirstName
 
-  def lastName: String = user.getLastName
+  override def lastName: String = user.getLastName
 
-  def universityId: String = user.getWarwickId
+  override def universityId: String = user.getWarwickId
 
-  def usercode: String = user.getUserId
+  override def usercode: String = user.getUserId
 
-  def shortDepartment: String = user.getShortDepartment
+  override def shortDepartment: String = user.getShortDepartment
 
-  def email: String = user.getEmail
+  override def departmentCode: String = user.getDepartmentCode
 
-  def asUser: User = user
+  override def email: String = user.getEmail
 
-  def asMember = None
+  override val asUser: User = user
+
+  override val asMember: Option[Member] = None
 }
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
-  def isMember = true
+  override val isMember = true
 
-  def isStaff = member.isStaff
+  override def isStaff: Boolean = member.isStaff
 
-  def fullName: Option[String] = member.fullName
+  override def fullName: Option[String] = member.fullName
 
-  def firstName: String = member.firstName
+  override def firstName: String = member.firstName
 
-  def lastName: String = member.lastName
+  override def lastName: String = member.lastName
 
-  def universityId: String = member.universityId
+  override def universityId: String = member.universityId
 
-  def usercode: String = member.userId
+  override def usercode: String = member.userId
 
-  def shortDepartment: String = member.homeDepartment.name
+  override def shortDepartment: String = member.homeDepartment.name
 
-  def email: String = member.email
+  override def departmentCode: String = member.homeDepartment.code
 
-  def asUser: User = member.asSsoUser
+  override def email: String = member.email
 
-  def asMember = Some(member)
+  override def asUser: User = member.asSsoUser
+
+  override val asMember: Option[Member] = Some(member)
 }

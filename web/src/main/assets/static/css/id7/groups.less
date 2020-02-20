@@ -158,6 +158,10 @@ table.table.attendance-table {
       background-position: bottom 14px right;
     }
   }
+
+  .eventRegister {
+    margin-top: 5px;
+  }
 }
 
 .seminar-attendance-profile {
@@ -300,6 +304,15 @@ table.week-selector {
 
 #namedLocationAlert .checkbox, #namedLocationAlert .help-block {
   margin-bottom: 0;
+}
+
+/* Hide the confusing dates in the header of the time picker */
+.datetimepicker-hours, .datetimepicker-minutes {
+  thead {
+    .prev, .switch, .next {
+      visibility: hidden !important;
+    }
+  }
 }
 
 @import "record-attendance.less";

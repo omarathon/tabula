@@ -102,6 +102,7 @@ abstract class Features {
   @Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules: Boolean = defaults.smallGroupCrossModules
   @Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite: Boolean = defaults.masqueradersCanWrite
   @Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions: Boolean = defaults.masqueradeElevatedPermissions
+  @Value("${features.masqueradeByQueryParam:false}") var masqueradeByQueryParam: Boolean = defaults.masqueradeByQueryParam
   @Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration: Boolean = defaults.autoGroupDeregistration
   @Value("${features.reports:true}") var reports: Boolean = defaults.reports
   @Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits: Boolean = defaults.queueFeedbackForSits
@@ -194,6 +195,7 @@ class FeaturesMessage {
   @BeanProperty var activityStreams = true
   @BeanProperty var masqueradersCanWrite = false
   @BeanProperty var masqueradeElevatedPermissions = false
+  @BeanProperty var masqueradeByQueryParam = false
   @BeanProperty var searchOnApiComponent = true
 
   @BeanProperty var collectRatings = true
