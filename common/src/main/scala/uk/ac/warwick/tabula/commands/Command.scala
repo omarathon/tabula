@@ -488,6 +488,7 @@ abstract class Description {
   def module(module: Module): Description = {
     if (module.adminDepartment != null) department(module.adminDepartment)
     property("module" -> module.id)
+    property("moduleCode" -> module.code)
   }
 
   def department(department: Department): Description = {

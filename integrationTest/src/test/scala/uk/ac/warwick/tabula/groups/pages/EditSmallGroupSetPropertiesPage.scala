@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.pages
 
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.Select
-import org.scalatest.selenium.WebBrowser
+import org.scalatestplus.selenium.WebBrowser
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
 
 trait EditSmallGroupSetProgressWizardLinks {

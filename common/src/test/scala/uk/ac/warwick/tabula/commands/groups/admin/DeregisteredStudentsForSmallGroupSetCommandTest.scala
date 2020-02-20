@@ -174,6 +174,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 
       d.allProperties should be(Map(
         "module" -> "moduleId",
+        "moduleCode" -> "in101",
         "smallGroupSet" -> "setId"
       ))
     }
@@ -198,6 +199,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 
       d.allProperties should be(Map(
         "module" -> "moduleId",
+        "moduleCode" -> "in101",
         "smallGroupSet" -> "setId",
         "students" -> Seq(user3.getWarwickId, user4.getWarwickId)
       ))

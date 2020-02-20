@@ -91,6 +91,7 @@ class CommandTest extends TestBase {
       "submission" -> "submission1Id",
       "assignment" -> "assignmentId",
       "module" -> "moduleId",
+      "moduleCode" -> "in101",
       "department" -> "in",
       "submissions" -> Seq("submission1Id", "submission2Id"),
       "students" -> List("0000001", "0000002"),

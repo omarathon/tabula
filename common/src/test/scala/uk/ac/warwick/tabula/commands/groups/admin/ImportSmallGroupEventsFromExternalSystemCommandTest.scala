@@ -238,7 +238,8 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 
     d.allProperties should be(Map(
       "smallGroupSet" -> "setId",
-      "module" -> "moduleId"
+      "module" -> "moduleId",
+      "moduleCode" -> "in101",
     ))
   }
 

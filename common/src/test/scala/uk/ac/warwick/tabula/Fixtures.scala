@@ -502,4 +502,28 @@ object Fixtures extends Mockito {
     s
   }
 
+  def exam(name: String = "Summer exam", department: Department = Fixtures.department("in"), academicYear: AcademicYear = AcademicYear(2019)): Exam = {
+    new Exam(name, department, academicYear)
+  }
+
+  def examQuestion(exam:Exam, name: String, score:Int): ExamQuestion = {
+    val q = new ExamQuestion(exam, name)
+    q.score = score
+    q
+  }
+
+  def examQuestion(exam:Exam, parent: ExamQuestion, name: String): ExamQuestion = {
+    val q = new ExamQuestion(exam, name)
+    q.parent = parent
+    parent.children.add(q)
+    q
+  }
+
+  def examQuestion(exam:Exam, parent: ExamQuestion, name: String, score: Int): ExamQuestion = {
+    val q = examQuestion(exam, parent, name)
+    q.score = score
+    q
+  }
+
+
 }

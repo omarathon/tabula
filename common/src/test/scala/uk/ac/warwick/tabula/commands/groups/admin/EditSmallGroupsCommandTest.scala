@@ -341,6 +341,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
       d.allProperties should be(Map(
         "module" -> "moduleId",
+        "moduleCode" -> "in101",
         "smallGroupSet" -> "existingId"
       ))
     }
