@@ -137,12 +137,16 @@ class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCirc
 
     click on linkText("file2.txt")
 
+    eventually {
+      find("mitcircs-details-attachment-modal").map(_.isDisplayed) should be(Some(true))
+      val ifr = find(cssSelector(".modal-body iframe"))
+      ifr.map(_.isDisplayed) should be(Some(true))
+    }
+
     val iframe = frame(find(cssSelector(".modal-body iframe")).get)
     switch to iframe
-    eventually {
-      // Checks it's been displayed inline
-      pageSource should include ("Here is another sample text file. You can use it for whatever you want, it's a magical mystery tour.")
-    }
+    // Checks it's been displayed inline
+    eventually(pageSource contains "Here is another sample text file. You can use it for whatever you want, it's a magical mystery tour." should be (true))
 
     switch to defaultContent
     eventually {
