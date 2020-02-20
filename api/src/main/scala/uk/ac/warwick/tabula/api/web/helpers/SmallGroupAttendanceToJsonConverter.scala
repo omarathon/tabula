@@ -22,7 +22,7 @@ trait SmallGroupAttendanceToJsonConverter {
     eventWithWeek match {
       case (event, week) => Map(
         "week" -> week,
-        "event" -> event.id
+        "id" -> event.id
       )
     }
   }
@@ -43,7 +43,7 @@ trait SmallGroupAttendanceToJsonConverter {
     Map(
       "comment" -> note.note,
       "updatedBy" -> note.updatedBy,
-      "updatedDate" -> DateFormats.IsoDate.print(note.updatedDate),
+      "updatedDate" -> DateFormats.IsoDateTime.print(note.updatedDate),
       "attachment" -> Option(note.attachment).map(_.id).orNull,
       "absenceType" -> note.absenceType.description
     )
