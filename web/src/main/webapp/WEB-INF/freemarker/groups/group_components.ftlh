@@ -1268,7 +1268,7 @@
            data-href="<@routes.groups.moduleAttendanceInYear module academicYear/>"
            data-name="${module_anchor(module)}">
 				<div class="clearfix">
-					<h4 class="section-title with-button"><a class="collapse-trigge icon-containerr" href="#"><@fmt.module_name module /></a></h4>
+					<h4 class="section-title with-button"><a class="collapse-trigge icon-container" href="#"><@fmt.module_name module /></a></h4>
 
 					<div class="striped-section-contents">
 			    </div>
