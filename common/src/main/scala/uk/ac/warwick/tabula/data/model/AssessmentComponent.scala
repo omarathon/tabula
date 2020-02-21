@@ -131,7 +131,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     this.weighting != other.weighting ||
     this.examPaperCode != other.examPaperCode ||
     this.examPaperTitle != other.examPaperTitle ||
-    this.examPaperSection != other.examPaperTitle ||
+    this.examPaperSection != other.examPaperSection ||
     this.examPaperDuration != other.examPaperDuration ||
     this.examPaperReadingTime != other.examPaperReadingTime ||
     this.examPaperType != other.examPaperType
