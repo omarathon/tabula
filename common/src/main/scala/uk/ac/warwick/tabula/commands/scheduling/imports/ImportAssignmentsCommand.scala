@@ -126,7 +126,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         assessmentMembershipService.getAllAssessmentComponents(yearsToImport)
       }
 
-      val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents(yearsToImport))
+      val assessmentComponents = logSize {
+        assignmentImporter.getAllAssessmentComponents(yearsToImport)
+          .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
+      }
+
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
           .groupBy(_.code).view.mapValues(_.head)
