@@ -11,8 +11,7 @@ trait SmallGroupEventAttendanceNoteToJsonConverter {
       "absenceType" -> note.absenceType.dbValue,
       "contents" -> note.note,
       "updatedDate" -> DateFormats.IsoDateTime.print(note.updatedDate),
-      "updatedBy" -> note.updatedBy,
-      "attachment" -> Option(note.attachment).map(_.id).orNull,
+      "updatedBy" -> note.updatedBy
     ) ++ (if (Option(note.attachment).nonEmpty) Map("attachment" -> jsonFileAttachmentObject(note.attachment)) else Map())
   }
 }
