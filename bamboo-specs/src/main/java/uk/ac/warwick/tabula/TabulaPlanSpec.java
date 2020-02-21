@@ -142,6 +142,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
             .copyPattern("*.png")
             .location("integrationTest/build/integrationTest-screenshots")
         )
+        .slackNotifications(SLACK_CHANNEL, false)
         .build(),
       build(PROJECT, "FUNCPG", "Tabula Functional Tests - tabula-dev")
         .linkedRepository(LINKED_REPOSITORY).noBranches()
@@ -173,6 +174,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
             .copyPattern("*.png")
             .location("integrationTest/build/integrationTest-screenshots")
         )
+        .slackNotifications(SLACK_CHANNEL, false)
         .build(),
       specsPlan(
         "CUKEPROD",
