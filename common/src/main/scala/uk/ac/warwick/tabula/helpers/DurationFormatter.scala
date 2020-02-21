@@ -59,10 +59,14 @@ object DurationFormatter {
       formatter.print(toPeriod(duration, roundUp)).trim
 
   private def toPeriod(start: DateTime, end: DateTime, roundUp: Boolean): ReadablePeriod =
-    toPeriod(new Duration(start, end), roundUp)
+    toPeriod(new Duration(start, end), new Period(start, end, periodType), roundUp)
 
   private def toPeriod(duration: Duration, roundUp: Boolean): ReadablePeriod = {
-    var period = duration.toPeriod(periodType)
+    toPeriod(duration, duration.toPeriod(periodType), roundUp)
+  }
+
+  private def toPeriod(duration: Duration, rawPeriod: Period, roundUp: Boolean): ReadablePeriod = {
+    var period = rawPeriod
 
     if (roundUp && (
         (duration.getStandardDays >= 7 && (period.getHours > 0 || period.getMinutes > 0 || period.getSeconds > 0)) ||

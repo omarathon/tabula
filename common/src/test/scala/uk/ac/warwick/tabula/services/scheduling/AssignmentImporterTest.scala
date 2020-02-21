@@ -29,7 +29,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
   AssignmentImporter.dialectRegexpLike = "regexp_matches"
   assignmentImporter.afterPropertiesSet()
 
-  val NONE = AssessmentComponent.NoneAssessmentGroup
+  val NONE: String = AssessmentComponent.NoneAssessmentGroup
 
   @Test def groupImportSql(): Unit = {
     // Not really testing AssignmentImporter but the behaviour of the query class for IN(..)
@@ -88,16 +88,14 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     withFakeTime(dateTime(2012, 5)) {
       assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       val components = sorted(assignmentImporter.getAllAssessmentComponents)
-      val tuples = components map asTuple
 
-      tuples should be(Seq(
-        ("CH115-30", "A", "Chemicals Essay"),
-        ("CH115-30", "NONE", "Students not registered for assessment"),
-        ("CH120-15", "A", "Chemistry Dissertation"),
-        ("CH130-15", "A", "Chem 130 A01"),
-        ("CH130-20", "A", "Chem 130 A01 (20 CATS)")
+      components.map(_.toString()) should be(Seq(
+        "AssessmentComponent[moduleCode=CH115-30,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chemicals Essay,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1150),examPaperTitle=Some(Chemicals Essay),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",
+        "AssessmentComponent[moduleCode=CH115-30,assessmentGroup=NONE,sequence=NONE,inUse=true,module=null,name=Students not registered for assessment,assessmentType=Other,marksCode=null,weighting=0,examPaperCode=None,examPaperTitle=None,examPaperSection=None,examPaperDuration=None,examPaperReadingTime=None,examPaperType=None]",
+        "AssessmentComponent[moduleCode=CH120-15,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chemistry Dissertation,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1200),examPaperTitle=Some(Chemistry Dissertation),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=Some(PT900S),examPaperType=Some(OpenBook)]",
+        "AssessmentComponent[moduleCode=CH130-15,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chem 130 A01,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1300),examPaperTitle=Some(Chem 130 A01),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",
+        "AssessmentComponent[moduleCode=CH130-20,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chem 130 A01 (20 CATS),assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1300),examPaperTitle=Some(Chem 130 A01),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]"
       ))
-
     }
   }
 

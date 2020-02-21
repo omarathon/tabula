@@ -4,7 +4,7 @@ import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.Duration
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
@@ -23,7 +23,7 @@ import scala.jdk.CollectionConverters._
 @Entity
 @Proxy
 @Table(name = "UPSTREAMASSIGNMENT")
-class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
+class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString {
 
   @transient var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
@@ -162,6 +162,24 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     examPaperReadingTime = other.examPaperReadingTime
     examPaperType = other.examPaperType
   }
+
+  override def toStringProps: Seq[(String, Any)] = Seq(
+     "moduleCode" -> moduleCode,
+     "assessmentGroup" -> assessmentGroup,
+     "sequence" -> sequence,
+     "inUse" -> inUse,
+     "module" -> module,
+     "name" -> name,
+     "assessmentType" -> assessmentType,
+     "marksCode" -> marksCode,
+     "weighting" -> weighting,
+     "examPaperCode" -> examPaperCode,
+     "examPaperTitle" -> examPaperTitle,
+     "examPaperSection" -> examPaperSection,
+     "examPaperDuration" -> examPaperDuration,
+     "examPaperReadingTime" -> examPaperReadingTime,
+     "examPaperType" -> examPaperType
+  )
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
 
