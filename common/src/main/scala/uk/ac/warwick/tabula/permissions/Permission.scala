@@ -258,8 +258,8 @@ object Permissions {
     object Read {
       case object Core extends Permission("View a member's name, Warwick email, job title and University ID")
 
-      // a hardcoded check in ViewProfileCommand stops users seeing staff profiles for different departments - this allows us to bypass that check
-      case object CoreCrossDepartment extends Permission("View staff profiles for any department")
+      // a hardcoded check in ViewProfileCommand stops users seeing profiles for different departments - this allows us to bypass that check
+      case object CoreCrossDepartment extends Permission("View profiles for any department")
       case object CoreStale extends Permission("View profiles of stale members")
       case object Photo extends Permission("View a member's photo")
 

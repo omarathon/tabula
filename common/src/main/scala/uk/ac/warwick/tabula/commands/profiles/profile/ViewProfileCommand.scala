@@ -69,7 +69,7 @@ trait ViewProfilePermissionsRestriction extends RequiresPermissionsChecking with
      * - You're not a god user
      * - You're not viewing your own profile
      * - You're not a member of staff
-     * - The profile is for a student or staff member
+     * - The profile is for a student or applicant
      * - You don't explicitly have Profiles.Read.CoreCrossDepartment
      * - The profile's touchedDepartments doesn't include the user's department code
      */
