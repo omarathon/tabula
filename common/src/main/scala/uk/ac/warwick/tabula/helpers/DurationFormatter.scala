@@ -12,6 +12,8 @@ class DurationFormatterTag extends BaseTemplateMethodModelEx {
     case Seq(end: DateTime, roundUp: Boolean) => DurationFormatter.format(new DateTime(), end, roundUp)
     case Seq(start: DateTime, end: DateTime) => DurationFormatter.format(start, end, roundUp = false)
     case Seq(start: DateTime, end: DateTime, roundUp: Boolean) => DurationFormatter.format(start, end, roundUp)
+    case Seq(duration: Duration) => DurationFormatter.format(duration, roundUp = false)
+    case Seq(duration: Duration, roundUp: Boolean) => DurationFormatter.format(duration, roundUp)
     case _ => throw new IllegalArgumentException("Bad args")
   }
 }
@@ -53,9 +55,18 @@ object DurationFormatter {
     else
       formatter.print(toPeriod(start, end, roundUp)).trim
 
-  private def toPeriod(start: DateTime, end: DateTime, roundUp: Boolean): ReadablePeriod = {
-    val duration = new Duration(start, end)
-    var period = new Period(start, end, periodType)
+  def format(duration: Duration, roundUp: Boolean): String =
+      formatter.print(toPeriod(duration, roundUp)).trim
+
+  private def toPeriod(start: DateTime, end: DateTime, roundUp: Boolean): ReadablePeriod =
+    toPeriod(new Duration(start, end), new Period(start, end, periodType), roundUp)
+
+  private def toPeriod(duration: Duration, roundUp: Boolean): ReadablePeriod = {
+    toPeriod(duration, duration.toPeriod(periodType), roundUp)
+  }
+
+  private def toPeriod(duration: Duration, rawPeriod: Period, roundUp: Boolean): ReadablePeriod = {
+    var period = rawPeriod
 
     if (roundUp && (
         (duration.getStandardDays >= 7 && (period.getHours > 0 || period.getMinutes > 0 || period.getSeconds > 0)) ||
