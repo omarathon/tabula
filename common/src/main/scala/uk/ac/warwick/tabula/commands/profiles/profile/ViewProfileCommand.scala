@@ -75,7 +75,7 @@ trait ViewProfilePermissionsRestriction extends RequiresPermissionsChecking with
      */
     if (!viewer.god && !viewingOwnProfile && !viewer.isStaff && profile.asMember.exists(m => m.isStudent || m.isApplicant) && !canSeeOtherDepartments && !viewerInSameDepartment) {
       logger.info(s"Denying access for $viewer to view a student or applicant profile in a different department: $profile")
-      throw PermissionDeniedException(viewer, Permissions.Profiles.Read.CoreCrossDepartment, profile)
+      throw PermissionDeniedException(viewer, Permissions.Profiles.Read.CoreCrossDepartment, profile.asMember.getOrElse(profile.asUser))
     }
   }
 }
