@@ -62,7 +62,7 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent]
+  def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   /**
     * Get all assessment groups that can serve this assignment this year.
@@ -250,8 +250,8 @@ class AssessmentMembershipServiceImpl
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
     dao.getAssessmentComponents(moduleCode, inUseOnly)
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] =
-    dao.getAllAssessmentComponents
+  def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
+    dao.getAllAssessmentComponents(academicYears)
 
   /**
     * Gets assessment components for this department.

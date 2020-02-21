@@ -122,10 +122,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doAssignments(): Unit = {
     benchmark("Process Assessment components") {
-
       val existingAssessmentComponents = transactional(readOnly = true) {
-        assessmentMembershipService.getAllAssessmentComponents
+        assessmentMembershipService.getAllAssessmentComponents(yearsToImport)
       }
+
       val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents(yearsToImport))
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
@@ -148,8 +148,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       })
 
       // find any existing AssessmentComponents that no longer appear in SITS
-        existingAssessmentComponents.foreach { existing =>
-          transactional() {
+      existingAssessmentComponents.foreach { existing =>
+        transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
             removeAssessmentComponent(existing)
           }
@@ -164,6 +164,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         assessmentMembershipService.getUpstreamAssessmentGroups(yearsToImport)
       }
       val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups(yearsToImport)
+
       // Split into chunks so we commit transactions periodically.
       for (groups <- logSize(upstreamAssessmentGroupsFromSITS).grouped(ImportGroupSize)) {
         saveGroups(groups)
@@ -439,14 +440,21 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
 
   @Value("${tabula.yearZero}") var yearZero: Int = 2000
 
-  override def yearsToImport: Seq[AcademicYear] = {
-    val next = AcademicYear.now().next.startYear
-    (yearZero until next).map(AcademicYear.starting)
-  }
+  private var currentYear: AcademicYear = _
+
+  override def yearsToImport: Seq[AcademicYear] = Seq(currentYear)
 
   override def applyInternal(): Unit = {
-    doGroups()
-    doGroupMembers()
+    val next = AcademicYear.now().next.startYear
+    for (year <- yearZero until next) {
+      currentYear = AcademicYear.starting(year)
+
+      benchmark(s"ImportAssignmentsCommand for $currentYear") {
+        doAssignments()
+        doGroups()
+        doGroupMembers()
+      }
+    }
   }
 
 }

@@ -165,14 +165,15 @@ class SandboxAssignmentImporter extends AssignmentImporter {
           UpstreamModuleRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
-            seatNumber = assessmentType match {
-              case AssessmentType.Essay => null
-              case AssessmentType.SummerExam => ((uniId % 300) + 1).toString
+            seatNumber = assessmentType.subtype match {
+              case TabulaAssessmentSubtype.Exam => ((uniId % 300) + 1).toString
+              case _ => null
             },
             occurrence = "A",
-            sequence = assessmentType match {
-              case AssessmentType.Essay => "A01"
-              case AssessmentType.SummerExam => "E01"
+            sequence = assessmentType.subtype match {
+              case TabulaAssessmentSubtype.Assignment => "A01"
+              case TabulaAssessmentSubtype.Exam => "E01"
+              case TabulaAssessmentSubtype.Other => "O01"
             },
             moduleCode = "%s-15".format(moduleCode.toUpperCase),
             assessmentGroup = "A",
@@ -375,9 +376,7 @@ object AssignmentImporter {
           on mab.map_code = mav.mod_code
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
-      where mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
-            mav.psl_code = 'Y' and -- period slot code of Y (year)
+      where mav.psl_code = 'Y' and -- period slot code of Y (year)
             mav.ayr_code in (:academic_year_code)
   union all
     select distinct
@@ -391,9 +390,7 @@ object AssignmentImporter {
           on mab.map_code = mav.mod_code
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
-      where mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- module type - not suspended, discontinued?
-            mav.psl_code = 'Y' and
+      where mav.psl_code = 'Y' and
             mab.mab_agrp is not null and
             mav.ayr_code in (:academic_year_code)"""
 
