@@ -9,6 +9,7 @@ trait SmallGroupEventAttendanceNoteToJsonConverter {
   def jsonSmallGroupEventAttendanceNoteObject(note: SmallGroupEventAttendanceNote): Map[String, Any] = {
     Map(
       "absenceType" -> note.absenceType.dbValue,
+      "absenceTypeDescription" -> note.absenceType.description,
       "contents" -> note.note,
       "updatedDate" -> DateFormats.IsoDateTime.print(note.updatedDate),
       "updatedBy" -> note.updatedBy
