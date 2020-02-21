@@ -48,7 +48,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
     val registrations: Seq[UpstreamModuleRegistration]
 
-    importer.allMembers(any[UpstreamModuleRegistration => Unit]) answers { arg: Any =>
+    importer.allMembers(any[Seq[AcademicYear]])(any[UpstreamModuleRegistration => Unit]) answers { arg: Any =>
       arg match {
         case fn: (UpstreamModuleRegistration => Unit)@unchecked => registrations.foreach(fn)
       }

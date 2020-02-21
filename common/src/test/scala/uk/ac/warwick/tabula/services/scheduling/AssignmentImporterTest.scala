@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 trait EmbeddedSits {
@@ -49,9 +49,9 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def importMembers(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       var members = ArrayBuffer[UpstreamModuleRegistration]()
-      assignmentImporter.allMembers { mr =>
+      assignmentImporter.allMembers(yearsToImport) { mr =>
         members += mr
       }
 
@@ -61,8 +61,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentGroups(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
-      val allGroups = sorted(assignmentImporter.getAllAssessmentGroups)
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val allGroups = sorted(assignmentImporter.getAllAssessmentGroups(yearsToImport))
       val tuples = allGroups.map(asTuple)
 
       /* We currently get the NONE assessmentgroups even for groups
@@ -86,8 +86,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentComponents(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
-      val components = sorted(assignmentImporter.getAllAssessmentComponents)
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val components = sorted(assignmentImporter.getAllAssessmentComponents(yearsToImport))
 
       components.map(_.toString()) should be(Seq(
         "AssessmentComponent[moduleCode=CH115-30,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chemicals Essay,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1150),examPaperTitle=Some(Chemicals Essay),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",

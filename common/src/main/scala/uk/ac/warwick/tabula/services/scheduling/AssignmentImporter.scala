@@ -35,17 +35,15 @@ trait AssignmentImporter {
     * Iterates through ALL module registration elements,
     * passing each ModuleRegistration item to the given callback for it to process.
     */
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent]
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   def getAllGradeBoundaries: Seq[GradeBoundary]
-
-  var yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -66,24 +64,24 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     jdbc = new NamedParameterJdbcTemplate(sits)
   }
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
-  private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
+  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]) = yearsToImport.map(_.toString).asJava: JList[String]
 
   // This will be quite a few thousand records, but not more than
   // 20k. Shouldn't cause any memory problems, so no point complicating
   // it by trying to stream or batch the data.
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
   /**
     * Iterates through ALL module registration elements in SITS (that's many),
     * passing each ModuleRegistration item to the given callback for it to process.
     */
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
-      "academic_year_code" -> yearsToImportArray)
+      "academic_year_code" -> yearsToImportArray(yearsToImport))
     jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
   }
 
@@ -130,13 +128,13 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
-  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
     if (members.map(_.universityId).contains(umr.universityId)) {
       callback(umr)
     }
-  })
+  }
 
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
@@ -148,13 +146,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
       moduleCodesToIds = moduleCodesToIds + (
         moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-        )
+      )
     }
 
     for {
       (moduleCode, ranges) <- moduleCodesToIds
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
+      academicYear <- yearsToImport
       range <- ranges
       uniId <- range
       if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
@@ -194,13 +192,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
   }
 
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
+      academicYear <- yearsToImport
     } yield {
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
@@ -214,7 +212,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       ag
     }
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] =
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] =
     for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
