@@ -68,7 +68,7 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     }
 
     if (confirm) {
-      submission.outcomesRecorded()
+      submission.outcomesRecorded(Some(user))
     }
 
     submission.lastModifiedBy = user

@@ -349,7 +349,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _state = Submitted
   }
 
-  def outcomesRecorded(): Unit = {
+  def outcomesRecorded(user: Option[User] = None): Unit = {
     require(Seq(Submitted, ReadyForPanel, OutcomesRecorded, ApprovedByChair).contains(_state), "Cannot record outcomes until this has been submitted by the student")
 
     // Only trigger this the first time that outcomes are submitted
@@ -358,6 +358,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     }
 
     _state = OutcomesRecorded
+
+    user.foreach { u =>
+      if (panel.exists(_.chair.contains(u))) {
+        approvedByChair(u)
+      }
+    }
   }
 
   def approvedByChair(user: User): Unit = {
