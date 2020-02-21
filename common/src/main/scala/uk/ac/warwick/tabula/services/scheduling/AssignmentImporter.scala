@@ -271,18 +271,21 @@ object AssignmentImporter {
     if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
     else orig
 
-  /** Get AssessmentComponents, and also some fake ones for linking to
-    * the group of students with no selected assessment group.
-    *
-    * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
-    * assessment components which make up modules.
-    * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
-    * specified.
-    *
-    * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
-    * SMO holds confirmed module registrations and is included to catch module registrations in departments which
-    * upload module registrations after confirmation.
-    */
+  /**
+   * Get AssessmentComponents, and also some fake ones for linking to
+   * the group of students with no selected assessment group.
+   *
+   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+   * assessment components which make up modules.
+   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+   * specified.
+   *
+   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
+   * upload module registrations after confirmation.
+   *
+   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
+   */
   def GetAssessmentsQuery =
     s"""
     select distinct
@@ -357,9 +360,7 @@ object AssignmentImporter {
           on mab.mab_apac = apa.apa_code
         left outer join $sitsSchema.cam_adv adv -- paper division (section)
           on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
-      where  mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
-            mab.mab_agrp is not null"""
+      where mab.mab_agrp is not null"""
 
   def GetAllAssessmentGroups =
     s"""
