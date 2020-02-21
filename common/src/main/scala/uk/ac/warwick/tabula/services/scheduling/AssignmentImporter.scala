@@ -1,8 +1,11 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import java.sql.{ResultSet, Types}
+import java.sql.{ResultSet, Timestamp, Types}
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
+import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -216,6 +219,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
     } yield assessmentType match {
       case AssessmentType.Essay =>
@@ -228,6 +232,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         a.inUse = true
         a.weighting = 30
         a.marksCode = "TABULA-UG"
+        a.examPaperCode = None
+        a.examPaperTitle = None
+        a.examPaperSection = None
+        a.examPaperDuration = None
+        a.examPaperReadingTime = None
+        a.examPaperType = None
         a
 
       case AssessmentType.SummerExam =>
@@ -240,6 +250,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e.inUse = true
         e.weighting = 70
         e.marksCode = "TABULA-UG"
+        e.examPaperCode = Some(s"${moduleCode.toUpperCase}0")
+        e.examPaperTitle = Some(module.name)
+        e.examPaperSection = Some("n/a")
+        e.examPaperDuration = Some(Duration.standardMinutes(120))
+        e.examPaperReadingTime = None
+        e.examPaperType = Some(ExaminationType.Standard)
         e
     }
 
@@ -279,7 +295,13 @@ object AssignmentImporter {
       'X' as assessment_code,
       'Y' as in_use,
       null as marks_code,
-      0 as weight
+      0 as weight,
+      null as exam_paper_code,
+      null as exam_paper_title,
+      null as exam_paper_section,
+      null as exam_paper_duration,
+      null as exam_paper_reading_time,
+      null as exam_paper_type
       from $sitsSchema.cam_sms sms
         join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -295,7 +317,13 @@ object AssignmentImporter {
       'X' as assessment_code,
       'Y' as in_use,
       null as marks_code,
-       0 as weight
+      0 as weight,
+      null as exam_paper_code,
+      null as exam_paper_title,
+      null as exam_paper_section,
+      null as exam_paper_duration,
+      null as exam_paper_reading_time,
+      null as exam_paper_type
       from $sitsSchema.cam_smo smo
         left outer join $sitsSchema.cam_ssn ssn
           on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -313,7 +341,13 @@ object AssignmentImporter {
       ${castToString("mab.ast_code")} as assessment_code,
       ${castToString("mab.mab_udf1")} as in_use,
       ${castToString("mab.mks_code")} as marks_code,
-      mab_perc as weight
+      mab.mab_perc as weight,
+      ${castToString("mab.mab_apac")} as exam_paper_code,
+      ${castToString("apa.apa_name")} as exam_paper_title,
+      case when (mab.mab_advc = 'X') then 'n/a' else ${castToString("mab.mab_advc")} end as exam_paper_section,
+      adv.adv_dura as exam_paper_duration,
+      adv.adv_rdtm as exam_paper_reading_time,
+      ${castToString("apa.apa_aptc")} as exam_paper_type
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
         join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
           on mab.map_code = mav.mod_code and
@@ -321,6 +355,10 @@ object AssignmentImporter {
              mav.ayr_code in (:academic_year_code)
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
+        left outer join $sitsSchema.cam_apa apa -- paper
+          on mab.mab_apac = apa.apa_code
+        left outer join $sitsSchema.cam_adv adv -- paper division (section)
+          on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
       where  mod.mod_iuse = 'Y' and -- in use
             mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
             mab.mab_agrp is not null"""
@@ -556,6 +594,10 @@ object AssignmentImporter {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     compile()
 
+    private val referenceDate: Instant = OffsetDateTime.parse("1900-01-01T00:00Z").toInstant
+    private def dateToDuration(ts: Timestamp): Duration =
+      Duration.standardMinutes(referenceDate.until(ts.toInstant, ChronoUnit.MINUTES))
+
     override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
       val a = new AssessmentComponent
       a.moduleCode = rs.getString("module_code")
@@ -569,6 +611,12 @@ object AssignmentImporter {
       }
       a.marksCode = rs.getString("marks_code")
       a.weighting = rs.getInt("weight")
+      a.examPaperCode = Option(rs.getString("exam_paper_code"))
+      a.examPaperTitle = Option(rs.getString("exam_paper_title"))
+      a.examPaperSection = Option(rs.getString("exam_paper_section"))
+      a.examPaperDuration = Option(rs.getTimestamp("exam_paper_duration")).map(dateToDuration)
+      a.examPaperReadingTime = if (rs.getTimestamp("exam_paper_reading_time") != null) Some(Duration.standardMinutes(15)) else None
+      a.examPaperType = Option(rs.getString("exam_paper_type")).map(ExaminationType.withName)
       a
     }
   }

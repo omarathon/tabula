@@ -131,10 +131,10 @@
             <th>Module</th>
             <th>Paper code and title</th>
             <th>Section</th>
-            <th>Length</th>
+            <th>Duration</th>
             <th>Reading time</th>
-            <th>Open book</th>
-            <th>Type</th>
+            <th>Exam type</th>
+            <th>Assessment type</th>
           </tr>
         </thead>
         <tbody>
@@ -143,11 +143,38 @@
               <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E'>
                 <tr>
                   <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}</td>
-                  <td>??? (${component.upstreamGroup.name})</td>
-                  <td>???</td>
-                  <td>???</td>
-                  <td>???</td>
-                  <td>???</td>
+                  <#if component.upstreamGroup.assessmentComponent.examPaperCode?has_content>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperCode} ${component.upstreamGroup.assessmentComponent.examPaperTitle!""}</td>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperSection!'Unknown'}</td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperDuration??>
+                        ${durationFormatter(component.upstreamGroup.assessmentComponent.examPaperDuration)}
+                      <#else>
+                        Unknown
+                      </#if>
+                    </td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperReadingTime??>
+                        ${durationFormatter(component.upstreamGroup.assessmentComponent.examPaperReadingTime)}
+                      <#else>
+                        n/a
+                      </#if>
+                    </td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperType??>
+                        ${component.upstreamGroup.assessmentComponent.examPaperType.name}
+                        <#if component.upstreamGroup.assessmentComponent.examPaperType.description??>
+                          <a class="use-popover" data-trigger="click focus" data-placement="left" data-content="${component.upstreamGroup.assessmentComponent.examPaperType.description}">
+                            <i class="fal fa-question-circle"></i>
+                          </a>
+                        </#if>
+                      <#else>
+                        Unknown
+                      </#if>
+                    </td>
+                  <#else>
+                    <td colspan="5">Unknown</td>
+                  </#if>
                   <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
                 </tr>
               </#if>

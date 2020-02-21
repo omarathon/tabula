@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.Duration
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -73,6 +74,39 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   var weighting: JInteger = _
 
+  @Column(name = "exam_paper_code")
+  private var _examPaperCode: String = _
+  def examPaperCode: Option[String] = Option(_examPaperCode)
+  def examPaperCode_=(code: Option[String]): Unit = _examPaperCode = code.orNull
+
+  @Column(name = "exam_paper_title")
+  private var _examPaperTitle: String = _
+  def examPaperTitle: Option[String] = Option(_examPaperTitle)
+  def examPaperTitle_=(title: Option[String]): Unit = _examPaperTitle = title.orNull
+
+  @Column(name = "exam_paper_section")
+  private var _examPaperSection: String = _
+  def examPaperSection: Option[String] = Option(_examPaperSection)
+  def examPaperSection_=(section: Option[String]): Unit = _examPaperSection = section.orNull
+
+  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDurationAsString")
+  @Column(name = "exam_paper_duration")
+  private var _examPaperDuration: Duration = _
+  def examPaperDuration: Option[Duration] = Option(_examPaperDuration)
+  def examPaperDuration_=(duration: Option[Duration]): Unit = _examPaperDuration = duration.orNull
+
+  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDurationAsString")
+  @Column(name = "exam_paper_reading_time")
+  private var _examPaperReadingTime: Duration = _
+  def examPaperReadingTime: Option[Duration] = Option(_examPaperReadingTime)
+  def examPaperReadingTime_=(readingTime: Option[Duration]): Unit = _examPaperReadingTime = readingTime.orNull
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.ExaminationTypeUserType")
+  @Column(name = "exam_paper_type")
+  private var _examPaperType: ExaminationType = _
+  def examPaperType: Option[ExaminationType] = Option(_examPaperType)
+  def examPaperType_=(examPaperType: Option[ExaminationType]): Unit = _examPaperType = examPaperType.orNull
+
   /**
     * Returns moduleCode without CATS. e.g. in304
     */
@@ -89,12 +123,18 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   def needsUpdatingFrom(other: AssessmentComponent): Boolean =
     this.name != other.name ||
-      this.module != other.module ||
-      this.assessmentGroup != other.assessmentGroup ||
-      this.assessmentType != other.assessmentType ||
-      this.inUse != other.inUse ||
-      this.marksCode != other.marksCode ||
-      this.weighting != other.weighting
+    this.module != other.module ||
+    this.assessmentGroup != other.assessmentGroup ||
+    this.assessmentType != other.assessmentType ||
+    this.inUse != other.inUse ||
+    this.marksCode != other.marksCode ||
+    this.weighting != other.weighting ||
+    this.examPaperCode != other.examPaperCode ||
+    this.examPaperTitle != other.examPaperTitle ||
+    this.examPaperSection != other.examPaperTitle ||
+    this.examPaperDuration != other.examPaperDuration ||
+    this.examPaperReadingTime != other.examPaperReadingTime ||
+    this.examPaperType != other.examPaperType
 
   override def preSave(newRecord: Boolean): Unit = {
     ensureNotNull("name", name)
@@ -115,6 +155,12 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     assessmentType = other.assessmentType
     marksCode = other.marksCode
     weighting = other.weighting
+    examPaperCode = other.examPaperCode
+    examPaperTitle = other.examPaperTitle
+    examPaperSection = other.examPaperSection
+    examPaperDuration = other.examPaperDuration
+    examPaperReadingTime = other.examPaperReadingTime
+    examPaperType = other.examPaperType
   }
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
