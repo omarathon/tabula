@@ -57,7 +57,7 @@ class ImportAddressCommandInternal(member: Member) extends CommandInternal[Unit]
       val addressBean = new BeanWrapperImpl(address)
       val hasChanged = copyBasicProperties(properties, sourceBean, addressBean)
       if (hasChanged) {
-        logger.debug(s"Saving $fieldName changes for $member.universityId  with  residence address $address")
+        logger.debug(s"Saving $fieldName changes for ${member.universityId} with residence address $address")
         addressDao.saveOrUpdate(address)
         update(address)
         member.lastUpdatedDate = DateTime.now
@@ -67,11 +67,11 @@ class ImportAddressCommandInternal(member: Member) extends CommandInternal[Unit]
 
     def deleteAddress(fieldName: String, address: Address, delete: () => Unit): Unit = {
       if (address != null) {
+        logger.debug(s"Removing $fieldName for ${member.universityId}")
+        addressDao.delete(address)
         delete()
         member.lastUpdatedDate = DateTime.now
         memberDao.saveOrUpdate(member)
-        addressDao.delete(address)
-        logger.debug(s"Removing $fieldName for $member.universityId ")
       }
     }
 
