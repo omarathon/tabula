@@ -145,8 +145,10 @@ class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCirc
 
     val iframe = frame(find(cssSelector(".modal-body iframe")).get)
     switch to iframe
-    // Checks it's been displayed inline
-    eventually(pageSource contains "Here is another sample text file. You can use it for whatever you want, it's a magical mystery tour." should be (true))
+    eventually {
+      // Checks it's been displayed inline
+      pageSource should include ("Here is another sample text file. You can use it for whatever you want, it's a magical mystery tour.")
+    }
 
     switch to defaultContent
     eventually {
