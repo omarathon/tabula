@@ -19,7 +19,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 
+import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
 
 trait AssignmentImporterComponent {
@@ -48,9 +50,9 @@ trait AssignmentImporter {
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
-
-  var sits: DataSource = Wire[DataSource]("sitsDataSource")
+class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
+  with AutowiringSitsDataSourceComponent
+  with AutowiringExamTimetableFetchingServiceComponent {
 
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
@@ -58,16 +60,21 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   var jdbc: NamedParameterJdbcTemplate = _
 
   override def afterPropertiesSet(): Unit = {
-    assessmentComponentQuery = new AssessmentComponentQuery(sits)
-    upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
-    gradeBoundaryQuery = new GradeBoundaryQuery(sits)
-    jdbc = new NamedParameterJdbcTemplate(sits)
+    assessmentComponentQuery = new AssessmentComponentQuery(sitsDataSource)
+    upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
+    gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
+    jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
   }
 
   def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
     "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
-  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]) = yearsToImport.map(_.toString).asJava: JList[String]
+  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
+  private def seatNumberExamProfilesArray(): JList[String] =
+    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+      .filter(_.seatNumbersPublished)
+      .map(_.code)
+      .asJava: JList[String]
 
   // This will be quite a few thousand records, but not more than
   // 20k. Shouldn't cause any memory problems, so no point complicating
@@ -81,13 +88,16 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     */
   def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
-      "academic_year_code" -> yearsToImportArray(yearsToImport))
+      "academic_year_code" -> yearsToImportArray(yearsToImport),
+      "seat_number_exam_profiles" -> seatNumberExamProfilesArray()
+    )
     jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
   }
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
       "academic_year_code" -> yearsToImport.map(_.toString).asJava,
+      "seat_number_exam_profiles" -> seatNumberExamProfilesArray(),
       "universityIds" -> members.map(_.universityId).asJava
     )
     jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
@@ -430,8 +440,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
@@ -481,8 +490,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -531,8 +539,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code

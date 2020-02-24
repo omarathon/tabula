@@ -1,13 +1,17 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import java.time.Duration
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.util.EntityUtils
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
-import org.joda.time.{DateTime, Period}
+import org.joda.time.format._
+import org.joda.time.{DateTime, LocalDate, Period}
 import org.springframework.stereotype.Service
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
 import uk.ac.warwick.tabula._
@@ -18,9 +22,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamTimetable
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.util.cache._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -28,6 +34,7 @@ import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
   val examTimetableUrl: String
+  val examProfilesUrl: String
 }
 
 trait ExamTimetableConfigurationComponent {
@@ -39,6 +46,7 @@ trait AutowiringExamTimetableConfigurationComponent extends ExamTimetableConfigu
 
   class AutowiringExamTimetableConfiguration extends ExamTimetableConfiguration {
     lazy val examTimetableUrl: String = Wire.optionProperty("${examTimetable.url}").getOrElse("https://exams.warwick.ac.uk/timetable/")
+    lazy val examProfilesUrl: String = Wire.optionProperty("${examProfiles.url}").getOrElse("https://exams.warwick.ac.uk/api/v1/examProfiles.json")
   }
 
 }
@@ -242,18 +250,43 @@ object ExamTimetableFetchingService {
     }
   }
 
+  case class ExamProfile(
+    code: String,
+    name: String,
+    academicYear: AcademicYear,
+    startDate: LocalDate,
+    endDate: LocalDate,
+    published: Boolean,
+    seatNumbersPublished: Boolean
+  )
+
+  val readsLocalDate: Reads[LocalDate] = implicitly[Reads[String]].map(LocalDate.parse(_, ISODateTimeFormat.localDateParser))
+  val readsExamProfile: Reads[ExamProfile] = (
+    (__ \ "code").read[String] and
+    (__ \ "name").read[String] and
+    (__ \ "academicYear").read[String].map(AcademicYear.parse) and
+    (__ \ "startDate").read[LocalDate](readsLocalDate) and
+    (__ \ "endDate").read[LocalDate](readsLocalDate) and
+    (__ \ "published").read[Boolean] and
+    (__ \ "seatNumbersPublished").read[Boolean]
+  )(ExamProfile.apply _)
+
+  // Yucky wrapper to make sure it's Serializable
+  case class ExamProfileList(examProfiles: Seq[ExamProfile] with java.io.Serializable)
 }
 
 trait ExamTimetableFetchingService {
   def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable]
+  def getExamProfiles: Future[Seq[ExamProfile]]
 }
 
 abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchingService with Logging {
+  self: ApacheHttpClientComponent
+    with ExamTimetableConfigurationComponent
+    with TrustedApplicationsManagerComponent
+    with CacheStrategyComponent =>
 
-  self: ApacheHttpClientComponent with ExamTimetableConfigurationComponent
-    with TrustedApplicationsManagerComponent =>
-
-  def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
+  override def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
     // staff and student have different end points
     val endpoint = if (member.universityId == viewer.universityId) {
       s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
@@ -284,6 +317,47 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
     }
     result
   }
+
+  val examProfilesCacheKey: String = "examProfiles"
+  val examProfilesCacheEntryFactory: CacheEntryFactory[String, ExamProfileList] = new SingularCacheEntryFactory[String, ExamProfileList] {
+    override def create(ignored: String): ExamProfileList = {
+      val req = RequestBuilder.get(examTimetableConfiguration.examProfilesUrl).build()
+
+      val handler: ResponseHandler[Seq[ExamProfile]] =
+        ApacheHttpClientUtils.jsonResponseHandler { data =>
+          if ((data \ "success").as[Boolean]) {
+            (data \ "examProfiles").validate[Seq[ExamProfile]](Reads.seq(readsExamProfile)).fold(
+              invalid => {
+                logger.error(s"Error fetching exam profiles: $invalid")
+                throw new IllegalStateException(s"Error fetching exam profiles: $invalid")
+              },
+              identity
+            )
+          } else throw new IllegalStateException(s"Invalid response from exam profiles endpoint: ${Json.prettyPrint(data)}")
+        }
+
+      Try(httpClient.execute(req, handler)).fold(
+        t => throw new CacheEntryUpdateException("Couldn't fetch exam profiles", t),
+        {
+          case profiles: Seq[ExamProfile] with java.io.Serializable => ExamProfileList(profiles)
+          case _ => throw new CacheEntryUpdateException("Unserializable collection returned from ExamTimetableFetchingService")
+        }
+      )
+    }
+
+    override def shouldBeCached(profiles: ExamProfileList): Boolean = true
+  }
+
+  lazy val examProfilesCache: Cache[String, ExamProfileList] =
+    Caches.builder("ExamProfilesCache", examProfilesCacheEntryFactory, cacheStrategy)
+      .expireAfterWrite(Duration.ofHours(1))
+      .maximumSize(1)
+      .build()
+
+  override def getExamProfiles: Future[Seq[ExamProfile]] = Future {
+    examProfilesCache.get(examProfilesCacheKey)
+      .examProfiles
+  }
 }
 
 @Service("examTimetableFetchingService")
@@ -293,6 +367,7 @@ class ExamTimetableFetchingServiceImpl
     with AutowiringExamTimetableConfigurationComponent
     with AutowiringTrustedApplicationsManagerComponent
     with AutowiringUserLookupComponent
+    with AutowiringCacheStrategyComponent
 
 trait ExamTimetableFetchingServiceComponent {
   def examTimetableFetchingService: ExamTimetableFetchingService

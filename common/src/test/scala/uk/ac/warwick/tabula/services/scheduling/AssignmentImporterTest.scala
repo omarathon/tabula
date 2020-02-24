@@ -23,7 +23,7 @@ trait EmbeddedSits {
 class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   val assignmentImporter = new AssignmentImporterImpl
-  assignmentImporter.sits = sits
+  assignmentImporter.sitsDataSource = sits
   AssignmentImporter.sitsSchema = "public"
   AssignmentImporter.sqlStringCastFunction = ""
   AssignmentImporter.dialectRegexpLike = "regexp_matches"
