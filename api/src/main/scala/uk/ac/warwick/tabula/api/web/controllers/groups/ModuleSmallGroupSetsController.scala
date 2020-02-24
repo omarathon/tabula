@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.groups.ModuleSmallGroupSetsController._
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupAttendanceToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, FileAttachmentToJsonConverter, SmallGroupAttendanceToJsonConverter, SmallGroupEventAttendanceNoteToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, _}
 import uk.ac.warwick.tabula.data.model._
@@ -36,7 +36,9 @@ abstract class ModuleSmallGroupSetsController extends ApiController
   with SmallGroupToJsonConverter
   with SmallGroupEventToJsonConverter
   with SmallGroupAttendanceToJsonConverter
-  with AssessmentMembershipInfoToJsonConverter {
+  with AssessmentMembershipInfoToJsonConverter
+  with SmallGroupEventAttendanceNoteToJsonConverter
+  with FileAttachmentToJsonConverter {
 
   hideDeletedItems
 
