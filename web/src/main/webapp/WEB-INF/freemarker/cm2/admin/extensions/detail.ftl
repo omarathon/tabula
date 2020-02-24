@@ -92,6 +92,7 @@ modelAttribute="modifyExtensionCommand"
   />
 
   <#if modifyExtensionCommand.attachedFiles?has_content>
+    <@f.hidden name="_attachedFiles" value="on" />
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
       <ul class="unstyled">
         <#list modifyExtensionCommand.attachedFiles as attachment>

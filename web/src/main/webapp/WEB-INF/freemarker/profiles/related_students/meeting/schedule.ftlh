@@ -154,29 +154,30 @@
       <@bs3form.filewidget basename="file" types=fileTypes />
 
     <#if command.attachedFiles?has_content>
-    <@bs3form.labelled_form_group path="attachedFiles" labelText="Previously uploaded files">
-      <ul class="unstyled">
-        <#list command.attachedFiles as attachment>
-          <li id="attachment-${attachment.id}" class="attachment">
-            <span>${attachment.name}</span>&nbsp;
-            <@f.hidden path="attachedFiles" value="${attachment.id}" />
-            <a class="remove-attachment" href="">Remove</a>
-          </li>
-        </#list>
-      </ul>
-      <script nonce="${nonce()}">
-        jQuery(function ($) {
-          $('.remove-attachment').on('click', function (e) {
-            $(this).closest("li.attachment").remove();
-            return false;
+      <@f.hidden name="_attachedFiles" value="on" />
+      <@bs3form.labelled_form_group path="attachedFiles" labelText="Previously uploaded files">
+        <ul class="unstyled">
+          <#list command.attachedFiles as attachment>
+            <li id="attachment-${attachment.id}" class="attachment">
+              <span>${attachment.name}</span>&nbsp;
+              <@f.hidden path="attachedFiles" value="${attachment.id}" />
+              <a class="remove-attachment" href="">Remove</a>
+            </li>
+          </#list>
+        </ul>
+        <script nonce="${nonce()}">
+          jQuery(function ($) {
+            $('.remove-attachment').on('click', function (e) {
+              $(this).closest("li.attachment").remove();
+              return false;
+            });
           });
-        });
-      </script>
-      <P class="very-subtle help-block">
-        This is a list of all supporting documents that have been attached to this meeting record.
-        Click the remove link next to a document to delete it.
-      </P>
-    </@bs3form.labelled_form_group>
+        </script>
+        <P class="very-subtle help-block">
+          This is a list of all supporting documents that have been attached to this meeting record.
+          Click the remove link next to a document to delete it.
+        </P>
+      </@bs3form.labelled_form_group>
     </#if>
 
       <@bs3form.labelled_form_group path="description" labelText="Description">
