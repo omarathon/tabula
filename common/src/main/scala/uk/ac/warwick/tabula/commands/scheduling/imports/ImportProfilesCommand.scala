@@ -306,7 +306,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
   def updateMissingForStaffOrApplicant(member: Member): Member = {
     val missingFromImport: Boolean = member match {
-      case _: ApplicantMember => profileImporter.getApplicantMemberFromSits(member.universityId).isEmpty
+      case _: ApplicantMember => !profileImporter.applicantExistsInSits(member.universityId)
       case _: StaffMember => profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
       case _ => throw new IllegalArgumentException("This function is only supposed to handle Applicant and Staff member.")
     }
