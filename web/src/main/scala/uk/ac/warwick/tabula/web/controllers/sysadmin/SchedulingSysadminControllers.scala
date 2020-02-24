@@ -7,7 +7,7 @@ import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, RecheckMissingRowsCommand, StampMissingRowsCommand}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, RecheckMissingRowsCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
@@ -305,12 +305,13 @@ class RecheckMissingController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/stamp-missing"))
 class StampMissingController extends BaseSysadminController {
-  @ModelAttribute("command") def command: Appliable[Unit] = StampMissingRowsCommand()
+  var scheduler: Scheduler = Wire[Scheduler]
 
   @PostMapping
-  def recheck(@ModelAttribute("command") form: Appliable[Unit]): Mav = {
-    form.apply()
-    redirectToHome
+  def recheck(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[StampMissingRowsJob]()
+    ))
   }
 }
 
