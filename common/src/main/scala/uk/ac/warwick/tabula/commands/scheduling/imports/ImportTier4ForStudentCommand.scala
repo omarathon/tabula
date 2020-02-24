@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudi
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.scheduling.{Tier4VisaImporterComponent, CasUsageImporterComponent, AutowiringCasUsageImporterComponent, AutowiringTier4VisaImporterComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringCasUsageImporterComponent, AutowiringTier4VisaImporterComponent, CasUsageImporterComponent, Tier4VisaImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ImportTier4ForStudentCommand {
@@ -27,19 +27,20 @@ class ImportTier4ForStudentCommandInternal(student: StudentMember, yearOnwards: 
     val newCasUsed = casUsageImporter.isCasUsed(student.universityId)
     val newTier4Visa = tier4VisaImporter.hasTier4Visa(student.universityId)
 
-    student.freshOrStaleStudentCourseYearDetailsFrom(yearOnwards).map {
+    student.freshOrStaleStudentCourseYearDetailsFrom(yearOnwards).foreach { scyd =>
       var hasChanged = false
-      scyd => {
-        if (scyd.casUsed != newCasUsed) {
-          scyd.casUsed = newCasUsed
-          hasChanged = true
-        }
-        if (scyd.tier4Visa != newTier4Visa) {
-          scyd.tier4Visa = newTier4Visa
-          hasChanged = true
-        }
-        if (hasChanged) studentCourseYearDetailsDao.saveOrUpdate(scyd)
+
+      if (scyd.casUsed != newCasUsed) {
+        scyd.casUsed = newCasUsed
+        hasChanged = true
       }
+
+      if (scyd.tier4Visa != newTier4Visa) {
+        scyd.tier4Visa = newTier4Visa
+        hasChanged = true
+      }
+
+      if (hasChanged) studentCourseYearDetailsDao.saveOrUpdate(scyd)
     }
   }
 }
