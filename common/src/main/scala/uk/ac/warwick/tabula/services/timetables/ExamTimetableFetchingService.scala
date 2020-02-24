@@ -144,10 +144,9 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 
   def parseXml(xml: Elem, universityId: String, topLevelUrl: String): Seq[TimetableEvent] = {
     val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml)
-    val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
     timetable.exams.flatMap { timetableExam =>
-      val uid = DigestUtils.md5Hex(Seq(examProfile, timetableExam.paper).mkString)
+      val uid = DigestUtils.md5Hex(Seq(timetableExam.profile, timetableExam.paper).mkString)
       Try(timetableExam.academicYear.weekForDate(timetableExam.startDateTime.toLocalDate).weekNumber) match {
         case Success(weekNumber) =>
           Some(TimetableEvent(
@@ -185,6 +184,7 @@ object ExamTimetableFetchingService {
   val examReadingTimeFormatter: PeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
 
   case class ExamTimetableExam(
+    profile: String,
     academicYear: AcademicYear,
     moduleCode: String,
     paper: String,
@@ -207,52 +207,58 @@ object ExamTimetableFetchingService {
   )
 
   def examTimetableFromXml(xml: Elem): ExamTimetable = {
-    val header = (xml \\ "exam-headerinfo").text
-    val instructions = (xml \\ "exam-instructions").text
+    val header = (xml \\ "exam-headerinfo").headOption.map(_.text).getOrElse("")
+    val instructions = (xml \\ "exam-instructions").headOption.map(_.text).getOrElse("")
 
-    if ((xml \\ "exam").isEmpty) {
+    if ((xml \\ "exam-profile").isEmpty) {
       ExamTimetable(header, instructions, Nil)
     } else {
-      val academicYear = AcademicYear((xml \\ "academic-year").text.toInt).extended
-      val exams = (xml \\ "exam").map(examNode => {
-        val moduleCode = (examNode \\ "module").text
-        val paper = (examNode \\ "paper").text
-        val section = (examNode \\ "section").text
-        val lengthString = (examNode \\ "length").text
-        val length = examPeriodFormatter.parsePeriod(lengthString)
-        val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
-          readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
-        )
-        val isOpenBook = (examNode \\ "open-book").text.maybeText.isDefined
+      val exams = (xml \\ "exam-profile").flatMap { profile =>
+        val profileCode = (profile \ "profile").text
+        val academicYear = AcademicYear((profile \ "academic-year").text.toInt).extended
 
-        val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
-        val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
-          extraTimePerHourNode.text.maybeText.flatMap(s => Try(s.toInt).toOption)
-        )
-        val extraTime = extraTimePerHour.map(minutes =>
-          Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
-        )
-        val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
+        (profile \ "exam").map { examNode =>
+          val moduleCode = (examNode \\ "module").text
+          val paper = (examNode \\ "paper").text
+          val section = (examNode \\ "section").text
+          val lengthString = (examNode \\ "length").text
+          val length = examPeriodFormatter.parsePeriod(lengthString)
+          val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
+            readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
+          )
+          val isOpenBook = (examNode \\ "open-book").text.maybeText.isDefined
 
-        val room = (examNode \\ "room").text
-        val seat = (examNode \\ "seat").text.maybeText
+          val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
+          val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
+            extraTimePerHourNode.text.maybeText.flatMap(s => Try(s.toInt).toOption)
+          )
+          val extraTime = extraTimePerHour.map(minutes =>
+            Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
+          )
+          val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
 
-        ExamTimetableExam(
-          academicYear,
-          moduleCode,
-          paper,
-          section,
-          length,
-          lengthString,
-          readingTime,
-          isOpenBook,
-          startDateTime,
-          endDateTime,
-          extraTimePerHour,
-          room,
-          seat
-        )
-      })
+          val room = (examNode \\ "room").text
+          val seat = (examNode \\ "seat").text.maybeText
+
+          ExamTimetableExam(
+            profileCode,
+            academicYear,
+            moduleCode,
+            paper,
+            section,
+            length,
+            lengthString,
+            readingTime,
+            isOpenBook,
+            startDateTime,
+            endDateTime,
+            extraTimePerHour,
+            room,
+            seat
+          )
+        }
+      }
+
       ExamTimetable(header, instructions, exams)
     }
   }
