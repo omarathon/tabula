@@ -15,6 +15,7 @@ import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
@@ -29,12 +30,14 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache._
 
 import scala.concurrent.Future
+import scala.jdk.DurationConverters._
 import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
   val examTimetableUrl: String
   val examProfilesUrl: String
+  val examProfilesCacheExpiry: Duration
 }
 
 trait ExamTimetableConfigurationComponent {
@@ -47,6 +50,11 @@ trait AutowiringExamTimetableConfigurationComponent extends ExamTimetableConfigu
   class AutowiringExamTimetableConfiguration extends ExamTimetableConfiguration {
     lazy val examTimetableUrl: String = Wire.optionProperty("${examTimetable.url}").getOrElse("https://exams.warwick.ac.uk/timetable/")
     lazy val examProfilesUrl: String = Wire.optionProperty("${examProfiles.url}").getOrElse("https://exams.warwick.ac.uk/api/v1/examProfiles.json")
+    lazy val examProfilesCacheExpiry: Duration =
+      Wire.optionProperty("${examProfiles.cacheExpiry}")
+        .map(FiniteDurationConverter.asDuration)
+        .map(_.toJava)
+        .getOrElse(Duration.ofHours(1))
   }
 
 }
@@ -85,7 +93,6 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
       Future(EventList(Nil, None))
     }
   }
-
 
   override def getTimetableForStudent(universityId: String): Future[EventList] = featureProtected(universityId)(doRequest)
 
@@ -350,7 +357,7 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 
   lazy val examProfilesCache: Cache[String, ExamProfileList] =
     Caches.builder("ExamProfilesCache", examProfilesCacheEntryFactory, cacheStrategy)
-      .expireAfterWrite(Duration.ofHours(1))
+      .expireAfterWrite(examTimetableConfiguration.examProfilesCacheExpiry)
       .maximumSize(1)
       .build()
 
