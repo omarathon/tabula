@@ -1,13 +1,17 @@
 package uk.ac.warwick.tabula.services.scheduling
 
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.junit.After
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterUtils}
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamProfile
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Future
 import scala.jdk.CollectionConverters._
 import scala.reflect._
 
@@ -24,6 +28,17 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   val assignmentImporter = new AssignmentImporterImpl
   assignmentImporter.sitsDataSource = sits
+  assignmentImporter.examTimetableFetchingService = smartMock[ExamTimetableFetchingService]
+  assignmentImporter.examTimetableFetchingService.getExamProfiles returns Future.successful(Seq(ExamProfile(
+    code = "EXSUM19",
+    name = "Summer exams 2019",
+    academicYear = AcademicYear.starting(2018),
+    startDate = new LocalDate(2019, DateTimeConstants.MAY, 19),
+    endDate = new LocalDate(2019, DateTimeConstants.JUNE, 30),
+    published = true,
+    seatNumbersPublished = true
+  )))
+
   AssignmentImporter.sitsSchema = "public"
   AssignmentImporter.sqlStringCastFunction = ""
   AssignmentImporter.dialectRegexpLike = "regexp_matches"
