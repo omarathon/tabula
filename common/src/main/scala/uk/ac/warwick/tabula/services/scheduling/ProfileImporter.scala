@@ -55,9 +55,9 @@ trait ProfileImporter {
 
   def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 
-  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
+  def applicantExistsInSits(universityId: String): Boolean
 
-  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation]
+  def applicantsExistingInSits(universityIds: Set[String]): Set[String]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -182,20 +182,18 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
     Option(membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
   }
 
-  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = {
+  def applicantExistsInSits(universityId: String): Boolean =
     Option(applicantByUniversityIdQuery.executeByNamedParam(
       Map("universityIds" -> universityId).asJava).asScala.toList.map{ case (membershipMember, _) => membershipMember}
-    ).flatMap(head)
-  }
+    ).flatMap(head).nonEmpty
 
-  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
+  def applicantsExistingInSits(universityIds: Set[String]): Set[String] =
     universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
       Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
         .asScala
-        .map { case (m, a) => MembershipInformation(m, Some(a)) }
+        .map { case (m, _) => m.universityId }
       ).getOrElse(Seq.empty)
     }.toSet
-  }
 
 }
 
@@ -452,9 +450,9 @@ class SandboxProfileImporter extends ProfileImporter with AutowiringProfileServi
 
   def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 
-  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
+  def applicantExistsInSits(universityId: String): Boolean = throw new UnsupportedOperationException
 
-  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = throw new UnsupportedOperationException
+  def applicantsExistingInSits(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {

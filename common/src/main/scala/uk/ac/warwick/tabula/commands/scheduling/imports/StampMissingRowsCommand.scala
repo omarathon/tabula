@@ -28,7 +28,8 @@ class StampMissingRowsCommandInternal
     with Logging
     with Daoisms
     with ChecksStudentsInSits
-    with ChecksStaffInMembership {
+    with ChecksStaffInMembership
+    with ChecksApplicantsInSits {
 
   self: MemberDaoComponent
     with StudentCourseYearDetailsDaoComponent
@@ -36,9 +37,9 @@ class StampMissingRowsCommandInternal
     with ProfileImporterComponent =>
 
   override def applyInternal(): Unit = {
+    applyApplicants()
     applyStudents()
     applyStaff()
-    applyApplicants()
   }
 
   def applyApplicants(): Unit = transactional() {
@@ -46,19 +47,17 @@ class StampMissingRowsCommandInternal
     val applicantsFromTabula = memberDao.getFreshApplicantsIds.toSet
     logger.info(s"${applicantsFromTabula.size} applicants to be fetched from SITS.")
 
-    val tabulaApplicantsInExistInSits = profileImporter
-      .getApplicantMembersFromSits(applicantsFromTabula)
-      .map(_.member.universityId)
+    val tabulaApplicantsInExistInSits = checkSitsForApplicants(applicantsFromTabula)
 
-    applicantsFromTabula
-      .diff(tabulaApplicantsInExistInSits)
-      .flatMap(universityId => memberDao.getByUniversityId(universityId))
-      .filterNot(_.stale)
-      .foreach { applicantMember =>
-        applicantMember.missingFromImportSince = DateTime.now
-        logger.info(s"Stamping applicant ${applicantMember.universityId} missing from import.")
-        memberDao.saveOrUpdate(applicantMember)
-      }
+    val universityIdsToStamp = applicantsFromTabula.diff(tabulaApplicantsInExistInSits)
+
+    logger.info(s"${universityIdsToStamp.size} applicants to stamp as missing")
+
+    memberDao.getAllWithUniversityIds(universityIdsToStamp.toSeq).foreach { applicantMember =>
+      applicantMember.missingFromImportSince = DateTime.now
+      logger.info(s"Stamping applicant ${applicantMember.universityId} missing from import.")
+      memberDao.saveOrUpdate(applicantMember)
+    }
   }
 
   def applyStudents(): Unit = {
@@ -201,7 +200,7 @@ trait ChecksStudentsInSits {
     val parsedSitsRows = universityIds.grouped(Daoisms.MaxInClauseCountOracle).zipWithIndex.map { case (ids, groupCount) =>
       val sitsRows = profileImporter.sitsStudentRows(ids.toSeq)
 
-      logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCountOracle} students requested from SITS; ${sitsRows.size} rows found")
+      logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCountOracle} students requested from SITS; ${sitsRows.size} rows found in this batch")
       (
         sitsRows.map(_.universityId.getOrElse("")).distinct,
         sitsRows.map(_.scjCode).distinct,
@@ -217,6 +216,18 @@ trait ChecksStudentsInSits {
     StudentsFound(universityIdsSeen.toSet, scjCodesSeen.toSet, studentCourseYearKeysSeen.toSet)
   }
 
+}
+
+trait ChecksApplicantsInSits {
+  self: ProfileImporterComponent with Logging =>
+
+  def checkSitsForApplicants(universityIds: Set[String]): Set[String] =
+    universityIds.grouped(Daoisms.MaxInClauseCountOracle).zipWithIndex.flatMap { case (ids, groupCount) =>
+      val applicantsInSits = profileImporter.applicantsExistingInSits(ids)
+
+      logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCountOracle} applicants requested from SITS; ${applicantsInSits.size} found in this batch")
+      applicantsInSits
+    }.toSet
 }
 
 trait ChecksStaffInMembership {
