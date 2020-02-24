@@ -48,7 +48,7 @@
 
           <p class="alert alert-info">You can also record attendance using an Excel spreadsheet. The spreadsheet must be in <samp>.xlsx</samp> format
             (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application).
-            You can <strong><a href="${templateUrl}">download a template spreadsheet</a></strong> which is correctly formatted, ready for completion.
+            <#if templateUrl?has_content>You can <strong><a href="${templateUrl}">download a template spreadsheet</a></strong> which is correctly formatted, ready for completion.</#if>
             <br /> <br />
             In Excel you may need to <a href="https://support.office.com/en-us/article/what-is-protected-view-d6f09ac7-e6b9-4495-8e43-2bbcdbcb6653#bm2">exit protected view</a> to
             edit the spreadsheet.
