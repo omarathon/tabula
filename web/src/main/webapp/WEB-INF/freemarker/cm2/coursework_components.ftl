@@ -1253,6 +1253,34 @@
                 </li>
               </#list>
             </ul>
+            <script nonce="${nonce()}">
+              jQuery(function ($) {
+                // remove attachment
+                $('body').on('click', '.feedback-attachments .remove-attachment', function (e) {
+                  e.preventDefault();
+
+                  var $target = $(e.target);
+                  var $attachmentContainer = $target.closest('li.attachment');
+
+                  var $form = $attachmentContainer.closest('form');
+                  var $ul = $attachmentContainer.closest('ul');
+
+                  var attachmentName = $attachmentContainer.find('i').first().next('a,span').text();
+                  $attachmentContainer.empty().append($('<del />').text(attachmentName));
+
+                  var buttonLabel = 'Save';
+                  var $submitButton = $form.find(':button:not([type="button"])');
+                  if ($submitButton.length) {
+                    buttonLabel = $submitButton.text();
+                  }
+
+                  if (!$ul.find('li').last().is('.pending-removal')) {
+                    var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>' + buttonLabel + '</samp>.</li>';
+                    $ul.append(alertMarkup);
+                  }
+                });
+              });
+            </script>
           <#else>
             The <@fmt.p number=feedback.attachments?size singular="feedback attachment" shownumber=false/> cannot be downloaded as the marker is unknown.
           </#if>

@@ -218,35 +218,17 @@
         multiple=true
       />
 
-      <#if editExtensionCommand.attachedFiles?has_content>
-        <@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
-          <ul class="unstyled">
-            <#list editExtensionCommand.attachedFiles as attachment>
-              <#assign url></#assign>
-              <li id="attachment-${attachment.id}" class="attachment">
-                <i class="fa fa-file-o"></i>
-                <a href="<@routes.cm2.extensionAttachment detail.extension attachment.name />"><#compress>
-                    ${attachment.name}
-                  </#compress></a>&nbsp;
-                <@f.hidden path="attachedFiles" value="${attachment.id}" />
-                <i class="fa fa-times-circle remove-attachment"></i>
-              </li>
-            </#list>
-          </ul>
-          <script nonce="${nonce()}">
-            jQuery(function ($) {
-              $(".remove-attachment").on("click", function (e) {
-                e.preventDefault();
-                $(this).closest("li.attachment").remove();
-              });
-            });
-          </script>
-          <div class="help-block">
-            This is a list of all supporting documents that have been attached to this extension request.
-            Click the remove link next to a document to delete it.
-          </div>
-        </@bs3form.labelled_form_group>
-      </#if>
+      <#function render_attachment attachment>
+        <#local result><@routes.cm2.extensionAttachment detail.extension attachment.name /></#local>
+        <#return result />
+      </#function>
+      <@bs3form.attachmentsList
+        path="attachedFiles"
+        labelText="Attached files"
+        attachedFiles=editExtensionCommand.attachedFiles
+        routeFunction=render_attachment
+        help="This is a list of all supporting documents that have been attached to this extension request. Click the remove link next to a document to delete it."
+      />
 
       <@bs3form.errors "state"/>
 

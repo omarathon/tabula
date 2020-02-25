@@ -260,28 +260,6 @@ $(function () {
     $row.trigger('show.bs.collapse');
   });
 
-  // remove attachment
-  $body.on("click", '.remove-attachment', function (e) {
-    e.preventDefault();
-    var $this = $(this);
-    var $form = $this.closest('form');
-    var $li = $this.closest("li");
-    $li.find('input, a').remove();
-    $li.find('span').wrap('<del />');
-    $li.find('i').css('display', 'none');
-    var $ul = $li.closest('ul');
-
-    if (!$ul.find('li').last().is('.pending-removal')) {
-      var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
-      $ul.append(alertMarkup);
-    }
-
-    if ($form.find('input[name=attachedFiles]').length === 0) {
-      var $blankInput = $('<input name="attachedFiles" type="hidden" />');
-      $form.append($blankInput);
-    }
-  });
-
   $('table.expanding-row-pairs').each(function () {
     $(this).find('tbody tr').each(function (i) {
       if (i % 2 === 0) {

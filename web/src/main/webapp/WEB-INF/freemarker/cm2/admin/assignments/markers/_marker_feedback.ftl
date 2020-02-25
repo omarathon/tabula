@@ -25,20 +25,19 @@
       </#if>
     </#if>
 
-    <#if command.attachedFiles?has_content >
-      <@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
-        <ul class="list-unstyled attachments">
-          <#list command.attachedFiles as attachment>
-            <li id="attachment-${attachment.id}" class="attachment">
-              <a href="<@routes.cm2.downloadMarkerFeedbackOne command.assignment command.marker command.currentMarkerFeedback attachment />">${attachment.name}</a>
-              <a href="#" class="btn btn-danger btn-xs remove-attachment">Remove</a>
-              <@f.hidden path="attachedFiles" value="${attachment.id}" />
-            </li>
-          </#list>
-        </ul>
-      </@bs3form.labelled_form_group>
+    <#if command.attachedFiles?has_content>
+      <#function render_attachment attachment>
+        <#local result><@routes.cm2.downloadMarkerFeedbackOne command.assignment command.marker command.currentMarkerFeedback attachment /></#local>
+        <#return result />
+      </#function>
+      <@bs3form.attachmentsList
+        path="attachedFiles"
+        labelText="Attached files"
+        attachedFiles=command.attachedFiles
+        routeFunction=render_attachment
+      />
     <#else>
-    <#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->
+      <#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->
       <@bs3form.labelled_form_group cssClass="hide" path="attachedFiles" labelText="Attached files">
         <ul class="list-unstyled attachments"></ul>
       </@bs3form.labelled_form_group>

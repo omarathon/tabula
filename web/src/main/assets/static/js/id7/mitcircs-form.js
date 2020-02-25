@@ -63,18 +63,6 @@ class MitCircsForm {
       .on('input change', e => $form.find(':input[name="contactOther"]').prop('disabled', !$(e.target).is(':checked')))
       .trigger('change');
 
-    // Removing attachments
-    $form
-      .on('click', '.remove-attachment', (e) => {
-        e.preventDefault();
-
-        const $target = $(e.target);
-        const $attachmentContainer = $target.closest('li.attachment');
-
-        $target.closest('.modal')
-          .on('hidden.bs.modal', () => $attachmentContainer.remove());
-      });
-
     // check-all on assessment tabs
     $form.on('change', '.check-all', (e) => {
       const $checkAll = $(e.target);
