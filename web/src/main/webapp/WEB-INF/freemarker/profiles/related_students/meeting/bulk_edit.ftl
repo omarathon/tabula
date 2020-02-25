@@ -107,10 +107,6 @@
   </#if>
   <script nonce="${nonce()}">
     jQuery(function ($) {
-      $(".remove-attachment").on("click", function (e) {
-        $(this).closest("li.attachment").remove();
-        return false;
-      });
       $("a.studentList").on("click", function () {
         var $studentList = $("div.studentList");
         var $selectedStudents = $("input.collection-checkbox:checked");

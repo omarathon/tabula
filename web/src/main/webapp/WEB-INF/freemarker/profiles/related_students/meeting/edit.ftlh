@@ -197,36 +197,17 @@
       </script>
     </#if>
 
-    <#-- file upload (TAB-359) -->
+      <#-- file upload (TAB-359) -->
       <#assign fileTypes=command.attachmentTypes />
       <@bs3form.filewidget basename="file" types=fileTypes />
 
-    <#if command.attachedFiles?has_content >
-      <@f.hidden name="_attachedFiles" value="on" />
-      <@bs3form.labelled_form_group path="attachedFiles" labelText="Previously uploaded files">
-        <ul class="unstyled">
-          <#list command.attachedFiles as attachment>
-            <li id="attachment-${attachment.id}" class="attachment">
-              <span>${attachment.name}</span>&nbsp;
-              <@f.hidden path="attachedFiles" value="${attachment.id}" />
-              <a class="remove-attachment" href="">Remove</a>
-            </li>
-          </#list>
-        </ul>
-        <script nonce="${nonce()}">
-          jQuery(function ($) {
-            $(".remove-attachment").on("click", function (e) {
-              $(this).closest("li.attachment").remove();
-              return false;
-            });
-          });
-        </script>
-        <p class="very-subtle help-block">
-          This is a list of all supporting documents that have been attached to this meeting record.
-          Click the remove link next to a document to delete it.
-        </p>
-      </@bs3form.labelled_form_group>
-    </#if>
+      <@bs3form.attachmentsList
+        path="attachedFiles"
+        labelText="Previously uploaded files"
+        attachedFiles=command.attachedFiles
+        help="This is a list of all supporting documents that have been attached to this meeting record. Click the remove link next to a document to delete it."
+        confirmModal=false
+      />
 
       <@bs3form.labelled_form_group path="description" labelText="Description">
         <@f.textarea rows="6" path="description" cssClass="form-control" />
