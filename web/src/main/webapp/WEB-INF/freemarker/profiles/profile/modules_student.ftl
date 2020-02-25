@@ -129,7 +129,8 @@
         <thead>
           <tr>
             <th>Module</th>
-            <th>Paper code and title</th>
+            <th>Paper code</th>
+            <th>Paper title</th>
             <th>Section</th>
             <th>Duration</th>
             <th>Reading time</th>
@@ -140,11 +141,12 @@
         <tbody>
           <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
             <#list moduleRegistrationAndComponent.components as component>
-              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E'>
+              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'LX'>
                 <tr>
-                  <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}</td>
+                  <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}<#if moduleRegistrationAndComponent.moduleRegistration.cats?has_content>-${moduleRegistrationAndComponent.moduleRegistration.cats}</#if></td>
                   <#if component.upstreamGroup.assessmentComponent.examPaperCode?has_content>
-                    <td>${component.upstreamGroup.assessmentComponent.examPaperCode} ${component.upstreamGroup.assessmentComponent.examPaperTitle!""}</td>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperCode}</td>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperTitle!""}</td>
                     <td>${component.upstreamGroup.assessmentComponent.examPaperSection!'Unknown'}</td>
                     <td>
                       <#if component.upstreamGroup.assessmentComponent.examPaperDuration??>
@@ -173,7 +175,7 @@
                       </#if>
                     </td>
                   <#else>
-                    <td colspan="5">Unknown</td>
+                    <td colspan="6">Unknown</td>
                   </#if>
                   <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
                 </tr>
