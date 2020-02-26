@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.feedback.{GenerateGradesFromMarkCommandRequest, GenerateGradesFromMarkCommandState}
-import uk.ac.warwick.tabula.data.model.{Assessment, GradeBoundary}
+import uk.ac.warwick.tabula.data.model.{Assignment, GradeBoundary}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.AbstractGenerateGradeFromMarkController.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -15,7 +15,7 @@ object AbstractGenerateGradeFromMarkController {
   type GenerateGradesFromMarkCommand = Appliable[Map[String, Seq[GradeBoundary]]] with GenerateGradesFromMarkCommandRequest with GenerateGradesFromMarkCommandState
 }
 
-abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends BaseController {
+abstract class AbstractGenerateGradeFromMarkController[A <: Assignment] extends BaseController {
 
   def command(assessment: A): GenerateGradesFromMarkCommand
 

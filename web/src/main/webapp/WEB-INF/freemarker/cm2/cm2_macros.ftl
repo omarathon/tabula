@@ -119,16 +119,6 @@
     </#if>
   </#macro>
 
-  <#macro moduleHeader title module preposition="for">
-    <#local two_line = module?has_content />
-    <div class="deptheader">
-      <h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
-      <#if two_line>
-        <h4 class="with-related">${preposition} <@fmt.module_name module /></h4>
-      </#if>
-    </div>
-  </#macro>
-
   <#macro assignmentHeader title assignment preposition="for" admin=true>
     <#if can.do('Submission.Read', assignment)>
       <div class="btn-toolbar dept-toolbar">

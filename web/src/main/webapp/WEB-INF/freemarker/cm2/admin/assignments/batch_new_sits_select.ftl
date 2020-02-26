@@ -56,7 +56,7 @@ first page of the form to setup a bunch of assignments from SITS.
       </@bs3form.labelled_form_group>
     </#if>
     <#macro hidden_properties>
-      <@f.hidden path="upstreamAssignment" />
+      <@f.hidden path="assessmentComponent" />
       <@f.hidden path="optionsId" cssClass="options-id-input" />
       <@f.hidden path="openDate" cssClass="open-date-field" />
       <@f.hidden path="openEnded" cssClass="open-ended-field" />
@@ -142,13 +142,13 @@ first page of the form to setup a bunch of assignments from SITS.
                     </#if>
                   </td>
                   <td class="selectable">
-                    ${item.upstreamAssignment.moduleCode?upper_case}
+                    ${item.assessmentComponent.moduleCode?upper_case}
                   </td>
                   <td class="selectable">
-                    ${(item.upstreamAssignment.assessmentType.value)!'A'}
+                    ${(item.assessmentComponent.assessmentType.value)!'A'}
                   </td>
                   <td class="selectable">
-                    ${item.upstreamAssignment.sequence}
+                    ${item.assessmentComponent.sequence}
                   </td>
                   <td class="selectable">
                     ${item.occurrence!'NONE'}

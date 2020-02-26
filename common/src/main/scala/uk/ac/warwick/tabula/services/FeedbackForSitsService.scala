@@ -30,7 +30,7 @@ trait FeedbackForSitsService {
 
   def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits]
 
-  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
+  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assignment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
 }
 
 trait FeedbackForSitsServiceComponent {
@@ -89,7 +89,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
     }
   }
 
-  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult = {
+  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assignment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult = {
 
     val studentsMarks = (for (f <- feedbacks; mark <- f.latestMark; uniId <- f.universityId) yield {
       uniId -> mark

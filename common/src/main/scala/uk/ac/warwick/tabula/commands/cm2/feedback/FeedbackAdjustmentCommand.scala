@@ -39,7 +39,7 @@ object FeedbackAdjustmentCommand {
     }
 }
 
-class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+class FeedbackAdjustmentCommandInternal(val assessment: Assignment, val student: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
   extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState {
 
   self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits with CopiesMarkToFeedback with FeedbackAdjustmentSitsGradeValidation =>
@@ -47,8 +47,10 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
   val feedback: Feedback = assessment.findFeedback(student.getUserId)
     .getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 
-  //Allowing PWD upload to SITS as long as record exists there
-  lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroupInfo(assessment.academicYear)).exists(_.exists(_.upstreamAssessmentGroup.membersIncludes(student)))
+  // Allowing PWD upload to SITS as long as record exists there
+  lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala
+    .map(_.toUpstreamAssessmentGroupInfo(assessment.academicYear))
+    .exists(_.exists(_.upstreamAssessmentGroup.membersIncludes(student)))
 
   def applyInternal(): Feedback = {
     val newMark = copyTo(feedback)
@@ -113,7 +115,7 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 }
 
 trait FeedbackAdjustmentCommandState {
-  val assessment: Assessment
+  val assessment: Assignment
   val student: User
   val feedback: Feedback
   val gradeGenerator: GeneratesGradesFromMarks

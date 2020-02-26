@@ -4,9 +4,14 @@ import javax.persistence.CascadeType.ALL
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.{JList, _}
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
+
+import scala.jdk.CollectionConverters._
 
 @FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Assignment.NotDeletedFilter)
@@ -14,6 +19,9 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
 @Proxy
 @Access(AccessType.FIELD)
 class Exam extends GeneratedId with CanBeDeleted with PermissionsTarget with StringId with Serializable with ToString {
+
+  @transient
+  var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 
   def this(name: String, department: Department, academicYear: AcademicYear) = {
     this()
@@ -49,6 +57,15 @@ class Exam extends GeneratedId with CanBeDeleted with PermissionsTarget with Str
 
   @Column(nullable = false)
   var lastModified: DateTime = DateTime.now()
+
+  @OneToMany(mappedBy = "exam", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+
+  // converts the assessmentGroups to UpstreamAssessmentGroupInfo
+  def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("Exam.upstreamAssessmentGroupInfos", id) {
+    assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala.toSeq, academicYear)
+  }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

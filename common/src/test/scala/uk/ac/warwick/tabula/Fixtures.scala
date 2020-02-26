@@ -150,7 +150,7 @@ object Fixtures extends Mockito {
     s
   }
 
-  def upstreamAssignment(module: Module, number: Int): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module

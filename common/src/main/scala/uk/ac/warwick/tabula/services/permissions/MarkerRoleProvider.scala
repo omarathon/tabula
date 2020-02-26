@@ -19,7 +19,7 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
   }
 
   def getRolesFor(user: CurrentUser, scope: PermissionsTarget): LazyList[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
-    def getRoles(assessmentsForMarker: LazyList[Assessment]) = assessmentsForMarker.map { assessment =>
+    def getRoles(assessmentsForMarker: LazyList[Assignment]) = assessmentsForMarker.map { assessment =>
       customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
     }
 

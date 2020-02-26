@@ -1,11 +1,10 @@
 <#import "*/assignment_components.ftl" as components />
-<#import "*/cm2_macros.ftl" as cm2 />
 <#--
 HFC-166 Don't use #compress on this file because
 the comments textarea needs to maintain newlines.
 -->
 
-<@cm2.moduleHeader "Create a new assignment" module "for" />
+<@fmt.moduleHeader "Create a new assignment" module "for" />
 
 <div class="fix-area">
   <#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>

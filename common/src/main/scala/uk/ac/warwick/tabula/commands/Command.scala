@@ -355,16 +355,17 @@ abstract class Description {
     s"${a.id} - ${a.hash}"
   ))
 
-  def assessment(assessment: Assessment): Description = assessment match {
-    case a: Assignment => assignment(a)
-  }
-
   /**
     * Record assignment, plus its module and department if available.
     */
   def assignment(assignment: Assignment): Description = {
     property("assignment" -> assignment.id)
     if (assignment.module != null) module(assignment.module)
+    this
+  }
+
+  def exam(exam: Exam): Description = {
+    property("exam" -> exam.id)
     this
   }
 

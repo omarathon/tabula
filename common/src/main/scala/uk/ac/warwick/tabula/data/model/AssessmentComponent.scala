@@ -16,13 +16,9 @@ import scala.jdk.CollectionConverters._
   * University systems. An component is timeless - it doesn't
   * relate to a specific instance of an assignment/exam or even a particular year.
   *
-  * This used to be UpstreamAssignment when we were only importing assignment-type
-  * components. Now we include other things like exams, so it has been renamed
-  * AssessmentComponent in line with what it's called in SITS.
   */
 @Entity
 @Proxy
-@Table(name = "UPSTREAMASSIGNMENT")
 class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString {
 
   @transient var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
