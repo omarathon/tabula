@@ -35,6 +35,7 @@
         labelText="Attached files"
         attachedFiles=command.attachedFiles
         routeFunction=render_attachment
+        confirmModal=false
       />
     <#else>
       <#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->
