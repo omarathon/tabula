@@ -260,9 +260,13 @@ Macros for customised form elements, containers and more complex pickers.
                     .append($('<del />').text(attachmentName));
 
                   var buttonLabel = 'Save';
-                  var $submitButton = $form.find(':button:not([type="button"])');
+                  var $submitButton = $form.find('button:not([type="button"]), input[type="submit"]');
                   if ($submitButton.length === 1) {
-                    buttonLabel = $submitButton.text();
+                    if ($submitButton.is('button')) {
+                      buttonLabel = $submitButton.text();
+                    } else if ($submitButton.is('input')) {
+                      buttonLabel = $submitButton.val();
+                    }
                   }
 
                   if (!$ul.find('li').last().is('.pending-removal')) {
