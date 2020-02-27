@@ -37,6 +37,10 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
     } else {
       null
     }
+    persistAttachments(scheduledMeetingRecord)
+
+    // persist the meeting record
+    meetingRecordService.saveOrUpdate(scheduledMeetingRecord)
   }
 
   def persistAttachments(meeting: ScheduledMeetingRecord): Unit = {
@@ -48,11 +52,8 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
       fileAttachmentService.deleteAttachments(filesToRemove)
     }
 
-    file.attached.asScala.foreach { attachment =>
-      attachment.meetingRecord = meeting
-      meeting.attachments.add(attachment)
-      attachment.temporary = false
-    }
+    val newAttachments = file.attached.asScala.map(_.duplicate())
+    newAttachments.foreach(meeting.addAttachment)
   }
 
   def onBind(result: BindingResult): Unit = {

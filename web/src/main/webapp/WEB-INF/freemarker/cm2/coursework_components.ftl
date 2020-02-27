@@ -1269,9 +1269,13 @@
                   $attachmentContainer.empty().append($('<del />').text(attachmentName));
 
                   var buttonLabel = 'Save';
-                  var $submitButton = $form.find(':button:not([type="button"])');
-                  if ($submitButton.length) {
-                    buttonLabel = $submitButton.text();
+                  var $submitButton = $form.find('button:not([type="button"]), input[type="submit"]');
+                  if ($submitButton.length === 1) {
+                    if ($submitButton.is('button')) {
+                      buttonLabel = $submitButton.text();
+                    } else if ($submitButton.is('input')) {
+                      buttonLabel = $submitButton.val();
+                    }
                   }
 
                   if (!$ul.find('li').last().is('.pending-removal')) {
