@@ -1,8 +1,11 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import java.sql.{ResultSet, Types}
+import java.sql.{ResultSet, Timestamp, Types}
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
+import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -16,7 +19,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 
+import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
 
 trait AssignmentImporterComponent {
@@ -32,24 +37,22 @@ trait AssignmentImporter {
     * Iterates through ALL module registration elements,
     * passing each ModuleRegistration item to the given callback for it to process.
     */
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent]
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   def getAllGradeBoundaries: Seq[GradeBoundary]
-
-  var yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
-
-  var sits: DataSource = Wire[DataSource]("sitsDataSource")
+class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
+  with AutowiringSitsDataSourceComponent
+  with AutowiringExamTimetableFetchingServiceComponent {
 
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
@@ -57,36 +60,44 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   var jdbc: NamedParameterJdbcTemplate = _
 
   override def afterPropertiesSet(): Unit = {
-    assessmentComponentQuery = new AssessmentComponentQuery(sits)
-    upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
-    gradeBoundaryQuery = new GradeBoundaryQuery(sits)
-    jdbc = new NamedParameterJdbcTemplate(sits)
+    assessmentComponentQuery = new AssessmentComponentQuery(sitsDataSource)
+    upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
+    gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
+    jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
   }
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
-  private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
+  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
+  private def seatNumberExamProfilesArray(): JList[String] =
+    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+      .filter(_.seatNumbersPublished)
+      .map(_.code)
+      .asJava: JList[String]
 
   // This will be quite a few thousand records, but not more than
   // 20k. Shouldn't cause any memory problems, so no point complicating
   // it by trying to stream or batch the data.
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray)).asScala.toSeq
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
   /**
     * Iterates through ALL module registration elements in SITS (that's many),
     * passing each ModuleRegistration item to the given callback for it to process.
     */
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
-      "academic_year_code" -> yearsToImportArray)
+      "academic_year_code" -> yearsToImportArray(yearsToImport),
+      "seat_number_exam_profiles" -> seatNumberExamProfilesArray()
+    )
     jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
   }
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
       "academic_year_code" -> yearsToImport.map(_.toString).asJava,
+      "seat_number_exam_profiles" -> seatNumberExamProfilesArray(),
       "universityIds" -> members.map(_.universityId).asJava
     )
     jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
@@ -127,13 +138,13 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
-  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
     if (members.map(_.universityId).contains(umr.universityId)) {
       callback(umr)
     }
-  })
+  }
 
-  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
+  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
@@ -145,13 +156,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
       moduleCodesToIds = moduleCodesToIds + (
         moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-        )
+      )
     }
 
     for {
       (moduleCode, ranges) <- moduleCodesToIds
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
+      academicYear <- yearsToImport
       range <- ranges
       uniId <- range
       if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
@@ -164,14 +175,15 @@ class SandboxAssignmentImporter extends AssignmentImporter {
           UpstreamModuleRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
-            seatNumber = assessmentType match {
-              case AssessmentType.Essay => null
-              case AssessmentType.SummerExam => ((uniId % 300) + 1).toString
+            seatNumber = assessmentType.subtype match {
+              case TabulaAssessmentSubtype.Exam => ((uniId % 300) + 1).toString
+              case _ => null
             },
             occurrence = "A",
-            sequence = assessmentType match {
-              case AssessmentType.Essay => "A01"
-              case AssessmentType.SummerExam => "E01"
+            sequence = assessmentType.subtype match {
+              case TabulaAssessmentSubtype.Assignment => "A01"
+              case TabulaAssessmentSubtype.Exam => "E01"
+              case TabulaAssessmentSubtype.Other => "O01"
             },
             moduleCode = "%s-15".format(moduleCode.toUpperCase),
             assessmentGroup = "A",
@@ -191,13 +203,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
   }
 
-  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+  def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
+      academicYear <- yearsToImport
     } yield {
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
@@ -211,11 +223,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       ag
     }
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] =
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] =
     for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
     } yield assessmentType match {
       case AssessmentType.Essay =>
@@ -228,6 +241,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         a.inUse = true
         a.weighting = 30
         a.marksCode = "TABULA-UG"
+        a.examPaperCode = None
+        a.examPaperTitle = None
+        a.examPaperSection = None
+        a.examPaperDuration = None
+        a.examPaperReadingTime = None
+        a.examPaperType = None
         a
 
       case AssessmentType.SummerExam =>
@@ -240,6 +259,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e.inUse = true
         e.weighting = 70
         e.marksCode = "TABULA-UG"
+        e.examPaperCode = Some(s"${moduleCode.toUpperCase}0")
+        e.examPaperTitle = Some(module.name)
+        e.examPaperSection = Some("n/a")
+        e.examPaperDuration = Some(Duration.standardMinutes(120))
+        e.examPaperReadingTime = None
+        e.examPaperType = Some(ExaminationType.Standard)
         e
     }
 
@@ -257,18 +282,21 @@ object AssignmentImporter {
     if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
     else orig
 
-  /** Get AssessmentComponents, and also some fake ones for linking to
-    * the group of students with no selected assessment group.
-    *
-    * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
-    * assessment components which make up modules.
-    * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
-    * specified.
-    *
-    * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
-    * SMO holds confirmed module registrations and is included to catch module registrations in departments which
-    * upload module registrations after confirmation.
-    */
+  /**
+   * Get AssessmentComponents, and also some fake ones for linking to
+   * the group of students with no selected assessment group.
+   *
+   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+   * assessment components which make up modules.
+   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+   * specified.
+   *
+   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
+   * upload module registrations after confirmation.
+   *
+   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
+   */
   def GetAssessmentsQuery =
     s"""
     select distinct
@@ -279,7 +307,13 @@ object AssignmentImporter {
       'X' as assessment_code,
       'Y' as in_use,
       null as marks_code,
-      0 as weight
+      0 as weight,
+      null as exam_paper_code,
+      null as exam_paper_title,
+      null as exam_paper_section,
+      null as exam_paper_duration,
+      null as exam_paper_reading_time,
+      null as exam_paper_type
       from $sitsSchema.cam_sms sms
         join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -295,7 +329,13 @@ object AssignmentImporter {
       'X' as assessment_code,
       'Y' as in_use,
       null as marks_code,
-       0 as weight
+      0 as weight,
+      null as exam_paper_code,
+      null as exam_paper_title,
+      null as exam_paper_section,
+      null as exam_paper_duration,
+      null as exam_paper_reading_time,
+      null as exam_paper_type
       from $sitsSchema.cam_smo smo
         left outer join $sitsSchema.cam_ssn ssn
           on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -313,7 +353,13 @@ object AssignmentImporter {
       ${castToString("mab.ast_code")} as assessment_code,
       ${castToString("mab.mab_udf1")} as in_use,
       ${castToString("mab.mks_code")} as marks_code,
-      mab_perc as weight
+      mab.mab_perc as weight,
+      ${castToString("mab.mab_apac")} as exam_paper_code,
+      ${castToString("apa.apa_name")} as exam_paper_title,
+      case when (mab.mab_advc = 'X') then 'n/a' else ${castToString("mab.mab_advc")} end as exam_paper_section,
+      adv.adv_dura as exam_paper_duration,
+      adv.adv_rdtm as exam_paper_reading_time,
+      ${castToString("apa.apa_aptc")} as exam_paper_type
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
         join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
           on mab.map_code = mav.mod_code and
@@ -321,9 +367,11 @@ object AssignmentImporter {
              mav.ayr_code in (:academic_year_code)
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
-      where  mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
-            mab.mab_agrp is not null"""
+        left outer join $sitsSchema.cam_apa apa -- paper
+          on mab.mab_apac = apa.apa_code
+        left outer join $sitsSchema.cam_adv adv -- paper division (section)
+          on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
+      where mab.mab_agrp is not null"""
 
   def GetAllAssessmentGroups =
     s"""
@@ -338,9 +386,7 @@ object AssignmentImporter {
           on mab.map_code = mav.mod_code
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
-      where mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
-            mav.psl_code = 'Y' and -- period slot code of Y (year)
+      where mav.psl_code = 'Y' and -- period slot code of Y (year)
             mav.ayr_code in (:academic_year_code)
   union all
     select distinct
@@ -354,9 +400,7 @@ object AssignmentImporter {
           on mab.map_code = mav.mod_code
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
-      where mod.mod_iuse = 'Y' and -- in use
-            mod.mot_code not in ('S-', 'D') and -- module type - not suspended, discontinued?
-            mav.psl_code = 'Y' and
+      where mav.psl_code = 'Y' and
             mab.mab_agrp is not null and
             mav.ayr_code in (:academic_year_code)"""
 
@@ -396,8 +440,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
@@ -447,8 +490,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -497,8 +539,7 @@ object AssignmentImporter {
 
           left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
             on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-              and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
-              and not $dialectRegexpLike(wss.wss_wspc, '^EX([BCDEFJKOP][A-Z]|AA)[A-Z]19$$') -- TAB-7153
+              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
 
           left join $sitsSchema.cam_sas sas -- Where component marks go
             on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -556,6 +597,10 @@ object AssignmentImporter {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     compile()
 
+    private val referenceDate: Instant = OffsetDateTime.parse("1900-01-01T00:00Z").toInstant
+    private def dateToDuration(ts: Timestamp): Duration =
+      Duration.standardMinutes(referenceDate.until(ts.toInstant, ChronoUnit.MINUTES))
+
     override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
       val a = new AssessmentComponent
       a.moduleCode = rs.getString("module_code")
@@ -569,6 +614,12 @@ object AssignmentImporter {
       }
       a.marksCode = rs.getString("marks_code")
       a.weighting = rs.getInt("weight")
+      a.examPaperCode = Option(rs.getString("exam_paper_code"))
+      a.examPaperTitle = Option(rs.getString("exam_paper_title"))
+      a.examPaperSection = Option(rs.getString("exam_paper_section"))
+      a.examPaperDuration = Option(rs.getTimestamp("exam_paper_duration")).map(dateToDuration)
+      a.examPaperReadingTime = if (rs.getTimestamp("exam_paper_reading_time") != null) Some(Duration.standardMinutes(15)) else None
+      a.examPaperType = Option(rs.getString("exam_paper_type")).map(ExaminationType.withName)
       a
     }
   }

@@ -270,35 +270,17 @@
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
 >
-  <#if command.attachedFiles?has_content>
-    <@f.hidden name="_attachedFiles" value="on" />
-    <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
-      <ul class="unstyled">
-        <#list command.attachedFiles as attachment>
-          <#assign url></#assign>
-          <li id="attachment-${attachment.id}" class="attachment">
-            <i class="fa fa-file-o"></i>
-            <a target="_blank" href="<@routes.mitcircs.renderAttachment submission attachment />"><#compress> ${attachment.name} </#compress></a>&nbsp;
-            <@f.hidden path="attachedFiles" value="${attachment.id}" />
-            <a href="" data-toggle="modal" data-target="#confirm-delete-${attachment.id}"><i class="fa fa-times-circle"></i></a>
-            <@modal.modal id="confirm-delete-${attachment.id}" role="dialog">
-              <@modal.wrapper>
-                <@modal.body>Are you sure that you want to delete ${attachment.name}?</@modal.body>
-                <@modal.footer>
-                  <a class="btn btn-danger remove-attachment" data-dismiss="modal">Delete</a>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </@modal.footer>
-              </@modal.wrapper>
-            </@modal.modal>
-          </li>
-        </#list>
-      </ul>
-      <div class="help-block">
-        This is a list of all supporting documents that have been attached to this mitigating circumstances submission.
-        Click the remove link next to a document to delete it.
-      </div>
-    </@bs3form.labelled_form_group>
-  </#if>
+  <#function render_attachment attachment>
+    <#local result><@routes.mitcircs.renderAttachment submission attachment /></#local>
+    <#return result />
+  </#function>
+  <@bs3form.attachmentsList
+    path="attachedFiles"
+    labelText="Supporting documentation"
+    attachedFiles=command.attachedFiles
+    routeFunction=render_attachment
+    help="This is a list of all supporting documents that have been attached to this mitigating circumstances submission. Click the remove link next to a document to delete it."
+  />
 
   <@bs3form.filewidget
     basename="file"

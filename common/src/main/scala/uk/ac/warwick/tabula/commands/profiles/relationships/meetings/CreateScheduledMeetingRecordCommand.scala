@@ -38,10 +38,8 @@ class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourse
 
   def applyInternal(): ScheduledMeetingRecord = {
     val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala.toSeq)
-    applyCommon(scheduledMeeting)
     scheduledMeeting.creationDate = DateTime.now
-    persistAttachments(scheduledMeeting)
-    meetingRecordService.saveOrUpdate(scheduledMeeting)
+    applyCommon(scheduledMeeting)
     scheduledMeeting
   }
 }

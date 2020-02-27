@@ -1,14 +1,18 @@
 package uk.ac.warwick.tabula.services.scheduling
 
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.junit.After
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterUtils}
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamProfile
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
 import scala.reflect._
 
 trait EmbeddedSits {
@@ -23,13 +27,24 @@ trait EmbeddedSits {
 class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   val assignmentImporter = new AssignmentImporterImpl
-  assignmentImporter.sits = sits
+  assignmentImporter.sitsDataSource = sits
+  assignmentImporter.examTimetableFetchingService = smartMock[ExamTimetableFetchingService]
+  assignmentImporter.examTimetableFetchingService.getExamProfiles returns Future.successful(Seq(ExamProfile(
+    code = "EXSUM19",
+    name = "Summer exams 2019",
+    academicYear = AcademicYear.starting(2018),
+    startDate = new LocalDate(2019, DateTimeConstants.MAY, 19),
+    endDate = new LocalDate(2019, DateTimeConstants.JUNE, 30),
+    published = true,
+    seatNumbersPublished = true
+  )))
+
   AssignmentImporter.sitsSchema = "public"
   AssignmentImporter.sqlStringCastFunction = ""
   AssignmentImporter.dialectRegexpLike = "regexp_matches"
   assignmentImporter.afterPropertiesSet()
 
-  val NONE = AssessmentComponent.NoneAssessmentGroup
+  val NONE: String = AssessmentComponent.NoneAssessmentGroup
 
   @Test def groupImportSql(): Unit = {
     // Not really testing AssignmentImporter but the behaviour of the query class for IN(..)
@@ -49,9 +64,9 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def importMembers(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       var members = ArrayBuffer[UpstreamModuleRegistration]()
-      assignmentImporter.allMembers { mr =>
+      assignmentImporter.allMembers(yearsToImport) { mr =>
         members += mr
       }
 
@@ -61,8 +76,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentGroups(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
-      val allGroups = sorted(assignmentImporter.getAllAssessmentGroups)
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val allGroups = sorted(assignmentImporter.getAllAssessmentGroups(yearsToImport))
       val tuples = allGroups.map(asTuple)
 
       /* We currently get the NONE assessmentgroups even for groups
@@ -78,7 +93,9 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
         ("CH130-15", "A", "A", "A01"),
         ("CH130-15", NONE, NONE, NONE),
         ("CH130-20", "A", "A", "A01"),
-        ("CH130-20", NONE, NONE, NONE)
+        ("CH130-20", NONE, NONE, NONE),
+        ("XX101-30", "A", "A", "A01"),
+        ("XX101-30", NONE, NONE, NONE)
       ))
 
     }
@@ -86,18 +103,17 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentComponents(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
-      val components = sorted(assignmentImporter.getAllAssessmentComponents)
-      val tuples = components map asTuple
+      val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
+      val components = sorted(assignmentImporter.getAllAssessmentComponents(yearsToImport))
 
-      tuples should be(Seq(
-        ("CH115-30", "A", "Chemicals Essay"),
-        ("CH115-30", "NONE", "Students not registered for assessment"),
-        ("CH120-15", "A", "Chemistry Dissertation"),
-        ("CH130-15", "A", "Chem 130 A01"),
-        ("CH130-20", "A", "Chem 130 A01 (20 CATS)")
+      components.map(_.toString()) should be(Seq(
+        "AssessmentComponent[moduleCode=CH115-30,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chemicals Essay,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1150),examPaperTitle=Some(Chemicals Essay),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",
+        "AssessmentComponent[moduleCode=CH115-30,assessmentGroup=NONE,sequence=NONE,inUse=true,module=null,name=Students not registered for assessment,assessmentType=Other,marksCode=null,weighting=0,examPaperCode=None,examPaperTitle=None,examPaperSection=None,examPaperDuration=None,examPaperReadingTime=None,examPaperType=None]",
+        "AssessmentComponent[moduleCode=CH120-15,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chemistry Dissertation,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1200),examPaperTitle=Some(Chemistry Dissertation),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=Some(PT900S),examPaperType=Some(OpenBook)]",
+        "AssessmentComponent[moduleCode=CH130-15,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chem 130 A01,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1300),examPaperTitle=Some(Chem 130 A01),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",
+        "AssessmentComponent[moduleCode=CH130-20,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Chem 130 A01 (20 CATS),assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(CH1300),examPaperTitle=Some(Chem 130 A01),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=None,examPaperType=Some(Standard)]",
+        "AssessmentComponent[moduleCode=XX101-30,assessmentGroup=A,sequence=A01,inUse=true,module=null,name=Danger Zone,assessmentType=SummerExam,marksCode=null,weighting=50,examPaperCode=Some(XX1010),examPaperTitle=Some(Danger Zone),examPaperSection=Some(n/a),examPaperDuration=Some(PT5400S),examPaperReadingTime=Some(PT900S),examPaperType=Some(OpenBook)]"
       ))
-
     }
   }
 

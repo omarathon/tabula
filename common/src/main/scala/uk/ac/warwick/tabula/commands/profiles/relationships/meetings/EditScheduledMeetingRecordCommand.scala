@@ -42,8 +42,6 @@ class EditScheduledMeetingRecordCommand(val editor: Member, val meetingRecord: S
     val isRescheduled = !meetingDate.equals(newMeetingDate)
 
     applyCommon(meetingRecord)
-    persistAttachments(meetingRecord)
-    meetingRecordService.saveOrUpdate(meetingRecord)
     ScheduledMeetingRecordResult(meetingRecord, isRescheduled)
   }
 }

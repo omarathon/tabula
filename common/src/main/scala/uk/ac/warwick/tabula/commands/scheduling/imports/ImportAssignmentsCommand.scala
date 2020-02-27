@@ -57,6 +57,8 @@ object ImportAssignmentsCommand {
 }
 
 trait ImportAssignmentsMembersToImport {
+  def yearsToImport: Seq[AcademicYear]
+
   def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit
 
   def importEverything: Boolean
@@ -66,7 +68,7 @@ trait ImportAssignmentsAllMembers extends ImportAssignmentsMembersToImport {
   self: AssignmentImporterComponent =>
 
   override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-    assignmentImporter.allMembers(callback)
+    assignmentImporter.allMembers(yearsToImport)(callback)
   }
 
   val importEverything: Boolean = true
@@ -76,7 +78,6 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
   self: AssignmentImporterComponent =>
 
   val members: Seq[MembershipMember]
-  val yearsToImport: Seq[AcademicYear]
 
   override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
     assignmentImporter.specificMembers(members, yearsToImport)(callback)
@@ -98,12 +99,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   var modifiedAssignments: Set[Assignment] = Set.empty
 
+  override def yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
+
   def applyInternal(): Unit = {
     benchmark("ImportAssessment") {
       if (importEverything) {
         doAssignments()
         logger.debug("Imported AssessmentComponents. Importing assessment groups...")
-        doGroups(AcademicYear.now())
+        doGroups()
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
         doGradeBoundaries()
@@ -119,14 +122,18 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doAssignments(): Unit = {
     benchmark("Process Assessment components") {
-
       val existingAssessmentComponents = transactional(readOnly = true) {
-        assessmentMembershipService.getAllAssessmentComponents
+        assessmentMembershipService.getAllAssessmentComponents(yearsToImport)
       }
-      val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
+
+      val assessmentComponents = logSize {
+        assignmentImporter.getAllAssessmentComponents(yearsToImport)
+          .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
+      }
+
       val modules = transactional(readOnly = true) {
         moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
-          .groupBy(_.code).mapValues(_.head)
+          .groupBy(_.code).view.mapValues(_.head)
       }
       assessmentComponents.grouped(ImportGroupSize).foreach(assignments => {
         benchmark("Save assessment component related assignments") {
@@ -145,8 +152,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       })
 
       // find any existing AssessmentComponents that no longer appear in SITS
-        existingAssessmentComponents.foreach { existing =>
-          transactional() {
+      existingAssessmentComponents.foreach { existing =>
+        transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
             removeAssessmentComponent(existing)
           }
@@ -155,12 +162,13 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
-  def doGroups(year: AcademicYear): Unit = {
+  def doGroups(): Unit = {
     benchmark("Import assessment groups") {
       val existingUpstreamAssessmentGroupsForThatYear = transactional(readOnly = true) {
-        assessmentMembershipService.getUpstreamAssessmentGroups(Seq(year))
+        assessmentMembershipService.getUpstreamAssessmentGroups(yearsToImport)
       }
-      val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups
+      val upstreamAssessmentGroupsFromSITS = assignmentImporter.getAllAssessmentGroups(yearsToImport)
+
       // Split into chunks so we commit transactions periodically.
       for (groups <- logSize(upstreamAssessmentGroupsFromSITS).grouped(ImportGroupSize)) {
         saveGroups(groups)
@@ -227,7 +235,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         val groupsToEmpty = transactional(readOnly = true) {
           assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
             ids = notEmptyGroupIds.filter(_.hasText).toSeq,
-            academicYears = assignmentImporter.yearsToImport
+            academicYears = yearsToImport
           )
         }
 
@@ -436,12 +444,20 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
 
   @Value("${tabula.yearZero}") var yearZero: Int = 2000
 
+  private var currentYear: AcademicYear = _
+
+  override def yearsToImport: Seq[AcademicYear] = Seq(currentYear)
+
   override def applyInternal(): Unit = {
     val next = AcademicYear.now().next.startYear
     for (year <- yearZero until next) {
-      assignmentImporter.yearsToImport = Seq(AcademicYear(year))
-      doGroups(AcademicYear(year))
-      doGroupMembers()
+      currentYear = AcademicYear.starting(year)
+
+      benchmark(s"ImportAssignmentsCommand for $currentYear") {
+        doAssignments()
+        doGroups()
+        doGroupMembers()
+      }
     }
   }
 

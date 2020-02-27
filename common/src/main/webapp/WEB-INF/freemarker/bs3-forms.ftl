@@ -7,6 +7,9 @@ Macros for customised form elements, containers and more complex pickers.
 
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+
+<#import "*/modal_macros.ftlh" as modal />
+
 <#compress>
   <#escape x as x?html>
 
@@ -196,6 +199,97 @@ Macros for customised form elements, containers and more complex pickers.
             //--></script>
         </@spring.bind>
       </@labelled_form_group>
+    </#macro>
+
+    <#macro attachmentsList path labelText attachedFiles=[] routeFunction="" help="" confirmModal=true detectMimeType=true>
+      <@f.hidden name="_${path}" value="on" />
+      <#if attachedFiles?has_content>
+        <@labelled_form_group path=path labelText=labelText>
+          <ul class="list-unstyled attachments">
+            <#list attachedFiles as attachment>
+              <#local url></#local>
+              <li id="attachment-${attachment.id}" class="attachment">
+                <#if detectMimeType>
+                  <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+                  <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+                <#else>
+                  <i class="fal fa-fw fa-file"></i>
+                </#if>
+                <#if routeFunction?has_content>
+                  <a target="_blank" href="${routeFunction(attachment)}"><#compress> ${attachment.name} </#compress></a>&nbsp;
+                <#else>
+                  <span><#compress> ${attachment.name} </#compress></span>&nbsp;
+                </#if>
+                <@f.hidden path=path value="${attachment.id}" id="${path}_${attachment.id}" />
+
+                <#if confirmModal>
+                  <a href="" data-toggle="modal" data-target="#confirm-delete-${attachment.id}"><i class="fa fa-times-circle"></i></a>
+                  <@modal.modal id="confirm-delete-${attachment.id}" role="dialog">
+                    <@modal.wrapper>
+                      <@modal.body>Are you sure that you want to delete ${attachment.name}?</@modal.body>
+                      <@modal.footer>
+                        <a class="btn btn-danger remove-attachment" data-dismiss="modal">Delete</a>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      </@modal.footer>
+                    </@modal.wrapper>
+                  </@modal.modal>
+                <#else>
+                  <a href="" class="remove-attachment"><i class="fa fa-times-circle"></i></a>
+                </#if>
+              </li>
+            </#list>
+          </ul>
+          <script nonce="${nonce()}">
+            jQuery(function ($) {
+              // remove attachment
+              $('body').on('click', '.attachments .remove-attachment', function (e) {
+                e.preventDefault();
+
+                var $target = $(e.target);
+
+                var $attachmentContainer = $target.closest('li.attachment');
+
+                var $form = $attachmentContainer.closest('form');
+                var $ul = $attachmentContainer.closest('ul');
+
+                function removeAttachment() {
+                  var attachmentName = $attachmentContainer.find('i').first().next('a,span').text();
+                  $attachmentContainer.empty()
+                    .append($('<i />').addClass('fa fa-fw'))
+                    .append('&nbsp;')
+                    .append($('<del />').text(attachmentName));
+
+                  var buttonLabel = 'Save';
+                  var $submitButton = $form.find('button:not([type="button"]), input[type="submit"]');
+                  if ($submitButton.length === 1) {
+                    if ($submitButton.is('button')) {
+                      buttonLabel = $submitButton.text();
+                    } else if ($submitButton.is('input')) {
+                      buttonLabel = $submitButton.val();
+                    }
+                  }
+
+                  if (!$ul.find('li').last().is('.pending-removal')) {
+                    var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>' + buttonLabel + '</samp>.</li>';
+                    $ul.append(alertMarkup);
+                  }
+                }
+
+                // Are we in a modal?
+                var $modal = $target.closest('.modal');
+                if ($modal.length) {
+                  $modal.on('hidden.bs.modal', removeAttachment);
+                } else {
+                  removeAttachment();
+                }
+              });
+            });
+          </script>
+          <#if help?has_content>
+            <div class="help-block">${help}</div>
+          </#if>
+        </@labelled_form_group>
+      </#if>
     </#macro>
 
   <#--

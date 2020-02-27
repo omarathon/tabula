@@ -1,16 +1,21 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import java.time.Duration
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.util.EntityUtils
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
-import org.joda.time.{DateTime, Period}
+import org.joda.time.format._
+import org.joda.time.{DateTime, LocalDate, Period}
 import org.springframework.stereotype.Service
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
@@ -18,16 +23,21 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamTimetable
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.util.cache._
 
 import scala.concurrent.Future
+import scala.jdk.DurationConverters._
 import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
   val examTimetableUrl: String
+  val examProfilesUrl: String
+  val examProfilesCacheExpiry: Duration
 }
 
 trait ExamTimetableConfigurationComponent {
@@ -39,6 +49,12 @@ trait AutowiringExamTimetableConfigurationComponent extends ExamTimetableConfigu
 
   class AutowiringExamTimetableConfiguration extends ExamTimetableConfiguration {
     lazy val examTimetableUrl: String = Wire.optionProperty("${examTimetable.url}").getOrElse("https://exams.warwick.ac.uk/timetable/")
+    lazy val examProfilesUrl: String = Wire.optionProperty("${examProfiles.url}").getOrElse("https://exams.warwick.ac.uk/api/v1/examProfiles.json")
+    lazy val examProfilesCacheExpiry: Duration =
+      Wire.optionProperty("${examProfiles.cacheExpiry}")
+        .map(FiniteDurationConverter.asDuration)
+        .map(_.toJava)
+        .getOrElse(Duration.ofHours(1))
   }
 
 }
@@ -77,7 +93,6 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
       Future(EventList(Nil, None))
     }
   }
-
 
   override def getTimetableForStudent(universityId: String): Future[EventList] = featureProtected(universityId)(doRequest)
 
@@ -129,10 +144,9 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 
   def parseXml(xml: Elem, universityId: String, topLevelUrl: String): Seq[TimetableEvent] = {
     val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml)
-    val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
     timetable.exams.flatMap { timetableExam =>
-      val uid = DigestUtils.md5Hex(Seq(examProfile, timetableExam.paper).mkString)
+      val uid = DigestUtils.md5Hex(Seq(timetableExam.profile, timetableExam.paper).mkString)
       Try(timetableExam.academicYear.weekForDate(timetableExam.startDateTime.toLocalDate).weekNumber) match {
         case Success(weekNumber) =>
           Some(TimetableEvent(
@@ -170,6 +184,7 @@ object ExamTimetableFetchingService {
   val examReadingTimeFormatter: PeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
 
   case class ExamTimetableExam(
+    profile: String,
     academicYear: AcademicYear,
     moduleCode: String,
     paper: String,
@@ -192,68 +207,99 @@ object ExamTimetableFetchingService {
   )
 
   def examTimetableFromXml(xml: Elem): ExamTimetable = {
-    val header = (xml \\ "exam-headerinfo").text
-    val instructions = (xml \\ "exam-instructions").text
+    val header = (xml \\ "exam-headerinfo").headOption.map(_.text).getOrElse("")
+    val instructions = (xml \\ "exam-instructions").headOption.map(_.text).getOrElse("")
 
-    if ((xml \\ "exam").isEmpty) {
+    if ((xml \\ "exam-profile").isEmpty) {
       ExamTimetable(header, instructions, Nil)
     } else {
-      val academicYear = AcademicYear((xml \\ "academic-year").text.toInt).extended
-      val exams = (xml \\ "exam").map(examNode => {
-        val moduleCode = (examNode \\ "module").text
-        val paper = (examNode \\ "paper").text
-        val section = (examNode \\ "section").text
-        val lengthString = (examNode \\ "length").text
-        val length = examPeriodFormatter.parsePeriod(lengthString)
-        val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
-          readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
-        )
-        val isOpenBook = (examNode \\ "open-book").text.maybeText.isDefined
+      val exams = (xml \\ "exam-profile").flatMap { profile =>
+        val profileCode = (profile \ "profile").text
+        val academicYear = AcademicYear((profile \ "academic-year").text.toInt).extended
 
-        val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
-        val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
-          extraTimePerHourNode.text.maybeText.flatMap(s => Try(s.toInt).toOption)
-        )
-        val extraTime = extraTimePerHour.map(minutes =>
-          Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
-        )
-        val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
+        (profile \ "exam").map { examNode =>
+          val moduleCode = (examNode \\ "module").text
+          val paper = (examNode \\ "paper").text
+          val section = (examNode \\ "section").text
+          val lengthString = (examNode \\ "length").text
+          val length = examPeriodFormatter.parsePeriod(lengthString)
+          val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
+            readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
+          )
+          val isOpenBook = (examNode \\ "open-book").text.maybeText.isDefined
 
-        val room = (examNode \\ "room").text
-        val seat = (examNode \\ "seat").text.maybeText
+          val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
+          val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
+            extraTimePerHourNode.text.maybeText.flatMap(s => Try(s.toInt).toOption)
+          )
+          val extraTime = extraTimePerHour.map(minutes =>
+            Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
+          )
+          val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
 
-        ExamTimetableExam(
-          academicYear,
-          moduleCode,
-          paper,
-          section,
-          length,
-          lengthString,
-          readingTime,
-          isOpenBook,
-          startDateTime,
-          endDateTime,
-          extraTimePerHour,
-          room,
-          seat
-        )
-      })
+          val room = (examNode \\ "room").text
+          val seat = (examNode \\ "seat").text.maybeText
+
+          ExamTimetableExam(
+            profileCode,
+            academicYear,
+            moduleCode,
+            paper,
+            section,
+            length,
+            lengthString,
+            readingTime,
+            isOpenBook,
+            startDateTime,
+            endDateTime,
+            extraTimePerHour,
+            room,
+            seat
+          )
+        }
+      }
+
       ExamTimetable(header, instructions, exams)
     }
   }
 
+  case class ExamProfile(
+    code: String,
+    name: String,
+    academicYear: AcademicYear,
+    startDate: LocalDate,
+    endDate: LocalDate,
+    published: Boolean,
+    seatNumbersPublished: Boolean
+  )
+
+  val readsLocalDate: Reads[LocalDate] = implicitly[Reads[String]].map(LocalDate.parse(_, ISODateTimeFormat.localDateParser))
+  val readsExamProfile: Reads[ExamProfile] = (
+    (__ \ "code").read[String] and
+    (__ \ "name").read[String] and
+    (__ \ "academicYear").read[String].map(AcademicYear.parse) and
+    (__ \ "startDate").read[LocalDate](readsLocalDate) and
+    (__ \ "endDate").read[LocalDate](readsLocalDate) and
+    (__ \ "published").read[Boolean] and
+    (__ \ "seatNumbersPublished").read[Boolean]
+  )(ExamProfile.apply _)
+
+  // Yucky wrapper to make sure it's Serializable
+  case class ExamProfileList(examProfiles: Seq[ExamProfile] with java.io.Serializable)
 }
 
 trait ExamTimetableFetchingService {
   def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable]
+  def getExamProfiles: Future[Seq[ExamProfile]]
 }
 
 abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchingService with Logging {
+  self: ApacheHttpClientComponent
+    with ExamTimetableConfigurationComponent
+    with TrustedApplicationsManagerComponent
+    with CacheStrategyComponent =>
 
-  self: ApacheHttpClientComponent with ExamTimetableConfigurationComponent
-    with TrustedApplicationsManagerComponent =>
-
-  def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
+  override def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
     // staff and student have different end points
     val endpoint = if (member.universityId == viewer.universityId) {
       s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
@@ -284,6 +330,47 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
     }
     result
   }
+
+  val examProfilesCacheKey: String = "examProfiles"
+  val examProfilesCacheEntryFactory: CacheEntryFactory[String, ExamProfileList] = new SingularCacheEntryFactory[String, ExamProfileList] {
+    override def create(ignored: String): ExamProfileList = {
+      val req = RequestBuilder.get(examTimetableConfiguration.examProfilesUrl).build()
+
+      val handler: ResponseHandler[Seq[ExamProfile]] =
+        ApacheHttpClientUtils.jsonResponseHandler { data =>
+          if ((data \ "success").as[Boolean]) {
+            (data \ "examProfiles").validate[Seq[ExamProfile]](Reads.seq(readsExamProfile)).fold(
+              invalid => {
+                logger.error(s"Error fetching exam profiles: $invalid")
+                throw new IllegalStateException(s"Error fetching exam profiles: $invalid")
+              },
+              identity
+            )
+          } else throw new IllegalStateException(s"Invalid response from exam profiles endpoint: ${Json.prettyPrint(data)}")
+        }
+
+      Try(httpClient.execute(req, handler)).fold(
+        t => throw new CacheEntryUpdateException("Couldn't fetch exam profiles", t),
+        {
+          case profiles: Seq[ExamProfile] with java.io.Serializable => ExamProfileList(profiles)
+          case _ => throw new CacheEntryUpdateException("Unserializable collection returned from ExamTimetableFetchingService")
+        }
+      )
+    }
+
+    override def shouldBeCached(profiles: ExamProfileList): Boolean = true
+  }
+
+  lazy val examProfilesCache: Cache[String, ExamProfileList] =
+    Caches.builder("ExamProfilesCache", examProfilesCacheEntryFactory, cacheStrategy)
+      .expireAfterWrite(examTimetableConfiguration.examProfilesCacheExpiry)
+      .maximumSize(1)
+      .build()
+
+  override def getExamProfiles: Future[Seq[ExamProfile]] = Future {
+    examProfilesCache.get(examProfilesCacheKey)
+      .examProfiles
+  }
 }
 
 @Service("examTimetableFetchingService")
@@ -293,6 +380,7 @@ class ExamTimetableFetchingServiceImpl
     with AutowiringExamTimetableConfigurationComponent
     with AutowiringTrustedApplicationsManagerComponent
     with AutowiringUserLookupComponent
+    with AutowiringCacheStrategyComponent
 
 trait ExamTimetableFetchingServiceComponent {
   def examTimetableFetchingService: ExamTimetableFetchingService

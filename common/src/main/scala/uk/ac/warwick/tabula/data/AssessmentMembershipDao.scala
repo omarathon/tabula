@@ -73,7 +73,7 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent]
+  def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   /**
     * Get all assessment groups that can serve this assignment this year.
@@ -345,9 +345,19 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
-  def getAllAssessmentComponents: Seq[AssessmentComponent] = {
-    session.newCriteria[AssessmentComponent].seq
-  }
+  def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
+    session.newQuery[AssessmentComponent](
+      """
+        select distinct ac
+        from AssessmentComponent ac
+          join UpstreamAssessmentGroup uag
+            on ac.assessmentGroup = uag.assessmentGroup and
+               ac.moduleCode = uag.moduleCode and
+               ac.sequence = uag.sequence
+        where
+          uag.academicYear in (:academicYears)""")
+      .setParameterList("academicYears", academicYears)
+      .seq
 
   def countPublishedFeedback(assignment: Assignment): Int = {
     session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")

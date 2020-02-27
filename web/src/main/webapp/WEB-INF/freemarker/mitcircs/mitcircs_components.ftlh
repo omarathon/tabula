@@ -94,10 +94,10 @@
 
       <#local title><@spring.message code=progress.stage.actionCode /></#local>
       <#if progress_index gt 0>
-        <div tabindex="0" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title?markup_string)}"></div>
+        <div tabindex="0" class="bar bar-${state} use-tooltip" data-toggle="tooltip" data-placement="top" title="${fmt.strip_html(title?markup_string)}"></div>
       </#if>
       <#local title><@spring.message code=progress.messageCode /></#local>
-      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title?markup_string)}">
+      <span tabindex="0" class="fa-stack use-tooltip" data-toggle="tooltip" data-placement="top" title="${fmt.strip_html(title?markup_string)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>

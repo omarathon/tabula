@@ -96,6 +96,7 @@
                     <thead>
                     <tr>
                       <th>Sequence</th>
+                      <th>Type</th>
                       <th>Name</th>
                       <th>Weighting</th>
                       <th>Mark</th>
@@ -106,6 +107,7 @@
                     <#list moduleRegistrationAndComponent.components as component>
                       <tr>
                         <td>${component.upstreamGroup.sequence}</td>
+                        <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
                         <td>${component.upstreamGroup.name}</td>
                         <td>${component.upstreamGroup.assessmentComponent.weighting!0}%</td>
                         <td>${component.member.firstAgreedMark!}</td>
@@ -120,6 +122,70 @@
           </div>
         </div>
       </#list>
+
+      <h2>Examinations</h2>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Paper code</th>
+            <th>Paper title</th>
+            <th>Section</th>
+            <th>Duration</th>
+            <th>Reading time</th>
+            <th>Exam type</th>
+            <th>Assessment type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
+            <#list moduleRegistrationAndComponent.components as component>
+              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'LX'>
+                <tr>
+                  <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}<#if moduleRegistrationAndComponent.moduleRegistration.cats?has_content>-${moduleRegistrationAndComponent.moduleRegistration.cats}</#if></td>
+                  <#if component.upstreamGroup.assessmentComponent.examPaperCode?has_content>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperCode}</td>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperTitle!""}</td>
+                    <td>${component.upstreamGroup.assessmentComponent.examPaperSection!'Unknown'}</td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperDuration??>
+                        ${durationFormatter(component.upstreamGroup.assessmentComponent.examPaperDuration)}
+                      <#else>
+                        Unknown
+                      </#if>
+                    </td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperReadingTime??>
+                        ${durationFormatter(component.upstreamGroup.assessmentComponent.examPaperReadingTime)}
+                      <#else>
+                        n/a
+                      </#if>
+                    </td>
+                    <td>
+                      <#if component.upstreamGroup.assessmentComponent.examPaperType??>
+                        ${component.upstreamGroup.assessmentComponent.examPaperType.name}
+                        <#if component.upstreamGroup.assessmentComponent.examPaperType.description??>
+                          <a class="use-popover" data-trigger="click focus" data-placement="left" data-content="${component.upstreamGroup.assessmentComponent.examPaperType.description}">
+                            <i class="fal fa-question-circle"></i>
+                          </a>
+                        </#if>
+                      <#else>
+                        Unknown
+                      </#if>
+                    </td>
+                  <#else>
+                    <td colspan="6">Unknown</td>
+                  </#if>
+                  <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
+                </tr>
+              </#if>
+            </#list>
+          </#list>
+        </tbody>
+      </table>
+
+
 
     <#else>
 
