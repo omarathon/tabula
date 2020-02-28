@@ -8,12 +8,15 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedRole, RoleOverride}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.userlookup.User
 
 class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 
-  private trait CommandTestSupport extends AddCustomRoleOverrideCommandState with PermissionsServiceComponent {
-    val permissionsService: PermissionsService = mock[PermissionsService]
+  private trait CommandTestSupport extends AddCustomRoleOverrideCommandState with PermissionsServiceComponent with SecurityServiceComponent {
+    val permissionsService: PermissionsService = smartMock[PermissionsService]
+    val securityService: SecurityService = smartMock[SecurityService]
   }
 
   private trait Fixture {
@@ -31,14 +34,14 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     val command = new AddCustomRoleOverrideCommandInternal(department, customRole) with CommandTestSupport
   }
 
-  @Test def init: Unit = {
+  @Test def init(): Unit = {
     new CommandFixture {
       command.department should be(department)
       command.customRoleDefinition should be(customRole)
     }
   }
 
-  @Test def apply: Unit = {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Allow
@@ -52,11 +55,11 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions: Unit = {
+  @Test def permissions(): Unit = {
     new Fixture {
       val d: Department = department
 
-      val command = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
+      val command: AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
         override val department: Department = d
         override val customRoleDefinition: CustomRoleDefinition = customRole
       }
@@ -64,14 +67,14 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
 
-      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, customRole)
+      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, customRole)
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment(): Unit = {
     new Fixture {
-      val command = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
-        override val department = null
+      val command: AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
+        override val department: Department = null
         override val customRoleDefinition: CustomRoleDefinition = customRole
       }
 
@@ -83,16 +86,19 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
   private trait ValidationFixture extends Fixture {
     val d: Department = department
 
-    val command = new AddCustomRoleOverrideCommandValidation with CommandTestSupport {
+    val command: AddCustomRoleOverrideCommandValidation with CommandTestSupport = new AddCustomRoleOverrideCommandValidation with CommandTestSupport {
       val department: Department = d
       val customRoleDefinition: CustomRoleDefinition = customRole
     }
   }
 
-  @Test def validateNoErrors: Unit = {
+  @Test def validateNoErrors(): Unit = withUser("cuscav") {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Deny
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Nil
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Nil
 
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -101,7 +107,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateNoPermission: Unit = {
+  @Test def validateNoPermission(): Unit = {
     new ValidationFixture {
       command.overrideType = RoleOverride.Allow
 
@@ -115,10 +121,13 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateExistingOverride: Unit = {
+  @Test def validateExistingOverride(): Unit = withUser("cuscav") {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Deny
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Nil
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Nil
 
       val existing = new RoleOverride
       existing.permission = Permissions.Module.ManageAssignments
@@ -136,10 +145,13 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyAllowed: Unit = {
+  @Test def validateAlreadyAllowed(): Unit = withUser("cuscav") {
     new ValidationFixture {
       command.permission = Permissions.Module.ManageAssignments
       command.overrideType = RoleOverride.Allow
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Nil
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Nil
 
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -151,10 +163,13 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def validateAlreadyNotAllowed: Unit = {
+  @Test def validateAlreadyNotAllowed(): Unit = withUser("cuscav") {
     new ValidationFixture {
       command.permission = Permissions.ImportSystemData
       command.overrideType = RoleOverride.Deny
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Nil
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Nil
 
       val errors = new BindException(command, "command")
       command.validate(errors)
@@ -166,11 +181,46 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description: Unit = {
+  @Test def validateCantGiveWhatYouDontHave(): Unit = withUser("cuscav") {
+    new ValidationFixture {
+      command.permission = Permissions.ImportSystemData
+      command.overrideType = RoleOverride.Allow
+
+      val otherUser: User = Fixtures.user()
+
+      val grantedBaseRole: GrantedRole[Department] = GrantedRole(department, customRole)
+      grantedBaseRole.users.add(otherUser)
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Seq(grantedBaseRole)
+
+      val derivedCustomRole = new CustomRoleDefinition
+      derivedCustomRole.baseRoleDefinition = customRole
+      derivedCustomRole.department = department
+      department.customRoleDefinitions.add(derivedCustomRole)
+
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Seq(derivedCustomRole)
+
+      val grantedDerivedRole: GrantedRole[Department] = GrantedRole(department, derivedCustomRole)
+      grantedDerivedRole.users.add(otherUser)
+
+      command.permissionsService.getAllGrantedRolesForDefinition(derivedCustomRole) returns Seq(grantedDerivedRole)
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(derivedCustomRole) returns Nil
+
+      val errors = new BindException(command, "command")
+      command.validate(errors)
+
+      errors.hasErrors should be(true)
+      errors.getErrorCount should be(2)
+      errors.getFieldError.getField should be("permission")
+      errors.getFieldError.getCodes should contain("permissions.cantGiveWhatYouDontHave")
+    }
+  }
+
+  @Test def description(): Unit = {
     new Fixture {
       val dept: Department = department
 
-      val command = new AddCustomRoleOverrideCommandDescription with AddCustomRoleOverrideCommandState {
+      val command: AddCustomRoleOverrideCommandDescription with AddCustomRoleOverrideCommandState = new AddCustomRoleOverrideCommandDescription with AddCustomRoleOverrideCommandState {
         override val eventName: String = "test"
         val department: Department = dept
         val customRoleDefinition: CustomRoleDefinition = customRole

@@ -159,6 +159,8 @@ object Permissions {
     case object Read extends Permission("View roles and permissions")
     case object Update extends Permission("Edit roles and permissions")
     case object Delete extends Permission("Remove roles and permissions")
+
+    case object ManageCustomRoles extends Permission("Manage custom roles")
   }
 
   object Department {

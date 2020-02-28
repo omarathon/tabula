@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, SelfValidating, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.jdk.CollectionConverters._
 
 object AddCustomRoleOverrideCommand {
@@ -18,6 +21,7 @@ object AddCustomRoleOverrideCommand {
       with AddCustomRoleOverrideCommandValidation
       with AddCustomRoleOverrideCommandPermissions
       with AutowiringPermissionsServiceComponent
+      with AutowiringSecurityServiceComponent
 }
 
 trait AddCustomRoleOverrideCommandState {
@@ -50,12 +54,14 @@ trait AddCustomRoleOverrideCommandPermissions extends RequiresPermissionsCheckin
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
-    p.PermissionCheck(Permissions.RolesAndPermissions.Create, customRoleDefinition)
+    p.PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, customRoleDefinition)
   }
 }
 
-trait AddCustomRoleOverrideCommandValidation extends SelfValidating {
-  self: AddCustomRoleOverrideCommandState =>
+trait AddCustomRoleOverrideCommandValidation extends SelfValidating with RoleOverrideDelegationValidation {
+  self: AddCustomRoleOverrideCommandState
+    with PermissionsServiceComponent
+    with SecurityServiceComponent =>
 
   import RoleOverride._
 
@@ -81,7 +87,38 @@ trait AddCustomRoleOverrideCommandValidation extends SelfValidating {
           errors.rejectValue("permission", "customRoleDefinition.override.notAllowed")
         }
       }
+
+      validateCanOverridePermission(customRoleDefinition, permission, overrideType)(errors, "permission")
     }
+  }
+}
+
+trait RoleOverrideDelegationValidation {
+  self: PermissionsServiceComponent
+    with SecurityServiceComponent =>
+
+  import RoleOverride._
+
+  def validateCanOverridePermission(customRoleDefinition: CustomRoleDefinition, permission: Permission, overrideType: OverrideType)(errors: Errors, field: String): Unit = {
+    // Check that you're not elevating permissions for anyone who already has this custom role that you don't have yourself
+    // This recursively checks derived role definitions too
+    def checkCanOverridePermission(roleDefinition: CustomRoleDefinition): Unit = {
+      val user = RequestInfo.fromThread.get.user
+
+      permissionsService.getAllGrantedRolesForDefinition(roleDefinition)
+        .filter(_.ensureUsers.nonEmpty)
+        .foreach { grantedRole =>
+          val scope: PermissionsTarget = grantedRole.scope.asInstanceOf[PermissionsTarget]
+
+          if (!securityService.canDelegate(user, permission, scope) && !user.god) {
+            errors.rejectValue(field, if (overrideType == Allow) "permissions.cantGiveWhatYouDontHave" else "permissions.cantRevokeWhatYouDontHave", Array(permission.description, scope), "")
+          }
+        }
+
+      permissionsService.getCustomRoleDefinitionsBasedOn(roleDefinition).foreach(checkCanOverridePermission)
+    }
+
+    checkCanOverridePermission(customRoleDefinition)
   }
 }
 
