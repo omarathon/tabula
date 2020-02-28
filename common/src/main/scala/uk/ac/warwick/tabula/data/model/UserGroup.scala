@@ -281,6 +281,7 @@ trait UnspecifiedTypeUserGroup {
   def size: Int
 
   def isEmpty: Boolean
+  def nonEmpty: Boolean = !isEmpty
 
   def includesUser(user: User): Boolean
 

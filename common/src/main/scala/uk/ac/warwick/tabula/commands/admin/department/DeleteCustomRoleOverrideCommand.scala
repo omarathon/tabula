@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, SelfValidating, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object DeleteCustomRoleOverrideCommand {
   def apply(department: Department, customRoleDefinition: CustomRoleDefinition, roleOverride: RoleOverride) =
@@ -17,6 +18,7 @@ object DeleteCustomRoleOverrideCommand {
       with DeleteCustomRoleOverrideCommandValidation
       with DeleteCustomRoleOverrideCommandPermissions
       with AutowiringPermissionsServiceComponent
+      with AutowiringSecurityServiceComponent
 }
 
 trait DeleteCustomRoleOverrideCommandState {
@@ -44,14 +46,19 @@ trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChec
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
     p.mustBeLinked(mandatory(roleOverride), mandatory(customRoleDefinition))
-    p.PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
+    p.PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, roleOverride)
   }
 }
 
-trait DeleteCustomRoleOverrideCommandValidation extends SelfValidating {
-  self: DeleteCustomRoleOverrideCommandState =>
+trait DeleteCustomRoleOverrideCommandValidation extends SelfValidating with RoleOverrideDelegationValidation {
+  self: DeleteCustomRoleOverrideCommandState
+    with PermissionsServiceComponent
+    with SecurityServiceComponent =>
 
-  override def validate(errors: Errors): Unit = {}
+  override def validate(errors: Errors): Unit = {
+    // Check that we can do the opposite of what we're deleting
+    validateCanOverridePermission(customRoleDefinition, roleOverride.permission, !roleOverride.overrideType)(errors, "")
+  }
 }
 
 trait DeleteCustomRoleOverrideCommandDescription extends Describable[RoleOverride] {

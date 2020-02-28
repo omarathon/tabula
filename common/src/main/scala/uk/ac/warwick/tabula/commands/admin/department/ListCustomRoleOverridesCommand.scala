@@ -41,6 +41,6 @@ trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsCheck
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
-    p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
+    p.PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, customRoleDefinition)
   }
 }
