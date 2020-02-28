@@ -56,7 +56,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
 
-      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, customRole)
+      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, customRole)
     }
   }
 

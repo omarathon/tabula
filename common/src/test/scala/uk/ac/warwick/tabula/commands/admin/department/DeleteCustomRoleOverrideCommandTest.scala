@@ -8,14 +8,17 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedRole, RoleOverride}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
 class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 
-  private trait CommandTestSupport extends DeleteCustomRoleOverrideCommandState with PermissionsServiceComponent {
-    val permissionsService: PermissionsService = mock[PermissionsService]
+  private trait CommandTestSupport extends DeleteCustomRoleOverrideCommandState with PermissionsServiceComponent with SecurityServiceComponent {
+    val permissionsService: PermissionsService = smartMock[PermissionsService]
+    val securityService: SecurityService = smartMock[SecurityService]
   }
 
   private trait Fixture {
@@ -39,7 +42,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     val command = new DeleteCustomRoleOverrideCommandInternal(department, customRole, roleOverride) with CommandTestSupport
   }
 
-  @Test def init: Unit = {
+  @Test def init(): Unit = {
     new CommandFixture {
       command.department should be(department)
       command.customRoleDefinition should be(customRole)
@@ -47,7 +50,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def apply: Unit = {
+  @Test def apply(): Unit = {
     new CommandFixture {
       command.applyInternal() should be(roleOverride)
       customRole.overrides.asScala should be(Symbol("empty"))
@@ -56,12 +59,12 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def permissions: Unit = {
+  @Test def permissions(): Unit = {
     new Fixture {
       val d: Department = department
       val o: RoleOverride = roleOverride
 
-      val command = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
+      val command: DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
         override val department: Department = d
         override val customRoleDefinition: CustomRoleDefinition = customRole
         override val roleOverride: RoleOverride = o
@@ -70,16 +73,16 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
       val checking: PermissionsChecking = mock[PermissionsChecking]
       command.permissionsCheck(checking)
 
-      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
+      verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, roleOverride)
     }
   }
 
-  @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {
+  @Test(expected = classOf[ItemNotFoundException]) def noDepartment(): Unit = {
     new Fixture {
       val o: RoleOverride = roleOverride
 
-      val command = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
-        override val department = null
+      val command: DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
+        override val department: Department = null
         override val customRoleDefinition: CustomRoleDefinition = customRole
         override val roleOverride: RoleOverride = o
       }
@@ -93,15 +96,18 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     val d: Department = department
     val o: RoleOverride = roleOverride
 
-    val command = new DeleteCustomRoleOverrideCommandValidation with CommandTestSupport {
+    val command: DeleteCustomRoleOverrideCommandValidation with CommandTestSupport = new DeleteCustomRoleOverrideCommandValidation with CommandTestSupport {
       val department: Department = d
       val customRoleDefinition: CustomRoleDefinition = customRole
       val roleOverride: RoleOverride = o
     }
   }
 
-  @Test def validateNoErrors: Unit = {
+  @Test def validateNoErrors(): Unit = withUser("cuscav") {
     new ValidationFixture {
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Nil
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Nil
+
       val errors = new BindException(command, "command")
       command.validate(errors)
 
@@ -109,12 +115,43 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
     }
   }
 
-  @Test def description: Unit = {
+  @Test def validateCantRevokeWhatYouDontHave(): Unit = withUser("cuscav") {
+    new ValidationFixture {
+      val otherUser: User = Fixtures.user()
+
+      val grantedBaseRole: GrantedRole[Department] = GrantedRole(department, customRole)
+      grantedBaseRole.users.add(otherUser)
+
+      command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns Seq(grantedBaseRole)
+
+      val derivedCustomRole = new CustomRoleDefinition
+      derivedCustomRole.baseRoleDefinition = customRole
+      derivedCustomRole.department = department
+      department.customRoleDefinitions.add(derivedCustomRole)
+
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns Seq(derivedCustomRole)
+
+      val grantedDerivedRole: GrantedRole[Department] = GrantedRole(department, derivedCustomRole)
+      grantedDerivedRole.users.add(otherUser)
+
+      command.permissionsService.getAllGrantedRolesForDefinition(derivedCustomRole) returns Seq(grantedDerivedRole)
+      command.permissionsService.getCustomRoleDefinitionsBasedOn(derivedCustomRole) returns Nil
+
+      val errors = new BindException(command, "command")
+      command.validate(errors)
+
+      errors.hasErrors should be(true)
+      errors.getErrorCount should be(2)
+      errors.getGlobalError.getCodes should contain("permissions.cantRevokeWhatYouDontHave")
+    }
+  }
+
+  @Test def description(): Unit = {
     new Fixture {
       val dept: Department = department
       val o: RoleOverride = roleOverride
 
-      val command = new DeleteCustomRoleOverrideCommandDescription with DeleteCustomRoleOverrideCommandState {
+      val command: DeleteCustomRoleOverrideCommandDescription with DeleteCustomRoleOverrideCommandState = new DeleteCustomRoleOverrideCommandDescription with DeleteCustomRoleOverrideCommandState {
         override val eventName: String = "test"
         val department: Department = dept
         val customRoleDefinition: CustomRoleDefinition = customRole

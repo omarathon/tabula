@@ -47,7 +47,7 @@ class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
     val checking = mock[PermissionsChecking]
     command.permissionsCheck(checking)
 
-    verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Read, command.customRoleDefinition)
+    verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, command.customRoleDefinition)
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def noDepartment: Unit = {

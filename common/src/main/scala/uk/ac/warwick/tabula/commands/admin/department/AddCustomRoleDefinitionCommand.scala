@@ -47,7 +47,7 @@ trait AddCustomRoleDefinitionCommandPermissions extends RequiresPermissionsCheck
   self: AddCustomRoleDefinitionCommandState =>
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
+    p.PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, mandatory(department))
   }
 }
 
@@ -63,6 +63,10 @@ trait AddCustomRoleDefinitionCommandValidation extends SelfValidating {
     }
 
     if (baseDefinition == null) errors.rejectValue("baseDefinition", "NotEmpty")
+    else if (!baseDefinition.isAssignable) {
+      // Make sure the base definition is assignable, because the custom role definition will be
+      errors.rejectValue("baseDefinition", "customRoleDefinition.baseDefinition.notAssignable")
+    }
   }
 }
 
