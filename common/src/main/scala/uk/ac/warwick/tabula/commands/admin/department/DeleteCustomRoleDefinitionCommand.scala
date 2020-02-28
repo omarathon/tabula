@@ -39,7 +39,7 @@ trait DeleteCustomRoleDefinitionCommandPermissions extends RequiresPermissionsCh
 
   def permissionsCheck(p: PermissionsChecking): Unit = {
     p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
-    p.PermissionCheck(Permissions.RolesAndPermissions.Delete, customRoleDefinition)
+    p.PermissionCheck(Permissions.RolesAndPermissions.ManageCustomRoles, customRoleDefinition)
   }
 }
 
@@ -51,10 +51,10 @@ trait DeleteCustomRoleDefinitionCommandValidation extends SelfValidating {
     val derived = permissionsService.getCustomRoleDefinitionsBasedOn(customRoleDefinition)
 
     // Must not have any derived roles
-    if (!granted.isEmpty) errors.reject("customRoleDefinition.delete.hasGrantedRoles")
+    if (granted.nonEmpty) errors.reject("customRoleDefinition.delete.hasGrantedRoles")
 
     // Must not have any active granted roles
-    if (!derived.isEmpty) errors.reject("customRoleDefinition.delete.hasDerivedRoles")
+    if (derived.nonEmpty) errors.reject("customRoleDefinition.delete.hasDerivedRoles")
   }
 }
 

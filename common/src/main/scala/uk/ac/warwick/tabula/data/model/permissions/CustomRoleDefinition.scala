@@ -77,9 +77,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
     val basePermissions = baseRoleDefinition.allPermissions(scope)
 
     val (additionOverrides, removalOverrides) = overrides.asScala.partition(_.overrideType)
-    val additions = additionOverrides.map {
-      _.permission -> scope
-    }
+    val additions = additionOverrides.map(_.permission -> scope)
     val removals = removalOverrides.map(_.permission)
 
     (basePermissions ++ additions) -- removals

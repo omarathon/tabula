@@ -65,7 +65,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
     Department.ExamGrids,
 
     MitigatingCircumstancesSubmission.ViewGrading,
-    MitigatingCircumstancesSubmission.ViewOutcomes
+    MitigatingCircumstancesSubmission.ViewOutcomes,
+
+    RolesAndPermissions.ManageCustomRoles
   )
 
   def canDelegateThisRolesPermissions: JBoolean = true
