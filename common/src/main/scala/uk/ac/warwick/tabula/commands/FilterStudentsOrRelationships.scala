@@ -117,7 +117,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
     val tier4Restrictions: Seq[ScalaRestriction] = {
       lazy val filteringOnTier4 = otherCriteria.contains("Tier 4 only") ||  otherCriteria.contains("Not Tier 4 only")
-      lazy val hasTier4Permissions = departments.map(d => securityService.can(user, Profiles.Read.Tier4VisaRequirement, d)).reduce(_ && _)
+      lazy val hasTier4Permissions = departments.forall(d => securityService.can(user, Profiles.Read.Tier4VisaRequirement, d))
       if (filteringOnTier4 && hasTier4Permissions) {
         Seq(tier4Restriction, notTier4Restriction).flatten
       } else {
