@@ -46,7 +46,7 @@ class SitsAssignmentItem(
   // whether to create an assignment from this item or not
   var include: Boolean,
   var occurrence: String,
-  var upstreamAssignment: AssessmentComponent
+  var assessmentComponent: AssessmentComponent
 ) {
 
   def this() = this(true, null, null)
@@ -57,8 +57,8 @@ class SitsAssignmentItem(
   var assessmentGroup: Option[UpstreamAssessmentGroup] = _
 
   // Name for new assignment. Defaults to the name of the upstream assignment, if provided.
-  var name: String = Option(upstreamAssignment).map(_.name).orNull
-  if (upstreamAssignment != null) upstreamAssignment.name else null
+  var name: String = Option(assessmentComponent).map(_.name).orNull
+  if (assessmentComponent != null) assessmentComponent.name else null
 
   // Will reference a key of AddSitsAssignmentsCommand.optionsMap. In this way, many SitsAssignmentItems
   // can share the same set of options without having to post many copies separately.
@@ -73,7 +73,7 @@ class SitsAssignmentItem(
   var openEnded: JBoolean = false
 
   def sameAssignment(other: SitsAssignmentItem): Boolean =
-    upstreamAssignment == other.upstreamAssignment &&
+    assessmentComponent == other.assessmentComponent &&
       occurrence == other.occurrence
 }
 
@@ -90,7 +90,7 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
       assignment.academicYear = academicYear
       assignment.name = item.name
 
-      assignment.module = findModule(item.upstreamAssignment).get
+      assignment.module = findModule(item.assessmentComponent).get
 
       assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
       if(!item.openEnded) {
@@ -109,7 +109,7 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 
       val assessmentGroup = new AssessmentGroup
       assessmentGroup.occurrence = item.occurrence
-      assessmentGroup.assessmentComponent = item.upstreamAssignment
+      assessmentGroup.assessmentComponent = item.assessmentComponent
       assessmentGroup.assignment = assignment
       assessmentMembershipService.save(assessmentGroup)
 
@@ -119,8 +119,8 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
     })
   }
 
-  private def findModule(upstreamAssignment: AssessmentComponent): Option[Module] = {
-    val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
+  private def findModule(assessmentComponent: AssessmentComponent): Option[Module] = {
+    val moduleCode = assessmentComponent.moduleCodeBasic.toLowerCase
     moduleAndDepartmentService.getModuleByCode(moduleCode)
   }
 
@@ -147,13 +147,13 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
 
   private def fetchSitsAssignmentItems(): JList[SitsAssignmentItem] = {
     for {
-      upstreamAssignment <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
-      assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy(_.occurrence)
+      assessmentComponent <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
+      assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(assessmentComponent, academicYear).sortBy(_.occurrence)
     } yield {
       val item = new SitsAssignmentItem(
-        include = shouldIncludeByDefault(upstreamAssignment),
+        include = shouldIncludeByDefault(assessmentComponent),
         occurrence = assessmentGroup.occurrence,
-        upstreamAssignment = upstreamAssignment)
+        assessmentComponent = assessmentComponent)
       item.assessmentGroup = Some(assessmentGroup)
       item
     }
@@ -170,9 +170,9 @@ trait AddSitsAssignmentsCommandOnBind extends BindListener {
       item.assessmentGroup = assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
         this.academicYear = academicYear
         this.occurrence = item.occurrence
-        this.moduleCode = item.upstreamAssignment.moduleCode
-        this.sequence = item.upstreamAssignment.sequence
-        this.assessmentGroup = item.upstreamAssignment.assessmentGroup
+        this.moduleCode = item.assessmentComponent.moduleCode
+        this.sequence = item.assessmentComponent.sequence
+        this.assessmentGroup = item.assessmentComponent.assessmentGroup
       })
     }
   }
@@ -218,7 +218,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     val modules = LazyMaps.create { (code: String) => moduleAndDepartmentService.getModuleByCode(code.toLowerCase).orNull }
 
     for (item <- items) {
-      for (existingAssignment <- assessmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.upstreamAssignment.moduleCodeBasic))) {
+      for (existingAssignment <- assessmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.assessmentComponent.moduleCodeBasic))) {
         val path = "sitsAssignmentItems[%d]".format(sitsAssignmentItems.indexOf(item))
         errors.rejectValue(path, "name.duplicate.assignment", Array(item.name), null)
       }
@@ -229,7 +229,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
 
       // also check that the upstream assignment names don't collide within a module.
       // group items by module, then look for duplicates within each group.
-      val groupedByModule = items.groupBy(_.upstreamAssignment.moduleCodeBasic)
+      val groupedByModule = items.groupBy(_.assessmentComponent.moduleCodeBasic)
       for ((modCode, moduleItems) <- groupedByModule;
            item <- moduleItems
            if moduleItems.exists(sameNameAs(item))) {
@@ -280,7 +280,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
       else modules(department)
 
     val hasInvalidAssignments = sitsAssignmentItems.asScala.exists { (item) =>
-      !deptModules.contains(item.upstreamAssignment.module)
+      !deptModules.contains(item.assessmentComponent.module)
     }
 
     if (hasInvalidAssignments) {

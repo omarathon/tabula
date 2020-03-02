@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assessment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.jdk.CollectionConverters._
 
 object UploadFeedbackToSitsCommand {
-  def apply(assessment: Assessment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+  def apply(assessment: Assignment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
     new UploadFeedbackToSitsCommandInternal(assessment, currentUser, gradeGenerator)
       with AutowiringFeedbackServiceComponent
       with AutowiringFeedbackForSitsServiceComponent
@@ -23,7 +23,7 @@ object UploadFeedbackToSitsCommand {
       with UploadFeedbackToSitsCommandRequest
 }
 
-class UploadFeedbackToSitsCommandInternal(val assessment: Assessment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
+class UploadFeedbackToSitsCommandInternal(val assessment: Assignment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
   extends CommandInternal[Seq[Feedback]] {
 
   self: FeedbackServiceComponent with FeedbackForSitsServiceComponent with UploadFeedbackToSitsCommandState =>
@@ -50,7 +50,7 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
   override lazy val eventName = "UploadFeedbackToSits"
 
   override def describe(d: Description): Unit =
-    d.assessment(assessment)
+    d.assignment(assessment)
 
   override def describeResult(d: Description, result: Seq[Feedback]): Unit =
     d.feedbacks(result)
@@ -60,7 +60,7 @@ trait UploadFeedbackToSitsCommandState {
 
   self: UploadFeedbackToSitsCommandRequest =>
 
-  def assessment: Assessment
+  def assessment: Assignment
 
   lazy val feedbacks: Seq[Feedback] = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.usercode))
 }

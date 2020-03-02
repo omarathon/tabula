@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.{HibernateHelpers, PostLoadBehaviour}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
@@ -106,7 +107,7 @@ object Assignment {
 @Proxy
 @Access(AccessType.FIELD)
 class Assignment
-  extends Assessment
+  extends GeneratedId with CanBeDeleted with PermissionsTarget
     with ToString
     with HasSettings
     with PostLoadBehaviour
@@ -135,6 +136,9 @@ class Assignment
   @transient
   var markingDescriptorService: MarkingDescriptorService = Wire[MarkingDescriptorService]("markingDescriptorService")
 
+  @transient
+  var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
+
   def this(_module: Module) {
     this()
     this.module = _module
@@ -143,14 +147,14 @@ class Assignment
   @Basic
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Column(nullable = false)
-  override var academicYear: AcademicYear = AcademicYear.now()
+  var academicYear: AcademicYear = AcademicYear.now()
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
   var fileExtensions: Seq[String] = _
 
   var attachmentLimit: Int = 1
 
-  override var name: String = _
+  var name: String = _
 
   override def humanReadableId: String = s"$name (${module.code.toUpperCase})"
 
@@ -204,13 +208,13 @@ class Assignment
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "module_id")
-  override var module: Module = _
+  var module: Module = _
 
   override def permissionsParents: LazyList[Module] = Option(module).to(LazyList)
 
   @OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)
-  override var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+  var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
   @OrderBy("submittedDate")
@@ -231,9 +235,18 @@ class Assignment
   @BatchSize(size = 200)
   var feedbacks: JList[Feedback] = JArrayList()
 
-  override def allFeedback: Seq[Feedback] = RequestLevelCache.cachedBy("Assignment.allFeedback", id) {
+  def allFeedback: Seq[Feedback] = RequestLevelCache.cachedBy("Assignment.allFeedback", id) {
     feedbackService.loadFeedbackForAssignment(this)
   }
+
+  // feedback that has been been through the marking process (not placeholders for marker feedback)
+  def fullFeedback: Seq[Feedback] = allFeedback.filterNot(_.isPlaceholder)
+
+  // returns feedback for a specified student
+  def findFeedback(usercode: String): Option[Feedback] = allFeedback.find(_.usercode == usercode)
+
+  // returns feedback for a specified student
+  def findFullFeedback(usercode: String): Option[Feedback] = fullFeedback.find(_.usercode == usercode)
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "feedback_template_id")
@@ -331,8 +344,13 @@ class Assignment
       !feedbackService.getFeedbackByUsercode(this, submission.usercode).exists(_.released)
     }
 
+  // if any feedback exists that has a marker feedback with a marker then at least one marker has been assigned
+  def markersAssigned: Boolean = allFeedback.exists(_.allMarkerFeedback.exists(_.marker != null))
+
   // if any feedback exists that has outstanding stages marking has begun (when marking is finished there is a completed stage)
-  override def isReleasedForMarking: Boolean = hasWorkflow && allFeedback.exists(_.outstandingStages.asScala.nonEmpty)
+  def isReleasedForMarking: Boolean = hasWorkflow && allFeedback.exists(_.outstandingStages.asScala.nonEmpty)
+
+  def isReleasedForMarking(usercode: String): Boolean = allFeedback.find(_.usercode == usercode).exists(_.releasedToMarkers)
 
   // sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
@@ -413,7 +431,7 @@ class Assignment
     * Before we allow customising of assignment feedback forms, we just want the basic
     * fields to allow you to enter a comment.
     */
-  override def addDefaultFeedbackFields(): Unit = {
+  def addDefaultFeedbackFields(): Unit = {
     val feedback = new TextField
     feedback.name = defaultFeedbackTextFieldName
     feedback.label = "Feedback"
@@ -431,7 +449,7 @@ class Assignment
     addField(notes)
   }
 
-  override def addDefaultFields(): Unit = {
+  def addDefaultFields(): Unit = {
     addDefaultSubmissionFields()
     addDefaultFeedbackFields()
   }
@@ -856,6 +874,25 @@ class Assignment
     else submissions.asScala.toSeq.filter { s => usercodes.contains(s.usercode) }
   }
 
+  // converts the assessmentGroups to UpstreamAssessmentGroupInfo
+  def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("Assessment.upstreamAssessmentGroupInfos", id) {
+    assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala.toSeq, academicYear)
+  }
+
+  // Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat number
+  def membershipInfo: AssessmentMembershipInfo = RequestLevelCache.cachedBy("Assessment.membershipInfo", id) {
+    assessmentMembershipService.determineMembership(this)
+  }
+
+  @transient
+  private lazy val seatNumbers: Map[String, Int] = assessmentMembershipService.determineMembershipUsersWithOrder(this).collect {
+    case (user, Some(seat)) => (user.getUserId, seat)
+  }.toMap
+
+  def getSeatNumber(user: User): Option[Int] = Option(user).flatMap(u => seatNumbers.get(u.getUserId))
+
+  def showSeatNumbers: Boolean = seatNumbers.nonEmpty
+
   def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
   def automaticallyReleaseToMarkers_=(include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
 
@@ -912,14 +949,6 @@ class Assignment
 
   def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
 
-  @transient
-  private lazy val seatNumbers: Map[String, Int] = assessmentMembershipService.determineMembershipUsersWithOrder(this).collect {
-    case (user, Some(seat)) => (user.getUserId, seat)
-  }.toMap
-
-  def getSeatNumber(user: User): Option[Int] = Option(user).flatMap(u => seatNumbers.get(u.getUserId))
-
-  def showSeatNumbers: Boolean = seatNumbers.nonEmpty
 }
 
 /**

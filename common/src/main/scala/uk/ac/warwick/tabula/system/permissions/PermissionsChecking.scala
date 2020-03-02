@@ -62,10 +62,10 @@ trait PermissionsCheckingMethods extends Logging {
       throw new ItemNotFoundException(module, "Not displaying module as it doesn't belong to specified department")
     }
 
-  def mustBeLinked(assessment: Assessment, module: Module): Unit =
-    if (mandatory(assessment).module.id != mandatory(module).id) {
+  def mustBeLinked(assignment: Assignment, module: Module): Unit =
+    if (mandatory(assignment).module.id != mandatory(module).id) {
       logger.info("Not displaying assessment as it doesn't belong to specified module")
-      throw new ItemNotFoundException(assessment, "Not displaying assessment as it doesn't belong to specified module")
+      throw new ItemNotFoundException(assignment, "Not displaying assessment as it doesn't belong to specified module")
     }
 
   def mustBeLinked(set: SmallGroupSet, module: Module): Unit =

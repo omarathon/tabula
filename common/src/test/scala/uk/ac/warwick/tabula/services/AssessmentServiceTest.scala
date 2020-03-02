@@ -425,7 +425,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentMembershipService.find(foundGroup.get) should be(Symbol("defined"))
   }
 
-  @Test def upstreamAssignments(): Unit = transactional { tx =>
+  @Test def assessmentComponents(): Unit = transactional { tx =>
     val chemistryDept = Fixtures.department("chem") // dept code irrelephant
   val chemistryModule = Fixtures.module("ch101")
     chemistryDept.modules.add(chemistryModule)
@@ -538,23 +538,23 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     assignmentMembershipService.save(upstreamGroup)
 
-    val upstreamAssignment = new AssessmentComponent
-    upstreamAssignment.module = module
-    upstreamAssignment.moduleCode = "ch101-10"
-    upstreamAssignment.sequence = "A01"
-    upstreamAssignment.assessmentGroup = "A"
-    upstreamAssignment.assessmentType = AssessmentType.Essay
-    upstreamAssignment.name = "Egg plants"
-    upstreamAssignment.inUse = true
+    val assessmentComponent = new AssessmentComponent
+    assessmentComponent.module = module
+    assessmentComponent.moduleCode = "ch101-10"
+    assessmentComponent.sequence = "A01"
+    assessmentComponent.assessmentGroup = "A"
+    assessmentComponent.assessmentType = AssessmentType.Essay
+    assessmentComponent.name = "Egg plants"
+    assessmentComponent.inUse = true
 
-    assignmentMembershipService.save(upstreamAssignment) should be(upstreamAssignment)
+    assignmentMembershipService.save(assessmentComponent) should be(assessmentComponent)
 
     assignmentService.save(assignment)
 
     val group = new AssessmentGroup
     group.membershipService = assignmentMembershipService
     group.assignment = assignment
-    group.assessmentComponent = upstreamAssignment
+    group.assessmentComponent = assessmentComponent
     group.occurrence = "A"
 
     session.save(group)

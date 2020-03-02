@@ -20,7 +20,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
       val group = new AssessmentGroup
       group.assignment = assignment
       group.occurrence = "B"
-      group.assessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("nl901"), 2)
+      group.assessmentComponent = Fixtures.assessmentComponent(Fixtures.module("nl901"), 2)
       group.membershipService = smartMock[AssessmentMembershipService]
       group.membershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Some(
         Fixtures.upstreamAssessmentGroupInfo(year, "A", "NL901-30", "B")

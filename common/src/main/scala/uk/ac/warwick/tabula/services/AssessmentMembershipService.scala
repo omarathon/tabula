@@ -101,15 +101,15 @@ trait AssessmentMembershipService {
 
   def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): AssessmentMembershipInfo
 
-  def determineMembership(assessment: Assessment): AssessmentMembershipInfo
+  def determineMembership(assignment: Assignment): AssessmentMembershipInfo
 
   def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Seq[User]
 
-  def determineMembershipUsers(assessment: Assessment): Seq[User]
+  def determineMembershipUsers(assignment: Assignment): Seq[User]
 
-  def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User]
+  def determineMembershipUsersIncludingPWD(assignment: Assignment): Seq[User]
 
-  def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])]
+  def determineMembershipUsersWithOrder(assignment: Assignment): Seq[(User, Option[Int])]
 
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
@@ -143,6 +143,7 @@ class AssessmentMembershipServiceImpl
   @Autowired var profileService: ProfileService = _
 
   val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
+  val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
 
   def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
     val autoEnrolled =
@@ -362,10 +363,8 @@ trait AssessmentMembershipMethods extends Logging {
   def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): AssessmentMembershipInfo =
     generateAssessmentMembershipInfo(upstream, others, resitOnly = resitOnly)
 
-  def determineMembership(assessment: Assessment): AssessmentMembershipInfo = assessment match {
-    case a: Assignment => determineMembership(a.upstreamAssessmentGroupInfos, Option(a.members), resitOnly = a.resitAssessment)
-    case _ => new AssessmentMembershipInfo(Nil)
-  }
+  def determineMembership(assignment: Assignment): AssessmentMembershipInfo =
+    determineMembership(assignment.upstreamAssessmentGroupInfos, Option(assignment.members), resitOnly = assignment.resitAssessment)
 
   /**
     * Returns just a list of User objects who are on this assessment group.
@@ -377,30 +376,24 @@ trait AssessmentMembershipMethods extends Logging {
   /**
     * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
     */
-  def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
-    case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroupInfos, Option(a.members), a.resitAssessment)
-    case _ => Nil
-  }
+  def determineMembershipUsers(assignment: Assignment): Seq[User] =
+    determineMembershipUsers(assignment.upstreamAssessmentGroupInfos, Option(assignment.members), assignment.resitAssessment)
 
-  def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User] = assessment match {
-    case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true, a.resitAssessment).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
-    case _ => Nil
-  }
+  def determineMembershipUsersIncludingPWD(a: Assignment): Seq[User] =
+    generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true, a.resitAssessment).items
+      .filter(notExclude)
+      .map(toUser)
+      .filter(notNull)
+      .filter(notAnonymous)
 
 
-  private def generateMembershipUsersWithOrder(exam: Assessment, includePWD: Boolean = false): Seq[(User, Option[Int])] = {
-    val sitsMembers =
-      exam.upstreamAssessmentGroupInfos.flatMap { uagInfo =>
-        if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
-      }.distinct.sortBy(_.position)
+  def determineMembershipUsersWithOrder(assignment: Assignment): Seq[(User, Option[Int])] = {
+    val sitsMembers = assignment.upstreamAssessmentGroupInfos.flatMap(_.currentMembers).distinct.sortBy(_.position)
     val sitsUniIds = sitsMembers.map(_.universityId)
-    val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains).toSeq).getOrElse(Nil)
+    val includesUniIds = Option(assignment.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains).toSeq).getOrElse(Nil)
     sitsMembers.map(m => userLookup.getUserByWarwickUniId(m.universityId) -> m.position) ++
       includesUniIds.map(u => userLookup.getUserByWarwickUniId(u)).sortBy(u => (u.getLastName, u.getFirstName)).map(u => u -> None)
   }
-
-  def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])] =
-    generateMembershipUsersWithOrder(exam)
 
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
     others.foreach { g => assert(g.universityIds) }

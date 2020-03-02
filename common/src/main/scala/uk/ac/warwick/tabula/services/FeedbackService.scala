@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 
 trait FeedbackService {
-  def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback]
+  def getStudentFeedback(assignment: Assignment, usercode: String): Option[Feedback]
 
   def loadFeedbackForAssignment(assignment: Assignment): Seq[Feedback]
 
@@ -57,8 +57,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
     userLookup.usersByUserIds(unplagiarisedUnreleasedIds).toSeq
   }
 
-  def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback] = {
-    assessment.findFullFeedback(usercode)
+  def getStudentFeedback(assignment: Assignment, usercode: String): Option[Feedback] = {
+    assignment.findFullFeedback(usercode)
   }
 
   def loadFeedbackForAssignment(assignment: Assignment): Seq[Feedback] =

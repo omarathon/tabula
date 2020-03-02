@@ -22,9 +22,9 @@ class AssessmentGroup extends GeneratedId {
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
   /*
-  Either assignment, smallGroupSet _or_ exam will be non-null
-  depending on which type of entity we're linking an
-  AssessmentComponent to...
+    Either assignment, smallGroupSet _or_ exam will be non-null
+    depending on which type of entity we're linking an
+    AssessmentComponent to...
    */
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -34,6 +34,10 @@ class AssessmentGroup extends GeneratedId {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_set_id")
   var smallGroupSet: SmallGroupSet = _
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "exam_id")
+  var exam: Exam = _
 
   def parent: Option[GeneratedId] =
     Seq(Option(assignment), Option(smallGroupSet)).flatten.headOption

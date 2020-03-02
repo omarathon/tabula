@@ -24,7 +24,10 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
     eventually {
       pageSource contains "Single marking - single use" should be (true)
       When("I click on the Single marking - single use assignment link")
-      click on id("main").webElement.findElement(By.partialLinkText("Single marking - single use"))
+      val assignmentRowLink = id("main").webElement.findElement(By.partialLinkText("Single marking - single use"))
+      assignmentRowLink.isDisplayed should be (true)
+      assignmentRowLink.isEnabled should be (true)
+      click on assignmentRowLink
     }
     Then("I see the summary assignment  screen")
     currentUrl.contains("/summary") should be(true)

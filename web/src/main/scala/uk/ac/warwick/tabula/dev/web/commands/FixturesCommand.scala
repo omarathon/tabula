@@ -79,15 +79,15 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
     subSubDepartmentAdminCommand.apply()
 
 
-    val upstreamAssignment = new AssessmentComponent
-    upstreamAssignment.assessmentGroup = "A"
-    upstreamAssignment.sequence = "A"
-    upstreamAssignment.moduleCode = "XXX01-30"
-    upstreamAssignment.module = module1
-    upstreamAssignment.name = "Assignment from SITS"
-    upstreamAssignment.assessmentType = AssessmentType.Essay
-    upstreamAssignment.inUse = true
-    session.save(upstreamAssignment)
+    val assessmentComponent = new AssessmentComponent
+    assessmentComponent.assessmentGroup = "A"
+    assessmentComponent.sequence = "A"
+    assessmentComponent.moduleCode = "XXX01-30"
+    assessmentComponent.module = module1
+    assessmentComponent.name = "Assignment from SITS"
+    assessmentComponent.assessmentType = AssessmentType.Essay
+    assessmentComponent.inUse = true
+    session.save(assessmentComponent)
 
     val upstreamAssessmentGroup = new UpstreamAssessmentGroup
     upstreamAssessmentGroup.academicYear = AcademicYear.now()

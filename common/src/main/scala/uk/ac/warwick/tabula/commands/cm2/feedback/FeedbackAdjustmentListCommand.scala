@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.feedback
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 import scala.jdk.CollectionConverters._
 
 object FeedbackAdjustmentListCommand {
-  def apply(assessment: Assessment) =
+  def apply(assessment: Assignment) =
     new FeedbackAdjustmentListCommandInternal(assessment)
       with ComposableCommand[Seq[StudentInfo]]
       with FeedbackAdjustmentListCommandPermissions
@@ -24,7 +24,7 @@ object FeedbackAdjustmentListCommand {
 
 case class StudentInfo(student: User, feedback: Option[Feedback])
 
-class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
+class FeedbackAdjustmentListCommandInternal(val assessment: Assignment)
   extends CommandInternal[Seq[StudentInfo]] with FeedbackAdjustmentListCommandState {
 
   self: UserLookupComponent with AssessmentMembershipServiceComponent =>
@@ -53,7 +53,7 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 }
 
 trait FeedbackAdjustmentListCommandState {
-  def assessment: Assessment
+  def assessment: Assignment
 
   var students: JList[String] = JArrayList()
 }
