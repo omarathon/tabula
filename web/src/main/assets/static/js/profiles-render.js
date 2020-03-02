@@ -699,7 +699,7 @@ $(function () {
     // reset slow load spinner
     $meetingModal.tabulaPrepareSpinners();
 
-    if ($f.find('#meeting-record-form').length == 1) {
+    if ($f.find('#meeting-record-form').length === 1) {
       // unhide the iframe
       $meetingModal.find('.modal-body').slideDown();
 
@@ -715,6 +715,13 @@ $(function () {
       $meetingModal.off('shown.bs.modal.meetingRecordFrameLoad').on('shown.bs.modal.meetingRecordFrameLoad', function () {
         $f.find('[name="title"]').focus();
       });
+    } else if ($f.find('#maintenance-message').length === 1) {
+      $meetingModal.find('.modal-body').slideDown()
+        .empty()
+        .append($f.find('#maintenance-message'));
+      $meetingModal.find('.modal-footer .btn-primary').remove();
+
+      $meetingModal.modal('show');
     } else {
       $meetingModal.modal('hide');
       document.location.reload(true);
@@ -767,7 +774,7 @@ $(function () {
     $loading.toggleClass('invisible');
 
     $.post(url, function (data) {
-      if (data.status == 'successful') {
+      if (data.status === 'successful') {
         if ($this.hasClass('delete-meeting-record') || $this.hasClass('restore-meeting-record')) {
           $dropdownItems.toggleClass('disabled');
           $row.toggleClass('subtle deleted');
@@ -790,15 +797,13 @@ $(function () {
     var $this = $(this), checkedInput = $this.find('input:checked');
     $this.find('div.ajaxErrors').hide();
     switch (checkedInput.val()) {
-      case 'confirm': {
+      case 'confirm':
         prepareMeetingModal($this, checkedInput.data('formhref'));
-      }
         break;
-      case 'reschedule': {
+      case 'reschedule':
         $this.closest('tr').prev('tr').find('.edit-meeting-record').trigger('click');
-      }
         break;
-      case 'missed': {
+      case 'missed':
         $.post(checkedInput.data('formhref'), $this.serialize(), function (data) {
           if (data.status === 'successful') {
             document.location.reload(true);
@@ -806,7 +811,6 @@ $(function () {
             $this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
           }
         });
-      }
         break;
     }
   });

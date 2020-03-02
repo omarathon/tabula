@@ -179,19 +179,27 @@
       </div>
       <script nonce="${nonce()}">
         jQuery(function ($) {
-          $('#meetingDateStr, #format').on('change', function () {
-            $.get('<@routes.profiles.meeting_will_create_checkpoint />', {
-              'student': '${studentCourseDetails.student.universityId}',
-              'relationshipType': '${relationshipType.urlPart}',
-              'meetingFormat': $('#format').val(),
-              'meetingDate': $('#meetingDateStr').val() + ' ' + $('#meetingTimeStr').val()
-            }, function (data) {
-              if (data.willCheckpointBeCreated) {
-                $('#willCheckpointBeCreatedMessage').show();
-              } else {
-                $('#willCheckpointBeCreatedMessage').hide();
-              }
-            })
+          $('#meetingDateStr, #meetingTimeStr, #format').on('change', function () {
+            var date = $('#meetingDateStr').val();
+            var time = $('#meetingTimeStr').val();
+            var format = $('#format').val();
+
+            if (date && time && format) {
+              $.get('<@routes.profiles.meeting_will_create_checkpoint />', {
+                'student': '${studentCourseDetails.student.universityId}',
+                'relationshipType': '${relationshipType.urlPart}',
+                'meetingFormat': $('#format').val(),
+                'meetingDate': $('#meetingDateStr').val() + ' ' + $('#meetingTimeStr').val()
+              }, function (data) {
+                if (data.willCheckpointBeCreated) {
+                  $('#willCheckpointBeCreatedMessage').show();
+                } else {
+                  $('#willCheckpointBeCreatedMessage').hide();
+                }
+              })
+            } else {
+              $('#willCheckpointBeCreatedMessage').hide();
+            }
           })
         });
       </script>

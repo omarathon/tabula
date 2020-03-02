@@ -58,26 +58,26 @@ trait PermissionsSelector[A <: PermissionsSelector[A]] {
 }
 
 object PermissionsSelector {
-  val AnyId = "*" // A special ID for converting to and from the catch-all selector
+  val AnyId: String = "*" // A special ID for converting to and from the catch-all selector
 
-  def Any[A <: PermissionsSelector[A] : ClassTag] = new PermissionsSelector[A] {
-    def id = AnyId
+  def Any[A <: PermissionsSelector[A] : ClassTag]: PermissionsSelector[A] = new PermissionsSelector[A] {
+    val id: String = AnyId
 
-    def description = "*"
+    val description = "*"
 
-    override def isWildcard = true
+    override val isWildcard = true
 
     override def <=(that: PermissionsSelector[A]): Boolean = {
       // Any is only <= other wildcards
       that.isWildcard
     }
 
-    override def toString = "*"
+    override val toString = "*"
 
-    override def hashCode: Int = id.hashCode
+    override val hashCode: Int = id.hashCode
 
     override def equals(other: Any): Boolean = other match {
-      case that: PermissionsSelector[A@unchecked] =>
+      case that: PermissionsSelector[A @unchecked] =>
         new EqualsBuilder()
           .append(id, that.id)
           .build()
