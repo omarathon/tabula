@@ -357,7 +357,7 @@ object AssignmentImporter {
       ${castToString("mab.mab_apac")} as exam_paper_code,
       ${castToString("apa.apa_name")} as exam_paper_title,
       case when (mab.mab_advc = 'X') then 'n/a' else ${castToString("mab.mab_advc")} end as exam_paper_section,
-      adv.adv_dura as exam_paper_duration,
+      coalesce(mab.mab_hohm, adv.adv_dura) as exam_paper_duration,
       adv.adv_rdtm as exam_paper_reading_time,
       ${castToString("apa.apa_aptc")} as exam_paper_type
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
