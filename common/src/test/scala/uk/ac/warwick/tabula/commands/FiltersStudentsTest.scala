@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.{Fixtures, JavaImports, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
@@ -10,6 +10,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
 
   trait Fixture {
     val thisProfileService: ProfileService = mock[ProfileService]
+    val thisSecurityService: SecurityService = mock[SecurityService]
 
     val dept: Department = Fixtures.department("arc", "School of Architecture")
     val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates", isImportDepartment = false)
@@ -54,6 +55,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList()
         val sortOrder: JavaImports.JList[Order] = JArrayList()
         val profileService: ProfileService = thisProfileService
+        val securityService: SecurityService = thisSecurityService
         val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
         val levelCodes: JavaImports.JList[String] = JArrayList()
         val studyLevelCodes: JavaImports.JList[String] = JArrayList()
@@ -61,6 +63,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val routes: JavaImports.JList[Route] = JArrayList()
         val courses: JavaImports.JList[Course] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       filter.allCourseTypes should be(CourseType.all)
@@ -87,6 +90,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList(sprF)
         val sortOrder: JavaImports.JList[Order] = JArrayList()
         val profileService: ProfileService = thisProfileService
+        val securityService: SecurityService = thisSecurityService
         val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList(1)
         val modules: JavaImports.JList[Module] = JArrayList(mod1)
         val routes: JavaImports.JList[Route] = JArrayList(route1, route2)
@@ -94,6 +98,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val levelCodes: JavaImports.JList[String] = JArrayList()
         val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       val serialized: String = filter.serializeFilter
@@ -130,6 +135,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList()
         val sortOrder: JavaImports.JList[Order] = JArrayList()
         val profileService: ProfileService = thisProfileService
+        val securityService: SecurityService = thisSecurityService
         val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
         val modules: JavaImports.JList[Module] = JArrayList()
         val routes: JavaImports.JList[Route] = JArrayList()
@@ -137,6 +143,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val levelCodes: JavaImports.JList[String] = JArrayList()
         val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       val serialized: String = filter.serializeFilter

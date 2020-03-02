@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, SecurityService, UserLookupComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -17,6 +17,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
     with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent {
 
     val profileService: ProfileService = smartMock[ProfileService]
+    val securityService: SecurityService = smartMock[SecurityService]
     val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
     val userLookup = new MockUserLookup
 

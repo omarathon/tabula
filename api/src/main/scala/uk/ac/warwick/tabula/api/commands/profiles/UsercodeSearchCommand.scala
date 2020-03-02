@@ -1,22 +1,23 @@
 package uk.ac.warwick.tabula.api.commands.profiles
 
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ModuleAndDepartmentServiceComponent}
 
 
 object UserCodeSearchCommand {
-  def apply(academicYear: AcademicYear) =
-    new UserCodeSearchCommandInternal(academicYear)
+  def apply(academicYear: AcademicYear, user: CurrentUser) =
+    new UserCodeSearchCommandInternal(academicYear, user)
       with ComposableCommand[Seq[String]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringSecurityServiceComponent
       with UserSearchCommandRequest
       with UserSearchCommandState
       with ReadOnly with Unaudited
 }
 
-abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear) extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[Seq[String]] with FiltersStudents {
 
   self: UserSearchCommandRequest with UserSearchCommandState with ModuleAndDepartmentServiceComponent =>
 
@@ -26,7 +27,7 @@ abstract class UserCodeSearchCommandInternal(val academicYear: AcademicYear) ext
     }
 
     val restrictions = if (studentsOnly) {
-      buildRestrictions(academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
+      buildRestrictions(user, Seq(department), academicYear, Seq(groupNameRestriction ++ enrolmentDepartmentRestriction ++ studyRouteRestriction).flatten)
     } else {
       groupNameRestriction ++ homeDepartmentRestriction
     }.toSeq

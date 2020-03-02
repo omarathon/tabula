@@ -4,7 +4,7 @@ import java.util.Optional
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.commands.profiles.{UserCodeSearchCommand, UserSearchCommandState}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.Mav
@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.web.Mav
 class UserCodeSearchController extends AbstractUserSearchController {
 
   @ModelAttribute("getCommand")
-  override protected def getCommand(@PathVariable academicYear: Optional[AcademicYear]): Appliable[Seq[String]] =
-    UserCodeSearchCommand(academicYear.orElse(AcademicYear.now()))
+  override protected def getCommand(@PathVariable academicYear: Optional[AcademicYear], user: CurrentUser): Appliable[Seq[String]] =
+    UserCodeSearchCommand(academicYear.orElse(AcademicYear.now()), user)
 
   override protected val resultKey: String = "usercodes"
 

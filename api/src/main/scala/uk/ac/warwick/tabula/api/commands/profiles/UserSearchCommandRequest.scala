@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.api.commands.profiles
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order.asc
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports.{JInteger, JList}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
@@ -10,9 +11,17 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.FiltersStudents
 import uk.ac.warwick.tabula.data.ScalaRestriction.inIfNotEmpty
 import uk.ac.warwick.tabula.data.{Aliasable, HibernateHelpers, ScalaRestriction}
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
+import uk.ac.warwick.tabula.services.SecurityServiceComponent
+
 import scala.jdk.CollectionConverters._
 
 trait UserSearchCommandRequest extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+  self: SecurityServiceComponent =>
+
+  def user: CurrentUser
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
   var department: Department = _
 
   val defaultOrder = Seq(asc("lastName"), asc("firstName"))

@@ -69,8 +69,9 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
       mockMeetingRecordService.countPendingApprovals(courseDetails1.student.universityId) returns 0
       mockMeetingRecordService.countPendingApprovals(courseDetails2.student.universityId) returns 0
 
-      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
+      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with SecurityServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
         var profileService: ProfileService = mockProfileService
+        val securityService: SecurityService = smartMock[SecurityService]
         var meetingRecordService: MeetingRecordService = mockMeetingRecordService
         var relationshipService: RelationshipService = mockRelationshipService
       }
@@ -117,8 +118,9 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
       mockMeetingRecordService.countPendingApprovals(courseDetails2.student.universityId) returns 0
 
 
-      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
+      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with SecurityServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
         var profileService: ProfileService = mockProfileService
+        val securityService: SecurityService = smartMock[SecurityService]
         var meetingRecordService: MeetingRecordService = mockMeetingRecordService
         var relationshipService: RelationshipService = mockRelationshipService
       }
@@ -144,8 +146,9 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
       mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, Nil) returns Seq(courseDetails1, courseDetails2)
 
-      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
+      val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with SecurityServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
         var profileService: ProfileService = mockProfileService
+        val securityService: SecurityService = smartMock[SecurityService]
         var meetingRecordService: MeetingRecordService = mockMeetingRecordService
         var relationshipService: RelationshipService = mockRelationshipService
       }

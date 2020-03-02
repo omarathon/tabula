@@ -8,15 +8,15 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
-  trait TestSupport extends AttendanceMonitoringServiceComponent with ProfileServiceComponent {
+  trait TestSupport extends AttendanceMonitoringServiceComponent with ProfileServiceComponent with SecurityServiceComponent {
     val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
     val profileService: ProfileService = smartMock[ProfileService]
+    val securityService: SecurityService = smartMock[SecurityService]
   }
 
   trait Fixture {
@@ -27,7 +27,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
     student2.lastName = "Smith"
     student2.firstName = "Bob"
 
-    val currentUser: User = Fixtures.user("1574575", "u1574575")
+    val currentUser: CurrentUser = Fixtures.currentUser("1574575", "u1574575")
 
     val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
     point1.startDate = new LocalDate(2013, 10, 1)
@@ -38,12 +38,14 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
     val state = new ReportStudentsChoosePeriodCommandState with TestSupport {
       val department: Department = Fixtures.department("its")
-      val academicYear = AcademicYear(2013)
+      val academicYear: AcademicYear = AcademicYear(2013)
+      val user: CurrentUser = currentUser
     }
 
     val validator = new ReportStudentsChoosePeriodValidation with ReportStudentsChoosePeriodCommandState with TestSupport {
       val department: Department = Fixtures.department("its")
-      val academicYear = AcademicYear(2013)
+      val academicYear: AcademicYear = AcademicYear(2013)
+      val user: CurrentUser = currentUser
     }
 
     val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"), AcademicYear(2013), currentUser) with ReportStudentsChoosePeriodCommandState with TestSupport

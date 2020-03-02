@@ -2,30 +2,30 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 case class StudentReportCount(student: StudentMember, missed: Int, unrecorded: Int)
 
-case class StudentReport(
+case class StudentReport (
   studentReportCounts: Seq[StudentReportCount],
   department: Department,
-  currentUser: User
+  user: User
 )
 
 object ReportStudentsChoosePeriodCommand {
-  def apply(department: Department, academicYear: AcademicYear, currentUser: User) =
-    new ReportStudentsChoosePeriodCommandInternal(department, academicYear, currentUser)
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+    new ReportStudentsChoosePeriodCommandInternal(department, academicYear, user)
       with ComposableCommand[StudentReport]
       with AutowiringProfileServiceComponent
+      with AutowiringSecurityServiceComponent
       with AutowiringAttendanceMonitoringServiceComponent
       with ReportStudentsChoosePeriodValidation
       with ReportStudentsChoosePeriodPermissions
@@ -36,16 +36,16 @@ object ReportStudentsChoosePeriodCommand {
 class ReportStudentsChoosePeriodCommandInternal(
   val department: Department,
   val academicYear: AcademicYear,
-  val currentUser: User
+  val user: CurrentUser
 ) extends CommandInternal[StudentReport] {
 
   self: ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
   override def applyInternal(): StudentReport = {
-    StudentReport(
+    StudentReport (
       studentReportCounts = studentMissedReportCounts,
       department = department,
-      currentUser = currentUser
+      user = user.apparentUser
     )
   }
 
@@ -81,7 +81,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
   lazy val allStudents: Seq[StudentMember] = benchmarkTask("profileService.findAllStudentsByRestrictions") {
     profileService.findAllStudentsByRestrictions(
       department = department,
-      restrictions = buildRestrictions(academicYear, additionalRestrictions)
+      restrictions = buildRestrictions(user, Seq(department), academicYear, additionalRestrictions)
     ).sortBy(s => (s.lastName, s.firstName))
   }
 

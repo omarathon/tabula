@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.admin
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.profiles.{FilterStudentsCommand, FilterStudentsResults}
 import uk.ac.warwick.tabula.commands.{Appliable, CurrentAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
@@ -24,8 +24,8 @@ class FilterStudentsAcademicYearController extends ProfilesController
   override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
   @ModelAttribute("filterStudentsCommand")
-  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-    FilterStudentsCommand(mandatory(department), mandatory(academicYear))
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
+    FilterStudentsCommand(mandatory(department), mandatory(academicYear), user)
 
 
   @RequestMapping

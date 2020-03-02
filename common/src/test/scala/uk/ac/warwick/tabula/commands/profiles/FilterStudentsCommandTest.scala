@@ -7,15 +7,16 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaOrder, ScalaRestriction}
-import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 
 import scala.jdk.CollectionConverters._
 
 
 class FilterStudentsCommandTest extends TestBase with Mockito {
 
-  trait CommandTestSupport extends ProfileServiceComponent {
+  trait CommandTestSupport extends ProfileServiceComponent with SecurityServiceComponent {
+    val securityService: SecurityService = mock[SecurityService]
     val profileService: ProfileService = mock[ProfileService]
 
     // this seems to need the 'anArgThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
@@ -51,13 +52,14 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
     val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
     val year: AcademicYear = AcademicYear.now()
+    val user: CurrentUser = Fixtures.currentUser()
 
   }
 
   @Test
   def bindLoadsNonWithdrawnStatuses(): Unit = {
     new Fixture {
-      val command = new FilterStudentsCommand(department, year) with CommandTestSupport
+      val command = new FilterStudentsCommand(department, year, user) with CommandTestSupport
 
       command.profileService.allSprStatuses(department) returns Seq(sprF, sprP)
 
@@ -72,7 +74,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   @Test
   def commandApplyDefaults(): Unit = {
     new Fixture {
-      val command = new FilterStudentsCommand(department, year) with CommandTestSupport
+      val command = new FilterStudentsCommand(department, year, user) with CommandTestSupport
       command.applyInternal()
 
       val expectedRestrictions = Seq()
@@ -91,7 +93,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   @Test
   def commandApplyComplicated(): Unit = {
     new Fixture {
-      val command = new FilterStudentsCommand(department, year) with CommandTestSupport
+      val command = new FilterStudentsCommand(department, year, user) with CommandTestSupport
 
       command.studentsPerPage = 10
       command.page = 3
@@ -161,7 +163,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
   def commandApplyDefaultsWithAliasedSort(): Unit = {
     new Fixture {
 
-      val command = new FilterStudentsCommand(department, year) with CommandTestSupport
+      val command = new FilterStudentsCommand(department, year, user) with CommandTestSupport
       command.sortOrder = JArrayList(Order.desc("studentCourseYearDetails.yearOfStudy"))
 
       command.applyInternal()
