@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.NotRecorded
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendance, _}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition

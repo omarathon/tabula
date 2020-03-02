@@ -5,7 +5,9 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 
 object SubmissionAttemptCommand {
-  def apply(assignment: Assignment, user: CurrentUser) =
+  type Command = Appliable[Unit] with SubmissionAttemptDescription
+
+  def apply(assignment: Assignment, user: CurrentUser): Command =
     new SubmissionAttemptCommandInternal(assignment, MemberOrUser(user.profile, user.apparentUser))
       with ComposableCommand[Unit]
       with SubmissionAttemptDescription
