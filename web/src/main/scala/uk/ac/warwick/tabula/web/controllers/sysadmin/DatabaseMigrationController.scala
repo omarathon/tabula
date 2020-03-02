@@ -1075,7 +1075,7 @@ object DatabaseMigrationController {
       StringColumn("resitagreedgrade"),
     )),
 
-    Migration("upstreamassignment", Seq(
+    Migration("assessmentComponent", Seq(
       StringColumn("id"),
       StringColumn("modulecode"),
       StringColumn("assessmentgroup"),

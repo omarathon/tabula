@@ -6,7 +6,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.FullyAnonymous
 import uk.ac.warwick.tabula.data.model.forms.TextField
-import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -40,14 +40,14 @@ object GenerateMarksTemplateCommand {
 object MarksTemplateCommand {
 
   // util to replace unsafe characters with spaces
-  def safeAssessmentName(assessment: Assessment): String = WorkbookUtil.createSafeSheetName(trimmedAssessmentName(assessment))
+  def safeAssessmentName(assessment: Assignment): String = WorkbookUtil.createSafeSheetName(trimmedAssessmentName(assessment))
 
   val MaxSpreadsheetNameLength = 31
   val MaxAssignmentNameLength: Int = MaxSpreadsheetNameLength - "Marks for ".length
 
   // trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
   // "Marks for " = 10 chars + assignment name (max 21) = 31
-  def trimmedAssessmentName(assessment: Assessment): String = {
+  def trimmedAssessmentName(assessment: Assignment): String = {
     if (assessment.name.length > MaxAssignmentNameLength)
       assessment.name.substring(0, MaxAssignmentNameLength)
     else

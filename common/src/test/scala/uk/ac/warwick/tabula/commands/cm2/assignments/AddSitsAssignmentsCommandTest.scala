@@ -18,9 +18,9 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
     val module2: Module = Fixtures.module(code = "ls102")
     val module3: Module = Fixtures.module(code = "ls103")
 
-    val upstream1: AssessmentComponent = Fixtures.upstreamAssignment(module = module1, number = 1)
-    val upstream2: AssessmentComponent = Fixtures.upstreamAssignment(module = module2, number = 2)
-    val upstream3: AssessmentComponent = Fixtures.upstreamAssignment(module = module3, number = 3)
+    val upstream1: AssessmentComponent = Fixtures.assessmentComponent(module = module1, number = 1)
+    val upstream2: AssessmentComponent = Fixtures.assessmentComponent(module = module2, number = 2)
+    val upstream3: AssessmentComponent = Fixtures.assessmentComponent(module = module3, number = 3)
     val assessmentGroup1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(upstream1)
     val assessmentGroup3: UpstreamAssessmentGroup = Fixtures.assessmentGroup(upstream3)
 

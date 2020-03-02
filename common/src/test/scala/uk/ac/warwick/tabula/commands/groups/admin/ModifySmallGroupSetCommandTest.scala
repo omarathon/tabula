@@ -64,10 +64,10 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
       command.academicYear = AcademicYear.now()
       command.membershipStyle = SmallGroupMembershipStyle.AssessmentComponents
 
-      val ac1: AssessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("in101"), 1)
+      val ac1: AssessmentComponent = Fixtures.assessmentComponent(Fixtures.module("in101"), 1)
       val upstream1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(ac1)
 
-      val ac2: AssessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("in102"), 2)
+      val ac2: AssessmentComponent = Fixtures.assessmentComponent(Fixtures.module("in102"), 2)
       val upstream2: UpstreamAssessmentGroup = Fixtures.assessmentGroup(ac2)
 
       command.assessmentMembershipService.getAssessmentComponents(module) returns (Seq(ac1, ac2))

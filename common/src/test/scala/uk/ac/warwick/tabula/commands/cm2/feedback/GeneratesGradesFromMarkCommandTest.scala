@@ -21,7 +21,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
     assessmentGroup.membershipService = mockAssignmentMembershipService
     assessmentGroup.occurrence = "A"
     assignment.assessmentGroups = JList(assessmentGroup)
-    val upstreamAssessmentComponent: AssessmentComponent = Fixtures.upstreamAssignment(module, 0)
+    val upstreamAssessmentComponent: AssessmentComponent = Fixtures.assessmentComponent(module, 0)
     assessmentGroup.assessmentComponent = upstreamAssessmentComponent
     val upstreamAssesmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
     val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2014), "A", module.code, null)

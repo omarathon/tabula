@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 import scala.jdk.CollectionConverters._
 
 object GenerateGradesFromMarkCommand {
-  def apply(assessment: Assessment) =
+  def apply(assessment: Assignment) =
     new GenerateGradesFromMarkCommandInternal(assessment)
       with AutowiringAssessmentMembershipServiceComponent
       with ComposableCommand[Map[String, Seq[GradeBoundary]]]
@@ -21,7 +21,7 @@ object GenerateGradesFromMarkCommand {
       with ReadOnly with Unaudited
 }
 
-class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
+class GenerateGradesFromMarkCommandInternal(val assessment: Assignment)
   extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
   self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
@@ -53,14 +53,14 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
         membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
       }.toMap
 
-    val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
-      assignmentUpstreamAssessmentGroupInfoMap.find { case (group, upstreamGroupInfo) =>
+    val studentAssessmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
+      assignmentUpstreamAssessmentGroupInfoMap.find { case (_, upstreamGroupInfo) =>
         upstreamGroupInfo.exists(_.upstreamAssessmentGroup.membersIncludes(student))
       }.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
     }
 
     studentMarks.asScala.map { case (uniId, mark) =>
-      uniId -> studentAssesmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
+      uniId -> studentAssessmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
     }.toMap
   }
 
@@ -80,7 +80,7 @@ trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with
 }
 
 trait GenerateGradesFromMarkCommandState {
-  def assessment: Assessment
+  def assessment: Assignment
 }
 
 trait GenerateGradesFromMarkCommandRequest {

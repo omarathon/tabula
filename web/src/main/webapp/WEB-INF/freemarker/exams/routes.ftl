@@ -20,6 +20,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro departmentNotificationSettings department><@_u context="/admin" page="/department/${department.code}/settings/notification" /></#macro>
 <#macro assignMarkersSmallGroups exam><@_u context="/groups" page="/admin/marker-allocation/exam/${exam.id}" /></#macro>
 
+<#-- Exams -->
+<#macro examsHome><@_u page="/" /></#macro>
+<#macro examsDepartmentHome department><@_u page="/admin/${department.code}/${academicYear.startYear?c}" /></#macro>
+<#macro examsDepartmentHomeForYear department academicYear><@_u page="/admin/${department.code}/${academicYear.startYear?c}" /></#macro>
+<#macro createExam module academicYear><@_u page="/admin/${module.adminDepartment.code}/${academicYear.startYear?c}/${module.code}/create" /></#macro>
+
 <#-- Grids -->
 <#macro gridsHome><@_u page="/grids" /></#macro>
 <#macro gridsDepartmentHomeForYear department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}" /></#macro>

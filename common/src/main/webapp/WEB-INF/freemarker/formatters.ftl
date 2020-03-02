@@ -131,6 +131,16 @@ preposition: Text to relate the title to the department name in the second line,
 	</div>
 </#macro>
 
+<#macro moduleHeader title module preposition="for">
+	<#local two_line = module?has_content />
+	<div class="deptheader">
+		<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+		<#if two_line>
+			<h4 class="with-related">${preposition} <@fmt.module_name module /></h4>
+		</#if>
+	</div>
+</#macro>
+
 <#macro module_name module withFormatting=true><#compress>
 	<#if withFormatting>
 		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
