@@ -63,6 +63,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val routes: JavaImports.JList[Route] = JArrayList()
         val courses: JavaImports.JList[Course] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       filter.allCourseTypes should be(CourseType.all)
@@ -97,6 +98,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val levelCodes: JavaImports.JList[String] = JArrayList()
         val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       val serialized: String = filter.serializeFilter
@@ -141,6 +143,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
         val levelCodes: JavaImports.JList[String] = JArrayList()
         val studyLevelCodes: JavaImports.JList[String] = JArrayList()
         var hallsOfResidence: JavaImports.JList[String] = JArrayList()
+        val includeTier4Filters: Boolean = false
       }
 
       val serialized: String = filter.serializeFilter

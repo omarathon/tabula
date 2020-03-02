@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.{SchemeMembershipExcludeType, SchemeMembershipI
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -133,6 +134,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
   def user: CurrentUser
 
   def department: Department = scheme.department
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
 
   // Bind variables
 
@@ -151,7 +153,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 
   def totalResults: Int = staticStudentIds.size
 
-  val studentsPerPage = FiltersStudents.DefaultStudentsPerPage
+  val studentsPerPage: Int = FiltersStudents.DefaultStudentsPerPage
 
   // Filter binds
   var courseTypes: JList[CourseType] = JArrayList()

@@ -109,8 +109,8 @@ trait ProfileFilterExtras extends FiltersStudents {
 
   final val HAS_ADMIN_NOTE = "Has administrative note"
 
-  lazy val tier4: Seq[String] = if (securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)) Seq("Tier 4 only") else Seq()
-  override lazy val allOtherCriteria: Seq[String] = tier4 ++ Seq(
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
+  override lazy val allOtherCriteria: Seq[String] = if (includeTier4Filters) Seq("Tier 4 only") else Seq() ++ Seq(
     "Visiting",
     "Enrolled for year or course completed",
     HAS_ADMIN_NOTE

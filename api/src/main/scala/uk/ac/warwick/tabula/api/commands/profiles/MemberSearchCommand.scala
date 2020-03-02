@@ -3,15 +3,16 @@ package uk.ac.warwick.tabula.api.commands.profiles
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order.asc
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.profiles.MemberSearchCommand._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDaoComponent}
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object MemberSearchCommand {
   val MaxLimit = 100
@@ -60,7 +61,12 @@ abstract class MemberSearchCommandInternal(override val departments: Seq[Departm
 }
 
 trait MemberSearchCommandRequest extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+  self: SecurityServiceComponent =>
+
   def departments: Seq[Department]
+  def user: CurrentUser
+  val includeTier4Filters: Boolean = departments.forall(d => securityService.can(user, Profiles.Read.Tier4VisaRequirement, d))
 
   val defaultOrder: Seq[Order] = Seq(asc("lastName"), asc("firstName"))
 

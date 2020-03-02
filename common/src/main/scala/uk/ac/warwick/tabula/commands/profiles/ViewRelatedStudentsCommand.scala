@@ -66,6 +66,7 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
     profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
   lazy val allDepartments: Seq[Department] = allCourses.flatMap(c => Option(c.department)).distinct
   lazy val allRoutes: Seq[Route] = allCourses.flatMap(c => Option(c.currentRoute)).distinct
+  def includeTier4Filters: Boolean = false
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)

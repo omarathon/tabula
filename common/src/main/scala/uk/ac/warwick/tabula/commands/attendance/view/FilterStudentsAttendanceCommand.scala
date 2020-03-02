@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands.{AutowiringSecurityServicePermissionsAwareR
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -133,8 +134,8 @@ trait AttendanceFilterExtras extends FiltersStudents {
     } else department.routes.asScala.toSeq.sorted(Route.DegreeTypeOrdering)
   }.filter(_.active)
 
-  override lazy val allOtherCriteria: Seq[String] = Seq(
-    "Tier 4 only",
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
+  override lazy val allOtherCriteria: Seq[String] = if(includeTier4Filters) Seq("Tier 4 only") else Seq() ++ Seq(
     "Visiting",
     "Enrolled for year or course completed",
     UNAUTHORISED,

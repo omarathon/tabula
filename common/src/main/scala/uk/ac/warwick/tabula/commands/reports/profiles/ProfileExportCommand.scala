@@ -2,13 +2,14 @@ package uk.ac.warwick.tabula.commands.reports.profiles
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ProfileExportCommand {
@@ -23,7 +24,7 @@ object ProfileExportCommand {
 }
 
 
-class ProfileExportCommandInternal(val department: Department, val academicYear: AcademicYear, user: CurrentUser)
+class ProfileExportCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
   extends CommandInternal[Seq[AttendanceMonitoringStudentData]] with TaskBenchmarking {
 
   self: ProfileServiceComponent with ProfileExportCommandState with SecurityServiceComponent =>
@@ -88,8 +89,9 @@ trait ProfileExportPermissions extends RequiresPermissionsChecking with Permissi
 
 trait ProfileExportCommandState extends FiltersStudents {
   def department: Department
-
+  def user: CurrentUser
   def academicYear: AcademicYear
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
 
   var studentsPerPage: Int = FiltersStudents.DefaultStudentsPerPage
   val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm

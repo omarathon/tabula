@@ -7,8 +7,9 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.{MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, AutowiringMitCircsWorkflowProgressServiceComponent, MitCircsSubmissionServiceComponent, MitCircsWorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
@@ -89,11 +90,15 @@ trait AdminHomePermissions extends RequiresPermissionsChecking with PermissionsC
 }
 
 trait AdminHomeCommandState {
+
+  self: SecurityServiceComponent =>
+
   // This is used to filter the department the MCS is made to
   def department: Department
-
   // This is used as part of filtering the students whose MCS should display
   def year: AcademicYear
+  def user: CurrentUser
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
 }
 
 trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState {

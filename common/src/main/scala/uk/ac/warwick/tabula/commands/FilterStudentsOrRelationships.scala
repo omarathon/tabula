@@ -169,5 +169,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   }
 
   lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
-  lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting", "Enrolled for year or course completed")
+
+  def includeTier4Filters: Boolean
+  lazy val allOtherCriteria: Seq[String] = if(includeTier4Filters) Seq("Tier 4 only") else Seq() ++ Seq("Visiting", "Enrolled for year or course completed")
 }

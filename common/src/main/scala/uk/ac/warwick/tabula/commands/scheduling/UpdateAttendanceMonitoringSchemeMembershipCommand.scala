@@ -77,7 +77,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
     val dataToUpdate: Seq[((Department, AcademicYear), Seq[String])] = universityIDsToUpdateWithDepartmentAndAcademicYear
       .groupBy { case (_, dept, academicYear) => (dept, academicYear) }
-      .mapValues(_.map { case (universityId, _, _) => universityId }).toSeq
+      .view.mapValues(_.map { case (universityId, _, _) => universityId }).toSeq
 
 
     dataToUpdate.foreach { case ((dept, academicYear), universityIds) =>
@@ -110,7 +110,8 @@ trait UpdateAttendanceMonitoringSchemeMembershipDescription extends Describable[
 }
 
 trait UpdateAttendanceMonitoringSchemeMembershipCommandState extends FiltersStudents with DeserializesFilter {
-  val department = null // Needs to be defined, but never actually used
+  def includeTier4Filters: Boolean = false
+  val department: Null = null // Needs to be defined, but never actually used
   val defaultOrder = Seq(asc("lastName"), asc("firstName"))
   var sortOrder: JList[Order] = JArrayList() // Never used
 
