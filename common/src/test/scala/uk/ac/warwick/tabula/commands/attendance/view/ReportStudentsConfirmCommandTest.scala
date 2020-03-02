@@ -13,6 +13,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     val academicYear = AcademicYear(2014)
     val user: CurrentUser = null
     val profileService: ProfileService = smartMock[ProfileService]
+    val securityService: SecurityService = smartMock[SecurityService]
     val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
   }
 

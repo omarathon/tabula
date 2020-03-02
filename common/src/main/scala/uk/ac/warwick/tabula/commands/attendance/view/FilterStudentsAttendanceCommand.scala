@@ -4,7 +4,6 @@ import org.hibernate.criterion.Order._
 import org.hibernate.criterion.{Order, Restrictions}
 import org.hibernate.sql.JoinType
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{AutowiringSecurityServicePermissionsAwareRoutes, _}
 import uk.ac.warwick.tabula.data.model._
@@ -14,13 +13,13 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 object FilterStudentsAttendanceCommand {
-  def apply(department: Department, academicYear: AcademicYear) =
-    new FilterStudentsAttendanceCommandInternal(department, academicYear)
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+    new FilterStudentsAttendanceCommandInternal(department, academicYear, user)
       with AutowiringSecurityServicePermissionsAwareRoutes
       with AutowiringProfileServiceComponent
       with AutowiringAttendanceMonitoringServiceComponent
@@ -32,7 +31,7 @@ object FilterStudentsAttendanceCommand {
 }
 
 
-class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear)
+class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
   extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult with TaskBenchmarking {
 
   self: FilterStudentsAttendanceCommandState with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
@@ -41,14 +40,14 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
     val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.countStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear, additionalRestrictions)
+        restrictions = buildRestrictions(user, Seq(department), academicYear, additionalRestrictions)
       )
     }
 
     val (offset, students) = benchmarkTask("profileService.findStudentsByRestrictionsInAffiliatedDepartments") {
       profileService.findStudentsByRestrictionsInAffiliatedDepartments(
         department = department,
-        restrictions = buildRestrictions(academicYear, additionalRestrictions),
+        restrictions = buildRestrictions(user, Seq(department), academicYear, additionalRestrictions),
         orders = buildOrders(),
         maxResults = studentsPerPage,
         startResult = studentsPerPage * (page - 1)
@@ -88,7 +87,7 @@ trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking wi
 
 trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
 
-  var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
+  var studentsPerPage: Int = FiltersStudents.DefaultStudentsPerPage
   val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 
   // Bind variables
@@ -116,6 +115,8 @@ trait AttendanceFilterExtras extends FiltersStudents {
   def department: Department
 
   def academicYear: AcademicYear
+
+  def user: CurrentUser
 
   final val UNAUTHORISED = "Missed (unauthorised)"
   final val AUTHORISED = "Missed (authorised)"
@@ -166,48 +167,53 @@ trait AttendanceFilterExtras extends FiltersStudents {
       unauthorisedAttendance6Restriction
     ).flatten: _*).toSeq
 
-  def unrecordedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(UNRECORDED) match {
-    case false => None
-    case true => ScalaRestriction.gt(
+  def unrecordedAttendanceRestriction: Option[ScalaRestriction] = if (otherCriteria.contains(UNRECORDED)) {
+    ScalaRestriction.gt(
       "attendanceCheckpointTotals.unrecorded",
       0,
       getAliasPaths("attendanceCheckpointTotals"): _*
     )
+  } else {
+    None
   }
 
-  def authorisedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(AUTHORISED) match {
-    case false => None
-    case true => ScalaRestriction.gt(
+  def authorisedAttendanceRestriction: Option[ScalaRestriction] = if (otherCriteria.contains(AUTHORISED)) {
+    ScalaRestriction.gt(
       "attendanceCheckpointTotals.authorised",
       0,
       getAliasPaths("attendanceCheckpointTotals"): _*
     )
+  } else {
+    None
   }
 
-  def unauthorisedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(UNAUTHORISED) match {
-    case false => None
-    case true => ScalaRestriction.gt(
+  def unauthorisedAttendanceRestriction: Option[ScalaRestriction] = if (otherCriteria.contains(UNAUTHORISED)) {
+    ScalaRestriction.gt(
       "attendanceCheckpointTotals.unauthorised",
       0,
       getAliasPaths("attendanceCheckpointTotals"): _*
     )
+  } else {
+    None
   }
 
-  def unauthorisedAttendance3Restriction: Option[ScalaRestriction] = otherCriteria.contains(UNAUTHORISED3) match {
-    case false => None
-    case true => ScalaRestriction.gt(
+  def unauthorisedAttendance3Restriction: Option[ScalaRestriction] = if (otherCriteria.contains(UNAUTHORISED3)) {
+    ScalaRestriction.gt(
       "attendanceCheckpointTotals.unauthorised",
       2,
       getAliasPaths("attendanceCheckpointTotals"): _*
     )
+  } else {
+    None
   }
 
-  def unauthorisedAttendance6Restriction: Option[ScalaRestriction] = otherCriteria.contains(UNAUTHORISED6) match {
-    case false => None
-    case true => ScalaRestriction.gt(
+  def unauthorisedAttendance6Restriction: Option[ScalaRestriction] = if (otherCriteria.contains(UNAUTHORISED6)) {
+    ScalaRestriction.gt(
       "attendanceCheckpointTotals.unauthorised",
       5,
       getAliasPaths("attendanceCheckpointTotals"): _*
     )
+  } else {
+    None
   }
 }

@@ -66,7 +66,7 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
         benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
           profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
             department = department,
-            restrictions = buildRestrictions(academicYear),
+            restrictions = buildRestrictions(user, Seq(department), academicYear),
             academicYear
           )
         }

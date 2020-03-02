@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
@@ -22,6 +22,7 @@ object UpdateAttendanceMonitoringSchemeMembershipCommand {
       with AutowiringProfileServiceComponent
       with AutowiringAttendanceMonitoringServiceComponent
       with AutowiringDeserializesFilterImpl
+      with AutowiringSecurityServiceComponent
       with UpdateAttendanceMonitoringSchemeMembershipDescription
       with UpdateAttendanceMonitoringSchemeMembershipPermissions
       with UpdateAttendanceMonitoringSchemeMembershipCommandState
@@ -54,7 +55,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
           val staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
             profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
               department = scheme.department,
-              restrictions = buildRestrictions(scheme.academicYear),
+              restrictions = buildRestrictionsNoTier4(scheme.academicYear),
               orders = buildOrders()
             )
           }

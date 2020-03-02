@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -27,6 +27,7 @@ object FilterMonitoringPointsCommand {
     new FilterMonitoringPointsCommandInternal(department, academicYear, user)
       with AutowiringAttendanceMonitoringServiceComponent
       with AutowiringProfileServiceComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[FilterMonitoringPointsCommandResult]
       with FilterMonitoringPointsPermissions
       with FilterMonitoringPointsCommandState
@@ -47,7 +48,7 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
       val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
         profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
           department = department,
-          restrictions = buildRestrictions(academicYear, additionalRestrictions),
+          restrictions = buildRestrictions(user, Seq(department), academicYear, additionalRestrictions),
           academicYear = academicYear
         )
       }

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.attendance.view.{FilterStudentsAttendanceCommand, FilteredStudentsAttendanceResult}
@@ -30,8 +30,8 @@ class ViewStudentsAttendanceController extends AttendanceController with HasMont
   override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
   @ModelAttribute("filterCommand")
-  def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-    FilterStudentsAttendanceCommand(mandatory(department), mandatory(academicYear))
+  def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
+    FilterStudentsAttendanceCommand(mandatory(department), mandatory(academicYear), user)
 
   @RequestMapping
   def home(

@@ -12,11 +12,10 @@ import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 case class FindStudentsForSchemeCommandResult(
   staticStudentIds: JList[String],
@@ -30,6 +29,7 @@ object FindStudentsForSchemeCommand {
       with AutowiringAttendanceMonitoringServiceComponent
       with AutowiringDeserializesFilterImpl
       with AutowiringUserLookupComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[FindStudentsForSchemeCommandResult]
       with PopulateFindStudentsForSchemeCommand
       with UpdatesFindStudentsForSchemeCommand
@@ -56,7 +56,7 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
       staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
         profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
           department = department,
-          restrictions = buildRestrictions(scheme.academicYear),
+          restrictions = buildRestrictions(user, Seq(scheme.department), scheme.academicYear),
 
           orders = buildOrders()
         ).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGro
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
@@ -26,6 +26,7 @@ object FindStudentsForUserGroupCommand {
       with AutowiringProfileServiceComponent
       with AutowiringDeserializesFilterImpl
       with AutowiringUserLookupComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[FindStudentsForUserGroupCommandResult]
       with PopulateFindStudentsForUserGroupCommand
       with UpdatesFindStudentsForUserGroupCommand
@@ -43,6 +44,7 @@ object FindStudentsForUserGroupCommand {
       with AutowiringProfileServiceComponent
       with AutowiringDeserializesFilterImpl
       with AutowiringUserLookupComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[FindStudentsForUserGroupCommandResult]
       with PopulateFindStudentsForUserGroupCommand
       with UpdatesFindStudentsForUserGroupCommand
@@ -93,7 +95,7 @@ class FindStudentsForUserGroupCommandInternal(val department: Department, val ac
           department = department,
           modules.asScala.toSet,
           academicYear,
-          restrictions = buildRestrictions(academicYear),
+          restrictions = buildRestrictionsNoTier4(academicYear),
           orders = buildOrders()
         ).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)
       }.asJava

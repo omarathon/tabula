@@ -213,6 +213,11 @@ object Fixtures extends Mockito {
     user
   }
 
+  def currentUser(universityId: String = "0123456", userId: String = "cuspxp") = {
+    val u = user(universityId, userId)
+    new CurrentUser(u, u)
+  }
+
   def member(userType: MemberUserType, universityId: String = "0123456", userId: String = "cuspxp", department: Department = null): Member = {
     val member = userType match {
       case MemberUserType.Student => new StudentMember

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.api.web.controllers.profiles
 
 import java.util.Optional
 
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.commands.profiles.UserSearchCommandState
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 abstract class AbstractUserSearchController extends ApiController with AutowiringProfileServiceComponent {
 
-  protected def getCommand(academicYear: Optional[AcademicYear]): Appliable[Seq[String]]
+  protected def getCommand(academicYear: Optional[AcademicYear], user: CurrentUser): Appliable[Seq[String]]
   protected def resultKey: String
 
   final override def onPreRequest: Unit = {

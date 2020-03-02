@@ -15,6 +15,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
   private trait CommandTestSupport extends ProfileServiceComponent with UserLookupComponent with FiltersStudents {
     val profileService: ProfileService = smartMock[ProfileService]
+    val securityService: SecurityService = smartMock[SecurityService]
     val userLookup = new MockUserLookup
   }
 
@@ -77,6 +78,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
         val academicYear: AcademicYear = AcademicYear.now()
         val adapter: MemberQueryMembershipAdapter = MemberQueryMembershipAdapter(set)
         val profileService: ProfileService = smartMock[ProfileService]
+        val securityService: SecurityService = smartMock[SecurityService]
         val sitsStatusDao: SitsStatusDao = smartMock[SitsStatusDao]
         val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
         val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]

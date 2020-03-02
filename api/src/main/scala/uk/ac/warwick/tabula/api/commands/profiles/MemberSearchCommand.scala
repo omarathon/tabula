@@ -3,32 +3,33 @@ package uk.ac.warwick.tabula.api.commands.profiles
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order.asc
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.profiles.MemberSearchCommand._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDaoComponent}
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object MemberSearchCommand {
   val MaxLimit = 100
   val DefaultLimit = 10
 
-  def apply(departments: Seq[Department]) =
-    new MemberSearchCommandInternal(departments)
+  def apply(departments: Seq[Department], user: CurrentUser) =
+    new MemberSearchCommandInternal(departments, user)
       with ComposableCommand[Seq[Member]]
       with AutowiringProfileServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringMemberDaoComponent
+      with AutowiringSecurityServiceComponent
       with MemberSearchCommandRequest
       with MemberSearchCommandValidation
       with ReadOnly with Unaudited
 }
 
-abstract class MemberSearchCommandInternal(override val departments: Seq[Department]) extends CommandInternal[Seq[Member]] with FiltersStudents {
+abstract class MemberSearchCommandInternal(override val departments: Seq[Department], val user: CurrentUser) extends CommandInternal[Seq[Member]] with FiltersStudents {
 
   self: MemberSearchCommandRequest with ModuleAndDepartmentServiceComponent with MemberDaoComponent =>
 
@@ -44,7 +45,7 @@ abstract class MemberSearchCommandInternal(override val departments: Seq[Departm
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(AcademicYear.now())
+    val restrictions = buildRestrictions(user, departments, AcademicYear.now())
 
     departments match {
       case Nil => profileService.findAllUserIdsByRestrictions(restrictions).distinct
