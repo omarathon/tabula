@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAttemptCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -14,11 +12,11 @@ import uk.ac.warwick.tabula.web.views.JSONView
 class SubmissionAttemptController extends CourseworkController {
 
   @ModelAttribute("command")
-  def command(@PathVariable assignment: Assignment) =
+  def command(@PathVariable assignment: Assignment): SubmissionAttemptCommand.Command =
     SubmissionAttemptCommand(mandatory(assignment), user)
 
-  @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {
+  @PostMapping
+  def submit(@ModelAttribute("command") cmd: SubmissionAttemptCommand.Command): Mav = {
     cmd.apply()
     Mav(new JSONView(Map(
       "success" -> true

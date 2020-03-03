@@ -85,8 +85,8 @@
   </#if>
 
   <#assign submitUrl><@routes.cm2.assignment assignment /></#assign>
-
-  <@f.form cssClass="double-submit-protection" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand">
+  <#assign submissionAttemptUrl><@routes.cm2.submission_attempt assignment /></#assign>
+  <@f.form cssClass="double-submit-protection" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand" data\-beacon=submissionAttemptUrl>
 
     <#if errors.hasErrors()>
       <div class="alert alert-warning">
@@ -185,21 +185,6 @@
       </#if>
     </div>
   </@f.form>
-
-  <script nonce="${nonce()}">
-    jQuery(function ($) {
-      $('form#submitAssignmentCommand').on('submit', function (e) {
-        e.preventDefault();
-        var form = this;
-        $.post({
-          url: '<@routes.cm2.submission_attempt assignment />',
-          complete: function () {
-            form.submit();
-          }
-        });
-      });
-    });
-  </script>
 
 <#elseif !submission??>
 

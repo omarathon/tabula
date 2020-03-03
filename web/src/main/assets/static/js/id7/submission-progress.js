@@ -5,10 +5,28 @@ class SubmissionProgress {
   constructor(form) {
     this.form = form;
 
-    $(form).on('submit', this.submit.bind(this));
+    $(form).on('submit', this.submissionAttempt.bind(this));
   }
 
-  submit(e) {
+  submissionAttempt(e) {
+    const $form = $(this.form);
+    const beacon = $form.data('beacon');
+    if (beacon) {
+      $.post({
+        url: beacon,
+        complete: () => this.submit(e),
+      });
+    } else {
+      this.submit(e);
+    }
+
+    // Cancel the default form submission
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  }
+
+  submit() {
     // Replace the submit buttons with a progress bar
     const $form = $(this.form);
     this.$progress = $('<div />')
@@ -124,11 +142,6 @@ class SubmissionProgress {
     }, false);
 
     request.send(formData);
-
-    // Cancel the default form submission
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    return false;
   }
 
   cancel() {
