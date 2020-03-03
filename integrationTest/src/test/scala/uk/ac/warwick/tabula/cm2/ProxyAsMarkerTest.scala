@@ -29,8 +29,10 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
       assignmentRowLink.isEnabled should be (true)
       click on assignmentRowLink
     }
-    Then("I see the summary assignment  screen")
-    currentUrl.contains("/summary") should be(true)
+    Then("I see the summary assignment screen")
+    eventually {
+      currentUrl.contains("/summary") should be(true)
+    }
 
     val expandAssignmentUser = eventually(id("main").webElement.findElements(By.className("student")).get(0)) //tabula-functest-student1
     click on expandAssignmentUser
@@ -38,8 +40,9 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
     val proxyLink = id("main").webElement.findElement(By.partialLinkText("Proxy"))
     click on proxyLink
 
-    currentUrl.contains("#single-marker-tabula-functest-student1") should be(true)
-
+    eventually {
+      currentUrl.contains("#single-marker-tabula-functest-student1") should be(true)
+    }
   }
 
   "Department admin" should "be able to proxy as marker" in as(P.Admin1) {
