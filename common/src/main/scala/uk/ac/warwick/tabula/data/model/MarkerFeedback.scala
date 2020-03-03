@@ -8,6 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, ModerationStage}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
@@ -49,7 +50,7 @@ class MarkerFeedback extends GeneratedId
   // returns an Anon user when the markerUsercode is null
   def marker: User = {
     val marker = userLookup.getUserByUserId(markerUsercode)
-    if (markerUsercode != null && !marker.isFoundUser)
+    if (markerUsercode.hasText && !marker.isFoundUser)
       dummyUser(ofUserType = MemberUserType.Other, userId = markerUsercode)
     else
       marker
