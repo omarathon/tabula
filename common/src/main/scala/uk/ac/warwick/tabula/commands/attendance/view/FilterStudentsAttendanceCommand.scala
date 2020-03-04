@@ -135,7 +135,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
   }.filter(_.active)
 
   def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
-  override lazy val allOtherCriteria: Seq[String] = if(includeTier4Filters) Seq("Tier 4 only") else Seq() ++ Seq(
+  override lazy val allOtherCriteria: Seq[String] = (if(includeTier4Filters) Seq("Tier 4 only") else Seq()) ++ Seq(
     "Visiting",
     "Enrolled for year or course completed",
     UNAUTHORISED,
