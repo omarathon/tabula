@@ -173,7 +173,7 @@
             </@filter>
 
             <#-- cross-app singleton introductory text -->
-            <#if showIntro("tier4-filtering", "anywhere")>
+            <#if showIntro("tier4-filtering", "anywhere") && filterCommand.includeTier4Filters>
                 <#assign introText>
                   <p>You can now filter to view only those students who may have Tier 4 monitoring/reporting requirements by checking 'Tier 4 only' under the 'Other'
                     tab.</p>

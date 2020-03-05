@@ -18,6 +18,23 @@ object Routes {
 
   def home: String = context + "/"
 
+  object Exams {
+
+    private val context = "/exams"
+
+    def home: String = s"$context/"
+
+    object admin {
+
+      def department(department: Department): String = s"$context/admin/department/${encoded(department.code)}"
+
+      def department(d: Department, academicYear: AcademicYear): String = s"${department(d)}/${encoded(academicYear.startYear.toString)}"
+
+      def module(m: Module, academicYear: AcademicYear): String = s"${department(m.adminDepartment, academicYear)}/${encoded(m.code)}"
+
+    }
+  }
+
   object Grids {
 
     private val context = "/exams/grids"

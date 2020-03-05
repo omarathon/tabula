@@ -3,13 +3,14 @@ package uk.ac.warwick.tabula.commands.profiles
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -19,20 +20,21 @@ case class FilterStudentsResults(
 )
 
 object FilterStudentsCommand {
-  def apply(department: Department, year: AcademicYear) =
-    new FilterStudentsCommand(department, year)
+  def apply(department: Department, year: AcademicYear, user: CurrentUser) =
+    new FilterStudentsCommand(department, year, user)
       with ComposableCommand[FilterStudentsResults]
       with FilterStudentsPermissions
       with AutowiringProfileServiceComponent
+      with AutowiringSecurityServiceComponent
       with ReadOnly with Unaudited
 }
 
-abstract class FilterStudentsCommand(val department: Department, val year: AcademicYear)
+abstract class FilterStudentsCommand(val department: Department, val year: AcademicYear, val user: CurrentUser)
   extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener with TaskBenchmarking {
   self: ProfileServiceComponent =>
 
   def applyInternal(): FilterStudentsResults = {
-    val restrictions = buildRestrictions(year, Seq(hasAdminNoteRestriction).flatten)
+    val restrictions = buildRestrictions(user, Seq(department), year, Seq(hasAdminNoteRestriction).flatten)
 
     val totalResults = benchmarkTask("countStudentsByRestrictions") {
       profileService.countStudentsByRestrictions(
@@ -78,8 +80,9 @@ trait FilterStudentsPermissions extends RequiresPermissionsChecking with Permiss
 
 trait FilterStudentsState extends ProfileFilterExtras {
   override def department: Department
+  def user: CurrentUser
 
-  var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
+  var studentsPerPage: Int = FiltersStudents.DefaultStudentsPerPage
   var page = 1
 
   val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
@@ -102,10 +105,12 @@ trait FilterStudentsState extends ProfileFilterExtras {
 
 trait ProfileFilterExtras extends FiltersStudents {
 
+  self: FilterStudentsState =>
+
   final val HAS_ADMIN_NOTE = "Has administrative note"
 
-  override lazy val allOtherCriteria: Seq[String] = Seq(
-    "Tier 4 only",
+  def includeTier4Filters: Boolean = securityService.can(user, Profiles.Read.Tier4VisaRequirement, department)
+  override lazy val allOtherCriteria: Seq[String] = (if (includeTier4Filters) Seq("Tier 4 only") else Seq()) ++ Seq(
     "Visiting",
     "Enrolled for year or course completed",
     HAS_ADMIN_NOTE
@@ -119,11 +124,12 @@ trait ProfileFilterExtras extends FiltersStudents {
     )) (table)
   }
 
-  def hasAdminNoteRestriction: Option[ScalaRestriction] = otherCriteria.contains(HAS_ADMIN_NOTE) match {
-    case false => None
-    case true => ScalaRestriction.notEmpty(
+  def hasAdminNoteRestriction: Option[ScalaRestriction] = if (otherCriteria.contains(HAS_ADMIN_NOTE)) {
+    ScalaRestriction.notEmpty(
       "memberNotes",
       getAliasPaths("memberNotes"): _*
     )
+  } else {
+    None
   }
 }

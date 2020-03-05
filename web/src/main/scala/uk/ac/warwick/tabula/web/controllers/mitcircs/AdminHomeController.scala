@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.mitcircs
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.mitcircs.{AdminHomeCommand, ListMitCircsPanelsCommand}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState
@@ -30,8 +30,8 @@ abstract class AbstractAdminDeptController
     retrieveActiveDepartment(Option(department))
 
   @ModelAttribute("command")
-  def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): AdminHomeCommand.Command =
-    AdminHomeCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now()))
+  def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): AdminHomeCommand.Command =
+    AdminHomeCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now()), user)
 
   @ModelAttribute("allSubmissionStates")
   def allSubmissionStates: Seq[MitigatingCircumstancesSubmissionState] =

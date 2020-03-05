@@ -309,7 +309,6 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
-  /** Just gets components of type Assignment for modules in this department, not all components. */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
     // TAB-2676 Include modules in sub-departments optionally
     def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
@@ -570,7 +569,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 				left join smallgroupset s on s.module_id = m.id and s.academicyear = :academicYear and s.membersgroup_id in
 					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
-				join upstreamassignment c on c.module_id = m.id
+				join assessmentcomponent c on c.module_id = m.id
 				join upstreamassessmentgroup uag
 					on (uag.academicyear = a.academicyear or uag.academicyear = s.academicyear)
 						 and uag.modulecode = c.modulecode

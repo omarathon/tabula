@@ -76,7 +76,9 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
     val datetime = DateTime.now.minusDays(1).withHourOfDay(11)
 
     eventually {
-      click on textField("meetingDateStr")
+      val meetingDateStr = textField("meetingDateStr")
+      val meetingDateCalendarIcon = meetingDateStr.underlying.findElement(By.xpath("..//*[contains(@class, \"fa-calendar\")]"))
+      click on meetingDateCalendarIcon
       val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
 
       dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be(datetime.toString("MMMM yyyy"))
@@ -85,7 +87,9 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
     }
 
     eventually {
-      click on textField("meetingTimeStr")
+      val meetingTimeStr = textField("meetingTimeStr")
+      val meetingTimeCalendarIcon = meetingTimeStr.underlying.findElement(By.xpath("..//*[contains(@class, \"fa-clock-o\")]"))
+      click on meetingTimeCalendarIcon
       val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
 
       click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == datetime.toString("H") + ":00" }.head
@@ -93,7 +97,9 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
     }
 
     eventually {
-      click on textField("meetingEndTimeStr")
+      val meetingEndTimeStr = textField("meetingEndTimeStr")
+      val meetingEndTimeCalendarIcon = meetingEndTimeStr.underlying.findElement(By.xpath("..//*[contains(@class, \"fa-clock-o\")]"))
+      click on meetingEndTimeCalendarIcon
       val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
 
       click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == datetime.plusHours(1).toString("H") + ":00" }.head

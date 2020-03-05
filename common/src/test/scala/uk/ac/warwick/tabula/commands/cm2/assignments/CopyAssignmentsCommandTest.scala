@@ -96,7 +96,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
         val group = new AssessmentGroup
         group.assignment = assignment
         group.occurrence = "A"
-        group.assessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("bs101"), 1)
+        group.assessmentComponent = Fixtures.assessmentComponent(Fixtures.module("bs101"), 1)
         group.membershipService = command.assessmentMembershipService
         group
       }
@@ -105,7 +105,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
         val group = new AssessmentGroup
         group.assignment = assignment
         group.occurrence = "B"
-        group.assessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("bs102"), 2)
+        group.assessmentComponent = Fixtures.assessmentComponent(Fixtures.module("bs102"), 2)
         group.membershipService = command.assessmentMembershipService
         group
       }

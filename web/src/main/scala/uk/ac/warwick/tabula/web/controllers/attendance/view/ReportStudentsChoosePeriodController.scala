@@ -19,7 +19,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 
   @ModelAttribute("command")
   def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
-    ReportStudentsChoosePeriodCommand(mandatory(department), mandatory(academicYear), user.apparentUser)
+    ReportStudentsChoosePeriodCommand(mandatory(department), mandatory(academicYear), user)
 
   @RequestMapping(method = Array(GET, HEAD))
   def form(

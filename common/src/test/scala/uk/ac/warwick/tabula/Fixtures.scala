@@ -150,7 +150,7 @@ object Fixtures extends Mockito {
     s
   }
 
-  def upstreamAssignment(module: Module, number: Int): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
@@ -211,6 +211,11 @@ object Fixtures extends Mockito {
     user.setFoundUser(true)
     user.setVerified(true)
     user
+  }
+
+  def currentUser(universityId: String = "0123456", userId: String = "cuspxp") = {
+    val u = user(universityId, userId)
+    new CurrentUser(u, u)
   }
 
   def member(userType: MemberUserType, universityId: String = "0123456", userId: String = "cuspxp", department: Department = null): Member = {

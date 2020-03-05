@@ -30,6 +30,7 @@ object ViewRelatedStudentsCommand {
       with AutowiringProfileServiceComponent
       with AutowiringMeetingRecordServiceComponent
       with AutowiringRelationshipServiceComponent
+      with AutowiringSecurityServiceComponent
       with ViewRelatedStudentsCommandPermissions
       with Unaudited with ReadOnly
   }
@@ -65,6 +66,7 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
     profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
   lazy val allDepartments: Seq[Department] = allCourses.flatMap(c => Option(c.department)).distinct
   lazy val allRoutes: Seq[Route] = allCourses.flatMap(c => Option(c.currentRoute)).distinct
+  def includeTier4Filters: Boolean = false
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
@@ -73,7 +75,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 
   def applyInternal(): Result = {
     val year = AcademicYear.now()
-    val studentCourseDetails = profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
+    val studentCourseDetails = profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictionsNoTier4(year))
     val students = studentCourseDetails.map(_.student).distinct
 
     val lastMeetingWithTotalPendingApprovalsMap: Map[String, (Option[MeetingRecord], Int)] = students.map(student => {

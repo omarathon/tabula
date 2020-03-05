@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{GetMapping, ModelAttribute, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.profiles.{MemberSearchCommand, MemberSearchCommandInternal, MemberSearchCommandRequest}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
@@ -32,8 +33,8 @@ class MembersController extends ApiController with AutowiringProfileServiceCompo
   }
 
   @ModelAttribute("command")
-  def command(@RequestParam(name = "department", required = false) departments: JList[Department]): Command =
-    MemberSearchCommand(Option(departments).map(_.asScala.toSeq).getOrElse(Seq[Department]()))
+  def command(@RequestParam(name = "department", required = false) departments: JList[Department], user: CurrentUser): Command =
+    MemberSearchCommand(Option(departments).map(_.asScala.toSeq).getOrElse(Seq[Department]()), user)
 
   @GetMapping(produces = Array("application/json"))
   def search(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {

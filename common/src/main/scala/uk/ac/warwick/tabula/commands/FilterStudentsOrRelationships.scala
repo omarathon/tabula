@@ -2,11 +2,13 @@ package uk.ac.warwick.tabula.commands
 
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.DetachedCriteria
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
 import scala.jdk.CollectionConverters._
@@ -19,7 +21,7 @@ object FilterStudentsOrRelationships {
 
 }
 
-trait FilterStudentsOrRelationships extends FiltersStudentsBase with PermissionsCheckingMethods with ProfileServiceComponent {
+trait FilterStudentsOrRelationships extends FiltersStudentsBase with PermissionsCheckingMethods with ProfileServiceComponent with SecurityServiceComponent {
 
   def getAliasPaths(sitsTable: String): Seq[(String, AliasAndJoinType)]
 
@@ -106,7 +108,32 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
     getAliasPaths("termtimeAddress"): _*
   )
 
-  protected def buildRestrictions(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction] = Seq.empty): Seq[ScalaRestriction] = {
+  protected def buildRestrictions(
+    user: CurrentUser,
+    departments: Seq[Department],
+    year: AcademicYear,
+    additionalRestrictions: Seq[ScalaRestriction] = Seq.empty
+  ): Seq[ScalaRestriction] = {
+
+    val tier4Restrictions: Seq[ScalaRestriction] = {
+      lazy val filteringOnTier4 = otherCriteria.contains("Tier 4 only") ||  otherCriteria.contains("Not Tier 4 only")
+      lazy val hasTier4Permissions = departments.forall(d => securityService.can(user, Profiles.Read.Tier4VisaRequirement, d))
+      if (filteringOnTier4 && hasTier4Permissions) {
+        Seq(tier4Restriction, notTier4Restriction).flatten
+      } else {
+        Seq()
+      }
+    }
+    buildRestrictionsInternal(year: AcademicYear, additionalRestrictions ++ tier4Restrictions)
+  }
+
+  // have to give this a different name to the method above as both have a default value for additionalRestrictions
+  protected def buildRestrictionsNoTier4(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction] = Seq.empty): Seq[ScalaRestriction] = {
+    buildRestrictionsInternal(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction])
+  }
+
+  private def buildRestrictionsInternal(year: AcademicYear, additionalRestrictions: Seq[ScalaRestriction]): Seq[ScalaRestriction] = {
+
     val restrictions = Seq(
       courseTypeRestriction,
       specificCourseTypeRestriction,
@@ -118,8 +145,6 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       studyLevelCodeRestriction,
       sprStatusRestriction,
       registeredModulesRestriction(year),
-      tier4Restriction,
-      notTier4Restriction,
       visitingRestriction,
       enrolledOrCompletedRestriction,
       isFinalistRestriction,
@@ -144,5 +169,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   }
 
   lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
-  lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting", "Enrolled for year or course completed")
+
+  def includeTier4Filters: Boolean
+  lazy val allOtherCriteria: Seq[String] = (if(includeTier4Filters) Seq("Tier 4 only") else Seq()) ++ Seq("Visiting", "Enrolled for year or course completed")
 }

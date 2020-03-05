@@ -75,7 +75,7 @@ Macros for customised form elements, containers and more complex pickers.
       </div>
     </#macro>
 
-    <#macro checkbox path="">
+    <#macro checkbox path="" inline=false>
       <#local errorClass="" />
       <#if path?has_content>
         <@spring.bind path=path>
@@ -84,7 +84,7 @@ Macros for customised form elements, containers and more complex pickers.
           </#if>
         </@spring.bind>
       </#if>
-      <div class="checkbox ${errorClass}">
+      <div class="checkbox<#if inline>-inline</#if> ${errorClass}">
         <label><#compress>
             <#nested />
             <#if path?has_content>

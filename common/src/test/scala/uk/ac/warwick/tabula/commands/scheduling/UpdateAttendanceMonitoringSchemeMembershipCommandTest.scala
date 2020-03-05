@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{DeserializesFilter, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula._
 
@@ -18,6 +18,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
     val features: FeaturesImpl = emptyFeatures
     val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
     val profileService: ProfileService = smartMock[ProfileService]
+    val securityService: SecurityService = smartMock[SecurityService]
     profileService.getAllMembersWithUniversityIds(Seq()) returns Seq()
 
     def deserializeFilter(filterString: String): Unit = {

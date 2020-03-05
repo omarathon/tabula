@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable
 
 object ReportStudentsConfirmCommand {
   def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -24,6 +23,7 @@ object ReportStudentsConfirmCommand {
       with ComposableCommand[Seq[MonitoringPointReport]]
       with AutowiringAttendanceMonitoringServiceComponent
       with AutowiringProfileServiceComponent
+      with AutowiringSecurityServiceComponent
       with ReportStudentsConfirmValidation
       with ReportStudentsConfirmDescription
       with ReportStudentsConfirmNotifier

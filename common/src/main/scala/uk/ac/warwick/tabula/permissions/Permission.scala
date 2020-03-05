@@ -58,26 +58,26 @@ trait PermissionsSelector[A <: PermissionsSelector[A]] {
 }
 
 object PermissionsSelector {
-  val AnyId = "*" // A special ID for converting to and from the catch-all selector
+  val AnyId: String = "*" // A special ID for converting to and from the catch-all selector
 
-  def Any[A <: PermissionsSelector[A] : ClassTag] = new PermissionsSelector[A] {
-    def id = AnyId
+  def Any[A <: PermissionsSelector[A] : ClassTag]: PermissionsSelector[A] = new PermissionsSelector[A] {
+    val id: String = AnyId
 
-    def description = "*"
+    val description = "*"
 
-    override def isWildcard = true
+    override val isWildcard = true
 
     override def <=(that: PermissionsSelector[A]): Boolean = {
       // Any is only <= other wildcards
       that.isWildcard
     }
 
-    override def toString = "*"
+    override val toString = "*"
 
-    override def hashCode: Int = id.hashCode
+    override val hashCode: Int = id.hashCode
 
     override def equals(other: Any): Boolean = other match {
-      case that: PermissionsSelector[A@unchecked] =>
+      case that: PermissionsSelector[A @unchecked] =>
         new EqualsBuilder()
           .append(id, that.id)
           .build()
@@ -104,7 +104,7 @@ object SelectorPermission {
       val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
       clz.getConstructors()(0).newInstance(selector).asInstanceOf[SelectorPermission[A]]
     } catch {
-      case e: ClassNotFoundException => throw new IllegalArgumentException("Selector permission " + name + " not recognised")
+      case _: ClassNotFoundException => throw new IllegalArgumentException("Selector permission " + name + " not recognised")
     }
   }
 
@@ -130,8 +130,8 @@ object Permissions {
       val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
       clz.getDeclaredField("MODULE$").get(null).asInstanceOf[Permission]
     } catch {
-      case e: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
-      case e: ClassCastException => throw new IllegalArgumentException("Permission " + name + " is not an endpoint of the hierarchy")
+      case _: ClassNotFoundException => throw new IllegalArgumentException("Permission " + name + " not recognised")
+      case _: ClassCastException => throw new IllegalArgumentException("Permission " + name + " is not an endpoint of the hierarchy")
     }
   }
 
@@ -181,6 +181,7 @@ object Permissions {
     // We don't Read a module, we ManageAssignments on it
     case object Administer extends Permission("Administer")
     case object ManageAssignments extends Permission("Manage assignments")
+    case object ManageExams extends Permission("Manage exams")
     case object ManageSmallGroups extends Permission("Manage small groups")
     case object Create extends Permission("Add a module")
     case object Update extends Permission("Edit a module")
@@ -201,6 +202,13 @@ object Permissions {
     case object Read extends Permission("View an assignment's settings")
     case object Update extends Permission("Edit an assignment")
     case object Delete extends Permission("Delete an assignment")
+  }
+
+  object Exam {
+    case object Read extends Permission("View an exam's settings")
+    case object Create extends Permission("Add an exam")
+    case object Update extends Permission("Edit an exam")
+    case object Delete extends Permission("Delete an exam")
   }
 
   object Submission {
