@@ -141,7 +141,7 @@
         <tbody>
           <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
             <#list moduleRegistrationAndComponent.components as component>
-              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'LX'>
+              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'LX' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'HE' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'OE'>
                 <tr>
                   <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}<#if moduleRegistrationAndComponent.moduleRegistration.cats?has_content>-${moduleRegistrationAndComponent.moduleRegistration.cats}</#if></td>
                   <#if component.upstreamGroup.assessmentComponent.examPaperCode?has_content>
