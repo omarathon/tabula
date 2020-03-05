@@ -140,7 +140,6 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
             tcaSubmission =>
             fileAttachment.originalityReport match {
               case existingOriginalityReport =>
-                logger.info(s"Updating Originality Report for ${fileAttachment.id}")
                 saveTcaStatusToOriginalityReport(tcaSubmission, existingOriginalityReport)
                 Right(tcaSubmission)
             }
