@@ -64,6 +64,8 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
   // TCA fields
 
+  var tcaSubmissionRequested: Boolean = _
+
   var tcaSubmission: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatusUserType")
