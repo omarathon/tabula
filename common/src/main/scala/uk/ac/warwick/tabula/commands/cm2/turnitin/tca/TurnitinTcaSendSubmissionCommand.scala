@@ -49,7 +49,8 @@ trait TurnitinTcaSendSubmissionState {
   def assignment: Assignment
   def attachments: Seq[FileAttachment] = assignment.submissions.asScala.toSeq.flatMap(_.allAttachments)
     .filter(attachment =>
-      attachment.originalityReport == null && TurnitinTcaService.validFile(attachment))
+      (attachment.originalityReport == null || attachment.originalityReport.tcaSubmissionRequested && attachment.originalityReport.tcaSubmissionStatus == null)
+        && TurnitinTcaService.validFile(attachment))
 }
 
 trait TurnitinTcaSendSubmissionDescription extends Describable[Result] {
