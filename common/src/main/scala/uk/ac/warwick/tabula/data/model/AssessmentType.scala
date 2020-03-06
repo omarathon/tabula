@@ -38,6 +38,7 @@ object AssessmentType extends Enum[AssessmentType] {
   case object AprilExam extends ExamType("EA", "Exam (April)")
   case object MayExam extends ExamType("EY", "Exam (May)")
   case object JulyExam extends ExamType("EL", "Exam (July)") // NOTE not in Module Approval 2020-01-22
+  case object Week39Exam extends ExamType("WK39", "Exam (June / July)") // https://warwick.slack.com/archives/CMARBSEE9/p1583487098028300
   case object SeptemberExam extends ExamType("ES", "Exam (September)")
   case object DecemberExam extends ExamType("ED", "Exam (December)")
   case object LocalExamination extends ExamType("LX", "Locally-timetabled examination")
