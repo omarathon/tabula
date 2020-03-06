@@ -37,17 +37,15 @@ object RequestLevelCache {
     }
 
   def cachedBy[A, B](cacheName: String, key: A)(default: => B): B =
-    EarlyRequestInfo.fromThread.map {
-      _.requestLevelCache.getCacheByName[A, B](cacheName)
-    } match {
-      case Some(cache) => {
+    EarlyRequestInfo.fromThread.map(_.requestLevelCache.getCacheByName[A, B](cacheName)) match {
+      case Some(cache) =>
         lazy val op = default
         try {
           cache.getOrElseUpdate(key, op)
         } catch {
           case e: NullPointerException => op
         }
-      }
+
       case _ =>
         // Include error to get stack trace
         requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
