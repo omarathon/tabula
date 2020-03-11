@@ -35,9 +35,6 @@ class ListEnhancedAssignmentsCommandTest extends TestBase with Mockito {
     val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
     assignment.cm2MarkingWorkflow = workflow
 
-    // Still false, until we have some students
-    AssignmentInfoFilters.Status.NoMarkers(info) should be (false)
-
     val feedback1 = Fixtures.assignmentFeedback("0000001")
     val feedback2 = Fixtures.assignmentFeedback("0000002")
 
