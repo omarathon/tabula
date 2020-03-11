@@ -539,7 +539,6 @@ object AssignmentInfoFilters {
 
       def apply(info: AssignmentInfo): Boolean =
         Option(info.assignment.cm2MarkingWorkflow).nonEmpty &&
-        info.assignment.allFeedback.nonEmpty &&
         info.assignment.allFeedback
           .forall { f =>
             f.allMarkerFeedback
