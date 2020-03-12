@@ -139,33 +139,41 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
             error => Left(error.message),
             tcaSubmission =>
             fileAttachment.originalityReport match {
-              case existingOriginalityReport if existingOriginalityReport != null =>
-                val message = s"Not creating an originality report as one already exists for file: ${fileAttachment.id}"
-                logger.warn(message)
-                Left(message)
-              case _ =>
-                logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
-                val report = new OriginalityReport
-                report.attachment = fileAttachment
-                fileAttachment.originalityReport = report
-                report.lastSubmittedToTurnitin = new DateTime(0)
-                report.tcaSubmissionStatus = tcaSubmission.status
-                report.tcaSubmission = tcaSubmission.id
-                originalityReportService.saveOrUpdate(report)
+              case existingOriginalityReport =>
+                saveTcaStatusToOriginalityReport(tcaSubmission, existingOriginalityReport)
                 Right(tcaSubmission)
             }
           )
         )
       }
 
-      Try(httpClient.execute(req, handler)).fold(
-        t => {
-          val message = s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}"
-          logger.error(message, t)
+      // only try if it's not LTI, and create the Originality Report first if necessary
+      fileAttachment.originalityReport match {
+        case existingOriginalityReport if existingOriginalityReport != null && existingOriginalityReport.turnitinId != null =>
+          val message = s"Not submitting or creating an originality report as one already exists for file: ${fileAttachment.id}"
+          logger.warn(message)
           Left(message)
-        },
-        identity
-      )
+        case existingOriginalityReport => {
+          // we haven't attempted TCA submission previously
+          if (existingOriginalityReport == null) {
+            logger.info(s"Creating blank Originality Report for ${fileAttachment.id}")
+            val report = new OriginalityReport
+            report.attachment = fileAttachment
+            report.tcaSubmissionRequested = true
+            fileAttachment.originalityReport = report
+            report.lastSubmittedToTurnitin = new DateTime(0)
+            originalityReportService.saveOrUpdate(report)
+          }
+          Try(httpClient.execute(req, handler)).fold(
+            t => {
+              val message = s"Error requesting the creation of a submission for file - ${fileAttachment.id}, Tabula submission ${tabulaSubmission.id}, student ${tabulaSubmission.studentIdentifier}"
+              logger.error(message, t)
+              Left(message)
+            },
+            identity
+          )
+        }
+      }
     }
   }
 
@@ -387,6 +395,13 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     })
 
     originalityReport
+  }
+
+  def saveTcaStatusToOriginalityReport(tcaSubmission: TcaSubmission, existingOriginalityReport: OriginalityReport): Unit = {
+    existingOriginalityReport.lastSubmittedToTurnitin = new DateTime()
+    existingOriginalityReport.tcaSubmissionStatus = tcaSubmission.status
+    existingOriginalityReport.tcaSubmission = tcaSubmission.id
+    originalityReportService.saveOrUpdate(existingOriginalityReport)
   }
 
   def persistMetadataToOriginalityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment]): Option[OriginalityReport] = {

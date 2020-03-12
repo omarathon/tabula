@@ -15,7 +15,8 @@ import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2._
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
@@ -77,7 +78,7 @@ object ListEnhancedAssignmentsCommand {
   type AssignmentResult = EnhancedAssignmentInfo
   type AssignmentCommand = Appliable[AssignmentResult] with ListEnhancedAssignmentCommandState
 
-  val AdminPermission = Permissions.Module.ManageAssignments
+  val AdminPermission: Permission = Permissions.Module.ManageAssignments
 
   def department(department: Department, academicYear: AcademicYear, user: CurrentUser): DepartmentCommand =
     new ListDepartmentAssignmentsCommandInternal(department, academicYear, user)
@@ -125,9 +126,11 @@ object ListEnhancedAssignmentsCommand {
       with ComposableCommand[AssignmentResult]
       with Unaudited with ReadOnly
 
-  def sortedModuleAssignments(module: Module, academicYear: AcademicYear) = {
-    module.assignments.asScala.toSeq.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }
-  }
+  def sortedModuleAssignments(module: Module, academicYear: AcademicYear): Seq[Assignment] =
+    module.assignments.asScala.toSeq
+      .filterNot(_.deleted)
+      .filter(_.academicYear == academicYear)
+      .sortBy { a => (a.openDate, a.name) }
 
 }
 
@@ -162,17 +165,18 @@ trait ListAssignmentsCommandRequest {
 abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, val user: CurrentUser)
   extends ListAssignmentsCommandState with ListAssignmentsCommandRequest {
 
-  protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
-    module,
-    sortedModuleAssignments(module, academicYear).map { assignment =>
-      BasicAssignmentInfo(assignment)
-    }.filter { info =>
-      (moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_ (info))) &&
+  protected def moduleInfo(module: Module): ModuleAssignmentsInfo =
+    ModuleAssignmentsInfo(
+      module,
+      sortedModuleAssignments(module, academicYear).map { assignment =>
+        BasicAssignmentInfo(assignment)
+      }.filter { info =>
+        (moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_ (info))) &&
         (workflowTypeFilters.asScala.isEmpty || workflowTypeFilters.asScala.exists(_ (info))) &&
         (statusFilters.asScala.isEmpty || statusFilters.asScala.exists(_ (info))) &&
         dueDateFilter(info)
-    }
-  )
+      }
+    )
 }
 
 class ListDepartmentAssignmentsCommandInternal(val department: Department, academicYear: AcademicYear, user: CurrentUser)
@@ -527,16 +531,20 @@ object AssignmentInfoFilters {
       val description = "Inactive"
 
       def apply(info: AssignmentInfo): Boolean =
-        !info.assignment.isBetweenDates() && !info.assignment.feedbackDeadline.exists(d => !d.isBefore(LocalDate.now))
+        !info.assignment.isBetweenDates() && info.assignment.feedbackDeadline.forall(_.isBefore(LocalDate.now))
     }
 
     case object NoMarkers extends AssignmentInfoFilter {
       val description = "No markers"
 
-      def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
-        .flatMap(_.allMarkerFeedback)
-        .flatMap(m => Option(m.marker)) // markers may have been removed so could be null
-        .isEmpty
+      def apply(info: AssignmentInfo): Boolean =
+        Option(info.assignment.cm2MarkingWorkflow).nonEmpty &&
+        info.assignment.allFeedback
+          .forall { f =>
+            f.allMarkerFeedback
+              .flatMap(_.marker.getUserId.maybeText)
+              .isEmpty
+          }
     }
 
     case object ReleasedToStudents extends AssignmentInfoFilter {
@@ -578,11 +586,11 @@ object AssignmentInfoFilters {
     case object BeingMarked extends AssignmentInfoFilter {
       val description = "Being marked"
 
-      def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
-        .flatMap(_.outstandingStages.asScala).flatMap {
-        case f: FinalStage => None
-        case s: MarkingWorkflowStage => Some(s)
-      }.nonEmpty
+      def apply(info: AssignmentInfo): Boolean =
+        info.assignment.allFeedback
+          .flatMap(_.outstandingStages.asScala)
+          .collect { case s: MarkingWorkflowStage => s }
+          .nonEmpty
     }
 
     case object MarkingComplete extends AssignmentInfoFilter {
