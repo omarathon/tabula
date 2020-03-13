@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 sealed abstract class IssueType(val description: String, val helpText: String, val evidenceGuidance: String) extends EnumEntry
 
+sealed abstract class CoronavirusIssueType(description: String, helpText: String) extends IssueType(description, helpText, "")
+
 object IssueType extends Enum[IssueType] {
 
   val values: immutable.IndexedSeq[IssueType] = findValues
@@ -77,7 +79,62 @@ object IssueType extends Enum[IssueType] {
     description = "Other",
     helpText = "This may include: gender transition or gender reassignment; maternity, paternity or adoption leave; caring responsibilities. However, this list is not exhaustive. If you want to report a claim for something which you believe represents a mitigating circumstance, but which is not shown on this form, you should enter it here.",
     evidenceGuidance = "Please supply independent evidence from a relevant professional person or body that explains what happened (including dates) and the effect it had on you."
+  ) {
+    val covidHelpText = "If coronavirus has affected your circumstances in some other way, please tick this option and tell us something about what has happened"
+  }
+
+  case object SelfIsolate extends CoronavirusIssueType(
+    description = "Advised by NHS111 / medical service to self isolate",
+    helpText = "If you have been advised by NHS111 or the local equivalent in your country, or by your GP or a doctor, that you need to self-isolate, tick this option",
   )
+
+  case object SelfIsolate7Days extends CoronavirusIssueType(
+    description = "Currently self isolating for 7 days",
+    helpText = "If you’re self-isolating for 7 days because you have a persistent cough, fever, or other relevant symptoms, tick this option",
+  )
+
+  case object SelfIsolate14Days extends CoronavirusIssueType(
+    description = "Currently self isolating for 14 days",
+    helpText = "If you’re self-isolating for 14 days because you have symptoms that suggest coronavirus, tick this option",
+  )
+
+  case object Diagnosed extends CoronavirusIssueType(
+    description = "Diagnosed with coronavirus",
+    helpText = "If you have been diagnosed with coronavirus by a doctor, tick this option",
+  )
+
+  case object AwaitingResults extends CoronavirusIssueType(
+    description = "Awaiting the result of a coronavirus test result",
+    helpText = "If you have been tested for coronavirus but have not yet received the results of your test, tick this option",
+  )
+
+  case object CoronavirusBereavement extends CoronavirusIssueType(
+    description = "Death / bereavement due to coronavirus",
+    helpText = "If there has been a death of someone in your family or close to you as a result of coronavirus, tick this option",
+  )
+
+  case object Carer extends CoronavirusIssueType(
+    description = "Carer for coronavirus patient",
+    helpText = "If you are acting as the carer for someone (other than yourself) who is suffering from coronavirus, tick this option",
+  )
+
+  case object CarerSelfIsolate extends CoronavirusIssueType(
+    description = "Carer for family member required to self-isolate",
+    helpText = "If someone in your family has been required to self-isolate, and you need to care for them while they are isolated, tick this option",
+  )
+
+  case object NoVisa extends CoronavirusIssueType(
+    description = "Not able to obtain visa",
+    helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions in your country, tick this option",
+  )
+
+  case object CannotTravel extends CoronavirusIssueType(
+    description = "Cannot travel to the UK",
+    helpText = "If there are travel restrictions in place which make it impossible for you to travel to the UK, tick this option",
+  )
+
+  def coronavirusIssueTypes: Seq[IssueType] = (IssueType.values.collect { case i: CoronavirusIssueType => i }) ++ Seq(Other)
+  def generalIssueTypes: Seq[IssueType] =  IssueType.values.diff(coronavirusIssueTypes) ++ Seq(Other)
 
   def validIssueTypes(student: StudentMember): Seq[IssueType] = {
     // TODO - Make it possible for TQ to enable this (we could also just manage this in code)
@@ -85,7 +142,7 @@ object IssueType extends Enum[IssueType] {
       if (Option(student.mostSignificantCourse).flatMap(scd => Option(scd.latestStudentCourseYearDetails)).flatMap(scyd => Option(scyd.modeOfAttendance)).map(_.code).contains("P")) Seq(IndustrialAction)
       else Seq(Employment, IndustrialAction)
 
-    IssueType.values.filterNot(invalidTypes.contains)
+    generalIssueTypes.filterNot(invalidTypes.contains)
   }
 }
 
