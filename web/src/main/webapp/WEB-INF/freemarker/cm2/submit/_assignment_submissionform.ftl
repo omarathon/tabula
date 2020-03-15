@@ -21,11 +21,11 @@
         <#if extension?? && extension.relevant>
           <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 
-          <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
+          <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" />,
           <span class="very-subtle">${extension_time_remaining}</span>.
           <@extensionButton extensionRequested isExtended />
         <#else>
-          <span>Assignment due:</span> <@fmt.date date=assignment.closeDate /> -
+          <span>Assignment due:</span> <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" /> -
           <span class="very-subtle">${time_remaining}</span>.
           <@extensionButton extensionRequested isExtended />
         </#if>
@@ -66,9 +66,9 @@
     <#else>
       <p>You can resubmit your work
         <#if isExtended && extension?? && extension.relevant>
-          until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
+          until the end of your extension, <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" /> (in ${durationFormatter(extension.expiryDate)}).
         <#else>
-          until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
+          until the deadline, <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" /> (in ${durationFormatter(assignment.closeDate)}).
         </#if>
       </p>
       <p>Ensure you attach <strong>all</strong> your assignment files. Any files you have submitted previously will be replaced.</p>
@@ -219,7 +219,7 @@
       When it's published you'll receive an automated email.
     </p>
   <#elseif !assignment.opened>
-    <p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true />.</p>
+    <p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true showLocal=true showLocalStyle="extended" />.</p>
   <#elseif assignment.closed && !isExtended>
     <div class="alert alert-warning">
       <h3>Submission date has passed</h3>

@@ -133,12 +133,12 @@
     <#elseif submission.authorisedLate>
       <#local state = "success" />
       <#local tooltip>
-        Submitted within extension ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
+        Submitted within extension ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate showLocal=true />)
       </#local>
     <#else>
       <#local state = "success" />
       <#local tooltip>
-        Submitted ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
+        Submitted ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate showLocal=true />)
       </#local>
     </#if>
   <#elseif !assignment.opened>
@@ -165,7 +165,7 @@
     <#if info.extended>
       <#local state = "info" />
       <#local tooltip>
-        ${extension_time_remaining} until extended deadline (<@fmt.date date=extension.expiryDate />)
+        ${extension_time_remaining} until extended deadline (<@fmt.date date=extension.expiryDate  showLocal=true />)
       </#local>
     <#elseif assignment.closed>
       <#local submissionStatus>
@@ -179,7 +179,7 @@
     <#else>
       <#local state = "success" />
       <#local tooltip>
-        Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
+        Due in ${time_remaining} (<@fmt.date date=info.studentDeadline showLocal=true />)
       </#local>
     </#if>
   <#elseif !assignment.collectSubmissions>
@@ -197,25 +197,25 @@
     <#if info.extended>
       <#local state = "info" />
       <#local tooltip>
-        ${extension_time_remaining} until extended deadline (<@fmt.date date=extension.expiryDate />)
+        ${extension_time_remaining} until extended deadline (<@fmt.date date=extension.expiryDate showLocal=true />)
       </#local>
     <#elseif assignment.closed>
       <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
       <#local state = "info" />
       <#local tooltip>
-        Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline />)
+        Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline showLocal=true />)
       </#local>
     <#else>
       <#local state = "success" />
       <#local tooltip>
-        Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
+        Due in ${time_remaining} (<@fmt.date date=info.studentDeadline showLocal=true />)
       </#local>
     </#if>
   <#else>
     <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
     <#local state = "info" />
     <#local tooltip>
-      Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline />)
+      Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline showLocal=true />)
     </#local>
   </#if>
 
@@ -286,7 +286,7 @@
       <#if info.submission??>
         <#local submission = info.submission />
         <#local submissionStatus>
-          <strong>Submitted:</strong> <@fmt.date date=submission.submittedDate />
+          <strong>Submitted:</strong> <@fmt.date date=submission.submittedDate showLocal=true />
         </#local>
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
@@ -335,7 +335,7 @@
       <#if info.feedback?? && info.feedback.released>
         <#if info.feedback.releasedDate??>
           <#local feedbackStatus>
-            <strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate />
+            <strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate showLocal=true />
           </#local>
         <#else>
           <#local feedbackStatus>
@@ -364,7 +364,7 @@
           <#local feedbackStatus>
             <strong>Assignment due:</strong>
             <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
-                  data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
+                  data-html="true"><@fmt.date date=info.studentDeadline showLocal=true showLocalStyle="extended" /> - ${durationFormatter(info.studentDeadline)}</span>
           </#local>
         </#if>
       </#if>
@@ -465,11 +465,11 @@
     <#else>
       ${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
     </#if>
-    (<@fmt.date date=submission.assignment.submissionDeadline(user.userId) />)
+    (<@fmt.date date=submission.assignment.submissionDeadline(user.userId) showLocal=true />)
   <#elseif assignment?has_content && user?has_content>
     <#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
     <@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.userId))}
-    (<@fmt.date date=assignment.submissionDeadline(user.userId) />)
+    (<@fmt.date date=assignment.submissionDeadline(user.userId) showLocal=true />)
   </#if>
 </#macro>
 
@@ -485,7 +485,7 @@
   <#if info.extended>
     <div class="extended deadline">
       <div class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></div>
-      Extension granted until <@fmt.date date=extension.expiryDate />
+      Extension granted until <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" />
     </div>
   <#elseif assignment.closed>
     <div class="late deadline">
@@ -493,18 +493,18 @@
         <#local latenesstooltip><@lateness assignment user info.submission /></#local>
         <div class="time-remaining">${extension_time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
         </div>
-        Extension deadline was <@fmt.date date=extension.expiryDate />
+        Extension deadline was <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" />
       <#else>
         <#local latenesstooltip><@lateness assignment user info.submission /></#local>
         <div class="time-remaining">${time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
         </div>
-        Deadline was <@fmt.date date=assignment.closeDate />
+        Deadline was <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" />
       </#if>
     </div>
   <#else>
     <div class="deadline">
       <div class="time-remaining">${time_remaining}</div>
-      Deadline <@fmt.date date=assignment.closeDate />
+      Deadline <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" />
     </div>
   </#if>
 </#macro>
