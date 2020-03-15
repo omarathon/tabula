@@ -89,13 +89,13 @@ object IssueType extends Enum[IssueType] {
   )
 
   case object SelfIsolate7Days extends CoronavirusIssueType(
-    description = "Currently self isolating for 7 days",
+    description = "Currently self-isolating for 7 days due to a persistent cough or fever or other symptom",
     helpText = "If you’re self-isolating for 7 days because you have a persistent cough, fever, or other relevant symptoms, tick this option",
   )
 
   case object SelfIsolate14Days extends CoronavirusIssueType(
-    description = "Currently self isolating for 14 days",
-    helpText = "If you’re self-isolating for 14 days because you have symptoms that suggest coronavirus, tick this option",
+    description = "Currently self-isolating for 14 days",
+    helpText = "If you’re self-isolating for 14 days because you have come into close contact with a person with symptoms that suggest coronavirus (even though you may not be showing symptoms yourself), tick this option",
   )
 
   case object Diagnosed extends CoronavirusIssueType(
@@ -125,7 +125,7 @@ object IssueType extends Enum[IssueType] {
 
   case object NoVisa extends CoronavirusIssueType(
     description = "Not able to obtain visa",
-    helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions in your country, tick this option",
+    helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions put in place by your country or by the UK, tick this option",
   )
 
   case object CannotTravel extends CoronavirusIssueType(

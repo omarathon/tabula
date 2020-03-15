@@ -46,6 +46,8 @@
   covidQuestion = "What period do your coronavirus circumstances cover?"
   hint = "If you're claiming for a period in the past, include a start and end date. If you're claiming for
     something that's ongoing, you may not know the end date at this point."
+  covidHint = "If you’re claiming for a period in the past, or a defined self-isolation period, include a
+    start and end date. If you’re claiming for something that’s ongoing, you may not know the end date at this point."
   cssClass = "form-horizontal"
 >
   <@bs3form.form_group "startDate">
@@ -256,7 +258,7 @@
     </#if>
     <@mitcirc.checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
-  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no <#if features.mitcircsCovid19>covid--no</#if>" style="display: none;">
     <@mitcirc.question_hint "Please tell us why you haven't yet discussed your circumstances with anyone" />
 
     <@bs3form.form_group "noContactReason">
@@ -278,11 +280,11 @@
 
 <@mitcirc.question_section question = "Details">
   <#if features.mitcircsCovid19>
-    <ol class="mitcircs-form__fields__section__hint <#if features.mitcircsCovid19>covid--yes</#if>">
-      <li>Please provide further details of how coronavirus has impacted you and how this has affected your assessments.</li>
-      <li>E.g. school was closed from 21/3/20 and I could not attend due to childcare</li>
-      <li>Or I developed a cough and have self isolated for 7 days</li>
-    </ol>
+    <p class="mitcircs-form__fields__section__hint covid--yes">
+      Please provide some details of how coronavirus has impacted you and how this has affected your assessments.
+      (E.g. school was closed from 21/3/20 and I could not attend due to childcare, I developed a cough and have
+      self-isolated for 7 days)
+    </p>
   </#if>
   <ol class="mitcircs-form__fields__section__hint <#if features.mitcircsCovid19>covid--no</#if>">
     <li>Please provide further details of the mitigating circumstances and how they have affected your assessments.</li>
@@ -306,16 +308,14 @@
   </ul>
 </#assign>
 <#assign evidenceCovidHelp>
-  <ul>
-    <li>Photocopy or scanned evidence is acceptable.</li>
-    <li>Written around the time you were experiencing your claim in order for an assessment to be made on the impact of your claim. Evidence written sometime after the event will not normally be accepted.</li>
-    <li>Written by an independent qualified practitioner (letters from relatives are not acceptable); dated and written on headed or official notepaper and in English. If the letter is in another language you must provide both a copy of the original note and a certified translation into English. The University may seek to verify the accuracy of the translation provided.</li>
-  </ul>
+  Photocopy or scanned evidence is acceptable and should be in English. If the evidence is in another language you should
+  provide both a copy of the original note and a certified translation into English. The University may seek to verify the
+  accuracy of any evidence provided.
 </#assign>
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf."
-  covidHint = "For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here."
+  covidHint = "<i class='fal fa-info-circle'></i> <strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here.</strong>"
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
   helpCovidPopover = evidenceCovidHelp
