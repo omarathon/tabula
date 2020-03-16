@@ -6,6 +6,7 @@ import RemovePlugin from 'remove-files-webpack-plugin';
 import {ProvidePlugin} from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
+import MomentTimezoneDataPlugin from 'moment-timezone-data-webpack-plugin';
 
 import StaticHashesPlugin from './build-tooling/StaticHashesPlugin';
 import WatchEventsPlugin from './build-tooling/WatchEventsPlugin';
@@ -98,6 +99,10 @@ const commonConfig = merge([
         },
       }),
       new MomentLocalesPlugin({localesToKeep: ['en-gb']}),
+      new MomentTimezoneDataPlugin({
+        startYear: 2012,
+        endYear: new Date().getFullYear() + 3, // Only need the next 3 years worth of tz data to keep bundle size down
+      })
     ],
     resolve: {
       alias: {
