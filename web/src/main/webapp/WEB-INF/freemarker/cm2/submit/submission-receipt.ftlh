@@ -61,14 +61,14 @@
 
   <div class="assignment-details">
     <#if !assignment.openEnded>
-      <p>Assignment deadline <@fmt.date date=assignment.closeDate at=true seconds=false relative=false /></p>
+      <p>Assignment deadline <@fmt.date date=assignment.closeDate at=true seconds=false relative=false showLocal=true showLocalStyle="extended" /></p>
     </#if>
   </div>
 
   <h2>Submission receipt for ${submission.universityId}</h2>
 
   <div class="submission-receipt">
-    <p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false /> (<#compress>
+    <p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false showLocal=true showLocalStyle="extended" /> (<#compress>
       <#if submission.late>
         <#if (extension.approved)!false>
           <@components.extensionLateness extension submission />
@@ -76,7 +76,7 @@
           <@components.lateness submission />
         </#if>
       <#elseif submission.authorisedLate && extension??>
-        within extension until <@fmt.date date=extension.expiryDate capitalise=false shortMonth=true relative=false />
+        within extension until <@fmt.date date=extension.expiryDate capitalise=false shortMonth=true relative=false showLocal=true showLocalStyle="extended" />
       <#else>
         on time
       </#if>

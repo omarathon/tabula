@@ -12,7 +12,7 @@
       <#if extension.approved>
         <div class="alert alert-info">
           <#assign approved_ago=durationFormatter(extension.reviewedOn) />
-          Your extension request was approved at <@fmt.date date=extension.reviewedOn /> (${approved_ago}).
+          Your extension request was approved at <@fmt.date date=extension.reviewedOn showLocal=true showLocalStyle="extended" /> (${approved_ago}).
         </div>
       <#elseif extension.rejected>
         <div class="alert alert-danger">
@@ -35,15 +35,15 @@
             <label class="control-label">New submission deadline</label>
             <div class="controls">
               <p>
-                Your new submission deadline is <@fmt.date date=extension.expiryDate at=true/>
+                Your new submission deadline is <@fmt.date date=extension.expiryDate at=true showLocal=true showLocalStyle="extended" />
               </p>
             </div>
           <#else>
               <label class="control-label">Extension deadline is before the assignment close date</label>
               <div class="controls">
                 <p>
-                  Your extension deadline date is <@fmt.date date=extension.expiryDate at=true/>
-                  but your submission deadline is when the assignment closes at  <@fmt.date date=assignment.closeDate />.
+                  Your extension deadline date is <@fmt.date date=extension.expiryDate at=true showLocal=true showLocalStyle="extended"/>
+                  but your submission deadline is when the assignment closes <@fmt.date date=assignment.closeDate at=true showLocal=true showLocalStyle="extended" />.
                 </p>
               </div>
           </#if>
@@ -72,7 +72,7 @@
 
       <#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
       <p>
-        You requested an extension for this assignment at <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
+        You requested an extension for this assignment at <@fmt.date date=existingRequest.requestedOn showLocal=true showLocalStyle="extended" /> (${time_since_request}).
         Use the form below to update the details of your extension request or to request a further extension.
       </p>
     </#if>
@@ -80,7 +80,7 @@
     <#if !assignment.newExtensionsCanBeRequested>
       <#if assignment.extensionsPossible>
         <p>
-          This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
+          This assignment closed <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" /> (${durationFormatter(assignment.closeDate)}).
           You cannot request <#if isModification>or modify </#if>an extension after the close date has passed.
         </p>
       <#else>
@@ -100,9 +100,9 @@
         <#if !isModification>
           <p>
             <#if assignment.closed>
-              This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
+              This assignment closed <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" /> (${durationFormatter(assignment.closeDate)}).
             <#else>
-              This assignment closes at <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)} remaining).
+              This assignment closes at <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" /> (${durationFormatter(assignment.closeDate)} remaining).
             </#if>
           </p>
         </#if>

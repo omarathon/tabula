@@ -4,14 +4,14 @@
       <a class="close" data-dismiss="alert">&times;</a>
       Thanks, we've received your submission. We'll send you an email confirming this shortly;
       don't worry if the email doesn't arrive straight away - we've already recorded the official
-      time of your submission, and it's <@fmt.date date=submission.submittedDate at=true seconds=false relative=false />,
+      time of your submission, and it's <@fmt.date date=submission.submittedDate at=true seconds=false relative=false showLocal=true showLocalStyle="extended" />,
       regardless of when the email reaches you.
     </div>
   </#if>
 
   <div class="well">
     <h3>Submission receipt</h3>
-    <p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
+    <p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false showLocal=true showLocalStyle="extended" />.</p>
     <p>Submission ID: ${submission.id}</p>
     <#if submission.allAttachments??>
       <p>
