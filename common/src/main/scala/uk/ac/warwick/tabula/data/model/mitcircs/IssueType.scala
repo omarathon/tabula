@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.data.model.mitcircs
 
-import enumeratum.EnumEntry
-import enumeratum._
+import enumeratum.{EnumEntry, _}
 import uk.ac.warwick.tabula.data.model.{EnumSeqUserType, StudentMember}
+import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 import scala.collection.immutable
-import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 sealed abstract class IssueType(val description: String, val helpText: String, val evidenceGuidance: String) extends EnumEntry
 
-sealed abstract class CoronavirusIssueType(description: String, helpText: String) extends IssueType(description, helpText, "")
+sealed abstract class CoronavirusIssueType(description: String, helpText: String, override val evidenceGuidance: String = "") extends IssueType(description, helpText, evidenceGuidance)
 
 object IssueType extends Enum[IssueType] {
 
