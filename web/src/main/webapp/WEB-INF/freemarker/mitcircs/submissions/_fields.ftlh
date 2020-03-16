@@ -259,14 +259,14 @@
     <@mitcirc.checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <#if features.mitcircsCovid19><div class="covid--no"></#if>
+    <div class="<#if features.mitcircsCovid19>covid--no</#if>">
       <@mitcirc.question_hint "Please tell us why you haven't yet discussed your circumstances with anyone" />
-    <#if features.mitcircsCovid19></div></#if>
 
-    <@bs3form.form_group "noContactReason">
-      <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
-      <@bs3form.errors path="noContactReason" />
-    </@bs3form.form_group>
+      <@bs3form.form_group "noContactReason">
+        <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
+        <@bs3form.errors path="noContactReason" />
+      </@bs3form.form_group>
+    </div>
 
     <div class="mitcircs-form__fields__section__hint">
       <p>Depending on your circumstances, you might find it helpful to talk to one or more of the following:</p>

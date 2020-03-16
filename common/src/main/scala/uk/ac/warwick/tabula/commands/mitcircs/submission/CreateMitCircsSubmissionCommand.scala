@@ -178,6 +178,9 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       if (!affectedAssessments.asScala.exists(_.selected))
         errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
 
+      // validate evidence
+      val covid19EvidenceExempt: Boolean = features.mitcircsCovid19 && Option(covid19Submission).exists(_.booleanValue)
+
       // validate contact
       Option(contacted).map(_.booleanValue) match {
         case Some(true) =>
@@ -186,7 +189,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
           else if (contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
             errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
         case Some(false) =>
-          if (!noContactReason.hasText)
+          if (!noContactReason.hasText && !covid19EvidenceExempt)
             errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
         case None =>
           errors.rejectValue("contacted", "mitigatingCircumstances.contacted.required")
@@ -195,8 +198,6 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       // validate reason
       if (!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
 
-      // validate evidence
-      val covid19EvidenceExempt: Boolean = features.mitcircsCovid19 && Option(covid19Submission).exists(_.booleanValue)
       if (!covid19EvidenceExempt && attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {
         errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
         errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.pending")
