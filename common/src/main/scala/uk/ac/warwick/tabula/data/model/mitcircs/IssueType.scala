@@ -48,7 +48,7 @@ object IssueType extends Enum[IssueType] {
   case object Bereavement extends IssueType(
     description = "Bereavement",
     helpText = "The death of someone close to you (normally a close family member or close friend) around the time of an assessment, supported by a death certificate or funeral notice.",
-    evidenceGuidance = "A copy of the death certificate, or order of funeral service, or death announcement in a newspaper or on the web."
+    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate).  If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
   )
   case object AbruptChange extends IssueType(
     description = "Sudden change in personal circumstances",
@@ -109,8 +109,9 @@ object IssueType extends Enum[IssueType] {
   )
 
   case object CoronavirusBereavement extends CoronavirusIssueType(
-    description = "Death / bereavement due to coronavirus",
+    description = "Bereavement due to coronavirus",
     helpText = "If there has been a death of someone in your family or close to you as a result of coronavirus, tick this option",
+    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate).  If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
   )
 
   case object Carer extends CoronavirusIssueType(

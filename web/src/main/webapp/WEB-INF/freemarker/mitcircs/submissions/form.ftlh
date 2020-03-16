@@ -40,14 +40,14 @@
           </@modal.wrapper>
         </@modal.modal>
 
-        <#if features.mitcircsCovid19>
-          <p>
-            Mitigating circumstances processes support students who have experienced sudden, unforeseen and serious issues such as an accident,
-            physical or mental health difficulties, or a detrimental change in personal circumstances. Sometimes issues like these can affect
-            your coursework or exams, and if so, and if you can provide evidence from an external source (eg your GP, hospital, counsellor),
-            then you should tell us about them.
-          </p>
+        <p>
+          Mitigating circumstances processes support students who have experienced sudden, unforeseen and serious issues such as an accident,
+          physical or mental health difficulties, or a detrimental change in personal circumstances. Sometimes issues like these can affect
+          your coursework or exams, and if so, you should tell us about them. You are normally expected to provide evidence from an external
+          source (eg your GP, hospital, counsellor) to support your submission.
+        </p>
 
+        <#if features.mitcircsCovid19>
           <p>
             We are currently dealing with coronavirus related mitigation in this system.  For coronavirus mitigation the need for external evidence
             is being relaxed, so you should tell us about your claim even if you cannot currently provide evidence about your issues.

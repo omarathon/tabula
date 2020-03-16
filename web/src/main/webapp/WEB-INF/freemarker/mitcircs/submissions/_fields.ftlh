@@ -238,7 +238,7 @@
 
 <@mitcirc.question_section
   question = "Have you discussed your mitigating circumstances with anyone?"
-  covidQuestion = "Have you discussed your coronavirus circumstances with anyone?"
+  covidQuestion = "Have you discussed your circumstances with anyone?"
 >
   <div class="radio">
     <@bs3form.radio_inline>
@@ -258,8 +258,10 @@
     </#if>
     <@mitcirc.checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
-  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no <#if features.mitcircsCovid19>covid--no</#if>" style="display: none;">
-    <@mitcirc.question_hint "Please tell us why you haven't yet discussed your circumstances with anyone" />
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
+    <#if features.mitcircsCovid19><div class="covid--no"></#if>
+      <@mitcirc.question_hint "Please tell us why you haven't yet discussed your circumstances with anyone" />
+    <#if features.mitcircsCovid19></div></#if>
 
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
@@ -273,6 +275,9 @@
         <li>Your personal tutor or another member of staff in your department</li>
         <li>Your GP or other healthcare professional</li>
         <li>Warwick’s <a href="https://warwick.ac.uk/supportservices" target="_blank">Wellbeing Support Services</a></li>
+        <li><a href="https://warwick.ac.uk/insite/coronavirus/" target="_blank">Current university FAQs on coronavirus</a></li>
+        <li><a href="https://www.gov.uk/government/publications/covid-19-stay-at-home-guidance/stay-at-home-guidance-for-people-with-confirmed-or-possible-coronavirus-covid-19-infection" target="_blank">Current UK government advice on coronavirus</a></li>
+        <li><a href="https://111.nhs.uk/service/COVID-19/" target="_blank">Current NHS111 advice on coronavirus</a></li>
       </ul>
     </div>
   </div>
@@ -315,7 +320,7 @@
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf."
-  covidHint = "<i class='fal fa-info-circle'></i> <strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here.</strong>"
+  covidHint = "<i class='fal fa-info-circle'></i> <strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here. If you have evidence but you would prefer not to upload it to the system, it is possible to share this with a trusted member of staff, eg. your personal or senior tutor.</strong>"
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
   helpCovidPopover = evidenceCovidHelp
