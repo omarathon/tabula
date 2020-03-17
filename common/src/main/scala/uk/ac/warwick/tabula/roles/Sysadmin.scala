@@ -38,7 +38,8 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
     Module.Update,
     Module.Delete,
     Feedback.UnPublish,
-    MonitoringPoints.OverwriteReported
+    MonitoringPoints.OverwriteReported,
+    Submission.CheckForPlagiarism
   )
 
 }

@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.services
 
 import org.hibernate.FetchMode
-import org.hibernate.criterion.Restrictions.{ge, le}
 import org.hibernate.criterion.Order._
-import org.joda.time.DateTime
+import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.Restrictions.{ge, le}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms
@@ -36,6 +37,8 @@ trait OriginalityReportService {
   def getOriginalityReportByFileId(fileId: String): Option[OriginalityReport]
 
   def getOriginalityReportByTcaSubmissionId(submissionId: String): Option[OriginalityReport]
+
+  def getIncompleteTcaSubmissions(since: LocalDate): Seq[OriginalityReport]
 
   def deleteOriginalityReport(attachment: FileAttachment): Unit
 
@@ -151,6 +154,17 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
     session.newCriteria[OriginalityReport]
       .add(is("tcaSubmission", submissionId))
       .seq.headOption
+  }
+
+  def getIncompleteTcaSubmissions(since: LocalDate): Seq[OriginalityReport] = {
+    session.newCriteria[OriginalityReport]
+      .add(Restrictions.eq("tcaSubmissionRequested", true))
+      .add(Restrictions.eq("reportReceived", false))
+      .add(Restrictions.or(
+        Restrictions.isNull("lastSubmittedToTurnitin"),
+        Restrictions.between("lastSubmittedToTurnitin", since.toDateTimeAtStartOfDay, new DateTime().minusHours(1))
+      ))
+      .seq
   }
 
   def saveOrUpdate(report: OriginalityReport): Unit = transactional() { session.saveOrUpdate(report) }

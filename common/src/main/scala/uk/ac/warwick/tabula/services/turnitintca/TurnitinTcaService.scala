@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Future
@@ -64,7 +63,7 @@ case class TurnitinTcaConfiguration(
 
 trait TurnitinTcaService {
   def createSubmission(fileAttachment: FileAttachment): Future[Either[String, TcaSubmission]]
-  def getSubmissionInfo(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]]
+  def getSubmissionInfo(fileAttachment: FileAttachment): Future[Either[String, TcaSubmission]]
   def getSimilarityReportInfo(fileAttachment: FileAttachment): Future[Either[String, TcaSimilarityReport]]
   def uploadSubmissionFile(fileAttachment: FileAttachment, tcaSubmission: TcaSubmission): Future[Either[String, TcaSubmission]]
   def requestSimilarityReport(tcaSubmission: TcaSubmission, fileAttachment: Option[FileAttachment] = None): Future[Unit]
@@ -161,7 +160,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
             report.attachment = fileAttachment
             report.tcaSubmissionRequested = true
             fileAttachment.originalityReport = report
-            report.lastSubmittedToTurnitin = new DateTime(0)
+            report.lastSubmittedToTurnitin = DateTime.now()
             originalityReportService.saveOrUpdate(report)
           }
           Try(httpClient.execute(req, handler)).fold(
@@ -177,7 +176,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
     }
   }
 
-  override def getSubmissionInfo(fileAttachment: FileAttachment, user: User): Future[Either[String, TcaSubmission]] = {
+  override def getSubmissionInfo(fileAttachment: FileAttachment): Future[Either[String, TcaSubmission]] = {
     Future {
 
       require(fileAttachment.originalityReport.tcaSubmission != null)
@@ -398,7 +397,7 @@ abstract class AbstractTurnitinTcaService extends TurnitinTcaService with Loggin
   }
 
   def saveTcaStatusToOriginalityReport(tcaSubmission: TcaSubmission, existingOriginalityReport: OriginalityReport): Unit = {
-    existingOriginalityReport.lastSubmittedToTurnitin = new DateTime()
+    existingOriginalityReport.lastSubmittedToTurnitin = DateTime.now()
     existingOriginalityReport.tcaSubmissionStatus = tcaSubmission.status
     existingOriginalityReport.tcaSubmission = tcaSubmission.id
     originalityReportService.saveOrUpdate(existingOriginalityReport)

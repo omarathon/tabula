@@ -163,6 +163,7 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ImportSmallGroupEventLocationsJob]("scheduling.importSmallGroupEventLocations"),
     propertiesConfiguredJob[TurnitinTcaRegisterWebhooksJob]("scheduling.turnitinTcaRegisterWebhooks"),
     propertiesConfiguredJob[BulkImportModuleRegistrationsJob]("scheduling.bulkImportModuleRegistrations"),
+    propertiesConfiguredJob[ProdTCAInProgressJob]("scheduling.prodTCAInProgress"),
 
     // Imports
     propertiesConfiguredJob[ImportAcademicDataJob]("scheduling.importAcademicData"),

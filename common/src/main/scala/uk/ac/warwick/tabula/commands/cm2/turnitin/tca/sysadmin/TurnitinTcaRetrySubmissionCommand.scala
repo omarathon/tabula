@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.turnitin.tca.sysadmin
 
-import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.sysadmin.TurnitinTcaRetrySubmissionCommand.{RequiredPermission, Result}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.turnitin.tca.sysadmin.TurnitinTcaRetrySubmissionCommand.{RequiredPermission, Result}
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSubmission, TcaSubmissionStatus, TurnitinTcaServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -18,8 +17,8 @@ object TurnitinTcaRetrySubmissionCommand {
   type CommandType = Appliable[Result]
   val RequiredPermission: Permission = Permissions.Submission.CheckForPlagiarism
 
-  def apply(assignment: Assignment, attachment: FileAttachment, user: User) =
-    new TurnitinTcaRetrySubmissionCommandInternal(assignment, attachment, user)
+  def apply(assignment: Assignment, attachment: FileAttachment) =
+    new TurnitinTcaRetrySubmissionCommandInternal(assignment, attachment)
       with ComposableCommand[Result]
       with TurnitinTcaRetrySubmissionCommandPermissions
       with TurnitinTcaRetrySubmissionCommandState
@@ -28,12 +27,12 @@ object TurnitinTcaRetrySubmissionCommand {
 
 }
 
-class TurnitinTcaRetrySubmissionCommandInternal(val assignment: Assignment, val attachment: FileAttachment, val user: User)
+class TurnitinTcaRetrySubmissionCommandInternal(val assignment: Assignment, val attachment: FileAttachment)
   extends CommandInternal[Result] {
   self: TurnitinTcaServiceComponent with TurnitinTcaRetrySubmissionCommandState  =>
   override def applyInternal(): Result = {
     Await.result(
-      turnitinTcaService.getSubmissionInfo(attachment, user)
+      turnitinTcaService.getSubmissionInfo(attachment)
         .flatMap(_.fold(
           error => Future.successful(Left(error)),
           tcaSubmission =>
@@ -56,7 +55,6 @@ class TurnitinTcaRetrySubmissionCommandInternal(val assignment: Assignment, val 
 trait TurnitinTcaRetrySubmissionCommandState {
   def assignment: Assignment
   def attachment: FileAttachment
-  def user: User
 }
 
 trait TurnitinTcaRetrySubmissionDescription extends Describable[Result] {

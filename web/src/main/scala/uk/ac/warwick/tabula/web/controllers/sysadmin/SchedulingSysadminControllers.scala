@@ -227,6 +227,18 @@ class ImportSitsModuleListsController extends BaseSysadminController {
 }
 
 @Controller
+@RequestMapping(Array("/sysadmin/tca/prod-in-progress"))
+class ProdTCAInProgressController extends BaseSysadminController with AutowiringJobServiceComponent {
+
+  var scheduler: Scheduler = Wire[Scheduler]
+
+  @RequestMapping(method = Array(POST), params = Array("since"))
+  def prodTCAInProgress(@RequestParam since: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ProdTCAInProgressJob]("since" -> since)))
+  }
+}
+
+@Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController with AutowiringJobServiceComponent {
 

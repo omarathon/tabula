@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.turnitintca.{AutowiringTurnitinTcaServiceComponent, TcaSimilarityReport, TcaSimilarityStatus, TurnitinTcaServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -18,8 +17,8 @@ object TurnitinTcaRetrySimilarityReportCommand {
   type CommandType = Appliable[Result]
   val RequiredPermission: Permission = Permissions.Submission.CheckForPlagiarism
 
-  def apply(assignment: Assignment, attachment: FileAttachment, user: User) =
-    new TurnitinTcaRetrySimilarityReportCommandInternal(assignment, attachment, user)
+  def apply(assignment: Assignment, attachment: FileAttachment) =
+    new TurnitinTcaRetrySimilarityReportCommandInternal(assignment, attachment)
       with ComposableCommand[Result]
       with TurnitinTcaRetrySimilarityReportCommandPermissions
       with TurnitinTcaRetrySimilarityReportCommandState
@@ -27,7 +26,7 @@ object TurnitinTcaRetrySimilarityReportCommand {
       with AutowiringTurnitinTcaServiceComponent
 }
 
-class TurnitinTcaRetrySimilarityReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment, val user: User)
+class TurnitinTcaRetrySimilarityReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment)
   extends CommandInternal[Result] {
   self: TurnitinTcaServiceComponent with TurnitinTcaRetrySimilarityReportCommandState =>
   override def applyInternal(): Result = {
@@ -49,7 +48,6 @@ class TurnitinTcaRetrySimilarityReportCommandInternal(val assignment: Assignment
 trait TurnitinTcaRetrySimilarityReportCommandState {
   def assignment: Assignment
   def attachment: FileAttachment
-  def user: User
 }
 
 trait TurnitinTcaRetrySimilarityReportDescription extends Describable[Result] {
