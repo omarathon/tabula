@@ -120,6 +120,37 @@
               </@filters.filter>
             </span>
 
+            <span class="mitcircs-submission-filters__filter mitcircs-submission-filters__filter--coronavirus">
+              <#assign placeholder = "All submissions" />
+              <div id="coronavirusState-filter" class="btn-group filter empty">
+                <a class="btn btn-filter btn-sm dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="true">
+                  <span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="">${placeholder}</span>
+                  <span class="caret"></span>
+                </a>
+                <div tabindex="-1" class="dropdown-menu filter-list">
+                  <button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+                  <ul>
+                    <li class="check-list-item" data-natural-sort="0">
+                      <label class="radio">
+                      <input type="radio" name="isCoronavirus" value="true" data-short-value="Coronavirus submissions"
+                        <#if command.coronavirus?? && command.coronavirus>checked="checked"</#if>
+                      >
+                        Coronavirus submissions
+                      </label>
+                    </li>
+                    <li class="check-list-item" data-natural-sort="1">
+                      <label class="radio">
+                      <input type="radio" name="isCoronavirus" value="false" data-short-value="All other submissions"
+                        <#if command.coronavirus?? && !command.coronavirus>checked="checked"</#if>
+                      >
+                        All other submissions
+                      </label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </span>
+
             <span class="mitcircs-submission-filters__filter mitcircs-submission-filters__filter--unread">
               <div class="checkbox">
                 <label>

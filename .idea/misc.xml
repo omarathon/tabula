@@ -4,6 +4,7 @@
     <file type="JRUBY" url="file://$PROJECT_DIR$/integrationTest/src/test/cucumber/features/step_definitions/general.rb" />
     <file type="JRUBY" url="file://$PROJECT_DIR$/integrationTest/src/test/cucumber/features/support/http.rb" />
     <file type="JRUBY" url="file://$PROJECT_DIR$/integrationTest/src/test/cucumber/Gemfile" />
+    <file type="web" url="file://$PROJECT_DIR$" />
     <file type="web" url="file://$PROJECT_DIR$/api/build/rootContent/WEB-INF/web.xml" />
     <file type="web" url="file://$PROJECT_DIR$/web/build/rootContent/WEB-INF/web.xml" />
     <type id="Spring" />
