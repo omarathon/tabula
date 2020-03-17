@@ -18,12 +18,11 @@ object ProdTCAInProgressCommand {
     with ProdTCAInProgressCommandPermissions
     with ProdTCAInProgressCommandDescription
     with AutowiringOriginalityReportServiceComponent
-  with ProdTCAInProgressRequest
+    with ProdTCAInProgressRequest
 }
 
 class ProdTCAInProgressCommandInternal() extends CommandInternal[Seq[OriginalityReport]] {
-  self: OriginalityReportServiceComponent
-  with ProdTCAInProgressRequest =>
+  self: OriginalityReportServiceComponent with ProdTCAInProgressRequest =>
 
   override def applyInternal(): Seq[OriginalityReport] = {
 

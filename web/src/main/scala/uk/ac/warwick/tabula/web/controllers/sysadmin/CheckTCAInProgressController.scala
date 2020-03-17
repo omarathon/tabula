@@ -5,13 +5,12 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.sysadmin._
 import uk.ac.warwick.tabula.data.model.OriginalityReport
-import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/tca/check-in-progress"))
-class CheckTCAInProgressController extends BaseSysadminController with AutowiringRelationshipServiceComponent {
+class CheckTCAInProgressController extends BaseSysadminController {
 
   @ModelAttribute("checkTCAInProgressCommand") def checkTCAInProgressCommand = CheckTCAInProgressCommand()
 
