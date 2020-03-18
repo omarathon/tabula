@@ -71,6 +71,8 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponentsWithExamPapers(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
@@ -332,6 +334,10 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
         (c.moduleCode, c.sequence)
       }
     }
+  }
+
+  def getAssessmentComponentsWithExamPapers(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
+    getAssessmentComponents(department, includeSubDepartments).filter(_.examPaperCode.isDefined)
   }
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] = {

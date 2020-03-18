@@ -60,6 +60,8 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponentsWithExamPapers(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
@@ -258,6 +260,8 @@ class AssessmentMembershipServiceImpl
     * Gets assessment components for this department.
     */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
+
+  def getAssessmentComponentsWithExamPapers(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponentsWithExamPapers(department, includeSubDepartments)
 
   def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
