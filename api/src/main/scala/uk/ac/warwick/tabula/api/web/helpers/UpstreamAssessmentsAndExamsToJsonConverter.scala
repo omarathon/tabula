@@ -20,13 +20,17 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
           "name" -> assessmentComponent.module.adminDepartment.name
         )
       ),
-      "examPaper" -> Map(
-          "code" -> assessmentComponent.examPaperCode,
+      "examPaper" -> (assessmentComponent.examPaperCode match {
+        case Some(examPaperCode) => Map(
+          "code" -> examPaperCode,
           "duration" -> assessmentComponent.examPaperDuration,
           "title" -> assessmentComponent.examPaperTitle,
           "readingTime" -> assessmentComponent.examPaperReadingTime,
           "section" -> assessmentComponent.examPaperSection,
           "type" -> assessmentComponent.examPaperType
-      ))}
+        )
+        case _ => null
+      })
+)}
 
 }

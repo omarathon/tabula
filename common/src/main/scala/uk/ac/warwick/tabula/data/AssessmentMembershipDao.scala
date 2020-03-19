@@ -71,6 +71,8 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+
   def getAssessmentComponentsWithExamPapers(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
@@ -311,13 +313,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
+  // TAB-2676 Include modules in sub-departments optionally
+  private def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
+
+  private def modulesIncludingSubDepartments(d: Department): Seq[Module] =
+    modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
+
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
-    // TAB-2676 Include modules in sub-departments optionally
-    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
-
-    def modulesIncludingSubDepartments(d: Department): Seq[Module] =
-      modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
-
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -329,6 +331,36 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           .add(is("inUse", true))
           .addOrder(asc("moduleCode"))
           .addOrder(asc("sequence"))
+      }, "module", deptModules)
+      components.sortBy { c =>
+        (c.moduleCode, c.sequence)
+      }
+    }
+  }
+
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] = {
+    val deptModules =
+      if (includeSubDepartments) modulesIncludingSubDepartments(department)
+      else modules(department)
+
+    if (deptModules.isEmpty) Nil
+    else {
+
+      val c = session.newCriteria[AssessmentComponent]
+        .add(is("inUse", true))
+        .addOrder(asc("moduleCode"))
+        .addOrder(asc("sequence"))
+        .addOrder(asc("sequence"))
+      if (withExamPapersOnly) {
+        c.add(isNotNull("examPaperCode"))
+      }
+      if (assessmentType.isDefined) {
+        c.add(isNotNull("assessmentType"))
+        c.add(is("assessmentType", assessmentType.get))
+      }
+
+      val components = safeInSeq(() => {
+        c
       }, "module", deptModules)
       components.sortBy { c =>
         (c.moduleCode, c.sequence)
