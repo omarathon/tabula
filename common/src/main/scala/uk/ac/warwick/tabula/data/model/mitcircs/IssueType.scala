@@ -123,6 +123,11 @@ object IssueType extends Enum[IssueType] {
     helpText = "If someone in your family has been required to self-isolate, and you need to care for them while they are isolated, tick this option",
   )
 
+  case object CarerChildcareClosure extends CoronavirusIssueType(
+    description = "Carer of children due to school closure",
+    helpText = "If you are experiencing difficulties due to childcare (eg difficulty fully participating in on-line teaching or assessment), tick this box",
+  )
+
   case object NoVisa extends CoronavirusIssueType(
     description = "Not able to obtain visa",
     helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions put in place by your country or by the UK, tick this option",
