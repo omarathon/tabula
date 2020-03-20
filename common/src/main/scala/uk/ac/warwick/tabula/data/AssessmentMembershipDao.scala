@@ -75,6 +75,10 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent]
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   /**
@@ -85,6 +89,8 @@ trait AssessmentMembershipDao {
   def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
   def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
+
+  def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember]
 
@@ -374,6 +380,23 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent] = {
+    val modules = modulesIncludingSubDepartments(department)
+    session.newCriteria[AssessmentComponent]
+      .add(safeIn("id", ids))
+      .add(safeIn("module", modules))
+      .seq
+  }
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] = {
+    val modules = modulesIncludingSubDepartments(department)
+    session.newCriteria[AssessmentComponent]
+      .add(safeIn("_examPaperCode", paperCodes))
+      .add(safeIn("module", modules))
+      .seq
+      .groupBy(_.examPaperCode.getOrElse("none"))
+  }
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     session.newQuery[AssessmentComponent](
       """
@@ -428,6 +451,22 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .setString("assessmentGroup", component.assessmentGroup)
       .setString("sequence", component.sequence)
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+  }
+
+  // TODO Get members for multiple components in a single query - Doing a single query for each may be acceptable. If so, burn this junk
+  // this will need a user-type to teach JPA about the Tuple being used for the composite key
+  // see https://stackoverflow.com/questions/55317347/jpql-and-list-of-tuples-as-parameter-for-select-in-statements
+  def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
+    session.createNativeQuery(s"""
+      select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+      where (uag.moduleCode, uag.assessmentGroup, uag.sequence) in (:compositeKeys)
+    """)
+      .setParameter("academicYear", academicYear.startYear)
+      .setParameter("compositeKeys", components.map(c => (c.moduleCode, c.assessmentGroup, c.sequence)).asJava)
+      .getResultList.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember] = {
