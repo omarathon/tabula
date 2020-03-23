@@ -40,7 +40,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
       "occurrence" -> info.upstreamAssessmentGroup.occurrence,
       "sequence" -> info.upstreamAssessmentGroup.sequence,
       "academicYear" -> info.upstreamAssessmentGroup.academicYear.toString,
-      "currentMembers," -> info.currentMembers.map(_.universityId).sorted
+      "currentMembers" -> info.currentMembers.map(_.universityId).sorted
     )
   }
 }
