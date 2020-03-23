@@ -16,6 +16,7 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
     Module.ManageSmallGroups,
 
     Assignment.Read,
+    Exam.Read,
 
     Submission.ViewPlagiarismStatus,
     Submission.Read,

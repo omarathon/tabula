@@ -64,6 +64,10 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent]
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   /**
@@ -252,6 +256,11 @@ class AssessmentMembershipServiceImpl
     */
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
     dao.getAssessmentComponents(moduleCode, inUseOnly)
+
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, ids)
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] =
+    dao.getAssessmentComponentsByPaperCode(department, paperCodes)
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)

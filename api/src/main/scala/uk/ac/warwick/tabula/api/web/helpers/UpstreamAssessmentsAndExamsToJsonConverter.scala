@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.TopLevelUrlComponent
-import uk.ac.warwick.tabula.data.model.AssessmentComponent
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroupInfo, UpstreamAssessmentGroupMember}
 
 trait UpstreamAssessmentsAndExamsToJsonConverter {
   self: TopLevelUrlComponent =>
@@ -31,6 +31,16 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
         )
         case _ => null
       })
-)}
+    )}
 
+  def jsonUpstreamAssessmentGroupInfoObject(info: UpstreamAssessmentGroupInfo): Map[String, Any] = {
+    Map(
+      "moduleCode" -> info.upstreamAssessmentGroup.moduleCode,
+      "assessmentGroup" -> info.upstreamAssessmentGroup.assessmentGroup,
+      "occurrence" -> info.upstreamAssessmentGroup.occurrence,
+      "sequence" -> info.upstreamAssessmentGroup.sequence,
+      "academicYear" -> info.upstreamAssessmentGroup.academicYear.toString,
+      "currentMembers" -> info.currentMembers.map(_.universityId).sorted
+    )
+  }
 }
