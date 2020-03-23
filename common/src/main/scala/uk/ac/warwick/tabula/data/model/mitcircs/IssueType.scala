@@ -88,7 +88,7 @@ object IssueType extends Enum[IssueType] {
   )
 
   case object SelfIsolate7Days extends CoronavirusIssueType(
-    description = "Currently self-isolating for 7 days due to a persistent cough or fever or other symptom",
+    description = "Currently self-isolating for 7 days due to a persistent cough or fever or other symptoms",
     helpText = "If you’re self-isolating for 7 days because you have a persistent cough, fever, or other relevant symptoms, tick this option",
   )
 
@@ -98,13 +98,15 @@ object IssueType extends Enum[IssueType] {
   )
 
   case object Diagnosed extends CoronavirusIssueType(
-    description = "Diagnosed with coronavirus",
+    description = "Diagnosed with coronavirus and/or a coronavirus hospital inpatient",
     helpText = "If you have been diagnosed with coronavirus by a doctor, tick this option",
+    evidenceGuidance = "Please provide the date you were diagnosed and/or entered hospital, the length of time you were ill or hospitalised, and the name of the hospital where you were treated. At a later date we may ask you to upload any formal evidence of your diagnosis and treatment."
   )
 
   case object AwaitingResults extends CoronavirusIssueType(
-    description = "Awaiting the result of a coronavirus test result",
+    description = "Awaiting the result of a coronavirus test",
     helpText = "If you have been tested for coronavirus but have not yet received the results of your test, tick this option",
+    evidenceGuidance = "Please provide the test result when known."
   )
 
   case object CoronavirusBereavement extends CoronavirusIssueType(
@@ -114,28 +116,32 @@ object IssueType extends Enum[IssueType] {
   )
 
   case object Carer extends CoronavirusIssueType(
-    description = "Carer for coronavirus patient",
+    description = "Carer for a coronavirus patient ",
     helpText = "If you are acting as the carer for someone (other than yourself) who is suffering from coronavirus, tick this option",
+    evidenceGuidance = "Please provide the date the patient was diagnosed and/or entered hospital, the length of time they were ill or hospitalised, and the name of the hospital where they were treated. At a later date we may ask you to upload any formal evidence of the coronavirus patient in question."
   )
 
   case object CarerSelfIsolate extends CoronavirusIssueType(
-    description = "Carer for family member required to self-isolate",
+    description = "Carer for a family/household member required to self-isolate",
     helpText = "If someone in your family has been required to self-isolate, and you need to care for them while they are isolated, tick this option",
   )
 
   case object CarerChildcareClosure extends CoronavirusIssueType(
     description = "Carer of children due to school closure",
     helpText = "If you are experiencing difficulties due to childcare (eg difficulty fully participating in on-line teaching or assessment), tick this box",
+    evidenceGuidance = "Please tell us how this has affected your ability to study and the name of the school(s) and dates closed. "
   )
 
   case object NoVisa extends CoronavirusIssueType(
-    description = "Not able to obtain visa",
+    description = "Not able to obtain a Visa",
     helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions put in place by your country or by the UK, tick this option",
+    evidenceGuidance = "Please provide us with any visa rejection. Please contact your department to find out how you can be provided with more support through on-line learning and assessment."
   )
 
   case object CannotTravel extends CoronavirusIssueType(
     description = "Cannot travel to the UK",
     helpText = "If there are travel restrictions in place which make it impossible for you to travel to the UK, tick this option",
+    evidenceGuidance = "Please provide links to any government advice/official travel restrictions or cancelled flight tickets where available. Please contact your department to find out how you can be provided with more support through on-line learning and assessment. "
   )
 
   def coronavirusIssueTypes: Seq[IssueType] = (IssueType.values.collect { case i: CoronavirusIssueType => i }) ++ Seq(Other)

@@ -16,9 +16,9 @@ class MitCircsForm {
     $form
       .find(':input[name="issueTypes"]')
       .on('input change', () => {
-        const checked = $(':input[name="issueTypes"]:checked').closest('.checkbox');
+        const $checked = $(':input[name="issueTypes"]:checked').closest('.checkbox');
         const $dl = $('<dl></dl>');
-        checked.each((i, issueType) => {
+        $checked.each((i, issueType) => {
           const $issueType = $(issueType);
           if ($issueType.data('evidenceguidance') !== '') {
             $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
