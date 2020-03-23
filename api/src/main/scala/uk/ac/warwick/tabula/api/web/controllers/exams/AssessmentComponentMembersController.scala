@@ -19,7 +19,7 @@ class AssessmentComponentMembersController extends ApiController with UpstreamAs
 
   @ModelAttribute("command")
   def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): AssessmentComponentMembersCommand.Command =
-    AssessmentComponentMembersCommand(department, academicYear)
+    AssessmentComponentMembersCommand(mandatory(department), mandatory(academicYear))
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def assessmentComponentMembers(@ModelAttribute("command") command: AssessmentComponentMembersCommand.Command): Mav = {
