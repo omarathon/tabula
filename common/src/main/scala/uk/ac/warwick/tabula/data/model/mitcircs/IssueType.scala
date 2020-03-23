@@ -97,6 +97,12 @@ object IssueType extends Enum[IssueType] {
     helpText = "If you’re self-isolating for 14 days because you have come into close contact with a person with symptoms that suggest coronavirus (even though you may not be showing symptoms yourself), tick this option",
   )
 
+  case object VulnerableGroup extends CoronavirusIssueType(
+    description = "I am in a highly vulnerable group and am being shielded for 12 weeks isolation",
+    helpText = "For example, people undergoing cancer treatment, people with severe respiratory conditions",
+    evidenceGuidance = "Please provide a copy of your official letter directing you to be shielded for 12 weeks isolation."
+  )
+
   case object Diagnosed extends CoronavirusIssueType(
     description = "Diagnosed with coronavirus and/or a coronavirus hospital inpatient",
     helpText = "If you have been diagnosed with coronavirus by a doctor, tick this option",

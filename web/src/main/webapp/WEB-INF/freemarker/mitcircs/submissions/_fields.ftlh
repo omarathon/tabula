@@ -320,7 +320,7 @@
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf."
-  covidHint = "<i class='fal fa-info-circle'></i> <strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here. If you have evidence but you would prefer not to upload it to the system, it is possible to share this with a trusted member of staff, eg. your personal or senior tutor.</strong>"
+  covidHint = "<strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here. If you have evidence but you would prefer not to upload it to the system, it is possible to share this with a trusted member of staff, eg. your personal or senior tutor.</strong>"
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
   helpCovidPopover = evidenceCovidHelp
