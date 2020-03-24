@@ -13,7 +13,7 @@ trait UpstreamExamPapersToJsonConverter {
         Map(
           "examPaper" -> Map(
             "code" -> uac.examPaperCode.get,
-            "duration" -> uac.examPaperDuration,
+            "duration" -> uac.examPaperDuration.toString,
             "title" -> uac.examPaperTitle.get,
             "readingTime" -> uac.examPaperReadingTime,
             "section" -> uac.examPaperSection,
