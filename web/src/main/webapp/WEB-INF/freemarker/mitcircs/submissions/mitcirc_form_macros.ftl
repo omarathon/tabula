@@ -41,7 +41,7 @@
 </#macro>
 
 <#assign questionIndex = 1 /> <#-- Used to generate unique IDs for popups - not used as the question number -->
-<#macro question_section question="" covidQuestion=""  hint="" covidHint="" cssClass="" helpPopover="" helpCovidPopover="" showNumber=true data="" covid19Hide=true>
+<#macro question_section question="" covidQuestion=""  hint="" covidHint="" cssClass="" helpPopover="" helpCovidPopover="" showNumber=true data="" covid19Hide=false>
   <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}" ${data} <#if features.mitcircsCovid19 && covid19Hide>style="display: none;"</#if>>
     <#if question?has_content>
       <legend>

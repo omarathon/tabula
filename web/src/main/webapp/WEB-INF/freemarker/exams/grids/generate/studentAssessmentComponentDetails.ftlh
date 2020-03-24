@@ -229,7 +229,7 @@
             <h3>MIT-${submission.key}<#if submission.acute> &mdash; Acute mitigation already applied</#if></h3>
 
             <@components.detail label="Grading">
-                ${submission.gradingCode} &mdash; ${submission.outcomeGrading.description} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
+                ${submission.gradingCode} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
             </@components.detail>
 
             <@components.detail label="Date approved">

@@ -8,7 +8,6 @@
   <@mitcirc.question_section
     question = "Are your mitigating circumstances coronavirus related?"
     showNumber = false
-    covid19Hide = false
   >
     <div class="radio">
       <@bs3form.radio_inline>
@@ -26,6 +25,7 @@
   question = "Your coronavirus circumstances"
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick."
   cssClass = "mitcircs-form__fields__section--covid19--yes"
+  covid19Hide = true
 >
   <@mitcirc.checkboxesWithOther covid19IssueTypes "issueTypes" "issueTypeDetails" />
 </@mitcirc.question_section>
@@ -37,6 +37,7 @@
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
   cssClass="mitcircs-form__fields__section--covid19--no"
+  covid19Hide = true
 >
   <@mitcirc.checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 </@mitcirc.question_section>
@@ -49,6 +50,7 @@
   covidHint = "If you’re claiming for a period in the past, or a defined self-isolation period, include a
     start and end date. If you’re claiming for something that’s ongoing, you may not know the end date at this point."
   cssClass = "form-horizontal"
+  covid19Hide = true
 >
   <@bs3form.form_group "startDate">
     <@bs3form.label path="startDate" cssClass="col-xs-4 col-sm-2">Start date</@bs3form.label>
@@ -93,6 +95,7 @@
   <@mitcirc.question_section
     question = "Does this relate to a previous mitigating circumstances claim of yours?"
     cssClass="mitcircs-form__fields__section--covid19--no"
+    covid19Hide = true
   >
     <@bs3form.form_group path="relatedSubmission">
       <@f.select path="relatedSubmission" cssClass="form-control">
@@ -113,6 +116,7 @@
     To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
   covidHint = "Please tell us which coursework submissions or exams have been affected by your coronavirus circumstances.
     To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
+  covid19Hide = true
 >
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
@@ -239,6 +243,7 @@
 <@mitcirc.question_section
   question = "Have you discussed your mitigating circumstances with anyone?"
   covidQuestion = "Have you discussed your circumstances with anyone?"
+  covid19Hide = true
 >
   <div class="radio">
     <@bs3form.radio_inline>
@@ -283,7 +288,7 @@
   </div>
 </@mitcirc.question_section>
 
-<@mitcirc.question_section question = "Details">
+<@mitcirc.question_section question = "Details" covid19Hide = true>
   <#if features.mitcircsCovid19>
     <p class="mitcircs-form__fields__section__hint covid--yes">
       Please provide some details of how coronavirus has impacted you and how this has affected your assessments.
@@ -329,6 +334,7 @@
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
   helpCovidPopover = evidenceCovidHelp
+  covid19Hide = true
 >
   <#function render_attachment attachment>
     <#local result><@routes.mitcircs.renderAttachment submission attachment /></#local>
@@ -364,6 +370,7 @@
   question = "If you're unable to provide evidence now please tell us about evidence you’re going to upload in the future"
   hint = "Please give a brief description of this outstanding evidence and tell us when you expect to be able to provide it"
   cssClass = "form-horizontal mitcircs-form__fields__section--covid19--no"
+  covid19Hide = true
 >
   <@bs3form.form_group "pendingEvidenceDue">
     <@bs3form.label path="pendingEvidenceDue" cssClass="col-xs-4 col-sm-2">Due date</@bs3form.label>

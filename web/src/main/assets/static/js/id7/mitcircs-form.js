@@ -88,7 +88,7 @@ class MitCircsForm {
             .not('.mitcircs-form__fields__section--covid19--yes,.mitcircs-form__fields__section--covid19--no')
             .show();
         }
-        this.updateQuestionNumbersAndColours();
+        MitCircsForm.updateQuestionNumbersAndColours(form);
       })
       .trigger('change');
 
@@ -96,8 +96,7 @@ class MitCircsForm {
     $form.on('submit', this.processAssessmentsTableFormFieldsForSubmission.bind(this));
   }
 
-  updateQuestionNumbersAndColours() {
-    const { form } = this;
+  static updateQuestionNumbersAndColours(form) {
     const $form = $(form);
 
     // colours
@@ -447,3 +446,5 @@ function init() {
 }
 
 $(() => init());
+
+export default MitCircsForm;

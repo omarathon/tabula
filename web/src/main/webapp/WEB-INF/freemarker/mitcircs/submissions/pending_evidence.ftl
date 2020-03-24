@@ -8,6 +8,7 @@
   <@f.form id="pendingEvidenceForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
     <@mitcirc.question_section
       question = "Please provide the pending evidence relevant to your submission"
+      showNumber = false
     >
       <@bs3form.filewidget
         basename="file"
@@ -23,6 +24,7 @@
       <@mitcirc.question_section
       question = "Do you intend to supply more evidence in the future?"
       cssClass = "form-horizontal"
+      showNumber = false
       >
         <div class="radio">
           <@bs3form.radio_inline>
