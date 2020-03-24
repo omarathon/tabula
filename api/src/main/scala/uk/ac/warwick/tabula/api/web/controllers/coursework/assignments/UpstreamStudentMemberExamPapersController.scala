@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.commands.profiles.StudentExamPapersCommand
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.UpstreamMemberExamPapersController.StudentExamPapersCommand
-import uk.ac.warwick.tabula.api.web.helpers.UpstreamExamPapersToJsonConverter
+import uk.ac.warwick.tabula.api.web.helpers.StudentUpstreamExamPapersToJsonConverter
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.exams.grids.ModuleRegistrationAndComponents
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -20,10 +20,10 @@ object UpstreamMemberExamPapersController {
 
 
 @Controller
-@RequestMapping(Array("/v1/student/{student}/academicyear/{academicYear}/upstreamexams"))
+@RequestMapping(Array("/v1/student/{student}/academicyear/{academicYear}/exams"))
 class UpstreamStudentMemberExamPapersController
   extends ApiController
-    with UpstreamExamPapersToJsonConverter {
+    with StudentUpstreamExamPapersToJsonConverter {
 
 
   @ModelAttribute("getExamPapersCommand")

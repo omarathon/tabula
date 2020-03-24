@@ -12,7 +12,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
         "code" -> examPaperCode,
         "duration" -> ac.examPaperDuration.map(_.toString).orNull,
         "title" -> ac.examPaperTitle,
-        "readingTime" -> ac.examPaperReadingTime,
+        "readingTime" -> ac.examPaperReadingTime.map(_.toString).orNull,
         "section" -> ac.examPaperSection,
         "type" -> ac.examPaperType
       )

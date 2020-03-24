@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.api.web.helpers
 import uk.ac.warwick.tabula.TopLevelUrlComponent
 import uk.ac.warwick.tabula.commands.exams.grids.ModuleRegistrationAndComponents
 
-trait UpstreamExamPapersToJsonConverter extends UpstreamAssessmentsAndExamsToJsonConverter {
+trait StudentUpstreamExamPapersToJsonConverter extends UpstreamAssessmentsAndExamsToJsonConverter {
   self: TopLevelUrlComponent =>
   def jsonUpstreamExamPapersObject(moduleRegAndComponents: ModuleRegistrationAndComponents): Map[String, Any] = {
     Map(
