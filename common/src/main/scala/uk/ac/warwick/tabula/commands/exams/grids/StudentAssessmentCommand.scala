@@ -23,6 +23,7 @@ object StudentAssessmentCommand {
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
+      with StudentModuleRegistrationAndComponents
       with ReadOnly with Unaudited {
 
       override def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] =
@@ -42,6 +43,7 @@ object StudentAssessmentProfileCommand {
       with AutowiringUpstreamRouteRuleServiceComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
+      with StudentModuleRegistrationAndComponents
       with ReadOnly with Unaudited
 }
 
@@ -63,7 +65,7 @@ case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGro
 class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[StudentMarksBreakdown] with TaskBenchmarking {
   self: StudentAssessmentCommandState
-    with AssessmentMembershipServiceComponent
+    with StudentModuleRegistrationAndComponents
     with ModuleRegistrationServiceComponent
     with CourseAndRouteServiceComponent
     with NormalCATSLoadServiceComponent
@@ -72,13 +74,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
   def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] = None
 
   override def applyInternal(): StudentMarksBreakdown = {
-    val modules = studentCourseYearDetails.moduleRegistrations.map { mr =>
-      val components = for {
-        uagm <- mr.upstreamAssessmentGroupMembers
-        aComponent <- assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
-      } yield Component(new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
-      ModuleRegistrationAndComponents(mr, components)
-    }
+    val modules = generateModuleRegistrationAndComponents(Seq(studentCourseYearDetails))
 
     val weightedMeanYearMark: Option[BigDecimal] =
       moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
@@ -100,7 +96,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
         val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
           moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
 
-        if(overcatSubsets.size > 1) {
+        if (overcatSubsets.size > 1) {
           // If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
           // find the subset that matches those modules, and show that mark if found
           studentCourseYearDetails.overcattingModules.flatMap(overcattingModules => {
@@ -124,6 +120,20 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
   }
 }
 
+trait StudentModuleRegistrationAndComponents {
+  self: AssessmentMembershipServiceComponent =>
+  def generateModuleRegistrationAndComponents(scyds: Seq[StudentCourseYearDetails]): Seq[ModuleRegistrationAndComponents] = {
+    scyds.flatMap { scyd =>
+      scyd.moduleRegistrations.map { mr =>
+        val components = for {
+          uagm <- mr.upstreamAssessmentGroupMembers
+          aComponent <- assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
+        } yield Component(new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
+        ModuleRegistrationAndComponents(mr, components)
+      }
+    }
+  }
+}
 
 trait StudentAssessmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 

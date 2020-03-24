@@ -1,23 +1,25 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.api.commands.profiles.ExamModuleRegistrationAndComponents
-import uk.ac.warwick.tabula.helpers.DurationFormatter
+import uk.ac.warwick.tabula.commands.exams.grids.ModuleRegistrationAndComponents
 
 trait UpstreamExamPapersToJsonConverter {
 
-  def jsonUpstreamExamPapersObject(moduleRegAndComponents: ExamModuleRegistrationAndComponents): Map[String, Any] = {
+  def jsonUpstreamExamPapersObject(moduleRegAndComponents: ModuleRegistrationAndComponents): Map[String, Any] = {
     Map(
       "scjCode" -> moduleRegAndComponents.moduleRegistration._scjCode,
-      "module" -> s"${moduleRegAndComponents.moduleRegistration.toSITSCode}",
-      "examcomponents" -> moduleRegAndComponents.components.map { component =>
+      "moduleCode" -> s"${moduleRegAndComponents.moduleRegistration.toSITSCode}",
+      "examComponents" -> moduleRegAndComponents.components.map { component =>
         val uac = component.upstreamGroup.assessmentComponent
-        Map("paperCode" -> uac.examPaperCode.get,
-          "paperTitle" -> uac.examPaperTitle.get,
-          "section" -> uac.examPaperSection,
-          "duration" -> uac.examPaperDuration.map { d => DurationFormatter.format(d, false) },
-          "readingTime" -> uac.examPaperReadingTime.map { r => DurationFormatter.format(r, false) }.getOrElse("n/a"),
-          "examType" -> uac.examPaperType.map(_.name),
-          "assessmentType" -> uac.assessmentType.name
+        Map(
+          "examPaper" -> Map(
+            "code" -> uac.examPaperCode.get,
+            "duration" -> uac.examPaperDuration,
+            "title" -> uac.examPaperTitle.get,
+            "readingTime" -> uac.examPaperReadingTime,
+            "section" -> uac.examPaperSection,
+            "type" -> uac.examPaperType
+          ),
+          "type" -> uac.assessmentType
         )
       }
     )
