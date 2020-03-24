@@ -260,7 +260,7 @@
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
     <div class="<#if features.mitcircsCovid19>covid--no</#if>">
-      <@mitcirc.question_hint "Please tell us why you haven't yet discussed your circumstances with anyone" />
+      <@mitcirc.question_hint "Please tell us why you haven’t been able to discuss your circumstances with anyone yet." />
 
       <@bs3form.form_group "noContactReason">
         <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
@@ -317,9 +317,14 @@
   provide both a copy of the original note and a certified translation into English. The University may seek to verify the
   accuracy of any evidence provided.
 </#assign>
+<#if features.mitcircsCovid19>
+  <#assign supportingEvidenceHint = "Due to the coronavirus pandemic we realise it may not be possible to obtain supporting evidence for your claim. If this is the case, please explain why you cannot obtain the evidence above. If you do have evidence please upload as much evidence as you have that is relevant." />
+<#else>
+  <#assign supportingEvidenceHint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf." />
+</#if>
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
-  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf."
+  hint = supportingEvidenceHint
   covidHint = "<strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here. If you have evidence but you would prefer not to upload it to the system, it is possible to share this with a trusted member of staff, eg. your personal or senior tutor.</strong>"
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp

@@ -17,22 +17,22 @@ object IssueType extends Enum[IssueType] {
   case object SeriousAccident extends IssueType(
     description = "Serious accident",
     helpText = "An accident which had a significant effect on your ability to complete an assessment. Normally the accident would have required you to receive medical treatment and would be supported by a doctor's (or other healthcare professional) note.",
-    evidenceGuidance = "A letter from a qualified health professional (e.g. medical doctor, nurse) on official, headed paper or with an official stamp. It must confirm the accident with dates, and must be recorded at the time of the accident, and must indicate the impact on the student."
+    evidenceGuidance = "Normally a letter or email from a qualified health professional (eg medical doctor, nurse). It should confirm the accident with dates and should indicate the impact on the student of possible."
   )
   case object SeriousPhysicalIllness extends IssueType(
     description = "Serious physical illness",
-    helpText = "An illness that might require medication prescribed by a GP, or a referral to a specialist, supported by a doctor's (or other healthcare professional) note. Minor illnesses such as coughs and colds not requiring treatment would not normally be eligible.",
-    evidenceGuidance = "A letter from a qualified health professional (e.g. medical doctor, nurse) on official, headed paper or with an official stamp. It must confirm the illness with dates, and must be recorded at the time of the illness, and must indicate the impact on the student."
+    helpText = "An illness that might require medication prescribed by a GP, or a referral to a specialist, normally supported by a doctor's (or other healthcare professional) note. Minor illnesses such as coughs and colds not requiring treatment would not normally be eligible.",
+    evidenceGuidance = "Normally a letter or email from a qualified health professional (eg medical doctor, nurse). It should confirm the illness with dates and should indicate the impact on the student of possible."
   )
   case object MentalHealth extends IssueType(
     description = "Mental health issue",
-    helpText = "A mental health issue for which you’re receiving or are waiting for support from university or other mental health services or your GP, supported by a note from your support service or GP / healthcare professional. Issues arising from short-term assessment stress and anxiety are not normally eligible unless it is a flare-up of a pre-diagnosed illness / condition.",
-    evidenceGuidance = "A letter from a qualified health professional (e.g. medical doctor, counsellor) on official, headed paper or with an official stamp. It must confirm the mental health issue with dates, and must be recorded at the time of the issue, and must indicate the impact on the student."
+    helpText = "A mental health issue for which you’re receiving or are waiting for support from university or other mental health services or your GP, normally supported by a note from your support service or GP / healthcare professional. Issues arising from short-term assessment stress and anxiety are not normally eligible unless it is a flare-up of a pre-diagnosed illness / condition.",
+    evidenceGuidance = "Normally a letter or email from a qualified health professional (eg medical doctor, nurse). It should confirm the mental health issue with dates and should indicate the impact on the student of possible."
   )
   case object SeriousMedicalOther extends IssueType(
     description = "Serious accident or illness of someone close",
-    helpText = "This would normally be a close family member, and would be supported by a doctor's note. Conditions which require you to undertake new and significant caring responsibilities are particularly relevant.",
-    evidenceGuidance = "A letter from a health professional on official, headed paper or with an official stamp confirming the circumstances,  with the dates, and some evidence of closeness. For carers, proof that you have substantial care and support responsibilities for the person. You should also indicate how this affected your ability to do the assessment."
+    helpText = "This would normally be a close family member, and would normally be supported by a doctor's note. Conditions which require you to undertake new and significant caring responsibilities are particularly relevant.",
+    evidenceGuidance = "Normally a letter or email from a qualified health professional (e.g. medical doctor, nurse). It should confirm the illness with dates. For carers, please upload any appropriate documentation that shows you have significant caring responsibility (the exception is for children and parents). You should indicate the impact this had on your ability to do assessment."
   )
   case object Employment extends IssueType(
     description = "Significant changes in employment circumstances",
@@ -42,17 +42,17 @@ object IssueType extends Enum[IssueType] {
   case object Deterioration extends IssueType(
     description = "Deterioration of a permanent condition",
     helpText = "A condition which you have already reported and is already covered by reasonable adjustments, but which has become significantly worse.",
-    evidenceGuidance = "A letter from a qualified health professional (e.g. medical doctor, nurse, mental health professional) on official, headed paper or with an official stamp. It must confirm the deterioration with dates, and must be recorded at the time of the deterioration, and must indicate the impact on the student."
+    evidenceGuidance = "A lNormally a letter or email from a qualified health professional (e.g. medical doctor, nurse). It should confirm the mental health issue with dates and should indicate the impact on the student of possible."
   )
   case object Bereavement extends IssueType(
     description = "Bereavement",
-    helpText = "The death of someone close to you (normally a close family member or close friend) around the time of an assessment, supported by a death certificate or funeral notice.",
-    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate).  If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
+    helpText = "If there has been a death of someone in your family or close to you, tick this option",
+    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate). If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
   )
   case object AbruptChange extends IssueType(
     description = "Sudden change in personal circumstances",
-    helpText = "Changes of this sort may include a divorce or separation, a sudden change in financial circumstances, a court appearance, or an acute accommodation crisis.",
-    evidenceGuidance = "A letter from a doctor, solicitor or other professional person, on official headed paper confirming the circumstances, the dates, and evidence of how it affects your ability to do the assessment. For financial problems, evidence of unforeseen hardship, e.g. bank statements or a letter of support from Student Funding or the Hardship Fund."
+    helpText = "Changes of this sort may include a divorce or separation, a sudden change in financial circumstances, a court appearance, or an acute accommodation crisis. If this is related to the coronavirus crisis either claim it here or separately in the coronavirus part of the portal.",
+    evidenceGuidance = "Normally a letter from a doctor, solicitor or other professional person, on official headed paper confirming the circumstances, the dates, and evidence of how it affects your ability to do the assessment. For financial problems, any evidence of unforeseen hardship, e.g. bank statements or a letter of support from Student Funding or the Hardship Fund."
   )
   case object LateDiagnosis extends IssueType(
     description = "Late diagnosis of a specific learning difference",
@@ -77,7 +77,7 @@ object IssueType extends Enum[IssueType] {
   case object Other extends IssueType(
     description = "Other",
     helpText = "This may include: gender transition or gender reassignment; maternity, paternity or adoption leave; caring responsibilities. However, this list is not exhaustive. If you want to report a claim for something which you believe represents a mitigating circumstance, but which is not shown on this form, you should enter it here.",
-    evidenceGuidance = "Please supply independent evidence from a relevant professional person or body that explains what happened (including dates) and the effect it had on you."
+    evidenceGuidance = "Where appropriate please supply any independent evidence that you may have from a relevant professional person or body (including dates) and the effect it had on you."
   ) {
     val covidHelpText = "If coronavirus has affected your circumstances in some other way, please tick this option and tell us something about what has happened"
   }
@@ -118,7 +118,7 @@ object IssueType extends Enum[IssueType] {
   case object CoronavirusBereavement extends CoronavirusIssueType(
     description = "Bereavement due to coronavirus",
     helpText = "If there has been a death of someone in your family or close to you as a result of coronavirus, tick this option",
-    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate).  If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
+    evidenceGuidance = "Depending upon your circumstances you may not be able to upload any evidence, (e.g order of funeral service, death announcement, death certificate). If you do have documentation and feel able to share it, please submit it here. Alternatively, you can share information about your circumstances with your personal or senior tutor who can acknowledge your claim on your behalf (you should tick the ‘sensitive evidence’ box below in this case)."
   )
 
   case object Carer extends CoronavirusIssueType(
