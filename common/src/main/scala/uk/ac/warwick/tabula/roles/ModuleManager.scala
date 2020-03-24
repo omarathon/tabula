@@ -17,6 +17,7 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
   GrantsScopedPermission(
     Assignment.Archive,
     Assignment.Delete,
+    Exam.Delete,
 
     Submission.SendReceipt,
     Submission.Delete,
