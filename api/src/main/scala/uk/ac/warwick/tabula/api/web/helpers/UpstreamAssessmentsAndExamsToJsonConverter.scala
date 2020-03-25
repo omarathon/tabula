@@ -6,6 +6,19 @@ import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentG
 trait UpstreamAssessmentsAndExamsToJsonConverter {
   self: TopLevelUrlComponent =>
 
+  def jsonExamPaperObject(ac: AssessmentComponent): (String, Any) = {
+    "examPaper" -> (ac.examPaperCode match {
+      case Some(examPaperCode) => Map(
+        "code" -> examPaperCode,
+        "duration" -> ac.examPaperDuration.map(_.toString).orNull,
+        "title" -> ac.examPaperTitle,
+        "readingTime" -> ac.examPaperReadingTime.map(_.toString).orNull,
+        "section" -> ac.examPaperSection,
+        "type" -> ac.examPaperType
+      )
+      case _ => null
+    })
+  }
   def jsonUpstreamAssessmentObject(assessmentComponent: AssessmentComponent): Map[String, Any] = {
     Map(
       "id" -> assessmentComponent.id,
@@ -20,18 +33,8 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
           "name" -> assessmentComponent.module.adminDepartment.name
         )
       ),
-      "examPaper" -> (assessmentComponent.examPaperCode match {
-        case Some(examPaperCode) => Map(
-          "code" -> examPaperCode,
-          "duration" -> assessmentComponent.examPaperDuration,
-          "title" -> assessmentComponent.examPaperTitle,
-          "readingTime" -> assessmentComponent.examPaperReadingTime,
-          "section" -> assessmentComponent.examPaperSection,
-          "type" -> assessmentComponent.examPaperType
-        )
-        case _ => null
-      })
-    )}
+      jsonExamPaperObject(assessmentComponent)
+)}
 
   def jsonUpstreamAssessmentGroupInfoObject(info: UpstreamAssessmentGroupInfo): Map[String, Any] = {
     Map(
