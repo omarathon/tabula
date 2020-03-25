@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import javax.persistence.{EntityManager, Query}
 import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.criterion.Order._
@@ -453,19 +454,17 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
-  // TODO Get members for multiple components in a single query - Doing a single query for each may be acceptable. If so, burn this junk
-  // this will need a user-type to teach JPA about the Tuple being used for the composite key
-  // see https://stackoverflow.com/questions/55317347/jpql-and-list-of-tuples-as-parameter-for-select-in-statements
   def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
-    session.createNativeQuery(s"""
+    val em: EntityManager = session
+    em.createNativeQuery(s"""
       select distinct uagm.* from UpstreamAssessmentGroupMember uagm
 				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear
 				join StudentCourseDetails scd on scd.universityId = uagm.universityId
 				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
-      where (uag.moduleCode, uag.assessmentGroup, uag.sequence) in (:compositeKeys)
-    """)
+      where array[uag.moduleCode, uag.assessmentGroup, uag.sequence] in (:compositeKeys)
+    """, classOf[UpstreamAssessmentGroupMember])
       .setParameter("academicYear", academicYear.startYear)
-      .setParameter("compositeKeys", components.map(c => (c.moduleCode, c.assessmentGroup, c.sequence)).asJava)
+      .setParameter("compositeKeys", components.map(AssessmentComponentKey.apply).asJava)
       .getResultList.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
