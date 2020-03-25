@@ -122,7 +122,8 @@ task webpack(type: NpmTask) {
   outputs.file 'build/rootContent/WEB-INF/static-hashes.properties'
   outputs.cacheIf { true }
 
-  if (isDevBuild) {
+  // This is a string and "false" is truthy thanks groovy
+  if (isDevBuild == "true") {
     args = ['run', 'dev']
   } else {
     args = ['run', 'build']
