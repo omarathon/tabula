@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import MitCircsForm from './mitcircs-form';
 
 class MitCircsOutcomesForm {
   constructor(form) {
@@ -44,6 +45,7 @@ class MitCircsOutcomesForm {
         $target.on('input change', () => {
           const enabled = $target.filter(':checked').val() !== 'Rejected';
           $container.collapse(enabled ? 'show' : 'hide');
+          MitCircsForm.updateQuestionNumbersAndColours(form);
         }).trigger('change');
       });
 
@@ -71,6 +73,8 @@ class MitCircsOutcomesForm {
       const $checkbox = $(e.target);
       $checkbox.closest('.row').find('.date-time-picker').filter(':visible').prop('disabled', !$checkbox.is(':checked'));
     }).trigger('change');
+
+    MitCircsForm.updateQuestionNumbersAndColours(form);
   }
 }
 

@@ -60,7 +60,15 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
+
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent]
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
+
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
@@ -251,6 +259,22 @@ class AssessmentMembershipServiceImpl
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
     dao.getAssessmentComponents(moduleCode, inUseOnly)
 
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, ids)
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] =
+    dao.getAssessmentComponentsByPaperCode(department, paperCodes)
+
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]] =
+    dao.getCurrentUpstreamAssessmentGroupMembers(components, academicYear)
+      .groupBy(_.upstreamAssessmentGroup)
+      .map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }
+      .toSeq
+      .groupBy(uagi => new AssessmentComponentKey(
+        uagi.upstreamAssessmentGroup.moduleCode,
+        uagi.upstreamAssessmentGroup.assessmentGroup,
+        uagi.upstreamAssessmentGroup.sequence
+      ))
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)
 
@@ -258,6 +282,9 @@ class AssessmentMembershipServiceImpl
     * Gets assessment components for this department.
     */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
+
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] =
+    dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly)
 
   def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 

@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmissi
 import uk.ac.warwick.tabula.data.{MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, AutowiringMitCircsWorkflowProgressServiceComponent, MitCircsSubmissionServiceComponent, MitCircsWorkflowProgressServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
+import scala.jdk.CollectionConverters._
 
 case class MitigatingCircumstancesWorkflowProgress(percentage: Int, t: String, messageCode: String)
 
@@ -67,6 +67,8 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
           approvedEndDate = Option(approvedEndDate),
           state = state.asScala.toSet,
           isUnread = isUnread,
+          // explicitly convert to scala boolean - otherwise null will always end up as Some(false) instead of None
+          isCoronavirus = Option(isCoronavirus).map(_.booleanValue)
         )
       ).map { submission =>
         val progress = workflowProgressService.progress(department)(submission)
@@ -121,6 +123,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var approvedEndDate: LocalDate = _
   var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList()
   var isUnread: Boolean = _
+  var isCoronavirus: JBoolean = null
 
   override val defaultOrder: Seq[Order] = Seq(Order.desc("_lastModified"))
   override val sortOrder: JList[Order] = JArrayList() // Not used

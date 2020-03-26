@@ -115,14 +115,15 @@ task installNpmDependencies(type: NpmTask) {
 }
 
 task webpack(type: NpmTask) {
-  inputs.files('webpack.config.babel.js', 'package.json').withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.files('webpack.config.babel.js', 'package.json', '../gradle-local.properties').withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.dir('build-tooling').withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.dir('src/main/assets/static').withPathSensitivity(PathSensitivity.RELATIVE)
   outputs.dir 'build/rootContent/static'
   outputs.file 'build/rootContent/WEB-INF/static-hashes.properties'
   outputs.cacheIf { true }
 
-  if (isDevBuild) {
+  // This is a string and "false" is truthy thanks groovy
+  if (isDevBuild == "true") {
     args = ['run', 'dev']
   } else {
     args = ['run', 'build']
