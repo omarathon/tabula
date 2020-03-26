@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import javax.persistence.{EntityManager, Query}
 import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.criterion.Order._
@@ -71,7 +72,13 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
+
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent]
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
@@ -83,6 +90,8 @@ trait AssessmentMembershipDao {
   def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
   def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
+
+  def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember]
 
@@ -309,13 +318,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     c.seq
   }
 
+  // TAB-2676 Include modules in sub-departments optionally
+  private def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
+
+  private def modulesIncludingSubDepartments(d: Department): Seq[Module] =
+    modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
+
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
-    // TAB-2676 Include modules in sub-departments optionally
-    def modules(d: Department): Seq[Module] = d.modules.asScala.toSeq
-
-    def modulesIncludingSubDepartments(d: Department): Seq[Module] =
-      modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
-
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -334,6 +343,34 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     }
   }
 
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] = {
+    val deptModules =
+      if (includeSubDepartments) modulesIncludingSubDepartments(department)
+      else modules(department)
+
+    if (deptModules.isEmpty) Nil
+    else {
+      val c = session.newCriteria[AssessmentComponent]
+        .add(is("inUse", true))
+        .addOrder(asc("moduleCode"))
+        .addOrder(asc("sequence"))
+      if (withExamPapersOnly) {
+        c.add(isNotNull("_examPaperCode"))
+      }
+      if (assessmentType.isDefined) {
+        c.add(isNotNull("assessmentType"))
+        c.add(is("assessmentType", assessmentType.get))
+      }
+
+      val components = safeInSeq(() => {
+        c
+      }, "module", deptModules)
+      components.sortBy { c =>
+        (c.moduleCode, c.sequence)
+      }
+    }
+  }
+
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] = {
     val c = session.newCriteria[AssessmentComponent]
       .add(is("moduleCode", moduleCode))
@@ -342,6 +379,23 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       c.add(is("inUse", true))
     }
     c.seq
+  }
+
+  def getAssessmentComponents(department: Department, ids: Seq[String]): Seq[AssessmentComponent] = {
+    val modules = modulesIncludingSubDepartments(department)
+    session.newCriteria[AssessmentComponent]
+      .add(safeIn("id", ids))
+      .add(safeIn("module", modules))
+      .seq
+  }
+
+  def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] = {
+    val modules = modulesIncludingSubDepartments(department)
+    session.newCriteria[AssessmentComponent]
+      .add(safeIn("_examPaperCode", paperCodes))
+      .add(safeIn("module", modules))
+      .seq
+      .groupBy(_.examPaperCode.getOrElse("none"))
   }
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
@@ -398,6 +452,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .setString("assessmentGroup", component.assessmentGroup)
       .setString("sequence", component.sequence)
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+  }
+
+  def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
+    val em: EntityManager = session
+    em.createNativeQuery(s"""
+      select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+      where array[uag.moduleCode, uag.assessmentGroup, uag.sequence] in (:compositeKeys)
+    """, classOf[UpstreamAssessmentGroupMember])
+      .setParameter("academicYear", academicYear.startYear)
+      .setParameter("compositeKeys", components.map(AssessmentComponentKey.apply).asJava)
+      .getResultList.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember] = {

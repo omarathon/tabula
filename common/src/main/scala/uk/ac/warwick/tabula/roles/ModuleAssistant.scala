@@ -20,6 +20,9 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
     Assignment.Update,
     Assignment.MarkOnBehalf,
 
+    Exam.Create,
+    Exam.Update,
+
     Submission.ManagePlagiarismStatus,
     Submission.CheckForPlagiarism,
     Submission.ReleaseForMarking,

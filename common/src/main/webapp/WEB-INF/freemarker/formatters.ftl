@@ -184,9 +184,11 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#macro>
 
-<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true excludeCurrentYear=false><#--
+<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true excludeCurrentYear=false showLocal=false showLocalStyle="short"><#--
 	--><#noescape><#--
-		-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime, excludeCurrentYear)}<#--
+		--><#if showLocal><time datetime="${date}" class="datetime-with-local datetime-with-local--${showLocalStyle}" data-relative="${relative?string('true', 'false')}"></#if><#--
+			-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime, excludeCurrentYear)}<#--
+		--><#if showLocal></time></#if><#--
 	--></#noescape><#--
 --></#macro>
 

@@ -28,26 +28,26 @@
 
   <#if extension??>
     <div>${extension_time_remaining} <span class="label label-info">Extended</span></div>
-    Extension granted until <@fmt.date date=extension.expiryDate />
+    Extension granted until <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" />
     <#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
   <#elseif assignment.closed>
     <div class="alert alert-info">
     <#if hasActiveExtension>
       <#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
       <div>${extension_time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
-      Extension deadline was <@fmt.date date=extension.expiryDate />
+      Extension deadline was <@fmt.date date=extension.expiryDate showLocal=true showLocalStyle="extended" />
       </div>
     <#else>
       <#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
       <div>${time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
-      Deadline was <@fmt.date date=assignment.closeDate />
+      Deadline was <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" />
     </#if>
     </div>
     <#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
   <#else>
     <div class="alert alert-info">
       <div>${time_remaining}</div>
-      Deadline <@fmt.date date=assignment.closeDate />
+      Deadline <@fmt.date date=assignment.closeDate showLocal=true showLocalStyle="extended" />
       <#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
     </div>
   </#if>
