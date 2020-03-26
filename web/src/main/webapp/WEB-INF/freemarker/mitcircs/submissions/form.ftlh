@@ -26,7 +26,11 @@
       <div class="mitcircs-form__guidance">
         <h2>General guidance</h2>
 
-        <p><i class="fas fa-play-circle">&nbsp;</i><a href="#" data-toggle="modal" data-target="#guidance-video-modal" id="mitigatingCircumstancesVideo">How to declare mitigating circumstances</a></p>
+        <#if features.mitcircsCovid19>
+          <p><a href="https://warwick.ac.uk/tabula/manual/cm2/mit-circs/declare" target="_blank">How to declare mitigating circumstances</a></p>
+        <#else>
+          <p><i class="fas fa-play-circle">&nbsp;</i><a href="#" data-toggle="modal" data-target="#guidance-video-modal" id="mitigatingCircumstancesVideo">How to declare mitigating circumstances</a></p>
+        </#if>
 
         <@modal.modal id="guidance-video-modal">
           <@modal.wrapper>
