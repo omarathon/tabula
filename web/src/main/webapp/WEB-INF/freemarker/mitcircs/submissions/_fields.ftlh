@@ -282,7 +282,7 @@
         <li>Warwick’s <a href="https://warwick.ac.uk/supportservices" target="_blank">Wellbeing Support Services</a></li>
         <li><a href="https://warwick.ac.uk/insite/coronavirus/" target="_blank">Current university FAQs on coronavirus</a></li>
         <li><a href="https://www.gov.uk/government/publications/covid-19-stay-at-home-guidance/stay-at-home-guidance-for-people-with-confirmed-or-possible-coronavirus-covid-19-infection" target="_blank">Current UK government advice on coronavirus</a></li>
-        <li><a href="https://111.nhs.uk/service/COVID-19/" target="_blank">Current NHS111 advice on coronavirus</a></li>
+        <li><a href="https://111.nhs.uk/service/COVID-19/" target="_blank">Current NHS 111 advice on coronavirus</a></li>
       </ul>
     </div>
   </div>
