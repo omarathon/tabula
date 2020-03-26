@@ -115,7 +115,7 @@ task installNpmDependencies(type: NpmTask) {
 }
 
 task webpack(type: NpmTask) {
-  inputs.files('webpack.config.babel.js', 'package.json').withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.files('webpack.config.babel.js', 'package.json', '../gradle-local.properties').withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.dir('build-tooling').withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.dir('src/main/assets/static').withPathSensitivity(PathSensitivity.RELATIVE)
   outputs.dir 'build/rootContent/static'

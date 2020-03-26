@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.mitcircs
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.mitcircs.{AdminHomeCommand, ListMitCircsPanelsCommand}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState
@@ -12,6 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController, DepartmentScopedController}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractAdminDeptController
   extends BaseController

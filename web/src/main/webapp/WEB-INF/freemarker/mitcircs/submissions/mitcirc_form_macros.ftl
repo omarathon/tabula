@@ -40,31 +40,44 @@
   </fieldset>
 </#macro>
 
-<#assign questionNumber = 1 />
-<#macro question_section question="" hint="" cssClass="" helpPopover="" showNumber=true data="">
-  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}" ${data}>
+<#assign questionIndex = 1 /> <#-- Used to generate unique IDs for popups - not used as the question number -->
+<#macro question_section question="" covidQuestion=""  hint="" covidHint="" cssClass="" helpPopover="" helpCovidPopover="" showNumber=true data="" covid19Hide=false>
+  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}" ${data} <#if features.mitcircsCovid19 && covid19Hide>style="display: none;"</#if>>
     <#if question?has_content>
       <legend>
-        <#if showNumber>${questionNumber}.</#if> ${question}
+        <#if showNumber><span class="mitcircs-form__fields__section__number"></span>.</#if>
+        <span <#if covidQuestion?has_content>class="covid--no"</#if>>${question}</span>
+        <#if covidQuestion?has_content><span class="covid--yes">${covidQuestion}</span></#if>
+
         <#if helpPopover?has_content>
-          <a tabindex="0" role="button" class="help-popover use-popover tabulaPopover-init" id="popover-evidence" data-html="true" data-placement="left" data-content="${helpPopover}" data-container="body" aria-label="Help" data-trigger="click focus" data-original-title="" title="">
-            <i class="icon-question-sign fa fa-question-circle"></i>
-          </a>
+          <#if helpCovidPopover?has_content><#assign covidClass>covid--no</#assign></#if>
+          <@fmt.help_popover id="question_section${questionIndex}_popover" content="${helpPopover}" html=true placement="left" cssClass="${covidClass}" />
+        </#if>
+        <#if helpCovidPopover?has_content>
+          <@fmt.help_popover id="question_section${questionIndex}_covid-popover" content="${helpCovidPopover}" html=true placement="left" cssClass="covid--yes" />
         </#if>
       </legend>
-      <#if showNumber><#assign questionNumber = questionNumber + 1 /></#if>
     </#if>
 
     <#if hint?has_content>
-      <@question_hint hint />
+      <@question_hint hint covidHint?has_content />
+    </#if>
+
+    <#if covidHint?has_content>
+      <@question_covid_hint covidHint />
     </#if>
 
     <#nested />
   </fieldset>
+  <#assign questionIndex = questionIndex + 1 />
 </#macro>
 
-<#macro question_hint hint>
-  <p class="mitcircs-form__fields__section__hint">(${hint})</p>
+<#macro question_hint hint covidHint=false>
+  <p class="mitcircs-form__fields__section__hint <#if covidHint> covid--no</#if>" >(${hint})</p>
+</#macro>
+
+<#macro question_covid_hint hint>
+  <p class="mitcircs-form__fields__section__hint covid--only covid--yes">(${hint})</p>
 </#macro>
 
 <#macro checkboxes enumValues enumField>
@@ -90,8 +103,12 @@
       </label>
       <#if value.entryName == "Other">
         <@f.input path="${otherField}" cssClass="form-control other-input" />
+        <#if value.covidHelpText??><@fmt.help_popover id="${value.entryName}Covid" content="${value.covidHelpText}" placement="left" cssClass="covid--yes"/></#if>
       </#if>
-      <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
+      <#if value.helpText??>
+        <#assign covidClass><#if value.covidHelpText??>covid--no</#if></#assign>
+        <@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left" cssClass="${covidClass}" />
+      </#if>
     </div>
     <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
   </#list>

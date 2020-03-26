@@ -26,7 +26,11 @@
       <div class="mitcircs-form__guidance">
         <h2>General guidance</h2>
 
-        <p><i class="fas fa-play-circle">&nbsp;</i><a href="#" data-toggle="modal" data-target="#guidance-video-modal" id="mitigatingCircumstancesVideo">How to declare mitigating circumstances</a></p>
+        <#if features.mitcircsCovid19>
+          <p><a href="https://warwick.ac.uk/tabula/manual/cm2/mit-circs/declare" target="_blank">How to declare mitigating circumstances</a></p>
+        <#else>
+          <p><i class="fas fa-play-circle">&nbsp;</i><a href="#" data-toggle="modal" data-target="#guidance-video-modal" id="mitigatingCircumstancesVideo">How to declare mitigating circumstances</a></p>
+        </#if>
 
         <@modal.modal id="guidance-video-modal">
           <@modal.wrapper>
@@ -43,17 +47,44 @@
         <p>
           Mitigating circumstances processes support students who have experienced sudden, unforeseen and serious issues such as an accident,
           physical or mental health difficulties, or a detrimental change in personal circumstances. Sometimes issues like these can affect
-          your coursework or exams, and if so, and if you can provide evidence from an external source (eg your GP, hospital, counsellor,
-          death certificate), then you should tell us about them.
+          your coursework or exams, and if so, you should tell us about them. You are normally expected to provide evidence from an external
+          source (eg your GP, hospital, counsellor) to support your submission.
         </p>
 
-        <p>
-          Before putting in a claim for mitigation, please read the
-          <a target="_blank" href="https://warwick.ac.uk/mitigatingcircumstances">university policy for mitigating circumstances</a>.
-          Mitigating circumstances do not result in changes to marks; they may result in you being able to take a failed assessment again
-          as a first attempt, or to have an extension for a deadline, or to have a late penalty removed. Mitigation may also be considered when
-          deciding final year degree classifications in borderline cases, but it does not automatically result in a higher degree classification.
-        </p>
+        <#if features.mitcircsCovid19>
+          <p>
+            We are currently dealing with coronavirus related mitigation in this system.  For coronavirus mitigation the need for external evidence
+            is being relaxed, so you should tell us about your claim even if you cannot currently provide evidence about your issues.
+          </p>
+
+          <p>
+            Before putting in a claim for mitigation for coronavirus related issues, please read the
+            <a href="https://warwick.ac.uk/insite/coronavirus/" target="_blank">current university FAQs on coronavirus</a>.
+          </p>
+
+          <p>
+            <a href="https://www.gov.uk/government/publications/covid-19-stay-at-home-guidance/stay-at-home-guidance-for-people-with-confirmed-or-possible-coronavirus-covid-19-infection" target="_blank">Current UK government advice on coronavirus</a>
+          </p>
+
+          <p>
+            <a href="https://111.nhs.uk/service/COVID-19/" target="_blank">Current NHS111 advice on coronavirus</a>
+          </p>
+        <#else>
+          <p>
+            Mitigating circumstances processes support students who have experienced sudden, unforeseen and serious issues such as an accident,
+            physical or mental health difficulties, or a detrimental change in personal circumstances. Sometimes issues like these can affect
+            your coursework or exams, and if so, and if you can provide evidence from an external source (eg your GP, hospital, counsellor,
+            death certificate), then you should tell us about them.
+          </p>
+
+          <p>
+            Before putting in a claim for mitigation, please read the
+            <a target="_blank" href="https://warwick.ac.uk/mitigatingcircumstances">university policy for mitigating circumstances</a>.
+            Mitigating circumstances do not result in changes to marks; they may result in you being able to take a failed assessment again
+            as a first attempt, or to have an extension for a deadline, or to have a late penalty removed. Mitigation may also be considered when
+            deciding final year degree classifications in borderline cases, but it does not automatically result in a higher degree classification.
+          </p>
+        </#if>
       </div>
     </header>
   </div>

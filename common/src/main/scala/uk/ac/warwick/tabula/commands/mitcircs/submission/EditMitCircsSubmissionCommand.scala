@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{CoronavirusIssueType, IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification, MitCircsUpdateOnBehalfNotification}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -93,6 +93,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     }
     file.attached.asScala.foreach(submission.addAttachment)
 
+    submission.covid19Submission = covid19Submission
     submission.relatedSubmission = relatedSubmission
 
     // reset approvedOn when changes are made by others or drafts are saved
@@ -153,6 +154,7 @@ trait EditMitCircsSubmissionRequest extends MitCircsSubmissionRequest {
   attachedFiles = JHashSet(submission.attachments.toSet)
   relatedSubmission = submission.relatedSubmission
   hasSensitiveEvidence = submission.hasSensitiveEvidence
+  covid19Submission = submission.covid19Submission
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {

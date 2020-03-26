@@ -199,6 +199,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   // Guarded against being set directly; use .approveAndSubmit() below
   def approvedOn: Option[DateTime] = Option(_approvedOn)
 
+  @Column(nullable = false)
+  var covid19Submission: Boolean = false
+
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   private val _attachments: JSet[FileAttachment] = JHashSet()
