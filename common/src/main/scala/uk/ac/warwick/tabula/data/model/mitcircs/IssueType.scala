@@ -141,13 +141,13 @@ object IssueType extends Enum[IssueType] {
   case object NoVisa extends CoronavirusIssueType(
     description = "Not able to obtain a Visa",
     helpText = "If you have not been able to obtain a visa to come to the UK because of travel or other restrictions put in place by your country or by the UK, tick this option",
-    evidenceGuidance = "Please provide us with any visa rejection. Please contact your department to find out how you can be provided with more support through on-line learning and assessment."
+    evidenceGuidance = "Please provide us with any visa rejection."
   )
 
   case object CannotTravel extends CoronavirusIssueType(
     description = "Cannot travel to the UK",
     helpText = "If there are travel restrictions in place which make it impossible for you to travel to the UK, tick this option",
-    evidenceGuidance = "Please provide links to any government advice/official travel restrictions or cancelled flight tickets where available. Please contact your department to find out how you can be provided with more support through on-line learning and assessment. "
+    evidenceGuidance = "Please provide links to any government advice/official travel restrictions or cancelled flight tickets where available."
   )
 
   def coronavirusIssueTypes: Seq[IssueType] = (IssueType.values.collect { case i: CoronavirusIssueType => i }) ++ Seq(Other)
