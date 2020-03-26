@@ -150,7 +150,7 @@ abstract class Features {
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:true}") var mitCircs: Boolean = defaults.mitCircs
-  @Value("${features.mitCircs.covid19:false}") var mitcircsCovid19: Boolean = defaults.mitcircsCovid19
+  @Value("${features.mitCircs.covid19:true}") var mitcircsCovid19: Boolean = defaults.mitcircsCovid19
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
@@ -301,7 +301,7 @@ class FeaturesMessage {
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
   @BeanProperty var mitCircs = true
-  @BeanProperty var mitcircsCovid19 = false
+  @BeanProperty var mitcircsCovid19 = true
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
   @BeanProperty var notificationBatching = false
