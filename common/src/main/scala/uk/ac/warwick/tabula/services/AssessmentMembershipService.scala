@@ -68,6 +68,8 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
 
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]]
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   /**
@@ -261,6 +263,17 @@ class AssessmentMembershipServiceImpl
 
   def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] =
     dao.getAssessmentComponentsByPaperCode(department, paperCodes)
+
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]] =
+    dao.getCurrentUpstreamAssessmentGroupMembers(components, academicYear)
+      .groupBy(_.upstreamAssessmentGroup)
+      .map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }
+      .toSeq
+      .groupBy(uagi => new AssessmentComponentKey(
+        uagi.upstreamAssessmentGroup.moduleCode,
+        uagi.upstreamAssessmentGroup.assessmentGroup,
+        uagi.upstreamAssessmentGroup.sequence
+      ))
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)
