@@ -506,6 +506,9 @@
         <entry key="theYear">
           <bean class="uk.ac.warwick.tabula.web.views.TheYear"/>
         </entry>
+        <entry key="assignmentCloseTimes">
+          <bean class="uk.ac.warwick.tabula.web.views.AssignmentCloseTimes"/>
+        </entry>
         <entry key="usersWithRole">
           <bean class="uk.ac.warwick.tabula.web.views.UsersWithRoleFunction"/>
         </entry>

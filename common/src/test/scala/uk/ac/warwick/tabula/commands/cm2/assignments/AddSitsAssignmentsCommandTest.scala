@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
@@ -139,7 +139,7 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
     val item = new SitsAssignmentItem(include, "A", assignment)
     item.optionsId = optionsId
     item.openDate = new LocalDate(2016, 9, 1)
-    item.closeDate = new LocalDate(2016, 11, 1)
+    item.closeDate = new DateTime(2016, 11, 1, 12, 0)
     item.openEnded = openEnded
     item
   }

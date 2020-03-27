@@ -28,7 +28,7 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     dept = Fixtures.department("in")
 
     assignment = Fixtures.assignment("demo")
-    assignment.closeDate = new LocalDate(2018, DateTimeConstants.SEPTEMBER, 11).toDateTime(Assignment.closeTime)
+    assignment.closeDate = new LocalDate(2018, DateTimeConstants.SEPTEMBER, 11).toDateTime(Assignment.defaultCloseTime)
     assignment.extensionService = smartMock[ExtensionService]
     assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 

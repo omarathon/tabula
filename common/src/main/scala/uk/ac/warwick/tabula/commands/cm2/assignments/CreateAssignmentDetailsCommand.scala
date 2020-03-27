@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import javax.validation.constraints.NotEmpty
 import org.hibernate.validator.constraints.Length
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -98,7 +99,7 @@ trait CreateAssignmentDetailsPrefill {
    */
   def copyNonspecificFrom(assignment: Assignment): Unit = {
     openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
-    closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+    closeDate = Option(assignment.closeDate).orNull
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
     if (assignment.workflowCategory.contains(WorkflowCategory.Reusable)) {
       reusableWorkflow = assignment.cm2MarkingWorkflow
@@ -125,8 +126,8 @@ trait AssignmentDetailsCopy {
     } else {
       assignment.openEndedReminderDate = null
 
-      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate)) {
-        assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate) || !closeDate.toLocalDate.isBefore(Assignment.closeTimeEnforcementDate)) {
+        assignment.closeDate = closeDate
       }
     }
 
@@ -155,7 +156,7 @@ trait ModifyAssignmentDetailsRequest extends SharedAssignmentDetailProperties wi
 
   var openDate: LocalDate = LocalDate.now
 
-  var closeDate: LocalDate = openDate.plusWeeks(2)
+  var closeDate: DateTime = openDate.plusWeeks(2).toDateTime(new LocalTime(12, 0))
 
   var openEndedReminderDate: LocalDate = _
 
@@ -207,7 +208,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
     if (!openEnded) {
       if (closeDate == null) {
         errors.rejectValue("closeDate", "closeDate.missing")
-      } else if (openDate != null && openDate.isAfter(closeDate)) {
+      } else if (openDate != null && openDate.isAfter(closeDate.toLocalDate)) {
         errors.rejectValue("closeDate", "closeDate.early")
       }
     }
@@ -236,8 +237,13 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
   // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
   def validateCloseDate(errors: Errors): Unit = {
     if (closeDate != null && !openEnded) {
-      if (holidayDates.contains(closeDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+      if (holidayDates.contains(closeDate.toLocalDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
         errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+      }
+      if(!Assignment.isValidCloseTime(closeDate)) {
+        val formatter = DateTimeFormat.forPattern("ha")
+        val times: Array[AnyRef] = Array(formatter.print(Assignment.CloseTimeStart).toLowerCase, formatter.print(Assignment.CloseTimeEnd).toLowerCase)
+        errors.rejectValue("closeDate", "closeDate.invalidTime", times, "")
       }
     }
   }
