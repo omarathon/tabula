@@ -33,7 +33,8 @@ class MitCircsForm {
 
     $form
       .find(':input[name="issueTypes"][value="Other"]')
-      .on('input change', e => $form.find(':input[name="issueTypeDetails"]').prop('disabled', !$(e.target).is(':checked')));
+      .on('input change', e => $(e.target).closest('label').siblings(':input[name="issueTypeDetails"]').prop('readonly', !$(e.target).is(':checked')))
+      .trigger('change');
 
     // End date or ongoing
     $form
@@ -61,8 +62,8 @@ class MitCircsForm {
       .trigger('change');
 
     $form
-      .find(':input[name="contacted"][value="Other"]')
-      .on('input change', e => $form.find(':input[name="contactOther"]').prop('disabled', !$(e.target).is(':checked')))
+      .find(':input[name="contacts"][value="Other"]')
+      .on('input change', e => $(e.target).closest('label').siblings(':input[name="contactOther"]').prop('readonly', !$(e.target).is(':checked')))
       .trigger('change');
 
     // check-all on assessment tabs
@@ -82,8 +83,14 @@ class MitCircsForm {
       .on('input change', () => {
         const val = $form.find('input[name="covid19Submission"]:checked').val();
         if (val) {
-          $form.find('.mitcircs-form__fields__section--covid19--yes, .covid--yes').toggle(val === 'true');
-          $form.find('.mitcircs-form__fields__section--covid19--no, .covid--no').toggle(val !== 'true');
+          $form.find('.mitcircs-form__fields__section--covid19--yes, .covid--yes')
+            .toggle(val === 'true')
+            .find('input')
+            .prop('disabled', val !== 'true');
+          $form.find('.mitcircs-form__fields__section--covid19--no, .covid--no')
+            .toggle(val !== 'true')
+            .find('input')
+            .prop('disabled', val === 'true');
           $form.find('.mitcircs-form__fields__section')
             .not('.mitcircs-form__fields__section--covid19--yes,.mitcircs-form__fields__section--covid19--no')
             .show();

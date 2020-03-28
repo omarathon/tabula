@@ -31,11 +31,21 @@ class MitCircsSubmissionTest extends BrowserTest with GivenWhenThen with MitCirc
     click on linkText("Declare mitigating circumstances")
     currentUrl should endWith("/mitcircs/new")
 
+    And("I state that this submission doesn't relate to coronavirus")
+    eventually {
+      find(xpath("//input[@type='radio'][@name='covid19Submission'][@value='false']")).get.isDisplayed should be (true)
+    }
+    click on radioButton(xpath("//input[@type='radio'][@name='covid19Submission'][@value='false']"))
+    eventually {
+      // the first help icon for issue types should be visible (could check any element in the form but this is the first with an ID)
+      find(id("popover-SeriousAccident")).get.isDisplayed should be (true)
+    }
+
     And("I fill in some issue types")
     click on checkbox(xpath("//input[@type='checkbox'][@name='issueTypes'][@value='SeriousAccident']"))
     click on checkbox(xpath("//input[@type='checkbox'][@name='issueTypes'][@value='SeriousMedicalOther']"))
-    click on checkbox(xpath("//input[@type='checkbox'][@name='issueTypes'][@value='Other']"))
-    textField("issueTypeDetails").value = "The Night Heron calls me"
+    click on checkbox(xpath("//fieldset[contains(@class, 'mitcircs-form__fields__section--covid19--no')]//input[@type='checkbox'][@name='issueTypes'][@value='Other']"))
+    textField(xpath("//fieldset[contains(@class, 'mitcircs-form__fields__section--covid19--no')]//input[@name='issueTypeDetails']")).value = "The Night Heron calls me"
 
     And("I fill in affected dates")
     textField("startDate").value = DateFormats.DatePickerFormatter.print(AcademicYear.now().firstDay)
