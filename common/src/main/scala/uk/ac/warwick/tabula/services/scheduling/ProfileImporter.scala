@@ -280,6 +280,25 @@ class SandboxProfileImporter extends ProfileImporter with AutowiringProfileServi
           case 9 => "9" // Unknown
           case _ => null
         }),
+        "special_exam_arrangements" -> (member.universityId.toLong % 100 match {
+          case 1 | 4 | 5 => "Y"
+          case n if n > 70 => "N"
+          case _ => null
+        }),
+        "special_exam_arrangements_room_code" -> (member.universityId.toLong % 100 match {
+          case 1 | 4 | 5 => "INDEPT"
+          case _ => null
+        }),
+        "special_exam_arrangements_room_name" -> (member.universityId.toLong % 100 match {
+          case 1 | 4 | 5 => "In Department - Reasonable Adjustment Room"
+          case _ => null
+        }),
+        "special_exam_arrangements_extra_time" -> (member.universityId.toLong % 100 match {
+          case 1 => "15"
+          case 4 => "20"
+          case 5 => "30"
+          case _ => null
+        }),
         "mst_type" -> "L",
         "sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
           char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
@@ -512,6 +531,11 @@ object ProfileImporter extends Logging {
 			prs.prs_udf1 as spr_tutor1,
 			spr.spr_ayrs as spr_academic_year_start,
 
+      spr.spr_udf4 as special_exam_arrangements,
+      spr.spr_udf5 as special_exam_arrangements_room_code,
+      rom.rom_name as special_exam_arrangements_room_name,
+      spr.spr_udf6 as special_exam_arrangements_extra_time,
+
 			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
@@ -583,6 +607,9 @@ object ProfileImporter extends Logging {
 
 			left outer join $sitsSchema.ins_prs prs -- Personnel
 				on spr.prs_code = prs.prs_code
+
+      left outer join $sitsSchema.ins_rom rom -- Room (for special exam arrangements)
+        on spr.spr_udf5 = rom.rom_code
 		 """
 
   def GetSingleStudentInformation: UniversityId = GetStudentInformation +
