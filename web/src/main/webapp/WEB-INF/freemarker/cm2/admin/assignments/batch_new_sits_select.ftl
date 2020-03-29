@@ -265,7 +265,7 @@ first page of the form to setup a bunch of assignments from SITS.
             </@bs3form.labelled_form_group>
             <@bs3form.labelled_form_group path="defaultCloseDate" labelText="Close date">
               <div class="input-group">
-                <input type="text" id="modal-close-date" name="closeDate" class="form-control date-time-minute-picke" value="${status.value}">
+                <input type="text" id="modal-close-date" name="closeDate" class="form-control date-time-minute-picker" value="${status.value}">
                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
               </div>
               <div class="help-block">

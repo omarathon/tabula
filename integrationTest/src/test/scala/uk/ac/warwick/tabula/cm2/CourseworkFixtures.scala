@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.{DateTimeConstants, LocalDate, LocalTime}
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
@@ -191,7 +191,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     while (!isWorkingDay(closeDate)) {
       closeDate = closeDate.plusDays(1)
     }
-    textField("closeDate").value = DateFormats.DatePickerFormatter.print(closeDate)
+    val closeDateTime = closeDate.toDateTime(new LocalTime(12, 0))
+    textField("closeDate").value = DateFormats.DateTimePickerFormatter.print(closeDateTime)
 
     singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
