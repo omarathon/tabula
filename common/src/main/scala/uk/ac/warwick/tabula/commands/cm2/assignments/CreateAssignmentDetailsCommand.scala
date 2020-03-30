@@ -167,7 +167,7 @@ trait ModifyAssignmentDetailsRequest extends SharedAssignmentDetailProperties wi
   var openDate: LocalDate = nextWorkingDay(LocalDate.now)(_.minusDays(1))
 
   // The default close day should always be a working day - if it isn't go forward in time until you find one
-  var closeDate: DateTime = nextWorkingDay(openDate.plusWeeks(2))(_.plusDays(1)).toDateTime(new LocalTime(12, 0))
+  var closeDate: DateTime = nextWorkingDay(openDate.plusWeeks(2))(_.plusDays(1)).toDateTime(Assignment.defaultCloseTime)
 
   var openEndedReminderDate: LocalDate = _
 
