@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import javax.validation.constraints.NotEmpty
 import org.hibernate.validator.constraints.Length
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -17,6 +18,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
+import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
 object CreateAssignmentDetailsCommand {
@@ -98,7 +100,7 @@ trait CreateAssignmentDetailsPrefill {
    */
   def copyNonspecificFrom(assignment: Assignment): Unit = {
     openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
-    closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+    closeDate = Option(assignment.closeDate).orNull
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
     if (assignment.workflowCategory.contains(WorkflowCategory.Reusable)) {
       reusableWorkflow = assignment.cm2MarkingWorkflow
@@ -125,8 +127,8 @@ trait AssignmentDetailsCopy {
     } else {
       assignment.openEndedReminderDate = null
 
-      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate)) {
-        assignment.closeDate = closeDate.toDateTime(Assignment.closeTime)
+      if (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate) || !closeDate.toLocalDate.isBefore(Assignment.closeTimeEnforcementDate)) {
+        assignment.closeDate = closeDate
       }
     }
 
@@ -153,9 +155,19 @@ trait ModifyAssignmentDetailsRequest extends SharedAssignmentDetailProperties wi
   @NotEmpty(message = "{NotEmpty.assignmentName}")
   var name: String = _
 
-  var openDate: LocalDate = LocalDate.now
+  protected lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
-  var closeDate: LocalDate = openDate.plusWeeks(2)
+  @tailrec
+  private def nextWorkingDay(date: LocalDate)(fn: (LocalDate) => LocalDate): LocalDate = {
+    if (!holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY) date
+    else nextWorkingDay(fn(date))(fn)
+  }
+
+  // The default open day should always be a working day - if it isn't go back in time until you find one
+  var openDate: LocalDate = nextWorkingDay(LocalDate.now)(_.minusDays(1))
+
+  // The default close day should always be a working day - if it isn't go forward in time until you find one
+  var closeDate: DateTime = nextWorkingDay(openDate.plusWeeks(2))(_.plusDays(1)).toDateTime(new LocalTime(12, 0))
 
   var openEndedReminderDate: LocalDate = _
 
@@ -196,8 +208,6 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
   self: ModifyAssignmentDetailsRequest
     with UserLookupComponent =>
 
-  private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
-
   // validation shared between add and edit
   def genericValidate(errors: Errors): Unit = {
     if (openDate == null) {
@@ -207,7 +217,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
     if (!openEnded) {
       if (closeDate == null) {
         errors.rejectValue("closeDate", "closeDate.missing")
-      } else if (openDate != null && openDate.isAfter(closeDate)) {
+      } else if (openDate != null && openDate.isAfter(closeDate.toLocalDate)) {
         errors.rejectValue("closeDate", "closeDate.early")
       }
     }
@@ -236,8 +246,13 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
   // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
   def validateCloseDate(errors: Errors): Unit = {
     if (closeDate != null && !openEnded) {
-      if (holidayDates.contains(closeDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+      if (holidayDates.contains(closeDate.toLocalDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
         errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+      }
+      if(!Assignment.isValidCloseTime(closeDate)) {
+        val formatter = DateTimeFormat.forPattern("ha")
+        val times: Array[AnyRef] = Array(formatter.print(Assignment.CloseTimeStart).toLowerCase, formatter.print(Assignment.CloseTimeEnd).toLowerCase)
+        errors.rejectValue("closeDate", "closeDate.invalidTime", times, "")
       }
     }
   }

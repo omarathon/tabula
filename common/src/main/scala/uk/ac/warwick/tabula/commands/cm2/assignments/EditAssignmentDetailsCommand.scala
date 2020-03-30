@@ -132,7 +132,7 @@ trait PopulateEditAssignmentDetailsRequest {
   openEnded = assignment.openEnded
   resitAssessment = assignment.resitAssessment
   openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
-  closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+  closeDate = Option(assignment.closeDate).orNull
   workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
   reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
   anonymity = assignment._anonymity
@@ -170,7 +170,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (openDate != null && (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate))) {
       validateOpenDate(errors)
     }
-    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate))) {
+    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate) || !closeDate.toLocalDate.isBefore(Assignment.closeTimeEnforcementDate))) {
       validateCloseDate(errors)
     }
 

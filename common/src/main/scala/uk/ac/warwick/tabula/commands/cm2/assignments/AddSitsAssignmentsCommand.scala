@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.validators.DateWithinYears
+import uk.ac.warwick.tabula.validators.{DateWithinYears, WithinYears}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionDeniedException}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -67,8 +67,9 @@ class SitsAssignmentItem(
   @DateWithinYears(maxPast = 3, maxFuture = 3)
   var openDate: LocalDate = _
 
-  @DateWithinYears(maxPast = 3, maxFuture = 3)
-  var closeDate: LocalDate = _
+  @WithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var closeDate: DateTime = _
 
   var openEnded: JBoolean = false
 
@@ -94,7 +95,7 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 
       assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
       if(!item.openEnded) {
-        assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+        assignment.closeDate = item.closeDate
       }
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
 
@@ -342,9 +343,9 @@ trait AddSitsAssignmentsCommandState {
   val defaultOpenDate: LocalDate = LocalDate.now()
 
   @DateWithinYears(maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   @BeanProperty
-  val defaultCloseDate: LocalDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+  val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH).toDateTime(new LocalTime(12, 0))
 
   @BeanProperty
   val defaultOpenEnded = false

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -122,7 +122,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
 
   @BeanProperty var name: String = null
   @BeanProperty var openDate: LocalDate = null
-  @BeanProperty var closeDate: LocalDate = null
+  @BeanProperty var closeDate: DateTime = null
   @BeanProperty var academicYear: AcademicYear = null
   @BeanProperty var feedbackTemplate: FeedbackTemplate = null
   @BeanProperty var markingWorkflow: CM2MarkingWorkflow = null
@@ -139,7 +139,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
   override def copyTo(state: A, errors: Errors): Unit = {
     if (Option(openDate).isEmpty && Option(closeDate).nonEmpty) {
       if (openEnded) openDate = LocalDate.now
-      else openDate = closeDate.minusWeeks(2)
+      else openDate = closeDate.minusWeeks(2).toLocalDate
     }
 
     Option(name).foreach(state.name = _)

@@ -67,19 +67,17 @@
   <fieldset id="close-dt" <#if openEnd == 'true'>disabled</#if>>
     <@bs3form.labelled_form_group path="closeDate" labelText="Closing date">
       <div class="input-group">
-        <@f.input type="text" path="closeDate" cssClass="form-control date-picker" placeholder="Pick the date" />
+        <@f.input type="text" path="closeDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       <div class="help-block">
-        The assignment will close at 12 noon on this date.
+        The assignment will close at this time.
         <#if showIntro("assignment-openclose-date-restrictions", "anywhere")>
           <#assign introText>
-            <p>University regulation 36 requires all assignments to close at 12 noon (mid-day) on a University working day.</p>
+            <p>All assignments are required to close between ${assignmentCloseTimes} on a University working day.</p>
 
             <p>Assignments open at 9am on the open date, which must also be a University working day.
               This makes it more likely that the first submission attempts will be made while staff members are available to deal with any issues.</p>
-
-            <p>Read <a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/forum?topic=8a1785d86dde8017016e26acf3e75bab" target="_blank">this Tabula noticeboard post</a> for more information.</p>
           </#assign>
           <a href="#"
              id="assignment-openclose-date-restrictions"

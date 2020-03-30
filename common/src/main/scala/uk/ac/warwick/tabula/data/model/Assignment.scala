@@ -40,8 +40,16 @@ object Assignment {
   final val MaximumFileAttachments = 50
 
   val openTime = new LocalTime(9, 0)
-  val closeTime = new LocalTime(12, 0)
+  val defaultCloseTime = new LocalTime(12, 0)
   val closeTimeEnforcementDate: LocalDate = new LocalDate(2019, DateTimeConstants.DECEMBER, 1)
+
+  final val CloseTimeStart = new LocalTime(10, 0)
+  final val CloseTimeEnd = new LocalTime(16, 0)
+  def isValidCloseTime(closeDate: DateTime): Boolean = {
+    val closeTime = closeDate.toLocalTime
+    !closeTime.isBefore(CloseTimeStart) && !closeTime.isAfter(CloseTimeEnd)
+  }
+
   val onTheDaySubmissionReminderTime = new LocalTime(8, 0)
   val minimumOnTheDaySubmissionReminderNotice: Duration = Duration.standardHours(4)
 
