@@ -105,7 +105,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     benchmark("ImportAssessment") {
       if (importEverything) {
         doAssignments()
-        logger.debug("Imported AssessmentComponents. Importing assessment groups...")
+        logger.debug("Imported AssessmentComponents. Importing exam schedule")
+        doExamSchedule()
+        logger.debug("Imported AssessmentComponentExamSchedules. Importing assessment groups...")
         doGroups()
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
@@ -246,6 +248,28 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
       }
     }
+  }
+
+  def doExamSchedule(): Unit = {
+    benchmark("Import exam schedule") { transactional() { // Do it all in one big tx
+      val existing = assessmentMembershipService.allScheduledExams(yearsToImport)
+
+      val seenIds =
+        assignmentImporter.getAllScheduledExams(yearsToImport)
+          .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
+          .map { schedule =>
+            val updated =
+              assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence)
+                .map(_.copyFrom(schedule))
+                .getOrElse(schedule)
+
+            assessmentMembershipService.save(updated)
+            updated.id
+          }
+
+      // Delete any ids that we haven't seen
+      existing.filterNot(e => seenIds.contains(e.id)).foreach(assessmentMembershipService.delete)
+    }}
   }
 
   /**
@@ -455,6 +479,7 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
 
       benchmark(s"ImportAssignmentsCommand for $currentYear") {
         doAssignments()
+        doExamSchedule()
         doGroups()
         doGroupMembers()
       }

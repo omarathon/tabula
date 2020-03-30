@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import javax.persistence.{EntityManager, Query}
+import javax.persistence.EntityManager
 import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.criterion.Order._
@@ -130,6 +130,16 @@ trait AssessmentMembershipDao {
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
+
+  def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule]
+
+  def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def save(schedule: AssessmentComponentExamSchedule): Unit
+
+  def delete(schedule: AssessmentComponentExamSchedule): Unit
 }
 
 @Repository
@@ -658,4 +668,34 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       columns(2).asInstanceOf[Int]
     ))
   }
+
+  override def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    session.newCriteria[AssessmentComponentExamSchedule]
+      .add(safeIn("academicYear", years))
+      .seq
+
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule] =
+    session.newCriteria[AssessmentComponentExamSchedule]
+      .add(is("examProfileCode", examProfileCode))
+      .add(is("slotId", slotId))
+      .add(is("sequence", sequence))
+      .seq.headOption
+
+  override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] = {
+    val c =
+      session.newCriteria[AssessmentComponentExamSchedule]
+        .add(is("moduleCode", component.moduleCode))
+        .add(is("assessmentComponentSequence", component.sequence))
+        .addOrder(asc("startTime"))
+
+    academicYear.foreach(year => c.add(is("academicYear", year)))
+
+    c.seq
+  }
+
+  override def save(schedule: AssessmentComponentExamSchedule): Unit =
+    session.saveOrUpdate(schedule)
+
+  override def delete(schedule: AssessmentComponentExamSchedule): Unit =
+    session.delete(schedule)
 }

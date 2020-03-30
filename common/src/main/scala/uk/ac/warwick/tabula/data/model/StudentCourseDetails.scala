@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{CascadeType, Entity, _}
 import org.hibernate.annotations.{Proxy, _}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, Duration, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object StudentCourseDetails {
   final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
@@ -254,6 +254,20 @@ trait BasicStudentCourseProperties {
 
   @Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
   var reasonForTransferCode: String = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Column(nullable = true, name = "special_exam_arrangements")
+  var specialExamArrangements: JBoolean = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
+  @Column(nullable = true, name = "special_exam_arrangements_location")
+  var specialExamArrangementsLocation: Location = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDurationAsString")
+  @Column(nullable = true, name = "special_exam_arrangements_extra_time")
+  var specialExamArrangementsExtraTime: Duration = _
 }
 
 trait StudentCourseProperties extends BasicStudentCourseProperties {

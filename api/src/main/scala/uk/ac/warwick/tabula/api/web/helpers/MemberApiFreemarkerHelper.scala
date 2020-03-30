@@ -198,4 +198,40 @@ object MemberApiFreemarkerHelper {
         Some("description" -> status.description)
       },
     ).flatten.toMap
+
+  def locationToJson(location: Location, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+    location match {
+      case NamedLocation(name) =>
+        Seq(
+          fieldRestriction.restrict("name") {
+            Some("name" -> name)
+          },
+        ).flatten.toMap
+
+      case MapLocation(name, locationId, syllabusPlusName) =>
+        Seq(
+          fieldRestriction.restrict("name") {
+            Some("name" -> name)
+          },
+          fieldRestriction.restrict("locationId") {
+            Some("locationId" -> locationId)
+          },
+          fieldRestriction.restrict("syllabusPlusName") {
+            syllabusPlusName.map("syllabusPlusName" -> _)
+          },
+        ).flatten.toMap
+
+      case AliasedMapLocation(name, MapLocation(_, locationId, syllabusPlusName)) =>
+        Seq(
+          fieldRestriction.restrict("name") {
+            Some("name" -> name)
+          },
+          fieldRestriction.restrict("locationId") {
+            Some("locationId" -> locationId)
+          },
+          fieldRestriction.restrict("syllabusPlusName") {
+            syllabusPlusName.map("syllabusPlusName" -> _)
+          },
+        ).flatten.toMap
+    }
 }

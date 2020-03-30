@@ -11,8 +11,10 @@ trait StudentUpstreamExamPapersToJsonConverter extends UpstreamAssessmentsAndExa
       "moduleCode" -> s"${moduleRegAndComponents.moduleRegistration.toSITSCode}",
       "examComponents" -> moduleRegAndComponents.components.map { component =>
         val ac = component.upstreamGroup.assessmentComponent
+        val academicYear = moduleRegAndComponents.moduleRegistration.academicYear
+        val scheduledExams = ac.scheduledExams(Some(academicYear))
         Map(
-          jsonExamPaperObject(ac),
+          jsonExamPaperObject(ac, scheduledExams),
           "type" -> ac.assessmentType
         )
       }
