@@ -72,7 +72,7 @@
       </div>
       <div class="help-block">
         The assignment will close at this time.
-        <#if !showIntro("assignment-openclose-date-restrictions", "anywhere")>
+        <#if showIntro("assignment-openclose-date-restrictions", "anywhere")>
           <#assign introText>
             <p>All assignments are required to close between ${assignmentCloseTimes} on a University working day.</p>
 

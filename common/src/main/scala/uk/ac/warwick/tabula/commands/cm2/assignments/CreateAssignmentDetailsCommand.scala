@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
+import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
 object CreateAssignmentDetailsCommand {
@@ -154,9 +155,19 @@ trait ModifyAssignmentDetailsRequest extends SharedAssignmentDetailProperties wi
   @NotEmpty(message = "{NotEmpty.assignmentName}")
   var name: String = _
 
-  var openDate: LocalDate = LocalDate.now
+  protected lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
-  var closeDate: DateTime = openDate.plusWeeks(2).toDateTime(new LocalTime(12, 0))
+  @tailrec
+  private def nextWorkingDay(date: LocalDate)(fn: (LocalDate) => LocalDate): LocalDate = {
+    if (!holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY) date
+    else nextWorkingDay(fn(date))(fn)
+  }
+
+  // The default open day should always be a working day - if it isn't go back in time until you find one
+  var openDate: LocalDate = nextWorkingDay(LocalDate.now)(_.minusDays(1))
+
+  // The default close day should always be a working day - if it isn't go forward in time until you find one
+  var closeDate: DateTime = nextWorkingDay(openDate.plusWeeks(2))(_.plusDays(1)).toDateTime(new LocalTime(12, 0))
 
   var openEndedReminderDate: LocalDate = _
 
@@ -196,8 +207,6 @@ trait CreateAssignmentDetailsRequest extends ModifyAssignmentDetailsRequest {
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
   self: ModifyAssignmentDetailsRequest
     with UserLookupComponent =>
-
-  private[this] lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
   // validation shared between add and edit
   def genericValidate(errors: Errors): Unit = {
