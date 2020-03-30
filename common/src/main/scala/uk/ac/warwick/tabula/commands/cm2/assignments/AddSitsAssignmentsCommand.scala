@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -68,6 +68,7 @@ class SitsAssignmentItem(
   var openDate: LocalDate = _
 
   @WithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   var closeDate: DateTime = _
 
   var openEnded: JBoolean = false
@@ -342,9 +343,9 @@ trait AddSitsAssignmentsCommandState {
   val defaultOpenDate: LocalDate = LocalDate.now()
 
   @DateWithinYears(maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   @BeanProperty
-  val defaultCloseDate: LocalDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+  val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH).toDateTime(new LocalTime(12, 0))
 
   @BeanProperty
   val defaultOpenEnded = false

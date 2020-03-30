@@ -142,6 +142,9 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
       datePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
 
       click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "8" }.head
+
+      eventually { click on datePicker.underlying.findElement(By.xpath(s"//span[@class='hour active']")) }
+      eventually { click on datePicker.underlying.findElement(By.xpath(s"//span[@class='minute active']")) }
     }
 
     Then("The close date should be the new value")
