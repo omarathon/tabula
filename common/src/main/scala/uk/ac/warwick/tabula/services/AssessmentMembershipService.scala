@@ -132,6 +132,16 @@ trait AssessmentMembershipService {
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
+
+  def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule]
+
+  def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def save(schedule: AssessmentComponentExamSchedule): Unit
+
+  def delete(schedule: AssessmentComponentExamSchedule): Unit
 }
 
 // all the small group sets and assignments in Tabula for a department with manually added students
@@ -335,8 +345,20 @@ class AssessmentMembershipServiceImpl
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo =
-    dao.departmentsManualMembership(department: Department, academicYear: AcademicYear)
+    dao.departmentsManualMembership(department, academicYear)
 
+  override def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    dao.allScheduledExams(years)
+
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule] =
+    dao.findScheduledExamBySlotSequence(examProfileCode, slotId, sequence)
+
+  override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    dao.findScheduledExams(component, academicYear)
+
+  override def save(schedule: AssessmentComponentExamSchedule): Unit = dao.save(schedule)
+
+  override def delete(schedule: AssessmentComponentExamSchedule): Unit = dao.delete(schedule)
 }
 
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
