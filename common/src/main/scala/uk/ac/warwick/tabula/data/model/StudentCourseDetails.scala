@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object StudentCourseDetails {
   final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
@@ -262,7 +262,7 @@ trait BasicStudentCourseProperties {
   @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
   @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
   @Column(nullable = true, name = "special_exam_arrangements_location")
-  var specialExamArrangementsLocation: NamedLocation = _
+  var specialExamArrangementsLocation: Location = _
 
   @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
   @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDurationAsString")

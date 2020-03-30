@@ -49,6 +49,17 @@ trait StudentCourseDetailsToJsonConverter
     int("courseYearLength", scd, "courseYearLength", fieldRestriction),
     boolean("mostSignificant", scd, "mostSignificant", fieldRestriction),
     str("reasonForTransferCode", scd, "reasonForTransferCode", fieldRestriction),
+    boolean("specialExamArrangements", scd, "specialExamArrangements", fieldRestriction),
+    fieldRestriction.nested("specialExamArrangementsLocation").flatMap { restriction =>
+      Option(scd.specialExamArrangementsLocation)
+        .filter(_ => canViewProperty(scd, "specialExamArrangementsLocation"))
+        .map(l => "specialExamArrangementsLocation" -> locationToJson(l, restriction))
+    },
+    fieldRestriction.restrict("specialExamArrangementsExtraTime") {
+      Option(scd.specialExamArrangementsExtraTime)
+        .filter(_ => canViewProperty(scd, "specialExamArrangementsExtraTime"))
+        .map(d => "specialExamArrangementsExtraTime" -> d.toString)
+    },
     fieldRestriction.nested("course").flatMap { restriction =>
       if (canViewProperty(scd, "course"))
         Some("course", courseToJson(scd.course, restriction))
