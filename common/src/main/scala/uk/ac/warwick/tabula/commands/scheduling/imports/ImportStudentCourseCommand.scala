@@ -114,7 +114,10 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
     "courseYearLength",
     "mostSignificant",
     "levelCode",
-    "reasonForTransferCode"
+    "reasonForTransferCode",
+    "specialExamArrangements",
+    "specialExamArrangementsLocation",
+    "specialExamArrangementsExtraTime"
   )
 
   private lazy val courseDepartment = courseRow.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
