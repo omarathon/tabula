@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.TopLevelUrlComponent
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 import uk.ac.warwick.tabula.data.model._
 
 trait UpstreamAssessmentsAndExamsToJsonConverter {
@@ -25,7 +25,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
       "examProfileCode" -> schedule.examProfileCode,
       "slotId" -> schedule.slotId,
       "sequence" -> schedule.sequence,
-      "startTime" -> schedule.startTime,
+      "startTime" -> DateFormats.IsoDateTime.print(schedule.startTime),
       "location" -> schedule.location.map {
         case NamedLocation(name) => Map("name" -> name)
         case MapLocation(name, locationId, syllabusPlusName) =>
