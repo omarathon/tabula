@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
-@RequestMapping(Array("/v1/academicyear"))
+@RequestMapping(Array("/v1/academicYear"))
 class AcademicYearController extends ApiController {
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def get(): Mav =
