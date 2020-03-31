@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.{DateTimeConstants, LocalDate, LocalTime}
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
@@ -175,23 +175,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     }
 
     textField("name").value = assignmentName
-
-    // Roll the dates to working days
-    val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
-    def isWorkingDay(date: LocalDate): Boolean =
-      !holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY
-
-    var openDate: LocalDate = LocalDate.now().minusDays(1)
-    while (!isWorkingDay(openDate)) {
-      openDate = openDate.minusDays(1)
-    }
-    textField("openDate").value = DateFormats.DatePickerFormatter.print(openDate)
-
-    var closeDate: LocalDate = openDate.plusWeeks(2)
-    while (!isWorkingDay(closeDate)) {
-      closeDate = closeDate.plusDays(1)
-    }
-    textField("closeDate").value = DateFormats.DatePickerFormatter.print(closeDate)
 
     singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 

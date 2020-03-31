@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
-import org.joda.time.Duration
+import org.joda.time.{DateTimeConstants, Duration, LocalDate, LocalTime}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -16,9 +16,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, ExamScheduleQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 
 import scala.concurrent.Await
@@ -46,6 +47,8 @@ trait AssignmentImporter {
   def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent]
 
   def getAllGradeBoundaries: Seq[GradeBoundary]
+
+  def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -57,12 +60,14 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
   var gradeBoundaryQuery: GradeBoundaryQuery = _
+  var examScheduleQuery: ExamScheduleQuery = _
   var jdbc: NamedParameterJdbcTemplate = _
 
   override def afterPropertiesSet(): Unit = {
     assessmentComponentQuery = new AssessmentComponentQuery(sitsDataSource)
     upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
     gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
+    examScheduleQuery = new ExamScheduleQuery(sitsDataSource)
     jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
   }
 
@@ -132,6 +137,17 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     else string
 
   def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
+
+  private def publishedExamProfilesArray(): JList[String] =
+    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+      .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
+      .map(_.code)
+      .asJava: JList[String]
+  override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    examScheduleQuery.executeByNamedParam(JMap(
+      "academic_year_code" -> yearsToImportArray(yearsToImport),
+      "published_exam_profiles" -> publishedExamProfilesArray()
+    )).asScala.toSeq
 }
 
 @Profile(Array("sandbox"))
@@ -269,6 +285,30 @@ class SandboxAssignmentImporter extends AssignmentImporter {
     }
 
   def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+
+  override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    (for {
+      (_, d) <- SandboxData.Departments.toSeq
+      route <- d.routes.values.toSeq
+      moduleCode <- route.moduleCodes
+      year <- yearsToImport
+    } yield (moduleCode, year)).zipWithIndex.map { case ((moduleCode, year), index) =>
+      val a = new AssessmentComponentExamSchedule
+      a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      a.assessmentComponentSequence = "E01"
+      a.examProfileCode = s"EXSUM${year.endYear % 100}"
+      a.slotId = f"${(index / 5) + 1}%03d"
+      a.sequence = f"${(index % 5) + 1}%03d" // Five exams per slot
+      a.academicYear = year
+      a.startTime =
+        new LocalDate(year.endYear, DateTimeConstants.JUNE, 1)
+          .plusDays(index / 10)
+          .toDateTime(if (index % 10 < 5) new LocalTime(9, 30) else new LocalTime(14, 0))
+      a.examPaperCode = s"${moduleCode.toUpperCase}0"
+      a.examPaperSection = Some("n/a")
+      a.location = Some(NamedLocation("Panorama Room"))
+      a
+    }
 }
 
 
@@ -593,6 +633,32 @@ object AssignmentImporter {
     where mkc_proc = 'SAS' and mkc_minm is not null and mkc_maxm is not null
   """
 
+  def GetExamSchedule: String =
+    s"""
+       |select
+       |    wsl.wsl_wspc, -- Exam profile code,
+       |    wsl.wsl_seqn, -- WASP Slot number
+       |    wsl.wsl_date, -- Date of the exam
+       |    wsl.wsl_begt, -- Start time of the exam (OE will likely ignore this)
+       |    wsm.wsm_seqn, -- WASP Assessment sequence (exam within slot)
+       |    wsm.wsm_ayrc, -- Academic year code (resits???)
+       |    wsm.wsm_modc, -- Module code
+       |    wsm.wsm_mapc, -- MAP code
+       |    wsm.wsm_mabs, -- MAB sequence
+       |    wsm.wsm_prcc, -- Personnel code (invigilator? module leader?)
+       |    wsm.wsm_apac, -- Paper code
+       |    wsm.wsm_advc, -- Paper division (section) code
+       |    wsm.wsm_romc, -- Room code
+       |    rom.rom_name  -- Room name
+       |from $sitsSchema.cam_wsl wsl -- WASP Exam Scheduling Slot
+       |    join $sitsSchema.cam_wsm wsm -- WASP Module Assessment
+       |        on wsl.wsl_wspc = wsm.wsm_wspc and wsl.wsl_seqn = wsm.wsm_wsls
+       |    left outer join $sitsSchema.ins_rom rom -- Room
+       |        on wsm.wsm_romc = rom.rom_code
+       |where wsl.wsl_wspc in (:published_exam_profiles)
+       |  and wsm.wsm_ayrc in (:academic_year_code)
+       |""".stripMargin
+
   class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     compile()
@@ -653,6 +719,33 @@ object AssignmentImporter {
         rs.getInt("maximum_mark"),
         rs.getString("signal_status")
       )
+    }
+  }
+
+  class ExamScheduleQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamSchedule](ds, GetExamSchedule) {
+    declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
+    declareParameter(new SqlParameter("published_exam_profiles", Types.VARCHAR))
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponentExamSchedule = {
+      val a = new AssessmentComponentExamSchedule
+      a.moduleCode = rs.getString("wsm_mapc") // Use MAP code to match AssessmentComponent
+      a.assessmentComponentSequence = rs.getString("wsm_mabs")
+      a.examProfileCode = rs.getString("wsl_wspc")
+      a.slotId = rs.getString("wsl_seqn")
+      a.sequence = rs.getString("wsm_seqn")
+      a.academicYear = AcademicYear.parse(rs.getString("wsm_ayrc"))
+      a.startTime =
+        rs.getDate("wsl_date").toLocalDate
+          .atTime(rs.getTimestamp("wsl_begt").toLocalDateTime.toLocalTime)
+          .asJoda.toDateTime
+      a.examPaperCode = rs.getString("wsm_apac")
+      a.examPaperSection = rs.getString("wsm_advc").maybeText
+      a.location =
+        rs.getString("rom_name").maybeText
+          .orElse(rs.getString("wsm_romc").maybeText)
+          .map(NamedLocation)
+      a
     }
   }
 

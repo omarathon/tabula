@@ -47,7 +47,11 @@ class SitsStudentRowTest extends TestBase {
       "end_date" -> new LocalDate(2018, DateTimeConstants.JUNE, 30).toDateTimeAtStartOfDay,
       "expected_end_date" -> new LocalDate(2018, DateTimeConstants.JUNE, 30).toDateTimeAtStartOfDay,
       "most_signif_indicator" -> null,
-      "funding_source" -> null
+      "funding_source" -> null,
+      "special_exam_arrangements" -> null,
+      "special_exam_arrangements_room_code" -> null,
+      "special_exam_arrangements_room_name" -> null,
+      "special_exam_arrangements_extra_time" -> null,
     )
 
     val row1 = SitsStudentRow(new MapResultSet(baseProperties ++ course1Properties ++ Map(
@@ -98,7 +102,11 @@ class SitsStudentRowTest extends TestBase {
       "end_date" -> null,
       "expected_end_date" -> new LocalDate(2022, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay,
       "most_signif_indicator" -> "Y",
-      "funding_source" -> null
+      "funding_source" -> null,
+      "special_exam_arrangements" -> "Y",
+      "special_exam_arrangements_room_code" -> "INDEPT",
+      "special_exam_arrangements_room_name" -> "In department",
+      "special_exam_arrangements_extra_time" -> "30",
     )
 
     val row3 = SitsStudentRow(new MapResultSet(baseProperties ++ course2Properties ++ Map(
