@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(Array("/v1/academicyear"))
 class AcademicYearController extends ApiController {
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def list(): Mav =
+  def get(): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
