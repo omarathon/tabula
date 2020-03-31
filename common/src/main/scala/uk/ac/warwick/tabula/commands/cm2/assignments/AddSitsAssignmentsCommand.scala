@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import org.joda.time.format.{DateTimeFormat => JodaDateTimeFormat}
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
@@ -259,8 +260,13 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
       }
 
       if (item.closeDate != null && !item.openEnded) {
-        if (holidayDates.contains(item.closeDate) || item.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+        if (holidayDates.contains(item.closeDate.toLocalDate) || item.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
           errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+        }
+        if(!Assignment.isValidCloseTime(item.closeDate)) {
+          val formatter = JodaDateTimeFormat.forPattern("ha")
+          val times: Array[AnyRef] = Array(formatter.print(Assignment.CloseTimeStart).toLowerCase, formatter.print(Assignment.CloseTimeEnd).toLowerCase)
+          errors.rejectValue("closeDate", "closeDate.invalidTime", times, "")
         }
       }
 
@@ -342,7 +348,7 @@ trait AddSitsAssignmentsCommandState {
   @BeanProperty
   val defaultOpenDate: LocalDate = LocalDate.now()
 
-  @DateWithinYears(maxFuture = 3)
+  @WithinYears(maxPast = 3, maxFuture = 3)
   @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   @BeanProperty
   val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH).toDateTime(new LocalTime(12, 0))
