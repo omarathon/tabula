@@ -25,7 +25,7 @@
       <excluded-url-pattern>/v1/department/*/modules</excluded-url-pattern>
       <excluded-url-pattern>/v1/module/*/occurrences/*</excluded-url-pattern>
       <excluded-url-pattern>/v1/relationships</excluded-url-pattern>
-      <excluded-url-pattern>/v1/academicyear</excluded-url-pattern>
+      <excluded-url-pattern>/v1/academicYear</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates.*</excluded-url-pattern>
       <excluded-url-pattern>/v1/termdates/*</excluded-url-pattern>
