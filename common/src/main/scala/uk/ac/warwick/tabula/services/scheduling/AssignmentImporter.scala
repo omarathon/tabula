@@ -292,7 +292,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       year <- yearsToImport
-    } yield (moduleCode, year)).zipWithIndex.map { case ((moduleCode, year), index) =>
+    } yield (moduleCode, year)).distinct.zipWithIndex.map { case ((moduleCode, year), index) =>
       val a = new AssessmentComponentExamSchedule
       a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
       a.assessmentComponentSequence = "E01"

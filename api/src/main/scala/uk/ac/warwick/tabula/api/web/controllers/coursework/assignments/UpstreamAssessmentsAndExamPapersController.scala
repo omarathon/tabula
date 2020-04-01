@@ -26,10 +26,13 @@ class UpstreamAssessmentsAndExamPapersController
   def list(
     @ModelAttribute("getUpstreamAssessmentsCommand") command: ViewViewableCommand[Department],
     @RequestParam(required = false) assessmentType: AssessmentType,
-    @RequestParam(defaultValue = "false") withExamPapersOnly: Boolean): Mav = {
-
+    @RequestParam(defaultValue = "false") withExamPapersOnly: Boolean,
+    @RequestParam(required = false) examProfileCode: String,
+  ): Mav = {
     val department = command.apply()
-      val assessmentComponents = assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = true, Option(assessmentType), withExamPapersOnly)
+      val assessmentComponents =
+        assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = true, Option(assessmentType), withExamPapersOnly)
+          .filter(c => examProfileCode.maybeText.isEmpty || c.scheduledExams(None).exists(s => examProfileCode.maybeText.contains(s.examProfileCode)))
 
       Mav(new JSONView(Map(
         "success" -> true,
