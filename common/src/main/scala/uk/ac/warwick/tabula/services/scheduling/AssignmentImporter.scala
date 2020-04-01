@@ -138,11 +138,19 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
 
   def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
 
+  private[this] lazy val extraExamProfileSchedulesToImport: Seq[String] =
+    Wire.property("${assignmentImporter.extraExamProfileSchedulesToImport}")
+      .split(',')
+      .filter(_.hasText)
+      .map(_.trim())
+
   private def publishedExamProfilesArray(): JList[String] =
     Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
       .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
       .map(_.code)
+      .concat(extraExamProfileSchedulesToImport)
       .asJava: JList[String]
+
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     examScheduleQuery.executeByNamedParam(JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
