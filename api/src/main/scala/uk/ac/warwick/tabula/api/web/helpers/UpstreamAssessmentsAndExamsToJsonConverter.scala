@@ -38,9 +38,14 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
   def jsonUpstreamAssessmentObject(assessmentComponent: AssessmentComponent): Map[String, Any] =
     Map(
       "id" -> assessmentComponent.id,
+      "name" -> assessmentComponent.name,
+      "moduleCode" -> assessmentComponent.moduleCode,
       "cats" -> assessmentComponent.cats,
       "sequence" -> assessmentComponent.sequence,
       "type" -> assessmentComponent.assessmentType,
+      "assessmentGroup" -> assessmentComponent.assessmentGroup,
+      "marksCode" -> assessmentComponent.marksCode,
+      "weighting" -> assessmentComponent.weighting,
       "module" -> Map(
         "code" -> assessmentComponent.module.code.toUpperCase,
         "name" -> assessmentComponent.module.name,
