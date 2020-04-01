@@ -139,7 +139,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
 
   private[this] lazy val extraExamProfileSchedulesToImport: Seq[String] =
-    Wire.property("${departmentMandatoryPermissionsWarning.mitCircsDepartmentCodesToIgnore}")
+    Wire.property("${assignmentImporter.extraExamProfileSchedulesToImport}")
       .split(',')
       .filter(_.hasText)
       .map(_.trim())
