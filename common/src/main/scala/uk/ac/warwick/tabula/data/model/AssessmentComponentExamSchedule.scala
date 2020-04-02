@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{Basic, Column, Entity}
-import org.hibernate.annotations.{Proxy, Type}
+import javax.persistence.CascadeType.ALL
+import javax.persistence.{Basic, Column, Entity, FetchType, JoinColumn, OneToMany, OrderBy}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
@@ -10,11 +12,12 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
 @Proxy
 class AssessmentComponentExamSchedule extends GeneratedId with ToString {
 
-  def this(examProfileCode: String, slotId: String, sequence: String) {
+  def this(examProfileCode: String, slotId: String, sequence: String, locationSequence: String) {
     this()
     this.examProfileCode = examProfileCode
     this.slotId = slotId
     this.sequence = sequence
+    this.locationSequence = locationSequence
   }
 
   // moduleCode and assessmentComponentSequence are a many-to-one mapping to an AssessmentComponent
@@ -24,7 +27,7 @@ class AssessmentComponentExamSchedule extends GeneratedId with ToString {
   @Column(name = "assessmentcomponent_sequence", nullable = false)
   var assessmentComponentSequence: String = _
 
-  // A schedule is unique on examProfileCode, slotId and sequence
+  // A schedule is unique on examProfileCode, slotId, sequence and locationSequence
   @Column(name = "profile_code", nullable = false)
   var examProfileCode: String = _
 
@@ -33,6 +36,9 @@ class AssessmentComponentExamSchedule extends GeneratedId with ToString {
 
   @Column(name = "sequence", nullable = false)
   var sequence: String = _
+
+  @Column(name = "location_sequence", nullable = false)
+  var locationSequence: String = _
 
   // This is the academic year of the users on the assessment, used for linking to UpstreamAssessmentGroup (along with moduleCode and assessmentComponentSequence)
   @Basic
@@ -57,9 +63,15 @@ class AssessmentComponentExamSchedule extends GeneratedId with ToString {
   def location: Option[Location] = Option(_location)
   def location_=(location: Option[Location]): Unit = _location = location.orNull
 
+  @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
+  @JoinColumn(name = "schedule_id")
+  @BatchSize(size = 200)
+  @OrderBy("seat_number, university_id")
+  var students: JList[AssessmentComponentExamScheduleStudent] = JArrayList()
+
   def copyFrom(other: AssessmentComponentExamSchedule): AssessmentComponentExamSchedule = {
     require(other.id == null, "Can only copy from transient instances")
-    require(other.examProfileCode == examProfileCode && other.slotId == slotId && other.sequence == sequence, "Must be for the same exam profile, slot and sequence in slot")
+    require(other.examProfileCode == examProfileCode && other.slotId == slotId && other.sequence == sequence && other.locationSequence == locationSequence, "Must be for the same exam profile, slot, sequence in slot and location sequence")
     this.moduleCode = other.moduleCode
     this.assessmentComponentSequence = other.assessmentComponentSequence
     this.academicYear = other.academicYear
@@ -77,6 +89,7 @@ class AssessmentComponentExamSchedule extends GeneratedId with ToString {
     "examProfileCode" -> examProfileCode,
     "slotId" -> slotId,
     "sequence" -> sequence,
+    "locationSequence" -> locationSequence,
     "academicYear" -> academicYear,
     "startTime" -> startTime,
     "examPaperCode" -> examPaperCode,

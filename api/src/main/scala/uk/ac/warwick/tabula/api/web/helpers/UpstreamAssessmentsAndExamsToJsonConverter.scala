@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
+
+import scala.jdk.CollectionConverters._
 
 trait UpstreamAssessmentsAndExamsToJsonConverter {
   self: TopLevelUrlComponent =>
@@ -25,6 +28,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
       "examProfileCode" -> schedule.examProfileCode,
       "slotId" -> schedule.slotId,
       "sequence" -> schedule.sequence,
+      "locationSequence" -> schedule.locationSequence,
       "startTime" -> DateFormats.IsoDateTime.print(schedule.startTime),
       "location" -> schedule.location.map {
         case NamedLocation(name) => Map("name" -> name)
@@ -33,14 +37,27 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
         case AliasedMapLocation(name, MapLocation(_, locationId, syllabusPlusName)) =>
           Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
       }.orNull,
+      "students" -> schedule.students.asScala.map { student =>
+        Map(
+          "seatNumber" -> JInteger(student.seatNumber),
+          "universityId" -> student.universityId,
+          "sprCode" -> student.sprCode,
+          "occurrence" -> student.occurrence,
+        )
+      }
     )
 
   def jsonUpstreamAssessmentObject(assessmentComponent: AssessmentComponent): Map[String, Any] =
     Map(
       "id" -> assessmentComponent.id,
+      "name" -> assessmentComponent.name,
+      "moduleCode" -> assessmentComponent.moduleCode,
       "cats" -> assessmentComponent.cats,
       "sequence" -> assessmentComponent.sequence,
       "type" -> assessmentComponent.assessmentType,
+      "assessmentGroup" -> assessmentComponent.assessmentGroup,
+      "marksCode" -> assessmentComponent.marksCode,
+      "weighting" -> assessmentComponent.weighting,
       "module" -> Map(
         "code" -> assessmentComponent.module.code.toUpperCase,
         "name" -> assessmentComponent.module.name,
