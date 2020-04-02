@@ -325,7 +325,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       a.startTime =
         new LocalDate(year.endYear, DateTimeConstants.JUNE, 1)
           .plusDays(index / 10)
-          .toDateTime(if (index % 10 < 5) new LocalTime(9, 30) else new LocalTime(14, 0))
+          .toDateTime(if (index % 10 < 5) new LocalTime(9, 0) else new LocalTime(14, 0))
       a.examPaperCode = s"${moduleCode.toUpperCase}0"
       a.examPaperSection = Some("n/a")
       a.location = Some(NamedLocation("Panorama Room"))
