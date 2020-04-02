@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import javax.validation.constraints.NotEmpty
 import org.hibernate.validator.constraints.Length
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
