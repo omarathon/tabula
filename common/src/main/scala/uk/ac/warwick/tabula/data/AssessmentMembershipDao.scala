@@ -133,7 +133,7 @@ trait AssessmentMembershipDao {
 
   def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
-  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule]
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
 
   def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
@@ -674,11 +674,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(safeIn("academicYear", years))
       .seq
 
-  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule] =
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
     session.newCriteria[AssessmentComponentExamSchedule]
       .add(is("examProfileCode", examProfileCode))
       .add(is("slotId", slotId))
       .add(is("sequence", sequence))
+      .add(is("locationSequence", locationSequence))
       .seq.headOption
 
   override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] = {

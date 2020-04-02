@@ -15,11 +15,12 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, ExamScheduleQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 
 import scala.concurrent.Await
@@ -49,6 +50,8 @@ trait AssignmentImporter {
   def getAllGradeBoundaries: Seq[GradeBoundary]
 
   def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -61,6 +64,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   var assessmentComponentQuery: AssessmentComponentQuery = _
   var gradeBoundaryQuery: GradeBoundaryQuery = _
   var examScheduleQuery: ExamScheduleQuery = _
+  var examScheduleStudentsQuery: ExamScheduleStudentsQuery = _
   var jdbc: NamedParameterJdbcTemplate = _
 
   override def afterPropertiesSet(): Unit = {
@@ -68,6 +72,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
     gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
     examScheduleQuery = new ExamScheduleQuery(sitsDataSource)
+    examScheduleStudentsQuery = new ExamScheduleStudentsQuery(sitsDataSource)
     jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
   }
 
@@ -155,6 +160,14 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     examScheduleQuery.executeByNamedParam(JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
       "published_exam_profiles" -> publishedExamProfilesArray()
+    )).asScala.toSeq
+
+  override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
+    examScheduleStudentsQuery.executeByNamedParam(JMap(
+      "exam_profile_code" -> schedule.examProfileCode,
+      "slot_id" -> schedule.slotId,
+      "sequence" -> schedule.sequence,
+      "location_sequence" -> schedule.locationSequence
     )).asScala.toSeq
 }
 
@@ -307,6 +320,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       a.examProfileCode = s"EXSUM${year.endYear % 100}"
       a.slotId = f"${(index / 5) + 1}%03d"
       a.sequence = f"${(index % 5) + 1}%03d" // Five exams per slot
+      a.locationSequence = "001"
       a.academicYear = year
       a.startTime =
         new LocalDate(year.endYear, DateTimeConstants.JUNE, 1)
@@ -317,6 +331,24 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       a.location = Some(NamedLocation("Panorama Room"))
       a
     }
+
+  override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] = {
+    var students: Seq[AssessmentComponentExamScheduleStudent] = Seq()
+
+    allMembers(Seq(schedule.academicYear)) { modReg =>
+      if (modReg.moduleCode == schedule.moduleCode && modReg.sequence == schedule.assessmentComponentSequence) {
+        val student = new AssessmentComponentExamScheduleStudent
+        student.seatNumber = Some(students.size + 1)
+        student.universityId = modReg.universityId
+        student.sprCode = modReg.sprCode
+        student.occurrence = modReg.occurrence
+
+        students = students :+ student
+      }
+    }
+
+    students
+  }
 }
 
 
@@ -649,6 +681,7 @@ object AssignmentImporter {
        |    wsl.wsl_date, -- Date of the exam
        |    wsl.wsl_begt, -- Start time of the exam (OE will likely ignore this)
        |    wsm.wsm_seqn, -- WASP Assessment sequence (exam within slot)
+       |    wsm.wsm_rseq, -- Assessment room sequence (multiple rooms for same exam)
        |    wsm.wsm_ayrc, -- Academic year code (resits???)
        |    wsm.wsm_modc, -- Module code
        |    wsm.wsm_mapc, -- MAP code
@@ -665,6 +698,25 @@ object AssignmentImporter {
        |        on wsm.wsm_romc = rom.rom_code
        |where wsl.wsl_wspc in (:published_exam_profiles)
        |  and wsm.wsm_ayrc in (:academic_year_code)
+       |""".stripMargin
+
+  def GetExamScheduleStudents: String =
+    s"""
+       |select
+       |    wss.wss_seat, -- Seat number
+       |    wss.wss_stuc, -- University ID
+       |    wss.wss_sprc, -- SPR code
+       |    wss.wss_mavo  -- MAV occurrence
+       |from $sitsSchema.cam_wsl wsl -- WASP Exam Scheduling Slot
+       |    join $sitsSchema.cam_wsm wsm -- WASP Module Assessment
+       |        on wsl.wsl_wspc = wsm.wsm_wspc and wsl.wsl_seqn = wsm.wsm_wsls
+       |    join $sitsSchema.cam_wss wss
+       |        on wsl.wsl_wspc = wss.wss_wspc and wsl.wsl_seqn = wss.wss_wsls and wsm.wsm_seqn = wss.wss_wsms and wsm.wsm_rseq = wss.wss_rseq
+       |where wsl.wsl_wspc = :exam_profile_code
+       |  and wsl.wsl_seqn = :slot_id
+       |  and wsm.wsm_seqn = :sequence
+       |  and wsm.wsm_rseq = :location_sequence
+       |order by wss.wss_seat, wss.wss_stuc
        |""".stripMargin
 
   class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
@@ -742,6 +794,7 @@ object AssignmentImporter {
       a.examProfileCode = rs.getString("wsl_wspc")
       a.slotId = rs.getString("wsl_seqn")
       a.sequence = rs.getString("wsm_seqn")
+      a.locationSequence = rs.getString("wsm_rseq")
       a.academicYear = AcademicYear.parse(rs.getString("wsm_ayrc"))
       a.startTime =
         rs.getDate("wsl_date").toLocalDate
@@ -754,6 +807,23 @@ object AssignmentImporter {
           .orElse(rs.getString("wsm_romc").maybeText)
           .map(NamedLocation)
       a
+    }
+  }
+
+  class ExamScheduleStudentsQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamScheduleStudent](ds, GetExamScheduleStudents) {
+    declareParameter(new SqlParameter("exam_profile_code", Types.VARCHAR))
+    declareParameter(new SqlParameter("slot_id", Types.VARCHAR))
+    declareParameter(new SqlParameter("sequence", Types.VARCHAR))
+    declareParameter(new SqlParameter("location_sequence", Types.VARCHAR))
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponentExamScheduleStudent = {
+      val s = new AssessmentComponentExamScheduleStudent
+      s.seatNumber = ImportMemberHelpers.getInteger(rs, "wss_seat")
+      s.universityId = rs.getString("wss_stuc")
+      s.sprCode = rs.getString("wss_sprc")
+      s.occurrence = rs.getString("wss_mavo")
+      s
     }
   }
 

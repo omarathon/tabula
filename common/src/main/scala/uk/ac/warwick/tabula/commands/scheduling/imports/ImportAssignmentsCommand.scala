@@ -259,11 +259,31 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
           .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
           .map { schedule =>
             val updated =
-              assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence)
+              assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence, schedule.locationSequence)
                 .map(_.copyFrom(schedule))
                 .getOrElse(schedule)
 
+            // Make sure any transient instances are saved before we try and add students to them
             assessmentMembershipService.save(updated)
+
+            val existingStudents = updated.students.asScala.toSeq
+            val students = assignmentImporter.getScheduledExamStudents(updated)
+
+            existingStudents.filterNot(s => students.exists(_.universityId == s.universityId))
+              .foreach(updated.students.remove)
+
+            students.foreach { s =>
+              existingStudents.find(e => s.universityId == e.universityId) match {
+                case Some(existing) if existing.sameDataAs(s) => // do nothing
+                case Some(existing) => existing.copyFrom(s)
+                case _ =>
+                  s.schedule = updated
+                  updated.students.add(s)
+              }
+            }
+
+            assessmentMembershipService.save(updated)
+
             updated.id
           }
 
