@@ -47,6 +47,7 @@ trait StudentExamPapersPermissions extends RequiresPermissionsChecking with Perm
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Profiles.Read.ModuleRegistration.Core, studentMember)
+    p.PermissionCheck(Profiles.Read.StudentCourseDetails.SpecialExamArrangements, studentMember)
   }
 }
 

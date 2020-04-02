@@ -43,6 +43,15 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
           "universityId" -> student.universityId,
           "sprCode" -> student.sprCode,
           "occurrence" -> student.occurrence,
+          "specialExamArrangements" -> student.studentCourseDetails.flatMap(scd => Option(scd.specialExamArrangements)).orNull,
+          "specialExamArrangementsLocation" -> student.studentCourseDetails.flatMap(scd => Option(scd.specialExamArrangementsLocation)).map {
+            case NamedLocation(name) => Map("name" -> name)
+            case MapLocation(name, locationId, syllabusPlusName) =>
+              Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
+            case AliasedMapLocation(name, MapLocation(_, locationId, syllabusPlusName)) =>
+              Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
+          }.orNull,
+          "specialExamArrangementsExtraTime" -> student.studentCourseDetails.flatMap(scd => Option(scd.specialExamArrangementsExtraTime)).map(_.toString).orNull,
         )
       }
     )

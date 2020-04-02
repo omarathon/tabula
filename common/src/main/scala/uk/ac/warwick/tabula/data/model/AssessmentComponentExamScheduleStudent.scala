@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.Proxy
+import org.hibernate.annotations.{Proxy, Where}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 
@@ -28,6 +28,12 @@ class AssessmentComponentExamScheduleStudent extends GeneratedId with ToString {
 
   @Column(name = "spr_code", nullable = false)
   var sprCode: String = _
+
+  @ManyToOne(fetch = FetchType.EAGER, optional = true)
+  @JoinColumn(name = "spr_code", referencedColumnName = "sprcode", insertable = false, updatable = false)
+  @Where(clause = "mostSignificant = true")
+  private val _studentCourseDetails: StudentCourseDetails = null
+  def studentCourseDetails: Option[StudentCourseDetails] = Option(_studentCourseDetails)
 
   // SITS MAV occurrence
   @Column(name = "occurrence", nullable = false)
