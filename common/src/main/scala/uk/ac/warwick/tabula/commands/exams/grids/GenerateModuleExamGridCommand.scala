@@ -52,18 +52,20 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
   self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): ModuleExamGridResult = {
+    val isHistoricalGrid = academicYear != AcademicYear.now()
     val result: Seq[(AssessmentIdentity, ModuleGridDetailRecord)] = benchmarkTask("GenerateMRComponents") {
       moduleRegistrationService.getByModuleAndYear(module, academicYear)
-        .filter(mr => mr.studentCourseDetails == mr.studentCourseDetails.student.mostSignificantCourse)
+        .groupBy(_.studentCourseDetails.student)
+        .view.mapValues(_.sortBy(_.scjSequence).reverse).toMap
+        // multiple registrations here should only be the result of a course transfer - pick the highest scj
+        .flatMap { case (_, registrations) => registrations.headOption }.toSeq
         .flatMap { mr =>
           val student: StudentMember = mr.studentCourseDetails.student
           val componentInfo: Seq[(AssessmentIdentity, AssessmentComponentInfo)] = mr.upstreamAssessmentGroupMembers.flatMap { uagm =>
             val code = s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}"
-            assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup).filter(_.inUse).map { comp =>
-              AssessmentIdentity(
-                code = code,
-                name = comp.name
-              ) -> AssessmentComponentInfo(
+            assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
+              .filter(ac => isHistoricalGrid || ac.inUse) // TAB-8263 only filter 'not in use' components for this years grids
+              .map { comp => AssessmentIdentity(code = code, name = comp.name) -> AssessmentComponentInfo(
                 mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
                 grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
                 isActualMark = uagm.agreedMark.isEmpty,
@@ -74,8 +76,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
                   isActualResitMark = uagm.resitAgreedMark.isEmpty,
                   isActualResitGrade = uagm.resitAgreedGrade.isEmpty
                 )
-              )
-            }
+              )}
           }.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }
 
           componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
