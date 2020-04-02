@@ -33,7 +33,8 @@ class StudentCourseDetails
     with HibernateVersioned
     with CanBeStale
     with PermissionsTarget
-    with Ordered[StudentCourseDetails] {
+    with Ordered[StudentCourseDetails]
+    with Serializable {
 
   @transient
   var relationshipService: RelationshipService = Wire.auto[RelationshipService]
