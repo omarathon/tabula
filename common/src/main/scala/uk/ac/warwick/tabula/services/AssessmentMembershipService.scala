@@ -135,7 +135,7 @@ trait AssessmentMembershipService {
 
   def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
-  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule]
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
 
   def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
@@ -350,8 +350,8 @@ class AssessmentMembershipServiceImpl
   override def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     dao.allScheduledExams(years)
 
-  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String): Option[AssessmentComponentExamSchedule] =
-    dao.findScheduledExamBySlotSequence(examProfileCode, slotId, sequence)
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
+    dao.findScheduledExamBySlotSequence(examProfileCode, slotId, sequence, locationSequence)
 
   override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     dao.findScheduledExams(component, academicYear)

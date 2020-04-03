@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
@@ -55,6 +56,9 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
 
   @Column(name = "scjCode")
   var _scjCode: String = _
+
+  // get the integer part of the SCJ code so we can sort registrations to the same module by it
+  def scjSequence: Int = _scjCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _

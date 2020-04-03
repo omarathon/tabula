@@ -1,10 +1,18 @@
 package uk.ac.warwick.tabula
 
+import org.joda.time.DateTime
+
 //scalastyle:off magic.number
 class AcademicYearTest extends TestBase {
   @Test def year: Unit = {
     AcademicYear.forDate(dateTime(2010, 11)).startYear should be(2010)
     AcademicYear.forDate(dateTime(2010, 5)).startYear should be(2009)
+  }
+
+  // Test that we're using local time, not UTC time to decide whether it's August
+  @Test def timezone: Unit = {
+    AcademicYear.forDate(DateTime.parse("2010-08-01T12:00:00+01:00")).startYear should be (2010)
+    AcademicYear.forDate(DateTime.parse("2010-08-01T00:30:00+01:00")).startYear should be (2010)
   }
 
   @Test def strings: Unit = {
