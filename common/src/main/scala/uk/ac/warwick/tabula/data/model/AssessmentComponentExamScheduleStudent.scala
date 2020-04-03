@@ -30,10 +30,9 @@ class AssessmentComponentExamScheduleStudent extends GeneratedId with ToString {
   var sprCode: String = _
 
   @ManyToOne(fetch = FetchType.EAGER, optional = true)
-  @JoinColumn(name = "spr_code", referencedColumnName = "sprcode", insertable = false, updatable = false)
-  @Where(clause = "mostSignificant = true")
-  private val _studentCourseDetails: StudentCourseDetails = null
-  def studentCourseDetails: Option[StudentCourseDetails] = Option(_studentCourseDetails)
+  @JoinColumn(name = "university_id", referencedColumnName = "universityId", insertable = false, updatable = false)
+  private val _student: StudentMember = null
+  def studentCourseDetails: Option[StudentCourseDetails] = Option(_student).flatMap(_.mostSignificantCourseDetails)
 
   // SITS MAV occurrence
   @Column(name = "occurrence", nullable = false)
