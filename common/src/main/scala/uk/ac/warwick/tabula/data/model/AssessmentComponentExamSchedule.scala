@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
+import scala.jdk.CollectionConverters._
+
 @Entity
 @Proxy
 class AssessmentComponentExamSchedule extends GeneratedId with ToString {
@@ -68,6 +70,9 @@ class AssessmentComponentExamSchedule extends GeneratedId with ToString {
   @BatchSize(size = 200)
   @OrderBy("seat_number, university_id")
   var students: JList[AssessmentComponentExamScheduleStudent] = JArrayList()
+
+  // set of all occurrences of a module that students sitting this exam are registered on - needed for linking with UpstreamAssessmentGroup
+  def occurrences: Set[String] = students.asScala.map(_.occurrence).toSet
 
   def copyFrom(other: AssessmentComponentExamSchedule): AssessmentComponentExamSchedule = {
     require(other.id == null, "Can only copy from transient instances")
