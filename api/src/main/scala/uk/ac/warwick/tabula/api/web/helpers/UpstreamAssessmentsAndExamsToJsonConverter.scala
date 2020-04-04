@@ -56,6 +56,13 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
       }
     )
 
+  def jsonUpstreamAssessmentGroupKeyObject(key: UpstreamAssessmentGroupKey): Map[String, Any] = Map(
+    "moduleCode" -> key.moduleCode,
+    "academicYear" -> key.academicYear,
+    "sequence" -> key.sequence,
+    "occurrence" -> key.occurrence
+  )
+
   def jsonUpstreamAssessmentObject(assessmentComponent: AssessmentComponent): Map[String, Any] =
     Map(
       "id" -> assessmentComponent.id,
