@@ -62,7 +62,7 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -311,8 +311,8 @@ class AssessmentMembershipServiceImpl
     */
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] =
-    dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly)
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] =
+    dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly, inUseOnly)
 
   def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 

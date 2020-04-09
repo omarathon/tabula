@@ -53,7 +53,7 @@ abstract class UpstreamAssessmentsAndExamPapersCommandInternal(val department: D
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): Seq[AssessmentComponent] =
-    assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = true, Option(assessmentType), withExamPapersOnly)
+    assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = true, Option(assessmentType), withExamPapersOnly, inUseOnly)
       .filter(c => examProfileCode.maybeText.isEmpty || c.scheduledExams(None).exists(s => examProfileCode.maybeText.contains(s.examProfileCode)))
 
 }
@@ -75,4 +75,5 @@ trait UpstreamAssessmentsAndExamPapersRequest {
   var assessmentType: AssessmentType = _
   var withExamPapersOnly: Boolean = false
   var examProfileCode: String = _
+  var inUseOnly: Boolean = true
 }

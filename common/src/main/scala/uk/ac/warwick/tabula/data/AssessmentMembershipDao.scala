@@ -72,7 +72,7 @@ trait AssessmentMembershipDao {
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -355,7 +355,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     }
   }
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] = {
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = {
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -363,9 +363,11 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     if (deptModules.isEmpty) Nil
     else {
       val c = session.newCriteria[AssessmentComponent]
-        .add(is("inUse", true))
         .addOrder(asc("moduleCode"))
         .addOrder(asc("sequence"))
+      if (inUseOnly) {
+        c.add(is("inUse", true))
+      }
       if (withExamPapersOnly) {
         c.add(isNotNull("_examPaperCode"))
       }
