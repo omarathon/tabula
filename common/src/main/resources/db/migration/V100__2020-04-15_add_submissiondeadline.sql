@@ -1,1 +1,1 @@
-alter table submission add column submissionDeadline timestamp(6);
+alter table submission add column explicitSubmissionDeadline timestamp(6);

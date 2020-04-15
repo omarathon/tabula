@@ -47,7 +47,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
   @Column(name = "submitted_date")
   var submittedDate: DateTime = _
 
-  var submissionDeadline: DateTime = _
+  var explicitSubmissionDeadline: DateTime = _
 
   @NotNull
   @Column(name = "userId")
