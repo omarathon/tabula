@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
-import org.joda.time.{DateTime, LocalDate, LocalTime}
+import org.joda.time.{LocalDate, LocalTime}
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -117,6 +117,9 @@ class CreateAssignmentController extends ModuleAssignmentsController {
   }
 }
 
+case class SitsLink(moduleCode: String, occurrence: String, sequence: String)
+
+
 trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends JsonApiRequest[A]
   with BooleanAssignmentProperties {
 
@@ -130,6 +133,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
   @BeanProperty var includeUsers: JList[String] = null
   @BeanProperty var excludeUsers: JList[String] = null
   @BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
+  @BeanProperty var sitsLinks: JList[SitsLink] = null
   @BeanProperty var fileAttachmentLimit: JInteger = null
   @BeanProperty var fileAttachmentTypes: JList[String] = null
   @BeanProperty var individualFileSizeLimit: JInteger = null
@@ -158,7 +162,6 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(excludeUsers).foreach { state.excludeUsers = _ }
-    Option(upstreamGroups).foreach(state.upstreamGroups = _)
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
     Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
     Option(individualFileSizeLimit).foreach(state.individualFileSizeLimit = _)
@@ -185,8 +188,26 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(turnitinExcludeBibliography).foreach(state.turnitinExcludeBibliography = _)
     Option(turnitinExcludeQuoted).foreach(state.turnitinExcludeQuoted = _)
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
+    val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
+    if (sitsLinksSeq.forall { link =>
+      state.availableUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
+        && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
 
-    state.afterBind()
+    }) {
+      val linkedUpstreamGroups: JList[UpstreamGroup] = state.availableUpstreamGroups.filter { upstreamGroup =>
+        sitsLinksSeq.exists { sitsLink =>
+          upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
+            upstreamGroup.sequence == sitsLink.sequence &&
+            upstreamGroup.occurrence == sitsLink.occurrence
+        }
+
+      }.asJava
+      Option(linkedUpstreamGroups).foreach(state.upstreamGroups = _)
+      state.afterBind()
+    } else {
+      errors.reject("assignment.api.sitsLinksInvalidData", "Invalid link")
+    }
+
   }
 
 }
