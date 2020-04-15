@@ -205,7 +205,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
       Option(linkedUpstreamGroups).foreach(state.upstreamGroups = _)
       state.afterBind()
     } else {
-      errors.reject("assignment.api.sitsLinksInvalidData", "Invalid link")
+      errors.reject("assignment.api.sitsLinks.invalidData")
     }
 
   }
