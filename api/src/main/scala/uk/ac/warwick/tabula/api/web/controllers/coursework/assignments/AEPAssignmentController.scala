@@ -46,7 +46,7 @@ trait AEPCreateSubmissionApi {
 
   @ModelAttribute("createCommand")
   def command(@PathVariable assignment: Assignment,
-    @RequestParam("universityId") member: Member, @RequestParam("submittedDate") submittedDate: DateTime): SubmitAssignmentCommandInternal
+    @RequestParam("universityId") member: Member, @RequestParam("submittedDate") submittedDate: DateTime): SubmitAssignmentCommand
     with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentSetSubmittedDatePermissions
     with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers
     with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
