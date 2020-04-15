@@ -202,7 +202,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
         }
 
       }.asJava
-      Option(linkedUpstreamGroups).foreach(state.upstreamGroups = _)
+      state.upstreamGroups = linkedUpstreamGroups
       state.afterBind()
     } else {
       errors.reject("assignment.api.sitsLinks.invalidData")
