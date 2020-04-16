@@ -49,7 +49,7 @@ trait AEPCreateSubmissionApi {
     @RequestParam("universityId") member: Member,
     @RequestParam("submittedDate") submittedDate: DateTime,
     @RequestParam("submissionDeadline") submissionDeadline: DateTime): SubmitAssignmentCommand
-    with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentSetSubmittedDatePermissions
+    with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentSetSubmittedDatePermissions
     with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers
     with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
     SubmitAssignmentCommand.onBehalfOfWithSubmittedDateAndDeadline(assignment, member, submittedDate, submissionDeadline)
