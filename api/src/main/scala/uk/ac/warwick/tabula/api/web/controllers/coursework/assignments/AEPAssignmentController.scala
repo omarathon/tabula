@@ -46,11 +46,13 @@ trait AEPCreateSubmissionApi {
 
   @ModelAttribute("createCommand")
   def command(@PathVariable assignment: Assignment,
-    @RequestParam("universityId") member: Member, @RequestParam("submittedDate") submittedDate: DateTime): SubmitAssignmentCommand
-    with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentSetSubmittedDatePermissions
+    @RequestParam("universityId") member: Member,
+    @RequestParam("submittedDate") submittedDate: DateTime,
+    @RequestParam("submissionDeadline") submissionDeadline: DateTime): SubmitAssignmentCommand
+    with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentSetSubmittedDatePermissions
     with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers
     with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
-    SubmitAssignmentCommand.onBehalfOfWithSubmittedDate(assignment, member, submittedDate)
+    SubmitAssignmentCommand.onBehalfOfWithSubmittedDateAndDeadline(assignment, member, submittedDate, submissionDeadline)
 
   // Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
   @RequestMapping(method = Array(POST), consumes = Array("multipart/mixed"), produces = Array(MediaType.APPLICATION_JSON_VALUE))

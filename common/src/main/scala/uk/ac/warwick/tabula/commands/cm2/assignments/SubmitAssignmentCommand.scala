@@ -41,7 +41,7 @@ object SubmitAssignmentCommand {
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
   def onBehalfOf(assignment: Assignment, member: Member) =
-    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), None)
+    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member))
       with ComposableCommand[Submission]
       with SubmitAssignmentBinding
       with SubmitAssignmentOnBehalfOfPermissions
@@ -54,8 +54,8 @@ object SubmitAssignmentCommand {
       with AutowiringZipServiceComponent
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
-  def onBehalfOfWithSubmittedDate(assignment: Assignment, member: Member, submittedDate: DateTime) =
-    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), Some(submittedDate))
+  def onBehalfOfWithSubmittedDateAndDeadline(assignment: Assignment, member: Member, submittedDate: DateTime, submissionDeadline: DateTime) =
+    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), Some(submittedDate), Some(submissionDeadline))
       with ComposableCommand[Submission]
       with SubmitAssignmentBinding
       with SubmitAssignmentOnBehalfOfPermissions
@@ -105,7 +105,8 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 }
 
-abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser, val submittedDate: Option[DateTime] = None)
+abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser,
+  val submittedDate: Option[DateTime] = None, val submissionDeadline: Option[DateTime] = None)
   extends CommandInternal[Submission] with SubmitAssignmentRequest {
 
   self: SubmissionServiceComponent
@@ -132,6 +133,8 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
     submission.submittedDate = submittedDate.getOrElse(new DateTime)
     submission.usercode = user.usercode
     submission._universityId = user.universityId
+
+    submissionDeadline.foreach(deadline => submission.explicitSubmissionDeadline = deadline)
 
     val savedValues = fields.asScala.map {
       case (_, submissionValue) =>

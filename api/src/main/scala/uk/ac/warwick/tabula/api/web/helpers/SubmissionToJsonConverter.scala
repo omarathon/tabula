@@ -35,7 +35,8 @@ trait SubmissionToJsonConverter {
       "submittedDate" -> Option(submission.submittedDate).map(DateFormats.IsoDateTime.print).orNull,
       "wordCount" -> submission.assignment.wordCountField.flatMap(submission.getValue).map { formValue => JInteger(Try(formValue.value.toInt).toOption) }.orNull,
       "suspectPlagiarised" -> submission.suspectPlagiarised
-    )
+    ) ++ (if (Option(submission.explicitSubmissionDeadline).nonEmpty)
+      Map("explicitSubmissionDeadline" -> Option(submission.explicitSubmissionDeadline).map(DateFormats.IsoDateTime.print).orNull) else Map())
   }
 
   def jsonSubmissionObject(student: AssignmentSubmissionStudentInfo): Map[String, Any] = {
