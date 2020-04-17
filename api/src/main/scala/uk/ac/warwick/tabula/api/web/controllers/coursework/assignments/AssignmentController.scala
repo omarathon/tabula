@@ -244,7 +244,7 @@ trait CreateSubmissionApi {
     SubmitAssignmentCommand.onBehalfOf(assignment, member)
 
   // Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
-  @RequestMapping(method = Array(POST), consumes = Array("multipart/mixed"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(method = Array(POST), consumes = Array("multipart/form-data"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   def create(@RequestPart("submission") request: CreateSubmissionRequest, @RequestPart("attachments") files: JList[MultipartFile], @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
     request.copyTo(command, errors)
 
