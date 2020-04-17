@@ -53,6 +53,21 @@ object SubmitAssignmentCommand {
       with AutowiringFeaturesComponent
       with AutowiringZipServiceComponent
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+
+  def onBehalfOfWithSubmittedDateAndDeadline(assignment: Assignment, member: Member, submittedDate: DateTime, submissionDeadline: DateTime) =
+    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), Some(submittedDate), Some(submissionDeadline))
+      with ComposableCommand[Submission]
+      with SubmitAssignmentBinding
+      with SubmitAssignmentOnBehalfOfPermissions
+      with SubmitAssignmentSetSubmittedDatePermissions
+      with SubmitAssignmentDescription
+      with SubmitAssignmentValidation
+      with SubmitAssignmentNotifications
+      with SubmitAssignmentTriggers
+      with AutowiringSubmissionServiceComponent
+      with AutowiringFeaturesComponent
+      with AutowiringZipServiceComponent
+      with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 }
 
 trait SubmitAssignmentState {
@@ -90,7 +105,8 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 }
 
-abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser)
+abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser,
+  val submittedDate: Option[DateTime] = None, val submissionDeadline: Option[DateTime] = None)
   extends CommandInternal[Submission] with SubmitAssignmentRequest {
 
   self: SubmissionServiceComponent
@@ -114,9 +130,11 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
     val submission = new Submission
     submission.assignment = assignment
     submission.submitted = true
-    submission.submittedDate = new DateTime
+    submission.submittedDate = submittedDate.getOrElse(new DateTime)
     submission.usercode = user.usercode
     submission._universityId = user.universityId
+
+    submissionDeadline.foreach(deadline => submission.explicitSubmissionDeadline = deadline)
 
     val savedValues = fields.asScala.map {
       case (_, submissionValue) =>
@@ -192,6 +210,14 @@ trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(assignment))
     p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
+  }
+}
+
+trait SubmitAssignmentSetSubmittedDatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  self: SubmitAssignmentState =>
+
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Submission.Update, PermissionsTarget.Global)
   }
 }
 

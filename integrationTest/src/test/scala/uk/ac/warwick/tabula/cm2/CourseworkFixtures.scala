@@ -176,6 +176,17 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
     textField("name").value = assignmentName
 
+    // Roll the open date to the last working day
+    val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+    def isWorkingDay(date: LocalDate): Boolean =
+      !holidayDates.contains(date) && date.getDayOfWeek != DateTimeConstants.SATURDAY && date.getDayOfWeek != DateTimeConstants.SUNDAY
+
+    var openDate: LocalDate = LocalDate.now().minusDays(1)
+    while (!isWorkingDay(openDate)) {
+      openDate = openDate.minusDays(1)
+    }
+    textField("openDate").value = DateFormats.DatePickerFormatter.print(openDate)
+
     singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
     cssSelector(s"input[name=createAndAddFeedback]").webElement.click()

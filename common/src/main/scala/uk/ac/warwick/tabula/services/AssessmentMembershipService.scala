@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
+import scala.jdk.CollectionConverters._
+
 trait AssessmentMembershipService {
   def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
 
@@ -71,6 +73,8 @@ trait AssessmentMembershipService {
   def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Map[UpstreamAssessmentGroupKey, Seq[Assignment]]
 
   /**
     * Get all assessment groups that can serve this assignment this year.
@@ -287,6 +291,20 @@ class AssessmentMembershipServiceImpl
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Map[UpstreamAssessmentGroupKey, Seq[Assignment]] = {
+    val allAssignments = dao.getAssignmentsForAssessmentGroups(keys)
+    keys.map(k => k -> {
+      allAssignments.filter(a => {
+        k.academicYear == a.academicYear && a.assessmentGroups.asScala.toSeq.exists(ag => {
+          val occurrence = ag.occurrence
+          val sequence = ag.assessmentComponent.sequence
+          val moduleCode = ag.assessmentComponent.moduleCode
+          occurrence == k.occurrence && sequence == k.sequence && moduleCode == k.moduleCode
+        })
+      })
+    }).toMap
+  }
 
   /**
     * Gets assessment components for this department.

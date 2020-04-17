@@ -82,6 +82,8 @@ trait AssessmentMembershipDao {
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
 
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Seq[Assignment]
+
   /**
     * Get all assessment groups that can serve this assignment this year.
     * Should return as many groups as there are distinct OCCURRENCE values for a given
@@ -215,7 +217,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .uniqueResult
 
   def find(group: AssessmentGroup): Option[AssessmentGroup] = {
-    if (group.assignment == null && group.smallGroupSet == null) None
+    if (group.assignment == null && group.smallGroupSet == null && group.exam == null) None
     else {
       val criteria = session.newCriteria[AssessmentGroup]
         .add(is("assessmentComponent", group.assessmentComponent))
@@ -423,6 +425,18 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           uag.academicYear in (:academicYears)""")
       .setParameterList("academicYears", academicYears)
       .seq
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Seq[Assignment] = {
+    val em: EntityManager = session
+    em.createNativeQuery(s"""
+      select distinct a.* from assignment a
+        join assessmentgroup ag on a.id = ag.assignment_id
+        join assessmentcomponent ac on ac.id = ag.upstream_id
+      where array[ac.modulecode, cast(a.academicyear as varchar), ac.sequence, ag.occurrence] in (:keys)
+    """, classOf[Assignment])
+      .setParameter("keys", keys.asJava)
+      .getResultList.asScala.toSeq.asInstanceOf[Seq[Assignment]]
+  }
 
   def countPublishedFeedback(assignment: Assignment): Int = {
     session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")

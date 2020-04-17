@@ -26,6 +26,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
   def jsonExamScheduleObject(schedule: AssessmentComponentExamSchedule): Map[String, Any] =
     Map(
       "examProfileCode" -> schedule.examProfileCode,
+      "academicYear" -> schedule.academicYear.toString,
       "slotId" -> schedule.slotId,
       "sequence" -> schedule.sequence,
       "locationSequence" -> schedule.locationSequence,
@@ -55,6 +56,13 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
         )
       }
     )
+
+  def jsonUpstreamAssessmentGroupKeyObject(key: UpstreamAssessmentGroupKey): Map[String, Any] = Map(
+    "moduleCode" -> key.moduleCode,
+    "academicYear" -> key.academicYear,
+    "sequence" -> key.sequence,
+    "occurrence" -> key.occurrence
+  )
 
   def jsonUpstreamAssessmentObject(assessmentComponent: AssessmentComponent): Map[String, Any] =
     Map(
