@@ -271,7 +271,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
             val students =
               assignmentImporter.getScheduledExamStudents(updated)
                 .map { student =>
-                  if (student.universityId.isEmpty && student.sprCode.nonEmpty) {
+                  if (!student.universityId.hasText && student.sprCode.hasText) {
                     // Just guess, duff data
                     student.universityId = student.sprCode.split('/').head
                   }
