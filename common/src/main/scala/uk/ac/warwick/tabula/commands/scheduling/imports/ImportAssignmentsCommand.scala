@@ -268,7 +268,17 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
             assessmentMembershipService.save(updated)
 
             val existingStudents = updated.students.asScala.toSeq
-            val students = assignmentImporter.getScheduledExamStudents(updated)
+            val students =
+              assignmentImporter.getScheduledExamStudents(updated)
+                .map { student =>
+                  if (student.universityId.isEmpty && student.sprCode.nonEmpty) {
+                    // Just guess, duff data
+                    student.universityId = student.sprCode.split('/').head
+                  }
+
+                  student
+                }
+                .filter(_.universityId.nonEmpty)
 
             existingStudents.filterNot(s => students.exists(_.universityId == s.universityId))
               .foreach(updated.students.remove)
