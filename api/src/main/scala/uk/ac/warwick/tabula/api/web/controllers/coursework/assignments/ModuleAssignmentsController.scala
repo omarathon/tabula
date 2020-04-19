@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter, AssignmentToXmlConverter}
-import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentMonolithCommand, CreateAssignmentMonolithRequest, ModifyAssignmentMonolithRequest}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentMonolithCommand, CreateAssignmentMonolithRequest, ModifyAssignmentMonolithRequest, SharedAssignmentStudentProperties}
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
@@ -121,7 +121,7 @@ case class SitsLink(moduleCode: String, occurrence: String, sequence: String)
 
 
 trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends JsonApiRequest[A]
-  with BooleanAssignmentProperties {
+  with BooleanAssignmentProperties with SharedAssignmentStudentProperties {
 
   @BeanProperty var name: String = null
   @BeanProperty var openDate: LocalDate = null
@@ -188,6 +188,9 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(turnitinExcludeBibliography).foreach(state.turnitinExcludeBibliography = _)
     Option(turnitinExcludeQuoted).foreach(state.turnitinExcludeQuoted = _)
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
+    Option(resitAssessment).foreach(state.resitAssessment = _)
+    Option(anonymity).foreach(state.anonymity = _)
+
     val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
     if (sitsLinksSeq.forall { link =>
       state.availableUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
