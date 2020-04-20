@@ -712,7 +712,13 @@ object AssignmentImporter {
        |        on wsl.wsl_wspc = wsm.wsm_wspc and wsl.wsl_seqn = wsm.wsm_wsls
        |    join $sitsSchema.cam_wss wss
        |        on wsl.wsl_wspc = wss.wss_wspc and wsl.wsl_seqn = wss.wss_wsls and wsm.wsm_seqn = wss.wss_wsms
-       |          and (wsm.wsm_rseq = wss.wss_rseq or (wss.wss_rseq is null and wsm.wsm_romc = wss.wss_romc)) -- TAB-8287
+       |          and (wsm.wsm_rseq = wss.wss_rseq or (
+       |            wss.wss_rseq is null and
+       |            wsm.wsm_romc = wss.wss_romc and
+       |            :location_sequence = (select min(wsm2.wsm_rseq) from $sitsSchema.cam_wsm wsm2
+       |              where wsm2.wsm_wspc = wsm.wsm_wspc and wsm2.wsm_wsls = wsm_wsls and wsm2.wsm_seqn = wsm.wsm_seqn
+     |              ) -- Avoid dupes for nulls
+       |          )) -- TAB-8287
        |where wsl.wsl_wspc = :exam_profile_code
        |  and wsl.wsl_seqn = :slot_id
        |  and wsm.wsm_seqn = :sequence
