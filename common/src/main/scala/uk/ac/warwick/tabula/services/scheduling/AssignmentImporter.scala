@@ -702,7 +702,7 @@ object AssignmentImporter {
 
   def GetExamScheduleStudents: String =
     s"""
-       |select
+       |select distinct
        |    wss.wss_seat, -- Seat number
        |    wss.wss_stuc, -- University ID
        |    wss.wss_sprc, -- SPR code
