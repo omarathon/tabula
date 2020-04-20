@@ -104,7 +104,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         createCell(row, currentColumnIndex + 1, entity.universityId, None)
         createCell(row, currentColumnIndex + 2, scd.scjCode, None)
         createCell(row, currentColumnIndex + 3, scd.course.code, None)
-        createCell(row, currentColumnIndex + 4, scd.currentRoute.code.toUpperCase, None)
+        createCell(row, currentColumnIndex + 4, Option(scd.currentRoute).map(_.code.toUpperCase).getOrElse(""), None)
         createCell(row, currentColumnIndex + 5, mr.academicYear.startYear.toString, None)
         createCell(row, currentColumnIndex + 6, mr.cats.toString, None)
 
