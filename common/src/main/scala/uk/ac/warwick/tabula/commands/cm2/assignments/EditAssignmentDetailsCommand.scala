@@ -185,11 +185,11 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (assignment.hasWorkflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
       val (existingMarkersA, existingMarkersB) = extractMarkers
 
-      if (!existingMarkersA.forall(markersA.asScala.contains)) {
+      if (markersA != null && !existingMarkersA.forall(markersA.asScala.contains)) {
         errors.rejectValue("markersA", "workflow.cannotRemoveMarkers")
       }
 
-      if (!existingMarkersB.forall(markersB.asScala.contains)) {
+      if (markersB != null && !existingMarkersB.forall(markersB.asScala.contains)) {
         errors.rejectValue("markersB", "workflow.cannotRemoveMarkers")
       }
     }
