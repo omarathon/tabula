@@ -306,6 +306,7 @@ trait SubmissionState {
       .flatMap(_.disability)
   )
 
+  def reasonableAdjustmentsDeclared: Option[Boolean] = submission.flatMap(_.reasonableAdjustmentsDeclared)
 }
 
 trait ExtensionState {

@@ -23,7 +23,8 @@ case class AssignmentSubmissionStudentInfo(
   stages: ListMap[String, WorkflowStages.StageProgress],
   coursework: WorkflowItems,
   assignment: Assignment,
-  disability: Option[Disability]
+  disability: Option[Disability],
+  reasonableAdjustmentsDeclared: Option[Boolean],
 )
 
 case class WorkflowItems(

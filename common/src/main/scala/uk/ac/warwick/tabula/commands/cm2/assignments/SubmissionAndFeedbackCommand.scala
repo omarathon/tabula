@@ -187,7 +187,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           stages = progress.stages,
           coursework = coursework,
           assignment = assignment,
-          disability = None
+          disability = None,
+          reasonableAdjustmentsDeclared = None,
         )
       }
     }
@@ -203,6 +204,10 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           .collect{ case student: StudentMember => student.disability.map(d => student.universityId -> d)  }
           .flatten
           .toMap
+      }
+
+      val reasonableAdjustmentsDeclaredLookup: Map[String, Option[Boolean]] = benchmarkTask("Lookup submissions ") {
+        enhancedSubmissions.map(es => es.submission.usercode -> es.submission.reasonableAdjustmentsDeclared).toMap
       }
 
       for (usercode <- usercodesWithSubmissionOrFeedback) yield {
@@ -249,7 +254,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           stages = progress.stages,
           coursework = coursework,
           assignment = assignment,
-          disability = disabilityLookup.get(user.getWarwickId)
+          disability = disabilityLookup.get(user.getWarwickId),
+          reasonableAdjustmentsDeclared = reasonableAdjustmentsDeclaredLookup.get(user.getWarwickId).flatten,
         )
       }
     }

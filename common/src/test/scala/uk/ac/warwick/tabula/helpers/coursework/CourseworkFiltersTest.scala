@@ -89,7 +89,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
       stages = ListMap.empty,
       coursework = workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension),
       assignment = assignment,
-      disability = None
+      disability = None,
+      reasonableAdjustmentsDeclared = None,
     )
 
   class SampleFilteringCommand(elems: (String, String)*) {
