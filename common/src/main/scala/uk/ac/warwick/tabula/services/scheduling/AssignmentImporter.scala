@@ -717,7 +717,7 @@ object AssignmentImporter {
        |            wsm.wsm_romc = wss.wss_romc and
        |            :location_sequence = (select min(wsm2.wsm_rseq) from $sitsSchema.cam_wsm wsm2
        |              where wsm2.wsm_wspc = wsm.wsm_wspc and wsm2.wsm_wsls = wsm_wsls and wsm2.wsm_seqn = wsm.wsm_seqn
-     |              ) -- Avoid dupes for nulls
+       |            ) -- Avoid dupes for nulls
        |          )) -- TAB-8287
        |where wsl.wsl_wspc = :exam_profile_code
        |  and wsl.wsl_seqn = :slot_id
