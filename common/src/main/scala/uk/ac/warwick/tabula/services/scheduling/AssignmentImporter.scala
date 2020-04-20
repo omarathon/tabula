@@ -149,12 +149,16 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       .filter(_.hasText)
       .map(_.trim())
 
-  private def publishedExamProfilesArray(): JList[String] =
-    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
-      .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
-      .map(_.code)
-      .concat(extraExamProfileSchedulesToImport)
+  private def publishedExamProfilesArray(): JList[String] = {
+    // MM 20/04/2020 ignore this for now. Some of the old data is a mess.
+//    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+//      .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
+//      .map(_.code)
+//      .concat(extraExamProfileSchedulesToImport)
+
+    extraExamProfileSchedulesToImport
       .asJava: JList[String]
+  }
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     examScheduleQuery.executeByNamedParam(JMap(
