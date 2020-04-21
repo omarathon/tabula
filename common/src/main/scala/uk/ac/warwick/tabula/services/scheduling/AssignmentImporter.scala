@@ -697,7 +697,6 @@ object AssignmentImporter {
        |    left outer join $sitsSchema.ins_rom rom -- Room
        |        on wsm.wsm_romc = rom.rom_code
        |where wsl.wsl_wspc in (:published_exam_profiles)
-       |  and wsm.wsm_ayrc in (:academic_year_code)
        |""".stripMargin
 
   def GetExamScheduleStudents: String =
