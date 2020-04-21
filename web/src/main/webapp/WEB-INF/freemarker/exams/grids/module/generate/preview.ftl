@@ -146,7 +146,11 @@
                     <td>${entity.universityId} </td>
                     <td> ${scd.scjCode}</td>
                     <td><span tabindex="0" class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
-                    <td><span tabindex="0" class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
+                    <td>
+                      <#if scd.currentRoute??>
+                        <span tabindex="0" class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span>
+                      </#if>
+                    </td>
                     <td>${mr.academicYear.startYear?c}</td>
                     <td>${mr.cats}</td>
                     <#list componentInfo as component>
