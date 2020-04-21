@@ -269,6 +269,7 @@ class CreateSubmissionRequest extends JsonApiRequest[SubmitAssignmentRequest] {
   @BeanProperty var attachments: JList[FileAttachment] = JArrayList()
   @BeanProperty var wordCount: JInteger = null
   @BeanProperty var useDisability: JBoolean = null
+  @BeanProperty var reasonableAdjustmentsDeclared: JBoolean = null
 
   override def copyTo(state: SubmitAssignmentRequest, errors: Errors): Unit = {
     attachments.asScala.foreach { attachment =>
@@ -284,6 +285,8 @@ class CreateSubmissionRequest extends JsonApiRequest[SubmitAssignmentRequest] {
     }
 
     state.useDisability = useDisability
+
+    state.reasonableAdjustmentsDeclared = reasonableAdjustmentsDeclared
   }
 
 }

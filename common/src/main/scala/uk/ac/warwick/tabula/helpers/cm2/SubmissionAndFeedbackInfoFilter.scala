@@ -126,6 +126,15 @@ object SubmissionAndFeedbackInfoFilters {
         item.coursework.enhancedSubmission.exists(_.submission.useDisability)
     }
 
+    case object ReasonableAdjustmentsDeclared extends SubmissionAndFeedbackInfoFilter {
+      val description = "Reasonable Adjustments Declared"
+
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(_.submission.reasonableAdjustmentsDeclared.contains(true))
+    }
+
     case object ExtensionRequested extends SubmissionAndFeedbackInfoFilter {
       val description = "Extension requested"
 
@@ -153,7 +162,7 @@ object SubmissionAndFeedbackInfoFilters {
         item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Approved)
     }
 
-    lazy val allSubmissionStates: Seq[SubmissionAndFeedbackInfoFilter] = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed)
+    lazy val allSubmissionStates: Seq[SubmissionAndFeedbackInfoFilter] = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed, ReasonableAdjustmentsDeclared)
   }
 
 

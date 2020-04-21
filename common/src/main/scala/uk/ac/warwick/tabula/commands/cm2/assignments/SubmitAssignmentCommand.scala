@@ -100,6 +100,8 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
   var useDisability: JBoolean = _
 
+  var reasonableAdjustmentsDeclared: JBoolean = _
+
   // used as a hint to the view.
   var justSubmitted: Boolean = false
 
@@ -155,6 +157,16 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
       value.name = Submission.UseDisabilityFieldName
       value.submission = submission
       useDisabilityValue.persist(value)
+      savedValues.append(value)
+    }
+
+    if (reasonableAdjustmentsDeclared != null) {
+      val reasonableAdjustmentsDeclaredValue = new BooleanFormValue(null)
+      reasonableAdjustmentsDeclaredValue.value = reasonableAdjustmentsDeclared
+      val value = new SavedFormValue
+      value.name = Submission.ReasonableAdjustmentsDeclaredFieldName
+      value.submission = submission
+      reasonableAdjustmentsDeclaredValue.persist(value)
       savedValues.append(value)
     }
 
