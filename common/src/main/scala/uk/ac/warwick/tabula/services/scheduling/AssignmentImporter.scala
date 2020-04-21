@@ -149,21 +149,17 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       .filter(_.hasText)
       .map(_.trim())
 
-  private def publishedExamProfilesArray(): JList[String] = {
-    // MM 20/04/2020 ignore this for now. Some of the old data is a mess.
-//    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
-//      .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
-//      .map(_.code)
-//      .concat(extraExamProfileSchedulesToImport)
-
-    extraExamProfileSchedulesToImport
+  private def publishedExamProfilesArray(yearsToImport: Seq[AcademicYear]): JList[String] = {
+    // MM 20/04/2020 ignore profiles not in extraExamProfileSchedulesToImport for now, old data is a mess
+    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+      .filter(p => yearsToImport.contains(p.academicYear) && (extraExamProfileSchedulesToImport.contains(p.code)/* || p.published || p.seatNumbersPublished*/))
+      .map(_.code)
       .asJava: JList[String]
   }
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     examScheduleQuery.executeByNamedParam(JMap(
-      "academic_year_code" -> yearsToImportArray(yearsToImport),
-      "published_exam_profiles" -> publishedExamProfilesArray()
+      "published_exam_profiles" -> publishedExamProfilesArray(yearsToImport)
     )).asScala.toSeq
 
   override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
@@ -701,7 +697,6 @@ object AssignmentImporter {
        |    left outer join $sitsSchema.ins_rom rom -- Room
        |        on wsm.wsm_romc = rom.rom_code
        |where wsl.wsl_wspc in (:published_exam_profiles)
-       |  and wsm.wsm_ayrc in (:academic_year_code)
        |""".stripMargin
 
   def GetExamScheduleStudents: String =
@@ -716,13 +711,39 @@ object AssignmentImporter {
        |        on wsl.wsl_wspc = wsm.wsm_wspc and wsl.wsl_seqn = wsm.wsm_wsls
        |    join $sitsSchema.cam_wss wss
        |        on wsl.wsl_wspc = wss.wss_wspc and wsl.wsl_seqn = wss.wss_wsls and wsm.wsm_seqn = wss.wss_wsms
-       |          and (wsm.wsm_rseq = wss.wss_rseq or (
-       |            wss.wss_rseq is null and
-       |            wsm.wsm_romc = wss.wss_romc and
-       |            :location_sequence = (select min(wsm2.wsm_rseq) from $sitsSchema.cam_wsm wsm2
-       |              where wsm2.wsm_wspc = wsm.wsm_wspc and wsm2.wsm_wsls = wsm_wsls and wsm2.wsm_seqn = wsm.wsm_seqn
-       |            ) -- Avoid dupes for nulls
-       |          )) -- TAB-8287
+       |          and (
+       |            -- Student has been scheduled, or
+       |            wsm.wsm_rseq = wss.wss_rseq or (
+       |
+       |              -- Student is not scheduled and
+       |              wss.wss_rseq is null and (
+       |                -- Student has been allocated a room and it's the earliest matching WSM for this room, or
+       |                (
+       |                  wsm.wsm_romc = wss.wss_romc and
+       |                  :location_sequence = (
+       |                    select min(wsm2.wsm_rseq)
+       |                      from $sitsSchema.cam_wsm wsm2
+       |                      where wsm2.wsm_wspc = wsm.wsm_wspc
+       |                        and wsm2.wsm_wsls = wsm_wsls
+       |                        and wsm2.wsm_seqn = wsm.wsm_seqn
+       |                        and wsm2.wsm_romc = wsm.wsm_romc
+       |                  )
+       |                ) or
+       |
+       |                -- Student hasn't been allocated a room and it's the earliest matching WSM
+       |                (
+       |                  wss.wss_romc is null and
+       |                  :location_sequence = (
+       |                    select min(wsm2.wsm_rseq)
+       |                      from $sitsSchema.cam_wsm wsm2
+       |                      where wsm2.wsm_wspc = wsm.wsm_wspc
+       |                        and wsm2.wsm_wsls = wsm_wsls
+       |                        and wsm2.wsm_seqn = wsm.wsm_seqn
+       |                  )
+       |                )
+       |              )
+       |            )
+       |          ) -- TAB-8287
        |where wsl.wsl_wspc = :exam_profile_code
        |  and wsl.wsl_seqn = :slot_id
        |  and wsm.wsm_seqn = :sequence
@@ -794,7 +815,6 @@ object AssignmentImporter {
   }
 
   class ExamScheduleQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamSchedule](ds, GetExamSchedule) {
-    declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     declareParameter(new SqlParameter("published_exam_profiles", Types.VARCHAR))
     compile()
 
