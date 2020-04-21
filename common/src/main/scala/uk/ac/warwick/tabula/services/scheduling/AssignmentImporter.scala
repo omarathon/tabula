@@ -149,21 +149,17 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       .filter(_.hasText)
       .map(_.trim())
 
-  private def publishedExamProfilesArray(): JList[String] = {
-    // MM 20/04/2020 ignore this for now. Some of the old data is a mess.
-//    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
-//      .filter(p => p.published || p.seatNumbersPublished) // TODO we might want to run this even for non-published exam schedules!
-//      .map(_.code)
-//      .concat(extraExamProfileSchedulesToImport)
-
-    extraExamProfileSchedulesToImport
+  private def publishedExamProfilesArray(yearsToImport: Seq[AcademicYear]): JList[String] = {
+    // MM 20/04/2020 ignore profiles not in extraExamProfileSchedulesToImport for now, old data is a mess
+    Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
+      .filter(p => yearsToImport.contains(p.academicYear) && (extraExamProfileSchedulesToImport.contains(p.code)/* || p.published || p.seatNumbersPublished*/))
+      .map(_.code)
       .asJava: JList[String]
   }
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     examScheduleQuery.executeByNamedParam(JMap(
-      "academic_year_code" -> yearsToImportArray(yearsToImport),
-      "published_exam_profiles" -> publishedExamProfilesArray()
+      "published_exam_profiles" -> publishedExamProfilesArray(yearsToImport)
     )).asScala.toSeq
 
   override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
@@ -820,7 +816,6 @@ object AssignmentImporter {
   }
 
   class ExamScheduleQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamSchedule](ds, GetExamSchedule) {
-    declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     declareParameter(new SqlParameter("published_exam_profiles", Types.VARCHAR))
     compile()
 

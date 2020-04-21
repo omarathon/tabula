@@ -99,8 +99,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   var modifiedAssignments: Set[Assignment] = Set.empty
 
-  // We always need to import the previous years in order to get resit students for exams
-  override def yearsToImport: Seq[AcademicYear] = AcademicYear.now().yearsSurrounding(2, 1)
+  override def yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 
   def applyInternal(): Unit = {
     benchmark("ImportAssessment") {
