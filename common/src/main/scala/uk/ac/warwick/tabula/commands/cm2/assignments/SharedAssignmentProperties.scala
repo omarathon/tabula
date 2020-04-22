@@ -30,6 +30,7 @@ trait SharedAssignmentDetailProperties extends BooleanAssignmentDetailProperties
   def copySharedDetailFrom(assignment: Assignment): Unit = {
     openEnded = assignment.openEnded
     resitAssessment = assignment.resitAssessment
+    createdByAEP = assignment.createdByAEP
   }
 
   def copySharedDetailTo(assignment: Assignment): Unit = {
