@@ -133,7 +133,7 @@ trait AssessmentMembershipDao {
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
-  def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+  def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule]
 
   def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
 
@@ -685,9 +685,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     ))
   }
 
-  override def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+  override def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule] =
     session.newCriteria[AssessmentComponentExamSchedule]
-      .add(safeIn("academicYear", years))
+      .add(safeIn("examProfileCode", examProfileCodes))
       .seq
 
   override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
