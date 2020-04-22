@@ -135,6 +135,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
   @BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
   @BeanProperty var sitsLinks: JList[SitsLink] = null
   @BeanProperty var fileAttachmentLimit: JInteger = null
+  @BeanProperty var unlimitedAttachments: JBoolean = null
   @BeanProperty var fileAttachmentTypes: JList[String] = null
   @BeanProperty var individualFileSizeLimit: JInteger = null
   @BeanProperty var minWordCount: JInteger = null
@@ -163,6 +164,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(excludeUsers).foreach { state.excludeUsers = _ }
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
+    Option(unlimitedAttachments).foreach(state.unlimitedAttachments = _)
     Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
     Option(individualFileSizeLimit).foreach(state.individualFileSizeLimit = _)
     Option(minWordCount).foreach(state.wordCountMin = _)
@@ -221,6 +223,7 @@ class CreateAssignmentRequest extends AssignmentPropertiesRequest[CreateAssignme
   includeUsers = JArrayList()
   upstreamGroups = JArrayList()
   fileAttachmentLimit = 1
+  unlimitedAttachments = false
   fileAttachmentTypes = JArrayList()
   wordCountConventions = "Exclude any bibliography or appendices."
 

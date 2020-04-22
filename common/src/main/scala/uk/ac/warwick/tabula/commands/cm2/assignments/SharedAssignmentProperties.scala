@@ -113,6 +113,8 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   @Max(Assignment.MaximumFileAttachments)
   var fileAttachmentLimit: Int = 1
 
+  var unlimitedAttachments: JBoolean = _
+
   @Min(1)
   @Max(Assignment.MaximumFileAttachments)
   var minimumFileAttachmentLimit: Int = 1
@@ -138,6 +140,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     for (field <- findCommentField(assignment)) comment = field.value
     for (file <- findFileField(assignment)) {
       fileAttachmentLimit = file.attachmentLimit
+      unlimitedAttachments = file.unlimitedAttachments
       minimumFileAttachmentLimit = file.minimumAttachmentLimit
       fileAttachmentTypes = file.attachmentTypes.asJava
       individualFileSizeLimit = file.individualFileSizeLimit
@@ -154,6 +157,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     for (field <- findCommentField(assignment)) field.value = comment
     for (file <- findFileField(assignment)) {
       file.attachmentLimit = fileAttachmentLimit
+      file.unlimitedAttachments = unlimitedAttachments
       file.minimumAttachmentLimit = minimumFileAttachmentLimit
       file.attachmentTypes = fileAttachmentTypes.asScala.toSeq
       file.individualFileSizeLimit = individualFileSizeLimit
