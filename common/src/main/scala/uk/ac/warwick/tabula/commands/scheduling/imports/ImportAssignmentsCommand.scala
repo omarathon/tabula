@@ -252,7 +252,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doExamSchedule(): Unit = {
     benchmark("Import exam schedule") { transactional() { // Do it all in one big tx
-      val existing = assessmentMembershipService.allScheduledExams(yearsToImport)
+      val existing = assessmentMembershipService.allScheduledExams(assignmentImporter.publishedExamProfiles(yearsToImport))
 
       val seenIds =
         assignmentImporter.getAllScheduledExams(yearsToImport)

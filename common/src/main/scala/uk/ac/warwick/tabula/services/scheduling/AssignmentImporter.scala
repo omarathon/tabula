@@ -52,6 +52,8 @@ trait AssignmentImporter {
   def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
   def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent]
+
+  def publishedExamProfiles(yearsToImport: Seq[AcademicYear]): Seq[String]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -149,17 +151,16 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       .filter(_.hasText)
       .map(_.trim())
 
-  private def publishedExamProfilesArray(yearsToImport: Seq[AcademicYear]): JList[String] = {
+  override def publishedExamProfiles(yearsToImport: Seq[AcademicYear]): Seq[String] = {
     // MM 20/04/2020 ignore profiles not in extraExamProfileSchedulesToImport for now, old data is a mess
     Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
       .filter(p => yearsToImport.contains(p.academicYear) && (extraExamProfileSchedulesToImport.contains(p.code)/* || p.published || p.seatNumbersPublished*/))
       .map(_.code)
-      .asJava: JList[String]
   }
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     examScheduleQuery.executeByNamedParam(JMap(
-      "published_exam_profiles" -> publishedExamProfilesArray(yearsToImport)
+      "published_exam_profiles" -> (publishedExamProfiles(yearsToImport).asJava: JList[String])
     )).asScala.toSeq
 
   override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
@@ -349,6 +350,9 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
     students
   }
+
+  override def publishedExamProfiles(yearsToImport: Seq[AcademicYear]): Seq[String] =
+    yearsToImport.map(year => s"EXSUM${year.endYear % 100}")
 }
 
 
