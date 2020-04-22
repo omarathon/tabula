@@ -137,7 +137,7 @@ trait AssessmentMembershipService {
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
-  def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+  def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule]
 
   def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
 
@@ -365,8 +365,8 @@ class AssessmentMembershipServiceImpl
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo =
     dao.departmentsManualMembership(department, academicYear)
 
-  override def allScheduledExams(years: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
-    dao.allScheduledExams(years)
+  override def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule] =
+    dao.allScheduledExams(examProfileCodes)
 
   override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
     dao.findScheduledExamBySlotSequence(examProfileCode, slotId, sequence, locationSequence)
