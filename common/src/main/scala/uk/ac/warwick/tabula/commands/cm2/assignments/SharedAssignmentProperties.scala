@@ -109,6 +109,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   @Length(max = 600)
   var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
 
+  // fileAttachmentLimit value is ignored if unlimitedAttachments is set to true
   @Min(1)
   @Max(Assignment.MaximumFileAttachments)
   var fileAttachmentLimit: Int = 1
