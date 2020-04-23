@@ -58,7 +58,6 @@ object SubmitAssignmentCommand {
     new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), Some(submittedDate), Some(submissionDeadline))
       with ComposableCommand[Submission]
       with SubmitAssignmentBinding
-      with SubmitAssignmentOnBehalfOfPermissions
       with SubmitAssignmentSetSubmittedDatePermissions
       with SubmitAssignmentDescription
       with SubmitAssignmentValidation
