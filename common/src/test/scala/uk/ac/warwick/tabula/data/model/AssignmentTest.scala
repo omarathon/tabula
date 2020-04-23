@@ -229,6 +229,32 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.isAuthorisedLate(submission) should be (false)
   }
 
+  @Test def aepAssignmentLateness(): Unit = {
+    val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
+    assignment.openDate = new DateTime(2020, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
+    // assignment closeDate should be ignored for AEP assignments
+    assignment.closeDate = new DateTime(2020, DateTimeConstants.JANUARY, 14, 0, 0, 0, 0)
+    assignment.openEnded = false
+    assignment.createdByAEP = true
+
+    val submission = new Submission
+    submission.usercode = "cuscao"
+
+    submission.submittedDate = new DateTime(2020, DateTimeConstants.JANUARY, 15, 0, 0, 0, 0)
+    submission.explicitSubmissionDeadline = new DateTime(2020, DateTimeConstants.JANUARY, 15, 15, 0, 0, 0)
+
+    assignment.isLate(submission) should be(false)
+    assignment.isAuthorisedLate(submission) should be(false)
+
+    submission.submittedDate = new DateTime(2020, DateTimeConstants.JANUARY, 15, 15, 02, 0, 0)
+
+    assignment.isLate(submission) should be(true)
+    assignment.isAuthorisedLate(submission) should be(false)
+  }
+
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i: Int): String = "%07d" format i
 
