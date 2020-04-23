@@ -528,7 +528,7 @@ class Assignment
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
   def submissionDeadline(submission: Submission): DateTime = {
-    if (!createdByAEP) submissionDeadline(submission.usercode)
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null) submissionDeadline(submission.usercode)
     else submission.explicitSubmissionDeadline
   }
 
@@ -566,7 +566,7 @@ class Assignment
     * called by submission.isAuthorisedLate to check against extensions
     */
   def isAuthorisedLate(submission: Submission): Boolean =
-    if (!createdByAEP) {
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null) {
       !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
     } else {
       submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline) && isWithinExtension(submission.usercode, submission.submittedDate)
