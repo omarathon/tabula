@@ -518,8 +518,11 @@ class Assignment
     if (openEnded) null
     else approvedExtensions.get(usercode) match {
       case Some(extension) if extension.relevant => extension.expiryDate.getOrElse(closeDate)
+      case _ if createdByAEP => findSubmission(usercode) match {
+        case Some(submission) => Some(submission.explicitSubmissionDeadline).getOrElse(closeDate)
+      }
       case _ => closeDate
-  }
+    }
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
