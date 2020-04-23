@@ -43,12 +43,20 @@
       <#if !isSelf>
         <@components.detail label="State" condensed=true>
           ${submission.state.description}
-          <#if submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair" >
+          <#if submission.state.entryName == "Outcomes Recorded">
             <#if submission.outcomesLastRecordedBy??>
-              <#if submission.state.entryName != "Approved By Chair">by </#if>${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+              by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
             </#if>
             <#if submission.outcomesLastRecordedOn??>
               at <@fmt.date date=submission.outcomesLastRecordedOn />
+            </#if>
+          </#if>
+          <#if submission.state.entryName == "Approved By Chair" >
+            <#if submission.outcomesApprovedBy??>
+                ${submission.outcomesApprovedBy.fullName!submission.outcomesApprovedBy.userId}
+            </#if>
+            <#if submission.outcomesApprovedOn??>
+              at <@fmt.date date=submission.outcomesApprovedOn />
             </#if>
           </#if>
         </@components.detail>
