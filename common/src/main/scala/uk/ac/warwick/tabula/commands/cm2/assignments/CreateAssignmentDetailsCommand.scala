@@ -236,7 +236,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
 
   // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
   def validateOpenDate(errors: Errors): Unit = {
-    if (openDate != null) {
+    if (openDate != null && !createdByAEP) {
       if (holidayDates.contains(openDate) || openDate.getDayOfWeek == DateTimeConstants.SATURDAY || openDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
         errors.rejectValue("openDate", "openDate.notWorkingDay")
       }
@@ -245,7 +245,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
 
   // Validation shared between add and edit but may be opt in (i.e. may not validate on edit if it hasn't changed)
   def validateCloseDate(errors: Errors): Unit = {
-    if (closeDate != null && !openEnded) {
+    if (closeDate != null && !openEnded && !createdByAEP) {
       if (holidayDates.contains(closeDate.toLocalDate) || closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
         errors.rejectValue("closeDate", "closeDate.notWorkingDay")
       }
