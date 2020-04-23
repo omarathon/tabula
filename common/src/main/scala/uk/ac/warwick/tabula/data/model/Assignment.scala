@@ -543,7 +543,6 @@ class Assignment
       else daysLate
     } else 0
 
-  // TODO account for AEP submissions?
   def workingDaysLateIfSubmittedNow(usercode: String): Int = {
     val deadline = submissionDeadline(usercode)
 
@@ -563,7 +562,11 @@ class Assignment
     * called by submission.isAuthorisedLate to check against extensions
     */
   def isAuthorisedLate(submission: Submission): Boolean =
-    !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
+    if (!createdByAEP) {
+      !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
+    } else {
+      submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline) && isWithinExtension(submission.usercode, submission.submittedDate)
+    }
 
   /**
     * Whether the assignment is not deleted.
