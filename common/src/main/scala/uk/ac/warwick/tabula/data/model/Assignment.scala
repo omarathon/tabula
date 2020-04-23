@@ -190,6 +190,7 @@ class Assignment
   var dissertation: JBoolean = _
   var allowExtensions: JBoolean = _
   var resitAssessment: JBoolean = _
+  var createdByAEP: JBoolean = _
 
   @Column(name = "anonymous_marking_method")
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AssignmentAnonymityUserType")
@@ -967,15 +968,18 @@ class Assignment
 trait BooleanAssignmentDetailProperties {
   @BeanProperty var openEnded: JBoolean = false
   @BeanProperty var resitAssessment: JBoolean = false
+  @BeanProperty var createdByAEP: JBoolean = false
 
   def copyDetailBooleansTo(assignment: Assignment): Unit = {
     assignment.openEnded = openEnded
     assignment.resitAssessment = resitAssessment
+    assignment.createdByAEP = createdByAEP
   }
 
   def copyBooleanAssignmentDetailPropertiesFrom(other: BooleanAssignmentDetailProperties): Unit = {
     openEnded = other.openEnded
     resitAssessment = other.resitAssessment
+    createdByAEP = other.createdByAEP
   }
 }
 

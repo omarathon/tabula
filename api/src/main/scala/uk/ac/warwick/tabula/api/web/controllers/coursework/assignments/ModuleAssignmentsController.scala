@@ -192,6 +192,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
     Option(resitAssessment).foreach(state.resitAssessment = _)
     Option(anonymity).foreach(state.anonymity = _)
+    Option(createdByAEP).foreach(state.createdByAEP = _)
 
     val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
     if (sitsLinksSeq.forall { link =>
@@ -226,5 +227,6 @@ class CreateAssignmentRequest extends AssignmentPropertiesRequest[CreateAssignme
   unlimitedAttachments = false
   fileAttachmentTypes = JArrayList()
   wordCountConventions = "Exclude any bibliography or appendices."
+  createdByAEP = false
 
 }

@@ -120,6 +120,8 @@ abstract class AbstractCopyAssignmentsCommandInternal
       // Single-use
       case workflow: CM2MarkingWorkflow => copyMarkingWorkflow(assignment.module.adminDepartment, workflow)
     }
+    // don't copy createdByAEP property
+    newAssignment.createdByAEP = false
 
     var workflowCtg = assignment.workflowCategory match {
       case Some(workflowCategory: WorkflowCategory) =>
