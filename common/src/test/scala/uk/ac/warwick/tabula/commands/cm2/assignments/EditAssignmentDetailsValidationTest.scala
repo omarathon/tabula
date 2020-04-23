@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 
-class EditAssignmentsCommandTest extends TestBase with Mockito {
+class EditAssignmentDetailsValidationTest extends TestBase with Mockito {
 
   trait Fixture {
     val validator = new EditAssignmentDetailsValidation with EditAssignmentDetailsCommandState with EditAssignmentDetailsRequest
