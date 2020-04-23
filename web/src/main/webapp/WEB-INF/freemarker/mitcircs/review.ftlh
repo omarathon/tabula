@@ -44,7 +44,7 @@
         <@components.detail label="State" condensed=true>
           ${submission.state.description}
           <#if submission.state.entryName == "Outcomes Recorded">
-            <#if submission.outcomesLastRecordedOn??>
+            <#if submission.outcomesLastRecordedBy??>
               by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
             </#if>
             <#if submission.outcomesLastRecordedOn??>
