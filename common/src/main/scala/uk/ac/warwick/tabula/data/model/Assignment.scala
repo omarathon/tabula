@@ -504,7 +504,7 @@ class Assignment
     * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
     */
   def isLate(submission: Submission): Boolean = {
-    if (!createdByAEP)
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null)
       !openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
     else submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline)
   }
