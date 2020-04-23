@@ -503,8 +503,11 @@ class Assignment
   /**
     * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
     */
-  def isLate(submission: Submission): Boolean =
-    !openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
+  def isLate(submission: Submission): Boolean = {
+    if (!createdByAEP)
+      !openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
+    else submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline)
+  }
 
   def lateSubmissionCount: Int = submissions.asScala.count(submission => isLate(submission))
 
@@ -520,7 +523,10 @@ class Assignment
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
-  def submissionDeadline(submission: Submission): DateTime = submissionDeadline(submission.usercode)
+  def submissionDeadline(submission: Submission): DateTime = {
+    if (!createdByAEP) submissionDeadline(submission.usercode)
+    else submission.explicitSubmissionDeadline
+  }
 
   def workingDaysLate(submission: Submission): Int =
     if (isLate(submission)) {
@@ -537,6 +543,7 @@ class Assignment
       else daysLate
     } else 0
 
+  // TODO account for AEP submissions?
   def workingDaysLateIfSubmittedNow(usercode: String): Int = {
     val deadline = submissionDeadline(usercode)
 
