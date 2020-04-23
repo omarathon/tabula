@@ -196,11 +196,11 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
 
     val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
     if (sitsLinksSeq.forall { link =>
-      state.availableUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
+      state.allUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
         && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
 
     }) {
-      val linkedUpstreamGroups: JList[UpstreamGroup] = state.availableUpstreamGroups.filter { upstreamGroup =>
+      val linkedUpstreamGroups: JList[UpstreamGroup] = state.allUpstreamGroups.filter { upstreamGroup =>
         sitsLinksSeq.exists { sitsLink =>
           upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
             upstreamGroup.sequence == sitsLink.sequence &&
