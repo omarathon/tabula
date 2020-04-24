@@ -131,6 +131,7 @@ trait PopulateEditAssignmentDetailsRequest {
   openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
   openEnded = assignment.openEnded
   resitAssessment = assignment.resitAssessment
+  createdByAEP = assignment.createdByAEP
   openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
   closeDate = Option(assignment.closeDate).orNull
   workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)

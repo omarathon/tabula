@@ -190,6 +190,7 @@ class Assignment
   var dissertation: JBoolean = _
   var allowExtensions: JBoolean = _
   var resitAssessment: JBoolean = _
+  var createdByAEP: JBoolean = _
 
   @Column(name = "anonymous_marking_method")
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AssignmentAnonymityUserType")
@@ -502,8 +503,11 @@ class Assignment
   /**
     * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
     */
-  def isLate(submission: Submission): Boolean =
-    !openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
+  def isLate(submission: Submission): Boolean = {
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null)
+      !openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
+    else submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline)
+  }
 
   def lateSubmissionCount: Int = submissions.asScala.count(submission => isLate(submission))
 
@@ -514,12 +518,19 @@ class Assignment
     if (openEnded) null
     else approvedExtensions.get(usercode) match {
       case Some(extension) if extension.relevant => extension.expiryDate.getOrElse(closeDate)
+      case _ if createdByAEP => findSubmission(usercode) match {
+        case Some(submission) => Option(submission.explicitSubmissionDeadline).getOrElse(closeDate)
+        case _ => closeDate
+      }
       case _ => closeDate
-  }
+    }
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
-  def submissionDeadline(submission: Submission): DateTime = submissionDeadline(submission.usercode)
+  def submissionDeadline(submission: Submission): DateTime = {
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null) submissionDeadline(submission.usercode)
+    else submission.explicitSubmissionDeadline
+  }
 
   def workingDaysLate(submission: Submission): Int =
     if (isLate(submission)) {
@@ -555,7 +566,11 @@ class Assignment
     * called by submission.isAuthorisedLate to check against extensions
     */
   def isAuthorisedLate(submission: Submission): Boolean =
-    !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
+    if (!createdByAEP || submission.explicitSubmissionDeadline == null) {
+      !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
+    } else {
+      submission.explicitSubmissionDeadline != null && submission.submittedDate.isAfter(submission.explicitSubmissionDeadline) && isWithinExtension(submission.usercode, submission.submittedDate)
+    }
 
   /**
     * Whether the assignment is not deleted.
@@ -967,15 +982,18 @@ class Assignment
 trait BooleanAssignmentDetailProperties {
   @BeanProperty var openEnded: JBoolean = false
   @BeanProperty var resitAssessment: JBoolean = false
+  @BeanProperty var createdByAEP: JBoolean = false
 
   def copyDetailBooleansTo(assignment: Assignment): Unit = {
     assignment.openEnded = openEnded
     assignment.resitAssessment = resitAssessment
+    assignment.createdByAEP = createdByAEP
   }
 
   def copyBooleanAssignmentDetailPropertiesFrom(other: BooleanAssignmentDetailProperties): Unit = {
     openEnded = other.openEnded
     resitAssessment = other.resitAssessment
+    createdByAEP = other.createdByAEP
   }
 }
 

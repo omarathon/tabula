@@ -8,6 +8,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -20,10 +21,12 @@ class CspReportController extends BaseController {
   val SecurityLogger: Logger = LoggerFactory.getLogger("uk.ac.warwick.SECURITY_REPORTS")
 
   @PostMapping(consumes = Array(MediaType.APPLICATION_JSON_VALUE, "application/csp-report"), produces = Array("application/json"))
-  def consumeReport(@RequestBody report: Map[String, Any], @RequestParam(required = false) enforced: Boolean, request: HttpServletRequest): Mav = {
+  def consumeReport(@RequestBody report: Map[String, Any], @RequestParam(required = false) enforced: Boolean, request: HttpServletRequest, user: CurrentUser): Mav = {
     val payload = report("csp-report").asInstanceOf[Map[String, Object]]
     val data = Map(
       "csp-report" -> (payload + ("mode" -> getCspMode(enforced))),
+      "username" -> user.apparentId.maybeText,
+      "source_ip" -> request.getRemoteAddr.maybeText,
       "request_headers" -> Map(
         "user-agent" -> request.getHeader("User-Agent").maybeText
       )
@@ -42,19 +45,19 @@ class CspReportController extends BaseController {
   }
 
   @PostMapping(consumes = Array("application/reports+json"), produces = Array("application/json"))
-  def consumeReport(@RequestBody reports: Seq[Map[String, Any]], @RequestParam(required = false) enforced: Boolean): Mav = {
-    reports.filter { r => r.get("type").contains("csp") && r.contains("body") }.foreach { report => {
+  def consumeReport(@RequestBody reports: Seq[Map[String, Any]], @RequestParam(required = false) enforced: Boolean, request: HttpServletRequest, user: CurrentUser): Mav = {
+    reports.filter { r => r.get("type").contains("csp") && r.contains("body") }.foreach(report => {
       val payload = report("body").asInstanceOf[Map[String, Object]]
       val data = Map(
         "csp-report" -> (payload + ("mode" -> getCspMode(enforced))),
+        "username" -> user.apparentId.maybeText,
+        "source_ip" -> request.getRemoteAddr.maybeText,
         "request_headers" -> Map(
           "user-agent" -> report.get("user_agent")
         )
       )
-
       SecurityLogger.info("{}", StructuredArguments.entries(Logging.convertForStructuredArguments(data).asInstanceOf[util.Map[String, Object]]))
-    }
-    }
+    })
 
     Mav(new JSONView(Map(
       "success" -> true,

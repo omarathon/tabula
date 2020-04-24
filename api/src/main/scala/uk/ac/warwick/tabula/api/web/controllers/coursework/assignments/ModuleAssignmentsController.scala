@@ -135,6 +135,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
   @BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
   @BeanProperty var sitsLinks: JList[SitsLink] = null
   @BeanProperty var fileAttachmentLimit: JInteger = null
+  @BeanProperty var unlimitedAttachments: JBoolean = null
   @BeanProperty var fileAttachmentTypes: JList[String] = null
   @BeanProperty var individualFileSizeLimit: JInteger = null
   @BeanProperty var minWordCount: JInteger = null
@@ -163,6 +164,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(excludeUsers).foreach { state.excludeUsers = _ }
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
+    Option(unlimitedAttachments).foreach(state.unlimitedAttachments = _)
     Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
     Option(individualFileSizeLimit).foreach(state.individualFileSizeLimit = _)
     Option(minWordCount).foreach(state.wordCountMin = _)
@@ -190,14 +192,15 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
     Option(resitAssessment).foreach(state.resitAssessment = _)
     Option(anonymity).foreach(state.anonymity = _)
+    Option(createdByAEP).foreach(state.createdByAEP = _)
 
     val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
     if (sitsLinksSeq.forall { link =>
-      state.availableUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
+      state.allUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
         && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
 
     }) {
-      val linkedUpstreamGroups: JList[UpstreamGroup] = state.availableUpstreamGroups.filter { upstreamGroup =>
+      val linkedUpstreamGroups: JList[UpstreamGroup] = state.allUpstreamGroups.filter { upstreamGroup =>
         sitsLinksSeq.exists { sitsLink =>
           upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
             upstreamGroup.sequence == sitsLink.sequence &&
@@ -221,7 +224,9 @@ class CreateAssignmentRequest extends AssignmentPropertiesRequest[CreateAssignme
   includeUsers = JArrayList()
   upstreamGroups = JArrayList()
   fileAttachmentLimit = 1
+  unlimitedAttachments = false
   fileAttachmentTypes = JArrayList()
   wordCountConventions = "Exclude any bibliography or appendices."
+  createdByAEP = false
 
 }

@@ -162,6 +162,26 @@ class FormFieldTest extends TestBase with Mockito {
     errors.getFieldError.getField should be("file")
     errors.getFieldError.getCode should be("file.toomany")
 
+    // Ignore attachment limit if unlimited allowed
+    value.file.attached = JArrayList()
+
+    attachment = new FileAttachment
+    attachment.name = "file.doc"
+    var anotherAttachment = new FileAttachment
+    anotherAttachment.name = "another-file.doc"
+    var yetAnotherAttachment = new FileAttachment
+    yetAnotherAttachment.name = "yet-another-file.doc"
+
+    value.file.attached.add(attachment)
+    value.file.attached.add(anotherAttachment)
+    value.file.attached.add(yetAnotherAttachment)
+
+    field.unlimitedAttachments = true
+    field.propertiesMap should be(Map("attachmentLimit" -> 2, "attachmentTypes" -> expectedTypes, "unlimitedAttachments" -> true))
+    errors = new BindException(value, "value")
+    field.validate(value, errors)
+    errors.getErrorCount should be(0)
+
     value.file.attached = JArrayList()
 
     attachment = new FileAttachment
