@@ -27,6 +27,10 @@
         <span class="label label-info">Disability disclosed</span>
       </a>
     </#if>
+
+    <#if command.reasonableAdjustmentsDeclared??>
+        <span class="label label-info">Reasonable adjustment declared</span>
+    </#if>
   </div>
 
   <div>
