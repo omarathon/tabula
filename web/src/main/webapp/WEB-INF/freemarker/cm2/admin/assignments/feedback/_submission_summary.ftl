@@ -29,7 +29,7 @@
     </#if>
 
     <#if command.reasonableAdjustmentsDeclared??>
-        <span class="label label-info">Reasonable adjustment declared</span>
+        <span class="label label-info">Reasonable adjustments declared</span>
     </#if>
   </div>
 

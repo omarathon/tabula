@@ -1360,7 +1360,7 @@
   </#if>
 </#macro>
 
-<#macro submission_details submission=[] showDisabilityDisclosure=false showReasonableAdjustmentDeclaration=false student=""><@compress single_line=true>
+<#macro submission_details submission=[] showDisabilityDisclosure=false showReasonableAdjustmentsDeclaration=false student=""><@compress single_line=true>
   <#if submission?has_content>
     <#if submission.submittedDate??>
       <span tabindex="0" class="date tabula-tooltip" data-title="<@lateness submission />">
@@ -1372,7 +1372,7 @@
       <@disability_disclosure student_disability=student.disability/>
     </#if>
 
-      <#if showReasonableAdjustmentDeclaration && student.reasonableAdjustmentsDeclared??>
+      <#if showReasonableAdjustmentsDeclaration && student.reasonableAdjustmentsDeclared??>
         <@reasonable_adjustment_declaration/>
       </#if>
 
@@ -1435,7 +1435,7 @@
 </#macro>
 
 <#macro reasonable_adjustment_declaration>
-  <span class="label label-info">Reasonable adjustment declared</span>
+  <span class="label label-info">Reasonable adjustments declared</span>
 </#macro>
 
 <#macro originalityReport attachment>
