@@ -324,7 +324,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       a.locationSequence = "001"
       a.academicYear = year
       a.startTime =
-        new LocalDate(year.endYear, DateTimeConstants.APRIL, 6)
+        new LocalDate(year.endYear, DateTimeConstants.APRIL, 27)
           .plusDays(index / 10)
           .toDateTime(if (index % 10 < 5) new LocalTime(9, 0) else new LocalTime(14, 0))
       a.examPaperCode = s"${moduleCode.toUpperCase}0"
