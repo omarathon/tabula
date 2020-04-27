@@ -32,7 +32,7 @@ abstract class ViewMultipleProfilesCommandInternal(val members: JList[String], v
     with ViewMultipleProfilesCommandState {
 
 
-  override def applyInternal(): JList[Member] = service.getAllMembersWithUniversityIds(mandatory(members).asScala.toSeq)
+  override def applyInternal(): JList[Member] = memberObjects
 }
 
 trait ViewMultipleProfilesValidator extends SelfValidating {
@@ -41,16 +41,17 @@ trait ViewMultipleProfilesValidator extends SelfValidating {
   var service: ProfileService = Wire.auto[ProfileService]
 
   override def validate(errors: Errors): Unit = {
-    if (members == null || members.size() == 0) {
+    if (memberObjects.size() == 0) {
       errors.reject("NotEmpty")
     }
-    memberObjects = service.getAllMembersWithUniversityIds(members.asScala.toSeq);
   }
 }
 
 trait ViewMultipleProfilesCommandState {
+  var service: ProfileService = Wire.auto[ProfileService]
+
   def members: JList[String]
-  var memberObjects: JList[Member] = _
+  lazy val memberObjects: JList[Member] = JList(service.getAllMembersWithUniversityIds(members.asScala.toSeq):_*)
   def viewer: CurrentUser
 }
 
@@ -58,7 +59,6 @@ trait ViewMultipleProfilesPermissionsRestriction extends RequiresPermissionsChec
   self: ViewMultipleProfilesCommandState
     with SecurityServiceComponent  =>
 
-  var service: ProfileService = Wire.auto[ProfileService]
 
   def permission: Permission
 

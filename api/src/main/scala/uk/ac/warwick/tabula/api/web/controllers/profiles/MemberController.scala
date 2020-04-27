@@ -4,7 +4,7 @@ import scala.jdk.CollectionConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
@@ -78,16 +78,17 @@ trait MultipleFreshMemberApi {
 
   def checkMember(m: Member): Member = notStale(mandatory(m))
 
-  def getCommand(members: JList[String]): ViewMultipleProfileCommand.Command =
+  @ModelAttribute("command")
+  def getCommand(@RequestParam members: JList[String]): ViewMultipleProfileCommand.Command =
     ViewMultipleProfileCommand(members, user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getMembers(@ModelAttribute("getCommand") command: ViewMultipleProfileCommand.Command, @RequestParam members: String[], @RequestParam(defaultValue = "member") fields: String): Mav =
+  def getMembers(@ModelAttribute("command") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
       "members" -> Map(
-        command.apply(members).asScala.map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
+        command.apply().asScala.map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
       )
     )))
 }
