@@ -247,7 +247,8 @@ trait SubmitAssignmentValidation extends SelfValidating {
 
     val hasExtension = assignment.isWithinExtension(user.asUser)
 
-    if (!assignment.allowLateSubmissions && (assignment.isClosed && !hasExtension)) {
+    // TODO take into account any specified submittedDate, instead of excluding AEP
+    if (!assignment.allowLateSubmissions && assignment.isClosed && !hasExtension && !assignment.createdByAEP ) {
       errors.reject("assignment.submit.closed")
     }
 
