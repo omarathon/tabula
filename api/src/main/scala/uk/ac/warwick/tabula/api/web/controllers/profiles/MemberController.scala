@@ -20,6 +20,13 @@ class MemberController extends ApiController
   with AutowiringScalaFreemarkerConfigurationComponent
 
 @Controller
+@RequestMapping(value = Array("/v1/memberProfiles"), params = Array("ids"))
+class MemberProfilesController extends ApiController
+  with MultipleMemberApi
+  with MemberToJsonConverter
+  with AutowiringScalaFreemarkerConfigurationComponent
+
+@Controller
 @RequestMapping(value = Array("/v1/member/{member}"), params = Array("includeStale"))
 class StaleMemberController extends ApiController
   with StaleMemberApi
@@ -63,6 +70,23 @@ trait GetMemberApi {
       "member" -> jsonMemberObject(checkMember(command.apply()), APIFieldRestriction.restriction("member", fields))
     )))
 }
+
+trait MultipleMemberApi {
+  self: ApiController with MemberToJsonConverter =>
+
+  def checkMember(m: Member): Member
+
+  def getCommand(m: Member): ViewProfileCommand.Command
+
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getMembers(@ModelAttribute("getCommand") command: ViewProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "member" -> jsonMemberObject(checkMember(command.apply()), APIFieldRestriction.restriction("member", fields))
+    )))
+}
+
 
 trait FreshMemberApi extends GetMemberApi {
   self: ApiController with MemberToJsonConverter =>
