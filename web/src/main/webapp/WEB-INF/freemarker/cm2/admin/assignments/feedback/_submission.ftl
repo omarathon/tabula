@@ -37,6 +37,13 @@
         </a>
       </li>
     </#if>
+
+    <#if command.reasonableAdjustmentsDeclared!false>
+      <li>
+        <span class="label label-info">Reasonable adjustments declared</span>
+      </li>
+    </#if>
+
   </ul>
 <#else>
   <#if command.assignment.openEnded>
