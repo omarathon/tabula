@@ -82,12 +82,12 @@ trait MultipleFreshMemberApi {
     ViewMultipleProfileCommand(members, user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getMembers(@ModelAttribute("getCommand") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
+  def getMembers(@ModelAttribute("getCommand") command: ViewMultipleProfileCommand.Command, @RequestParam members: String[], @RequestParam(defaultValue = "member") fields: String): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
       "members" -> Map(
-        command.apply().asScala.map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
+        command.apply(members).asScala.map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
       )
     )))
 }
