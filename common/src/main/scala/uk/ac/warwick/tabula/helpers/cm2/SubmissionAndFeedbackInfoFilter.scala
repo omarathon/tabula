@@ -129,7 +129,7 @@ object SubmissionAndFeedbackInfoFilters {
     case object ReasonableAdjustmentsDeclared extends SubmissionAndFeedbackInfoFilter {
       val description = "Reasonable Adjustments Declared"
 
-      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.createdByAEP
 
       def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
         item.coursework.enhancedSubmission.exists(_.submission.reasonableAdjustmentsDeclared.contains(true))
