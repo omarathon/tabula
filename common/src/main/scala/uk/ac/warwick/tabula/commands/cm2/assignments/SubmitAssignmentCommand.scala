@@ -61,7 +61,6 @@ object SubmitAssignmentCommand {
       with SubmitAssignmentSetSubmittedDatePermissions
       with SubmitAssignmentDescription
       with SubmitAssignmentValidation
-      with SubmitAssignmentNotifications
       with SubmitAssignmentTriggers
       with AutowiringSubmissionServiceComponent
       with AutowiringFeaturesComponent
