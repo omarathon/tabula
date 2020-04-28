@@ -1,23 +1,22 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
 import org.springframework.validation.Errors
-
-import scala.jdk.CollectionConverters._
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileService, ProfileServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSecurityServiceComponent, ProfileServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+
+import scala.jdk.CollectionConverters._
 
 object ViewMultipleProfileCommand {
   type Command = Appliable[Seq[Member]] with ViewMultipleProfilePermissions
 
-  def apply(members: JList[String], viewer: CurrentUser): Command =
-    new ViewMultipleProfilesCommandInternal(members, viewer)
+  def apply(viewer: CurrentUser): Command =
+    new ViewMultipleProfilesCommandInternal(viewer)
       with ViewMultipleProfilePermissions
       with AutowiringSecurityServiceComponent
       with AutowiringProfileServiceComponent
@@ -26,7 +25,7 @@ object ViewMultipleProfileCommand {
 
 }
 
-abstract class ViewMultipleProfilesCommandInternal(val members: JList[String], val viewer: CurrentUser)
+abstract class ViewMultipleProfilesCommandInternal(val viewer: CurrentUser)
   extends CommandInternal[Seq[Member]]
     with PermissionsCheckingMethods
     with ProfileServiceComponent
@@ -48,7 +47,7 @@ trait ViewMultipleProfilesValidator extends SelfValidating {
 trait ViewMultipleProfilesCommandState {
   self: ProfileServiceComponent =>
 
-  def members: JList[String]
+  var members: JList[String] = _
   lazy val memberObjects: Seq[Member] = profileService.getAllMembersWithUniversityIds(members.asScala.toSeq)
   def viewer: CurrentUser
 }
