@@ -47,21 +47,24 @@ trait ViewMultipleProfilesValidator extends SelfValidating {
 trait ViewMultipleProfilesCommandState {
   self: ProfileServiceComponent =>
 
-  var members: JList[String] = _
+  var members: JList[String] = JArrayList()
   lazy val memberObjects: Seq[Member] = profileService.getAllMembersWithUniversityIds(members.asScala.toSeq)
+
   def viewer: CurrentUser
 }
 
 trait ViewMultipleProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods with Logging with CheckViewProfile {
   self: ViewMultipleProfilesCommandState
-    with SecurityServiceComponent  =>
+    with SecurityServiceComponent =>
 
 
   val permission: Permission = Permissions.Profiles.Read.Core
 
   override def permissionsCheck(p: PermissionsChecking): Unit = {
-    for (member <- memberObjects) {
-      checkViewProfile(p, MemberOrUser(member), viewer)
-    }
+    if (memberObjects.nonEmpty) {
+      for (member <- memberObjects) {
+        checkViewProfile(p, MemberOrUser(member), viewer)
+      }
+    } else p.PermissionCheck(Permissions.UserPicker)
   }
 }

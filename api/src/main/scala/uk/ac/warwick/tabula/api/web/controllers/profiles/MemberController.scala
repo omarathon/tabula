@@ -83,7 +83,7 @@ trait MultipleFreshMemberApi {
     ViewMultipleProfileCommand(user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getMembers(@ModelAttribute command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
+  def getMembers(@ModelAttribute("command") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
