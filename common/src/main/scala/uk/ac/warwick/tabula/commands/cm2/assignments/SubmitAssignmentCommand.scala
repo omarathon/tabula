@@ -118,7 +118,8 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
 
   override def applyInternal(): Submission = transactional() {
     assignment.submissions.asScala.find(_.isForUser(user.asUser)).foreach { existingSubmission =>
-      if (assignment.resubmittable(user.asUser)) {
+      if (assignment.resubmittable(user.asUser) ||
+        (assignment.createdByAEP && assignment.allowResubmission && assignment.isAlive && assignment.collectSubmissions && assignment.isOpened)) {
         triggerService.removeExistingTriggers(existingSubmission)
         submissionService.delete(existingSubmission)
       } else { // Validation should prevent ever reaching here.
