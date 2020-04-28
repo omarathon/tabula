@@ -88,7 +88,7 @@ trait MultipleFreshMemberApi {
       "success" -> true,
       "status" -> "ok",
       "members" -> Map(
-        command.apply().asScala.map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
+        command.apply().map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
       )
     )))
 }
