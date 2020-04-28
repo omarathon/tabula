@@ -7,17 +7,14 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.AssignmentController._
 import uk.ac.warwick.tabula.api.web.helpers._
 import uk.ac.warwick.tabula.commands.cm2.assignments._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FileFormValue
-import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.web.Mav
 
@@ -48,10 +45,7 @@ trait AEPCreateSubmissionApi {
   def command(@PathVariable assignment: Assignment,
     @RequestParam("universityId") member: Member,
     @RequestParam("submittedDate") submittedDate: DateTime,
-    @RequestParam("submissionDeadline") submissionDeadline: DateTime): SubmitAssignmentCommand
-    with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentSetSubmittedDatePermissions
-    with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentTriggers
-    with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
+    @RequestParam("submissionDeadline") submissionDeadline: DateTime): SubmitAssignmentCommand =
     SubmitAssignmentCommand.onBehalfOfWithSubmittedDateAndDeadline(assignment, member, submittedDate, submissionDeadline)
 
   // Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
