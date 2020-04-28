@@ -79,8 +79,8 @@ trait MultipleFreshMemberApi {
   def checkMember(m: Member): Member = notStale(mandatory(m))
 
   @ModelAttribute("command")
-  def getCommand(): ViewMultipleProfileCommand.Command =
-    ViewMultipleProfileCommand(user)
+  def getCommand(@RequestParam members: JList[String]): ViewMultipleProfileCommand.Command =
+    ViewMultipleProfileCommand(members, user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def getMembers(@ModelAttribute("command") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =

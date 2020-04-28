@@ -15,8 +15,8 @@ import scala.jdk.CollectionConverters._
 object ViewMultipleProfileCommand {
   type Command = Appliable[Seq[Member]] with ViewMultipleProfilePermissions
 
-  def apply(viewer: CurrentUser): Command =
-    new ViewMultipleProfilesCommandInternal(viewer)
+  def apply(members: JList[String], viewer: CurrentUser): Command =
+    new ViewMultipleProfilesCommandInternal(members, viewer)
       with ViewMultipleProfilePermissions
       with AutowiringSecurityServiceComponent
       with AutowiringProfileServiceComponent
@@ -25,7 +25,7 @@ object ViewMultipleProfileCommand {
 
 }
 
-abstract class ViewMultipleProfilesCommandInternal(val viewer: CurrentUser)
+abstract class ViewMultipleProfilesCommandInternal(val members: JList[String], val viewer: CurrentUser)
   extends CommandInternal[Seq[Member]]
     with PermissionsCheckingMethods
     with ProfileServiceComponent
@@ -47,7 +47,7 @@ trait ViewMultipleProfilesValidator extends SelfValidating {
 trait ViewMultipleProfilesCommandState {
   self: ProfileServiceComponent =>
 
-  var members: JList[String] = JArrayList()
+  def members: JList[String]
   lazy val memberObjects: Seq[Member] = profileService.getAllMembersWithUniversityIds(members.asScala.toSeq)
 
   def viewer: CurrentUser
