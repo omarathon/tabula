@@ -77,13 +77,13 @@ trait MultipleFreshMemberApi {
   self: ApiController with MemberToJsonConverter =>
 
   def checkMember(m: Member): Member = notStale(mandatory(m))
-
-  @ModelAttribute("command")
-  def getCommand(@RequestParam members: JList[String]): ViewMultipleProfileCommand.Command =
-    ViewMultipleProfileCommand(members, user)
+//
+//  @ModelAttribute("command")
+//  def getCommand(@RequestParam members: JList[String]): ViewMultipleProfileCommand.Command =
+//    ViewMultipleProfileCommand(members, user)
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getMembers(@ModelAttribute("command") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
+  def getMembers(command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String, @RequestParam members: JList[String]): Mav =
     Mav(new JSONView(Map(
       "success" -> true,
       "status" -> "ok",
