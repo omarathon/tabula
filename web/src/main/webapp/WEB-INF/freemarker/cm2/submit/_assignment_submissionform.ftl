@@ -15,7 +15,7 @@
 
 <#macro assignmentInformation>
   <div>
-    <#if !assignment.openEnded && !assignment.createdByAEP??>
+    <#if !assignment.openEnded && !(assignment.createdByAEP!false)>
       <#assign time_remaining = durationFormatter(assignment.closeDate) />
       <p>
         <#if extension?? && extension.relevant>
@@ -44,7 +44,7 @@
           If you do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
         </p>
       </#if>
-    <#elseif !assignment.createdByAEP??>
+    <#elseif !(assignment.createdByAEP!false)>
       <p class="very-subtle">
         This assignment does not have a deadline.
 
