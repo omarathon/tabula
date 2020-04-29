@@ -6,7 +6,7 @@
       <h2>Assignment page for students</h2>
 
       <p>You can give students a link to this page to
-        <#if assignment.collectSubmissions>submit work and to</#if>
+        <#if assignment.collectSubmissions && !assignment.createdByAEP >submit work and to</#if>
         receive their feedback<#if assignment.collectMarks> and/or marks</#if>.</p>
 
       <p>If a student isn't in the enrolled list for your assignment, then they will receive a message on this page that
