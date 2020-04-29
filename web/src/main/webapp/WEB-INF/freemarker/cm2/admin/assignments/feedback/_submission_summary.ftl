@@ -27,6 +27,10 @@
         <span class="label label-info">Disability disclosed</span>
       </a>
     </#if>
+
+    <#if command.reasonableAdjustmentsDeclared??>
+        <@components.reasonable_adjustment_declaration/>
+    </#if>
   </div>
 
   <div>

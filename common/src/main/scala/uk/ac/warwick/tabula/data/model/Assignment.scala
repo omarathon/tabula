@@ -590,7 +590,7 @@ class Assignment
   /**
     * Calculates whether we could submit to this assignment.
     */
-  def submittable(user: User): Boolean = isAlive && collectSubmissions && isOpened && (allowLateSubmissions || !isClosed || isWithinExtension(user))
+  def submittable(user: User): Boolean = isAlive && collectSubmissions && isOpened && !createdByAEP && (allowLateSubmissions || !isClosed || isWithinExtension(user))
 
   /**
     * Calculates whether we could re-submit to this assignment (assuming that the current

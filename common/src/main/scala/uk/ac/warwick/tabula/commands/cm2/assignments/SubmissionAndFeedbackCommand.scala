@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
@@ -17,7 +16,6 @@ import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceCo
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters._
 
 object SubmissionAndFeedbackCommand {
@@ -73,6 +71,7 @@ trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer
   val enhancedFeedbacksCommand: ListFeedbackCommand.CommandType = ListFeedbackCommand(assignment)
 
   override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
+
   override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
 }
 
@@ -201,7 +200,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
         }
 
         profileService.getAllMembersWithUserIds(users, activeOnly = false)
-          .collect{ case student: StudentMember => student.disability.map(d => student.universityId -> d)  }
+          .collect { case student: StudentMember => student.disability.map(d => student.universityId -> d) }
           .flatten
           .toMap
       }
@@ -255,7 +254,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           coursework = coursework,
           assignment = assignment,
           disability = disabilityLookup.get(user.getWarwickId),
-          reasonableAdjustmentsDeclared = reasonableAdjustmentsDeclaredLookup.get(user.getWarwickId).flatten,
+          reasonableAdjustmentsDeclared = reasonableAdjustmentsDeclaredLookup.get(user.getUserId).flatten,
         )
       }
     }
