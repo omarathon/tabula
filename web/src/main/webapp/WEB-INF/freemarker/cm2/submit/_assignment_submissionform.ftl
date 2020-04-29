@@ -201,7 +201,7 @@
       or submit your assignment then you'll need to get in touch directly with your
       course/module convenor as the assignment has now been archived.
     </p>
-  <#elseif !assignment.collectSubmissions || assignment.createdByAEP?? >
+  <#elseif !assignment.collectSubmissions || assignment.createdByAEP!false>
     <p>
       This assignment isn't collecting submissions through this system, but you may get
       an email to retrieve your feedback from here.
