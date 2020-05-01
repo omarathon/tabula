@@ -1372,7 +1372,7 @@
       <@disability_disclosure student_disability=student.disability/>
     </#if>
 
-      <#if showReasonableAdjustmentsDeclaration && student.reasonableAdjustmentsDeclared??>
+      <#if showReasonableAdjustmentsDeclaration && student.reasonableAdjustmentsDeclared!false>
         <@reasonable_adjustment_declaration/>
       </#if>
 
@@ -1399,7 +1399,7 @@
       <@disability_disclosure student_disability=student.disability/>
     </#if>
 
-    <#if student.reasonableAdjustmentsDeclared??>
+    <#if student.reasonableAdjustmentsDeclared!false>
         <@reasonable_adjustment_declaration/>
     </#if>
   <#else>
