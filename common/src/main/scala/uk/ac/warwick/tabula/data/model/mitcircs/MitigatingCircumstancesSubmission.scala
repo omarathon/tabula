@@ -412,7 +412,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isAcute: Boolean = Option(acuteOutcome).isDefined
   def canConfirmSensitiveEvidence: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || state == ApprovedByChair || panel.nonEmpty) && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || !isAcute)
-  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || isAcute)
+  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && ((panel.isEmpty && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)) || isAcute)
   def canWithdraw: Boolean = !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canApproveOutcomes: Boolean = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
   def canReopen: Boolean = isWithdrawn
