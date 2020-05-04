@@ -28,7 +28,7 @@
       </a>
     </#if>
 
-    <#if command.reasonableAdjustmentsDeclared??>
+    <#if command.reasonableAdjustmentsDeclared!false>
         <@components.reasonable_adjustment_declaration/>
     </#if>
   </div>
