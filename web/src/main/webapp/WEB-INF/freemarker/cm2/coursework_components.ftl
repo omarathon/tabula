@@ -562,6 +562,9 @@
       <#if stageInfo.completed>
         <#local state = 'success' />
         <#local icon = 'fa-check-circle-o' />
+      <#elseif stageInfo.skipped>
+        <#local state = 'primary' />
+        <#local icon = 'fa-arrow-circle-o-right' />
       <#elseif stageInfo.started>
         <#local state = 'warning' />
         <#local icon = 'fa-dot-circle-o' />
