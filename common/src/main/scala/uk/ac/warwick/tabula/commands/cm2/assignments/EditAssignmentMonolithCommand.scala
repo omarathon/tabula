@@ -69,7 +69,7 @@ abstract class EditAssignmentMonolithCommandInternal(val assignment: Assignment)
     studentsCommand.hiddenFromStudents = hiddenFromStudents
 
     studentsCommand.assessmentGroups = assignment.assessmentGroups.stream().collect(Collectors.toList())
-    studentsCommand.members = members
+    studentsCommand.members.copyFrom(members)
     studentsCommand.apply()
 
     assessmentService.save(assignment)
