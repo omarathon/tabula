@@ -194,26 +194,27 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(anonymity).foreach(state.anonymity = _)
     Option(createdByAEP).foreach(state.createdByAEP = _)
 
-    val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
-    if (sitsLinksSeq.forall { link =>
-      state.allUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
-        && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
+    if (sitsLinks != null ) {
+      val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
+      if (sitsLinksSeq.forall { link =>
+        state.allUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
+          && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
 
-    }) {
-      val linkedUpstreamGroups: JList[UpstreamGroup] = state.allUpstreamGroups.filter { upstreamGroup =>
-        sitsLinksSeq.exists { sitsLink =>
-          upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
-            upstreamGroup.sequence == sitsLink.sequence &&
-            upstreamGroup.occurrence == sitsLink.occurrence
-        }
+      }) {
+        val linkedUpstreamGroups: JList[UpstreamGroup] = state.allUpstreamGroups.filter { upstreamGroup =>
+          sitsLinksSeq.exists { sitsLink =>
+            upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
+              upstreamGroup.sequence == sitsLink.sequence &&
+              upstreamGroup.occurrence == sitsLink.occurrence
+          }
 
-      }.asJava
-      state.upstreamGroups = linkedUpstreamGroups
-      state.afterBind()
-    } else {
-      errors.reject("assignment.api.sitsLinks.invalidData")
+        }.asJava
+        state.upstreamGroups = linkedUpstreamGroups
+      } else {
+        errors.reject("assignment.api.sitsLinks.invalidData")
+      }
     }
-
+    state.afterBind()
   }
 
 }
