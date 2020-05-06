@@ -52,7 +52,7 @@ class OnlineMarkerFeedbackCommandInternal(
   val student: User,
   val marker: User,
   val submitter: CurrentUser,
-  val gradeGenerator: GeneratesGradesFromMarks
+  val gradeGenerator: GeneratesGradesFromMarks,
 ) extends CommandInternal[MarkerFeedback] with OnlineMarkerFeedbackState with MarkerCopyFromFormFields with MarkerWriteToFormFields {
 
   self: ProfileServiceComponent with CM2MarkingWorkflowServiceComponent with FileAttachmentServiceComponent with SavedFormValueDaoComponent
@@ -66,7 +66,7 @@ class OnlineMarkerFeedbackCommandInternal(
     )
 
     copyTo(markerFeedback)
-    markerFeedback.updatedOn = DateTime.now
+    markerFeedback.updatedOn = if (approved) null else DateTime.now
     feedbackService.save(markerFeedback)
     markerFeedback
   }

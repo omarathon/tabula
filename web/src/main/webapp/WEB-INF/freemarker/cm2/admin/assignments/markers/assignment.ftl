@@ -249,6 +249,7 @@
       $body.on('change', 'input[type=radio][name=changesState]', function (e) {
         var show = this.value === "make-changes";
         $(this).closest('.online-marking').find('.marking-and-feedback').toggle(show);
+        $(this).closest('.online-marking').find('.marking-and-feedback.approved').val(!show);
       });
 
     })(jQuery);
