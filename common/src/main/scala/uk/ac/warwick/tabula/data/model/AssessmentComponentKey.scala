@@ -11,6 +11,7 @@ import scala.jdk.CollectionConverters._
 
 object AssessmentComponentKey {
   def apply(ac: AssessmentComponent): AssessmentComponentKey = new AssessmentComponentKey(ac.moduleCode, ac.assessmentGroup, ac.sequence)
+  def apply(uag: UpstreamAssessmentGroup): AssessmentComponentKey = new AssessmentComponentKey(uag.moduleCode, uag.assessmentGroup, uag.sequence)
   def unapply(key: AssessmentComponentKey): Option[Seq[String]] = Some(Seq(key.moduleCode, key.assessmentGroup, key.sequence))
 }
 

@@ -154,6 +154,7 @@ abstract class Features {
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
+  @Value("${features.marksManagement:false}") var marksManagement: Boolean = defaults.marksManagement
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -305,6 +306,7 @@ class FeaturesMessage {
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
   @BeanProperty var notificationBatching = false
+  @BeanProperty var marksManagement = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

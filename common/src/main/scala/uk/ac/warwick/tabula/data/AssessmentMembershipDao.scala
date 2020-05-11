@@ -107,6 +107,8 @@ trait AssessmentMembershipDao {
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
+
   def emptyMembers(groupsToEmpty: Seq[String]): Int
 
   def countPublishedFeedback(assignment: Assignment): Int
@@ -543,6 +545,28 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .seq
       .map(_.id)
 
+  // Get only current members
+  private def currentMembersByGroup(upstreamGroups: Seq[UpstreamAssessmentGroup]): Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
+    if (upstreamGroups.isEmpty) Map.empty
+    else session.newQuery[UpstreamAssessmentGroupMember](
+      """
+        select distinct uagm
+        from UpstreamAssessmentGroupMember uagm
+          join uagm.upstreamAssessmentGroup uag
+
+          join StudentCourseDetails scd on
+            scd.student.universityId = uagm.universityId
+
+          join StudentCourseYearDetails scyd on
+            scyd.studentCourseDetails = scd and
+            scyd.academicYear = uag.academicYear and
+            scd.statusOnCourse.code not like 'P%'
+        where
+          uag in (:upstreamGroups)""")
+      .setParameterList("upstreamGroups", upstreamGroups)
+      .seq
+      .groupBy(_.upstreamAssessmentGroup)
+
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] = {
     // Get the UpstreamAssessmentGroups first as some of them will be empty
     val upstreamGroups: Seq[UpstreamAssessmentGroup] =
@@ -566,27 +590,33 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
         .setParameterList("groups", groups)
         .seq
 
-    // Get only current members
-    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
-      if (upstreamGroups.isEmpty) Map.empty
-      else session.newQuery[UpstreamAssessmentGroupMember](
+    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] = currentMembersByGroup(upstreamGroups)
+
+    upstreamGroups.map { group =>
+      UpstreamAssessmentGroupInfo(group, currentMembers.getOrElse(group, Nil))
+    }
+  }
+
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] = {
+    // Get the UpstreamAssessmentGroups first as some of them will be empty
+    val upstreamGroups: Seq[UpstreamAssessmentGroup] =
+      if (components.isEmpty) Nil
+      else session.newQuery[UpstreamAssessmentGroup](
         """
-        select distinct uagm
-        from UpstreamAssessmentGroupMember uagm
-          join uagm.upstreamAssessmentGroup uag
-
-          join StudentCourseDetails scd on
-            scd.student.universityId = uagm.universityId
-
-          join StudentCourseYearDetails scyd on
-            scyd.studentCourseDetails = scd and
-            scyd.academicYear = uag.academicYear and
-            scd.statusOnCourse.code not like 'P%'
+        select uag
+        from UpstreamAssessmentGroup uag
+          join AssessmentComponent ac
+            on ac.assessmentGroup = uag.assessmentGroup and
+               ac.moduleCode = uag.moduleCode and
+               ac.sequence = uag.sequence
         where
-          uag in (:upstreamGroups)""")
-        .setParameterList("upstreamGroups", upstreamGroups)
+          uag.academicYear = :academicYear and
+          ac in (:components)""")
+        .setParameter("academicYear", academicYear)
+        .setParameterList("components", components)
         .seq
-        .groupBy(_.upstreamAssessmentGroup)
+
+    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] = currentMembersByGroup(upstreamGroups)
 
     upstreamGroups.map { group =>
       UpstreamAssessmentGroupInfo(group, currentMembers.getOrElse(group, Nil))
