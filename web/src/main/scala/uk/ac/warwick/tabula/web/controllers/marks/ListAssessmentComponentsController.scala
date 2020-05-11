@@ -30,7 +30,7 @@ class ListAssessmentComponentsController
 
   @ModelAttribute("command")
   def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): ListAssessmentComponentsCommand.Command =
-    ListAssessmentComponentsCommand(mandatory(department), mandatory(academicYear))
+    ListAssessmentComponentsCommand(mandatory(department), mandatory(academicYear), user)
 
   @RequestMapping
   def list(@ModelAttribute("command") command: ListAssessmentComponentsCommand.Command, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav =
