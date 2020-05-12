@@ -252,8 +252,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       }
 
   def save(group: UpstreamAssessmentGroup): Unit =
-    find(group).getOrElse {
-      session.save(group)
+    find(group) match {
+      case Some(existing) if existing.deadline == group.deadline => // Do nothing
+      case Some(outdated) =>
+        outdated.deadline = group.deadline
+        session.update(outdated)
+
+      case _ => session.save(group)
     }
 
   def save(member: UpstreamAssessmentGroupMember): Unit = session.saveOrUpdate(member)
