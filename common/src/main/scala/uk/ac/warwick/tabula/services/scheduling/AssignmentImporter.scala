@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
@@ -242,13 +243,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
   }
 
   def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
-    for {
+    (for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- yearsToImport
-    } yield {
+    } yield (moduleCode, assessmentType, academicYear)).zipWithIndex.map { case ((moduleCode, assessmentType, academicYear), index) =>
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
       ag.academicYear = academicYear
@@ -258,6 +259,25 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         case AssessmentType.Essay => "A01"
         case AssessmentType.SummerExam => "E01"
       }
+      ag.deadline = Some(assessmentType match {
+        case AssessmentType.Essay =>
+          index % 20 match {
+            case i if i > 10 =>
+              academicYear.termOrVacation(PeriodType.springTerm)
+                .firstDay.withDayOfWeek((index % 5) + 1)
+                .plusWeeks(index % 10)
+
+            case i =>
+              academicYear.termOrVacation(PeriodType.autumnTerm)
+                .firstDay.withDayOfWeek((index % 5) + 1)
+                .plusWeeks(i)
+          }
+
+        case AssessmentType.SummerExam =>
+          new LocalDate(academicYear.endYear, DateTimeConstants.APRIL, 27)
+            .plusDays(index / 10)
+      })
+
       ag
     }
 
