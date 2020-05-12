@@ -31,7 +31,13 @@
         <td>${result.upstreamAssessmentGroupInfo.upstreamAssessmentGroup.occurrence}</td>
         <td>${result.assessmentComponent.assessmentType.name}</td>
         <td>${result.assessmentComponent.weighting}%</td>
-        <td>- <#-- TODO --></td>
+        <td>
+          <#if result.upstreamAssessmentGroupInfo.upstreamAssessmentGroup.deadline??>
+            <@fmt.date date=result.upstreamAssessmentGroupInfo.upstreamAssessmentGroup.deadline includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+          <#else>
+            <span class="very-subtle">Unknown</span>
+          </#if>
+        </td>
         <td>${result.upstreamAssessmentGroupInfo.currentMembers?size}</td>
         <td>${result.currentMembersWithMarksUploaded?size}</td>
       </tr>

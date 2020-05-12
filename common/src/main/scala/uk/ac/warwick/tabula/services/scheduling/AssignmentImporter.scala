@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
@@ -242,13 +243,13 @@ class SandboxAssignmentImporter extends AssignmentImporter {
   }
 
   def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
-    for {
+    (for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- yearsToImport
-    } yield {
+    } yield (moduleCode, assessmentType, academicYear)).zipWithIndex.map { case ((moduleCode, assessmentType, academicYear), index) =>
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
       ag.academicYear = academicYear
@@ -258,6 +259,25 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         case AssessmentType.Essay => "A01"
         case AssessmentType.SummerExam => "E01"
       }
+      ag.deadline = Some(assessmentType match {
+        case AssessmentType.Essay =>
+          index % 20 match {
+            case i if i > 10 =>
+              academicYear.termOrVacation(PeriodType.springTerm)
+                .firstDay.withDayOfWeek((index % 5) + 1)
+                .plusWeeks(index % 10)
+
+            case i =>
+              academicYear.termOrVacation(PeriodType.autumnTerm)
+                .firstDay.withDayOfWeek((index % 5) + 1)
+                .plusWeeks(i)
+          }
+
+        case AssessmentType.SummerExam =>
+          new LocalDate(academicYear.endYear, DateTimeConstants.APRIL, 27)
+            .plusDays(index / 10)
+      })
+
       ag
     }
 
@@ -464,7 +484,8 @@ object AssignmentImporter {
       mav.mod_code as module_code,
       '${AssessmentComponent.NoneAssessmentGroup}' as mav_occurrence,
       '${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
-      '${AssessmentComponent.NoneAssessmentGroup}' as seq
+      '${AssessmentComponent.NoneAssessmentGroup}' as seq,
+      null as deadline
       from $sitsSchema.cam_mab mab
         join $sitsSchema.cam_mav mav
           on mab.map_code = mav.mod_code
@@ -478,12 +499,20 @@ object AssignmentImporter {
       mav.mod_code as module_code,
       ${castToString("mav.mav_occur")} as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
       ${castToString("mab.mab_agrp")} as assessment_group, -- group of assessment components forming one assessment choice
-      ${castToString("mab.mab_seq")} as seq -- individual assessments (e.g each exam or coursework component)
+      ${castToString("mab.mab_seq")} as seq, -- individual assessments (e.g each exam or coursework component)
+      mad.mad_ddate as deadline
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
         join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are available in the year
           on mab.map_code = mav.mod_code
         join $sitsSchema.ins_mod mod
           on mav.mod_code = mod.mod_code
+        left outer join $sitsSchema.cam_mad mad -- Module Assessment... Deadline? one-to-one to mav/mab?
+          on mav.mod_code = mad.mod_code and
+             mav.mav_occur = mad.mav_occur and
+             mav.ayr_code = mad.ayr_code and
+             mav.psl_code = mad.psl_code and
+             mab.map_code = mad.map_code and
+             mab.mab_seq = mad.mab_seq
       where mav.psl_code = 'Y' and
             mab.mab_agrp is not null and
             mav.ayr_code in (:academic_year_code)"""
@@ -801,6 +830,7 @@ object AssignmentImporter {
     ag.assessmentGroup = rs.getString("assessment_group")
     ag.occurrence = rs.getString("mav_occurrence")
     ag.sequence = rs.getString("seq")
+    ag.deadline = Option(rs.getDate("deadline")).map(_.toLocalDate.asJoda)
     ag
   }
 

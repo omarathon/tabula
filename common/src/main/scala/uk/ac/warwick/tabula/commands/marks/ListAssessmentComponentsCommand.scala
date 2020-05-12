@@ -23,13 +23,13 @@ object ListAssessmentComponentsCommand {
 
   def apply(department: Department, academicYear: AcademicYear, currentUser: CurrentUser): Command =
     new ListAssessmentComponentsCommandInternal(department, academicYear, currentUser)
+      with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringSecurityServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
       with Unaudited with ReadOnly
-      with AutowiringAssessmentMembershipServiceComponent
-      with AutowiringSecurityServiceComponent
-      with AutowiringModuleAndDepartmentServiceComponent
 }
 
 abstract class ListAssessmentComponentsCommandInternal(val department: Department, val academicYear: AcademicYear, val currentUser: CurrentUser)
