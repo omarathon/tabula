@@ -18,6 +18,7 @@ object Routes {
   val groups = tabula.groups.web.Routes
   val attendance = tabula.attendance.web.Routes
   val mitcircs = tabula.mitcircs.web.Routes
+  val marks = tabula.marks.web.Routes
   val admin = tabula.admin.web.Routes
   val sysadmin = tabula.sysadmin.web.Routes
   val reports = tabula.reports.web.Routes

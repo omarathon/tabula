@@ -40,6 +40,8 @@ trait AssessmentMembershipService {
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
+
   def getUpstreamAssessmentGroups(module: Module, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(student: StudentMember, academicYear: AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup]
@@ -242,6 +244,9 @@ class AssessmentMembershipServiceImpl
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
     dao.getUpstreamAssessmentGroupInfo(groups, academicYear)
 
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
+    dao.getUpstreamAssessmentGroupInfoForComponents(components, academicYear)
+
   def getUpstreamAssessmentGroup(id: String): Option[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroup(id)
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember] = dao.getCurrentUpstreamAssessmentGroupMembers(uagid)
@@ -283,11 +288,7 @@ class AssessmentMembershipServiceImpl
       .groupBy(_.upstreamAssessmentGroup)
       .map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }
       .toSeq
-      .groupBy(uagi => new AssessmentComponentKey(
-        uagi.upstreamAssessmentGroup.moduleCode,
-        uagi.upstreamAssessmentGroup.assessmentGroup,
-        uagi.upstreamAssessmentGroup.sequence
-      ))
+      .groupBy(uagi => AssessmentComponentKey(uagi.upstreamAssessmentGroup))
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)

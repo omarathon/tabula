@@ -9,13 +9,19 @@
     </#if>
 
     <#if features.smallGroupTeaching>
-      <li class="groups-active"><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></li>
+      <li class="groups-active"><a href="<@url page="/" context="/groups" />">Small Groups</a></li>
     </#if>
 
-    <li class="courses-active cm2-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
+    <li class="courses-active cm2-active"><a href="<@url page="/" context="/coursework" />">Coursework</a></li>
 
     <#if examsEnabled || examGridsEnabled>
-      <li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Management</a></li>
+      <li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Grids</a></li>
+    </#if>
+
+    <#if features.marksManagement>
+      <#if canManageMarksManagement>
+        <li class="marks-active"><a href="<@url page="/" context="/marks" />">Marks</a></li>
+      </#if>
     </#if>
 
     <#if features.attendanceMonitoring>
@@ -86,6 +92,15 @@
           <span class="hint">Manage exam board grids</span>
         </#if>
       </li>
+    </#if>
+
+    <#if features.marksManagement>
+      <#if canManageMarksManagement>
+        <li>
+          <h2><a href="<@url page="/" context="/marks" />">Marks Management</a></h2>
+          <span class="hint">View, upload and scale component marks</span>
+        </li>
+      </#if>
     </#if>
 
     <#if features.attendanceMonitoring>

@@ -67,6 +67,14 @@
   <#assign name="mitcircs" />
   <#assign nonav=false />
   <#assign homeUrl><@routes.mitcircs.home /></#assign>
+<#elseif requestPath == '/marks' || requestPath?starts_with('/marks/')>
+  <#assign bodyClass="marks-page" />
+  <#assign siteHeader="Marks Management" />
+  <#assign subsite=true />
+  <#assign title="Marks Management" />
+  <#assign name="marks" />
+  <#assign nonav=false />
+  <#assign homeUrl><@routes.marks.home /></#assign>
 <#else>
   <#assign bodyClass="tabula-page" />
   <#assign siteHeader="Tabula" />
