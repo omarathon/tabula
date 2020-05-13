@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import uk.ac.warwick.tabula.Fixtures.assignment
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -16,6 +17,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.jdk.CollectionConverters._
 
@@ -150,15 +152,16 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assessmentComponent(module: Module, number: Int): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
     a.moduleCode = "%s-30" format module.code.toUpperCase
     a.assessmentGroup = "A"
-    a.sequence = "A%02d" format number
-    a.assessmentType = AssessmentType.Essay
+    a.sequence = "%s%02d".format(assessmentType.subtype.code, number)
+    a.assessmentType = assessmentType
     a.inUse = true
+    a.weighting = weighting
     a
   }
 
@@ -185,12 +188,30 @@ object Fixtures extends Mockito {
     UpstreamAssessmentGroupInfo(uag, activeMembers.asScala.toSeq)
   }
 
-  def assessmentGroup(assignment: AssessmentComponent): UpstreamAssessmentGroup =
-    assessmentGroup(
-      academicYear = AcademicYear(2012),
+  def assessmentGroup(assignment: AssessmentComponent, academicYear: AcademicYear = AcademicYear(2012)): UpstreamAssessmentGroup = {
+    val group = assessmentGroup(
+      academicYear = academicYear,
       code = assignment.assessmentGroup,
       module = assignment.moduleCode + "-30",
-      occurrence = "A")
+      occurrence = "A"
+    )
+    group.assessmentComponent = assignment
+    group
+  }
+
+  def assessmentGroupAndMember(
+    assignment: AssessmentComponent,
+    actualMark: BigDecimal,
+    academicYear: AcademicYear,
+    deadline: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+  ): UpstreamAssessmentGroup = {
+    val group = assessmentGroup(assignment, academicYear)
+    group.deadline = Option(deadline)
+    val groupMember = new UpstreamAssessmentGroupMember(group, "0123456")
+    groupMember.actualMark = Option(actualMark)
+    group.members.addAll(Seq(groupMember).asJava)
+    group
+  }
 
   def feedbackTemplate(name: String): FeedbackTemplate = {
     val template = new FeedbackTemplate
@@ -349,6 +370,7 @@ object Fixtures extends Mockito {
   ): ModuleRegistration = {
     val scjCode = Option(scd).map(_.scjCode).orNull
     val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence)
+    mr.studentCourseDetails = scd
     mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
     mr.selectionStatus = status
     mr

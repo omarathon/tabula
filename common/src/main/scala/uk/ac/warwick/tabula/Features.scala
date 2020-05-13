@@ -142,6 +142,8 @@ abstract class Features {
   @Value("${features.scheduling.departmentMandatoryPermissionsWarning:false}") var schedulingDepartmentMandatoryPermissionsWarning: Boolean = defaults.schedulingDepartmentMandatoryPermissionsWarning
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
+  @Value("${features.exams.graduationBenchmark:false}") var graduationBenchmark: Boolean = defaults.graduationBenchmark
+  @Value("${features.exams.graduationBenchmark.studentView:false}") var graduationBenchmarkStudentView: Boolean = defaults.graduationBenchmarkStudentView
 
   @Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
   @Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
@@ -292,6 +294,8 @@ class FeaturesMessage {
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
+  @BeanProperty var graduationBenchmark = false
+  @BeanProperty var graduationBenchmarkStudentView = false
 
   @BeanProperty var reports = true
 

@@ -36,6 +36,15 @@ class UpstreamAssessmentGroup extends GeneratedId {
   @Column(nullable = false)
   var academicYear: AcademicYear = _
 
+  @ManyToOne(fetch = FetchType.EAGER, optional = true)
+  @JoinColumns(value = Array(
+    new JoinColumn(name = "moduleCode", referencedColumnName="moduleCode", insertable = false, updatable = false),
+    new JoinColumn(name = "sequence", referencedColumnName="sequence", insertable = false, updatable = false)
+  ))
+  private var _assessmentComponent: AssessmentComponent = _
+  def assessmentComponent: Option[AssessmentComponent] = Option(_assessmentComponent)
+  def assessmentComponent_=(assessmentComponent: AssessmentComponent): Unit = _assessmentComponent = assessmentComponent
+
   @Column(name = "deadline")
   private var _deadline: LocalDate = _
   def deadline: Option[LocalDate] = Option(_deadline)
@@ -91,6 +100,9 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
       case 0 => Ordering.String.compare(this.universityId, that.universityId)
       case nonZero => nonZero
     }
+
+  // FIXME - just inherits from the components deadline - leaving this here in case we need to do something fancy to support resits
+  def deadline: Option[LocalDate] = upstreamAssessmentGroup.deadline
 
   def isAgreedMark: Boolean = resitAgreedMark.orElse(agreedMark).isDefined
 

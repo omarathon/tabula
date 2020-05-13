@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, Modu
 
 import scala.math.BigDecimal.RoundingMode
 
+case class ComponentAndMarks(assessmentComponent: Option[AssessmentComponent], member: UpstreamAssessmentGroupMember, cats:BigDecimal)
+
 trait ModuleRegistrationService {
 
   def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
@@ -44,6 +46,12 @@ trait ModuleRegistrationService {
     * @return The weighted mean mark, if all the provided registration has an agreed mark
     */
   def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
+
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
+
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
+
+  def graduationBenchmark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
   /**
     * Like weightedMeanYearMark but only returns year marks calculated from agreed (post board) marks
@@ -121,6 +129,36 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
+
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
+    val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
+      .map(_.weighting.toInt)
+      .getOrElse(0)
+
+    val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
+    ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+  }
+
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+    val completedCats = moduleRegistrations.flatMap(benchmarkComponentsAndMarks).map(_.cats).sum
+    val totalCats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+    if(totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
+  }
+
+  def graduationBenchmark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+    val marksForBenchmark = moduleRegistrations.map(mr => mr -> benchmarkComponentsAndMarks(mr)).toMap
+
+    val cats = marksForBenchmark.values.flatten.map(_.cats).sum
+
+    val benchmark = if(cats == 0) BigDecimal(0) else {
+      marksForBenchmark.values.flatten.map { componentAndMarks =>
+        val mark = componentAndMarks.member.firstDefinedMark.getOrElse(throw new IllegalStateException("Components without marks shouldn't be used to calculate the benchmark"))
+        mark * componentAndMarks.cats
+      }.sum / marksForBenchmark.values.flatten.map(_.cats).sum
+    }
+
+    benchmark.setScale(1, RoundingMode.HALF_UP)
+  }
 
   def overcattedModuleSubsets(
     moduleRegistrations: Seq[ModuleRegistration],
