@@ -16,6 +16,7 @@
       <th rowspan="2">Weighting</th>
       <th rowspan="2">Initial deadline</th>
       <th colspan="2">Students</th>
+      <th rowspan="2"></th>
     </tr>
     <tr>
       <th>Current</th>
@@ -40,6 +41,9 @@
         </td>
         <td>${result.upstreamAssessmentGroupInfo.currentMembers?size}</td>
         <td>${result.currentMembersWithMarksUploaded?size}</td>
+        <td>
+          <a class="btn btn-default btn-sm" href="<@routes.marks.assessmentcomponent_marks result.assessmentComponent result.upstreamAssessmentGroupInfo.upstreamAssessmentGroup />">Marks</a>
+        </td>
       </tr>
     </#list>
   </tbody>
