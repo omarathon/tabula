@@ -1,6 +1,6 @@
 <div class="deptheader">
   <h1>Record marks</h1>
-  <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
+  <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
 </div>
 
 <div class="fix-area">
