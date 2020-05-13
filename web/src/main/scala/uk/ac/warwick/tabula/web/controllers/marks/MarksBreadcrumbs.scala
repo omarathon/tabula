@@ -23,6 +23,11 @@ object MarksBreadcrumbs {
       val title: String = "Assessment Components"
       val url = Some(Routes.marks.Admin.AssessmentComponents(department, academicYear))
     }
+
+    case class AssessmentComponentRecordMarks(assessmentComponent: model.AssessmentComponent, upstreamAssessmentGroup: model.UpstreamAssessmentGroup, override val active: Boolean = false) extends BreadCrumb {
+      val title: String = s"${assessmentComponent.name} (${upstreamAssessmentGroup.academicYear.toString})"
+      val url = Some(Routes.marks.Admin.AssessmentComponents.recordMarks(assessmentComponent, upstreamAssessmentGroup))
+    }
   }
 
 }

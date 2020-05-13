@@ -16,3 +16,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
   </#if>
 </#macro>
 <#macro assessmentcomponents department academicYear><@_u page="/admin/${department.code}/${academicYear.startYear?c}/assessment-components" /></#macro>
+<#macro assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks" /></#macro>
+<#macro assessmentcomponent_generateGrades assessmentComponent><@_u page="/admin/assessment-component/${assessmentComponent.id}/generate-grades" /></#macro>

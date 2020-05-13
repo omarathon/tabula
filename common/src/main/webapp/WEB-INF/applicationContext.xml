@@ -129,6 +129,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.AbstractMeetingRecordIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssessmentGroupIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkerFeedbackIdConverter"/>
@@ -237,6 +238,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
+        <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssessmentGroupIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>

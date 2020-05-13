@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.marks.web
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesNote, MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -25,6 +24,7 @@ object Routes {
 
     object AssessmentComponents {
       def apply(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/assessment-components"
+      def recordMarks(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): String = s"$context/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks"
     }
   }
 }

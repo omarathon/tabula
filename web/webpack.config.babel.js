@@ -31,6 +31,7 @@ const paths = {
     'static/js/id7/cm2': './src/main/assets/static/js/id7/cm2.js',
     'static/js/id7/attendance': './src/main/assets/static/js/id7/attendance.js',
     'static/js/id7/mitcircs': './src/main/assets/static/js/id7/mitcircs.js',
+    'static/js/id7/marks': './src/main/assets/static/js/id7/marks.js',
 
     // Stuff that gets included from FTLs
     'static/js/sortable-table': './src/main/assets/static/js/sortable-table.js',
@@ -47,6 +48,7 @@ const paths = {
     'static/css/id7/cm2': './src/main/assets/static/css/id7/cm2.less',
     'static/css/id7/attendance': './src/main/assets/static/css/id7/attendance.less',
     'static/css/id7/mitcircs': './src/main/assets/static/css/id7/mitcircs.less',
+    'static/css/id7/marks': './src/main/assets/static/css/id7/marks.less',
 
     // Old ID6 junk
     'static/css/bootstrap': './src/main/assets/static/css/bootstrap.less',
