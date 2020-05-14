@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.{AssessmentComponentMarksDaoComponent, Autowiri
 trait AssessmentComponentMarksService {
   def getOrCreateRecordedStudent(uagm: UpstreamAssessmentGroupMember): RecordedAssessmentComponentStudent
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
+  def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
 }
 
@@ -22,6 +23,10 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
 
   override def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {
     assessmentComponentMarksDao.getAllRecordedStudents(uag)
+  }
+
+  override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {
+    assessmentComponentMarksDao.allNeedingWritingToSits
   }
 
   override def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent = transactional() {
