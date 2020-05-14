@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, Upst
 trait AssessmentComponentMarksDao {
   def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
+  def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
 }
 
@@ -32,6 +33,12 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
       .add(is("occurrence", uag.occurrence))
       .add(is("sequence", uag.sequence))
       .add(is("academicYear", uag.academicYear))
+      .seq
+
+  override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] =
+    session.newCriteria[RecordedAssessmentComponentStudent]
+      .add(is("needsWritingToSits", true))
+      // TODO order by most recent mark updatedDate asc
       .seq
 
   override def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent = {

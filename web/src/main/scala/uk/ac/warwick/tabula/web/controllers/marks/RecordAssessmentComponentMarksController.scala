@@ -7,26 +7,13 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand
+import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
+import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.marks.RecordAssessmentComponentMarksController.StudentMarkRecord
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
-
-object RecordAssessmentComponentMarksController {
-  case class StudentMarkRecord(
-    universityId: String,
-    position: Option[Int],
-    currentMember: Boolean,
-    mark: Option[Int],
-    grade: Option[String],
-    needsWritingToSits: Boolean,
-    outOfSync: Boolean,
-    agreed: Boolean
-  )
-}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
@@ -59,34 +46,7 @@ class RecordAssessmentComponentMarksController extends BaseController
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup)
-
-    info.allMembers.map { member =>
-      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
-
-      StudentMarkRecord(
-        universityId = member.universityId,
-        position = member.position,
-        currentMember = info.currentMembers.contains(member),
-        mark =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstAgreedMark.map(_.toInt))
-            .orElse(recordedStudent.flatMap(_.latestMark))
-            .orElse(member.firstDefinedMark.map(_.toInt)),
-        grade =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(member.firstAgreedGrade)
-            .orElse(recordedStudent.flatMap(_.latestGrade))
-            .orElse(member.firstDefinedGrade),
-        needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
-        outOfSync =
-          recordedStudent.exists(!_.needsWritingToSits) && (
-            recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.map(_.toInt).contains(m)) ||
-            recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstAgreedGrade.contains(g))
-          ),
-        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
-      )
-    }
+    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
   }
 
   @ModelAttribute("isGradeValidation")

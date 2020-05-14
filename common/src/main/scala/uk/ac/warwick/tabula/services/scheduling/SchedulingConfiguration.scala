@@ -199,6 +199,7 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ExportAttendanceToSitsJob]("scheduling.exportAttendanceToSits"),
     propertiesConfiguredJob[SynchroniseAttendanceToSitsJob]("scheduling.synchroniseAttendanceToSits"),
     propertiesConfiguredJob[ExportFeedbackToSitsJob]("scheduling.exportFeedbackToSits"),
+    propertiesConfiguredJob[ExportRecordedAssessmentComponentStudentsToSitsJob]("scheduling.exportRecordedAssessmentComponentStudentsToSits"),
     propertiesConfiguredJob[ExportYearMarksToSitsJob]("scheduling.exportYearMarksToSits")
   ).flatten
 }

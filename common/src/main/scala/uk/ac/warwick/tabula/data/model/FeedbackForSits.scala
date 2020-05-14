@@ -13,7 +13,6 @@ class FeedbackForSits extends GeneratedId {
   @JoinColumn(name = "feedback_id")
   var feedback: Feedback = _
 
-
   @Column(name = "status")
   @Type(`type` = "uk.ac.warwick.tabula.data.model.FeedbackForSitsStatusUserType")
   var status: FeedbackForSitsStatus = _

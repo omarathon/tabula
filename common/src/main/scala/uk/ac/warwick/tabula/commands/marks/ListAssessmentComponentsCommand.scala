@@ -5,16 +5,63 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksService, AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object ListAssessmentComponentsCommand {
+  case class StudentMarkRecord(
+    universityId: String,
+    position: Option[Int],
+    currentMember: Boolean,
+    mark: Option[Int],
+    grade: Option[String],
+    needsWritingToSits: Boolean,
+    outOfSync: Boolean,
+    agreed: Boolean
+  )
+
+  def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
+    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
+
+    info.allMembers.map { member =>
+      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
+
+      StudentMarkRecord(
+        universityId = member.universityId,
+        position = member.position,
+        currentMember = info.currentMembers.contains(member),
+        mark =
+          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
+            .orElse(member.firstAgreedMark.map(_.toInt))
+            .orElse(recordedStudent.flatMap(_.latestMark))
+            .orElse(member.firstDefinedMark.map(_.toInt)),
+        grade =
+          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
+            .orElse(member.firstAgreedGrade)
+            .orElse(recordedStudent.flatMap(_.latestGrade))
+            .orElse(member.firstDefinedGrade),
+        needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
+        outOfSync =
+          recordedStudent.exists(!_.needsWritingToSits) && (
+            recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.map(_.toInt).contains(m)) ||
+              recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstAgreedGrade.contains(g))
+            ),
+        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
+      )
+    }
+  }
+
   case class AssessmentComponentInfo(
     assessmentComponent: AssessmentComponent,
-    upstreamAssessmentGroupInfo: UpstreamAssessmentGroupInfo,
+    upstreamAssessmentGroup: UpstreamAssessmentGroup,
+    students: Seq[StudentMarkRecord]
   ) {
-    lazy val currentMembersWithMarksUploaded: Seq[UpstreamAssessmentGroupMember] =
-      upstreamAssessmentGroupInfo.currentMembers.filter(_.actualMark.nonEmpty)
+    val studentsWithMarks: Seq[StudentMarkRecord] = students.filter(_.mark.nonEmpty)
+
+    val needsWritingToSits: Boolean = students.exists(_.needsWritingToSits)
+    val outOfSync: Boolean = students.exists(_.outOfSync)
+    val allAgreed: Boolean = students.nonEmpty && students.forall(_.agreed)
   }
   type Result = Seq[AssessmentComponentInfo]
   type Command = Appliable[Result]
@@ -23,6 +70,7 @@ object ListAssessmentComponentsCommand {
 
   def apply(department: Department, academicYear: AcademicYear, currentUser: CurrentUser): Command =
     new ListAssessmentComponentsCommandInternal(department, academicYear, currentUser)
+      with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
@@ -35,7 +83,8 @@ object ListAssessmentComponentsCommand {
 abstract class ListAssessmentComponentsCommandInternal(val department: Department, val academicYear: AcademicYear, val currentUser: CurrentUser)
   extends CommandInternal[Result]
     with ListAssessmentComponentsState {
-  self: AssessmentMembershipServiceComponent
+  self: AssessmentComponentMarksServiceComponent
+    with AssessmentMembershipServiceComponent
     with ListAssessmentComponentsModulesWithPermission
     with SecurityServiceComponent
     with ModuleAndDepartmentServiceComponent =>
@@ -59,12 +108,13 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
       .map { upstreamAssessmentGroupInfo =>
         AssessmentComponentInfo(
           assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup)),
-          upstreamAssessmentGroupInfo,
+          upstreamAssessmentGroupInfo.upstreamAssessmentGroup,
+          studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
         )
       }
       .sortBy { info =>
         // module_code, assessment_group, sequence, mav_occurrence
-        (info.assessmentComponent.moduleCode, info.assessmentComponent.assessmentGroup, info.assessmentComponent.sequence, info.upstreamAssessmentGroupInfo.upstreamAssessmentGroup.occurrence)
+        (info.assessmentComponent.moduleCode, info.assessmentComponent.assessmentGroup, info.assessmentComponent.sequence, info.upstreamAssessmentGroup.occurrence)
       }
   }
 

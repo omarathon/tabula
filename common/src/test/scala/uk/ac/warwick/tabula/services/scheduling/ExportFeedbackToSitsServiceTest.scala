@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import java.util
-
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -33,14 +32,14 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
 
     val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-    val paramGetter = new ParameterGetter(feedback)
+    val paramGetter = new FeedbackParameterGetter(feedback)
 
   }
 
   @Test
   def queryParams(): Unit = withUser("1000006", "cusdx") {
     new Environment {
-      val inspectMe: util.HashMap[String, Object] = paramGetter.getQueryParams.get
+      val inspectMe: JMap[String, Any] = paramGetter.getQueryParams.get
       inspectMe.get("studentId") should be("1000006")
       inspectMe.get("academicYear") should be(year.toString)
       inspectMe.get("moduleCodeMatcher") should be("NL901%")
@@ -51,8 +50,8 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
   def noAssessmentGroups(): Unit = withUser("1000006", "cusdx") {
     new Environment {
       assignment.assessmentGroups.clear()
-      val newParamGetter = new ParameterGetter(feedback)
-      val inspectMe: Option[util.HashMap[String, Object]] = newParamGetter.getQueryParams
+      val newParamGetter = new FeedbackParameterGetter(feedback)
+      val inspectMe: Option[JMap[String, Any]] = newParamGetter.getQueryParams
       inspectMe.isEmpty should be(true)
     }
   }
@@ -61,7 +60,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
   def updateParams(): Unit = withUser("1000006", "cusdx") {
     new Environment {
 
-      val inspectMe: util.HashMap[String, Object] = paramGetter.getUpdateParams(73, "A").get
+      val inspectMe: JMap[String, Any] = paramGetter.getUpdateParams(73, "A").get
       inspectMe.get("studentId") should be("1000006")
       inspectMe.get("academicYear") should be(year.toString)
       inspectMe.get("moduleCodeMatcher") should be("NL901%")
