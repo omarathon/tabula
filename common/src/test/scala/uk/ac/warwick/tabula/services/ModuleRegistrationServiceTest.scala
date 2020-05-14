@@ -1,26 +1,27 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.data.model.TabulaAssessmentSubtype.Exam
-import uk.ac.warwick.tabula.data.model.{AssessmentType, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.SortedMap
+import scala.util.Random
 
 class ModuleRegistrationServiceTest extends TestBase with Mockito {
 
   val mockModuleRegistrationDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
 
   trait Fixture {
-    val service = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent {
+    val service: AbstractModuleRegistrationService with ModuleRegistrationDaoComponent = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent {
       val moduleRegistrationDao: ModuleRegistrationDao = mockModuleRegistrationDao
     }
   }
 
   trait GraduationBenchmarkFixture extends Fixture {
     val scd: StudentCourseDetails = Fixtures.student().mostSignificantCourse
-    val academicYear = AcademicYear(2019)
+    val academicYear: AcademicYear = AcademicYear(2019)
     scd.latestStudentCourseYearDetails.academicYear = academicYear
 
     val mockMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
@@ -43,8 +44,8 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(88), ModuleSelectionStatus.Core),
     )
 
-    val components = SortedMap(
-      "in301" -> Seq(Fixtures.assessmentComponent(modules("in301"), 1, AssessmentType.Essay, 100)),
+    val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
+      "in301" -> Seq(Fixtures.assessmentComponent(modules("in301"), 1, AssessmentType.Essay)),
 
       "in302" -> Seq(
         Fixtures.assessmentComponent(modules("in302"), 1, AssessmentType.Laboratory, 30),
@@ -68,7 +69,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
         Fixtures.assessmentComponent(modules("in305"), 2, AssessmentType.SummerExam, 80),
       ),
 
-      "in306" -> Seq( Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam, 100) )
+      "in306" -> Seq( Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam) )
     )
 
     val componentMarks = Seq(
@@ -120,8 +121,8 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       )
       val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map(), allowEmpty = false)
       result.isRight should be (true)
-      result.right.get.scale should be(1)
-      result.right.get.doubleValue should be(64.6)
+      result.toOption.get.scale should be(1)
+      result.toOption.get.doubleValue should be(64.6)
 
       val moduleRegistrationsWithMissingAgreedMark = Seq(
         Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
@@ -144,8 +145,8 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       )
       val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0), allowEmpty = false)
       overriddenResult.isRight should be (true)
-      overriddenResult.right.get.scale should be(1)
-      overriddenResult.right.get.doubleValue should be(64.6)
+      overriddenResult.toOption.get.scale should be(1)
+      overriddenResult.toOption.get.doubleValue should be(64.6)
     }
   }
 
@@ -157,7 +158,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 
       val noErrorResult: Either[String, BigDecimal] = service.weightedMeanYearMark(Nil, Map(), allowEmpty = true)
       noErrorResult.isRight should be(true)
-      noErrorResult.right.get should be(BigDecimal(0))
+      noErrorResult.toOption.get should be(BigDecimal(0))
     }
   }
 
@@ -165,7 +166,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   def overcattedModuleSubsets(): Unit = {
     new Fixture {
       val scd: StudentCourseDetails = Fixtures.student().mostSignificantCourse
-      val academicYear = AcademicYear(2014)
+      val academicYear: AcademicYear = AcademicYear(2014)
       scd.latestStudentCourseYearDetails.academicYear = academicYear
       val moduleRegistrations = Seq(
         Fixtures.moduleRegistration(scd, Fixtures.module("ch3c5"), BigDecimal(6).underlying, academicYear, "", BigDecimal(78), ModuleSelectionStatus.Core),
@@ -188,9 +189,9 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 
 
   @Test
-  def benchmarkComponentsAndMarks: Unit = {
+  def benchmarkComponentsAndMarks(): Unit = {
     new GraduationBenchmarkFixture {
-      val componentAndMarks = service.benchmarkComponentsAndMarks(moduleRegistrations.head)
+      val componentAndMarks: Seq[ComponentAndMarks] = service.benchmarkComponentsAndMarks(moduleRegistrations.head)
       componentAndMarks.size should be (1)
       componentAndMarks.head.cats should be (BigDecimal(30))
       componentAndMarks.head.member.firstDefinedMark should be (Some(BigDecimal(55)))
@@ -198,16 +199,118 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   }
 
   @Test
-  def graduationBenchmark: Unit = {
+  def graduationBenchmark(): Unit = {
     new GraduationBenchmarkFixture {
       service.graduationBenchmark(moduleRegistrations) should be (BigDecimal(60.0))
     }
   }
 
   @Test
-  def percentageOfAssessmentTaken: Unit = {
+  def percentageOfAssessmentTaken(): Unit = {
     new GraduationBenchmarkFixture {
       service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(52.5))
+    }
+  }
+
+  @Test
+  def postgraduateBenchmark(): Unit = {
+    new Fixture {
+      val scd: StudentCourseDetails = Fixtures.student().mostSignificantCourse
+      val academicYear: AcademicYear = AcademicYear(2019)
+      scd.latestStudentCourseYearDetails.academicYear = academicYear
+
+      // examples from https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/pgt/examples/
+
+      val exampleA: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax931"), BigDecimal(10).underlying, academicYear, "", BigDecimal(91), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax924"), BigDecimal(10).underlying, academicYear, "", BigDecimal(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", BigDecimal(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax91v"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93p"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax423"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95k"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92t"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(69), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax956"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p2"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95l"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleA, BigDecimal(120)) should be (BigDecimal(72.1))
+
+
+      val exampleB: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p4"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9f7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax984"), BigDecimal(10).underlying, academicYear, "", BigDecimal(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax926"), BigDecimal(10).underlying, academicYear, "", BigDecimal(63), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9l8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax3m7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax963"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e5"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax932"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97g"), BigDecimal(10).underlying, academicYear, "", BigDecimal(46), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleB, BigDecimal(120)) should be (BigDecimal(66.2))
+
+      val exampleC: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", BigDecimal(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax933"), BigDecimal(15).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax994"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax982"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97l"), BigDecimal(15).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax947"), BigDecimal(15).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94z"), BigDecimal(60).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ep"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9m3"), BigDecimal(10).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleC, BigDecimal(120)) should be (BigDecimal(63.2))
+
+      val exampleD: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax986"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax979"), BigDecimal(15).underlying, academicYear, "", BigDecimal(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95j"), BigDecimal(15).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e9"), BigDecimal(60).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97k"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax957"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94n"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleD, BigDecimal(120)) should be (BigDecimal(53.8))
+
+      val exampleE: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92b"), BigDecimal(15).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax974"), BigDecimal(15).underlying, academicYear, "", BigDecimal(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95p"), BigDecimal(60).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9s4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax966"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9dw"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9r4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9vp"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleE, BigDecimal(120)) should be (BigDecimal(61.1))
+
+      val exampleF: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", BigDecimal(100), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(76), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", BigDecimal(75), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9u0"), BigDecimal(15).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax988"), BigDecimal(15).underlying, academicYear, "", BigDecimal(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92m"), BigDecimal(15).underlying, academicYear, "", BigDecimal(53), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(exampleF, BigDecimal(120)) should be (BigDecimal(73.1))
     }
   }
 }

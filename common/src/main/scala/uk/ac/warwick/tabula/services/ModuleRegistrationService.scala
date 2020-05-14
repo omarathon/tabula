@@ -53,6 +53,8 @@ trait ModuleRegistrationService {
 
   def graduationBenchmark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
+  def postgraduateBenchmark(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): BigDecimal
+
   /**
     * Like weightedMeanYearMark but only returns year marks calculated from agreed (post board) marks
     */
@@ -158,6 +160,18 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     }
 
     benchmark.setScale(1, RoundingMode.HALF_UP)
+  }
+
+  def postgraduateBenchmark(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): BigDecimal = {
+    val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.cats)).reverse
+    var catsConsidered = BigDecimal(0)
+    val bestModules = sortedByMark.takeWhile { mr =>
+      val takeMore = catsConsidered < bestCats
+      if(takeMore) catsConsidered += mr.cats
+      takeMore
+    }
+    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
+    (total / catsConsidered).setScale(1, RoundingMode.HALF_UP)
   }
 
   def overcattedModuleSubsets(
