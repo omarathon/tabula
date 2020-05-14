@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
@@ -35,6 +36,20 @@ class UpstreamAssessmentGroup extends GeneratedId {
   @Column(nullable = false)
   var academicYear: AcademicYear = _
 
+  @ManyToOne(fetch = FetchType.EAGER, optional = true)
+  @JoinColumns(value = Array(
+    new JoinColumn(name = "moduleCode", referencedColumnName="moduleCode", insertable = false, updatable = false),
+    new JoinColumn(name = "sequence", referencedColumnName="sequence", insertable = false, updatable = false)
+  ))
+  private var _assessmentComponent: AssessmentComponent = _
+  def assessmentComponent: Option[AssessmentComponent] = Option(_assessmentComponent)
+  def assessmentComponent_=(assessmentComponent: AssessmentComponent): Unit = _assessmentComponent = assessmentComponent
+
+  @Column(name = "deadline")
+  private var _deadline: LocalDate = _
+  def deadline: Option[LocalDate] = Option(_deadline)
+  def deadline_=(deadline: Option[LocalDate]): Unit = _deadline = deadline.orNull
+
   @OneToMany(mappedBy = "upstreamAssessmentGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)
   var members: JList[UpstreamAssessmentGroupMember] = JArrayList()
@@ -55,9 +70,10 @@ class UpstreamAssessmentGroup extends GeneratedId {
       .append(occurrence, other.occurrence)
       .append(academicYear, other.academicYear)
       .append(sequence, other.sequence)
+      // This intentionally doesn't take into account deadline
       .isEquals
 
-  override def toString: String = "%s %s g:%s o:%s s:%s" format(moduleCode, academicYear, assessmentGroup, occurrence, sequence)
+  override def toString: String = "%s %s g:%s o:%s s:%s d:%s" format(moduleCode, academicYear, assessmentGroup, occurrence, sequence, deadline.map(_.toString("yyyy-MM-dd")).orNull)
 
 }
 
@@ -84,6 +100,9 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
       case 0 => Ordering.String.compare(this.universityId, that.universityId)
       case nonZero => nonZero
     }
+
+  // FIXME - just inherits from the components deadline - leaving this here in case we need to do something fancy to support resits
+  def deadline: Option[LocalDate] = upstreamAssessmentGroup.deadline
 
   def isAgreedMark: Boolean = resitAgreedMark.orElse(agreedMark).isDefined
 

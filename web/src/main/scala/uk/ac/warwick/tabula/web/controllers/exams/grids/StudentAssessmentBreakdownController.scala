@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
-import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
+import uk.ac.warwick.tabula.web.controllers.exams.{ExamsController, StudentCourseYearDetailsBreadcrumbs}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes, Breadcrumbs => BaseBreadcumbs}
 
 
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/{studentCourseDetails}/assessmentdetails"))
 class StudentAssessmentBreakdownController extends ExamsController
-  with DepartmentScopedController with AcademicYearScopedController
+  with StudentCourseYearDetailsBreadcrumbs with DepartmentScopedController with AcademicYearScopedController
   with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
   with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
   with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringNormalCATSLoadServiceComponent
@@ -72,30 +72,7 @@ class StudentAssessmentBreakdownController extends ExamsController
       "member" -> studentCourseDetails.student,
       "mitigatingCircumstances" -> breakdown.mitigatingCircumstances.getOrElse(Nil)
     ).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
-      .secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
+      .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
 
-  }
-
-  def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: StudentCourseYearDetails => String): Seq[BreadCrumb] = {
-    val chooseScyd = scd.freshStudentCourseYearDetailsForYear(activeAcademicYear) // fresh scyd for this year
-      .orElse(scd.freshOrStaleStudentCourseYearDetailsForYear(activeAcademicYear))
-      .getOrElse(throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year"))
-
-    val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
-      case Nil =>
-        scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
-      case fresh =>
-        fresh
-    }
-    scyds.map(scyd =>
-      BaseBreadcumbs.Standard(
-        title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
-        url = Some(urlGenerator(scyd)),
-        tooltip = "%s %s".format(
-          scyd.studentCourseDetails.course.name,
-          scyd.academicYear.getLabel
-        )
-      ).setActive(scyd == chooseScyd)
-    ).toSeq
   }
 }

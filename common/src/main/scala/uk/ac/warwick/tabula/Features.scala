@@ -142,6 +142,8 @@ abstract class Features {
   @Value("${features.scheduling.departmentMandatoryPermissionsWarning:false}") var schedulingDepartmentMandatoryPermissionsWarning: Boolean = defaults.schedulingDepartmentMandatoryPermissionsWarning
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
+  @Value("${features.exams.graduationBenchmark:false}") var graduationBenchmark: Boolean = defaults.graduationBenchmark
+  @Value("${features.exams.graduationBenchmark.studentView:false}") var graduationBenchmarkStudentView: Boolean = defaults.graduationBenchmarkStudentView
 
   @Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
   @Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
@@ -154,6 +156,7 @@ abstract class Features {
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
+  @Value("${features.marksManagement:false}") var marksManagement: Boolean = defaults.marksManagement
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -291,6 +294,8 @@ class FeaturesMessage {
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
+  @BeanProperty var graduationBenchmark = false
+  @BeanProperty var graduationBenchmarkStudentView = false
 
   @BeanProperty var reports = true
 
@@ -305,6 +310,7 @@ class FeaturesMessage {
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
   @BeanProperty var notificationBatching = false
+  @BeanProperty var marksManagement = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

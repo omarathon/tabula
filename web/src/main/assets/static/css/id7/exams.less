@@ -117,6 +117,37 @@ div.assessment_details {
   }
 }
 
+.benchmark-breakdown-calculation {
+  display: flex;
+  margin: 10px 0 20px 0;
+
+  & > div {
+    font-size: 150%;
+  }
+
+  .formula {
+    margin: 0 20px 0 auto;
+
+    font-size: 120%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .numerator {
+      border-bottom: solid black 1px;
+    }
+  }
+
+  .result {
+    margin: 0 auto 0 20px;
+  }
+
+  .use-tooltip {
+    cursor: help;
+  }
+}
+
 .exam-grid-preview {
   .key, .overcat-key {
     .table {

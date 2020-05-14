@@ -50,9 +50,7 @@ sealed abstract class MarkType(val code: String, val description: String) {
 }
 
 object MarkType {
-
   case object Adjustment extends MarkType("adjustment", "Adjustment")
-
   case object PrivateAdjustment extends MarkType("private", "Private Adjustment")
 
   // manual collection - keep in sync with the case objects above
@@ -60,28 +58,21 @@ object MarkType {
 
   def fromCode(code: String): MarkType =
     if (code == null) null
-    else members.find {
-      _.code == code
-    } match {
+    else members.find(_.code == code) match {
       case Some(caseObject) => caseObject
       case None => throw new IllegalArgumentException()
     }
 
   def fromDescription(description: String): MarkType =
     if (description == null) null
-    else members.find {
-      _.description == description
-    } match {
+    else members.find(_.description == description) match {
       case Some(caseObject) => caseObject
       case None => throw new IllegalArgumentException()
     }
 }
 
 class MarkTypeUserType extends AbstractStringUserType[MarkType] {
-
-  override def sqlTypes = Array(Types.VARCHAR)
-
+  override def sqlTypes: Array[Int] = Array(Types.VARCHAR)
   override def convertToObject(string: String): MarkType = MarkType.fromCode(string)
-
   override def convertToValue(format: MarkType): String = format.code
 }

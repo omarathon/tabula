@@ -203,11 +203,13 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var agreedMarkUploadedBy: User = _
 
+  def totalCats: BigDecimal = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+
   def toExamGridEntityYear: ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYear", id) {
       ExamGridEntityYear(
         moduleRegistrations = moduleRegistrations, //ones that are not deleted
-        cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+        cats = totalCats,
         route = route match {
           case _: Route => route
           case _ => studentCourseDetails.currentRoute

@@ -45,9 +45,10 @@ object ExamGridColumnOption {
     val PassedCATS = 31
     val PreviousYears = 40
     val CurrentYear = 41
-    val OvercattedYearMark = 42
-    val BoardAgreedMark = 43
-    val FinalOverallMark = 44
+    val GraduationBenchmark = 42
+    val OvercattedYearMark = 43
+    val BoardAgreedMark = 44
+    val FinalOverallMark = 45
     val SuggestedResult = 50
     val SuggestedFinalYearGrade = 51
     val MitigatingCircumstances = 60

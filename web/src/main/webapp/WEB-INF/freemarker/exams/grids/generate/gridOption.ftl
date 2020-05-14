@@ -431,6 +431,18 @@
           </label>
         </div>
       </div>
+
+      <#if features.graduationBenchmark>
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="graduationBenchmark"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("graduationBenchmark")>checked</#if>
+              /> Current year weighted assessment mark<@fmt.help_popover id="currentyear" content="Weighted assessment mark for the graduation benchmark." />
+            </label>
+          </div>
+        </div>
+      </#if>
+
       <div class="col-md-3">
         <div class="checkbox">
           <label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"

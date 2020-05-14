@@ -11,9 +11,14 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
+
+object ModuleRegistration {
+  final val GraduationBenchmarkCutoff: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+}
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
@@ -121,6 +126,12 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
     val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))
     upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
+  }
+
+  def componentsForBenchmark: Seq[UpstreamAssessmentGroupMember] = {
+    upstreamAssessmentGroupMembers
+      .filter(_.deadline.exists(d => d.isBefore(ModuleRegistration.GraduationBenchmarkCutoff) || d.isEqual(ModuleRegistration.GraduationBenchmarkCutoff)))
+      .filter(_.firstDefinedMark.isDefined)
   }
 
   override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
