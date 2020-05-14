@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.data.model.CourseType._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
 
@@ -25,7 +26,16 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
     override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
       state.entities.map(entity =>
         entity -> entity.validYears.get(state.yearOfStudy).map(entityYear => {
-          ExamGridColumnValueDecimal(moduleRegistrationService.graduationBenchmark(entityYear.moduleRegistrations))
+          entityYear.studentCourseYearDetails.flatMap(_.studentCourseDetails.courseType) match {
+            case Some(PGT) =>
+              val catsToConsider =
+                if (entityYear.studentCourseYearDetails.flatMap(scyd => Option(scyd.studentCourseDetails.award).map(_.code)).contains("PGDIP")) BigDecimal(90)
+                else BigDecimal(120)
+              ExamGridColumnValueDecimal(moduleRegistrationService.postgraduateBenchmark(entityYear.moduleRegistrations, catsToConsider))
+            case Some(UG) => ExamGridColumnValueDecimal(moduleRegistrationService.graduationBenchmark(entityYear.moduleRegistrations))
+            case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
+            case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
+          }
         }).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
       ).toMap
     }
