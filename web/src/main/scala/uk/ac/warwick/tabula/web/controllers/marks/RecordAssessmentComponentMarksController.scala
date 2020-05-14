@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
+import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand.StudentMarksItem
 import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
@@ -19,6 +20,8 @@ import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceCompo
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
+
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
@@ -70,7 +73,12 @@ class RecordAssessmentComponentMarksController extends BaseController
    * - The most recent import date was more than 5 minutes ago
    */
   @RequestMapping
-  def triggerImportIfNecessary(@ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord], @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup, model: ModelMap): String = {
+  def triggerImportIfNecessary(
+    @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
+    model: ModelMap,
+    @ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command,
+  ): String = {
     val universityIds = studentMarkRecords.map(_.universityId)
     lazy val members = profileService.getAllMembersWithUniversityIds(universityIds)
 
@@ -91,7 +99,10 @@ class RecordAssessmentComponentMarksController extends BaseController
       model.addAttribute("studentLastImportDates", studentLastImportDates)
 
       "marks/admin/assessment-components/job-progress"
-    } else formView
+    } else {
+      command.populate()
+      formView
+    }
   }
 
   private def stopOngoingImportForStudents(universityIds: Seq[String]): Unit =
@@ -111,26 +122,69 @@ class RecordAssessmentComponentMarksController extends BaseController
       ))).noLayout()
     ).getOrElse(throw new ItemNotFoundException)
 
+  // For people who hit the back button back to the /skip-import page or refresh it
+  @RequestMapping(Array("/skip-import"))
+  def skipImportRefresh(@ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
+    command.populate()
+    formView
+  }
+
   @PostMapping(Array("/skip-import"))
-  def skipImport(@RequestParam jobId: String): String = {
+  def skipImport(@RequestParam jobId: String, @ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
     jobService.getInstance(jobId)
       .filterNot(_.finished)
       .filter(_.jobType == ImportMembersJob.identifier)
       .foreach(jobService.kill)
 
+    command.populate()
     formView
   }
 
   @RequestMapping(Array("/import-complete"))
-  def importComplete: String = formView
+  def importComplete(@ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
+    command.populate()
+    formView
+  }
 
-  @PostMapping
+  @PostMapping(params = Array("!confirm"))
+  def preview(
+    @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
+    errors: Errors,
+    model: ModelMap,
+    @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+  ): String =
+    if (errors.hasErrors) {
+      model.addAttribute("flash__error", "flash.hasErrors")
+      formView
+    } else {
+      // Filter down to just changes
+      val changes: Seq[(StudentMarkRecord, StudentMarksItem)] =
+        cmd.students.asScala.values.toSeq.flatMap { student =>
+          // We know the .get is safe because it's validated
+          val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
+
+          // Mark and grade are empty, or haven't changed
+          if (
+            (!student.mark.hasText && !student.grade.hasText) ||
+            (
+              (!student.mark.hasText || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
+              (!student.grade.hasText || studentMarkRecord.grade.contains(student.grade))
+            )
+          ) None else Some(studentMarkRecord -> student)
+        }
+
+      model.addAttribute("changes", changes)
+
+      "marks/admin/assessment-components/record_preview"
+    }
+
+  @PostMapping(params = Array("confirm=true"))
   def save(
     @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
     errors: Errors,
     @PathVariable assessmentComponent: AssessmentComponent,
     @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
-    model: ModelMap
+    model: ModelMap,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
       model.addAttribute("flash__error", "flash.hasErrors")

@@ -12,7 +12,7 @@ import scala.collection.mutable
 abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var items: JList[A])
   extends SheetContentsHandler with Logging {
 
-  var lastContents: String = null
+  var lastContents: String = _
   var cellIsString = false
   var isFirstRow = true // flag to skip the first row as it will contain column headers
   var columnMap: mutable.Map[Short, String] = scala.collection.mutable.Map[Short, String]()

@@ -51,7 +51,7 @@
     </@modal.wrapper>
   </@modal.modal>
 
-  <button class="btn btn-primary" type="submit">Skip import and generate grid</button>
+  <button class="btn btn-primary" type="submit">Skip import and record component marks</button>
 </@f.form>
 
 <script nonce="${nonce()}">
