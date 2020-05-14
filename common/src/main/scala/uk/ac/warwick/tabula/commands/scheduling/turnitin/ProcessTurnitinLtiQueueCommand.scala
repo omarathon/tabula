@@ -134,7 +134,11 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
     } else {
       report.lastTurnitinError = response.statusMessage.getOrElse("Failed to upload")
       logger.warn(s"Failed to submit paper for report ${report.id}: ${response.statusMessage.getOrElse("Failed to upload")}. ${response.json.orElse(response.html).orElse(response.xml).getOrElse("")}")
-      report.submitToTurnitinRetries += 1
+      if (report.lastTurnitinError.equals("Your submission must contain 20 words or more.")) {
+        report.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
+      } else {
+        report.submitToTurnitinRetries += 1
+      }
     }
 
     originalityReportService.saveOrUpdate(report)
