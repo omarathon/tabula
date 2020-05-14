@@ -1,25 +1,33 @@
 package uk.ac.warwick.tabula.web.controllers.marks
 
 import javax.validation.Valid
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping, RequestParam}
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
-import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
+import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
+import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
 class RecordAssessmentComponentMarksController extends BaseController
   with AutowiringAssessmentComponentMarksServiceComponent
-  with AutowiringAssessmentMembershipServiceComponent {
+  with AutowiringAssessmentMembershipServiceComponent
+  with AutowiringProfileServiceComponent
+  with AutowiringJobServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
   validatesSelf[SelfValidating]
 
@@ -53,8 +61,68 @@ class RecordAssessmentComponentMarksController extends BaseController
   def isGradeValidation(@PathVariable assessmentComponent: AssessmentComponent): Boolean =
     assessmentComponent.module.adminDepartment.assignmentGradeValidation
 
+  private val formView: String = "marks/admin/assessment-components/record"
+
+  /**
+   * Upon loading the form, trigger a skippable import if:
+   *
+   * - Any of the student mark records is outOfSync; or
+   * - The most recent import date was more than 5 minutes ago
+   */
   @RequestMapping
-  def formView: String = "marks/admin/assessment-components/record"
+  def triggerImportIfNecessary(@ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord], @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup, model: ModelMap): String = {
+    val universityIds = studentMarkRecords.map(_.universityId)
+    lazy val members = profileService.getAllMembersWithUniversityIds(universityIds)
+
+    if (!maintenanceModeService.enabled && (studentMarkRecords.exists(_.outOfSync) || members.flatMap(m => Option(m.lastImportDate)).exists(_.isBefore(DateTime.now.minusMinutes(5))))) {
+      stopOngoingImportForStudents(universityIds)
+
+      val studentLastImportDates =
+        members.map(m =>
+          (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
+        ).sortBy(_._2)
+
+      val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(upstreamAssessmentGroup.academicYear)))
+
+      model.addAttribute("jobId", jobInstance.id)
+      model.addAttribute("jobProgress", jobInstance.progress)
+      model.addAttribute("jobStatus", jobInstance.status)
+      model.addAttribute("oldestImport", studentLastImportDates.headOption.map { case (_, datetime) => datetime })
+      model.addAttribute("studentLastImportDates", studentLastImportDates)
+
+      "marks/admin/assessment-components/job-progress"
+    } else formView
+  }
+
+  private def stopOngoingImportForStudents(universityIds: Seq[String]): Unit =
+    jobService.jobDao.listRunningJobs
+      .filter(_.jobType == ImportMembersJob.identifier)
+      .filter(_.getStrings(ImportMembersJob.MembersKey).toSet == universityIds.toSet)
+      .foreach(jobService.kill)
+
+  @PostMapping(Array("/progress"))
+  def jobProgress(@RequestParam jobId: String): Mav =
+    jobService.getInstance(jobId).map(jobInstance =>
+      Mav(new JSONView(Map(
+        "id" -> jobInstance.id,
+        "status" -> jobInstance.status,
+        "progress" -> jobInstance.progress,
+        "finished" -> jobInstance.finished
+      ))).noLayout()
+    ).getOrElse(throw new ItemNotFoundException)
+
+  @PostMapping(Array("/skip-import"))
+  def skipImport(@RequestParam jobId: String): String = {
+    jobService.getInstance(jobId)
+      .filterNot(_.finished)
+      .filter(_.jobType == ImportMembersJob.identifier)
+      .foreach(jobService.kill)
+
+    formView
+  }
+
+  @RequestMapping(Array("/import-complete"))
+  def importComplete: String = formView
 
   @PostMapping
   def save(
