@@ -40,7 +40,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
       val department = feedback.module.adminDepartment
 
       if (!department.canUploadMarksToSitsForYear(feedback.academicYear, feedback.module))
-        logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed")
+        logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed for ${feedback.academicYear}")
       else {
 
         // first check to see if there is one and only one matching row

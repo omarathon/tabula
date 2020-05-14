@@ -55,7 +55,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
         }).exists(_.members.asScala.find(_.universityId == student.universityId).exists(_.resitExpected.contains(true)))
 
       if (!canUploadMarksToSitsForYear) {
-        logger.warn(s"Not uploading assessment component mark $student as department for ${student.moduleCode} is closed")
+        logger.warn(s"Not uploading assessment component mark $student as department for ${student.moduleCode} is closed for ${student.academicYear}")
         None
       } else {
         // first check to see if there is one and only one matching row
