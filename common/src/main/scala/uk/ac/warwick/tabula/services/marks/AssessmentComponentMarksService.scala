@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.marks
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
@@ -9,6 +10,7 @@ trait AssessmentComponentMarksService {
   def getOrCreateRecordedStudent(uagm: UpstreamAssessmentGroupMember): RecordedAssessmentComponentStudent
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
   def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
+  def mostRecentlyWrittenStudentDate: Option[DateTime]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
 }
 
@@ -27,6 +29,10 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
 
   override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {
     assessmentComponentMarksDao.allNeedingWritingToSits
+  }
+
+  override def mostRecentlyWrittenStudentDate: Option[DateTime] = transactional(readOnly = true) {
+    assessmentComponentMarksDao.mostRecentlyWrittenStudentDate
   }
 
   override def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent = transactional() {
