@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections._
+import org.hibernate.criterion.Restrictions._
+import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms._
@@ -9,6 +12,7 @@ trait AssessmentComponentMarksDao {
   def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
   def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
+  def mostRecentlyWrittenStudentDate: Option[DateTime]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
 }
 
@@ -40,6 +44,12 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
       .add(is("needsWritingToSits", true))
       // TODO order by most recent mark updatedDate asc
       .seq
+
+  override def mostRecentlyWrittenStudentDate: Option[DateTime] =
+    session.newCriteria[RecordedAssessmentComponentStudent]
+      .add(isNotNull("_lastWrittenToSits"))
+      .project[DateTime](max("_lastWrittenToSits"))
+      .uniqueResult
 
   override def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent = {
     session.saveOrUpdate(student)
