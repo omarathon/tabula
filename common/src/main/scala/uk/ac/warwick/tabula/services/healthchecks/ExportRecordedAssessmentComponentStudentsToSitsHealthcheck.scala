@@ -67,7 +67,7 @@ class ExportRecordedAssessmentComponentStudentsToSitsHealthcheck extends Service
       else ServiceHealthcheck.Status.Okay // queue still processing so may take time to sent them all
 
     val delayMessage =
-      s"Last written mark $mostRecentlyWrittenMarkDelay ago, oldest written mark $oldestUnwrittenMarkDelay old " +
+      s"Last written mark $mostRecentlyWrittenMarkDelay ago, oldest unwritten mark $oldestUnwrittenMarkDelay old " +
       (if (delayStatus == ServiceHealthcheck.Status.Error) " (!!)" else if (delayStatus == ServiceHealthcheck.Status.Warning) " (!)" else "") +
       s"(warning: $DelayWarningThreshold, critical: $DelayErrorThreshold)"
 
