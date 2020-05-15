@@ -45,7 +45,7 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="webform">
       <div class="fix-area">
-        <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
+        <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <table class="table table-striped">
             <thead>
               <tr>
