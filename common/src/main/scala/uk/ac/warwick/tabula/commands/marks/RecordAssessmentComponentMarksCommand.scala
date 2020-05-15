@@ -1,24 +1,39 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import org.springframework.validation.Errors
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException
+import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.ss.util.CellReference
+import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
+import org.apache.poi.xssf.usermodel.XSSFComment
+import org.springframework.validation.{BindingResult, Errors}
+import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, RecordedAssessmentComponentStudent, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
+import scala.util.Using
 
 object RecordAssessmentComponentMarksCommand {
   type UniversityID = String
-  class StudentMarksItem(val universityID: UniversityID) {
+  class StudentMarksItem {
+    def this(universityID: UniversityID) {
+      this()
+      this.universityID = universityID
+    }
+
+    var universityID: UniversityID = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var grade: String = _
     var comments: String = _
@@ -28,6 +43,8 @@ object RecordAssessmentComponentMarksCommand {
   type Command = Appliable[Result]
     with RecordAssessmentComponentMarksRequest
     with SelfValidating
+    with BindListener
+    with PopulateOnForm
 
   val AdminPermission: Permission = Permissions.Feedback.Publish
 
@@ -38,6 +55,8 @@ object RecordAssessmentComponentMarksCommand {
       with RecordAssessmentComponentMarksValidation
       with RecordAssessmentComponentMarksPermissions
       with RecordAssessmentComponentMarksDescription
+      with RecordAssessmentComponentMarksSpreadsheetBindListener
+      with RecordAssessmentComponentMarksPopulateOnForm
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringTransactionalComponent
@@ -85,6 +104,109 @@ trait RecordAssessmentComponentMarksRequest {
   var students: JMap[UniversityID, StudentMarksItem] =
     LazyMaps.create { id: String => new StudentMarksItem(id) }
       .asJava
+
+  // For uploading a spreadsheet
+  var file: UploadedFile = new UploadedFile
+}
+
+trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener {
+  self: RecordAssessmentComponentMarksRequest
+    with TransactionalComponent =>
+
+  final val MAX_MARKS_ROWS: Int = 5000
+  final val VALID_FILE_TYPES: Seq[String] = Seq(".xlsx")
+
+  override def onBind(result: BindingResult): Unit = {
+    val fileNames = file.fileNames map (_.toLowerCase)
+    val invalidFiles = fileNames.filter(s => !VALID_FILE_TYPES.exists(s.endsWith))
+
+    if (invalidFiles.nonEmpty) {
+      if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), VALID_FILE_TYPES.mkString(", ")), "")
+      else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), VALID_FILE_TYPES.mkString(", ")), "")
+    }
+
+    if (!result.hasErrors) {
+      transactional() {
+        result.pushNestedPath("file")
+        file.onBind(result)
+        result.popNestedPath()
+
+        file.attached.asScala.filter(_.hasData).foreach(file => {
+          try {
+            Using.resource(file.asByteSource.openStream()) { stream =>
+              val pkg = OPCPackage.open(stream)
+              val sst = new ReadOnlySharedStringsTable(pkg)
+              val reader = new XSSFReader(pkg)
+              val styles = reader.getStylesTable
+
+              val items: JList[StudentMarksItem] = JArrayList()
+              val sheetHandler = new AbstractXslxSheetHandler(styles, sst, items) {
+                override def newCurrentItem: StudentMarksItem = new StudentMarksItem()
+                override def cell(cellReference: UniversityID, formattedValue: UniversityID, comment: XSSFComment): Unit = {
+                  val col = new CellReference(cellReference).getCol
+                  if (isFirstRow) {
+                    columnMap(col) = formattedValue
+                  } else if (columnMap.asJava.containsKey(col) && formattedValue.hasText) {
+                    columnMap(col) match {
+                      case "University ID" | "ID" =>
+                        currentItem.universityID = formattedValue
+                      case "Mark" =>
+                        currentItem.mark = formattedValue
+                      case "Grade" =>
+                        currentItem.grade = formattedValue
+                      case "Comments" =>
+                        currentItem.comments = formattedValue
+                      case _ => // ignore anything else
+                    }
+                  }
+                }
+              }
+
+              val parser = sheetHandler.fetchSheetParser
+              reader.getSheetsData.asScala.foreach { is =>
+                Using.resource(is)(sheet => parser.parse(new InputSource(sheet)))
+              }
+
+              if (items.size() > MAX_MARKS_ROWS) {
+                result.rejectValue("file", "file.tooManyRows", Array(MAX_MARKS_ROWS.toString), "")
+                items.clear()
+              } else {
+                items.asScala.filter(_.universityID.hasText).foreach { item =>
+                  students.put(item.universityID, item)
+                }
+              }
+            }
+          } catch {
+            case _: InvalidFormatException => result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), VALID_FILE_TYPES.mkString(", ")), "")
+          }
+        })
+      }
+    }
+  }
+}
+
+trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
+  self: RecordAssessmentComponentMarksState
+    with RecordAssessmentComponentMarksRequest
+    with AssessmentComponentMarksServiceComponent
+    with AssessmentMembershipServiceComponent =>
+
+  override def populate(): Unit = {
+    val info = UpstreamAssessmentGroupInfo(
+      upstreamAssessmentGroup,
+      assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
+    )
+
+    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService).foreach { student =>
+      if (student.mark.nonEmpty || student.grade.nonEmpty) {
+        val s = new StudentMarksItem(student.universityId)
+        student.mark.foreach(m => s.mark = m.toString)
+        student.grade.foreach(s.grade = _)
+
+        students.put(student.universityId, s)
+      }
+    }
+  }
 }
 
 trait RecordAssessmentComponentMarksValidation extends SelfValidating {
@@ -107,10 +229,15 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
           val asInt = item.mark.toInt
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
-          } else if (doGradeValidation && item.grade.hasText) {
+          } else if (doGradeValidation) {
             val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, asInt)
-            if (validGrades.nonEmpty && !validGrades.exists(_.grade == item.grade)) {
-              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+            if (item.grade.hasText) {
+              if (validGrades.nonEmpty && !validGrades.exists(_.grade == item.grade)) {
+                errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+              }
+            } else if (asInt != 0 || assessmentComponent.module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
+              // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
+              validGrades.find(_.isDefault).foreach(gb => item.grade = gb.grade)
             }
           }
         } catch {

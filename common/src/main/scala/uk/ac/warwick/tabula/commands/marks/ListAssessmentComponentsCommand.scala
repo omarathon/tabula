@@ -20,13 +20,8 @@ object ListAssessmentComponentsCommand {
     outOfSync: Boolean,
     agreed: Boolean
   )
-
-  def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
-    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
-
-    info.allMembers.map { member =>
-      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
-
+  object StudentMarkRecord {
+    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
       StudentMarkRecord(
         universityId = member.universityId,
         position = member.position,
@@ -49,6 +44,15 @@ object ListAssessmentComponentsCommand {
             ),
         agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
       )
+  }
+
+  def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
+    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
+
+    info.allMembers.map { member =>
+      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
+
+      StudentMarkRecord(info, member, recordedStudent)
     }
   }
 
