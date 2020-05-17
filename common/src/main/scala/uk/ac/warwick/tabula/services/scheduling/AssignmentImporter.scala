@@ -159,10 +159,14 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       .map(_.code)
   }
 
-  override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
-    examScheduleQuery.executeByNamedParam(JMap(
-      "published_exam_profiles" -> (publishedExamProfiles(yearsToImport).asJava: JList[String])
+  override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] = {
+    val examProfiles = publishedExamProfiles(yearsToImport)
+
+    if (examProfiles.isEmpty) Seq.empty
+    else examScheduleQuery.executeByNamedParam(JMap(
+      "published_exam_profiles" -> (examProfiles.asJava: JList[String])
     )).asScala.toSeq
+  }
 
   override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
     examScheduleStudentsQuery.executeByNamedParam(JMap(
