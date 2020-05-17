@@ -721,7 +721,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   }
 
   override def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule] =
-    session.newCriteria[AssessmentComponentExamSchedule]
+    if (examProfileCodes.isEmpty) Seq.empty
+    else session.newCriteria[AssessmentComponentExamSchedule]
       .add(safeIn("examProfileCode", examProfileCodes))
       .seq
 
