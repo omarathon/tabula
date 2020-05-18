@@ -142,7 +142,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
               val items: JList[StudentMarksItem] = JArrayList()
               val sheetHandler = new AbstractXslxSheetHandler(styles, sst, items) {
                 override def newCurrentItem: StudentMarksItem = new StudentMarksItem()
-                override def cell(cellReference: UniversityID, formattedValue: UniversityID, comment: XSSFComment): Unit = {
+                override def cell(cellReference: String, formattedValue: String, comment: XSSFComment): Unit = {
                   val col = new CellReference(cellReference).getCol
                   if (isFirstRow) {
                     columnMap(col) = formattedValue

@@ -33,7 +33,7 @@
       <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
         <h3>Select file</h3>
 
-        <@bs3form.labelled_form_group path="file" labelText="Files">
+        <@bs3form.labelled_form_group path="file" labelText="File">
           <input type="file" name="file.upload" />
         </@bs3form.labelled_form_group>
 
