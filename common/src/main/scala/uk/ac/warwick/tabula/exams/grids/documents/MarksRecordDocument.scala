@@ -47,7 +47,8 @@ class MarksRecordDocument extends ExamGridDocument
       UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
       isConfidential = isConfidential,
       calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-      selectCourseCommand.isLevelGrid
+      selectCourseCommand.isLevelGrid,
+      gridOptionsCommand.applyBenchmark
     )
 
     val file = new FileAttachment()
