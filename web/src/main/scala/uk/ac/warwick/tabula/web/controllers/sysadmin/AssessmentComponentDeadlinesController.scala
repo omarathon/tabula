@@ -78,9 +78,10 @@ object AssessmentComponentDeadlinesController {
   type Command = Appliable[Result] with SelfValidating with BindListener
 
   def DeadlineDateFormats: Seq[DateTimeFormatter] = Seq(
+    DateTimeFormat.forPattern("dd-MMM-yy"),
     DateTimeFormat.forPattern("dd-MM-yyyy"),
-    DateTimeFormat.forPattern("dd/MM/yyyy"),
     DateTimeFormat.forPattern("M/d/yy"),
+    DateTimeFormat.forPattern("dd/MM/yyyy"),
   )
 
   def CountModuleAssessmentDeadlineRowsSql(sitsSchema: String) =
