@@ -157,6 +157,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       existingAssessmentComponents.foreach { existing =>
         transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
+            session.refresh(existing)
             removeAssessmentComponent(existing)
           }
         }

@@ -68,7 +68,7 @@ class CreateExamCommandInternal(val module: Module, val academicYear: AcademicYe
 trait CreateExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateExamState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, module)
   }
 }
@@ -76,7 +76,7 @@ trait CreateExamPermissions extends RequiresPermissionsChecking with Permissions
 trait CreateExamValidation extends SelfValidating {
   self: CreateExamRequest with CreateExamState =>
 
-  def validate(errors: Errors) {
+  def validate(errors: Errors): Unit = {
     if (assessmentComponents.isEmpty) errors.rejectValue("assessmentComponents", "exam.assessmentComponents.empty")
     if (occurrences.isEmpty) errors.rejectValue("occurrences", "exam.occurrence.empty")
   }
@@ -85,11 +85,11 @@ trait CreateExamValidation extends SelfValidating {
 trait CreateExamDescription extends Describable[Result] {
   self: CreateExamState =>
 
-  def describe(d: Description) {
+  def describe(d: Description): Unit = {
     d.module(module)
   }
 
-  override def describeResult(d: Description, exam: Exam) {
+  override def describeResult(d: Description, exam: Exam): Unit = {
     d.exam(exam).module(module)
   }
 }
