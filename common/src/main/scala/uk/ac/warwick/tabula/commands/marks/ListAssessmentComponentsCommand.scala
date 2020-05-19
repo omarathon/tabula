@@ -40,8 +40,8 @@ object ListAssessmentComponentsCommand {
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.map(_.toInt).contains(m)) ||
-              recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstAgreedGrade.contains(g))
-            ),
+            recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
+          ),
         agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
       )
   }
