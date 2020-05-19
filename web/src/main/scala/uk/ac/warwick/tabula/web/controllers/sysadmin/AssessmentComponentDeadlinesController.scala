@@ -165,27 +165,36 @@ object AssessmentComponentDeadlinesController {
       with AssessmentComponentDeadlinesState  {
     self: AssessmentComponentDeadlinesRequest
       with AssessmentMembershipServiceComponent
-      with SitsDataSourceComponent =>
+      with SitsDataSourceComponent
+      with TransactionalComponent =>
 
     def sitsSchema: String
     lazy val updateQuery: UpdateModuleAssessmentDeadlineQuery = new UpdateModuleAssessmentDeadlineQuery(sitsDataSource, sitsSchema)
 
-    override def applyInternal(): Seq[(UpstreamAssessmentGroup, LocalDate)] = items.asScala.flatMap { item =>
-      val groups =
-        assessmentMembershipService.getUpstreamAssessmentGroups(item.academicYear, item.moduleCode)
-          .find(uag => uag.occurrence == item.occurrence && uag.sequence == item.sequence)
+    override def applyInternal(): Seq[(UpstreamAssessmentGroup, LocalDate)] = transactional() {
+      items.asScala.flatMap { item =>
+        val groups =
+          assessmentMembershipService.getUpstreamAssessmentGroups(item.academicYear, item.moduleCode)
+            .find(uag => uag.occurrence == item.occurrence && uag.sequence == item.sequence)
 
-      // Update MAD record in SITS
-      require(updateQuery.updateByNamedParam(JHashMap(
-        "module_code" -> item.moduleCode,
-        "occurrence" -> item.occurrence,
-        "sequence" -> item.sequence,
-        "academic_year_code" -> item.academicYear.toString,
-        "deadline" -> Option(item.deadline).map(d => Date.valueOf(d.asJava)).orNull,
-      )) == 1, s"Unable to update deadline for $groups")
+        // Update MAD record in SITS
+        require(updateQuery.updateByNamedParam(JHashMap(
+          "module_code" -> item.moduleCode,
+          "occurrence" -> item.occurrence,
+          "sequence" -> item.sequence,
+          "academic_year_code" -> item.academicYear.toString,
+          "deadline" -> Option(item.deadline).map(d => Date.valueOf(d.asJava)).orNull,
+        )) == 1, s"Unable to update deadline for $groups")
 
-      groups.map(_ -> item.deadline)
-    }.toSeq
+        // Update the UpstreamAssessmentGroup records too
+        groups.foreach { uag =>
+          uag.deadline = Option(item.deadline)
+          assessmentMembershipService.save(uag)
+        }
+
+        groups.map(_ -> item.deadline)
+      }.toSeq
+    }
   }
 
   trait AssessmentComponentDeadlinesState {
