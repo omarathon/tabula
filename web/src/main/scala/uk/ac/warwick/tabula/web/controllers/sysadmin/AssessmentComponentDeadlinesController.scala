@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Po
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.xml.sax.InputSource
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
@@ -34,6 +34,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, Auto
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.jdk.CollectionConverters._
 import scala.util.{Try, Using}
@@ -66,6 +67,7 @@ class AssessmentComponentDeadlinesController extends BaseSysadminController {
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
       model.addAttribute("flash__error", "flash.hasErrors")
+      model.addAttribute("errors", errors)
       formView
     } else {
       command.apply()
@@ -202,12 +204,20 @@ object AssessmentComponentDeadlinesController {
     def department: Department
   }
 
-  class AssessmentComponentDeadlines {
+  class AssessmentComponentDeadlines extends ToString {
     var moduleCode: String = _
     var occurrence: String = _
     var sequence: String = _
     var academicYear: AcademicYear = AcademicYear.now() // default to current
     var deadline: LocalDate = _
+
+    override def toStringProps: Seq[(String, Any)] = Seq(
+      "moduleCode" -> moduleCode,
+      "occurrence" -> occurrence,
+      "sequence" -> sequence,
+      "academicYear" -> academicYear,
+      "deadline" -> deadline
+    )
   }
 
   trait AssessmentComponentDeadlinesRequest {
@@ -283,7 +293,7 @@ object AssessmentComponentDeadlinesController {
     }
   }
 
-  trait AssessmentComponentDeadlinesValidation extends SelfValidating {
+  trait AssessmentComponentDeadlinesValidation extends SelfValidating with Logging {
     self: AssessmentComponentDeadlinesState
       with AssessmentComponentDeadlinesRequest
       with AssessmentMembershipServiceComponent
@@ -307,9 +317,13 @@ object AssessmentComponentDeadlinesController {
             assessmentMembershipService.getUpstreamAssessmentGroups(item.academicYear, item.moduleCode)
               .find(uag => uag.occurrence == item.occurrence && uag.sequence == item.sequence)
 
-          if (groups.isEmpty) errors.rejectValue("", "NotEmpty")
-          else if (groups.exists(_.assessmentComponent.exists(_.module.adminDepartment != department))) errors.rejectValue("", "NotEmpty")
-          else {
+          if (groups.isEmpty) {
+            logger.info(s"No assessment groups found for $item")
+            errors.rejectValue("", "NotEmpty")
+          } else if (groups.exists(_.assessmentComponent.exists(_.module.adminDepartment != department))) {
+            logger.info(s"Wrong department for $item (${groups.flatMap(_.assessmentComponent.map(_.module.adminDepartment.code))})")
+            errors.rejectValue("", "NotEmpty")
+          } else {
             // Make sure a MAD row exists
             val rowCount = countQuery.executeByNamedParam(JHashMap(
               "module_code" -> item.moduleCode,
@@ -318,7 +332,10 @@ object AssessmentComponentDeadlinesController {
               "academic_year_code" -> item.academicYear.toString,
             )).get(0)
 
-            if (rowCount != 1) errors.rejectValue("", "NotEmpty")
+            if (rowCount != 1) {
+              logger.info(s"No MAD row found for $item")
+              errors.rejectValue("", "NotEmpty")
+            }
           }
         }
 
