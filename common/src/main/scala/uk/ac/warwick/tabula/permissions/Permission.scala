@@ -241,6 +241,7 @@ object Permissions {
   object Marks {
     case object MarksManagement extends ScopelessPermission("Marks management across all departments")
     case object UploadToSits extends ScopelessPermission("Upload marks to SITS")
+    case object ReviewComponentMarksUpload extends ScopelessPermission("See the progress of departmental component mark upload")
   }
 
   object Extension {

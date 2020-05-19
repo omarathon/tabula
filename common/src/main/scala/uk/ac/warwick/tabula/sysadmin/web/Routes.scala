@@ -36,6 +36,10 @@ object Routes {
     def home: String = context + "/relationships"
   }
 
+  object MarksManagement {
+    def home: String = context + "/marksmanagement"
+  }
+
   object jobs {
     def list: String = context + "/jobs/list"
 
