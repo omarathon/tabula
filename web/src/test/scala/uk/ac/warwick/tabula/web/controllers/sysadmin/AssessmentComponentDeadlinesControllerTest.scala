@@ -16,6 +16,7 @@ class AssessmentComponentDeadlinesControllerTest extends TestBase {
     parseDeadlineDate("Sep-20") should be (new LocalDate(2020, DateTimeConstants.SEPTEMBER, 1))
     parseDeadlineDate("WEEK 40") should be (new LocalDate(2020, DateTimeConstants.JUNE, 29))
     parseDeadlineDate("week 40") should be (new LocalDate(2020, DateTimeConstants.JUNE, 29))
+    parseDeadlineDate("17.1.2020") should be (new LocalDate(2020, DateTimeConstants.JANUARY, 17))
   }
 
 }
