@@ -3,6 +3,8 @@
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
 </div>
 
+<p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank.</p>
+
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>
 
@@ -33,7 +35,7 @@
       <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
         <h3>Select file</h3>
 
-        <@bs3form.labelled_form_group path="file" labelText="Files">
+        <@bs3form.labelled_form_group path="file" labelText="File">
           <input type="file" name="file.upload" />
         </@bs3form.labelled_form_group>
 
