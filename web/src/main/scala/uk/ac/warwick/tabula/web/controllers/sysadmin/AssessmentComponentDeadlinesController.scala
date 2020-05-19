@@ -82,6 +82,7 @@ object AssessmentComponentDeadlinesController {
     DateTimeFormat.forPattern("dd-MM-yyyy"),
     DateTimeFormat.forPattern("M/d/yy"),
     DateTimeFormat.forPattern("dd/MM/yyyy"),
+    DateTimeFormat.forPattern("d.M.yyyy"),
   )
 
   val DeadlineYearMonthFormats: Seq[DateTimeFormatter] = Seq(
