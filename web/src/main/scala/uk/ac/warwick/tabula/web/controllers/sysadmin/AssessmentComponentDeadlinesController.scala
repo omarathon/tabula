@@ -8,8 +8,8 @@ import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.apache.poi.xssf.usermodel.XSSFComment
-import org.joda.time.LocalDate
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import org.joda.time.{LocalDate, YearMonth}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, SqlUpdate}
 import org.springframework.jdbc.core.SqlParameter
@@ -77,12 +77,31 @@ object AssessmentComponentDeadlinesController {
   type Result = Seq[(UpstreamAssessmentGroup, LocalDate)]
   type Command = Appliable[Result] with SelfValidating with BindListener
 
-  def DeadlineDateFormats: Seq[DateTimeFormatter] = Seq(
+  val DeadlineLocalDateFormats: Seq[DateTimeFormatter] = Seq(
     DateTimeFormat.forPattern("dd-MMM-yy"),
     DateTimeFormat.forPattern("dd-MM-yyyy"),
     DateTimeFormat.forPattern("M/d/yy"),
     DateTimeFormat.forPattern("dd/MM/yyyy"),
   )
+
+  val DeadlineYearMonthFormats: Seq[DateTimeFormatter] = Seq(
+    DateTimeFormat.forPattern("MMM-yy"),
+  )
+
+  def parseDeadlineDate(in: String): LocalDate = in match {
+    case r"""(?i)^\s*week (\d+)${weekNumber}\s*$$""" =>
+      AcademicYear.now().weeks(weekNumber.toInt).firstDay
+
+    case s if DeadlineYearMonthFormats.exists(df => Try(YearMonth.parse(s, df)).isSuccess) =>
+      DeadlineYearMonthFormats.to(LazyList).map(df => Try(YearMonth.parse(s, df)))
+        .find(_.isSuccess)
+        .get.get.toLocalDate(1)
+
+    case s => DeadlineLocalDateFormats.to(LazyList).map(df => Try(df.parseLocalDate(s)))
+      .find(_.isSuccess)
+      .map(_.get)
+      .getOrElse(throw new IllegalArgumentException(s"Couldn't parse date $in"))
+  }
 
   def CountModuleAssessmentDeadlineRowsSql(sitsSchema: String) =
     s"""
@@ -234,11 +253,7 @@ object AssessmentComponentDeadlinesController {
                     case "academicyear" | "academic year" =>
                       currentItem.academicYear = AcademicYear.parse(formattedValue)
                     case "deadline" =>
-                      currentItem.deadline =
-                        DeadlineDateFormats.map(df => Try(df.parseLocalDate(formattedValue)))
-                          .find(_.isSuccess)
-                          .map(_.get)
-                          .getOrElse(throw new IllegalArgumentException(s"Couldn't parse date $formattedValue"))
+                      currentItem.deadline = parseDeadlineDate(formattedValue)
                     case _ => // ignore anything else
                   }
                 }
