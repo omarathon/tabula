@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.SortedMap
-import scala.util.Random
 
 class ModuleRegistrationServiceTest extends TestBase with Mockito {
 

@@ -452,21 +452,6 @@ class ProgressionServiceTest extends TestBase with Mockito {
     service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns Option(yearWeighting3)
   }
 
-  class ThreeYearStudentWithSpecifiedMarksAndYearWeightingsFixture(marks: Seq[BigDecimal], yearWeightings: Seq[Int]) extends ThreeYearStudentFixture {
-    student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = marks(0).underlying
-    student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = marks(1).underlying
-    service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(marks(2))
-    service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] =>
-      Seq((marks(2), args(0).asInstanceOf[Seq[ModuleRegistration]]))
-    }
-
-    val weightings: Seq[CourseYearWeighting] = yearWeightings.zipWithIndex.map { case (w, i) => Fixtures.yearWeighting(course, new JBigDecimal(w), student.mostSignificantCourse.sprStartAcademicYear, i + 1) }
-
-    service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Option(weightings(0))
-    service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns Option(weightings(1))
-    service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns Option(weightings(2))
-  }
-
   @Test
   def suggestedFinalYearGrade(): Unit = {
     // Missing module mark in 2nd year
@@ -902,20 +887,81 @@ class ProgressionServiceTest extends TestBase with Mockito {
     }
   }
 
-  /*
-  TODO - more tests!
+  class FixtureWithYearsAndMarks(marks: Seq[BigDecimal], yearWeightings: Seq[Int]) {
+
+    val student: StudentMember = Fixtures.student("1234")
+    student.mostSignificantCourse.course = course
+    student.mostSignificantCourse.sprStartAcademicYear = academicYear - (yearWeightings.size - 1)
+    val currentScyd: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
+    currentScyd.academicYear = academicYear
+    currentScyd.yearOfStudy = yearWeightings.size
+    student.mostSignificantCourse.courseYearLength = yearWeightings.size
+    currentScyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+    val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
+      override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
+      override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
+    }
+
+    def entityYear: ExamGridEntityYear = currentScyd.toExamGridEntityYear
+    var weightings: Seq[CourseYearWeighting] = Seq()
+
+    val previousYears = yearWeightings.reverse.tail.reverse.zipWithIndex.map { case (w, i) =>
+      val yearOfStudy = i + 1
+      val scyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails()
+      scyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+      scyd.studentCourseDetails = student.mostSignificantCourse
+      scyd.yearOfStudy = yearOfStudy
+      scyd.academicYear = academicYear - (yearWeightings.size -1 -i)
+      scyd.agreedMark = marks(i).underlying()
+      student.mostSignificantCourse.addStudentCourseYearDetails(scyd)
+
+      val weighting = Fixtures.yearWeighting(course, new JBigDecimal(w), student.mostSignificantCourse.sprStartAcademicYear, yearOfStudy)
+      weightings = weightings :+ weighting
+      service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, yearOfStudy) returns Option(weighting)
+      scyd
+    }
+
+    service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(marks.last)
+    service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] =>
+      Seq((marks.last, args(0).asInstanceOf[Seq[ModuleRegistration]]))
+    }
+
+    val lastYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(yearWeightings.last), student.mostSignificantCourse.sprStartAcademicYear, yearWeightings.size)
+    weightings = weightings :+ lastYearWeighting
+    service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, yearWeightings.size) returns Option(lastYearWeighting)
+  }
+
   @Test
   def graduateBenchmark(): Unit = {
-    new ThreeYearStudentWithSpecifiedMarksAndYearWeightingsFixture(
-      Seq(BigDecimal(70), BigDecimal(58), BigDecimal(65)),
+    // examples from https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/undergraduateintermediatefinal/graduationbenchmark-finalists/
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(70), BigDecimal(58), BigDecimal(60)),
       Seq(0, 50, 50)
     ) {
-
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(50))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(65))
 
-      service.graduationBenchmark(entityYear3, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(60.3)
+      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(60.3))
     }
-  }*/
+
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(64), BigDecimal(68), BigDecimal(70)),
+      Seq(10, 30, 60)
+    ) {
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(76))
+      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(70))
+    }
+
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(64), BigDecimal(68), BigDecimal(76), BigDecimal(72)),
+      Seq(10, 20, 30, 40)
+    ) {
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(72))
+
+      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(71.5))
+    }
+  }
 
 }
