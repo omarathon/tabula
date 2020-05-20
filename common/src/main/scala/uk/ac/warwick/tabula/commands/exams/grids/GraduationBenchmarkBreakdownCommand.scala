@@ -45,8 +45,8 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
   override def applyInternal(): GraduationBenchmarkBreakdown = {
     val modules = studentCourseYearDetails.moduleRegistrations.map { mr => mr -> moduleRegistrationService.benchmarkComponentsAndMarks(mr) }.toMap
     GraduationBenchmarkBreakdown(
-      modules.filter{ case (_, components) => components.nonEmpty},
-      moduleRegistrationService.graduationBenchmark(studentCourseYearDetails.moduleRegistrations),
+      modules.filter{ case (_, components) => components.nonEmpty },
+      moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations),
       studentCourseYearDetails.totalCats,
       moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations),
     )

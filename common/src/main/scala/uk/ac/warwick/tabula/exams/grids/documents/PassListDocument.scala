@@ -53,7 +53,8 @@ class PassListDocument extends ExamGridDocument
       UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
       isConfidential,
       calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-      selectCourseCommand.isLevelGrid
+      selectCourseCommand.isLevelGrid,
+      gridOptionsCommand.applyBenchmark
     )
 
     val file = new FileAttachment()
