@@ -88,10 +88,10 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
                 // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync
                 upstreamAssessmentGroupMember.foreach { uagm =>
                   if (resit) {
-                    uagm.resitActualMark = student.latestMark.map(BigDecimal(_))
+                    uagm.resitActualMark = student.latestMark
                     uagm.resitActualGrade = student.latestGrade
                   } else {
-                    uagm.actualMark = student.latestMark.map(BigDecimal(_))
+                    uagm.actualMark = student.latestMark
                     uagm.actualGrade = student.latestGrade
                   }
 

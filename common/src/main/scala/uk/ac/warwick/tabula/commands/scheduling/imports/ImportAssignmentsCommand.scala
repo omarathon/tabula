@@ -348,13 +348,13 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
               if (studentRegistrations.size == 1) {
                 new UpstreamAssessmentGroupMemberProperties {
                   position = Try(studentRegistrations.head.seatNumber.toInt).toOption
-                  actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
+                  actualMark = Try(studentRegistrations.head.actualMark.toInt).toOption
                   actualGrade = studentRegistrations.head.actualGrade.maybeText
-                  agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
+                  agreedMark = Try(studentRegistrations.head.agreedMark.toInt).toOption
                   agreedGrade = studentRegistrations.head.agreedGrade.maybeText
-                  resitActualMark = Try(BigDecimal(studentRegistrations.head.resitActualMark)).toOption
+                  resitActualMark = Try(studentRegistrations.head.resitActualMark.toInt).toOption
                   resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
-                  resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
+                  resitAgreedMark = Try(studentRegistrations.head.resitAgreedMark.toInt).toOption
                   resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
                   resitExpected = Option(studentRegistrations.head.resitExpected)
                 }
@@ -382,13 +382,13 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
                 new UpstreamAssessmentGroupMemberProperties {
                   position = resolveDuplicates(validInts(studentRegistrations.map(_.seatNumber)), "seat number")
-                  actualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.actualMark)), "actual mark")
+                  actualMark = resolveDuplicates(validInts(studentRegistrations.map(_.actualMark)), "actual mark")
                   actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
-                  agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
+                  agreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.agreedMark)), "agreed mark")
                   agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
-                  resitActualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
+                  resitActualMark = resolveDuplicates(validInts(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
                   resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
-                  resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
+                  resitAgreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
                   resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
                   resitExpected = resolveDuplicates(studentRegistrations.map(_.resitExpected), "resit expected")
                 }

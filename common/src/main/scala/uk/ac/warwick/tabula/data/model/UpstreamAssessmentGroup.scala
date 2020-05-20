@@ -108,13 +108,13 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 
   def isResitMark: Boolean = resitAgreedMark.orElse(resitActualMark).isDefined
 
-  def firstDefinedMark: Option[BigDecimal] = resitAgreedMark.orElse(resitActualMark).orElse(firstOriginalMark)
+  def firstDefinedMark: Option[Int] = resitAgreedMark.orElse(resitActualMark).orElse(firstOriginalMark)
 
   // doesn't include resit marks
-  def firstOriginalMark: Option[BigDecimal] = agreedMark.orElse(actualMark)
+  def firstOriginalMark: Option[Int] = agreedMark.orElse(actualMark)
 
   // only includes board agreed marks
-  def firstAgreedMark: Option[BigDecimal] = resitAgreedMark.orElse(agreedMark)
+  def firstAgreedMark: Option[Int] = resitAgreedMark.orElse(agreedMark)
 
   def isAgreedGrade: Boolean = resitAgreedGrade.orElse(agreedGrade).isDefined
 
@@ -134,26 +134,26 @@ trait UpstreamAssessmentGroupMemberProperties {
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var position: Option[Int] = None
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
-  var actualMark: Option[BigDecimal] = None
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var actualMark: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var actualGrade: Option[String] = None
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
-  var agreedMark: Option[BigDecimal] = None
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var agreedMark: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var agreedGrade: Option[String] = None
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
-  var resitActualMark: Option[BigDecimal] = None
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var resitActualMark: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var resitActualGrade: Option[String] = None
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
-  var resitAgreedMark: Option[BigDecimal] = None
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var resitAgreedMark: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var resitAgreedGrade: Option[String] = None
