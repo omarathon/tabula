@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.data.model.TabulaAssessmentSubtype.Exam
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
@@ -73,17 +73,17 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
     )
 
     val componentMarks = Seq(
-      BigDecimal(55),
-      BigDecimal(67),
-      BigDecimal(65),
-      BigDecimal(43),
-      BigDecimal(54),
-      BigDecimal(65),
-      BigDecimal(65),
-      BigDecimal(66),
-      BigDecimal(50),
-      BigDecimal(65),
-      BigDecimal(63)
+      55,
+      67,
+      65,
+      43,
+      54,
+      65,
+      65,
+      66,
+      50,
+      65,
+      63
     )
 
     val upstreamAssessmentGroups: Map[String, Seq[UpstreamAssessmentGroup]] = components.zipWithIndex.map { case ((mc, components), i) =>
