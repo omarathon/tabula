@@ -17,4 +17,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 <#macro assessmentcomponents department academicYear><@_u page="/admin/${department.code}/${academicYear.startYear?c}/assessment-components" /></#macro>
 <#macro assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks" /></#macro>
+<#macro assessmentcomponent_marks_skipImport assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/skip-import" /></#macro>
+<#macro assessmentcomponent_marks_progress assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/progress" /></#macro>
+<#macro assessmentcomponent_marks_importComplete assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/import-complete" /></#macro>
+<#macro assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/template.xlsx" /></#macro>
 <#macro assessmentcomponent_generateGrades assessmentComponent><@_u page="/admin/assessment-component/${assessmentComponent.id}/generate-grades" /></#macro>

@@ -1,38 +1,36 @@
 package uk.ac.warwick.tabula.web.controllers.marks
 
 import javax.validation.Valid
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping, RequestParam}
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand
+import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
+import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand.StudentMarksItem
+import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
-import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
+import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.marks.RecordAssessmentComponentMarksController.StudentMarkRecord
-import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
+import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
-object RecordAssessmentComponentMarksController {
-  case class StudentMarkRecord(
-    universityId: String,
-    position: Option[Int],
-    currentMember: Boolean,
-    mark: Option[Int],
-    grade: Option[String],
-    needsWritingToSits: Boolean,
-    outOfSync: Boolean,
-    agreed: Boolean
-  )
-}
+import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
 class RecordAssessmentComponentMarksController extends BaseController
   with AutowiringAssessmentComponentMarksServiceComponent
-  with AutowiringAssessmentMembershipServiceComponent {
+  with AutowiringAssessmentMembershipServiceComponent
+  with AutowiringProfileServiceComponent
+  with AutowiringJobServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
   validatesSelf[SelfValidating]
 
@@ -59,50 +57,134 @@ class RecordAssessmentComponentMarksController extends BaseController
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup)
-
-    info.allMembers.map { member =>
-      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
-
-      StudentMarkRecord(
-        universityId = member.universityId,
-        position = member.position,
-        currentMember = info.currentMembers.contains(member),
-        mark =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstAgreedMark.map(_.toInt))
-            .orElse(recordedStudent.flatMap(_.latestMark))
-            .orElse(member.firstDefinedMark.map(_.toInt)),
-        grade =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(member.firstAgreedGrade)
-            .orElse(recordedStudent.flatMap(_.latestGrade))
-            .orElse(member.firstDefinedGrade),
-        needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
-        outOfSync =
-          recordedStudent.exists(!_.needsWritingToSits) && (
-            recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.map(_.toInt).contains(m)) ||
-            recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstAgreedGrade.contains(g))
-          ),
-        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
-      )
-    }
+    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
   }
 
   @ModelAttribute("isGradeValidation")
   def isGradeValidation(@PathVariable assessmentComponent: AssessmentComponent): Boolean =
     assessmentComponent.module.adminDepartment.assignmentGradeValidation
 
-  @RequestMapping
-  def formView: String = "marks/admin/assessment-components/record"
+  private val formView: String = "marks/admin/assessment-components/record"
 
-  @PostMapping
+  /**
+   * Upon loading the form, trigger a skippable import if:
+   *
+   * - Any of the student mark records is outOfSync; or
+   * - The most recent import date was more than 5 minutes ago
+   */
+  @RequestMapping
+  def triggerImportIfNecessary(
+    @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
+    model: ModelMap,
+    @ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command,
+  ): String = {
+    val universityIds = studentMarkRecords.map(_.universityId)
+    lazy val members = profileService.getAllMembersWithUniversityIds(universityIds)
+
+    if (!maintenanceModeService.enabled && (studentMarkRecords.exists(_.outOfSync) || members.flatMap(m => Option(m.lastImportDate)).exists(_.isBefore(DateTime.now.minusMinutes(5))))) {
+      stopOngoingImportForStudents(universityIds)
+
+      val studentLastImportDates =
+        members.map(m =>
+          (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
+        ).sortBy(_._2)
+
+      val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(upstreamAssessmentGroup.academicYear)))
+
+      model.addAttribute("jobId", jobInstance.id)
+      model.addAttribute("jobProgress", jobInstance.progress)
+      model.addAttribute("jobStatus", jobInstance.status)
+      model.addAttribute("oldestImport", studentLastImportDates.headOption.map { case (_, datetime) => datetime })
+      model.addAttribute("studentLastImportDates", studentLastImportDates)
+
+      "marks/admin/assessment-components/job-progress"
+    } else {
+      command.populate()
+      formView
+    }
+  }
+
+  private def stopOngoingImportForStudents(universityIds: Seq[String]): Unit =
+    jobService.jobDao.listRunningJobs
+      .filter(_.jobType == ImportMembersJob.identifier)
+      .filter(_.getStrings(ImportMembersJob.MembersKey).toSet == universityIds.toSet)
+      .foreach(jobService.kill)
+
+  @PostMapping(Array("/progress"))
+  def jobProgress(@RequestParam jobId: String): Mav =
+    jobService.getInstance(jobId).map(jobInstance =>
+      Mav(new JSONView(Map(
+        "id" -> jobInstance.id,
+        "status" -> jobInstance.status,
+        "progress" -> jobInstance.progress,
+        "finished" -> jobInstance.finished
+      ))).noLayout()
+    ).getOrElse(throw new ItemNotFoundException)
+
+  // For people who hit the back button back to the /skip-import page or refresh it
+  @RequestMapping(Array("/skip-import"))
+  def skipImportRefresh(@ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
+    command.populate()
+    formView
+  }
+
+  @PostMapping(Array("/skip-import"))
+  def skipImport(@RequestParam jobId: String, @ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
+    jobService.getInstance(jobId)
+      .filterNot(_.finished)
+      .filter(_.jobType == ImportMembersJob.identifier)
+      .foreach(jobService.kill)
+
+    command.populate()
+    formView
+  }
+
+  @RequestMapping(Array("/import-complete"))
+  def importComplete(@ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command): String = {
+    command.populate()
+    formView
+  }
+
+  @PostMapping(params = Array("!confirm"))
+  def preview(
+    @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
+    errors: Errors,
+    model: ModelMap,
+    @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+  ): String =
+    if (errors.hasErrors) {
+      model.addAttribute("flash__error", "flash.hasErrors")
+      formView
+    } else {
+      // Filter down to just changes
+      val changes: Seq[(StudentMarkRecord, StudentMarksItem)] =
+        cmd.students.asScala.values.toSeq.flatMap { student =>
+          // We know the .get is safe because it's validated
+          val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
+
+          // Mark and grade are empty, or haven't changed
+          if (
+            (!student.mark.hasText && !student.grade.hasText) ||
+            (
+              (!student.mark.hasText || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
+              (!student.grade.hasText || studentMarkRecord.grade.contains(student.grade))
+            )
+          ) None else Some(studentMarkRecord -> student)
+        }
+
+      model.addAttribute("changes", changes)
+
+      "marks/admin/assessment-components/record_preview"
+    }
+
+  @PostMapping(params = Array("confirm=true"))
   def save(
     @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
     errors: Errors,
     @PathVariable assessmentComponent: AssessmentComponent,
     @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
-    model: ModelMap
+    model: ModelMap,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
       model.addAttribute("flash__error", "flash.hasErrors")

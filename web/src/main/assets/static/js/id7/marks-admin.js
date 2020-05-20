@@ -61,4 +61,25 @@ $(() => {
       doRequest();
     }
   });
+
+  // Treat enter as tab in .marks-form
+  $('form.marks-form').each((i, form) => {
+    const $form = $(form);
+
+    // All visible inputs that:
+    // - Aren't buttons (including submit inputs)
+    // - Aren't textareas (so we can still add newlines)
+    $form.on('keydown', ':input:visible:not(:button):not(input[type="submit"]):not(textarea)', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+
+        // Tabbable inputs are all form inputs, buttons and links that are visible and aren't
+        // excluded from tabindex
+        const $tabbable = $form.find(':input, :button, a').filter(':visible:not([tabindex="-1"])');
+        const currentIndex = $tabbable.index(document.activeElement);
+
+        $tabbable.eq(currentIndex + 1).focus();
+      }
+    });
+  });
 });
