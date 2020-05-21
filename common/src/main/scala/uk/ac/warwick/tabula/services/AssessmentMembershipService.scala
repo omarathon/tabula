@@ -354,6 +354,7 @@ class AssessmentMembershipServiceImpl
     component.marksCode match {
       case code: String if code.hasText =>
         dao.getGradeBoundaries(code).filter(_.isValidForMark(mark))
+          .sortBy { gb => (!gb.isDefault, gb.grade) } // Defaults first, then alphabetical
       case _ =>
         Seq()
     }

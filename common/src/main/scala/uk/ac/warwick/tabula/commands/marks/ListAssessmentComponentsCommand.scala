@@ -18,7 +18,8 @@ object ListAssessmentComponentsCommand {
     grade: Option[String],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
-    agreed: Boolean
+    agreed: Boolean,
+    history: Seq[RecordedAssessmentComponentStudentMark] // Most recent first
   )
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
@@ -28,9 +29,9 @@ object ListAssessmentComponentsCommand {
         currentMember = info.currentMembers.contains(member),
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstAgreedMark.map(_.toInt))
+            .orElse(member.firstAgreedMark)
             .orElse(recordedStudent.flatMap(_.latestMark))
-            .orElse(member.firstDefinedMark.map(_.toInt)),
+            .orElse(member.firstDefinedMark),
         grade =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
             .orElse(member.firstAgreedGrade)
@@ -39,17 +40,18 @@ object ListAssessmentComponentsCommand {
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
-            recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.map(_.toInt).contains(m)) ||
+            recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
-        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty
+        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
+        history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
       )
   }
 
   def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
     val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
 
-    info.allMembers.map { member =>
+    info.allMembers.sortBy(_.universityId).map { member =>
       val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
 
       StudentMarkRecord(info, member, recordedStudent)

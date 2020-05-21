@@ -82,7 +82,7 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
           assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
 
         recordedAssessmentComponentStudent.addMark(
-          uploaderId = currentUser.userId,
+          uploader = currentUser.apparentUser,
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
           comments = item.comments
