@@ -1,3 +1,4 @@
+<#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
 
 <div class="deptheader">
@@ -131,7 +132,7 @@
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].mark">
                       <div class="input-group">
-                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control" autocomplete="off" type="number" min="0" max="100" />
+                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
                         <div class="input-group-addon">%</div>
                       </div>
                     </@bs3form.labelled_form_group>
@@ -139,10 +140,10 @@
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string />
+                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string />
                         <@f.select path="students[${student.universityId}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control" />
+                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control grade-box" />
                       </#if>
                     </@bs3form.labelled_form_group>
                   </td>
@@ -165,3 +166,9 @@
     </div>
   </div>
 </div>
+<script id="setHash" data-tab="<#if from_origin?has_content>${from_origin}<#else>upload</#if>">
+  document.addEventListener("DOMContentLoaded", function () {
+    const el = document.getElementById('setHash');
+    window.location.hash = el.getAttribute('data-tab');
+  });
+</script>

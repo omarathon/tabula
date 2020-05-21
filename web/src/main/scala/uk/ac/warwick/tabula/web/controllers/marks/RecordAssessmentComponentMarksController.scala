@@ -154,6 +154,11 @@ class RecordAssessmentComponentMarksController extends BaseController
     @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
   ): String =
     if (errors.hasErrors) {
+      if (errors.hasFieldErrors("file")) {
+        model.addAttribute("from_origin", "upload")
+      } else {
+        model.addAttribute("from_origin", "webform")
+      }
       model.addAttribute("flash__error", "flash.hasErrors")
       formView
     } else {
@@ -187,10 +192,12 @@ class RecordAssessmentComponentMarksController extends BaseController
     model: ModelMap,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
+      model.addAttribute("from_origin", "webform")
       model.addAttribute("flash__error", "flash.hasErrors")
       formView
     } else {
       cmd.apply()
+
       RedirectFlashing(Routes.marks.Admin.AssessmentComponents(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
     }
 
