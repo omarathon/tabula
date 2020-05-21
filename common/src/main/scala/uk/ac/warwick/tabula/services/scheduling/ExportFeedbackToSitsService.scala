@@ -178,16 +178,12 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 
   override def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = {
     val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
-    val (updateQuery, tableName) =
-      if (resit) (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
-      else (new ExportFeedbackToSitsQuery(sitsDataSource), "CAM_SAS")
+    val updateQuery =
+      if (resit) new ExportResitFeedbackToSitsQuery(sitsDataSource)
+      else new ExportFeedbackToSitsQuery(sitsDataSource)
 
-    if (student.latestMark.nonEmpty || student.latestGrade.nonEmpty) {
-      updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
-    } else {
-      logger.warn(f"Not updating SITS $tableName for assessment component mark $student - no latest mark or grade found")
-      0
-    }
+    // Write a null mark/grade if requested, so don't need to check if mark/grade set
+    updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
 
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
