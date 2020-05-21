@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -36,6 +35,19 @@ object ImportAssignmentsCommand {
     with AutowiringAssignmentImporterComponent
     with Daoisms {
     override lazy val eventName = "ImportAssignmentsAllYears"
+  }
+
+  def applyIndividualYear(year: AcademicYear): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
+    with ImportAssignmentsIndividualYearCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
+    with ImportAssignmentsAllMembers
+    with ImportAssignmentsDescription
+    with AutowiringAssignmentImporterComponent
+    with Daoisms {
+    override def yearsToImport: Seq[AcademicYear] = Seq(year)
+
+    override lazy val eventName = "ImportAssignmentsIndividualYear"
   }
 
   def applyForMembers(applyMembers: Seq[MembershipMember], applyYears: Seq[AcademicYear]): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
@@ -190,12 +202,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
   }
 
   /**
-    * This calls the importer method that iterates over ALL module registrations.
-    * The results are ordered such that it can hold a list of items until it
-    * detects one that belongs to a different group, at which point it saves
-    * what it's got and starts a new list. This way we don't have to load many
-    * things into memory at once.
-    */
+   * This calls the importer method that iterates over ALL module registrations.
+   * The results are ordered such that it can hold a list of items until it
+   * detects one that belongs to a different group, at which point it saves
+   * what it's got and starts a new list. This way we don't have to load many
+   * things into memory at once.
+   */
   def doGroupMembers(): Unit = {
     benchmark("Import all group members") {
       var registrations = List[UpstreamModuleRegistration]()
@@ -252,64 +264,66 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
   }
 
   def doExamSchedule(): Unit = {
-    benchmark("Import exam schedule") { transactional() { // Do it all in one big tx
-      val existing = assessmentMembershipService.allScheduledExams(assignmentImporter.publishedExamProfiles(yearsToImport))
+    benchmark("Import exam schedule") {
+      transactional() { // Do it all in one big tx
+        val existing = assessmentMembershipService.allScheduledExams(assignmentImporter.publishedExamProfiles(yearsToImport))
 
-      val seenIds =
-        assignmentImporter.getAllScheduledExams(yearsToImport)
-          .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
-          .map { schedule =>
-            val updated =
-              assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence, schedule.locationSequence)
-                .map(_.copyFrom(schedule))
-                .getOrElse(schedule)
+        val seenIds =
+          assignmentImporter.getAllScheduledExams(yearsToImport)
+            .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
+            .map { schedule =>
+              val updated =
+                assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence, schedule.locationSequence)
+                  .map(_.copyFrom(schedule))
+                  .getOrElse(schedule)
 
-            // Make sure any transient instances are saved before we try and add students to them
-            assessmentMembershipService.save(updated)
+              // Make sure any transient instances are saved before we try and add students to them
+              assessmentMembershipService.save(updated)
 
-            val existingStudents = updated.students.asScala.toSeq
-            val students =
-              assignmentImporter.getScheduledExamStudents(updated)
-                .map { student =>
-                  if (!student.universityId.hasText && student.sprCode.hasText) {
-                    // Just guess, duff data
-                    student.universityId = student.sprCode.split('/').head
+              val existingStudents = updated.students.asScala.toSeq
+              val students =
+                assignmentImporter.getScheduledExamStudents(updated)
+                  .map { student =>
+                    if (!student.universityId.hasText && student.sprCode.hasText) {
+                      // Just guess, duff data
+                      student.universityId = student.sprCode.split('/').head
+                    }
+
+                    student
                   }
+                  .filter(_.universityId.nonEmpty)
 
-                  student
+              existingStudents.filterNot(s => students.exists(_.universityId == s.universityId))
+                .foreach(updated.students.remove)
+
+              students.foreach { s =>
+                existingStudents.find(e => s.universityId == e.universityId) match {
+                  case Some(existing) if existing.sameDataAs(s) => // do nothing
+                  case Some(existing) => existing.copyFrom(s)
+                  case _ =>
+                    s.schedule = updated
+                    updated.students.add(s)
                 }
-                .filter(_.universityId.nonEmpty)
-
-            existingStudents.filterNot(s => students.exists(_.universityId == s.universityId))
-              .foreach(updated.students.remove)
-
-            students.foreach { s =>
-              existingStudents.find(e => s.universityId == e.universityId) match {
-                case Some(existing) if existing.sameDataAs(s) => // do nothing
-                case Some(existing) => existing.copyFrom(s)
-                case _ =>
-                  s.schedule = updated
-                  updated.students.add(s)
               }
+
+              assessmentMembershipService.save(updated)
+
+              updated.id
             }
 
-            assessmentMembershipService.save(updated)
-
-            updated.id
-          }
-
-      // Delete any ids that we haven't seen
-      existing.filterNot(e => seenIds.contains(e.id)).foreach(assessmentMembershipService.delete)
-    }}
+        // Delete any ids that we haven't seen
+        existing.filterNot(e => seenIds.contains(e.id)).foreach(assessmentMembershipService.delete)
+      }
+    }
   }
 
   /**
-    * This sequence of ModuleRegistrations represents the members of an assessment
-    * group, so save them (and reconcile it with any existing members we have in the
-    * database).
-    * The students in a group does NOT vary by sequence, so the membership should be set on ALL the groups.
-    * Then set the properties of members of each group by sequence.
-    */
+   * This sequence of ModuleRegistrations represents the members of an assessment
+   * group, so save them (and reconcile it with any existing members we have in the
+   * database).
+   * The students in a group does NOT vary by sequence, so the membership should be set on ALL the groups.
+   * Then set the properties of members of each group by sequence.
+   */
   def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
     registrations.headOption.map { head =>
       var hasChanged: Boolean = false
@@ -400,16 +414,16 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
             group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
               val memberHasChanged = (
                 member.position != properties.position ||
-                member.actualMark != properties.actualMark ||
-                member.actualGrade != properties.actualGrade ||
-                member.agreedMark != properties.agreedMark ||
-                member.agreedGrade != properties.agreedGrade ||
-                member.resitActualMark != properties.resitActualMark ||
-                member.resitActualGrade != properties.resitActualGrade ||
-                member.resitAgreedMark != properties.resitAgreedMark ||
-                member.resitAgreedGrade != properties.resitAgreedGrade ||
-                member.resitExpected != properties.resitExpected
-              )
+                  member.actualMark != properties.actualMark ||
+                  member.actualGrade != properties.actualGrade ||
+                  member.agreedMark != properties.agreedMark ||
+                  member.agreedGrade != properties.agreedGrade ||
+                  member.resitActualMark != properties.resitActualMark ||
+                  member.resitActualGrade != properties.resitActualGrade ||
+                  member.resitAgreedMark != properties.resitAgreedMark ||
+                  member.resitAgreedGrade != properties.resitAgreedGrade ||
+                  member.resitExpected != properties.resitExpected
+                )
 
               if (memberHasChanged) {
                 hasChanged = true
@@ -495,10 +509,22 @@ trait ImportAssignmentsDescription extends Describable[Unit] {
   def describe(d: Description): Unit = {}
 }
 
-trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
+trait ImportAssignmentsYearCommand extends ImportAssignmentsCommand {
+  def process(year: AcademicYear): Unit = {
+    benchmark(s"ImportAssignmentsCommand for $year") {
+      doAssignments()
+      doExamSchedule()
+      doGroups()
+      doGroupMembers()
+      logger.info(s"ImportAssignmentsCommand for $year completed")
+    }
+  }
 
-  @Value("${tabula.yearZero}") var yearZero: Int = 2000
+}
 
+trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsYearCommand {
+
+  var yearZero: Int = Wire.property("${tabula.yearZero:2000}").toInt
   private var currentYear: AcademicYear = _
 
   override def yearsToImport: Seq[AcademicYear] = Seq(currentYear)
@@ -507,16 +533,15 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
     val next = AcademicYear.now().next.startYear
     for (year <- yearZero until next) {
       currentYear = AcademicYear.starting(year)
-
-      benchmark(s"ImportAssignmentsCommand for $currentYear") {
-        doAssignments()
-        doExamSchedule()
-        doGroups()
-        doGroupMembers()
-      }
+      process(currentYear)
     }
   }
+}
 
+trait ImportAssignmentsIndividualYearCommand extends ImportAssignmentsYearCommand {
+  override def applyInternal(): Unit = {
+    process(yearsToImport.head)
+  }
 }
 
 trait RemovesMissingAssessmentComponents {
