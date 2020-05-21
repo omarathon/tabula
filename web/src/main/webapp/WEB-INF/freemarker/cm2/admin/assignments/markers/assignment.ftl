@@ -117,7 +117,7 @@
           var $comments = $prevFeedback.find('.feedback-comments:first');
           var $notes = $prevFeedback.find('.feedback-comments:not(:first):last');
           var $attachments = $prevFeedback.find('.feedback-attachments li');
-          var $form = $('.marking-and-feedback form', $row);
+          var $form = $('form', $row);
 
           var $newComments = $form.find('textarea:first');
           if ($newComments.val()) {
