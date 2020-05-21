@@ -71,7 +71,7 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
 
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq
-      .filter(s => s.mark.nonEmpty || s.grade.nonEmpty)
+      .filter(s => s.mark.nonEmpty || s.grade.nonEmpty || s.comments.nonEmpty)
       .map { item =>
         val upstreamAssessmentGroupMember =
           upstreamAssessmentGroup.members.asScala
