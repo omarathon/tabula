@@ -116,7 +116,7 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 
   "First marker" should "be able to download submissions" in as(P.Marker1) {
 
-    click on linkText("Coursework Management")
+    click on linkText("Coursework")
     currentUrl.contains("/coursework/") should be(true)
 
     openMarkingScreen()

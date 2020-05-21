@@ -54,7 +54,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 
   private def addAttachments(): Unit = {
 
-    click on linkText("Coursework Management")
+    click on linkText("Coursework")
     currentUrl should include("/coursework/")
 
     val submitLink = eventually {
