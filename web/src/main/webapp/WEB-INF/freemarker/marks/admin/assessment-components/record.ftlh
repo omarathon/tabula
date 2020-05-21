@@ -14,8 +14,8 @@
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
-    <li role="presentation"><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
+    <li role="presentation" <#if (from_origin!"upload") == "upload">class="active"</#if>><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
+    <li role="presentation" <#if (from_origin!"upload") == "webform">class="active"</#if>><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
@@ -166,9 +166,3 @@
     </div>
   </div>
 </div>
-<script id="setHash" data-tab="<#if from_origin?has_content>${from_origin}<#else>upload</#if>">
-  document.addEventListener("DOMContentLoaded", function () {
-    const el = document.getElementById('setHash');
-    window.location.hash = el.getAttribute('data-tab');
-  });
-</script>
