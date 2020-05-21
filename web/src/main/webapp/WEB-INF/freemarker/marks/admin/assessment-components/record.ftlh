@@ -24,7 +24,7 @@
         <strong>Grade</strong> and <strong>Comments</strong>.
         You can use this <a href="<@routes.marks.assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup />">generated spreadsheet</a> as a template.</p>
 
-      <p>Enter the results in the following columns (all other columns are locked):</p>
+      <p>Enter the corresponding results for each university ID in the following columns:</p>
 
       <ul>
         <li>Column B - Mark</li>
