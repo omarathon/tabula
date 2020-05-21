@@ -7,7 +7,7 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 
   private def openBulkAdjustmentScreen(): Unit = {
 
-    click on linkText("Coursework Management")
+    click on linkText("Coursework")
     currentUrl.contains("/coursework/") should be(true)
 
     When("I go the admin page")

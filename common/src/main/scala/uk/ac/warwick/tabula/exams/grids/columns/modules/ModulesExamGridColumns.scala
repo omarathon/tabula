@@ -63,7 +63,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
     _values.getOrElseUpdate(entity, {
       val values = getModuleRegistration(entity).map(mr => {
         val overallMark = {
-          if (entity.markOverrides.exists(_.get(module).isDefined)) {
+          if (entity.markOverrides.exists(_.contains(module))) {
             ExamGridColumnValueOverrideDecimal(entity.markOverrides.get(module))
           } else {
             if (mr.passFail) {
@@ -100,28 +100,28 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
         }
         if (state.showComponentMarks) {
           def toValue(member: UpstreamAssessmentGroupMember): ExamGridColumnValue = {
-            val (mark, isActual) = (member.firstDefinedMark.orNull, !member.isAgreedMark)
+            val (mark, isActual) = (member.firstDefinedMark, !member.isAgreedMark)
 
             def markAsString: String = {
-              val raw = mark.underlying.stripTrailingZeros.toPlainString
+              val raw = mark.get.toString
               val checkResit = if (member.isResitMark) s"[$raw ${member.firstOriginalMark.map(s => s"($s)").getOrElse("")}]" else raw
               val checkShowSequence = if (state.showComponentSequence) s"$checkResit (${member.upstreamAssessmentGroup.sequence})" else checkResit
               checkShowSequence
             }
 
-            if (mark == null) {
+            if (mark.isEmpty) {
               ExamGridColumnValueMissing("Agreed and actual mark missing")
             } else if (member.firstDefinedGrade.contains("F")) {
               if (state.showComponentSequence || member.isResitMark) {
                 ExamGridColumnValueFailedString(markAsString, isActual)
               } else {
-                ExamGridColumnValueFailedDecimal(mark, isActual)
+                ExamGridColumnValueFailedDecimal(BigDecimal(mark.get), isActual)
               }
             } else {
               if (state.showComponentSequence || member.isResitMark) {
                 ExamGridColumnValueString(markAsString, isActual)
               }
-              else ExamGridColumnValueDecimal(mark, isActual)
+              else ExamGridColumnValueDecimal(BigDecimal(mark.get), isActual)
             }
           }
 

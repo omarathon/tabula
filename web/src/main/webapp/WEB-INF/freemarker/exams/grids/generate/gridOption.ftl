@@ -432,17 +432,6 @@
         </div>
       </div>
 
-      <#if features.graduationBenchmark>
-        <div class="col-md-3">
-          <div class="checkbox">
-            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="graduationBenchmark"
-                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("graduationBenchmark")>checked</#if>
-              /> Current year weighted assessment mark<@fmt.help_popover id="currentyear" content="Weighted assessment mark for the graduation benchmark." />
-            </label>
-          </div>
-        </div>
-      </#if>
-
       <div class="col-md-3">
         <div class="checkbox">
           <label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"
@@ -480,6 +469,40 @@
         </div>
       </#if>
     </div>
+
+    <#if features.graduationBenchmark>
+      <hr />
+      <h3>Graduation benchmark</h3>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="benchmarkWeightedAssessmentMark"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("benchmarkWeightedAssessmentMark")>checked</#if>
+              /> Current year weighted assessment mark<@fmt.help_popover id="benchmarkWeightedAssessmentMark" content="Weighted assessment mark for the graduation benchmark." />
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="graduationBenchmark"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("graduationBenchmark")>checked</#if>
+              /> Graduation benchmark <@fmt.help_popover id="graduationBenchmark" content="Calculated graduation benchmark." />
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="applyBenchmark" <#if gridOptionsCommand.applyBenchmark>checked</#if> />
+              Apply graduation benchmark <@fmt.help_popover id="applyBenchmark" content="The graduation benchmark will be used to calculate the final degree mark and classification." />
+            </label>
+          </div>
+        </div>
+      </div>
+    </#if>
 
     <hr />
 

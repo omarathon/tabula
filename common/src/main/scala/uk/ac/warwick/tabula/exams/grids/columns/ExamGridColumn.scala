@@ -45,10 +45,11 @@ object ExamGridColumnOption {
     val PassedCATS = 31
     val PreviousYears = 40
     val CurrentYear = 41
-    val GraduationBenchmark = 42
+    val BenchmarkWeightedAssessmentMark = 42
     val OvercattedYearMark = 43
     val BoardAgreedMark = 44
-    val FinalOverallMark = 45
+    val GraduationBenchmark = 45
+    val FinalOverallMark = 46
     val SuggestedResult = 50
     val SuggestedFinalYearGrade = 51
     val MitigatingCircumstances = 60
@@ -147,11 +148,12 @@ case class ExamGridColumnState(
   showComponentSequence: Boolean,
   showModuleNames: ExamGridDisplayModuleNameColumnValue,
   calculateYearMarks: Boolean,
-  isLevelGrid: Boolean
+  isLevelGrid: Boolean,
+  applyBenchmark: Boolean,
 )
 
 case object EmptyExamGridColumnState {
-  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks = false, isLevelGrid = false)
+  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks = false, isLevelGrid = false, applyBenchmark = false)
 }
 
 @Component

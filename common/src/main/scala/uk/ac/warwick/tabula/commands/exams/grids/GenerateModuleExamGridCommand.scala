@@ -40,9 +40,9 @@ case class ModuleGridDetailRecord(
 )
 
 
-case class AssessmentComponentInfo(mark: BigDecimal, grade: String, isActualMark: Boolean, isActualGrade: Boolean, resitInfo: ResitComponentInfo)
+case class AssessmentComponentInfo(mark: Option[Int], grade: Option[String], isActualMark: Boolean, isActualGrade: Boolean, resitInfo: ResitComponentInfo)
 
-case class ResitComponentInfo(resitMark: BigDecimal, resitGrade: String, isActualResitMark: Boolean, isActualResitGrade: Boolean)
+case class ResitComponentInfo(resitMark: Option[Int], resitGrade: Option[String], isActualResitMark: Boolean, isActualResitGrade: Boolean)
 
 case class AssessmentIdentity(code: String, name: String)
 
@@ -66,13 +66,13 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
             assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
               .filter(ac => isHistoricalGrid || ac.inUse) // TAB-8263 only filter 'not in use' components for this years grids
               .map { comp => AssessmentIdentity(code = code, name = comp.name) -> AssessmentComponentInfo(
-                mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
-                grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
+                mark = uagm.agreedMark.orElse(uagm.actualMark),
+                grade = uagm.agreedGrade.orElse(uagm.actualGrade),
                 isActualMark = uagm.agreedMark.isEmpty,
                 isActualGrade = uagm.agreedGrade.isEmpty,
                 resitInfo = ResitComponentInfo(
-                  resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.orNull),
-                  resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.orNull),
+                  resitMark = uagm.resitAgreedMark.orElse(uagm.resitActualMark),
+                  resitGrade = uagm.resitAgreedGrade.orElse(uagm.resitActualGrade),
                   isActualResitMark = uagm.resitAgreedMark.isEmpty,
                   isActualResitGrade = uagm.resitAgreedGrade.isEmpty
                 )

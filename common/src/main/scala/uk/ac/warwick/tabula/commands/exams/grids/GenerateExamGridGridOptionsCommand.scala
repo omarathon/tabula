@@ -173,6 +173,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
   var mandatoryModulesAndYearMarkColumns: Boolean = true
   var customColumnTitles: JList[String] = JArrayList()
   var entitiesPerPage: Int = 0
+  var applyBenchmark: Boolean = false
 
   def showFullLayout: Boolean = layout == "full"
 

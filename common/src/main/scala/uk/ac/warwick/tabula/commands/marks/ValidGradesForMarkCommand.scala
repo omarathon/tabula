@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.marks.ValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.marks.ValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -35,11 +35,14 @@ abstract class ValidGradesForMarkCommandInternal(val assessmentComponent: Assess
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) = {
-    val validGrades =
-      mark.maybeText
-        .flatMap(m => Try(m.toInt).toOption)
-        .map(m => assessmentMembershipService.gradesForMark(assessmentComponent, m))
-        .getOrElse(Seq.empty)
+    val validGrades = mark.maybeText match {
+      case Some(m) =>
+        Try(m.toInt).toOption
+          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt)))
+          .getOrElse(Seq.empty)
+
+      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None)
+    }
 
     val default =
       if (existing.maybeText.nonEmpty && validGrades.exists(_.grade == existing)) {

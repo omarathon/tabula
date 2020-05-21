@@ -53,7 +53,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
       submitAssignment(P.Student2, "Single marking - single use", assignmentId, "/file2.txt", mustBeEnrolled = false)
 
       as(P.Admin1) {
-        click on linkText("Coursework Management")
+        click on linkText("Coursework")
         currentUrl.contains("/coursework/") should be(true)
 
         click on linkText("Test Services")

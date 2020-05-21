@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.Fixtures.assignment
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -201,7 +200,7 @@ object Fixtures extends Mockito {
 
   def assessmentGroupAndMember(
     assignment: AssessmentComponent,
-    actualMark: BigDecimal,
+    actualMark: Int,
     academicYear: AcademicYear,
     deadline: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
   ): UpstreamAssessmentGroup = {
