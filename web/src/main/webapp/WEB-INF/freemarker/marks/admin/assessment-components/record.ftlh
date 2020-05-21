@@ -34,6 +34,32 @@
 
       <p>Note that you can upload any of the following: marks only; grades only (for pass/fail modules); marks and grades only; marks and comments only; marks, grades and comments.</p>
 
+      <#if assessmentComponent.module.adminDepartment??>
+        <#assign department = assessmentComponent.module.adminDepartment />
+        <h6>
+          Departmental settings for ${department.name}
+          <#if can.do("Department.ManageDisplaySettings", department)>
+            <a href="<@routes.admin.displaysettings department />">Change</a>
+          </#if>
+        </h6>
+
+        <ul>
+          <#if department.assignmentGradeValidation>
+            <li>Grade validation is currently <strong>ON</strong> - invalid grades cannot be saved. A grade must be provided if a mark is entered.</li>
+
+            <#if assessmentComponent.marksCode != 'PF'>
+              <#if department.assignmentGradeValidationUseDefaultForZero>
+                <li>The default grade for a mark of 0 is <strong>F</strong>. Please check grades carefully.</li>
+              <#else>
+                <li>A grade will <strong>NOT</strong> be pre-filled for a mark of 0. A valid grade must be provided.</li>
+              </#if>
+            </#if>
+          <#else>
+            <li>Grade validation is currently <strong>OFF</strong> - please make sure only valid grades are recorded.</li>
+          </#if>
+        </ul>
+      </#if>
+
       <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
         <h3>Select file</h3>
 
