@@ -152,6 +152,8 @@ class RecordAssessmentComponentMarksController extends BaseController
     errors: Errors,
     model: ModelMap,
     @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @PathVariable assessmentComponent: AssessmentComponent,
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
   ): String =
     if (errors.hasErrors) {
       model.addAttribute("flash__error", "flash.hasErrors")
@@ -174,6 +176,7 @@ class RecordAssessmentComponentMarksController extends BaseController
         }
 
       model.addAttribute("changes", changes)
+      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.AssessmentComponents.recordMarks(assessmentComponent, upstreamAssessmentGroup)}/skip-import"))
 
       "marks/admin/assessment-components/record_preview"
     }
