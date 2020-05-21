@@ -6,6 +6,7 @@ import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
@@ -62,13 +63,13 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   private val _marks: JList[RecordedAssessmentComponentStudentMark] = JArrayList()
   def marks: Seq[RecordedAssessmentComponentStudentMark] = _marks.asScala.toSeq
 
-  def addMark(uploaderId: String, mark: Int, grade: Option[String], comments: String = null): RecordedAssessmentComponentStudentMark = {
+  def addMark(uploader: User, mark: Int, grade: Option[String], comments: String = null): RecordedAssessmentComponentStudentMark = {
     val newMark = new RecordedAssessmentComponentStudentMark
     newMark.recordedAssessmentComponentStudent = this
     newMark.mark = mark
     newMark.grade = grade
     newMark.comments = comments
-    newMark.updatedBy = uploaderId
+    newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
     _marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
     needsWritingToSits = true
@@ -119,8 +120,9 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
 
   var comments: String = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   @Column(name = "updated_by", nullable = false)
-  var updatedBy: String = _
+  var updatedBy: User = _
 
   @Column(name = "updated_date", nullable = false)
   var updatedDate: DateTime = _
