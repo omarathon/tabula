@@ -72,11 +72,12 @@ class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Resul
       val percentageComplete = Math.ceil((studentsWithMarks.toFloat / totalStudents.toFloat) * 100).toInt
       ComponentMarkUploadProgressResult(department,
         ComponentMarkUploadProgress(
-        assessmentComponentInfo.size,
-        totalStudents,
-        studentsWithMarks,
-        percentageComplete =  if (totalStudents > 0) s"$percentageComplete%" else ""
-      ))
+          assessmentComponentInfo.size,
+          totalStudents,
+          studentsWithMarks,
+          percentageComplete =  if (totalStudents > 0) s"$percentageComplete%" else ""
+        )
+      )
     }.toSeq.filter(_.componentMarkUploadProgress.assessmentComponentCount > 0).sortBy(_.department.name)
   }
 }

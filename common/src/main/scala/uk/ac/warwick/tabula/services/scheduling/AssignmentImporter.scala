@@ -302,7 +302,15 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         a.assessmentType = AssessmentType.Essay
         a.inUse = true
         a.weighting = 30
-        a.marksCode = "TABULA-UG"
+
+        val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+        a.marksCode =
+          if (isPassFail) "TABULA-PF"
+          else route.degreeType match {
+            case DegreeType.Postgraduate => "TABULA-PG"
+            case _ => "TABULA-UG"
+          }
+
         a.examPaperCode = None
         a.examPaperTitle = None
         a.examPaperSection = None
@@ -320,7 +328,15 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e.assessmentType = AssessmentType.SummerExam
         e.inUse = true
         e.weighting = 70
-        e.marksCode = "TABULA-UG"
+
+        val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+        e.marksCode =
+          if (isPassFail) "TABULA-PF"
+          else route.degreeType match {
+            case DegreeType.Postgraduate => "TABULA-PG"
+            case _ => "TABULA-UG"
+          }
+
         e.examPaperCode = Some(s"${moduleCode.toUpperCase}0")
         e.examPaperTitle = Some(module.name)
         e.examPaperSection = Some("n/a")
@@ -707,7 +723,7 @@ object AssignmentImporter {
       mkc.mkc_maxm as maximum_mark,
       mkc.mkc_sigs as signal_status
     from $sitsSchema.cam_mkc mkc
-    where mkc_proc = 'SAS' and mkc_minm is not null and mkc_maxm is not null
+    where mkc_proc = 'SAS'
   """
 
   def GetExamSchedule: String =
@@ -842,11 +858,16 @@ object AssignmentImporter {
     compile()
 
     override def mapRow(rs: ResultSet, rowNumber: Int): GradeBoundary = {
+      def getNullableInt(column: String): Option[Int] = {
+        val intValue = rs.getInt(column)
+        if (rs.wasNull()) None else Some(intValue)
+      }
+
       GradeBoundary(
         rs.getString("marks_code"),
         rs.getString("grade"),
-        rs.getInt("minimum_mark"),
-        rs.getInt("maximum_mark"),
+        getNullableInt("minimum_mark"),
+        getNullableInt("maximum_mark"),
         rs.getString("signal_status")
       )
     }

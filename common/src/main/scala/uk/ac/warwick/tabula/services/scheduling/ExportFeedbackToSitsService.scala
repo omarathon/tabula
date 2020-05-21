@@ -182,7 +182,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
       if (resit) (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
       else (new ExportFeedbackToSitsQuery(sitsDataSource), "CAM_SAS")
 
-    if (student.latestMark.nonEmpty && student.latestGrade.nonEmpty) {
+    if (student.latestMark.nonEmpty || student.latestGrade.nonEmpty) {
       updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
     } else {
       logger.warn(f"Not updating SITS $tableName for assessment component mark $student - no latest mark or grade found")

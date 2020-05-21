@@ -46,13 +46,12 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
       val marks = arg.asInstanceOf[Map[String, Int]]
       marks.map { case (id, mark) => (id, mark) match {
         case (i, _) if id == "3" => i -> Seq() // Mocks that ID 3 isn't linked to an assessment component in SITS with a mark scheme
-        case (_, m) if m < 40 => id -> Seq(GradeBoundary(null, "F", 0, 39, "N"))
-        case (_, m) if m >= 40 && mark < 50 => id -> Seq(GradeBoundary(null, "3", 40, 50, "N"))
-        case (_, m) if m >= 50 && mark < 60 => id -> Seq(GradeBoundary(null, "22", 50, 60, "N"))
-        case (_, m) if m >= 60 && mark < 70 => id -> Seq(GradeBoundary(null, "21", 60, 70, "N"))
-        case (_, m) if m >= 70 => id -> Seq(GradeBoundary(null, "1", 70, 100, "N"))
-      }
-      }
+        case (_, m) if m < 40 => id -> Seq(GradeBoundary(null, "F", Some(0), Some(39), "N"))
+        case (_, m) if m >= 40 && mark < 50 => id -> Seq(GradeBoundary(null, "3", Some(40), Some(50), "N"))
+        case (_, m) if m >= 50 && mark < 60 => id -> Seq(GradeBoundary(null, "22", Some(50), Some(60), "N"))
+        case (_, m) if m >= 60 && mark < 70 => id -> Seq(GradeBoundary(null, "21", Some(60), Some(70), "N"))
+        case (_, m) if m >= 70 => id -> Seq(GradeBoundary(null, "1", Some(70), Some(100), "N"))
+      }}
     }
 
     val assignment: Assignment = newDeepAssignment()

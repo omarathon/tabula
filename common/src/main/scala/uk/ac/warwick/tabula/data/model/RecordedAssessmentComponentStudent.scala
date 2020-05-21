@@ -63,7 +63,7 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   private val _marks: JList[RecordedAssessmentComponentStudentMark] = JArrayList()
   def marks: Seq[RecordedAssessmentComponentStudentMark] = _marks.asScala.toSeq
 
-  def addMark(uploader: User, mark: Int, grade: Option[String], comments: String = null): RecordedAssessmentComponentStudentMark = {
+  def addMark(uploader: User, mark: Option[Int], grade: Option[String], comments: String = null): RecordedAssessmentComponentStudentMark = {
     val newMark = new RecordedAssessmentComponentStudentMark
     newMark.recordedAssessmentComponentStudent = this
     newMark.mark = mark
@@ -76,7 +76,7 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     newMark
   }
 
-  def latestMark: Option[Int] = marks.headOption.map(_.mark)
+  def latestMark: Option[Int] = marks.headOption.flatMap(_.mark)
   def latestGrade: Option[String] = marks.headOption.flatMap(_.grade)
 
   @Column(name = "needs_writing_to_sits", nullable = false)
@@ -112,8 +112,8 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
   @ForeignKey(name = "none")
   var recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent = _
 
-  @Column(nullable = false)
-  var mark: Int = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var mark: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var grade: Option[String] = None
