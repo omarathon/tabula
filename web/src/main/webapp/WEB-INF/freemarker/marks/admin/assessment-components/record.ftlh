@@ -30,7 +30,7 @@
         <li>Column D - Comments</li>
       </ul>
 
-      <p>Note that you can upload any of the following: marks only; marks and grades only; marks and comments only; marks, grades and comments.</p>
+      <p>Note that you can upload any of the following: marks only; grades only (for pass/fail modules); marks and grades only; marks and comments only; marks, grades and comments.</p>
 
       <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
         <h3>Select file</h3>

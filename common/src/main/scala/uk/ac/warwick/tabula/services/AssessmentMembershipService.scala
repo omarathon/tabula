@@ -133,7 +133,7 @@ trait AssessmentMembershipService {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary]
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
@@ -350,16 +350,13 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary] = {
-    def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
-
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary] =
     component.marksCode match {
-      case code: String =>
-        dao.getGradeBoundaries(code).filter(gradeBoundaryMatchesMark)
+      case code: String if code.hasText =>
+        dao.getGradeBoundaries(code).filter(_.isValidForMark(mark))
       case _ =>
         Seq()
     }
-  }
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 

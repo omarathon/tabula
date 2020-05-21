@@ -121,9 +121,16 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
               ).sum % 100
             }
 
+          val marksCode =
+            if (isPassFail) "TABULA-PF"
+            else route.degreeType match {
+              case DegreeType.Postgraduate => "TABULA-PG"
+              case _ => "TABULA-UG"
+            }
+
           val g =
             if (isPassFail) if (m == 100) "P" else "F"
-            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= m && gb.maximumMark >= m).map(_.grade).getOrElse("F")
+            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
           (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
         } else (None: Option[JBigDecimal], null: String, null: String)

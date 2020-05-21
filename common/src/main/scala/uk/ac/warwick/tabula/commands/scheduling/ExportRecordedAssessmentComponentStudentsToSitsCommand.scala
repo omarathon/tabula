@@ -112,9 +112,12 @@ trait ExportRecordedAssessmentComponentStudentsToSitsDescription extends Describ
   override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Result): Unit =
-    d.property(
-      "marks" -> result.map { student =>
+    d.properties(
+      "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
         student.universityId -> student.latestMark.get
+      }.toMap,
+      "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
+        student.universityId -> student.latestGrade.get
       }.toMap
     )
 }

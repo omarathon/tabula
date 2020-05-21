@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.Entity
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.Proxy
+import org.hibernate.annotations.{Proxy, Type}
 
 object GradeBoundary {
-  def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int, signalStatus: String): GradeBoundary = {
+  def apply(marksCode: String, grade: String, minimumMark: Option[Int], maximumMark: Option[Int], signalStatus: String): GradeBoundary = {
+    require(minimumMark.nonEmpty == maximumMark.nonEmpty, "Either both minimum mark and maxmimum mark must be provided, or neither")
+
     val gb = new GradeBoundary()
     gb.grade = grade
     gb.marksCode = marksCode
@@ -37,15 +39,19 @@ class GradeBoundary extends GeneratedId {
   @NotNull
   var grade: String = _
 
-  @NotNull
-  var minimumMark: Int = 0
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var minimumMark: Option[Int] = None
 
-  @NotNull
-  var maximumMark: Int = 100
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var maximumMark: Option[Int] = None
 
   @NotNull
   var signalStatus: String = _
 
   def isDefault: Boolean = signalStatus == "N"
+
+  def isValidForMark(mark: Option[Int]): Boolean =
+    (minimumMark.isEmpty && maximumMark.isEmpty) ||
+    mark.exists { m => minimumMark.exists(_ <= m) && maximumMark.exists(_ >= m) }
 
 }

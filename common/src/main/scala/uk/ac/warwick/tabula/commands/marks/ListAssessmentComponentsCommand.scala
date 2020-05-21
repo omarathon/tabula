@@ -61,7 +61,7 @@ object ListAssessmentComponentsCommand {
     upstreamAssessmentGroup: UpstreamAssessmentGroup,
     students: Seq[StudentMarkRecord]
   ) {
-    val studentsWithMarks: Seq[StudentMarkRecord] = students.filter(_.mark.nonEmpty)
+    val studentsWithMarks: Seq[StudentMarkRecord] = students.filter(s => s.mark.nonEmpty || s.grade.nonEmpty)
 
     val needsWritingToSits: Boolean = students.exists(_.needsWritingToSits)
     val outOfSync: Boolean = students.exists(_.outOfSync)

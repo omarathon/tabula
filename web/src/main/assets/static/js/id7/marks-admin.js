@@ -19,13 +19,6 @@ $(() => {
           currentRequest.abort();
         }
 
-        if ($markInput.val().length === 0) {
-          $input.show().prop('disabled', false);
-          $select.prop('disabled', true).hide();
-
-          return;
-        }
-
         const data = {
           mark: $markInput.val(),
         };
