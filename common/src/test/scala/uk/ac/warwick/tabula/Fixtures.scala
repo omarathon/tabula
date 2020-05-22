@@ -160,7 +160,7 @@ object Fixtures extends Mockito {
     a.sequence = "%s%02d".format(assessmentType.subtype.code, number)
     a.assessmentType = assessmentType
     a.inUse = true
-    a.weighting = weighting
+    a.rawWeighting = weighting
     a
   }
 

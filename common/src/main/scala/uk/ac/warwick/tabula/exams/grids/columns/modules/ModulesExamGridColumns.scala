@@ -133,9 +133,9 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
               allComponents.filter { uagm =>
                 _assessmentComponents.find { component =>
                   component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
-                    component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
-                    component.sequence == uagm.upstreamAssessmentGroup.sequence
-                }.flatMap(ac => Option(ac.weighting)).exists(_ > 0)
+                  component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
+                  component.sequence == uagm.upstreamAssessmentGroup.sequence
+                }.flatMap(ac => Option(ac.rawWeighting)).exists(_ > 0) // TODO Need to take into account VAW
               }
             }
           }

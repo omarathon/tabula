@@ -307,7 +307,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         a.assessmentGroup = "A"
         a.assessmentType = AssessmentType.Essay
         a.inUse = true
-        a.weighting = 30
+        a.rawWeighting = 30
 
         val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
         a.marksCode =
@@ -333,7 +333,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e.assessmentGroup = "A"
         e.assessmentType = AssessmentType.SummerExam
         e.inUse = true
-        e.weighting = 70
+        e.rawWeighting = 70
 
         val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
         e.marksCode =
@@ -844,7 +844,7 @@ object AssignmentImporter {
         case _ => false
       }
       a.marksCode = rs.getString("marks_code")
-      a.weighting = rs.getInt("weight")
+      a.rawWeighting = rs.getInt("weight")
       a.examPaperCode = Option(rs.getString("exam_paper_code"))
       a.examPaperTitle = Option(rs.getString("exam_paper_title"))
       a.examPaperSection = Option(rs.getString("exam_paper_section"))

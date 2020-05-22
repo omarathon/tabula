@@ -130,9 +130,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
+  // FIXME needs to take into account VAW and scaled weightings
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
     val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
-      .map(_.weighting.toInt)
+      .map(_.rawWeighting.toInt)
       .getOrElse(0)
 
     val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
