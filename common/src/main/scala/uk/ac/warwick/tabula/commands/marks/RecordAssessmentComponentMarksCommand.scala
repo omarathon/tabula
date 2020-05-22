@@ -239,6 +239,10 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
               // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
               validGrades.find(_.isDefault).foreach(gb => item.grade = gb.grade)
             }
+
+            if (!item.grade.hasText) {
+              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+            }
           }
         } catch {
           case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
