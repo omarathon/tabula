@@ -42,7 +42,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
       case definition: Any => definition
       case _ if !name.startsWith("/") =>
         def hasResource(path: String): Boolean =
-          resourceResolver.getResources(path).exists(_.exists())
+          Try(resourceResolver.getResources(path)).toOption.exists(_.exists(_.exists()))
 
         val template = Extensions
           .map(extension => FreemarkerRoot + name + extension)
