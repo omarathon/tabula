@@ -19,7 +19,7 @@
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="upload">
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "upload">active</#if>" id="upload">
       <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
         should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>,
         <strong>Grade</strong> and <strong>Comments</strong>.
@@ -74,7 +74,7 @@
         </div>
       </@f.form>
     </div>
-    <div role="tabpanel" class="tab-pane" id="webform">
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "webform">active</#if>" id="webform">
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <table class="table table-striped">
