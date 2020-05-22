@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.{RowCallbackHandler, SqlParameter}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model._
@@ -22,6 +21,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
@@ -37,9 +37,9 @@ trait AutowiringAssignmentImporterComponent extends AssignmentImporterComponent 
 
 trait AssignmentImporter {
   /**
-    * Iterates through ALL module registration elements,
-    * passing each ModuleRegistration item to the given callback for it to process.
-    */
+   * Iterates through ALL module registration elements,
+   * passing each ModuleRegistration item to the given callback for it to process.
+   */
   def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
@@ -61,7 +61,7 @@ trait AssignmentImporter {
 @Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   with AutowiringSitsDataSourceComponent
-  with AutowiringExamTimetableFetchingServiceComponent {
+  with AutowiringExamTimetableFetchingServiceComponent with AutowiringFeaturesComponent {
 
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
@@ -96,15 +96,21 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
 
   /**
-    * Iterates through ALL module registration elements in SITS (that's many),
-    * passing each ModuleRegistration item to the given callback for it to process.
-    */
+   * Iterates through ALL module registration elements in SITS (that's many),
+   * passing each ModuleRegistration item to the given callback for it to process.
+   */
   def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
       "seat_number_exam_profiles" -> seatNumberExamProfilesArray()
     )
-    jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+
+    if (yearsToImport.exists(ay => ay == AcademicYear.now) && features.includeSMSForCurrentYear) {
+      params.putAll(JMap("current_academic_year_code" -> AcademicYear.now))
+      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+    } else {
+      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembersExcludeSMS, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+    }
   }
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
@@ -113,7 +119,12 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       "seat_number_exam_profiles" -> seatNumberExamProfilesArray(),
       "universityIds" -> members.map(_.universityId).asJava
     )
-    jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+    if (yearsToImport.exists(ay => ay == AcademicYear.now) && features.includeSMSForCurrentYear) {
+      params.putAll(JMap("current_academic_year_code" -> AcademicYear.now))
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+    } else {
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityIdExcludingSMS(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+    }
   }
 
   class UpstreamModuleRegistrationRowCallbackHandler(callback: UpstreamModuleRegistration => Unit) extends RowCallbackHandler {
@@ -398,6 +409,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
 object AssignmentImporter {
   var sitsSchema: String = Wire.property("${schema.sits}")
+  var features: Features = Wire[Features]
   var sqlStringCastFunction: String = "to_char"
   var dialectRegexpLike = "regexp_like"
 
@@ -406,22 +418,7 @@ object AssignmentImporter {
     if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
     else orig
 
-  /**
-   * Get AssessmentComponents, and also some fake ones for linking to
-   * the group of students with no selected assessment group.
-   *
-   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
-   * assessment components which make up modules.
-   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
-   * specified.
-   *
-   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
-   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
-   * upload module registrations after confirmation.
-   *
-   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
-   */
-  def GetAssessmentsQuery =
+  def GetAssessmentsQueryFromSMS =
     s"""
     select distinct
       sms.mod_code as module_code,
@@ -443,8 +440,12 @@ object AssignmentImporter {
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
       where
         sms.sms_agrp is null and -- assessment group, ie group of assessment components which together represent an assessment choice
+        sms.ayr_code = ${AcademicYear.now.toString} and -- Dirty hack  but works - need this at start to make sure we pick it for current year only. ayr later  will filter properly  but we don't know that initially
         sms.ayr_code in (:academic_year_code)
-  union all
+        """
+
+  def GetAssessmentsQueryExcludingSMS =
+    s"""
     select distinct
       smo.mod_code as module_code,
       '${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -496,6 +497,33 @@ object AssignmentImporter {
         left outer join $sitsSchema.cam_adv adv -- paper division (section)
           on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
       where mab.mab_agrp is not null"""
+
+  /**
+   * Get AssessmentComponents, and also some fake ones for linking to
+   * the group of students with no selected assessment group.
+   *
+   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+   * assessment components which make up modules.
+   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+   * specified.
+   *
+   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
+   * upload module registrations after confirmation.
+   *
+   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
+   */
+  def GetAssessmentsQuery = {
+    if (features.includeSMSForCurrentYear) {
+      s"""
+        $GetAssessmentsQueryFromSMS
+      union all
+   $GetAssessmentsQueryExcludingSMS"""
+    } else {
+      s"""$GetAssessmentsQueryFromSMS"""
+    }
+  }
+
 
   def GetAllAssessmentGroups =
     s"""
@@ -584,7 +612,7 @@ object AssignmentImporter {
               and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
 
       where
-        sms.ayr_code in (:academic_year_code)"""
+        sms.ayr_code = :current_academic_year_code"""
 
   // this gets a student's assessments from the SMO table, which stores confirmed module choices
   def GetConfirmedModuleRegistrations =
@@ -695,17 +723,40 @@ object AssignmentImporter {
       $GetAutoUploadedConfirmedModuleRegistrations
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-  /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
-  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean): String = {
-    val sprClause = if (multipleUniIds)  {
+  def GetAllAssessmentGroupMembersExcludeSMS =
+    s"""
+      $GetConfirmedModuleRegistrations
+        union all
+      $GetAutoUploadedConfirmedModuleRegistrations
+    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
+
+  def GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds: Boolean): String = {
+    if (multipleUniIds) {
       s" and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)"
     } else {
       s" and spr.spr_code like :universityIds || '%'"
     }
+  }
+
+  /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
+  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean): String = {
+    val sprClause = GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds)
     s"""
       $GetUnconfirmedModuleRegistrations
         $sprClause
         union all
+      $GetConfirmedModuleRegistrations
+        $sprClause
+        union all
+      $GetAutoUploadedConfirmedModuleRegistrations
+        $sprClause
+    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
+  }
+
+  /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
+  def GetModuleRegistrationsByUniversityIdExcludingSMS(multipleUniIds: Boolean): String = {
+    val sprClause = GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds)
+    s"""
       $GetConfirmedModuleRegistrations
         $sprClause
         union all
@@ -809,6 +860,7 @@ object AssignmentImporter {
     compile()
 
     private val referenceDate: Instant = OffsetDateTime.parse("1900-01-01T00:00Z").toInstant
+
     private def dateToDuration(ts: Timestamp): Duration =
       Duration.standardMinutes(referenceDate.until(ts.toInstant, ChronoUnit.MINUTES))
 
