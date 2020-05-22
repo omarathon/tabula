@@ -77,6 +77,7 @@
     <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "webform">active</#if>" id="webform">
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
+          <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
           <table class="table table-striped">
             <thead>
               <tr>
