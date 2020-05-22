@@ -287,15 +287,17 @@ object ExportFeedbackToSitsService {
   // SAS_UDF1, SAS_UDF2 - user defined fields used for audit
   final def UpdateSITSFeedbackSql =
     f"""
-		update $sitsSchema.cam_sas
-		set sas_actm = :actualMark,
-			sas_actg = :actualGrade,
-			sas_prcs = 'I',
-			sas_proc = 'SAS',
-			sas_udf1 = '$tabulaIdentifier',
-			sas_udf2 = :now
-		$writeableWhereClause
-	"""
+    update $sitsSchema.cam_sas
+    set sas_actm = :actualMark,
+      sas_actg = :actualGrade,
+      sas_agrm = null,
+      sas_agrg = null,
+      sas_prcs = 'I',
+      sas_proc = 'SAS',
+      sas_udf1 = '$tabulaIdentifier',
+      sas_udf2 = :now
+    $writeableWhereClause
+  """
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
   // SRA_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
@@ -303,15 +305,17 @@ object ExportFeedbackToSitsService {
   // SRA_UDF2, SRA_UDF3 - user defined fields used for audit
   final def UpdateSITSResitFeedbackSql =
     f"""
-		update $sitsSchema.cam_sra
-		set sra_actm = :actualMark,
-			sra_actg = :actualGrade,
-			sra_prcs = 'I',
-			sra_proc = 'RAS',
-			sra_udf2 = '$tabulaIdentifier',
-			sra_udf3 = :now
-		$resitWriteableWhereClause
-	"""
+    update $sitsSchema.cam_sra
+    set sra_actm = :actualMark,
+      sra_actg = :actualGrade,
+      sra_agrm = null,
+      sra_agrg = null,
+      sra_prcs = 'I',
+      sra_proc = 'RAS',
+      sra_udf2 = '$tabulaIdentifier',
+      sra_udf3 = :now
+    $resitWriteableWhereClause
+  """
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
     declareParameter(new SqlParameter("actualMark", Types.INTEGER))
