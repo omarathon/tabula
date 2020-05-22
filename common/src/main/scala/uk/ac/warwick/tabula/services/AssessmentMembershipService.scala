@@ -148,6 +148,14 @@ trait AssessmentMembershipService {
   def save(schedule: AssessmentComponentExamSchedule): Unit
 
   def delete(schedule: AssessmentComponentExamSchedule): Unit
+
+  def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
+  def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule]
+
+  def save(rule: VariableAssessmentWeightingRule): Unit
+
+  def delete(rule: VariableAssessmentWeightingRule): Unit
 }
 
 // all the small group sets and assignments in Tabula for a department with manually added students
@@ -376,6 +384,16 @@ class AssessmentMembershipServiceImpl
   override def save(schedule: AssessmentComponentExamSchedule): Unit = dao.save(schedule)
 
   override def delete(schedule: AssessmentComponentExamSchedule): Unit = dao.delete(schedule)
+
+  override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    dao.allVariableAssessmentWeightingRules
+
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] =
+    dao.getVariableAssessmentWeightingRules(moduleCodeWithCats, assessmentGroup)
+
+  override def save(rule: VariableAssessmentWeightingRule): Unit = dao.save(rule)
+
+  override def delete(rule: VariableAssessmentWeightingRule): Unit = dao.delete(rule)
 }
 
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {

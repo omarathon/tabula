@@ -144,6 +144,14 @@ trait AssessmentMembershipDao {
   def save(schedule: AssessmentComponentExamSchedule): Unit
 
   def delete(schedule: AssessmentComponentExamSchedule): Unit
+
+  def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
+  def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule]
+
+  def save(rule: VariableAssessmentWeightingRule): Unit
+
+  def delete(rule: VariableAssessmentWeightingRule): Unit
 }
 
 @Repository
@@ -751,4 +759,22 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
   override def delete(schedule: AssessmentComponentExamSchedule): Unit =
     session.delete(schedule)
+
+  override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    session.newCriteria[VariableAssessmentWeightingRule]
+      .addOrder(asc("moduleCode"))
+      .addOrder(asc("assessmentGroup"))
+      .addOrder(asc("ruleSequence"))
+      .seq
+
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] =
+    session.newCriteria[VariableAssessmentWeightingRule]
+      .add(is("moduleCode", moduleCodeWithCats))
+      .add(is("assessmentGroup", assessmentGroup))
+      .addOrder(asc("ruleSequence"))
+      .seq
+
+  override def save(rule: VariableAssessmentWeightingRule): Unit = session.saveOrUpdate(rule)
+
+  override def delete(rule: VariableAssessmentWeightingRule): Unit = session.delete(rule)
 }

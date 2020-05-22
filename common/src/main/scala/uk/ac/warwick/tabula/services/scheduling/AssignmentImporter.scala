@@ -50,6 +50,8 @@ trait AssignmentImporter {
 
   def getAllGradeBoundaries: Seq[GradeBoundary]
 
+  def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
   def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
   def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent]
@@ -66,6 +68,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
   var gradeBoundaryQuery: GradeBoundaryQuery = _
+  var variableAssessmentWeightingRuleQuery: VariableAssessmentWeightingRuleQuery = _
   var examScheduleQuery: ExamScheduleQuery = _
   var examScheduleStudentsQuery: ExamScheduleStudentsQuery = _
   var jdbc: NamedParameterJdbcTemplate = _
@@ -74,6 +77,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     assessmentComponentQuery = new AssessmentComponentQuery(sitsDataSource)
     upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
     gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
+    variableAssessmentWeightingRuleQuery = new VariableAssessmentWeightingRuleQuery(sitsDataSource)
     examScheduleQuery = new ExamScheduleQuery(sitsDataSource)
     examScheduleStudentsQuery = new ExamScheduleStudentsQuery(sitsDataSource)
     jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
@@ -144,7 +148,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     if (string == null) AssessmentComponent.NoneAssessmentGroup
     else string
 
-  def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
+  override def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
+
+  override def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] = variableAssessmentWeightingRuleQuery.execute().asScala.toSeq
 
   private[this] lazy val extraExamProfileSchedulesToImport: Seq[String] =
     Wire.property("${assignmentImporter.extraExamProfileSchedulesToImport}")
@@ -346,7 +352,9 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e
     }
 
-  def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+  override def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+
+  override def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] = Seq.empty
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     (for {
@@ -714,7 +722,7 @@ object AssignmentImporter {
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
   }
 
-  def GetAllGradeBoundaries =
+  def GetAllGradeBoundaries: String =
     s"""
     select
       mkc.mks_code as marks_code,
@@ -725,6 +733,18 @@ object AssignmentImporter {
     from $sitsSchema.cam_mkc mkc
     where mkc_proc = 'SAS'
   """
+
+  def GetAllVariableAssessmentWeightingRules: String =
+    s"""
+       |select
+       |    vaw.vaw_mapc as module_code,
+       |    vaw.vaw_seqn as rule_sequence,
+       |    vaw.vaw_agrp as assessment_group,
+       |    vaw.vaw_awgt as weighting,
+       |    vaw.vaw_atcc as assessment_type
+       |from $sitsSchema.cam_vaw vaw
+       |where vaw.vaw_atcc is not null
+       |""".stripMargin
 
   def GetExamSchedule: String =
     s"""
@@ -871,6 +891,12 @@ object AssignmentImporter {
         rs.getString("signal_status")
       )
     }
+  }
+
+  class VariableAssessmentWeightingRuleQuery(ds: DataSource) extends MappingSqlQuery[VariableAssessmentWeightingRule](ds, GetAllVariableAssessmentWeightingRules) {
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): VariableAssessmentWeightingRule = ???
   }
 
   class ExamScheduleQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamSchedule](ds, GetExamSchedule) {
