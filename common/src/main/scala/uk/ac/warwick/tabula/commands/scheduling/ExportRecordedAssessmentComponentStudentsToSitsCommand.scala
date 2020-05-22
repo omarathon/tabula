@@ -90,9 +90,13 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
                   if (resit) {
                     uagm.resitActualMark = student.latestMark
                     uagm.resitActualGrade = student.latestGrade
+                    uagm.resitAgreedMark = None
+                    uagm.resitAgreedGrade = None
                   } else {
                     uagm.actualMark = student.latestMark
                     uagm.actualGrade = student.latestGrade
+                    uagm.agreedMark = None
+                    uagm.agreedGrade = None
                   }
 
                   assessmentMembershipService.save(uagm)
