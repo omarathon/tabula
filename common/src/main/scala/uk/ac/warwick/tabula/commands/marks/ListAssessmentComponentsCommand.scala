@@ -43,7 +43,7 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
-        agreed = recordedStudent.exists(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
+        agreed = recordedStudent.forall(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
       )
   }
