@@ -124,6 +124,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
         doGradeBoundaries()
+        logger.debug("Imported grade boundaries. Importing variable assessment weighting rules...")
+        doVariableAssessmentWeightingRules()
 
         logger.debug("Removing blank feedback for students who have deregistered...")
         removeBlankFeedbackForDeregisteredStudents()
@@ -471,6 +473,23 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         assessmentMembershipService.save(gradeBoundary)
       }
     }
+  }
+
+  def doVariableAssessmentWeightingRules(): Unit = transactional() {
+    val existing = assessmentMembershipService.allVariableAssessmentWeightingRules
+    val upstream = assignmentImporter.getAllVariableAssessmentWeightingRules
+
+    val additions = upstream.filterNot(rule => existing.exists(_.matchesKey(rule)))
+    val deletions = existing.filterNot(rule => upstream.exists(_.matchesKey(rule)))
+    val modifications = existing.flatMap { rule =>
+      upstream.find(_.matchesKey(rule)).map { r =>
+        rule.copyFrom(r)
+        rule
+      }
+    }
+
+    (additions ++ modifications).foreach(assessmentMembershipService.save)
+    deletions.foreach(assessmentMembershipService.delete)
   }
 
   def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =
