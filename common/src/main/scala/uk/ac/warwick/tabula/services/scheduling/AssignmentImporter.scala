@@ -896,7 +896,15 @@ object AssignmentImporter {
   class VariableAssessmentWeightingRuleQuery(ds: DataSource) extends MappingSqlQuery[VariableAssessmentWeightingRule](ds, GetAllVariableAssessmentWeightingRules) {
     compile()
 
-    override def mapRow(rs: ResultSet, rowNumber: Int): VariableAssessmentWeightingRule = ???
+    override def mapRow(rs: ResultSet, rowNumber: Int): VariableAssessmentWeightingRule = {
+      val rule = new VariableAssessmentWeightingRule
+      rule.moduleCode = rs.getString("module_code")
+      rule.ruleSequence = rs.getString("rule_sequence")
+      rule.assessmentGroup = rs.getString("assessment_group")
+      rule.weighting = rs.getInt("weighting")
+      rule.assessmentType = AssessmentType.factory(rs.getString("assessment_type"))
+      rule
+    }
   }
 
   class ExamScheduleQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponentExamSchedule](ds, GetExamSchedule) {
