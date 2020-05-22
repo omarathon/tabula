@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAssignmentsIndividualYearCommand
 import uk.ac.warwick.tabula.data.convert.FiniteDurationConverter
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
@@ -160,6 +161,7 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ImportProfilesSingleDepartmentJob]("scheduling.importProfilesSingleDepartment"),
     propertiesConfiguredJob[ImportAssignmentsJob]("scheduling.importAssignments"),
     propertiesConfiguredJob[ImportAssignmentsAllYearsJob]("scheduling.importAssignmentsAllYears"),
+    propertiesConfiguredJob[ImportAssignmentsIndividualYearJob]("scheduling.importAssignmentsIndividualYear"),
     propertiesConfiguredJob[ImportSmallGroupEventLocationsJob]("scheduling.importSmallGroupEventLocations"),
     propertiesConfiguredJob[TurnitinTcaRegisterWebhooksJob]("scheduling.turnitinTcaRegisterWebhooks"),
     propertiesConfiguredJob[BulkImportModuleRegistrationsJob]("scheduling.bulkImportModuleRegistrations"),
