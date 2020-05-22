@@ -56,7 +56,7 @@
 
       <div class="submit-buttons fix-footer">
         <input type="submit" class="btn btn-primary" value="Confirm" />
-        <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
+        <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
       </div>
     </@f.form>
   </div>
