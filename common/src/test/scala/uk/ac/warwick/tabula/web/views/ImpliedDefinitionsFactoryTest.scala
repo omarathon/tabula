@@ -5,7 +5,9 @@ import java.util.Locale
 import org.apache.tiles.Definition
 import org.apache.tiles.definition.dao.DefinitionDAO
 import org.apache.tiles.locale.LocaleResolver
-import org.apache.tiles.request.{ApplicationContext, ApplicationResource, Request}
+import org.apache.tiles.request.{ApplicationResource, Request}
+import org.springframework.core.io.Resource
+import org.springframework.core.io.support.ResourcePatternResolver
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
@@ -14,11 +16,19 @@ class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 
   val defDao: DefinitionDAO[Locale] = mock[DefinitionDAO[Locale]]
   val localeResolver: LocaleResolver = mock[LocaleResolver]
+  val resourceResolver: ResourcePatternResolver = smartMock[ResourcePatternResolver]
 
   factory.setDefinitionDAO(defDao)
   factory.setLocaleResolver(localeResolver)
+  factory.resourceResolver = resourceResolver
 
   localeResolver.resolveLocale(isA[Request]) returns Locale.ENGLISH
+
+  private val existingResource: Resource = {
+    val r = smartMock[Resource]
+    r.exists() returns true
+    r
+  }
 
   @Test def matchesDefinition(): Unit = {
     val definition = mock[Definition]
@@ -37,9 +47,8 @@ class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 
   @Test def resolve(): Unit = {
     val ctx = mock[Request]
-    val applicationContext = mock[ApplicationContext]
-    ctx.getApplicationContext returns applicationContext
-    applicationContext.getResource("/WEB-INF/freemarker/my/template.ftl") returns mock[ApplicationResource]
+
+    resourceResolver.getResources("/WEB-INF/freemarker/my/template.ftl") returns Array(existingResource)
 
     val baseDefinition = mock[Definition]
     defDao.getDefinition("base", Locale.ENGLISH) returns baseDefinition
@@ -51,10 +60,9 @@ class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 
   @Test def useFtlhIfAvailable(): Unit = {
     val ctx = mock[Request]
-    val applicationContext = mock[ApplicationContext]
-    ctx.getApplicationContext returns applicationContext
-    applicationContext.getResource("/WEB-INF/freemarker/my/template.ftl") returns mock[ApplicationResource]
-    applicationContext.getResource("/WEB-INF/freemarker/my/template.ftlh") returns mock[ApplicationResource]
+
+    resourceResolver.getResources("/WEB-INF/freemarker/my/template.ftl") returns Array(existingResource)
+    resourceResolver.getResources("/WEB-INF/freemarker/my/template.ftlh") returns Array(existingResource)
 
     val baseDefinition = mock[Definition]
     defDao.getDefinition("base", Locale.ENGLISH) returns baseDefinition

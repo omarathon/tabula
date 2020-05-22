@@ -1,8 +1,12 @@
 package uk.ac.warwick.tabula.web.views
 
+import javax.servlet.ServletContext
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory
-import org.apache.tiles.request.Request
+import org.apache.tiles.request.servlet.ServletApplicationContext
+import org.apache.tiles.request.{ApplicationContext, ApplicationContextAware, Request}
 import org.apache.tiles.{Attribute, Definition}
+import org.springframework.core.io.support.ResourcePatternResolver
+import org.springframework.web.context.support.ServletContextResourcePatternResolver
 import uk.ac.warwick.tabula.helpers.Logging
 
 import scala.jdk.CollectionConverters._
@@ -17,7 +21,7 @@ import scala.util.Try
   *
   * e.g. "time/view" will use a body template of /WEB-INF/freemarker/time/view.ftl
   */
-class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging {
+class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging with ApplicationContextAware {
 
   final val FreemarkerRoot = "/WEB-INF/freemarker/"
   final val Extensions = Seq(
@@ -37,9 +41,12 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
     super.getDefinition(name, ctx) match {
       case definition: Any => definition
       case _ if !name.startsWith("/") =>
+        def hasResource(path: String): Boolean =
+          resourceResolver.getResources(path).exists(_.exists())
+
         val template = Extensions
           .map(extension => FreemarkerRoot + name + extension)
-          .find(f => Try(ctx.getApplicationContext.getResource(f) != null).getOrElse(false))
+          .find(hasResource)
 
         new Definition(layoutDefinition(ctx)) {
           template.foreach { template =>
@@ -63,5 +70,20 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
         case _ => DefaultLayout
       }
     else DefaultLayout
+
+  var resourceResolver: ResourcePatternResolver = _
+
+  override def setApplicationContext(applicationContext: ApplicationContext): Unit = {
+    // The secret ingredient is crime
+    val field = {
+      val f = classOf[ServletApplicationContext].getDeclaredField("servletContext")
+      f.setAccessible(true)
+      f
+    }
+
+    val servletContext = field.get(applicationContext).asInstanceOf[ServletContext]
+
+    this.resourceResolver = new ServletContextResourcePatternResolver(servletContext)
+  }
 
 }
