@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
-import org.joda.time.{DateTimeConstants, Duration, LocalDate, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, Duration, LocalDate, LocalTime}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -20,12 +20,15 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 trait AssignmentImporterComponent {
   def assignmentImporter: AssignmentImporter
@@ -185,7 +188,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
 
 @Profile(Array("sandbox"))
 @Service
-class SandboxAssignmentImporter extends AssignmentImporter {
+class SandboxAssignmentImporter extends AssignmentImporter
+  with AutowiringAssessmentComponentMarksServiceComponent
+  with AutowiringAssessmentMembershipServiceComponent {
 
   override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
     if (members.map(_.universityId).contains(umr.universityId)) {
@@ -220,6 +225,59 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       val level = moduleCode.substring(3, 4).toInt
 
       if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) {
+        val universityId = uniId.toString
+
+        val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
+        val assessmentGroup = "A"
+        val sequence = assessmentType.subtype match {
+          case TabulaAssessmentSubtype.Assignment => "A01"
+          case TabulaAssessmentSubtype.Exam => "E01"
+          case TabulaAssessmentSubtype.Other => "O01"
+        }
+        val occurrence = "A"
+
+        val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
+          assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
+            this.academicYear = academicYear
+            this.occurrence = occurrence
+            this.moduleCode = moduleCodeFull
+            this.sequence = sequence
+            this.assessmentGroup = assessmentGroup
+          }).flatMap(_.members.asScala.find(_.universityId == universityId))
+
+        val recordedStudent: Option[RecordedAssessmentComponentStudent] =
+          upstreamAssessmentGroupMember.flatMap { uagm =>
+            assessmentComponentMarksService.getAllRecordedStudents(uagm.upstreamAssessmentGroup)
+              .find(_.universityId == uagm.universityId)
+          }
+
+        val (mark, grade) =
+          if (academicYear < AcademicYear.now()) {
+            val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+
+            val m =
+              if (isPassFail) {
+                if (math.random < 0.25) 0 else 100
+              } else {
+                val moduleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                  Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+                ).sum % 100
+
+                // Random noise around the module mark, +/- 15 marks
+                Math.max(0, Math.min(moduleMark + ((math.random * 30) - 15).toInt, 100))
+              }
+
+            val marksCode =
+              if (isPassFail) "TABULA-PF"
+              else "TABULA-UG"
+
+            val g =
+              if (isPassFail) if (m == 100) "P" else "F"
+              else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
+
+            (if (isPassFail) null else m.toString, g)
+          } else (null: String, null: String)
+
         callback(
           UpstreamModuleRegistration(
             year = academicYear.toString,
@@ -228,16 +286,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
               case TabulaAssessmentSubtype.Exam => ((uniId % 300) + 1).toString
               case _ => null
             },
-            occurrence = "A",
-            sequence = assessmentType.subtype match {
-              case TabulaAssessmentSubtype.Assignment => "A01"
-              case TabulaAssessmentSubtype.Exam => "E01"
-              case TabulaAssessmentSubtype.Other => "O01"
-            },
-            moduleCode = "%s-15".format(moduleCode.toUpperCase),
-            assessmentGroup = "A",
-            actualMark = null,
-            actualGrade = null,
+            occurrence = occurrence,
+            sequence = sequence,
+            moduleCode = moduleCode,
+            assessmentGroup = assessmentGroup,
+            actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
+            actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
             agreedMark = null,
             agreedGrade = null,
             resitActualMark = null,
@@ -247,6 +301,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
             resitExpected = false
           )
         )
+
+        recordedStudent.filter(_.needsWritingToSits).foreach { s =>
+          s.needsWritingToSits = false
+          s.lastWrittenToSits = Some(DateTime.now)
+          assessmentComponentMarksService.saveOrUpdate(s)
+        }
       }
     }
 
