@@ -264,7 +264,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
                 ).sum % 100
 
                 // Random noise around the module mark, +/- 15 marks
-                Math.max(0, Math.min(moduleMark + ((math.random * 30) - 15).toInt, 100))
+                Math.max(0, Math.min(moduleMark + ((math.random * 15) - 30).toInt, 100))
               }
 
             val marksCode =
