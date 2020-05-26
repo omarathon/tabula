@@ -38,7 +38,7 @@ object UpstreamAffectedAssessment {
     "inUse" -> o.inUse,
     "assessmentType" -> maybeType(o),
     "marksCode" -> o.marksCode,
-    "weighting" -> Int.unbox(o.weighting),
+    "weighting" -> o.scaledWeighting,
   )
 
   implicit val writesUpstreamAssessmentGroup: Writes[UpstreamAssessmentGroup] = o => Json.obj(

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.jdk.CollectionConverters._
@@ -388,8 +388,9 @@ class AssessmentMembershipServiceImpl
   override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
     dao.allVariableAssessmentWeightingRules
 
-  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] =
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] = RequestLevelCache.cachedBy("AssessmentMembershipService.getVariableAssessmentWeightingRules", s"$moduleCodeWithCats-$assessmentGroup") {
     dao.getVariableAssessmentWeightingRules(moduleCodeWithCats, assessmentGroup)
+  }
 
   override def save(rule: VariableAssessmentWeightingRule): Unit = dao.save(rule)
 

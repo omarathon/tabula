@@ -74,7 +74,7 @@ trait UpstreamAssessmentsAndExamsToJsonConverter {
       "type" -> assessmentComponent.assessmentType,
       "assessmentGroup" -> assessmentComponent.assessmentGroup,
       "marksCode" -> assessmentComponent.marksCode,
-      "weighting" -> assessmentComponent.weighting,
+      "weighting" -> assessmentComponent.rawWeighting,
       "module" -> Map(
         "code" -> assessmentComponent.module.code.toUpperCase,
         "name" -> assessmentComponent.module.name,
