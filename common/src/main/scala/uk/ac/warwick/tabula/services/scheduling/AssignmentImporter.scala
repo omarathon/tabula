@@ -79,10 +79,20 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
   }
 
-  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
-    "academic_year_code" -> yearsToImportArray(yearsToImport))).asScala.toSeq
+  def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = {
+    val currentAcademicYearCode =  if (includeSMS(yearsToImport)) yearsToImport.intersect(AcademicYear.allCurrent()) else Seq()
+    val paraMap = JMap(
+      "academic_year_code" -> yearsToImportArray(yearsToImport),
+             "current_academic_year_code" -> yearsToImportArray(currentAcademicYearCode),
+    )
 
+    assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
+  }
   private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
+
+  //For academic years marked current we do import SMS data if the feature flag is on. For all other cases SMS data is ignored.
+  private def includeSMS(yearsToImport: Seq[AcademicYear]): Boolean = features.includeSMSForCurrentYear && yearsToImport.intersect(AcademicYear.allCurrent()).nonEmpty
+
   private def seatNumberExamProfilesArray(): JList[String] =
     Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
       .filter(_.seatNumbersPublished)
@@ -104,9 +114,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       "academic_year_code" -> yearsToImportArray(yearsToImport),
       "seat_number_exam_profiles" -> seatNumberExamProfilesArray()
     )
-
-    if (yearsToImport.exists(ay => ay == AcademicYear.now) && features.includeSMSForCurrentYear) {
-      params.putAll(JMap("current_academic_year_code" -> AcademicYear.now))
+    if (includeSMS(yearsToImport)) {
+      params.putAll(JMap("current_academic_year_code" -> yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))))
       jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     } else {
       jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembersExcludeSMS, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
@@ -119,8 +128,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
       "seat_number_exam_profiles" -> seatNumberExamProfilesArray(),
       "universityIds" -> members.map(_.universityId).asJava
     )
-    if (yearsToImport.exists(ay => ay == AcademicYear.now) && features.includeSMSForCurrentYear) {
-      params.putAll(JMap("current_academic_year_code" -> AcademicYear.now))
+    if (includeSMS(yearsToImport)) {
+      params.putAll(JMap("current_academic_year_code" -> yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))))
       jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     } else {
       jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityIdExcludingSMS(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
@@ -418,9 +427,24 @@ object AssignmentImporter {
     if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
     else orig
 
-  def GetAssessmentsQueryFromSMS =
+  /**
+   * Get AssessmentComponents, and also some fake ones for linking to
+   * the group of students with no selected assessment group.
+   *
+   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+   * assessment components which make up modules.
+   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+   * specified.
+   *
+   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
+   * upload module registrations after confirmation.
+   *
+   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
+   */
+  def GetAssessmentsQuery =
     s"""
-    select distinct
+select distinct
       sms.mod_code as module_code,
       '${AssessmentComponent.NoneAssessmentGroup}' as seq,
       'Students not registered for assessment' as name,
@@ -440,12 +464,8 @@ object AssignmentImporter {
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
       where
         sms.sms_agrp is null and -- assessment group, ie group of assessment components which together represent an assessment choice
-        sms.ayr_code = ${AcademicYear.now.toString} and -- Dirty hack  but works - need this at start to make sure we pick it for current year only. ayr later  will filter properly  but we don't know that initially
-        sms.ayr_code in (:academic_year_code)
-        """
-
-  def GetAssessmentsQueryExcludingSMS =
-    s"""
+        sms.ayr_code in (:current_academic_year_code)
+  union all
     select distinct
       smo.mod_code as module_code,
       '${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -498,32 +518,6 @@ object AssignmentImporter {
           on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
       where mab.mab_agrp is not null"""
 
-  /**
-   * Get AssessmentComponents, and also some fake ones for linking to
-   * the group of students with no selected assessment group.
-   *
-   * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
-   * assessment components which make up modules.
-   * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
-   * specified.
-   *
-   * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
-   * SMO holds confirmed module registrations and is included to catch module registrations in departments which
-   * upload module registrations after confirmation.
-   *
-   * Remember this could be for previous years so don't make decisions based on whether the module is _currently_ in use.
-   */
-  def GetAssessmentsQuery = {
-    if (features.includeSMSForCurrentYear) {
-      s"""
-        $GetAssessmentsQueryFromSMS
-      union all
-   $GetAssessmentsQueryExcludingSMS"""
-    } else {
-      s"""$GetAssessmentsQueryFromSMS"""
-    }
-  }
-
 
   def GetAllAssessmentGroups =
     s"""
@@ -566,6 +560,7 @@ object AssignmentImporter {
             mav.ayr_code in (:academic_year_code)"""
 
   // for students who register for modules through SITS,this gets their assessments before their choices are confirmed
+  // We only refer to unconfirmed choices for current academic year based on the feature flag.
   def GetUnconfirmedModuleRegistrations =
     s"""
     select
@@ -612,7 +607,7 @@ object AssignmentImporter {
               and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
 
       where
-        sms.ayr_code = :current_academic_year_code"""
+        sms.ayr_code in (:current_academic_year_code)"""
 
   // this gets a student's assessments from the SMO table, which stores confirmed module choices
   def GetConfirmedModuleRegistrations =
@@ -857,6 +852,8 @@ object AssignmentImporter {
 
   class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
+    declareParameter(new SqlParameter("current_academic_year_code", Types.VARCHAR))
+
     compile()
 
     private val referenceDate: Instant = OffsetDateTime.parse("1900-01-01T00:00Z").toInstant
