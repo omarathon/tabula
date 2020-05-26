@@ -972,7 +972,7 @@ object AssignmentImporter {
       rule.moduleCode = rs.getString("module_code")
       rule.ruleSequence = rs.getString("rule_sequence")
       rule.assessmentGroup = rs.getString("assessment_group")
-      rule.weighting = rs.getInt("weighting")
+      rule.rawWeighting = rs.getInt("weighting")
       rule.assessmentType = AssessmentType.factory(rs.getString("assessment_type"))
       rule
     }

@@ -12,7 +12,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 object StudentAssessmentCommand {
-  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
+  type Command = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
+
+  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new StudentAssessmentCommandInternal(studentCourseDetails, academicYear)
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
@@ -60,7 +62,7 @@ case class ModuleRegistrationAndComponents(
   components: Seq[Component]
 )
 
-case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGroupMember)
+case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGroupMember, weighting: Option[BigDecimal])
 
 class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[StudentMarksBreakdown] with TaskBenchmarking {
@@ -125,11 +127,23 @@ trait StudentModuleRegistrationAndComponents {
   def generateModuleRegistrationAndComponents(scyds: Seq[StudentCourseYearDetails]): Seq[ModuleRegistrationAndComponents] = {
     scyds.flatMap { scyd =>
       scyd.moduleRegistrations.map { mr =>
-        val components = for {
-          uagm <- mr.upstreamAssessmentGroupMembers
-          aComponent <- assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
-        } yield Component(new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
-        ModuleRegistrationAndComponents(mr, components)
+        val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember)] =
+          for {
+            uagm <- mr.upstreamAssessmentGroupMembers
+            aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
+          } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
+
+        // For VAW. Only considers agreed marks otherwise the student may be able to infer if they've got higher marks on one assessment than another
+        // based on the weighting
+        val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = false)
+        val hasAnyMarks = marks.exists { case (_, _, mark) => mark.nonEmpty }
+
+        ModuleRegistrationAndComponents(
+          mr,
+          components.map { case (ug, uagm) =>
+            Component(ug, uagm, if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting)
+          }
+        )
       }
     }
   }

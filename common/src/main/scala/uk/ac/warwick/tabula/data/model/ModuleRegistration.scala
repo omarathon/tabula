@@ -134,6 +134,13 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
       .filter(_.firstDefinedMark.isDefined)
   }
 
+  def componentMarks(includeActualMarks: Boolean): Seq[(AssessmentType, String, Option[Int])] =
+    upstreamAssessmentGroupMembers.flatMap { uagm =>
+      uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
+        (ac.assessmentType, ac.sequence, if (includeActualMarks) uagm.firstDefinedMark else uagm.firstAgreedMark)
+      }
+    }
+
   override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)

@@ -130,14 +130,19 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
-  // FIXME needs to take into account VAW and scaled weightings
-  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
-    val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
-      .map(_.rawWeighting.toInt)
-      .getOrElse(0)
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
+    lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
 
-    val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
-    ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    moduleRegistration.componentsForBenchmark.map { uagm =>
+      val weighting: BigDecimal =
+        uagm.upstreamAssessmentGroup.assessmentComponent
+          .flatMap(_.weightingFor(marks))
+          .getOrElse(BigDecimal(0))
+
+      val cats = (weighting / 100) * moduleRegistration.cats
+      ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    }
   }
 
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
