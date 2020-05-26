@@ -208,6 +208,7 @@ object Fixtures extends Mockito {
     group.deadline = Option(deadline)
     val groupMember = new UpstreamAssessmentGroupMember(group, "0123456")
     groupMember.actualMark = Option(actualMark)
+    group.members.clear()
     group.members.addAll(Seq(groupMember).asJava)
     group
   }

@@ -42,7 +42,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       Fixtures.moduleRegistration(scd, modules("in304"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in305"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(77), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(88), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(15).underlying, academicYear, "", BigDecimal(80), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in307"), BigDecimal(15).underlying, academicYear, "", BigDecimal(80), ModuleSelectionStatus.Core),
     )
 
     val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
@@ -229,14 +229,14 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   @Test
   def benchmarkWeightedAssessmentMark(): Unit = {
     new GraduationBenchmarkFixture {
-      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(59.5))
+      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(60.6))
     }
   }
 
   @Test
   def percentageOfAssessmentTaken(): Unit = {
     new GraduationBenchmarkFixture {
-      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(47.5))
+      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(60.0))
     }
   }
 }
