@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
-import org.joda.time.{DateTimeConstants, Duration, LocalDate, LocalTime}
+import org.joda.time._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -19,6 +19,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter._
 import uk.ac.warwick.tabula.services.timetables.AutowiringExamTimetableFetchingServiceComponent
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
@@ -26,6 +28,7 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 trait AssignmentImporterComponent {
   def assignmentImporter: AssignmentImporter
@@ -50,6 +53,8 @@ trait AssignmentImporter {
 
   def getAllGradeBoundaries: Seq[GradeBoundary]
 
+  def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
   def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule]
 
   def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent]
@@ -66,6 +71,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
   var assessmentComponentQuery: AssessmentComponentQuery = _
   var gradeBoundaryQuery: GradeBoundaryQuery = _
+  var variableAssessmentWeightingRuleQuery: VariableAssessmentWeightingRuleQuery = _
   var examScheduleQuery: ExamScheduleQuery = _
   var examScheduleStudentsQuery: ExamScheduleStudentsQuery = _
   var jdbc: NamedParameterJdbcTemplate = _
@@ -74,6 +80,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     assessmentComponentQuery = new AssessmentComponentQuery(sitsDataSource)
     upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sitsDataSource)
     gradeBoundaryQuery = new GradeBoundaryQuery(sitsDataSource)
+    variableAssessmentWeightingRuleQuery = new VariableAssessmentWeightingRuleQuery(sitsDataSource)
     examScheduleQuery = new ExamScheduleQuery(sitsDataSource)
     examScheduleStudentsQuery = new ExamScheduleStudentsQuery(sitsDataSource)
     jdbc = new NamedParameterJdbcTemplate(sitsDataSource)
@@ -83,7 +90,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     val currentAcademicYearCode =  if (includeSMS(yearsToImport)) yearsToImport.intersect(AcademicYear.allCurrent()) else Seq()
     val paraMap = JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
-             "current_academic_year_code" -> yearsToImportArray(currentAcademicYearCode),
+             "current_academic_year_code" -> yearsToImportArray(currentAcademicYearCode)
     )
 
     assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
@@ -164,7 +171,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     if (string == null) AssessmentComponent.NoneAssessmentGroup
     else string
 
-  def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
+  override def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala.toSeq
+
+  override def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] = variableAssessmentWeightingRuleQuery.execute().asScala.toSeq
 
   private[this] lazy val extraExamProfileSchedulesToImport: Seq[String] =
     Wire.property("${assignmentImporter.extraExamProfileSchedulesToImport}")
@@ -199,7 +208,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
 
 @Profile(Array("sandbox"))
 @Service
-class SandboxAssignmentImporter extends AssignmentImporter {
+class SandboxAssignmentImporter extends AssignmentImporter
+  with AutowiringAssessmentComponentMarksServiceComponent
+  with AutowiringAssessmentMembershipServiceComponent {
 
   override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
     if (members.map(_.universityId).contains(umr.universityId)) {
@@ -222,48 +233,114 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       )
     }
 
-    for {
-      (moduleCode, ranges) <- moduleCodesToIds
-      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- yearsToImport
-      range <- ranges
-      uniId <- range
-      if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
-    } {
-      val yearOfStudy = (uniId % 3) + 1
-      val level = moduleCode.substring(3, 4).toInt
+    val upstreamModuleRegistrations: Seq[UpstreamModuleRegistration] =
+      (for {
+        (moduleCode, ranges) <- moduleCodesToIds
+        assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
+        academicYear <- yearsToImport
+        range <- ranges
+        uniId <- range
+        if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
+      } yield {
+        val yearOfStudy = (uniId % 3) + 1
+        val level = moduleCode.substring(3, 4).toInt
 
-      if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) {
-        callback(
-          UpstreamModuleRegistration(
+        if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) uk.ac.warwick.tabula.data.Transactions.transactional() {
+          val universityId = uniId.toString
+
+          val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
+          val assessmentGroup = "A"
+          val sequence = assessmentType.subtype match {
+            case TabulaAssessmentSubtype.Assignment => "A01"
+            case TabulaAssessmentSubtype.Exam => "E01"
+          }
+          val occurrence = "A"
+
+          val template = new UpstreamAssessmentGroup
+          template.academicYear = academicYear
+          template.occurrence = occurrence
+          template.moduleCode = moduleCodeFull
+          template.sequence = sequence
+          template.assessmentGroup = assessmentGroup
+
+          val upstreamAssessmentGroup: Option[UpstreamAssessmentGroup] =
+            assessmentMembershipService.getUpstreamAssessmentGroup(template)
+
+          val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
+            upstreamAssessmentGroup.flatMap(_.members.asScala.find(_.universityId == universityId))
+
+          val recordedStudent: Option[RecordedAssessmentComponentStudent] =
+            upstreamAssessmentGroupMember.flatMap { uagm =>
+              assessmentComponentMarksService.getAllRecordedStudents(uagm.upstreamAssessmentGroup)
+                .find(_.universityId == uagm.universityId)
+            }
+
+          val (mark, grade) =
+            if (academicYear < AcademicYear.now()) {
+              val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+
+              val randomModuleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+              ).sum % 100
+
+              val m =
+                if (isPassFail) {
+                  if (randomModuleMark < 40) 0 else 100
+                } else {
+                  val markVariance = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                    Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+                  ).sum % 15
+
+                  val assessmentMark = assessmentType.subtype match {
+                    case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance
+                    case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                  }
+
+                  Math.max(0, Math.min(100, assessmentMark))
+                }
+
+              val marksCode =
+                if (isPassFail) "TABULA-PF"
+                else "TABULA-UG"
+
+              val g =
+                if (isPassFail) if (m == 100) "P" else "F"
+                else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
+
+              (if (isPassFail) null else m.toString, g)
+            } else (null: String, null: String)
+
+          recordedStudent.filter(_.needsWritingToSits).foreach { s =>
+            s.needsWritingToSits = false
+            s.lastWrittenToSits = Some(DateTime.now)
+            assessmentComponentMarksService.saveOrUpdate(s)
+          }
+
+          Some(UpstreamModuleRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
             seatNumber = assessmentType.subtype match {
               case TabulaAssessmentSubtype.Exam => ((uniId % 300) + 1).toString
               case _ => null
             },
-            occurrence = "A",
-            sequence = assessmentType.subtype match {
-              case TabulaAssessmentSubtype.Assignment => "A01"
-              case TabulaAssessmentSubtype.Exam => "E01"
-              case TabulaAssessmentSubtype.Other => "O01"
-            },
-            moduleCode = "%s-15".format(moduleCode.toUpperCase),
-            assessmentGroup = "A",
-            actualMark = null,
-            actualGrade = null,
-            agreedMark = null,
-            agreedGrade = null,
+            occurrence = occurrence,
+            sequence = sequence,
+            moduleCode = moduleCodeFull,
+            assessmentGroup = assessmentGroup,
+            actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
+            actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
+            agreedMark = if (academicYear < AcademicYear.now()) mark else null,
+            agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
             resitActualMark = null,
             resitActualGrade = null,
             resitAgreedMark = null,
             resitAgreedGrade = null,
             resitExpected = false
-          )
-        )
-      }
-    }
+          ))
+        } else None
+      }).flatten.toSeq
 
+    upstreamModuleRegistrations.sortBy(umr => (umr.year, umr.occurrence, umr.moduleCode, umr.assessmentGroup)).foreach(callback)
   }
 
   def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
@@ -321,7 +398,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         a.assessmentGroup = "A"
         a.assessmentType = AssessmentType.Essay
         a.inUse = true
-        a.weighting = 30
+        a.rawWeighting = 30
 
         val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
         a.marksCode =
@@ -347,7 +424,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e.assessmentGroup = "A"
         e.assessmentType = AssessmentType.SummerExam
         e.inUse = true
-        e.weighting = 70
+        e.rawWeighting = 70
 
         val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
         e.marksCode =
@@ -366,7 +443,9 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         e
     }
 
-  def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+  override def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+
+  override def getAllVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] = Seq.empty
 
   override def getAllScheduledExams(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
     (for {
@@ -444,7 +523,7 @@ object AssignmentImporter {
    */
   def GetAssessmentsQuery =
     s"""
-select distinct
+    select distinct
       sms.mod_code as module_code,
       '${AssessmentComponent.NoneAssessmentGroup}' as seq,
       'Students not registered for assessment' as name,
@@ -517,7 +596,6 @@ select distinct
         left outer join $sitsSchema.cam_adv adv -- paper division (section)
           on mab.mab_apac = adv.adv_apac and mab.mab_advc = adv.adv_code
       where mab.mab_agrp is not null"""
-
 
   def GetAllAssessmentGroups =
     s"""
@@ -760,7 +838,7 @@ select distinct
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
   }
 
-  def GetAllGradeBoundaries =
+  def GetAllGradeBoundaries: String =
     s"""
     select
       mkc.mks_code as marks_code,
@@ -771,6 +849,18 @@ select distinct
     from $sitsSchema.cam_mkc mkc
     where mkc_proc = 'SAS'
   """
+
+  def GetAllVariableAssessmentWeightingRules: String =
+    s"""
+       |select
+       |    vaw.vaw_mapc as module_code,
+       |    vaw.vaw_seqn as rule_sequence,
+       |    vaw.vaw_agrp as assessment_group,
+       |    vaw.vaw_awgt as weighting,
+       |    vaw.vaw_atcc as assessment_type
+       |from $sitsSchema.cam_vaw vaw
+       |where vaw.vaw_atcc is not null
+       |""".stripMargin
 
   def GetExamSchedule: String =
     s"""
@@ -873,7 +963,7 @@ select distinct
         case _ => false
       }
       a.marksCode = rs.getString("marks_code")
-      a.weighting = rs.getInt("weight")
+      a.rawWeighting = rs.getInt("weight")
       a.examPaperCode = Option(rs.getString("exam_paper_code"))
       a.examPaperTitle = Option(rs.getString("exam_paper_title"))
       a.examPaperSection = Option(rs.getString("exam_paper_section"))
@@ -919,6 +1009,20 @@ select distinct
         getNullableInt("maximum_mark"),
         rs.getString("signal_status")
       )
+    }
+  }
+
+  class VariableAssessmentWeightingRuleQuery(ds: DataSource) extends MappingSqlQuery[VariableAssessmentWeightingRule](ds, GetAllVariableAssessmentWeightingRules) {
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): VariableAssessmentWeightingRule = {
+      val rule = new VariableAssessmentWeightingRule
+      rule.moduleCode = rs.getString("module_code")
+      rule.ruleSequence = rs.getString("rule_sequence")
+      rule.assessmentGroup = rs.getString("assessment_group")
+      rule.weighting = rs.getInt("weighting")
+      rule.assessmentType = AssessmentType.factory(rs.getString("assessment_type"))
+      rule
     }
   }
 

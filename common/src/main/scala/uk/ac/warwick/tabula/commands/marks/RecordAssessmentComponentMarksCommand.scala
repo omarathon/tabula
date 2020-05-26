@@ -221,7 +221,9 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (!upstreamAssessmentGroup.members.asScala.exists(_.universityId == universityID)) {
-        errors.rejectValue("", "id.wrong.marker")
+        errors.popNestedPath()
+        errors.rejectValue("", "uniNumber.unacceptable", Array(universityID), null)
+        errors.pushNestedPath(s"students[$universityID]")
       }
 
       if (item.mark.hasText) {

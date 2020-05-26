@@ -495,21 +495,17 @@
         function reflowScroll() {
           setTimeout(function () {
             $scrollWrapper
-            // Update the width of the scroll track to match the container
+              // Update the width of the scroll track to match the container
               .width($scrollWrapper.parent().width())
               // Update the scroll bar so it reflects the width of the grid
               .children().width($grid.width()).end()
-            // Reset the scroll bar to the initial position
+              // Reset the scroll bar to the initial position
               .scrollLeft(0);
           }, 0);
         }
 
         $(window).on('id7:reflow', reflowScroll);
         reflowScroll();
-
-        // we want to hide the native scroll bar on non-mac platform
-        // after we moved the the original scroll bar to a different place.
-        $('.table-responsive').css('overflow-x', 'hidden');
       }
 
       setTimeout(function () {

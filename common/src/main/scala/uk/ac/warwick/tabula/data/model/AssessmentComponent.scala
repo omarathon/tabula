@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.jdk.CollectionConverters._
+import scala.math.BigDecimal.RoundingMode
 
 /**
   * Represents an upstream assessment component as found in the central
@@ -68,7 +69,31 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   var marksCode: String = _
 
-  var weighting: JInteger = _
+  /**
+   * The raw weighting of the assessment component. Beware! This may need scaling (e.g. where weightings are 125/125/750 because SITS doesn't support decimals)
+   * or may be affected by VariableAssessmentWeightingRules.
+   */
+  @Column(name = "weighting")
+  var rawWeighting: JInteger = _
+
+  @transient lazy val scaledWeighting: Option[BigDecimal] = Option(rawWeighting).map(_.toInt).map { weighting =>
+    // If VAW applies, just use the raw weighting
+    if (membershipService.getVariableAssessmentWeightingRules(moduleCode, assessmentGroup).nonEmpty) BigDecimal(weighting)
+    else {
+      val totalWeight =
+        membershipService.getAssessmentComponents(moduleCode, inUseOnly = false)
+          .filter(_.assessmentGroup == assessmentGroup)
+          .flatMap(ac => Option(ac.rawWeighting).map(_.toInt))
+          .sum
+
+      if (totalWeight == 100) BigDecimal(weighting)
+      else {
+        val bd = BigDecimal(weighting * 100) / BigDecimal(totalWeight)
+        bd.setScale(1, RoundingMode.HALF_UP)
+        bd
+      }
+    }
+  }
 
   @Column(name = "exam_paper_code")
   private var _examPaperCode: String = _
@@ -124,7 +149,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     this.assessmentType != other.assessmentType ||
     this.inUse != other.inUse ||
     this.marksCode != other.marksCode ||
-    this.weighting != other.weighting ||
+    this.rawWeighting != other.rawWeighting ||
     this.examPaperCode != other.examPaperCode ||
     this.examPaperTitle != other.examPaperTitle ||
     this.examPaperSection != other.examPaperSection ||
@@ -150,7 +175,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     name = other.name
     assessmentType = other.assessmentType
     marksCode = other.marksCode
-    weighting = other.weighting
+    rawWeighting = other.rawWeighting
     examPaperCode = other.examPaperCode
     examPaperTitle = other.examPaperTitle
     examPaperSection = other.examPaperSection
@@ -168,7 +193,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
      "name" -> name,
      "assessmentType" -> assessmentType,
      "marksCode" -> marksCode,
-     "weighting" -> weighting,
+     "rawWeighting" -> rawWeighting,
      "examPaperCode" -> examPaperCode,
      "examPaperTitle" -> examPaperTitle,
      "examPaperSection" -> examPaperSection,

@@ -124,6 +124,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
         doGradeBoundaries()
+        logger.debug("Imported grade boundaries. Importing variable assessment weighting rules...")
+        doVariableAssessmentWeightingRules()
 
         logger.debug("Removing blank feedback for students who have deregistered...")
         removeBlankFeedbackForDeregisteredStudents()
@@ -355,6 +357,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         val theseRegistrations = hasSequence.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
         if (theseRegistrations.nonEmpty) {
           val registrationsByStudent = theseRegistrations.groupBy(_.sprCode)
+
           // Where there are multiple values for each of the properties (seat number, mark, and grade) we need to flatten them to a single value.
           // Where there is ambiguity, set the value to None
           val propertiesMap: Map[String, UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case (sprCode, studentRegistrations) =>
@@ -374,8 +377,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
-
-                def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
 
                 def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
 
@@ -414,16 +415,16 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
             group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
               val memberHasChanged = (
                 member.position != properties.position ||
-                  member.actualMark != properties.actualMark ||
-                  member.actualGrade != properties.actualGrade ||
-                  member.agreedMark != properties.agreedMark ||
-                  member.agreedGrade != properties.agreedGrade ||
-                  member.resitActualMark != properties.resitActualMark ||
-                  member.resitActualGrade != properties.resitActualGrade ||
-                  member.resitAgreedMark != properties.resitAgreedMark ||
-                  member.resitAgreedGrade != properties.resitAgreedGrade ||
-                  member.resitExpected != properties.resitExpected
-                )
+                member.actualMark != properties.actualMark ||
+                member.actualGrade != properties.actualGrade ||
+                member.agreedMark != properties.agreedMark ||
+                member.agreedGrade != properties.agreedGrade ||
+                member.resitActualMark != properties.resitActualMark ||
+                member.resitActualGrade != properties.resitActualGrade ||
+                member.resitAgreedMark != properties.resitAgreedMark ||
+                member.resitAgreedGrade != properties.resitAgreedGrade ||
+                member.resitExpected != properties.resitExpected
+              )
 
               if (memberHasChanged) {
                 hasChanged = true
@@ -471,6 +472,23 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         assessmentMembershipService.save(gradeBoundary)
       }
     }
+  }
+
+  def doVariableAssessmentWeightingRules(): Unit = transactional() {
+    val existing = assessmentMembershipService.allVariableAssessmentWeightingRules
+    val upstream = assignmentImporter.getAllVariableAssessmentWeightingRules
+
+    val additions = upstream.filterNot(rule => existing.exists(_.matchesKey(rule)))
+    val deletions = existing.filterNot(rule => upstream.exists(_.matchesKey(rule)))
+    val modifications = existing.flatMap { rule =>
+      upstream.find(_.matchesKey(rule)).map { r =>
+        rule.copyFrom(r)
+        rule
+      }
+    }
+
+    (additions ++ modifications).foreach(assessmentMembershipService.save)
+    deletions.foreach(assessmentMembershipService.delete)
   }
 
   def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =

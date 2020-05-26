@@ -16,7 +16,6 @@ class WorkingDaysHelperTest extends TestBase {
     * Warwick Utils tests pass, you probably just need to update to the latest Warwick Utils.
     */
   @Test
-  @Ignore("Time being ignore as new dates for 2020/21 have not been released.Once released remove this ignore")
   def enoughDates(): Unit = {
     val helper = new WorkingDaysHelperImpl()
     val dates = helper.getHolidayDates.asScala.toSeq.map(_.asJoda).sorted

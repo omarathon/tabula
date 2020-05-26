@@ -130,9 +130,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
+  // FIXME needs to take into account VAW and scaled weightings
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
     val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
-      .map(_.weighting.toInt)
+      .map(_.rawWeighting.toInt)
       .getOrElse(0)
 
     val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
@@ -194,6 +195,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           ruleFilteredSubsets
         }
       }
+
+      // Explicitly specify how to order doubles
+      import Ordering.Double.TotalOrdering
       subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>

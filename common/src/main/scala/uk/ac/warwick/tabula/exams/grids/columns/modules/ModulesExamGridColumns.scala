@@ -133,9 +133,9 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
               allComponents.filter { uagm =>
                 _assessmentComponents.find { component =>
                   component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
-                    component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
-                    component.sequence == uagm.upstreamAssessmentGroup.sequence
-                }.flatMap(ac => Option(ac.weighting)).exists(_ > 0)
+                  component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
+                  component.sequence == uagm.upstreamAssessmentGroup.sequence
+                }.flatMap(ac => Option(ac.rawWeighting)).exists(_ > 0) // TODO Need to take into account VAW
               }
             }
           }
@@ -160,18 +160,18 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
     })
   }
 
-  private def scaled(bg: JBigDecimal): JBigDecimal =
-    JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
+  protected def scaled(bg: JBigDecimal): JBigDecimal =
+    JBigDecimal(Option(bg).map(_.setScale(1, RoundingMode.HALF_UP)))
 
   private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] = {
     entity.moduleRegistrations.find(mr =>
       mr.module == module &&
-        scaled(mr.cats) == scaled(cats) &&
-        (moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
+      scaled(mr.cats) == scaled(cats) &&
+      (moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
     )
   }
 
-  override val secondaryValue: String = cats.toPlainString
+  override val secondaryValue: String = scaled(cats).toPlainString
 
 }
 
@@ -222,9 +222,9 @@ abstract class OptionalModuleExamGridColumn(state: ExamGridColumnState, module: 
 
   // TAB-6883 - show the FMC that this module belongs to for stats
   override val secondaryValue: String = if(state.department.rootDepartment.code == "st") {
-    cats.toPlainString + moduleList.map(ml => s" - ${ml.shortName}").getOrElse("")
+    scaled(cats).toPlainString + moduleList.map(ml => s" - ${ml.shortName}").getOrElse("")
   } else {
-    cats.toPlainString
+    scaled(cats).toPlainString
   }
 }
 
