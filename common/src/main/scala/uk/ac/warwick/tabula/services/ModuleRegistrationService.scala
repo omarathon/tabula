@@ -194,6 +194,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           ruleFilteredSubsets
         }
       }
+
+      // Explicitly specify how to order doubles
+      import Ordering.Double.TotalOrdering
       subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>

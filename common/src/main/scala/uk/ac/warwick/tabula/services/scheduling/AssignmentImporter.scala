@@ -213,73 +213,79 @@ class SandboxAssignmentImporter extends AssignmentImporter
       )
     }
 
-    for {
-      (moduleCode, ranges) <- moduleCodesToIds
-      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-      academicYear <- yearsToImport
-      range <- ranges
-      uniId <- range
-      if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
-    } {
-      val yearOfStudy = (uniId % 3) + 1
-      val level = moduleCode.substring(3, 4).toInt
+    val upstreamModuleRegistrations: Seq[UpstreamModuleRegistration] =
+      (for {
+        (moduleCode, ranges) <- moduleCodesToIds
+        assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
+        academicYear <- yearsToImport
+        range <- ranges
+        uniId <- range
+        if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
+      } yield {
+        val yearOfStudy = (uniId % 3) + 1
+        val level = moduleCode.substring(3, 4).toInt
 
-      if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) {
-        val universityId = uniId.toString
+        if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) uk.ac.warwick.tabula.data.Transactions.transactional() {
+          val universityId = uniId.toString
 
-        val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
-        val assessmentGroup = "A"
-        val sequence = assessmentType.subtype match {
-          case TabulaAssessmentSubtype.Assignment => "A01"
-          case TabulaAssessmentSubtype.Exam => "E01"
-          case TabulaAssessmentSubtype.Other => "O01"
-        }
-        val occurrence = "A"
+          val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
+          val assessmentGroup = "A"
+          val sequence = assessmentType.subtype match {
+            case TabulaAssessmentSubtype.Assignment => "A01"
+            case TabulaAssessmentSubtype.Exam => "E01"
+            case TabulaAssessmentSubtype.Other => "O01"
+          }
+          val occurrence = "A"
 
-        val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
-          assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
-            this.academicYear = academicYear
-            this.occurrence = occurrence
-            this.moduleCode = moduleCodeFull
-            this.sequence = sequence
-            this.assessmentGroup = assessmentGroup
-          }).flatMap(_.members.asScala.find(_.universityId == universityId))
+          val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
+            assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
+              this.academicYear = academicYear
+              this.occurrence = occurrence
+              this.moduleCode = moduleCodeFull
+              this.sequence = sequence
+              this.assessmentGroup = assessmentGroup
+            }).flatMap(_.members.asScala.find(_.universityId == universityId))
 
-        val recordedStudent: Option[RecordedAssessmentComponentStudent] =
-          upstreamAssessmentGroupMember.flatMap { uagm =>
-            assessmentComponentMarksService.getAllRecordedStudents(uagm.upstreamAssessmentGroup)
-              .find(_.universityId == uagm.universityId)
+          val recordedStudent: Option[RecordedAssessmentComponentStudent] =
+            upstreamAssessmentGroupMember.flatMap { uagm =>
+              assessmentComponentMarksService.getAllRecordedStudents(uagm.upstreamAssessmentGroup)
+                .find(_.universityId == uagm.universityId)
+            }
+
+          val (mark, grade) =
+            if (academicYear < AcademicYear.now()) {
+              val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+
+              val m =
+                if (isPassFail) {
+                  if (math.random < 0.25) 0 else 100
+                } else {
+                  val moduleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                    Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+                  ).sum % 100
+
+                  // Random noise around the module mark, +/- 15 marks
+                  Math.max(0, Math.min(moduleMark + ((math.random * 15) - 30).toInt, 100))
+                }
+
+              val marksCode =
+                if (isPassFail) "TABULA-PF"
+                else "TABULA-UG"
+
+              val g =
+                if (isPassFail) if (m == 100) "P" else "F"
+                else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
+
+              (if (isPassFail) null else m.toString, g)
+            } else (null: String, null: String)
+
+          recordedStudent.filter(_.needsWritingToSits).foreach { s =>
+            s.needsWritingToSits = false
+            s.lastWrittenToSits = Some(DateTime.now)
+            assessmentComponentMarksService.saveOrUpdate(s)
           }
 
-        val (mark, grade) =
-          if (academicYear < AcademicYear.now()) {
-            val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
-
-            val m =
-              if (isPassFail) {
-                if (math.random < 0.25) 0 else 100
-              } else {
-                val moduleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-                  Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-                ).sum % 100
-
-                // Random noise around the module mark, +/- 15 marks
-                Math.max(0, Math.min(moduleMark + ((math.random * 15) - 30).toInt, 100))
-              }
-
-            val marksCode =
-              if (isPassFail) "TABULA-PF"
-              else "TABULA-UG"
-
-            val g =
-              if (isPassFail) if (m == 100) "P" else "F"
-              else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
-
-            (if (isPassFail) null else m.toString, g)
-          } else (null: String, null: String)
-
-        callback(
-          UpstreamModuleRegistration(
+          Some(UpstreamModuleRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
             seatNumber = assessmentType.subtype match {
@@ -288,7 +294,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
             },
             occurrence = occurrence,
             sequence = sequence,
-            moduleCode = moduleCode,
+            moduleCode = moduleCodeFull,
             assessmentGroup = assessmentGroup,
             actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
             actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
@@ -299,17 +305,11 @@ class SandboxAssignmentImporter extends AssignmentImporter
             resitAgreedMark = null,
             resitAgreedGrade = null,
             resitExpected = false
-          )
-        )
+          ))
+        } else None
+      }).flatten.toSeq
 
-        recordedStudent.filter(_.needsWritingToSits).foreach { s =>
-          s.needsWritingToSits = false
-          s.lastWrittenToSits = Some(DateTime.now)
-          assessmentComponentMarksService.saveOrUpdate(s)
-        }
-      }
-    }
-
+    upstreamModuleRegistrations.sortBy(umr => (umr.year, umr.occurrence, umr.moduleCode, umr.assessmentGroup)).foreach(callback)
   }
 
   def getAllAssessmentGroups(yearsToImport: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
