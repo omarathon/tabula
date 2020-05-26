@@ -87,13 +87,14 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   }
 
   def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = {
-    val currentAcademicYearCode =  if (includeSMS(yearsToImport)) yearsToImport.intersect(AcademicYear.allCurrent()) else Seq()
+    val currentAcademicYearCode =  if (includeSMS(yearsToImport)) {
+      yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))
+    } else Seq("").asJava //set blank for SMS table to be ignored in the actual SQL
     val paraMap = JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
-             "current_academic_year_code" -> yearsToImportArray(currentAcademicYearCode)
+      "current_academic_year_code" -> currentAcademicYearCode
     )
-
-    assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
+   assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
   }
   private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
 
