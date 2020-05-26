@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Instant, OffsetDateTime}
 
 import javax.sql.DataSource
-import org.joda.time.{DateTime, DateTimeConstants, Duration, LocalDate, LocalTime}
+import org.joda.time._
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -233,18 +233,21 @@ class SandboxAssignmentImporter extends AssignmentImporter
           val sequence = assessmentType.subtype match {
             case TabulaAssessmentSubtype.Assignment => "A01"
             case TabulaAssessmentSubtype.Exam => "E01"
-            case TabulaAssessmentSubtype.Other => "O01"
           }
           val occurrence = "A"
 
+          val template = new UpstreamAssessmentGroup
+          template.academicYear = academicYear
+          template.occurrence = occurrence
+          template.moduleCode = moduleCodeFull
+          template.sequence = sequence
+          template.assessmentGroup = assessmentGroup
+
+          val upstreamAssessmentGroup: Option[UpstreamAssessmentGroup] =
+            assessmentMembershipService.getUpstreamAssessmentGroup(template)
+
           val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
-            assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
-              this.academicYear = academicYear
-              this.occurrence = occurrence
-              this.moduleCode = moduleCodeFull
-              this.sequence = sequence
-              this.assessmentGroup = assessmentGroup
-            }).flatMap(_.members.asScala.find(_.universityId == universityId))
+            upstreamAssessmentGroup.flatMap(_.members.asScala.find(_.universityId == universityId))
 
           val recordedStudent: Option[RecordedAssessmentComponentStudent] =
             upstreamAssessmentGroupMember.flatMap { uagm =>
@@ -256,16 +259,24 @@ class SandboxAssignmentImporter extends AssignmentImporter
             if (academicYear < AcademicYear.now()) {
               val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
 
+              val randomModuleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+              ).sum % 100
+
               val m =
                 if (isPassFail) {
-                  if (math.random < 0.25) 0 else 100
+                  if (randomModuleMark < 40) 0 else 100
                 } else {
-                  val moduleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                  val markVariance = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
                     Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-                  ).sum % 100
+                  ).sum % 15
 
-                  // Random noise around the module mark, +/- 15 marks
-                  Math.max(0, Math.min(moduleMark + ((math.random * 15) - 30).toInt, 100))
+                  val assessmentMark = assessmentType.subtype match {
+                    case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance
+                    case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                  }
+
+                  Math.max(0, Math.min(100, assessmentMark))
                 }
 
               val marksCode =
@@ -298,8 +309,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
             assessmentGroup = assessmentGroup,
             actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
             actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
-            agreedMark = null,
-            agreedGrade = null,
+            agreedMark = if (academicYear < AcademicYear.now()) mark else null,
+            agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
             resitActualMark = null,
             resitActualGrade = null,
             resitAgreedMark = null,

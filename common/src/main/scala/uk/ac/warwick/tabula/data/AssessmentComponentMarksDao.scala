@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
@@ -32,11 +33,13 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
 
   override def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent] =
     session.newCriteria[RecordedAssessmentComponentStudent]
+      .setFetchMode("_marks", FetchMode.JOIN)
       .add(is("moduleCode", uag.moduleCode))
       .add(is("assessmentGroup", uag.assessmentGroup))
       .add(is("occurrence", uag.occurrence))
       .add(is("sequence", uag.sequence))
       .add(is("academicYear", uag.academicYear))
+      .distinct
       .seq
 
   override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] =

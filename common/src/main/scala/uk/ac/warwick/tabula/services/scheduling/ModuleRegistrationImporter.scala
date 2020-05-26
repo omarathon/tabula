@@ -112,14 +112,14 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
       val (mark, grade, result) =
         if (academicYear < AcademicYear.now()) {
+          val randomMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+            Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+          ).sum % 100
+
           val m =
             if (isPassFail) {
-              if (math.random < 0.25) 0 else 100
-            } else {
-              (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-              ).sum % 100
-            }
+              if (randomMark < 40) 0 else 100
+            } else randomMark
 
           val marksCode =
             if (isPassFail) "TABULA-PF"
