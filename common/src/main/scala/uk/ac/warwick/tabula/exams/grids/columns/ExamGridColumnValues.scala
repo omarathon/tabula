@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
+import org.apache.commons.lang.StringEscapeUtils
+import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.{Cell, CellStyle}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles
@@ -73,6 +75,21 @@ object ExamGridColumnValue {
           ExamGridColumnValueString(values.map(_.getValueStringForRender).mkString(","))
         }
     }
+  }
+}
+
+object ExamGridColumnGraduationBenchmarkDecimal {
+  def apply(value: BigDecimal, isActual: Boolean = false, url: String) = new ExamGridColumnGraduationBenchmarkDecimal(value, isActual, url)
+}
+
+class ExamGridColumnGraduationBenchmarkDecimal(value: BigDecimal, override val isActual: Boolean = false, val url: String) extends ExamGridColumnValueDecimal(value, isActual) {
+  override def toHTML: String = "<a href=\""+StringEscapeUtils.escapeHtml(url)+"\" target=\"_blank\">"+super.toHTML+"</a>"
+
+  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+    super.populateCell(cell, cellStyleMap, commentHelper)
+    val link = cell.getSheet.getWorkbook.getCreationHelper.createHyperlink(HyperlinkType.URL)
+    link.setAddress(url)
+    cell.setHyperlink(link)
   }
 }
 
