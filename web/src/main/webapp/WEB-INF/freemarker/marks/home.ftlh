@@ -1,7 +1,7 @@
 <h1>Marks management</h1>
 
 <#macro link_to_department department>
-  <a href="<@routes.marks.assessmentcomponents department academicYear />">
+  <a href="<@routes.marks.adminhome department academicYear />">
     ${department.name}
   </a>
 </#macro>

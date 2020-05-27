@@ -90,31 +90,47 @@
 						</span>
 					</div>
 
-					<div class="col-md-2">
-            <#-- TODO progress bar -->
-            progress bar
-            <@stage_progress_bar [] />
+					<div class="col-md-4">
+            <@stage_progress_bar item.stages?values />
+            <div class="next-action">
+              <#if item.nextStage??>
+                <#local nextStageUrl="" />
+
+                <#-- Set nextStage URL based on action code -->
+
+                <#if nextStageUrl?has_content>
+                  <a href="${nextStageUrl}"><#compress><@spring.message code=item.nextStage.actionCode /></#compress></a>
+                <#else>
+                  <@spring.message code=item.nextStage.actionCode />
+                </#if>
+              <#elseif item.progress.percentage == 100>
+                Complete
+              </#if>
+            </div>
 					</div>
 
-					<div class="col-md-4">
+					<div class="col-md-2">
 						<div class="pull-right">
               <@dropdown_menu "Module marks" "btn-xs">
                 <li>
-                  <a href="#">Calculate module marks</a>
+                  <a href="<@routes.admin.moduleperms item.module />">
+                    Manage module permissions
+                  </a>
                 </li>
 
-                <li>
-                  <a href="#">Confirm module marks</a>
+                <li class="disabled">
+                  <a>Calculate module marks</a>
                 </li>
 
-                <li>
-                  <a href="#">Process module marks</a>
+                <li class="disabled">
+                  <a>Confirm module marks</a>
+                </li>
+
+                <li class="disabled">
+                  <a>Process module marks</a>
                 </li>
 							</@dropdown_menu>
 						</div>
-
-            <#-- TODO Next stage -->
-            <a href="#">Next action text</a>
 					</div>
 				</div>
 
@@ -136,8 +152,7 @@
         <div class="col-xs-6">Students</div>
       </div>
     </div>
-    <div class="col-md-2">Progress</div>
-    <div class="col-md-4">Actions</div>
+    <div class="col-md-6">Progress / Actions</div>
   </div>
 
   <#-- Fix nth-of-type zebra striping -->
@@ -171,31 +186,44 @@
           </div>
         </div>
 
-        <div class="col-md-2">
-          <#-- TODO progress bar -->
-          progress bar
-          <@stage_progress_bar [] />
+        <div class="col-md-4">
+          <@stage_progress_bar info.stages?values />
+          <div class="next-action">
+            <#if info.nextStage??>
+              <#local nextStageUrl="" />
+
+              <#-- Set nextStage URL based on action code -->
+
+              <#if nextStageUrl?has_content>
+                <a href="${nextStageUrl}"><#compress><@spring.message code=info.nextStage.actionCode /></#compress></a>
+              <#else>
+                <@spring.message code=info.nextStage.actionCode />
+              </#if>
+            <#elseif info.progress.percentage == 100>
+              Complete
+            </#if>
+          </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
           <div class="pull-right">
             <@dropdown_menu "Component marks" "btn-xs">
               <li>
-                <a href="#">Calculate module marks</a>
+                <#-- Don't need a permission_button here as we need the same permission to see this page -->
+                <a href="<@routes.marks.assessmentcomponent_marks info.assessmentComponent info.upstreamAssessmentGroup />">
+                  Record component marks
+                </a>
               </li>
 
-              <li>
-                <a href="#">Confirm module marks</a>
+              <li class="disabled">
+                <a>Missing mark adjustment</a>
               </li>
 
-              <li>
-                <a href="#">Process module marks</a>
+              <li class="disabled">
+                <a>Scaling</a>
               </li>
             </@dropdown_menu>
           </div>
-
-          <#-- TODO Next stage -->
-          <a href="#">Next action text</a>
         </div>
       </div>
     </#list>

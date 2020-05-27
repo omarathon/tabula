@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.MarksWorkf
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksService, AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
@@ -88,6 +88,7 @@ object ListAssessmentComponentsCommand {
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringMarksWorkflowProgressServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -100,6 +101,7 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
     with ListAssessmentComponentsForModulesWithPermission {
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
+    with MarksWorkflowProgressServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
   override def applyInternal(): Result = assessmentComponentInfos
@@ -110,6 +112,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
   self: ListAssessmentComponentsState
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
+    with MarksWorkflowProgressServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
   lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
@@ -129,10 +132,19 @@ trait ListAssessmentComponentsForModulesWithPermission {
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
       .filter(_.allMembers.nonEmpty)
       .map { upstreamAssessmentGroupInfo =>
+        val assessmentComponent = assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup))
+        val upstreamAssessmentGroup = upstreamAssessmentGroupInfo.upstreamAssessmentGroup
+        val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+
+        val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students)
+
         AssessmentComponentInfo(
-          assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup)),
-          upstreamAssessmentGroupInfo.upstreamAssessmentGroup,
-          studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+          assessmentComponent,
+          upstreamAssessmentGroup,
+          students,
+          progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),
+          nextStage = progress.nextStage,
+          stages = progress.stages,
         )
       }
       .sortBy { info =>

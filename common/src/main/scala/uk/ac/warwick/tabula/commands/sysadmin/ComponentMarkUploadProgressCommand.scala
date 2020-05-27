@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.sysadmin
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, studentMarkRecords}
+import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.MarksWorkflowProgress
 import uk.ac.warwick.tabula.commands.sysadmin.ComponentMarkUploadProgressCommand.{ComponentMarkUploadProgress, _}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentComponentKey, Department}
@@ -10,6 +11,8 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.immutable.ListMap
 
 object ComponentMarkUploadProgressCommand {
 
@@ -48,8 +51,9 @@ class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Resul
       val assessmentComponents = assessmentMembershipService.getAssessmentComponents(moduleAndDepartmentService.getDepartmentByCode(department.code).head, includeSubDepartments = false)
         .filter { ac =>
           ac.assessmentGroup != "AO" &&
-            ac.sequence != AssessmentComponent.NoneAssessmentGroup
-        }
+          ac.sequence != AssessmentComponent.NoneAssessmentGroup
+      }
+
       val assessmentComponentsByKey: Map[AssessmentComponentKey, AssessmentComponent] =
         assessmentComponents.map { ac =>
           AssessmentComponentKey(ac) -> ac
@@ -62,7 +66,12 @@ class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Resul
             AssessmentComponentInfo(
               assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup)),
               upstreamAssessmentGroupInfo.upstreamAssessmentGroup,
-              studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+              studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService),
+
+              // Not used
+              progress = MarksWorkflowProgress(0, null, null),
+              nextStage = None,
+              stages = ListMap.empty,
             )
           }
       }

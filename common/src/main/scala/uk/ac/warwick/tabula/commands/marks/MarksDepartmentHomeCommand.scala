@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.marks
 
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.AssessmentComponentInfo
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand._
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, Module}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringMarksWorkflowProgressServiceComponent, MarksWorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
@@ -36,6 +36,7 @@ object MarksDepartmentHomeCommand {
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringMarksWorkflowProgressServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -48,20 +49,28 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
     with ListAssessmentComponentsForModulesWithPermission {
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
+    with MarksWorkflowProgressServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
   override def applyInternal(): Result = {
     assessmentComponentInfos
       .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
       .map { case ((moduleCode, occurrence), infos) =>
+        val progress = workflowProgressService.moduleOccurrenceProgress(infos)
+
         ModuleOccurrence(
           moduleCode = moduleCode,
           module = infos.head.assessmentComponent.module,
           occurrence = occurrence,
+
+          progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),
+          nextStage = progress.nextStage,
+          stages = progress.stages,
+
           assessmentComponents =
             infos.groupBy(_.assessmentComponent.assessmentGroup)
               .toSeq
-              .sortBy { case (assessmentGroup, _) => assessmentGroup }
+              .sortBy { case (assessmentGroup, _) => assessmentGroup },
         )
       }
       .toSeq.sortBy { mo => (mo.moduleCode, mo.occurrence) }

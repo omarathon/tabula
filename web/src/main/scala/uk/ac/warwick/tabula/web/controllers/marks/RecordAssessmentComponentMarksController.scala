@@ -202,7 +202,7 @@ class RecordAssessmentComponentMarksController extends BaseController
     } else {
       cmd.apply()
 
-      RedirectFlashing(Routes.marks.Admin.AssessmentComponents(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
+      RedirectFlashing(Routes.marks.Admin.home(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
     }
 
 }

@@ -8,7 +8,7 @@
 <#if changes?size == 0>
   <p>There were no changes to marks or grades.</p>
 
-  <p><a href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Back to assessment components</a></p>
+  <p><a href="<@routes.marks.adminhome assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Back to assessment components</a></p>
 <#else>
   <p>The following marks and grades will be changed:</p>
 
