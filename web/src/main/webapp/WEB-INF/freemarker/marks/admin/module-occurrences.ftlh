@@ -64,9 +64,9 @@
       </#if>
       <#local title><@spring.message code=progress.messageCode /></#local>
       <span tabindex="0" class="fa-stack use-tooltip" data-toggle="tooltip" data-placement="top" title="${fmt.strip_html(title?markup_string)}">
-				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
-			</span>
+        <i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+        <i class="fa fa-stack-1x ${icon} text-${state}"></i>
+      </span>
     </#list>
   </div>
 </#macro>
@@ -78,19 +78,19 @@
     <div id="${anchor}" class="module-occurrence-info striped-section collapsible<#if expand_by_default> expanded</#if>"
          <#-- Populate this lazily? -->
          data-name="${anchor}">
-			<div class="clearfix">
-				<div class="section-title row">
-					<div class="col-md-6">
-						<span class="h4">
+      <div class="clearfix">
+        <div class="section-title row">
+          <div class="col-md-6">
+            <span class="h4">
               <a class="collapse-trigger icon-container" href="#">
                 <#-- Can't use the standard fmt.module_name as we want full module code and occurrence -->
                 <span class="mod-code">${item.moduleCode?upper_case}</span>
                 <span class="mod-name">${item.module.name}<#if has_multiple_occurrences> (${item.occurrence})</#if></span>
               </a>
-						</span>
-					</div>
+            </span>
+          </div>
 
-					<div class="col-md-4">
+          <div class="col-md-4">
             <@stage_progress_bar item.stages?values />
             <div class="next-action">
               <#if item.nextStage??>
@@ -107,10 +107,10 @@
                 Complete
               </#if>
             </div>
-					</div>
+          </div>
 
-					<div class="col-md-2">
-						<div class="pull-right">
+          <div class="col-md-2">
+            <div class="pull-right">
               <@dropdown_menu "Module marks" "btn-xs">
                 <li>
                   <a href="<@routes.admin.moduleperms item.module />">
@@ -129,17 +129,17 @@
                 <li class="disabled">
                   <a>Process module marks</a>
                 </li>
-							</@dropdown_menu>
-						</div>
-					</div>
-				</div>
+              </@dropdown_menu>
+            </div>
+          </div>
+        </div>
 
-				<div class="striped-section-contents">
+        <div class="striped-section-contents">
           <#-- Populate this lazily? -->
           <@module_occurrence_inner item />
-				</div>
-			</div>
-		</div> <!-- module-info striped-section-->
+        </div>
+      </div>
+    </div> <!-- module-info striped-section-->
   </div>
 </#macro>
 
