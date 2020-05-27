@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
 import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService
 import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamProfile
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
@@ -38,6 +38,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     published = true,
     seatNumbersPublished = true
   )))
+  assignmentImporter.features = emptyFeatures
+
 
   AssignmentImporter.sitsSchema = "public"
   AssignmentImporter.sqlStringCastFunction = ""
@@ -64,8 +66,10 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def importMembers(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
+      assignmentImporter.features.includeSMSForCurrentYear = true
       val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       var members = ArrayBuffer[UpstreamModuleRegistration]()
+
       assignmentImporter.allMembers(yearsToImport) { mr =>
         members += mr
       }
@@ -76,6 +80,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentGroups(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
+      assignmentImporter.features.includeSMSForCurrentYear = true
       val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       val allGroups = sorted(assignmentImporter.getAllAssessmentGroups(yearsToImport))
       val tuples = allGroups.map(asTuple)
@@ -103,6 +108,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def allAssessmentComponents(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
+      assignmentImporter.features.includeSMSForCurrentYear = true
       val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       val components = sorted(assignmentImporter.getAllAssessmentComponents(yearsToImport))
 
