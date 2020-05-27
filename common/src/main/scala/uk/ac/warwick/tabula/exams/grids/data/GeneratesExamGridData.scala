@@ -67,7 +67,8 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       showComponentSequence = gridOptionsCommand.showComponentSequence,
       showModuleNames = gridOptionsCommand.moduleNameToShow,
       calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-      isLevelGrid = selectCourseCommand.isLevelGrid
+      isLevelGrid = selectCourseCommand.isLevelGrid,
+      applyBenchmark = gridOptionsCommand.applyBenchmark
     )
 
     val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))

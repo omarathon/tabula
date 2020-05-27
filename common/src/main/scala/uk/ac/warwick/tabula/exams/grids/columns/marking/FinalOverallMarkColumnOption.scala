@@ -32,6 +32,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
             entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
             state.calculateYearMarks,
             state.isLevelGrid,
+            state.applyBenchmark,
             entity.yearWeightings
           ) match {
             case unknown: FinalYearGrade.Unknown => ExamGridColumnValueMissing(unknown.details)

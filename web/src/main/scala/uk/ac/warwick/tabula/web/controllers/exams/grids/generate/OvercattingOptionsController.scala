@@ -192,7 +192,8 @@ class OvercattingOptionsView(
     showComponentSequence = false,
     showModuleNames = department.moduleNameToShow,
     calculateYearMarks = false,
-    isLevelGrid = basedOnLevel
+    isLevelGrid = basedOnLevel,
+    applyBenchmark = false
   )
 
   private lazy val currentYearMark = if (basedOnLevel) {

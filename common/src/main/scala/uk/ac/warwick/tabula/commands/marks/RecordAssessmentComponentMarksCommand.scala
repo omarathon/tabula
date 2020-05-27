@@ -71,7 +71,7 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
 
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq
-      .filter(_.mark.nonEmpty)
+      .filter(s => s.mark.nonEmpty || s.grade.nonEmpty || s.comments.nonEmpty)
       .map { item =>
         val upstreamAssessmentGroupMember =
           upstreamAssessmentGroup.members.asScala
@@ -82,8 +82,8 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
           assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
 
         recordedAssessmentComponentStudent.addMark(
-          uploaderId = currentUser.userId,
-          mark = item.mark.toInt,
+          uploader = currentUser.apparentUser,
+          mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
           comments = item.comments
         )
@@ -221,7 +221,9 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (!upstreamAssessmentGroup.members.asScala.exists(_.universityId == universityID)) {
-        errors.rejectValue("", "id.wrong.marker")
+        errors.popNestedPath()
+        errors.rejectValue("", "uniNumber.unacceptable", Array(universityID), null)
+        errors.pushNestedPath(s"students[$universityID]")
       }
 
       if (item.mark.hasText) {
@@ -230,22 +232,29 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
           } else if (doGradeValidation) {
-            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, asInt)
+            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt))
             if (item.grade.hasText) {
-              if (validGrades.nonEmpty && !validGrades.exists(_.grade == item.grade)) {
+              if (!validGrades.exists(_.grade == item.grade)) {
                 errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
               }
             } else if (asInt != 0 || assessmentComponent.module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
               // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
               validGrades.find(_.isDefault).foreach(gb => item.grade = gb.grade)
             }
+
+            if (!item.grade.hasText) {
+              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+            }
           }
         } catch {
           case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
             errors.rejectValue("mark", "actualMark.format")
         }
-      } else if (doGradeValidation && item.grade.hasText) {
-        errors.rejectValue("mark", "actualMark.validateGrade.adjustedGrade")
+      } else if (doGradeValidation&& item.grade.hasText) {
+        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None)
+        if (!validGrades.exists(_.grade == item.grade)) {
+          errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+        }
       }
 
       errors.popNestedPath()
@@ -272,9 +281,12 @@ trait RecordAssessmentComponentMarksDescription extends Describable[Result] {
      .upstreamAssessmentGroup(upstreamAssessmentGroup)
 
   override def describeResult(d: Description, result: Result): Unit =
-    d.property(
-      "marks" -> result.map { student =>
+    d.properties(
+      "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
         student.universityId -> student.latestMark.get
+      }.toMap,
+      "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
+        student.universityId -> student.latestGrade.get
       }.toMap
     )
 }

@@ -1,3 +1,6 @@
+<#-- @ftlvariable name="from_origin" type="java.lang.String" -->
+<#import "*/modal_macros.ftlh" as modal />
+
 <div class="deptheader">
   <h1>Record marks</h1>
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
@@ -11,18 +14,18 @@
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
-    <li role="presentation"><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
+    <li role="presentation" <#if (from_origin!"upload") == "upload">class="active"</#if>><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
+    <li role="presentation" <#if (from_origin!"upload") == "webform">class="active"</#if>><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="upload">
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "upload">active</#if>" id="upload">
       <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
         should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>,
         <strong>Grade</strong> and <strong>Comments</strong>.
         You can use this <a href="<@routes.marks.assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup />">generated spreadsheet</a> as a template.</p>
 
-      <p>Enter the results in the following columns (all other columns are locked):</p>
+      <p>Enter the corresponding results for each university ID in the following columns:</p>
 
       <ul>
         <li>Column B - Mark</li>
@@ -30,7 +33,33 @@
         <li>Column D - Comments</li>
       </ul>
 
-      <p>Note that you can upload any of the following: marks only; marks and grades only; marks and comments only; marks, grades and comments.</p>
+      <p>Note that you can upload any of the following: marks only; grades only (for pass/fail modules); marks and grades only; marks and comments only; marks, grades and comments.</p>
+
+      <#if assessmentComponent.module.adminDepartment??>
+        <#assign department = assessmentComponent.module.adminDepartment />
+        <h6>
+          Departmental settings for ${department.name}
+          <#if can.do("Department.ManageDisplaySettings", department)>
+            <a href="<@routes.admin.displaysettings department />">Change</a>
+          </#if>
+        </h6>
+
+        <ul>
+          <#if department.assignmentGradeValidation>
+            <li>Grade validation is currently <strong>ON</strong> - invalid grades cannot be saved. A grade must be provided if a mark is entered.</li>
+
+            <#if assessmentComponent.marksCode != 'PF'>
+              <#if department.assignmentGradeValidationUseDefaultForZero>
+                <li>The default grade for a mark of 0 is <strong>F</strong>. Please check grades carefully.</li>
+              <#else>
+                <li>A grade will <strong>NOT</strong> be pre-filled for a mark of 0. A valid grade must be provided.</li>
+              </#if>
+            </#if>
+          <#else>
+            <li>Grade validation is currently <strong>OFF</strong> - please make sure only valid grades are recorded.</li>
+          </#if>
+        </ul>
+      </#if>
 
       <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
         <h3>Select file</h3>
@@ -45,25 +74,26 @@
         </div>
       </@f.form>
     </div>
-    <div role="tabpanel" class="tab-pane" id="webform">
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "webform">active</#if>" id="webform">
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
+          <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
           <table class="table table-striped">
             <thead>
               <tr>
-                <th>University ID</th>
-                <th>Mark</th>
-                <th>Grade</th>
-                <th>New mark</th>
-                <th>New grade</th>
-                <th>Comments</th>
+                <th class="col-sm-1">University ID</th>
+                <th class="col-sm-2">Mark</th>
+                <th class="col-sm-1">Grade</th>
+                <th class="col-sm-2">New mark</th>
+                <th class="col-sm-2">New grade</th>
+                <th class="col-sm-4">Comments</th>
               </tr>
             </thead>
             <tbody>
               <#list studentMarkRecords as student>
                 <tr>
-                  <td class="col-md-2">${student.universityId}<#if !student.currentMember> <span class="very-subtle">(not current)</span></#if></td>
-                  <td class="col-md-1">
+                  <td>${student.universityId}<#if !student.currentMember> <span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if></td>
+                  <td>
                     ${student.mark!}
                     <#if student.needsWritingToSits>
                       <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
@@ -81,29 +111,70 @@
                         <span class="sr-only">Agreed mark published to student</span>
                       </span>
                     </#if>
+
+                    <#if student.history?has_content>
+                      <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#mark-history-modal-${student.universityId}"><i class="fal fa-history"></i> View history</button>
+
+                      <@modal.modal id="mark-history-modal-${student.universityId}">
+                        <@modal.wrapper cssClass="modal-lg">
+                          <@modal.header>
+                            <h3 class="modal-title">Mark history for ${student.universityId}</h3>
+                          </@modal.header>
+                          <@modal.body>
+                            <table class="table table-condensed table-striped">
+                              <thead>
+                                <tr>
+                                  <th class="col-sm-3">Date</th>
+                                  <th class="col-sm-3">User</th>
+                                  <th class="col-sm-1">Mark</th>
+                                  <th class="col-sm-1">Grade</th>
+                                  <th class="col-sm-4">Comments</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <#list student.history as history>
+                                  <tr>
+                                    <td>
+                                      <@fmt.date date=history.updatedDate />
+                                    </td>
+                                    <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
+                                    <td>${history.mark!'-'}</td>
+                                    <td>${history.grade!'-'}</td>
+                                    <td>${history.comments!}</td>
+                                  </tr>
+                                </#list>
+                              </tbody>
+                            </table>
+                          </@modal.body>
+                          <@modal.footer>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </@modal.footer>
+                        </@modal.wrapper>
+                      </@modal.modal>
+                    </#if>
                   </td>
-                  <td class="col-md-1">
+                  <td>
                     ${student.grade!}
                   </td>
-                  <td class="col-md-2">
+                  <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].mark">
                       <div class="input-group">
-                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control" autocomplete="off" type="number" min="0" max="100" />
+                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
                         <div class="input-group-addon">%</div>
                       </div>
                     </@bs3form.labelled_form_group>
                   </td>
-                  <td class="col-md-2">
+                  <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string />
+                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string />
                         <@f.select path="students[${student.universityId}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control" />
+                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control grade-box" />
                       </#if>
                     </@bs3form.labelled_form_group>
                   </td>
-                  <td class="col-md-4">
+                  <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].comments">
                       <@f.input path="students[${student.universityId}].comments" cssClass="form-control" />
                     </@bs3form.labelled_form_group>

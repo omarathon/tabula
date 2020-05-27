@@ -165,7 +165,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
     try {
       val asBigDecimal = BigDecimal(markString).setScale(1, RoundingMode.HALF_UP)
       if (asBigDecimal < 0) {
-        (null, Seq(s"Mark must be 0 or more")) // And surely less than 100, but apprently not /facepalm
+        (null, Seq(s"Mark must be 0 or more")) // And surely less than 100, but apparently not /facepalm
       } else {
         (asBigDecimal, Seq())
       }

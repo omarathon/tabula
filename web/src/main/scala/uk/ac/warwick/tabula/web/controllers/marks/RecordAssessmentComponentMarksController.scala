@@ -152,8 +152,15 @@ class RecordAssessmentComponentMarksController extends BaseController
     errors: Errors,
     model: ModelMap,
     @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @PathVariable assessmentComponent: AssessmentComponent,
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
   ): String =
     if (errors.hasErrors) {
+      if (errors.hasFieldErrors("file")) {
+        model.addAttribute("from_origin", "upload")
+      } else {
+        model.addAttribute("from_origin", "webform")
+      }
       model.addAttribute("flash__error", "flash.hasErrors")
       formView
     } else {
@@ -163,10 +170,11 @@ class RecordAssessmentComponentMarksController extends BaseController
           // We know the .get is safe because it's validated
           val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
 
-          // Mark and grade are empty, or haven't changed
+          // Mark and grade and comment are empty, or haven't changed and no comment
           if (
-            (!student.mark.hasText && !student.grade.hasText) ||
+            (!student.mark.hasText && !student.grade.hasText && !student.comments.hasText) ||
             (
+              !student.comments.hasText &&
               (!student.mark.hasText || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
               (!student.grade.hasText || studentMarkRecord.grade.contains(student.grade))
             )
@@ -174,6 +182,7 @@ class RecordAssessmentComponentMarksController extends BaseController
         }
 
       model.addAttribute("changes", changes)
+      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.AssessmentComponents.recordMarks(assessmentComponent, upstreamAssessmentGroup)}/skip-import"))
 
       "marks/admin/assessment-components/record_preview"
     }
@@ -187,10 +196,12 @@ class RecordAssessmentComponentMarksController extends BaseController
     model: ModelMap,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
+      model.addAttribute("from_origin", "webform")
       model.addAttribute("flash__error", "flash.hasErrors")
       formView
     } else {
       cmd.apply()
+
       RedirectFlashing(Routes.marks.Admin.AssessmentComponents(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
     }
 

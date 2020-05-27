@@ -31,7 +31,7 @@
         <td>${result.assessmentComponent.sequence}</td>
         <td>${result.upstreamAssessmentGroup.occurrence}</td>
         <td>${result.assessmentComponent.assessmentType.name}</td>
-        <td>${result.assessmentComponent.weighting}%</td>
+        <td>${(result.assessmentComponent.scaledWeighting!0)?string["0.#"]}%</td>
         <td>
           <#if result.upstreamAssessmentGroup.deadline??>
             <@fmt.date date=result.upstreamAssessmentGroup.deadline includeTime=false relative=false shortMonth=true excludeCurrentYear=true />

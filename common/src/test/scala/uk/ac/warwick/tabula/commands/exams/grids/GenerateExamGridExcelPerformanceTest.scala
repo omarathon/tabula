@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.cats._
-import uk.ac.warwick.tabula.exams.grids.columns.marking.{CurrentYearMarkColumnOption, GraduationBenchmarkColumnOption, OvercattedYearMarkColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.marking.{CurrentYearMarkColumnOption, BenchmarkWeightedAssessmentMarkColumnOption, OvercattedYearMarkColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, OptionalModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.studentidentification.{NameColumnOption, RouteColumnOption, UniversityIDColumnOption}
 import uk.ac.warwick.tabula.exams.grids.{NullStatusAdapter, StatusAdapter}
@@ -223,7 +223,8 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
     showComponentSequence = false,
     showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames,
     calculateYearMarks = false,
-    isLevelGrid = false
+    isLevelGrid = false,
+    applyBenchmark = false
   )
 
   val firstNameColumn: NameColumnOption#FirstNameColumn = new NameColumnOption().FirstNameColumn(examGridColumnState)
@@ -249,7 +250,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
   val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
   moduleRegistrationService.weightedMeanYearMark(Nil, Map.empty, allowEmpty = false) returns Left(s"The year mark cannot be calculated because there are no module marks")
   moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Left(s"The year mark cannot be calculated because there are no module marks")
-  moduleRegistrationService.graduationBenchmark(any[Seq[ModuleRegistration]]) returns(BigDecimal(50))
+  moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns(BigDecimal(50))
 
 
   val best90MA2WeightedColumnOption = new Best90MA2WeightAverageMarksColumn()
@@ -261,8 +262,8 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
   val currentYearMarkColumnOption = new CurrentYearMarkColumnOption()
   currentYearMarkColumnOption.moduleRegistrationService = moduleRegistrationService
 
-  val graduationBenchmarkColumnOption = new GraduationBenchmarkColumnOption()
-  graduationBenchmarkColumnOption.moduleRegistrationService = moduleRegistrationService
+  val benchmarkWeightedAssessmentMarkColumnOption = new BenchmarkWeightedAssessmentMarkColumnOption()
+  benchmarkWeightedAssessmentMarkColumnOption.moduleRegistrationService = moduleRegistrationService
 
   val best90MA2WeightedColumn: Best90MA2WeightAverageMarksColumn#Column = best90MA2WeightedColumnOption.Column(examGridColumnState)
   val best90MA2CourseStatusColumn: Best90MA2CourseStatusColumn#Column = best90MA2CourseStatusColumnOption.Column(examGridColumnState)
@@ -270,7 +271,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
   val totalCATSColumn: TotalCATSColumnOption#Column = new TotalCATSColumnOption().Column(examGridColumnState)
   val passedCATSColumn: PassedCATSColumnOption#Column = new PassedCATSColumnOption().Column(examGridColumnState, 1)
   val currentYearMarkColumn: CurrentYearMarkColumnOption#Column = currentYearMarkColumnOption.Column(examGridColumnState)
-  val graduationBenchmarkColumn: GraduationBenchmarkColumnOption#Column = graduationBenchmarkColumnOption.Column(examGridColumnState)
+  val benchmarkWeightedAssessmentMarkColumn: BenchmarkWeightedAssessmentMarkColumnOption#Column = benchmarkWeightedAssessmentMarkColumnOption.Column(examGridColumnState)
   val overcattedYearMarkColumn: OvercattedYearMarkColumnOption#Column = new OvercattedYearMarkColumnOption().Column(examGridColumnState)
 
   val rightColumns: Seq[ChosenYearExamGridColumn] = Seq(
@@ -280,7 +281,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
     totalCATSColumn,
     passedCATSColumn,
     currentYearMarkColumn,
-    graduationBenchmarkColumn,
+    benchmarkWeightedAssessmentMarkColumn,
     overcattedYearMarkColumn,
   )
 

@@ -4,15 +4,15 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.exams.grids.{StudentAssessmentCommand, _}
+import uk.ac.warwick.tabula.commands.exams.grids.StudentAssessmentCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.exams.{ExamsController, StudentCourseYearDetailsBreadcrumbs}
-import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes, Breadcrumbs => BaseBreadcumbs}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 
 @Controller
@@ -23,9 +23,6 @@ class StudentAssessmentBreakdownController extends ExamsController
   with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
   with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringNormalCATSLoadServiceComponent
   with TaskBenchmarking {
-
-
-  type CommandType = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
 
   override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
@@ -38,7 +35,7 @@ class StudentAssessmentBreakdownController extends ExamsController
 
   @ModelAttribute("command")
   def command(@PathVariable studentCourseDetails: StudentCourseDetails,
-    @PathVariable academicYear: AcademicYear): CommandType = {
+    @PathVariable academicYear: AcademicYear): StudentAssessmentCommand.Command = {
     StudentAssessmentCommand(studentCourseDetails, mandatory(academicYear))
   }
 
@@ -54,7 +51,7 @@ class StudentAssessmentBreakdownController extends ExamsController
   def viewStudentAssessmentDetails(
     @PathVariable studentCourseDetails: StudentCourseDetails,
     @PathVariable academicYear: AcademicYear,
-    @ModelAttribute("command") cmd: CommandType
+    @ModelAttribute("command") cmd: StudentAssessmentCommand.Command
   ): Mav = {
 
     val breakdown = cmd.apply()

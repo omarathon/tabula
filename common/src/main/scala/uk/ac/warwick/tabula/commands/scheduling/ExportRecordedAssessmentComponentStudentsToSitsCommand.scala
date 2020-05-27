@@ -88,11 +88,15 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
                 // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync
                 upstreamAssessmentGroupMember.foreach { uagm =>
                   if (resit) {
-                    uagm.resitActualMark = student.latestMark.map(BigDecimal(_))
+                    uagm.resitActualMark = student.latestMark
                     uagm.resitActualGrade = student.latestGrade
+                    uagm.resitAgreedMark = None
+                    uagm.resitAgreedGrade = None
                   } else {
-                    uagm.actualMark = student.latestMark.map(BigDecimal(_))
+                    uagm.actualMark = student.latestMark
                     uagm.actualGrade = student.latestGrade
+                    uagm.agreedMark = None
+                    uagm.agreedGrade = None
                   }
 
                   assessmentMembershipService.save(uagm)
@@ -112,9 +116,12 @@ trait ExportRecordedAssessmentComponentStudentsToSitsDescription extends Describ
   override def describe(d: Description): Unit = {}
 
   override def describeResult(d: Description, result: Result): Unit =
-    d.property(
-      "marks" -> result.map { student =>
+    d.properties(
+      "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
         student.universityId -> student.latestMark.get
+      }.toMap,
+      "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
+        student.universityId -> student.latestGrade.get
       }.toMap
     )
 }

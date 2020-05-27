@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.jdk.CollectionConverters._
@@ -133,7 +133,7 @@ trait AssessmentMembershipService {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary]
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
@@ -148,6 +148,14 @@ trait AssessmentMembershipService {
   def save(schedule: AssessmentComponentExamSchedule): Unit
 
   def delete(schedule: AssessmentComponentExamSchedule): Unit
+
+  def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
+  def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule]
+
+  def save(rule: VariableAssessmentWeightingRule): Unit
+
+  def delete(rule: VariableAssessmentWeightingRule): Unit
 }
 
 // all the small group sets and assignments in Tabula for a department with manually added students
@@ -350,16 +358,14 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary] = {
-    def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
-
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary] =
     component.marksCode match {
-      case code: String =>
-        dao.getGradeBoundaries(code).filter(gradeBoundaryMatchesMark)
+      case code: String if code.hasText =>
+        dao.getGradeBoundaries(code).filter(_.isValidForMark(mark))
+          .sortBy { gb => (!gb.isDefault, gb.grade) } // Defaults first, then alphabetical
       case _ =>
         Seq()
     }
-  }
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 
@@ -378,6 +384,17 @@ class AssessmentMembershipServiceImpl
   override def save(schedule: AssessmentComponentExamSchedule): Unit = dao.save(schedule)
 
   override def delete(schedule: AssessmentComponentExamSchedule): Unit = dao.delete(schedule)
+
+  override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    dao.allVariableAssessmentWeightingRules
+
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] = RequestLevelCache.cachedBy("AssessmentMembershipService.getVariableAssessmentWeightingRules", s"$moduleCodeWithCats-$assessmentGroup") {
+    dao.getVariableAssessmentWeightingRules(moduleCodeWithCats, assessmentGroup)
+  }
+
+  override def save(rule: VariableAssessmentWeightingRule): Unit = dao.save(rule)
+
+  override def delete(rule: VariableAssessmentWeightingRule): Unit = dao.delete(rule)
 }
 
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {

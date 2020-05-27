@@ -111,23 +111,23 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         cSeqColumnIndex = 0
         aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
           cSeqColumnIndex = cSeqColumnIndex + 1
-          var (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
+          val (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (Option(cInfo.resitInfo.resitMark).isDefined) {
               if (Option(cInfo.mark).isDefined) {
                 //will use resit style because of the limitation of multiple sytle application to single excel cell for SXSSFWorkbook
-                (s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               } else {
-                (s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               }
             } else if (Option(cInfo.mark).isDefined) {
-              (cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark, mr.module.degreeType))
+              (cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
             } else {
               ("X", None)
             }
             case _ => ("", None)
           }
           createCell(row, currentColumnIndex + 6 + cSeqColumnIndex, cMark, cMarkStyle)
-          var (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
+          val (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (Option(cInfo.resitInfo.resitGrade).isDefined) {
               if (Option(cInfo.grade).isDefined) {
                 (s"[${cInfo.resitInfo.resitGrade.toString}(${cInfo.grade.toString})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)

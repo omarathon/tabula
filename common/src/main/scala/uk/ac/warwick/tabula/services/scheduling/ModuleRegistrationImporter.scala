@@ -112,18 +112,25 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
       val (mark, grade, result) =
         if (academicYear < AcademicYear.now()) {
+          val randomMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+            Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+          ).sum % 100
+
           val m =
             if (isPassFail) {
-              if (math.random < 0.25) 0 else 100
-            } else {
-              (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-              ).sum % 100
+              if (randomMark < 40) 0 else 100
+            } else randomMark
+
+          val marksCode =
+            if (isPassFail) "TABULA-PF"
+            else route.degreeType match {
+              case DegreeType.Postgraduate => "TABULA-PG"
+              case _ => "TABULA-UG"
             }
 
           val g =
             if (isPassFail) if (m == 100) "P" else "F"
-            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= m && gb.maximumMark >= m).map(_.grade).getOrElse("F")
+            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
           (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
         } else (None: Option[JBigDecimal], null: String, null: String)

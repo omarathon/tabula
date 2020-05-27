@@ -33,6 +33,7 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
             entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
             state.calculateYearMarks,
             state.isLevelGrid,
+            state.applyBenchmark,
             entity.yearWeightings
           ) match {
             case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)

@@ -25,7 +25,8 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
     routeRulesLookup: UpstreamRouteRuleLookup,
     isConfidential: Boolean,
     calculateYearMarks: Boolean,
-    isLevelGrid: Boolean
+    isLevelGrid: Boolean,
+    applyBenchmark: Boolean,
   ): XWPFDocument = {
 
     val doc = new XWPFDocument()
@@ -61,6 +62,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
             routeRules,
             calculateYearMarks,
             isLevelGrid,
+            applyBenchmark,
             entity.yearWeightings
           ) match {
             case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true

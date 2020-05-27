@@ -215,6 +215,21 @@ class ImportSitsAssignmentsAllYearsController extends BaseSysadminController wit
 }
 
 @Controller
+@RequestMapping(Array("/sysadmin/import-sits-individual-year"))
+class ImportSitsAssignmentsIndividualYearController extends BaseSysadminController with AutowiringJobServiceComponent {
+
+  var scheduler: Scheduler = Wire[Scheduler]
+
+  @RequestMapping(method = Array(POST))
+  def importYear(@RequestParam academicYear: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[ImportAssignmentsIndividualYearJob]("academicYear" -> academicYear)
+    ))
+  }
+
+}
+
+@Controller
 @RequestMapping(Array("/sysadmin/import-module-lists"))
 class ImportSitsModuleListsController extends BaseSysadminController {
 

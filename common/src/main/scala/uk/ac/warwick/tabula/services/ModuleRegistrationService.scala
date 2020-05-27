@@ -51,9 +51,7 @@ trait ModuleRegistrationService {
 
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
-  def graduationBenchmark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
-
-  def postgraduateBenchmark(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): BigDecimal
+  def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
   /**
     * Like weightedMeanYearMark but only returns year marks calculated from agreed (post board) marks
@@ -132,13 +130,19 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
-  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
-    val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
-      .map(_.weighting.toInt)
-      .getOrElse(0)
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
+    lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
 
-    val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
-    ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    moduleRegistration.componentsForBenchmark.map { uagm =>
+      val weighting: BigDecimal =
+        uagm.upstreamAssessmentGroup.assessmentComponent
+          .flatMap(_.weightingFor(marks))
+          .getOrElse(BigDecimal(0))
+
+      val cats = (weighting / 100) * moduleRegistration.cats
+      ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    }
   }
 
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
@@ -147,7 +151,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     if(totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
   }
 
-  def graduationBenchmark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+  def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
     val marksForBenchmark = moduleRegistrations.map(mr => mr -> benchmarkComponentsAndMarks(mr)).toMap
 
     val cats = marksForBenchmark.values.flatten.map(_.cats).sum
@@ -160,18 +164,6 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     }
 
     benchmark.setScale(1, RoundingMode.HALF_UP)
-  }
-
-  def postgraduateBenchmark(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): BigDecimal = {
-    val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.cats)).reverse
-    var catsConsidered = BigDecimal(0)
-    val bestModules = sortedByMark.takeWhile { mr =>
-      val takeMore = catsConsidered < bestCats
-      if(takeMore) catsConsidered += mr.cats
-      takeMore
-    }
-    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
-    (total / catsConsidered).setScale(1, RoundingMode.HALF_UP)
   }
 
   def overcattedModuleSubsets(
@@ -208,6 +200,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           ruleFilteredSubsets
         }
       }
+
+      // Explicitly specify how to order doubles
+      import Ordering.Double.TotalOrdering
       subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>

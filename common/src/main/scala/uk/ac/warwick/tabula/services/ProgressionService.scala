@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
+import uk.ac.warwick.tabula.data.model.CourseType.{PGT, UG}
 import uk.ac.warwick.tabula.data.model.DegreeType.{Postgraduate, Undergraduate}
 import uk.ac.warwick.tabula.data.model._
 
@@ -144,9 +145,13 @@ object ProgressionService {
 trait ProgressionService {
   def getYearMark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
-  def suggestedResult(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, yearWeightings: Seq[CourseYearWeighting]): ProgressionResult
+  def graduationBenchmark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
-  def suggestedFinalYearGrade(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, yearWeightings: Seq[CourseYearWeighting]): FinalYearGrade
+  def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
+
+  def suggestedResult(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, applyBenchmark: Boolean, yearWeightings: Seq[CourseYearWeighting]): ProgressionResult
+
+  def suggestedFinalYearGrade(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, applyBenchmark: Boolean, yearWeightings: Seq[CourseYearWeighting]): FinalYearGrade
 }
 
 abstract class AbstractProgressionService extends ProgressionService {
@@ -180,7 +185,51 @@ abstract class AbstractProgressionService extends ProgressionService {
     }
   }
 
-  def suggestedResult(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, yearWeightings: Seq[CourseYearWeighting]): ProgressionResult = {
+  def graduationBenchmark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {
+    entityYear.studentCourseYearDetails.map(scyd => {
+      val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
+      if (entityYear.yearOfStudy >= finalYearOfStudy) {
+        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
+        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings)
+        lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
+        for (mpy <- markPerYear; yw <- yearWeightings) yield {
+          calculateBenchmark(entityPerYear, mpy, yw)
+        }
+      } else {
+        Left("Only applies to the final year of study")
+      }
+    }).getOrElse(Left(s"Missing year details for ${entityYear.level.map(_.code).getOrElse("an unknown level")}"))
+  }
+
+  def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+    val bestCats =
+      if (Option(scyd.studentCourseDetails.award).map(_.code).contains("PGDIP")) BigDecimal(90)
+      else BigDecimal(120)
+    val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.cats)).reverse
+    var catsConsidered = BigDecimal(0)
+    val bestModules = sortedByMark.takeWhile { mr =>
+      val takeMore = catsConsidered < bestCats
+      if(takeMore) catsConsidered += mr.cats
+      takeMore
+    }
+    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
+    (total / catsConsidered).setScale(1, RoundingMode.HALF_UP)
+  }
+
+  private def calculateBenchmark(entityPerYear: Map[Int, ExamGridEntityYear], marksPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting]): BigDecimal = {
+    val finalYear :: otherYears = entityPerYear.keys.toSeq.reverse
+    val previousYearWeightedMarks = otherYears.map(year =>
+      marksPerYear(year) * yearWeightings(year).weighting
+    ).sum
+    val finalYearModules = entityPerYear(finalYear).moduleRegistrations
+    val percentageOfFinalYearAssessments = moduleRegistrationService.percentageOfAssessmentTaken(finalYearModules) / 100
+    val benchmarkWeightedFinalYear = yearWeightings(finalYear).weighting * moduleRegistrationService.benchmarkWeightedAssessmentMark(finalYearModules) * percentageOfFinalYearAssessments
+    val weightedPercentageOfCompletedAssessments = otherYears.map(year => yearWeightings(year).weighting).sum + (yearWeightings(finalYear).weighting * percentageOfFinalYearAssessments)
+    if (weightedPercentageOfCompletedAssessments == 0) BigDecimal(0)
+    else ((previousYearWeightedMarks + benchmarkWeightedFinalYear) / weightedPercentageOfCompletedAssessments).setScale(1, RoundingMode.HALF_UP)
+  }
+
+  def suggestedResult(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, applyBenchmark: Boolean, yearWeightings: Seq[CourseYearWeighting]): ProgressionResult = {
     entityYear.studentCourseYearDetails.map(scyd => {
       val emptyExpectingMarks = entityYear.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty)
       val emptyExpectingGrades = entityYear.moduleRegistrations.filter(mr => mr.passFail && mr.firstDefinedGrade.isEmpty)
@@ -194,7 +243,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       } else if (entityYear.yearOfStudy == 1) {
         suggestedResultFirstYear(entityYear, normalLoad, routeRulesPerYear.getOrElse(scyd.yearOfStudy, Seq()), yearWeightings)
       } else if (scyd.isFinalYear) {
-        val sfyg = suggestedFinalYearGrade(entityYear, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, yearWeightings)
+        val sfyg = suggestedFinalYearGrade(entityYear, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, applyBenchmark, yearWeightings)
 
         sfyg match {
           case g if g.fail => ProgressionResult.Resit
@@ -230,9 +279,9 @@ abstract class AbstractProgressionService extends ProgressionService {
       val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
       if (overallMark.isLeft) {
-        ProgressionResult.Unknown(overallMark.left.get)
+        ProgressionResult.Unknown(overallMark.swap.toOption.get)
       } else {
-        val overallMarkSatisfied = overallMark.right.get >= ProgressionService.FirstYearPassMark
+        val overallMarkSatisfied = overallMark.toOption.get >= ProgressionService.FirstYearPassMark
         if (passedCredits && passedCoreRequired && overallMarkSatisfied) {
           ProgressionResult.Proceed
         } else if (passedCoreRequired && overallMarkSatisfied) {
@@ -256,7 +305,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       if (overallMark.isLeft) {
         ProgressionResult.Unknown("Over Catted Mark not yet chosen")
       } else {
-        val overallMarkSatisfied = overallMark.right.get >= ProgressionService.IntermediateYearPassMark
+        val overallMarkSatisfied = overallMark.toOption.get >= ProgressionService.IntermediateYearPassMark
         if (passedCredits && overallMarkSatisfied) {
           ProgressionResult.Proceed
         } else {
@@ -269,58 +318,51 @@ abstract class AbstractProgressionService extends ProgressionService {
   /**
     * Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ug13
     */
-  def suggestedFinalYearGrade(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): FinalYearGrade = {
+  def suggestedFinalYearGrade(
+    entityYear: ExamGridEntityYear,
+    normalLoad: BigDecimal,
+    routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]],
+    calculateYearMarks: Boolean,
+    groupByLevel: Boolean,
+    applyBenchmark: Boolean,
+    weightings: Seq[CourseYearWeighting]
+  ): FinalYearGrade = {
     entityYear.studentCourseYearDetails.map(scyd => {
       val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
       if (entityYear.yearOfStudy >= finalYearOfStudy) {
-        val entityPerYear: Map[Int, ExamGridEntityYear] = {
-          val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
-          val allScyds = scds.flatMap(_.freshStudentCourseYearDetails)
+        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
+        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings)
+        lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
 
-          if (groupByLevel) {
-            allScyds.groupBy(_.level.orNull)
-              .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _ *) }
-          } else {
-            (1 to finalYearOfStudy).map(block => {
-              val latestSCYDForThisYear = allScyds.filter(_.yearOfStudy.toInt == block).lastOption
-              block -> latestSCYDForThisYear.map(_.toExamGridEntityYear).orNull
-            }).toMap
-          }
-        }
-
-        lazy val markPerYear: Map[Int, Either[String, BigDecimal]] = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings)
-        lazy val yearWeightings: Map[Int, Option[CourseYearWeighting]] = markPerYear.map { case (year, _) =>
-          val yearWeighting = weightings.filter(_.yearOfStudy == year)
-          year -> yearWeighting.headOption
-        }
-        if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
-          FinalYearGrade.Unknown(
-            "The final overall mark cannot be calculated because there is no mark for " +
-              markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }
-                .map { case (year, _) => year }
-                .toSeq
-                .sorted
-                .map { year => s"year $year" }
-                .mkString(", ")
-          )
-        } else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty }) {
-          FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
-            yearWeightings.filter { case (_, possibleWeighting) => possibleWeighting.isEmpty }.map { case (year, _) =>
-              s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.studentCourseDetails.sprStartAcademicYear.toString} Year $year"
-            }.mkString(", ")
-          ))
-        } else {
+        (for(mpy <- markPerYear; yw <- yearWeightings) yield {
           weightedFinalYearGrade(
             scyd,
             entityPerYear,
-            markPerYear.map { case (year, possibleMark) => (year, possibleMark.right.get) },
-            yearWeightings.map { case (year, option) => year -> option.get }
+            mpy,
+            yw,
+            entityYear.moduleRegistrations,
+            applyBenchmark
           )
-        }
+        }).fold(FinalYearGrade.Unknown.apply, identity)
       } else {
         FinalYearGrade.Ignore
       }
     }).getOrElse(FinalYearGrade.Ignore)
+  }
+
+  private def getEntityPerYear(scyd: StudentCourseYearDetails, groupByLevel: Boolean, finalYearOfStudy: Int): Map[Int, ExamGridEntityYear] = {
+    val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
+    val allScyds = scds.flatMap(_.freshStudentCourseYearDetails).filter(_.studentCourseDetails.courseType == scyd.studentCourseDetails.courseType)
+
+    if (groupByLevel) {
+      allScyds.groupBy(_.level.orNull)
+        .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _ *) }
+    } else {
+      (1 to finalYearOfStudy).map(block => {
+        val latestSCYDForThisYear = allScyds.filter(_.yearOfStudy.toInt == block).lastOption
+        block -> latestSCYDForThisYear.map(_.toExamGridEntityYear).orNull
+      }).toMap
+    }
   }
 
   private def getMarkPerYear(
@@ -330,8 +372,8 @@ abstract class AbstractProgressionService extends ProgressionService {
     routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]],
     calculatePreviousYearMarks: Boolean,
     yearWeightings: Seq[CourseYearWeighting]
-  ): Map[Int, Either[String, BigDecimal]] = {
-    entityPerYear.filter { case (_, entityYear) => entityYear != null }.map { case (year, entityYear) =>
+  ): Either[String, Map[Int, BigDecimal]] = {
+    val markPerYear = entityPerYear.filter { case (_, entityYear) => entityYear != null }.map { case (year, entityYear) =>
       year -> entityYear.studentCourseYearDetails.map(thisScyd => {
         if (!calculatePreviousYearMarks && year != finalYearOfStudy) {
           Option(thisScyd.agreedMark) match {
@@ -342,6 +384,35 @@ abstract class AbstractProgressionService extends ProgressionService {
           getYearMark(entityYear, normalLoad, routeRulesPerYear.getOrElse(year, Seq()), yearWeightings)
         }
       }).getOrElse(Left(s"Could not find course details for year $year"))
+    }
+
+    if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
+      Left("The final overall mark cannot be calculated because there is no mark for " +
+        markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }
+          .map { case (year, _) => year }
+          .toSeq
+          .sorted
+          .map { year => s"year $year" }
+          .mkString(", ")
+      )
+    } else {
+      Right(markPerYear.map { case (year, marks) => year -> marks.toOption.get })
+    }
+  }
+
+  private def getWeightingsPerYear(scyd: StudentCourseYearDetails, weightings: Seq[CourseYearWeighting], years: Seq[Int]): Either[String, Map[Int, CourseYearWeighting]] = {
+    val (yearsWithoutWeightings, yearWeightings) = years.map { year =>
+      val yearWeighting = weightings.filter(_.yearOfStudy == year)
+      yearWeighting.headOption.map(w => Right(year -> w)).getOrElse(Left(year))
+    }.partitionMap(identity)
+
+    if(yearsWithoutWeightings.nonEmpty) {
+      val missingYearsString = yearsWithoutWeightings.map(y =>
+        s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.studentCourseDetails.sprStartAcademicYear.toString} Year $y"
+      )
+      Left(s"Could not find year weightings for: $missingYearsString")
+    } else {
+      Right(yearWeightings.toMap)
     }
   }
 
@@ -355,7 +426,9 @@ abstract class AbstractProgressionService extends ProgressionService {
     scyd: StudentCourseYearDetails,
     entityPerYear: Map[Int, ExamGridEntityYear],
     markPerYear: Map[Int, BigDecimal],
-    yearWeightings: Map[Int, CourseYearWeighting]
+    yearWeightings: Map[Int, CourseYearWeighting],
+    moduleRegistrations: Seq[ModuleRegistration],
+    applyBenchmark: Boolean
   ): FinalYearGrade = {
     // This only considers years where the weighting counts  when they are not not abroad - so for a course with an
     // intercalated year weighted 0,50,0,50, this would consider years 2 and 4. For weightings set like 0/50/50/50 (2nd or 3rd year abroad for same course), it will consider last 2 years non- abroad ones
@@ -374,9 +447,21 @@ abstract class AbstractProgressionService extends ProgressionService {
     } else if (scyd.studentCourseDetails.courseType.isEmpty) {
       FinalYearGrade.Unknown("Unknown course type")
     } else {
-      val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
+      val yearWeightedMark: BigDecimal = markPerYear.map { case (year, _) =>
         markPerYear(year) * yearWeightings(year).weighting
       }.sum.setScale(1, RoundingMode.HALF_UP)
+
+      val finalMark = if(applyBenchmark) {
+        val graduationBenchmark = scyd.studentCourseDetails.courseType match {
+          case Some(PGT) => postgraduateBenchmark(scyd, moduleRegistrations)
+          case Some(UG) => calculateBenchmark(entityPerYear, markPerYear, yearWeightings)
+          case _ => BigDecimal(0)
+        }
+
+        Seq(yearWeightedMark, graduationBenchmark).max
+      } else {
+        yearWeightedMark
+      }
 
       val passedModuleRegistrationsInFinalTwoYears: Seq[ModuleRegistration] = finalTwoYearsModuleRegistrations.filter(isPassed)
       val passedCreditsInFinalTwoYears = passedModuleRegistrationsInFinalTwoYears.map(mr => BigDecimal(mr.cats)).sum >= ProgressionService.FinalTwoYearsRequiredCredits
