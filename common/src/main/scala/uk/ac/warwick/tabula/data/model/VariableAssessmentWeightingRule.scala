@@ -26,8 +26,8 @@ class VariableAssessmentWeightingRule extends GeneratedId with ToString {
   @Column(name = "assessment_type", nullable = false)
   var assessmentType: AssessmentType = _
 
-  @Column(nullable = false)
-  var weighting: Int = _
+  @Column(name = "weighting", nullable = false)
+  var rawWeighting: Int = _
 
   def matchesKey(other: VariableAssessmentWeightingRule): Boolean =
     moduleCode == other.moduleCode &&
@@ -38,7 +38,7 @@ class VariableAssessmentWeightingRule extends GeneratedId with ToString {
     require(matchesKey(other))
 
     assessmentType = other.assessmentType
-    weighting = other.weighting
+    rawWeighting = other.rawWeighting
   }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
@@ -46,6 +46,6 @@ class VariableAssessmentWeightingRule extends GeneratedId with ToString {
     "assessmentGroup" -> assessmentGroup,
     "ruleSequence" -> ruleSequence,
     "assessmentType" -> assessmentType,
-    "weighting" -> weighting
+    "rawWeighting" -> rawWeighting
   )
 }

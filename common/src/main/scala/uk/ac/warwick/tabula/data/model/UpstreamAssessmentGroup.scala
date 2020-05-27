@@ -104,26 +104,32 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
   // FIXME - just inherits from the components deadline - leaving this here in case we need to do something fancy to support resits
   def deadline: Option[LocalDate] = upstreamAssessmentGroup.deadline
 
-  def isAgreedMark: Boolean = resitAgreedMark.orElse(agreedMark).isDefined
+  def isAgreedMark: Boolean = firstAgreedMark.isDefined
 
-  def isResitMark: Boolean = resitAgreedMark.orElse(resitActualMark).isDefined
+  def isResitMark: Boolean = firstResitMark.isDefined
 
-  def firstDefinedMark: Option[Int] = resitAgreedMark.orElse(resitActualMark).orElse(firstOriginalMark)
+  def firstDefinedMark: Option[Int] = firstResitMark.orElse(firstOriginalMark)
 
   // doesn't include resit marks
   def firstOriginalMark: Option[Int] = agreedMark.orElse(actualMark)
 
+  // only includes resit marks
+  def firstResitMark: Option[Int] = resitAgreedMark.orElse(resitActualMark)
+
   // only includes board agreed marks
   def firstAgreedMark: Option[Int] = resitAgreedMark.orElse(agreedMark)
 
-  def isAgreedGrade: Boolean = resitAgreedGrade.orElse(agreedGrade).isDefined
+  def isAgreedGrade: Boolean = firstAgreedGrade.isDefined
 
-  def isResitGrade: Boolean = resitAgreedGrade.orElse(resitActualGrade).isDefined
+  def isResitGrade: Boolean = firstResitGrade.isDefined
 
-  def firstDefinedGrade: Option[String] = resitAgreedGrade.orElse(resitActualGrade).orElse(firstOriginalGrade)
+  def firstDefinedGrade: Option[String] = firstResitGrade.orElse(firstOriginalGrade)
 
   // doesn't include resit grades
   def firstOriginalGrade: Option[String] = agreedGrade.orElse(actualGrade)
+
+  // only includes resit grades
+  def firstResitGrade: Option[String] = resitAgreedGrade.orElse(resitActualGrade)
 
   // only includes board agreed marks
   def firstAgreedGrade: Option[String] = resitAgreedGrade.orElse(agreedGrade)
