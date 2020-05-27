@@ -101,7 +101,7 @@
       <@f.select path="relatedSubmission" cssClass="form-control">
         <option value="">No, this does not relate to a previous submission</option>
         <#list previousSubmissions as submission>
-          <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type.entryName == "Other"> - ${submission.issueTypeDetails}</#if><#if type_has_next>, </#if></#list></#if></#assign>
+          <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type.entryName == "Other"><#if submission.issueTypeDetails?has_content> - ${submission.issueTypeDetails!""}</#if></#if><#if type_has_next>, </#if></#list></#if></#assign>
           <@f.option value="${submission.key}" label="${label?markup_string}" />
         </#list>
       </@f.select>
