@@ -70,7 +70,7 @@
 
         <div class="buttons form-group">
           <button type="submit" class="btn btn-primary">Upload</button>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
+          <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.adminhome assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
         </div>
       </@f.form>
     </div>
@@ -186,7 +186,7 @@
 
           <div class="submit-buttons fix-footer">
             <input type="submit" class="btn btn-primary" value="Save" />
-            <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
+            <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.adminhome assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
           </div>
         </@f.form>
       </div>

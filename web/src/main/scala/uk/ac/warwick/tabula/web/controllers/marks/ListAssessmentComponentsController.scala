@@ -5,10 +5,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.marks.web.Routes
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController, DepartmentScopedController}
 
 @Controller
@@ -39,6 +38,6 @@ class ListAssessmentComponentsController
       .crumbs(
         MarksBreadcrumbs.Admin.HomeForYear(department, academicYear),
         MarksBreadcrumbs.Admin.AssessmentComponents(department, academicYear, active = true)
-      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.Admin.home(department, _)): _*)
+      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.marks.Admin.AssessmentComponents(department, _)): _*)
 
 }
