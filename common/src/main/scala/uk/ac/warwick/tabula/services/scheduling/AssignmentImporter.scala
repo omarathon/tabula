@@ -87,15 +87,16 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   }
 
   def getAllAssessmentComponents(yearsToImport: Seq[AcademicYear]): Seq[AssessmentComponent] = {
-    val currentAcademicYearCode =  if (includeSMS(yearsToImport)) {
+    val currentAcademicYearCode = if (includeSMS(yearsToImport)) {
       yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))
     } else Seq("").asJava //set blank for SMS table to be ignored in the actual SQL
     val paraMap = JMap(
       "academic_year_code" -> yearsToImportArray(yearsToImport),
       "current_academic_year_code" -> currentAcademicYearCode
     )
-   assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
+    assessmentComponentQuery.executeByNamedParam(paraMap).asScala.toSeq
   }
+
   private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
 
   //For academic years marked current we do import SMS data if the feature flag is on. For all other cases SMS data is ignored.
@@ -124,9 +125,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     )
     if (includeSMS(yearsToImport)) {
       params.putAll(JMap("current_academic_year_code" -> yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))))
-      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers(false), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     } else {
-      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembersExcludeSMS, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers(true), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     }
   }
 
@@ -138,9 +139,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     )
     if (includeSMS(yearsToImport)) {
       params.putAll(JMap("current_academic_year_code" -> yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))))
-      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, false), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     } else {
-      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityIdExcludingSMS(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, true), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     }
   }
 
@@ -185,7 +186,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
   override def publishedExamProfiles(yearsToImport: Seq[AcademicYear]): Seq[String] = {
     // MM 20/04/2020 ignore profiles not in extraExamProfileSchedulesToImport for now, old data is a mess
     Await.result(examTimetableFetchingService.getExamProfiles, scala.concurrent.duration.Duration.Inf)
-      .filter(p => yearsToImport.contains(p.academicYear) && (extraExamProfileSchedulesToImport.contains(p.code)/* || p.published || p.seatNumbersPublished*/))
+      .filter(p => yearsToImport.contains(p.academicYear) && (extraExamProfileSchedulesToImport.contains(p.code) /* || p.published || p.seatNumbersPublished*/))
       .map(_.code)
   }
 
@@ -231,7 +232,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
 
       moduleCodesToIds = moduleCodesToIds + (
         moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-      )
+        )
     }
 
     val upstreamModuleRegistrations: Seq[UpstreamModuleRegistration] =
@@ -788,8 +789,16 @@ object AssignmentImporter {
         smo.ayr_code in (:academic_year_code) and
         ssn.ssn_sprc is null -- no matching SSN"""
 
-  def GetAllAssessmentGroupMembers =
-    s"""
+  def GetAllAssessmentGroupMembers(excludeSMS: Boolean) = {
+    if (excludeSMS) {
+      s"""
+      $GetConfirmedModuleRegistrations
+        union all
+      $GetAutoUploadedConfirmedModuleRegistrations
+    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
+
+    } else {
+      s"""
       $GetUnconfirmedModuleRegistrations
         union all
       $GetConfirmedModuleRegistrations
@@ -797,12 +806,9 @@ object AssignmentImporter {
       $GetAutoUploadedConfirmedModuleRegistrations
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-  def GetAllAssessmentGroupMembersExcludeSMS =
-    s"""
-      $GetConfirmedModuleRegistrations
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
-    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
+    }
+  }
+
 
   def GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds: Boolean): String = {
     if (multipleUniIds) {
@@ -813,9 +819,19 @@ object AssignmentImporter {
   }
 
   /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
-  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean): String = {
+  def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean, excludeSMS: Boolean): String = {
     val sprClause = GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds)
-    s"""
+    if (excludeSMS) {
+      s"""
+      $GetConfirmedModuleRegistrations
+        $sprClause
+        union all
+      $GetAutoUploadedConfirmedModuleRegistrations
+        $sprClause
+    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
+
+    } else {
+      s"""
       $GetUnconfirmedModuleRegistrations
         $sprClause
         union all
@@ -825,18 +841,8 @@ object AssignmentImporter {
       $GetAutoUploadedConfirmedModuleRegistrations
         $sprClause
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
-  }
+    }
 
-  /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
-  def GetModuleRegistrationsByUniversityIdExcludingSMS(multipleUniIds: Boolean): String = {
-    val sprClause = GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds)
-    s"""
-      $GetConfirmedModuleRegistrations
-        $sprClause
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
-        $sprClause
-    order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
   }
 
   def GetAllGradeBoundaries: String =
