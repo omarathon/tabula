@@ -1,0 +1,209 @@
+<#function route_function dept>
+  <#local result><@routes.marks.adminhome dept academicYear /></#local>
+  <#return result />
+</#function>
+
+<@fmt.id7_deptheader "Marks" route_function "for" />
+
+<#function module_occurrence_anchor module_code occurrence>
+  <#return "${module_code}-${occurrence}"?lower_case />
+</#function>
+
+<#macro all_module_occurrences results expand_by_default has_multiple_occurrences>
+  <#list results as item>
+    <@module_occurrence item expand_by_default has_multiple_occurrences />
+
+    <#if !expand_by_default>
+      <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
+      <script type="text/javascript" nonce="${nonce()}">
+        GlobalScripts.initCollapsible(jQuery('#${module_occurrence_anchor(item.moduleCode, item.occurrence)}'));
+      </script>
+    </#if>
+  </#list>
+</#macro>
+
+<#-- Output a dropdown menu only if there is anything in it. -->
+<#macro dropdown_menu text button_size="btn-md">
+  <#-- Capture the content between the macro tags into a string -->
+  <#local content><#nested /></#local>
+  <#if content?markup_string?trim?has_content>
+    <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown" href="#">${text} <span class="caret"></span></a>
+    <ul class="dropdown-menu pull-right">
+      ${content?no_esc}
+    </ul>
+  </#if>
+</#macro>
+
+<#-- Progress bar for a single submission  -->
+<#macro stage_progress_bar stages>
+  <div class="stage-progress-bar">
+    <#list stages as progress>
+      <#local stage = progress.stage />
+
+      <#local state = 'default' />
+      <#local icon = 'fa-circle-o' />
+      <#if progress.completed>
+        <#if progress.health.toString == 'Good'>
+          <#local state = 'success' />
+          <#local icon = 'fa-check-circle-o' />
+        <#else>
+          <#local state = 'danger' />
+          <#local icon = 'fa-times-circle-o' />
+        </#if>
+      <#elseif progress.skipped>
+        <#local state = 'primary' />
+        <#local icon = 'fa-arrow-circle-o-right' />
+      <#elseif progress.started>
+        <#local state = 'warning' />
+        <#local icon = 'fa-dot-circle-o' />
+      </#if>
+
+      <#local title><@spring.message code=progress.stage.actionCode /></#local>
+      <#if progress_index gt 0>
+        <div tabindex="0" class="bar bar-${state} use-tooltip" data-toggle="tooltip" data-placement="top" title="${fmt.strip_html(title?markup_string)}"></div>
+      </#if>
+      <#local title><@spring.message code=progress.messageCode /></#local>
+      <span tabindex="0" class="fa-stack use-tooltip" data-toggle="tooltip" data-placement="top" title="${fmt.strip_html(title?markup_string)}">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
+			</span>
+    </#list>
+  </div>
+</#macro>
+
+<#macro module_occurrence item expand_by_default has_multiple_occurrences>
+  <#local anchor = module_occurrence_anchor(item.moduleCode, item.occurrence) />
+
+  <div id="${anchor}-container">
+    <div id="${anchor}" class="module-occurrence-info striped-section collapsible<#if expand_by_default> expanded</#if>"
+         <#-- Populate this lazily? -->
+         data-name="${anchor}">
+			<div class="clearfix">
+				<div class="section-title row">
+					<div class="col-md-6">
+						<span class="h4">
+              <a class="collapse-trigger icon-container" href="#">
+                <#-- Can't use the standard fmt.module_name as we want full module code and occurrence -->
+                <span class="mod-code">${item.moduleCode?upper_case}</span>
+                <span class="mod-name">${item.module.name}<#if has_multiple_occurrences> (${item.occurrence})</#if></span>
+              </a>
+						</span>
+					</div>
+
+					<div class="col-md-2">
+            <#-- TODO progress bar -->
+            progress bar
+            <@stage_progress_bar [] />
+					</div>
+
+					<div class="col-md-4">
+						<div class="pull-right">
+              <@dropdown_menu "Module marks" "btn-xs">
+                <li>
+                  <a href="#">Calculate module marks</a>
+                </li>
+
+                <li>
+                  <a href="#">Confirm module marks</a>
+                </li>
+
+                <li>
+                  <a href="#">Process module marks</a>
+                </li>
+							</@dropdown_menu>
+						</div>
+
+            <#-- TODO Next stage -->
+            <a href="#">Next action text</a>
+					</div>
+				</div>
+
+				<div class="striped-section-contents">
+          <#-- Populate this lazily? -->
+          <@module_occurrence_inner item />
+				</div>
+			</div>
+		</div> <!-- module-info striped-section-->
+  </div>
+</#macro>
+
+<#macro module_occurrence_inner item>
+  <div class="row">
+    <div class="col-md-3">Component</div>
+    <div class="col-md-3">
+      <div class="row">
+        <div class="col-xs-6">Deadline</div>
+        <div class="col-xs-6">Students</div>
+      </div>
+    </div>
+    <div class="col-md-2">Progress</div>
+    <div class="col-md-4">Actions</div>
+  </div>
+
+  <#-- Fix nth-of-type zebra striping -->
+  <div></div>
+
+  <#list item.assessmentComponents as components_by_group>
+    <#local assessment_group = components_by_group._1() />
+    <#local components = components_by_group._2() />
+
+    <#list components as info>
+      <div class="item-info row component-${info.assessmentComponent.id}">
+        <div class="col-md-3">
+          <h4 class="component-name">
+            ${info.assessmentComponent.name}
+          </h4>
+
+          (${info.assessmentComponent.sequence}, ${info.assessmentComponent.assessmentType.name}, ${(info.assessmentComponent.scaledWeighting!0)?string["0.#"]}%)
+        </div>
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-xs-6">
+              <#if info.upstreamAssessmentGroup.deadline??>
+                <@fmt.date date=info.upstreamAssessmentGroup.deadline includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              <#else>
+                <span class="very-subtle">Unknown</span>
+              </#if>
+            </div>
+            <div class="col-xs-6">
+              <@fmt.p info.students?size "student" "students" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <#-- TODO progress bar -->
+          progress bar
+          <@stage_progress_bar [] />
+        </div>
+
+        <div class="col-md-4">
+          <div class="pull-right">
+            <@dropdown_menu "Component marks" "btn-xs">
+              <li>
+                <a href="#">Calculate module marks</a>
+              </li>
+
+              <li>
+                <a href="#">Confirm module marks</a>
+              </li>
+
+              <li>
+                <a href="#">Process module marks</a>
+              </li>
+            </@dropdown_menu>
+          </div>
+
+          <#-- TODO Next stage -->
+          <a href="#">Next action text</a>
+        </div>
+      </div>
+    </#list>
+  </#list>
+</#macro>
+
+<#if results?has_content>
+  <@all_module_occurrences results false hasMultipleOccurrences />
+<#else>
+  <p>No modules were found for marks.</p>
+</#if>
