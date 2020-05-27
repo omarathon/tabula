@@ -86,6 +86,9 @@ object Routes {
     def weightings(department: Department, academicYear: AcademicYear): String =
       s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/weightings"
 
+    def benchmarkdetails(scyd: StudentCourseYearDetails): String =
+      s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/benchmarkdetails"
+
     def assessmentdetails(scyd: StudentCourseYearDetails): String =
       s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"
   }

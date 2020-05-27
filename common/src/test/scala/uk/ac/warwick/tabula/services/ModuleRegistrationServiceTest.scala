@@ -32,15 +32,17 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       "in304" -> Fixtures.module("in304"),
       "in305" -> Fixtures.module("in305"),
       "in306" -> Fixtures.module("in306"),
+      "in307" -> Fixtures.module("in307"),
     )
 
     val moduleRegistrations = Seq(
       Fixtures.moduleRegistration(scd, modules("in301"), BigDecimal(30).underlying, academicYear, "", BigDecimal(55), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in302"), BigDecimal(30).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in303"), BigDecimal(30).underlying, academicYear, "", BigDecimal(67), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in303"), BigDecimal(15).underlying, academicYear, "", BigDecimal(67), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in304"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in305"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(77), ModuleSelectionStatus.Core),
       Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(88), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in307"), BigDecimal(15).underlying, academicYear, "", BigDecimal(80), ModuleSelectionStatus.Core),
     )
 
     val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
@@ -68,8 +70,32 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
         Fixtures.assessmentComponent(modules("in305"), 2, AssessmentType.SummerExam, 80),
       ),
 
-      "in306" -> Seq( Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam) )
+      "in306" -> Seq(Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam)),
+
+      // VAW, best 2 of 3 assessments
+      "in307" -> Seq(
+        Fixtures.assessmentComponent(modules("in307"), 1, AssessmentType.Essay, 50),
+        Fixtures.assessmentComponent(modules("in307"), 2, AssessmentType.Essay, 50),
+        Fixtures.assessmentComponent(modules("in307"), 3, AssessmentType.Essay, 50),
+      )
     )
+    components.values.foreach(_.foreach(_.membershipService = mockMembershipService))
+
+    mockMembershipService.getVariableAssessmentWeightingRules("IN301-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN302-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN303-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN304-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN305-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN306-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN307-30", "A") returns Seq(
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 50),
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 50),
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 0),
+    )
+
+    mockMembershipService.getAssessmentComponents(anyString, isEq(false)) answers { args: Array[AnyRef] =>
+      components(Module.stripCats(args(0).asInstanceOf[String]).get.toLowerCase)
+    }
 
     val componentMarks = Seq(
       55,
@@ -82,7 +108,10 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       66,
       50,
       65,
-      63
+      63,
+      60,
+      70,
+      90
     )
 
     val upstreamAssessmentGroups: Map[String, Seq[UpstreamAssessmentGroup]] = components.zipWithIndex.map { case ((mc, components), i) =>
@@ -200,14 +229,14 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   @Test
   def benchmarkWeightedAssessmentMark(): Unit = {
     new GraduationBenchmarkFixture {
-      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(60.0))
+      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(60.6))
     }
   }
 
   @Test
   def percentageOfAssessmentTaken(): Unit = {
     new GraduationBenchmarkFixture {
-      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(52.5))
+      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(60.0))
     }
   }
 }

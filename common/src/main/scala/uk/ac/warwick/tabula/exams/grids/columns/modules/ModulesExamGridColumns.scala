@@ -126,7 +126,10 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
           }
 
           val assessmentComponents = {
-            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
+            // We don't currently show the weighting on the drill-down page so this is a bit wasteful really.
+            lazy val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = true)
+
+            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.firstDefinedMark.isDefined)
             if (state.showZeroWeightedComponents)
               allComponents
             else {
@@ -135,7 +138,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
                   component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
                   component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
                   component.sequence == uagm.upstreamAssessmentGroup.sequence
-                }.flatMap(ac => Option(ac.rawWeighting)).exists(_ > 0) // TODO Need to take into account VAW
+                }.flatMap(ac => ac.weightingFor(marks)).exists(_ > 0)
               }
             }
           }

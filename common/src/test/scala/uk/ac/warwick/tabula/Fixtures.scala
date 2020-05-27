@@ -151,12 +151,12 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A"): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
     a.moduleCode = "%s-30" format module.code.toUpperCase
-    a.assessmentGroup = "A"
+    a.assessmentGroup = assessmentGroup
     a.sequence = "%s%02d".format(assessmentType.subtype.code, number)
     a.assessmentType = assessmentType
     a.inUse = true
@@ -208,8 +208,19 @@ object Fixtures extends Mockito {
     group.deadline = Option(deadline)
     val groupMember = new UpstreamAssessmentGroupMember(group, "0123456")
     groupMember.actualMark = Option(actualMark)
+    group.members.clear()
     group.members.addAll(Seq(groupMember).asJava)
     group
+  }
+
+  def variableAssessmentWeightingRule(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A"): VariableAssessmentWeightingRule = {
+    val rule = new VariableAssessmentWeightingRule
+    rule.moduleCode = "%s-30" format module.code.toUpperCase
+    rule.assessmentGroup = assessmentGroup
+    rule.ruleSequence = "%03d".format(number)
+    rule.assessmentType = assessmentType
+    rule.rawWeighting = weighting
+    rule
   }
 
   def feedbackTemplate(name: String): FeedbackTemplate = {
