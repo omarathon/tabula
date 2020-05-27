@@ -66,6 +66,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
   @Test def importMembers(): Unit = {
     withFakeTime(dateTime(2012, 5)) {
+      assignmentImporter.features.includeSMSForCurrentYear = true
       val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
       var members = ArrayBuffer[UpstreamModuleRegistration]()
 
