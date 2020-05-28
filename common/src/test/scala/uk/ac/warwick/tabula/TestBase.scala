@@ -17,9 +17,9 @@ import org.junit.rules.Timeout
 import org.junit.{After, Before, Rule}
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.junit.{AssertionsForJUnit, JUnitSuite}
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatestplus.junit.{AssertionsForJUnit, JUnitSuite}
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
 import org.springframework.util.FileCopyUtils
@@ -30,14 +30,13 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
-import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.util.web.Uri
 
-import scala.jdk.CollectionConverters._
 import scala.collection.parallel.CollectionConverters._
+import scala.jdk.CollectionConverters._
 
 /** Base class for tests which boringly uses the JUnit support of
  * Scalatest, so you do @Test annotated methods as you normally would.

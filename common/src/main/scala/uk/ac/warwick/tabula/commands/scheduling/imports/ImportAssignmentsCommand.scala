@@ -466,9 +466,16 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doGradeBoundaries(): Unit = {
     transactional() {
-      val boundaries = assignmentImporter.getAllGradeBoundaries
-      boundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
-      for (gradeBoundary <- logSize(boundaries)) {
+      val sitsBoundaries = assignmentImporter.getAllGradeBoundaries
+
+      // Inject the FM grade if it doesn't exist already
+      val allBoundaries = sitsBoundaries ++ sitsBoundaries.map(_.marksCode).distinct.flatMap { marksCode =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade)) None
+        else Some(GradeBoundary(marksCode, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S"))
+      }
+
+      allBoundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
+      for (gradeBoundary <- logSize(allBoundaries)) {
         assessmentMembershipService.save(gradeBoundary)
       }
     }

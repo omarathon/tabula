@@ -155,14 +155,17 @@ object SandboxData {
     GradeBoundary("TABULA-UG", "22", Some(50), Some(59), "N"),
     GradeBoundary("TABULA-UG", "3", Some(40), Some(49), "N"),
     GradeBoundary("TABULA-UG", "F", Some(0), Some(39), "N"),
+    GradeBoundary("TABULA-UG", GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S"),
     GradeBoundary("TABULA-PG", "A+", Some(80), Some(100), "N"),
     GradeBoundary("TABULA-PG", "A", Some(70), Some(79), "N"),
     GradeBoundary("TABULA-PG", "B", Some(60), Some(69), "N"),
     GradeBoundary("TABULA-PG", "C", Some(50), Some(59), "N"),
     GradeBoundary("TABULA-PG", "D", Some(40), Some(49), "N"),
     GradeBoundary("TABULA-PG", "E", Some(0), Some(39), "N"),
+    GradeBoundary("TABULA-PG", GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S"),
     GradeBoundary("TABULA-PF", "P", None, None, "S"),
-    GradeBoundary("TABULA-PF", "F", None, None, "S")
+    GradeBoundary("TABULA-PF", "F", None, None, "S"),
+    GradeBoundary("TABULA-PF", GradeBoundary.WithdrawnGrade, None, None, "S"),
   )
 
   def randomName(id: Long, gender: Gender): Name = {

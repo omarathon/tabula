@@ -19,7 +19,7 @@ object WorkflowProgress {
     val workflowMap = WorkflowStages.toMap(progresses)
 
     // Quick exit for if we're at the end
-    if (progresses.last.completed) {
+    if (progresses.last.completed || progresses.last.skipped) {
       WorkflowProgress(MaxPower, progresses.last.messageCode, progresses.last.health.cssClass, None, workflowMap)
     } else {
       val stagesWithPreconditionsMet = progresses.filter(progress => workflowMap(progress.stage.toString).preconditionsMet)
@@ -29,7 +29,7 @@ object WorkflowProgress {
           val index = progresses.indexOf(lastProgress)
 
           // If the current stage is complete, the next stage requires action
-          val nextProgress = if (lastProgress.completed) {
+          val nextProgress = if (lastProgress.completed || lastProgress.skipped) {
             val nextProgressCandidate = progresses(index + 1)
 
             if (stagesWithPreconditionsMet.contains(nextProgressCandidate)) {
@@ -39,7 +39,7 @@ object WorkflowProgress {
               // Find the latest incomplete stage from earlier in the workflow whose preconditions are met.
               val earlierReadyStages = progresses.reverse
                 .dropWhile(_ != nextProgressCandidate)
-                .filterNot(_.completed)
+                .filterNot(s => s.completed || s.skipped)
                 .filter(stagesWithPreconditionsMet.contains)
 
               earlierReadyStages.headOption.getOrElse(lastProgress)
@@ -109,7 +109,7 @@ object WorkflowStages {
       else p.stage.preconditions.exists { predicate =>
         predicate.forall { stage =>
           progresses.find(_.stage == stage) match {
-            case Some(progress) if progress.completed => true
+            case Some(progress) if progress.completed || progress.skipped => true
             case _ => false
           }
         }

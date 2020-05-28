@@ -17,6 +17,18 @@ object GradeBoundary {
     gb
   }
 
+  /**
+   * The value of the grade field (accompanied with a mark of 0) that should be set if a student did not take a component
+   * due to withdrawal.
+   */
+  val WithdrawnGrade = "W"
+
+  /**
+   * The value of the grade field that should be set if a component is missing due to force majeure under regulation 41.
+   * @see https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/marks/#missingmarks
+   */
+  val ForceMajeureMissingComponentGrade = "FM"
+
   private val byGradeOrdering = Ordering.by[GradeBoundary, String](_.grade)
 
   implicit val defaultOrdering = new Ordering[GradeBoundary]() {
