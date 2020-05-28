@@ -6,7 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, UpstreamAssessmentGroup}
 
 @Service
 class MarksWorkflowProgressService {
@@ -155,7 +155,6 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate) &&
         upstreamAssessmentGroup.deadline.nonEmpty
 
-      // TODO check MMA and mark as skipped
       if (students.forall(s => s.mark.isEmpty && s.grade.isEmpty)) {
         // No marks have been recorded
         StageProgress(
@@ -178,6 +177,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           started = true,
           messageCode = "workflow.marks.component.RecordMarks.outOfSync",
           health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.exists(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) && students.forall(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) || s.grade.contains(GradeBoundary.WithdrawnGrade))) {
+        // Component is MMA
+        StageProgress(
+          stage = RecordMarks,
+          started = true,
+          messageCode = "workflow.marks.component.RecordMarks.missed",
+          skipped = true,
         )
       } else if (students.forall(s => s.mark.nonEmpty || s.grade.nonEmpty)) {
         // All marks have been recorded

@@ -215,8 +215,10 @@
                 </a>
               </li>
 
-              <li class="disabled">
-                <a>Missing mark adjustment</a>
+              <li>
+                <a href="<@routes.marks.assessmentcomponent_missingMarks info.assessmentComponent info.upstreamAssessmentGroup />">
+                  Missing mark adjustment
+                </a>
               </li>
 
               <li class="disabled">
