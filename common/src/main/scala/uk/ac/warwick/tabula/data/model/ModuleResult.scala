@@ -36,3 +36,12 @@ class ModuleResultUserType extends AbstractBasicUserType[ModuleResult, String] {
   override def convertToValue(result: ModuleResult): String = result.dbValue
 
 }
+
+class OptionModuleResultUserType extends AbstractBasicUserType[Option[ModuleResult], String] {
+  val basicType = StandardBasicTypes.STRING
+  override def sqlTypes = Array(Types.VARCHAR)
+  val nullValue = null
+  val nullObject: Option[ModuleResult] = None
+  override def convertToObject(string: String): Option[ModuleResult] = Option(string).map(ModuleResult.fromCode)
+  def convertToValue(obj: Option[ModuleResult]): String = obj.map(_.dbValue).orNull
+}

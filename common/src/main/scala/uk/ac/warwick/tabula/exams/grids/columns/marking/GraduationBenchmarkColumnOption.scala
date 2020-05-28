@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.AutowiringTopLevelUrlComponent
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.model.CourseType.{PGT, UG}
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringProgressionServiceComponent}
 
 @Component
-class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringProgressionServiceComponent with AutowiringModuleRegistrationServiceComponent {
+class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringProgressionServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringTopLevelUrlComponent {
 
   override val identifier: ExamGridColumnOption.Identifier = "graduationBenchmark"
 
@@ -29,7 +31,11 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
           entityYear.studentCourseYearDetails.flatMap(_.studentCourseDetails.courseType) match {
             case Some(PGT) =>
               val scyd = entityYear.studentCourseYearDetails.get
-              ExamGridColumnValueDecimal(progressionService.postgraduateBenchmark(scyd, entityYear.moduleRegistrations))
+              ExamGridColumnGraduationBenchmarkDecimal(
+                progressionService.postgraduateBenchmark(scyd, entityYear.moduleRegistrations),
+                isActual = false,
+                toplevelUrl+Routes.Grids.benchmarkdetails(scyd)
+              )
             case Some(UG) => progressionService.graduationBenchmark(
               entityYear,
               state.normalLoadLookup(entityYear.route),
@@ -37,7 +43,11 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
               state.calculateYearMarks,
               state.isLevelGrid,
               entity.yearWeightings
-            ).fold(ExamGridColumnValueMissing.apply, gb => ExamGridColumnValueDecimal(gb))
+            ).fold(ExamGridColumnValueMissing.apply, gb => ExamGridColumnGraduationBenchmarkDecimal(
+              gb,
+              isActual = false,
+              toplevelUrl+Routes.Grids.benchmarkdetails(entityYear.studentCourseYearDetails.get)
+            ))
             case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
             case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
           }
