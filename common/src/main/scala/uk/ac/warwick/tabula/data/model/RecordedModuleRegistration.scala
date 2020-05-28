@@ -20,7 +20,7 @@ import scala.jdk.CollectionConverters._
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
-class RecordedModuleRegistration() extends GeneratedId
+class RecordedModuleRegistration extends GeneratedId
   with HibernateVersioned
   with ToString {
 
@@ -32,7 +32,7 @@ class RecordedModuleRegistration() extends GeneratedId
     this.occurrence = mr.occurrence
   }
 
-  @Column(nullable = false)
+  @Column(name = "scj_code", nullable = false)
   var scjCode: String = _
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -112,6 +112,10 @@ class RecordedModuleMark extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var grade: Option[String] = None
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionModuleResultUserType")
+  @Column(name = "module_result")
+  var moduleResult: Option[ModuleResult] = _
 
   var comments: String = _
 
