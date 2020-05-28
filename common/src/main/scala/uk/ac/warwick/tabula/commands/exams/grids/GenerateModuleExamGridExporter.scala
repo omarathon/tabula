@@ -114,13 +114,13 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
           val (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitMark.isDefined) {
               if (cInfo.mark.isDefined) {
-                //will use resit style because of the limitation of multiple sytle application to single excel cell for SXSSFWorkbook
-                (s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                //will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
+                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               } else {
-                (s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               }
             } else if (cInfo.mark.isDefined) {
-              (cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
             } else {
               ("X", None)
             }
@@ -130,12 +130,12 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
           val (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitGrade.isDefined) {
               if (cInfo.grade.isDefined) {
-                (s"[${cInfo.resitInfo.resitGrade.toString}(${cInfo.grade.toString})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
               } else {
-                (s"[${cInfo.resitInfo.resitGrade.toString}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
               }
             } else if (cInfo.grade.isDefined) {
-              (cInfo.grade.toString, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
+              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
             } else {
               ("X", None)
             }
