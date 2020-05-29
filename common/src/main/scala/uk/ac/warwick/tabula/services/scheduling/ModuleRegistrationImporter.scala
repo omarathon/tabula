@@ -10,8 +10,7 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JList, JMap}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, ImportModuleRegistrationsCommand}
 import uk.ac.warwick.tabula.data.model._
@@ -21,15 +20,16 @@ import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearsQuery, ModuleRegistrationsByUniversityIdsQuery}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
 
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 /**
-  * Import module registration data from SITS.
-  *
-  */
+ * Import module registration data from SITS.
+ *
+ */
 trait ModuleRegistrationImporter {
   def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow]
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow]
@@ -65,19 +65,35 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking {
+class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking with AutowiringFeaturesComponent {
   lazy val moduleRegistrationsByAcademicYearsQuery: ModuleRegistrationsByAcademicYearsQuery = new ModuleRegistrationsByAcademicYearsQuery(sitsDataSource)
   lazy val moduleRegistrationsByUniversityIdsQuery: ModuleRegistrationsByUniversityIdsQuery = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
 
+  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
   def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
-      moduleRegistrationsByAcademicYearsQuery.executeByNamedParam(Map("academicYears" -> academicYears.asJava).asJava).asScala.distinct.toSeq
+      val currentAcademicYears = if (features.includeSMSForCurrentYear && academicYears.intersect(AcademicYear.allCurrent()).nonEmpty) {
+        yearsToImportArray(academicYears.intersect(AcademicYear.allCurrent()))
+      } else Seq("").asJava //set blank for SMS table to be ignored in the actual SQL
+      val paraMap = JMap(
+        "academicYears" -> yearsToImportArray(academicYears),
+        "currentAcademicYears" -> currentAcademicYears
+      )
+      moduleRegistrationsByAcademicYearsQuery.executeByNamedParam(paraMap).asScala.distinct.toSeq
     }
 
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
+      val currentAcademicYears = if (features.includeSMSForCurrentYear) {
+        yearsToImportArray(AcademicYear.allCurrent())
+      } else Seq("").asJava
+
       universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
-        moduleRegistrationsByUniversityIdsQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.distinct.toSeq
+        val paraMap = JMap(
+          "universityIds" -> ids.asJava,
+          "currentAcademicYears" -> currentAcademicYears
+        )
+        moduleRegistrationsByUniversityIdsQuery.executeByNamedParam(paraMap).asScala.distinct.toSeq
       }.toSeq
     }
 }
@@ -160,7 +176,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
 object ModuleRegistrationImporter {
   val sitsSchema: String = Wire.property("${schema.sits}")
-
+  var features: Features = Wire[Features]
   // a list of all the markscheme codes that we consider to be pass/fail modules
   final val PassFailMarkSchemeCodes = Seq("PF")
 
@@ -207,7 +223,7 @@ object ModuleRegistrationImporter {
         and mav.mod_code = sms.mod_code
         and mav.mav_occur = sms.sms_occl
 
-       where sms.ayr_code in (:academicYears)"""
+       where sms.ayr_code in (:currentAcademicYears)"""
 
   def ConfirmedModuleRegistrationsForAcademicYear =
     s"""
@@ -292,7 +308,7 @@ object ModuleRegistrationImporter {
         and mav.mod_code = sms.mod_code
         and mav.mav_occur = sms.sms_occl
 
-       where spr.spr_stuc in (:universityIds)"""
+       where spr.spr_stuc in (:universityIds) and sms.ayr_code in (:currentAcademicYears)"""
 
   def ConfirmedModuleRegistrationsForUniversityIds =
     s"""
@@ -337,6 +353,7 @@ object ModuleRegistrationImporter {
        where
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
        and spr.spr_stuc in (:universityIds)"""
+
 
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     new ModuleRegistrationRow(
@@ -510,12 +527,12 @@ class ModuleRegistrationRow(
   private def scaled(bg: JBigDecimal): JBigDecimal =
     JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
 
-  def matches(that: ModuleRegistration) : Boolean = {
+  def matches(that: ModuleRegistration): Boolean = {
     scjCode == that._scjCode &&
-    Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
-    AcademicYear.parse(academicYear) == that.academicYear &&
-    scaled(cats) == scaled(that.cats) &&
-    occurrence == that.occurrence
+      Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
+      AcademicYear.parse(academicYear) == that.academicYear &&
+      scaled(cats) == scaled(that.cats) &&
+      occurrence == that.occurrence
   }
 
   def toModuleRegistration(module: Module): ModuleRegistration = new ModuleRegistration(
