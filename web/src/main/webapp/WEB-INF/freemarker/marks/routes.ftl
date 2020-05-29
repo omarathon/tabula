@@ -23,3 +23,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/template.xlsx" /></#macro>
 <#macro assessmentcomponent_generateGrades assessmentComponent><@_u page="/admin/assessment-component/${assessmentComponent.id}/generate-grades" /></#macro>
 <#macro assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/missing-marks" /></#macro>
+<#macro assessmentcomponent_scaling assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/scaling" /></#macro>
