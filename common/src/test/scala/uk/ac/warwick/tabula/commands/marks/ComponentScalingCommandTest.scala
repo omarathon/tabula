@@ -18,6 +18,9 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
 
   @Test
   def defaults(): Unit = {
+    scaling.passMarkAdjustment = 5
+    scaling.upperClassAdjustment = 5
+
     scaling.scaleMark(0) should be (0)
     scaling.scaleMark(5) should be (6)
     scaling.scaleMark(10) should be (11)
