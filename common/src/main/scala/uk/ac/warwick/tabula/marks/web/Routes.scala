@@ -26,6 +26,7 @@ object Routes {
       def apply(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/assessment-components"
       def recordMarks(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): String = s"$context/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks"
       def missingMarks(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): String = s"$context/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/missing-marks"
+      def scaling(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): String = s"$context/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/scaling"
     }
   }
 }

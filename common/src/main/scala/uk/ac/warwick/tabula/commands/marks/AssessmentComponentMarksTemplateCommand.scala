@@ -41,8 +41,9 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
     val students = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
 
     val workbook = new SXSSFWorkbook
-    val sheetName = WorkbookUtil.createSafeSheetName(s"Marks for ${assessmentComponent.name} (${assessmentComponent.moduleCode}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})")
-    val sheet = workbook.createSheet(sheetName.safeSubstring(0, 31))
+    val fullSheetName = s"Marks for ${assessmentComponent.name} (${assessmentComponent.moduleCode}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})"
+    val sheetName = WorkbookUtil.createSafeSheetName(fullSheetName)
+    val sheet = workbook.createSheet(sheetName)
 
     val lockedCellStyle = workbook.createCellStyle()
     lockedCellStyle.setLocked(false)
@@ -91,6 +92,6 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
 
     // add conditional formatting for invalid marks
     if (sheet.getLastRowNum > 0) addConditionalFormatting(sheet)
-    new ExcelView(s"$sheetName.xlsx", workbook)
+    new ExcelView(s"$fullSheetName.xlsx", workbook)
   }
 }

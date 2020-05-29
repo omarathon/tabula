@@ -33,6 +33,11 @@ object MarksBreadcrumbs {
       val title: String = s"${assessmentComponent.name} (${upstreamAssessmentGroup.academicYear.toString})"
       val url = Some(Routes.marks.Admin.AssessmentComponents.missingMarks(assessmentComponent, upstreamAssessmentGroup))
     }
+
+    case class AssessmentComponentScaling(assessmentComponent: model.AssessmentComponent, upstreamAssessmentGroup: model.UpstreamAssessmentGroup, override val active: Boolean = false) extends BreadCrumb {
+      val title: String = s"${assessmentComponent.name} (${upstreamAssessmentGroup.academicYear.toString})"
+      val url = Some(Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup))
+    }
   }
 
 }

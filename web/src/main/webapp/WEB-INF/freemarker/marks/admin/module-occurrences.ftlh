@@ -221,8 +221,10 @@
                 </a>
               </li>
 
-              <li class="disabled">
-                <a>Scaling</a>
+              <li>
+                <a href="<@routes.marks.assessmentcomponent_scaling info.assessmentComponent info.upstreamAssessmentGroup />">
+                  Scaling
+                </a>
               </li>
             </@dropdown_menu>
           </div>
