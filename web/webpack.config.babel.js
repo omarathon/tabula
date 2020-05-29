@@ -31,6 +31,7 @@ const paths = {
     'static/js/id7/cm2': './src/main/assets/static/js/id7/cm2.js',
     'static/js/id7/attendance': './src/main/assets/static/js/id7/attendance.js',
     'static/js/id7/mitcircs': './src/main/assets/static/js/id7/mitcircs.js',
+    'static/js/id7/scaling': './src/main/assets/static/js/id7/scaling-graph.js',
     'static/js/id7/marks': './src/main/assets/static/js/id7/marks.js',
 
     // Stuff that gets included from FTLs

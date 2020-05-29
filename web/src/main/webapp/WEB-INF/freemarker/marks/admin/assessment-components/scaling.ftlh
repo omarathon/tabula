@@ -13,11 +13,12 @@
     </p>
   </div>
 
+  <div class="col-md-8 col-md-pull-4">
   <#if marks?has_content>
     <script type="application/json" id="marks">${marks}</script>
+    <canvas id="chart"></canvas>
   </#if>
 
-  <div class="col-md-8 col-md-pull-4">
     <#assign hasErrors = false />
     <@spring.hasBindErrors name="command">
       <#assign hasErrors = errors.hasGlobalErrors() />
@@ -93,4 +94,7 @@
       </@f.form>
     </#if>
   </div>
+
+
 </div>
+<@script "/static/js/id7/scaling.js" />
