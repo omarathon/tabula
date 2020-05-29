@@ -13,6 +13,10 @@
     </p>
   </div>
 
+  <#if marks?has_content>
+    <script type="application/json" id="marks">${marks}</script>
+  </#if>
+
   <div class="col-md-8 col-md-pull-4">
     <#assign hasErrors = false />
     <@spring.hasBindErrors name="command">
