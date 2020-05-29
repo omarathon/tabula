@@ -15,6 +15,7 @@
 
   <div class="col-md-8 col-md-pull-4">
   <#if marks?has_content>
+    <p>Marks for this assignment are shown on the graph. If marks are scaled, the Y axis values will change.</p>
     <script type="application/json" id="marks">${marks}</script>
     <canvas id="chart"></canvas>
   </#if>
