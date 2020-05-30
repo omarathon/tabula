@@ -48,7 +48,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = null
+        agreedMark = None
       ))
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
@@ -461,7 +461,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         scyd2.academicYear,
-        agreedMark = null
+        agreedMark = None
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,

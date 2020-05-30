@@ -25,6 +25,7 @@ import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{Modu
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
   * Import module registration data from SITS.
@@ -130,8 +131,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
             if (isPassFail) if (m == 100) "P" else "F"
             else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
-          (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
-        } else (None: Option[JBigDecimal], null: String, null: String)
+          (Some(m), g, if (m < 40) "F" else "P")
+        } else (None: Option[Int], null: String, null: String)
 
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
@@ -334,6 +335,11 @@ object ModuleRegistrationImporter {
        and spr.spr_stuc in (:universityIds)"""
 
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
+    def getNullableInt(column: String): Option[Int] = {
+      val intValue = resultSet.getInt(column)
+      if (resultSet.wasNull()) None else Some(intValue)
+    }
+
     new ModuleRegistrationRow(
       resultSet.getString("scj_code"),
       resultSet.getString("mod_code"),
@@ -342,9 +348,9 @@ object ModuleRegistrationImporter {
       resultSet.getString("ses_code"),
       resultSet.getString("occurrence"),
       resultSet.getString("ayr_code"),
-      Option(resultSet.getBigDecimal("smr_actm")),
+      getNullableInt("smr_actm"),
       resultSet.getString("smr_actg"),
-      Option(resultSet.getBigDecimal("smr_agrm")),
+      getNullableInt("smr_agrm"),
       resultSet.getString("smr_agrg"),
       resultSet.getString("smr_mksc"),
       resultSet.getString("smr_rslt"),
@@ -388,8 +394,10 @@ trait CopyModuleRegistrationProperties {
     copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
       copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
       copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
-      copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
-      copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+      copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+      copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
+      copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+      copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
       copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
   }
 
@@ -425,7 +433,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "marksCode"
+    "assessmentGroup", "occurrence", "marksCode"
   )
 }
 
@@ -438,9 +446,9 @@ class ModuleRegistrationRow(
   var selectionStatusCode: String,
   var occurrence: String,
   var academicYear: String,
-  var actualMark: Option[JBigDecimal],
+  var actualMark: Option[Int],
   var actualGrade: String,
-  var agreedMark: Option[JBigDecimal],
+  var agreedMark: Option[Int],
   var agreedGrade: String,
   var marksCode: String,
   var moduleResult: String,

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.Asses
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.marks._
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
 import scala.collection.immutable.ListMap
@@ -86,6 +86,8 @@ object MarksDepartmentHomeCommand {
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringMarksWorkflowProgressServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -99,18 +101,26 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with MarksWorkflowProgressServiceComponent
-    with ListAssessmentComponentsModulesWithPermission =>
+    with ListAssessmentComponentsModulesWithPermission
+    with ModuleRegistrationServiceComponent
+    with ModuleRegistrationMarksServiceComponent =>
 
   override def applyInternal(): Result = {
     assessmentComponentInfos
       .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
       .map { case ((moduleCode, occurrence), infos) =>
-        val progress = workflowProgressService.moduleOccurrenceProgress(infos)
+        val module = infos.head.assessmentComponent.module
+        val cats = infos.head.assessmentComponent.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).get
+
+        val moduleRegistrations = moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
+        val students = studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+
+        val progress = workflowProgressService.moduleOccurrenceProgress(students, infos)
 
         ModuleOccurrence(
           moduleCode = moduleCode,
-          module = infos.head.assessmentComponent.module,
-          cats = infos.head.assessmentComponent.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).get,
+          module = module,
+          cats = cats,
           occurrence = occurrence,
 
           progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),

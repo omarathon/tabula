@@ -35,9 +35,9 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
     val modRegRow1 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
-      Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A", "PF", "P", None)
+      Some(90), "A", Some(90), "A", "PF", "P", None)
     val modRegRow2 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
-      Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C", "WAR", "P", None)
+      Some(50), "C", Some(50), "C", "WAR", "P", None)
 
     val scdDao: StudentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
     scdDao.getByScjCode("0000001/1") returns Some(scd)
@@ -67,6 +67,10 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
       newModRegs.head._scjCode should be(scd.scjCode)
       newModRegs.head.lastUpdatedDate.getDayOfMonth should be(LocalDate.now.getDayOfMonth)
       newModRegs.head.passFail should be (true)
+      newModRegs.head.actualMark should be (Some(90))
+      newModRegs.head.actualGrade should be (Some("A"))
+      newModRegs.head.agreedMark should be (Some(90))
+      newModRegs.head.agreedGrade should be (Some("A"))
 
       // now reset the last updated date to 10 days ago:
       val tenDaysAgo: DateTime = DateTime.now.minusDays(10)
