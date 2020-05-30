@@ -34,7 +34,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       module.code = "ab123"
       moduleDao.saveOrUpdate(module)
 
-      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
       modReg.assessmentGroup = "D"
       modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
       modRegDao.saveOrUpdate(modReg)
@@ -54,7 +54,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       module2.code = "cd456"
       moduleDao.saveOrUpdate(module2)
 
-      val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A")
+      val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A", null)
       modReg2.assessmentGroup = "E"
       modReg2.selectionStatus = ModuleSelectionStatus.Core
       modRegDao.saveOrUpdate(modReg2)
@@ -91,7 +91,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       module.code = "ab123"
       moduleDao.saveOrUpdate(module)
 
-      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
       modReg.assessmentGroup = "D"
       modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
       modRegDao.saveOrUpdate(modReg)
@@ -126,7 +126,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     module.code = "ab123"
     moduleDao.saveOrUpdate(module)
 
-    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
     modReg.assessmentGroup = "D"
     modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
     modRegDao.saveOrUpdate(modReg)
@@ -136,7 +136,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     module2.code = "cd456"
     moduleDao.saveOrUpdate(module2)
 
-    val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A")
+    val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A", null)
     modReg2.assessmentGroup = "E"
     modReg2.selectionStatus = ModuleSelectionStatus.Core
     modRegDao.saveOrUpdate(modReg2)

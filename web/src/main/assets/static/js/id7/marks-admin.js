@@ -21,6 +21,7 @@ $(() => {
 
         const data = {
           mark: $markInput.val(),
+          resit: $markInput.data('resit') || false,
         };
 
         if ($select.is(':visible')) {

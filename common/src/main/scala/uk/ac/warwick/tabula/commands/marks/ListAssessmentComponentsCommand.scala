@@ -17,6 +17,7 @@ object ListAssessmentComponentsCommand {
     universityId: String,
     position: Option[Int],
     currentMember: Boolean,
+    resitExpected: Boolean,
     mark: Option[Int],
     grade: Option[String],
     needsWritingToSits: Boolean,
@@ -30,6 +31,7 @@ object ListAssessmentComponentsCommand {
         universityId = member.universityId,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
+        resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty),
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(member.firstAgreedMark)

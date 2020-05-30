@@ -68,8 +68,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
           } else {
             if (mr.passFail) {
               val (grade, isActual) = mr.agreedGrade match {
-                case grade: String => (grade, false)
-                case _ => Option(mr.actualGrade).map(g => (g, true)).getOrElse(null, false)
+                case Some(grade: String) => (grade, false)
+                case _ => mr.actualGrade.map(g => (g, true)).getOrElse(null, false)
               }
               if (grade == null) {
                 ExamGridColumnValueMissing("Agreed and actual grade missing")
@@ -80,12 +80,12 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
               }
             } else {
               val (mark, isActual) = mr.agreedMark match {
-                case mark: JBigDecimal => (BigDecimal(mark), false)
-                case _ => Option(mr.actualMark).map(m => (BigDecimal(m), true)).getOrElse(null, false)
+                case Some(mark: Int) => (BigDecimal(mark), false)
+                case _ => mr.actualMark.map(m => (BigDecimal(m), true)).getOrElse(null, false)
               }
               if (mark == null) {
                 ExamGridColumnValueMissing("Agreed and actual mark missing")
-              } else if (isActual && mr.actualGrade == "F" || mr.agreedGrade == "F") {
+              } else if (isActual && mr.actualGrade.contains("F") || mr.agreedGrade.contains("F")) {
                 ExamGridColumnValueFailedDecimal(mark, isActual)
               } else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
                 ExamGridColumnValueOvercatDecimal(mark, isActual)

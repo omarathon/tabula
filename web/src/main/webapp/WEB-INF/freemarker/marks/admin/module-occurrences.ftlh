@@ -118,8 +118,8 @@
                   </a>
                 </li>
 
-                <li class="disabled">
-                  <a>Calculate module marks</a>
+                <li>
+                  <a href="<@routes.marks.module_marks item.module item.cats academicYear item.occurrence />">Calculate module marks</a>
                 </li>
 
                 <li class="disabled">

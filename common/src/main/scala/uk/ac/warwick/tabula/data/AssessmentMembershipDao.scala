@@ -129,7 +129,7 @@ trait AssessmentMembershipDao {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
+  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
@@ -660,15 +660,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     session.save(gb)
   }
 
-  def deleteGradeBoundaries(marksCode: String): Unit = {
-    getGradeBoundaries(marksCode).foreach(session.delete)
-  }
+  def deleteGradeBoundaries(marksCode: String): Unit =
+    session.newUpdateQuery("delete GradeBoundary gb where gb.marksCode = :marksCode")
+      .setParameter("marksCode", marksCode)
+      .run()
 
-  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] = {
+  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary] =
     session.newCriteria[GradeBoundary]
       .add(is("marksCode", marksCode))
+      .add(is("process", process))
       .seq
-  }
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
     val assignments = session.createSQLQuery(

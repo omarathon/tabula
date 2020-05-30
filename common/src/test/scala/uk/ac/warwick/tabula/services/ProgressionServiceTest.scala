@@ -82,7 +82,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(100)
+        agreedMark = Some(100)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -104,7 +104,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(30)
+        agreedMark = Some(30)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -126,7 +126,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -148,14 +148,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
       student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -180,7 +180,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(100)
+        agreedMark = Some(100)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -202,7 +202,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -224,14 +224,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
       student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       ))
 
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
@@ -317,14 +317,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(75).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -364,7 +364,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module2,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(50)
+        agreedMark = Some(50)
       )
       student.mostSignificantCourse.addModuleRegistration(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
@@ -384,7 +384,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module2,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(50)
+        agreedMark = Some(50)
       )
       student.mostSignificantCourse.addModuleRegistration(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
@@ -468,7 +468,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module2,
         BigDecimal(60).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -484,28 +484,28 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(35) // Failed in 2nd year
+        agreedMark = Some(35) // Failed in 2nd year
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -526,28 +526,28 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(35) // Failed in final year
+        agreedMark = Some(35) // Failed in final year
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -568,28 +568,28 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -631,14 +631,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
       mod = module1,
       cats = BigDecimal(40).underlying,
       year = scyd.academicYear,
-      agreedMark = BigDecimal(70)
+      agreedMark = Some(70)
     ))
     student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
       scd = student.mostSignificantCourse,
       mod = module2,
       cats = BigDecimal(40).underlying,
       year = scyd.academicYear,
-      agreedMark = BigDecimal(70)
+      agreedMark = Some(70)
     ))
     service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(70.0))
     service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Option(yearWeighting)
@@ -663,28 +663,28 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd1.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd1.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       student.mostSignificantCourse.addModuleRegistration(mr1)
       student.mostSignificantCourse.addModuleRegistration(mr2)
@@ -780,93 +780,93 @@ class ProgressionServiceTest extends TestBase with Mockito {
       val pgtScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(studentCourseDetails = pgtScd)
 
       val exampleA: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax931"), BigDecimal(10).underlying, academicYear, "", BigDecimal(91), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax924"), BigDecimal(10).underlying, academicYear, "", BigDecimal(74), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", BigDecimal(74), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax91v"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax93p"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax423"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax95k"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92t"), BigDecimal(10).underlying, academicYear, "", BigDecimal(72), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(69), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax956"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p2"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax95l"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax931"), BigDecimal(10).underlying, academicYear, "", Some(91), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax924"), BigDecimal(10).underlying, academicYear, "", Some(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", Some(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax91v"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93p"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax423"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95k"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92t"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t7"), BigDecimal(10).underlying, academicYear, "", Some(69), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax956"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p2"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p7"), BigDecimal(10).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95l"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleA) should be(BigDecimal(72.1))
 
 
       val exampleB: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(71), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p4"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9f7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax984"), BigDecimal(10).underlying, academicYear, "", BigDecimal(65), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax926"), BigDecimal(10).underlying, academicYear, "", BigDecimal(63), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9l8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(61), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax3m7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax963"), BigDecimal(10).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e5"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax932"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax97g"), BigDecimal(10).underlying, academicYear, "", BigDecimal(46), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t8"), BigDecimal(10).underlying, academicYear, "", Some(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p4"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9f7"), BigDecimal(10).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax984"), BigDecimal(10).underlying, academicYear, "", Some(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax926"), BigDecimal(10).underlying, academicYear, "", Some(63), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9l8"), BigDecimal(10).underlying, academicYear, "", Some(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax3m7"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax963"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e5"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax932"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97g"), BigDecimal(10).underlying, academicYear, "", Some(46), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleB) should be(BigDecimal(66.2))
 
       val exampleC: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p8"), BigDecimal(10).underlying, academicYear, "", BigDecimal(73), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", BigDecimal(71), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax933"), BigDecimal(15).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax994"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax982"), BigDecimal(10).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax97l"), BigDecimal(15).underlying, academicYear, "", BigDecimal(66), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax947"), BigDecimal(15).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax94z"), BigDecimal(60).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ep"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9m3"), BigDecimal(10).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p8"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", Some(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax933"), BigDecimal(15).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax994"), BigDecimal(15).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax982"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97l"), BigDecimal(15).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax947"), BigDecimal(15).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94z"), BigDecimal(60).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ep"), BigDecimal(15).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9m3"), BigDecimal(10).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleC) should be(BigDecimal(63.2))
 
       val exampleD: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax986"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax979"), BigDecimal(15).underlying, academicYear, "", BigDecimal(61), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax95j"), BigDecimal(15).underlying, academicYear, "", BigDecimal(57), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e9"), BigDecimal(60).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax97k"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax957"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax94n"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax986"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax979"), BigDecimal(15).underlying, academicYear, "", Some(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95j"), BigDecimal(15).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e9"), BigDecimal(60).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97k"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax957"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94n"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleD) should be(BigDecimal(53.8))
 
       val exampleE: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92b"), BigDecimal(15).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax974"), BigDecimal(15).underlying, academicYear, "", BigDecimal(65), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax95p"), BigDecimal(60).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9s4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax966"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9dw"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9r4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9vp"), BigDecimal(15).underlying, academicYear, "", BigDecimal(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92b"), BigDecimal(15).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax974"), BigDecimal(15).underlying, academicYear, "", Some(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95p"), BigDecimal(60).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(15).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9s4"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax966"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9dw"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9r4"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9vp"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleE) should be(BigDecimal(61.1))
 
       val exampleF: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", BigDecimal(100), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(76), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", BigDecimal(75), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9u0"), BigDecimal(15).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax93y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(54), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax988"), BigDecimal(15).underlying, academicYear, "", BigDecimal(54), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92m"), BigDecimal(15).underlying, academicYear, "", BigDecimal(53), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", Some(100), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(76), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", Some(75), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9u0"), BigDecimal(15).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93y"), BigDecimal(15).underlying, academicYear, "", Some(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax988"), BigDecimal(15).underlying, academicYear, "", Some(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92m"), BigDecimal(15).underlying, academicYear, "", Some(53), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgtScyd, exampleF) should be(BigDecimal(73.1))
 
@@ -876,12 +876,12 @@ class ProgressionServiceTest extends TestBase with Mockito {
       val pgdipScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(studentCourseDetails = pgdipScd)
 
       val exampleG: Seq[ModuleRegistration] = Random.shuffle(Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", BigDecimal(100), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", BigDecimal(76), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", BigDecimal(75), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", Some(100), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(76), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", Some(75), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
       ))
       service.postgraduateBenchmark(pgdipScyd, exampleG) should be(BigDecimal(76.8))
     }

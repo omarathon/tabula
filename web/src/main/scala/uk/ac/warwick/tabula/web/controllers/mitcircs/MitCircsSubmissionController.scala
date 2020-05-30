@@ -36,7 +36,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
     val builder = ListMap.newBuilder[AcademicYear, Seq[Module]]
 
     student.moduleRegistrationsByYear(None)
-      .filter { mr => Option(mr.agreedMark).isEmpty && Option(mr.agreedGrade).isEmpty }
+      .filter { mr => mr.agreedMark.isEmpty && mr.agreedGrade.isEmpty }
       .groupBy(_.academicYear)
       .view.mapValues(_.map(_.module).toSeq.sorted)
       .toSeq

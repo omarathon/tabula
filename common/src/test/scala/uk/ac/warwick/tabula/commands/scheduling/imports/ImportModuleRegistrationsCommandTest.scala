@@ -23,7 +23,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     session.saveOrUpdate(mod)
     session.flush()
 
-    val mr = new ModuleRegistration(scd.scjCode, mod, new JBigDecimal(30), AcademicYear(2013), "A")
+    val mr = new ModuleRegistration(scd.scjCode, mod, new JBigDecimal(30), AcademicYear(2013), "A", null)
     session.saveOrUpdate(mr)
     session.flush()
 

@@ -82,18 +82,18 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
       //detail rows
       entities.foreach { entity =>
-        val (mark, markStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
-          (entity.moduleRegistration.agreedMark.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
-        } else if (Option(entity.moduleRegistration.actualMark).isDefined) {
-          (entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark, entity.moduleRegistration.module.degreeType))
+        val (mark, markStyle) = if (entity.moduleRegistration.agreedMark.isDefined) {
+          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType))
+        } else if (entity.moduleRegistration.actualMark.isDefined) {
+          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType))
         } else {
           ("X", None)
         }
 
-        val (grade, gradeStyle) = if (Option(entity.moduleRegistration.agreedGrade).isDefined) {
-          (entity.moduleRegistration.agreedGrade, None)
-        } else if (Option(entity.moduleRegistration.actualGrade).isDefined) {
-          (entity.moduleRegistration.actualGrade, Option(cellStyleMap(ActualMark)))
+        val (grade, gradeStyle) = if (entity.moduleRegistration.agreedGrade.isDefined) {
+          (entity.moduleRegistration.agreedGrade.get, None)
+        } else if (entity.moduleRegistration.actualGrade.isDefined) {
+          (entity.moduleRegistration.actualGrade.get, Option(cellStyleMap(ActualMark)))
         } else {
           ("X", None)
         }
