@@ -39,6 +39,10 @@
   .table {
     colgroup.assessment-component, colgroup.module-mark-calculation {
       border-left: 2px solid @table-border-color;
+
+      + colgroup.assessment-component {
+        border-left: 1px solid @table-border-color;
+      }
     }
   }
 }
