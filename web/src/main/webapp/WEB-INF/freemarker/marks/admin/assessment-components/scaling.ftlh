@@ -98,4 +98,3 @@
 
 
 </div>
-<@script "/static/js/id7/scaling.js" />
