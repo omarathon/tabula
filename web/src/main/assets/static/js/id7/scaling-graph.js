@@ -32,6 +32,7 @@ $(() => {
     const chart = new Chart(document.getElementById('chart').getContext('2d'), {
       type: 'scatter',
       data: {
+        labels: Object.keys(markData),
         datasets: [{
           data: computeNewMarks(marks),
           pointBackgroundColor: '#3e7a73',
