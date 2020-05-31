@@ -23,6 +23,27 @@
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
           <table class="table table-striped">
+            <colgroup class="student">
+              <col class="student-info" />
+            </colgroup>
+            <#list assessmentComponents as ac>
+              <colgroup class="assessment-component">
+                <col class="assessment-component-mark" />
+                <col class="assessment-component-grade" />
+              </colgroup>
+            </#list>
+            <colgroup class="module-mark-calculation">
+              <col class="calculated-mark" />
+              <col class="calculated-grade" />
+              <col class="calculated-result" />
+            </colgroup>
+            <colgroup class="form-fields">
+              <col class="form-mark" />
+              <col class="form-grade" />
+              <col class="form-result" />
+              <col class="form-comments" />
+            </colgroup>
+
             <thead>
               <tr>
                 <th class="col-sm-1" rowspan="2">SCJ Code</th>
