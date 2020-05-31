@@ -83,7 +83,7 @@ $(() => {
             },
             gridLines: {
               color: '#eee',
-              drawOnChartArea: false,
+              drawOnChartArea: true,
             },
           }],
         },
