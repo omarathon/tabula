@@ -7,7 +7,6 @@
 @icon-font-path: '../../lib/fontawesome-pro/webfonts';
 @fa-font-path: '../../lib/fontawesome-pro/webfonts';
 
-@import "wide-viewport-support.less";
 @import "id7-fixes.css";
 @import "id7-theme.less";
 @import "main.less";
@@ -47,27 +46,9 @@
       }
     }
   }
-
-  // Wide mode
-  @media (min-width: @screen-xl-min) {
-    background-image: ~'url("../../images/id7/masthead-logo-bleed-lg.205799765821.svg")';
-
-    html.no-svgfilters &, html.ie-or-edge &, html.safari & {
-      background-image: ~'url("../../images/id7/masthead-logo-bleed-lg.152434348300.png")';
-    }
-
-    html.safari & {
-      @media (-webkit-min-device-pixel-ratio: 2) {
-        background-image: ~'url("../../images/id7/masthead-logo-bleed-lg@2x.304213346238.png")';
-      }
-
-      @media (-webkit-min-device-pixel-ratio: 3) {
-        background-image: ~'url("../../images/id7/masthead-logo-bleed-lg@3x.330867839375.png")';
-      }
-    }
-  }
 }
 
+@import "wide-viewport-support.less";
 @import (inline) "@universityofwarwick/statuspage-widget/dist/main.css";
 
 .StatusPageEmbed__content__context, .StatusPageEmbed__content__title {
