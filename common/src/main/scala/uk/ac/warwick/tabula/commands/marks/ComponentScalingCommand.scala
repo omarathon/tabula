@@ -49,7 +49,7 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
       val recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent =
         assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
 
-      val (scaledMark, scaledGrade) = scale(mark, grade)
+      val (scaledMark, scaledGrade) = scale(mark, grade, upstreamAssessmentGroupMember.resitExpected.getOrElse(false))
 
       recordedAssessmentComponentStudent.addMark(
         uploader = currentUser.apparentUser,
@@ -94,11 +94,11 @@ trait ComponentScalingAlgorithm {
     case _ => true
   }
 
-  def scale(mark: Option[Int], grade: Option[String]): (Option[Int], Option[String]) =
+  def scale(mark: Option[Int], grade: Option[String], isResit: Boolean): (Option[Int], Option[String]) =
     if (shouldScale(mark, grade)) {
       val scaledMark = mark.map(scaleMark)
       val scaledGrade =
-        assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark)
+        assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark, isResit)
           .find(_.isDefault)
           .map(_.grade)
           .orElse(grade) // Use the old grade if necessary (it shouldn't be)

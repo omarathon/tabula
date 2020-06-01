@@ -18,7 +18,7 @@ class ModuleRegistrationTest extends TestBase {
     val module = new Module
     module.code = "ab123"
 
-    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10"), AcademicYear(2012), "A")
+    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10"), AcademicYear(2012), "A", null)
     modReg.assessmentGroup = "D"
     modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 
@@ -27,5 +27,11 @@ class ModuleRegistrationTest extends TestBase {
     modReg.selectionStatus = ModuleSelectionStatus.fromCode("C")
 
     modReg.selectionStatus.description should be("Core")
+
+    modReg.passFail should be (false)
+    modReg.marksCode = "WAR"
+    modReg.passFail should be (false)
+    modReg.marksCode = "PF"
+    modReg.passFail should be (true)
   }
 }

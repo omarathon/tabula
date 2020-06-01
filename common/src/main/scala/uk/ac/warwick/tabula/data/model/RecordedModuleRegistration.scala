@@ -26,6 +26,7 @@ class RecordedModuleRegistration extends GeneratedId
 
   def this(mr: ModuleRegistration) {
     this()
+    this.scjCode = mr._scjCode
     this.module = mr.module
     this.cats = mr.cats
     this.academicYear = mr.academicYear
@@ -46,9 +47,6 @@ class RecordedModuleRegistration extends GeneratedId
   @Column(name = "academic_year", nullable = false)
   var academicYear: AcademicYear = _
 
-  @Column(name="assessment_group", nullable = false)
-  var assessmentGroup: String = _
-
   @Column(nullable = false)
   var occurrence: String = _
 
@@ -58,11 +56,12 @@ class RecordedModuleRegistration extends GeneratedId
   private val _marks: JList[RecordedModuleMark] = JArrayList()
   def marks: Seq[RecordedModuleMark] = _marks.asScala.toSeq
 
-  def addMark(uploader: User, mark: Option[Int], grade: Option[String], comments: String = null): RecordedModuleMark = {
+  def addMark(uploader: User, mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: String = null): RecordedModuleMark = {
     val newMark = new RecordedModuleMark
     newMark.recordedModuleRegistration = this
     newMark.mark = mark
     newMark.grade = grade
+    newMark.result = result
     newMark.comments = comments
     newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
@@ -73,6 +72,7 @@ class RecordedModuleRegistration extends GeneratedId
 
   def latestMark: Option[Int] = marks.headOption.flatMap(_.mark)
   def latestGrade: Option[String] = marks.headOption.flatMap(_.grade)
+  def latestResult: Option[ModuleResult] = marks.headOption.flatMap(_.result)
 
   @Column(name = "needs_writing_to_sits", nullable = false)
   var needsWritingToSits: Boolean = false
@@ -89,7 +89,6 @@ class RecordedModuleRegistration extends GeneratedId
     "moduleCode" -> module.code,
     "cats" -> cats,
     "academicYear" -> academicYear,
-    "assessmentGroup" -> assessmentGroup,
     "occurrence" -> occurrence,
   )
 
@@ -115,7 +114,7 @@ class RecordedModuleMark extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionModuleResultUserType")
   @Column(name = "module_result")
-  var moduleResult: Option[ModuleResult] = _
+  var result: Option[ModuleResult] = _
 
   var comments: String = _
 
@@ -129,6 +128,7 @@ class RecordedModuleMark extends GeneratedId
   override def toStringProps: Seq[(String, Any)] = Seq(
     "mark" -> mark,
     "grade" -> grade,
+    "result" -> result,
     "comments" -> comments
   )
 }

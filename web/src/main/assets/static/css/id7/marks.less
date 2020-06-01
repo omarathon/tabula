@@ -28,3 +28,25 @@
 .striped-section .section-title .next-action {
   color: @text-color;
 }
+
+.marks-form {
+  > .table, > .id7-wide-table-wrapper-container > .table-responsive > .table {
+    > tbody > tr > td {
+      white-space: nowrap;
+
+      .modal, .has-error {
+        white-space: normal;
+      }
+    }
+  }
+
+  .table {
+    colgroup.assessment-component, colgroup.module-mark-calculation {
+      border-left: 2px solid @table-border-color;
+
+      + colgroup.assessment-component {
+        border-left: 1px solid @table-border-color;
+      }
+    }
+  }
+}

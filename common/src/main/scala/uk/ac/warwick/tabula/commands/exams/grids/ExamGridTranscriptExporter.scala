@@ -63,12 +63,12 @@ object ExamGridTranscriptExporter extends TaskBenchmarking with AddConfidentialW
         year.moduleRegistrations.zipWithIndex.foreach { case (mr, index) =>
           val row = moduleTable.getRow(index + 2)
           row.getCell(0).setText(s"${mr.module.code.toUpperCase} ${mr.module.name}")
-          if (Option(mr.agreedMark).isDefined) {
-            row.getCell(1).setText(mr.agreedMark.toPlainString)
-            row.getCell(2).setText(mr.agreedGrade)
-          } else if (Option(mr.actualMark).isDefined) {
-            row.getCell(1).setText(mr.actualMark.toPlainString)
-            row.getCell(2).setText(mr.actualGrade)
+          if (mr.agreedMark.isDefined) {
+            row.getCell(1).setText(mr.agreedMark.get.toString)
+            row.getCell(2).setText(mr.agreedGrade.getOrElse(""))
+          } else if (mr.actualMark.isDefined) {
+            row.getCell(1).setText(mr.actualMark.get.toString)
+            row.getCell(2).setText(mr.actualGrade.getOrElse(""))
           }
         }
 

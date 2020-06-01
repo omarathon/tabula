@@ -64,8 +64,8 @@ object ImportAssignmentsCommand {
     assignmentsFound: Int,
     assignmentsChanged: Int,
     groupsFound: Int,
-    groupsChanged: Int)
-
+    groupsChanged: Int
+  )
 }
 
 trait ImportAssignmentsMembersToImport {
@@ -469,9 +469,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       val sitsBoundaries = assignmentImporter.getAllGradeBoundaries
 
       // Inject the FM grade if it doesn't exist already
-      val allBoundaries = sitsBoundaries ++ sitsBoundaries.map(_.marksCode).distinct.flatMap { marksCode =>
+      val allBoundaries = sitsBoundaries ++ sitsBoundaries.map(gb => (gb.marksCode, gb.process)).distinct.flatMap { case (marksCode, process) =>
         if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade)) None
-        else Some(GradeBoundary(marksCode, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S"))
+        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None))
       }
 
       allBoundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)

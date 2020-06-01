@@ -176,7 +176,7 @@ abstract class MitCircsDataGenerationCommandInternal(val department: Department)
 
     val moduleRegistrations =
       student.moduleRegistrationsByYear(Some(AcademicYear.now()))
-        .filter { mr => Option(mr.agreedMark).isEmpty && Option(mr.agreedGrade).isEmpty }
+        .filter { mr => mr.agreedMark.isEmpty && mr.agreedGrade.isEmpty }
 
     if (moduleRegistrations.nonEmpty) {
       command.affectedAssessments.addAll(

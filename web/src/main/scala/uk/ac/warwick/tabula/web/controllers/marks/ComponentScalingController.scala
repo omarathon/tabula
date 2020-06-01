@@ -56,7 +56,7 @@ class ComponentScalingController extends BaseController {
     } else {
       val changes: Seq[(UpstreamAssessmentGroupMember, (Option[Int], Option[Int]), (Option[String], Option[String]), String)] =
         cmd.studentsToSet.map { case (upstreamAssessmentGroupMember, originalMark, originalGrade) =>
-          val (scaledMark, scaledGrade) = cmd.scale(originalMark, originalGrade)
+          val (scaledMark, scaledGrade) = cmd.scale(originalMark, originalGrade, upstreamAssessmentGroupMember.resitExpected.getOrElse(false))
 
           (upstreamAssessmentGroupMember, originalMark -> scaledMark, originalGrade -> scaledGrade, cmd.comment(originalMark))
         }
