@@ -10,8 +10,7 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JList, JMap}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, ImportModuleRegistrationsCommand}
 import uk.ac.warwick.tabula.data.model._
@@ -21,6 +20,7 @@ import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearsQuery, ModuleRegistrationsByUniversityIdsQuery}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
 
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
@@ -28,9 +28,9 @@ import scala.util.Try
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
-  * Import module registration data from SITS.
-  *
-  */
+ * Import module registration data from SITS.
+ *
+ */
 trait ModuleRegistrationImporter {
   def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow]
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow]
@@ -66,19 +66,35 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking {
+class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking with AutowiringFeaturesComponent {
   lazy val moduleRegistrationsByAcademicYearsQuery: ModuleRegistrationsByAcademicYearsQuery = new ModuleRegistrationsByAcademicYearsQuery(sitsDataSource)
   lazy val moduleRegistrationsByUniversityIdsQuery: ModuleRegistrationsByUniversityIdsQuery = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
 
+  private def yearsToImportArray(yearsToImport: Seq[AcademicYear]): JList[String] = yearsToImport.map(_.toString).asJava: JList[String]
   def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
-      moduleRegistrationsByAcademicYearsQuery.executeByNamedParam(Map("academicYears" -> academicYears.asJava).asJava).asScala.distinct.toSeq
+      val currentAcademicYears = if (features.includeSMSForCurrentYear && academicYears.intersect(AcademicYear.allCurrent()).nonEmpty) {
+        yearsToImportArray(academicYears.intersect(AcademicYear.allCurrent()))
+      } else Seq("").asJava //set blank for SMS table to be ignored in the actual SQL
+      val paraMap = JMap(
+        "academicYears" -> yearsToImportArray(academicYears),
+        "currentAcademicYears" -> currentAcademicYears
+      )
+      moduleRegistrationsByAcademicYearsQuery.executeByNamedParam(paraMap).asScala.distinct.toSeq
     }
 
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
     benchmarkTask("Fetch module registrations") {
+      val currentAcademicYears = if (features.includeSMSForCurrentYear) {
+        yearsToImportArray(AcademicYear.allCurrent())
+      } else Seq("").asJava
+
       universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
-        moduleRegistrationsByUniversityIdsQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.distinct.toSeq
+        val paraMap = JMap(
+          "universityIds" -> ids.asJava,
+          "currentAcademicYears" -> currentAcademicYears
+        )
+        moduleRegistrationsByUniversityIdsQuery.executeByNamedParam(paraMap).asScala.distinct.toSeq
       }.toSeq
     }
 }
@@ -160,6 +176,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 object ModuleRegistrationImporter {
   val sitsSchema: String = Wire.property("${schema.sits}")
 
+  var features: Features = Wire[Features]
+
   // union 2 things -
   // 1. unconfirmed module registrations from the SMS table
   // 2. confirmed module registrations from the SMO table
@@ -203,7 +221,7 @@ object ModuleRegistrationImporter {
         and mav.mod_code = sms.mod_code
         and mav.mav_occur = sms.sms_occl
 
-       where sms.ayr_code in (:academicYears)"""
+       where sms.ayr_code in (:currentAcademicYears)"""
 
   def ConfirmedModuleRegistrationsForAcademicYear =
     s"""
@@ -288,7 +306,7 @@ object ModuleRegistrationImporter {
         and mav.mod_code = sms.mod_code
         and mav.mav_occur = sms.sms_occl
 
-       where spr.spr_stuc in (:universityIds)"""
+       where spr.spr_stuc in (:universityIds) and sms.ayr_code in (:currentAcademicYears)"""
 
   def ConfirmedModuleRegistrationsForUniversityIds =
     s"""
@@ -334,6 +352,7 @@ object ModuleRegistrationImporter {
        (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
        and spr.spr_stuc in (:universityIds)"""
 
+
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
     def getNullableInt(column: String): Option[Int] = {
       val intValue = resultSet.getInt(column)
@@ -361,6 +380,7 @@ object ModuleRegistrationImporter {
   class ModuleRegistrationsByAcademicYearsQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
     declareParameter(new SqlParameter("academicYears", Types.VARCHAR))
+    declareParameter(new SqlParameter("currentAcademicYears", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
@@ -369,6 +389,7 @@ object ModuleRegistrationImporter {
   class ModuleRegistrationsByUniversityIdsQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForUniversityIds union $ConfirmedModuleRegistrationsForUniversityIds") {
     declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    declareParameter(new SqlParameter("currentAcademicYears", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
