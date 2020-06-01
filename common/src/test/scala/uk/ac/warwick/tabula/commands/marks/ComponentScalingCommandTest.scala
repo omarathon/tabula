@@ -1,25 +1,34 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup}
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksService, AssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class ComponentScalingCommandTest extends TestBase with Mockito {
 
   val scaling =
     new ComponentScalingAlgorithm
       with ComponentScalingRequest
+      with ComponentScalingValidation
       with RecordAssessmentComponentMarksState
-      with AssessmentMembershipServiceComponent {
+      with MissingMarkAdjustmentStudentsToSet
+      with AssessmentMembershipServiceComponent
+      with AssessmentComponentMarksServiceComponent {
       override val assessmentComponent: AssessmentComponent = Fixtures.assessmentComponent(Fixtures.module("in101"), 1)
-      override val upstreamAssessmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(assessmentComponent)
+      override val upstreamAssessmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroupAndMember(assessmentComponent, 70, AcademicYear.now())
       override val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      override val assessmentComponentMarksService: AssessmentComponentMarksService = smartMock[AssessmentComponentMarksService]
+
+      assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup) returns Seq.empty
+      calculate = true
     }
 
   @Test
   def defaults(): Unit = {
-    scaling.passMarkAdjustment = 5
-    scaling.upperClassAdjustment = 5
+    scaling.scaledPassMark = 35
+    scaling.scaledUpperClassMark = 65
 
     scaling.scaleMark(0) should be (0)
     scaling.scaleMark(5) should be (6)
@@ -47,8 +56,8 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
   @Test
   def options(): Unit = {
     scaling.passMark = 50
-    scaling.passMarkAdjustment = 17
-    scaling.upperClassAdjustment = 12
+    scaling.scaledPassMark = 33
+    scaling.scaledUpperClassMark = 58
 
     scaling.scaleMark(0) should be (0)
     scaling.scaleMark(5) should be (8)
@@ -71,6 +80,89 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
     scaling.scaleMark(90) should be (93)
     scaling.scaleMark(95) should be (96)
     scaling.scaleMark(100) should be (100)
+  }
+
+  @Test
+  def validationMissingMarks(): Unit = {
+    scaling.upstreamAssessmentGroup.members.get(0).actualMark = None
+    scaling.scaledPassMark = 45
+    scaling.scaledUpperClassMark = 75
+
+    val errors = new BindException(scaling, "scaling")
+    scaling.validate(errors)
+
+    errors.getErrorCount should be (1)
+    errors.getGlobalError.getCode should be ("scaling.studentsWithMissingMarks")
+    errors.getGlobalError.getArguments should be (Array("0123456"))
+  }
+
+  @Test
+  def validationNoChanges(): Unit = {
+    scaling.upstreamAssessmentGroup.members.get(0).actualGrade = Some(GradeBoundary.WithdrawnGrade)
+    scaling.scaledPassMark = 45
+    scaling.scaledUpperClassMark = 75
+
+    val errors = new BindException(scaling, "scaling")
+    scaling.validate(errors)
+
+    errors.getErrorCount should be (1)
+    errors.getGlobalError.getCode should be ("scaling.noChanges")
+  }
+
+  @Test
+  def validationNoAdjustment(): Unit = {
+    val errors = new BindException(scaling, "scaling")
+    scaling.validate(errors)
+
+    errors.getErrorCount should be (1)
+    errors.getFieldError("scaledUpperClassMark").getCode should be ("scaling.noAdjustments")
+  }
+
+  @Test
+  def validationPasses(): Unit = {
+    scaling.scaledPassMark = 45
+    scaling.scaledUpperClassMark = 75
+
+    val errors = new BindException(scaling, "scaling")
+    scaling.validate(errors)
+
+    errors.hasErrors should be (false)
+  }
+
+  @Test
+  def preventsDivByZero(): Unit = {
+    def validateInput(passMark: Int, scaledPassMark: Int, scaledUpperClassMark: Int): Boolean = {
+      scaling.passMark = passMark
+      scaling.scaledPassMark = scaledPassMark
+      scaling.scaledUpperClassMark = scaledUpperClassMark
+
+      val errors = new BindException(scaling, "scaling")
+      scaling.validate(errors)
+      !errors.hasErrors
+    }
+
+    // Just hammer it with various options and make sure:
+    // - It doesn't blow with a div/0
+    // - 0 is 0 and 100 is 100, scaledPassMark always goes to passMark and scaledUpperClassMark always goes to upperClassMark
+    // - The scaled marks are contiguous
+    for {
+      passMark <- Seq(40, 50)
+      scaledPassMark <- 0 to 100
+      scaledUpperClassMark <- 0 to 100
+
+      if validateInput(passMark, scaledPassMark, scaledUpperClassMark)
+    } {
+      scaling.scaleMark(0) should be (0)
+      scaling.scaleMark(100) should be (100)
+      scaling.scaleMark(scaling.scaledPassMark) should be (scaling.passMark)
+      scaling.scaleMark(scaling.scaledUpperClassMark) should be (70)
+
+      (1 to 99).foreach { mark =>
+        val scaled = scaling.scaleMark(mark)
+        (scaled >= scaling.scaleMark(mark - 1)) should be (true)
+        (scaled <= scaling.scaleMark(mark + 1)) should be (true)
+      }
+    }
   }
 
 }

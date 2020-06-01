@@ -170,14 +170,11 @@ class RecordAssessmentComponentMarksController extends BaseController
           // We know the .get is safe because it's validated
           val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
 
-          // Mark and grade and comment are empty, or haven't changed and no comment
+          // Mark and grade haven't changed and no comment
           if (
-            (!student.mark.hasText && !student.grade.hasText && !student.comments.hasText) ||
-            (
-              !student.comments.hasText &&
-              (!student.mark.hasText || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
-              (!student.grade.hasText || studentMarkRecord.grade.contains(student.grade))
-            )
+            !student.comments.hasText &&
+            ((!student.mark.hasText && studentMarkRecord.mark.isEmpty) || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
+            ((!student.grade.hasText && studentMarkRecord.grade.isEmpty) || studentMarkRecord.grade.contains(student.grade))
           ) None else Some(studentMarkRecord -> student)
         }
 

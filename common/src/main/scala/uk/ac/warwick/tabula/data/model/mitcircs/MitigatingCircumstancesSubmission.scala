@@ -159,7 +159,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
     MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r }
-      .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
+      .map{ r => r -> affectedAssessments.asScala.toSeq.filter{ a => Option(a.boardRecommendations).exists(_.contains(r)) } }
       .filter{ case (_, a) => a.nonEmpty }
       .toMap
 
@@ -292,7 +292,6 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "boardRecommendationComments")
   private var encryptedBoardRecommendationComments: CharSequence = _
-  // free text for use when the boardRecommendations type includes Other
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 

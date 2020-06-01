@@ -37,6 +37,7 @@ abstract class AbstractMarksAdminDepartmentHomepageController
     Mav("marks/admin/module-occurrences",
       "results" -> results,
       "hasMultipleOccurrences" -> hasMultipleOccurrences,
+      "academicYear" -> academicYear,
     ).crumbs(
       MarksBreadcrumbs.Admin.HomeForYear(department, academicYear, active = true)
     ).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.marks.Admin.home(department, _)): _*)

@@ -25,6 +25,7 @@ import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Import module registration data from SITS.
@@ -121,7 +122,12 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       moduleCode <- route.moduleCodes if moduleCode.substring(3, 4).toInt <= yearOfStudy
     } yield {
       val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
-      val markScheme = if (isPassFail) "PF" else "WAR"
+      val marksCode =
+        if (isPassFail) "TABULA-PF"
+        else route.degreeType match {
+          case DegreeType.Postgraduate => "TABULA-PG"
+          case _ => "TABULA-UG"
+        }
 
       val level = moduleCode.substring(3, 4).toInt
       val academicYear = AcademicYear.now - (yearOfStudy - level)
@@ -137,19 +143,12 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
               if (randomMark < 40) 0 else 100
             } else randomMark
 
-          val marksCode =
-            if (isPassFail) "TABULA-PF"
-            else route.degreeType match {
-              case DegreeType.Postgraduate => "TABULA-PG"
-              case _ => "TABULA-UG"
-            }
-
           val g =
             if (isPassFail) if (m == 100) "P" else "F"
             else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
-          (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
-        } else (None: Option[JBigDecimal], null: String, null: String)
+          (Some(m), g, if (m < 40) "F" else "P")
+        } else (None: Option[Int], null: String, null: String)
 
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
@@ -166,7 +165,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         actualGrade = grade,
         agreedMark = mark,
         agreedGrade = grade,
-        markScheme = markScheme,
+        marksCode = marksCode,
         moduleResult = result,
         endWeek = None
       )
@@ -176,9 +175,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
 object ModuleRegistrationImporter {
   val sitsSchema: String = Wire.property("${schema.sits}")
+
   var features: Features = Wire[Features]
-  // a list of all the markscheme codes that we consider to be pass/fail modules
-  final val PassFailMarkSchemeCodes = Seq("PF")
 
   // union 2 things -
   // 1. unconfirmed module registrations from the SMS table
@@ -356,6 +354,11 @@ object ModuleRegistrationImporter {
 
 
   def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
+    def getNullableInt(column: String): Option[Int] = {
+      val intValue = resultSet.getInt(column)
+      if (resultSet.wasNull()) None else Some(intValue)
+    }
+
     new ModuleRegistrationRow(
       resultSet.getString("scj_code"),
       resultSet.getString("mod_code"),
@@ -364,9 +367,9 @@ object ModuleRegistrationImporter {
       resultSet.getString("ses_code"),
       resultSet.getString("occurrence"),
       resultSet.getString("ayr_code"),
-      Option(resultSet.getBigDecimal("smr_actm")),
+      getNullableInt("smr_actm"),
       resultSet.getString("smr_actg"),
-      Option(resultSet.getBigDecimal("smr_agrm")),
+      getNullableInt("smr_agrm"),
       resultSet.getString("smr_agrg"),
       resultSet.getString("smr_mksc"),
       resultSet.getString("smr_rslt"),
@@ -412,8 +415,10 @@ trait CopyModuleRegistrationProperties {
     copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
       copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
       copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
-      copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
-      copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+      copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+      copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
+      copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+      copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
       copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
   }
 
@@ -449,7 +454,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"
+    "assessmentGroup", "occurrence", "marksCode"
   )
 }
 
@@ -462,34 +467,14 @@ class ModuleRegistrationRow(
   var selectionStatusCode: String,
   var occurrence: String,
   var academicYear: String,
-  var actualMark: Option[JBigDecimal],
+  var actualMark: Option[Int],
   var actualGrade: String,
-  var agreedMark: Option[JBigDecimal],
+  var agreedMark: Option[Int],
   var agreedGrade: String,
-  var passFail: Boolean,
+  var marksCode: String,
   var moduleResult: String,
   var endWeek: Option[Int]
 ) {
-
-  def this(
-    scjCode: String,
-    sitsModuleCode: String,
-    cats: JBigDecimal,
-    assessmentGroup: String,
-    selectionStatusCode: String,
-    occurrence: String,
-    academicYear: String,
-    actualMark: Option[JBigDecimal],
-    actualGrade: String,
-    agreedMark: Option[JBigDecimal],
-    agreedGrade: String,
-    markScheme: String,
-    moduleResult: String,
-    endWeek: Option[Int]
-  ) {
-    this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult, endWeek)
-  }
-
   def moduleCode: Option[String] = Module.stripCats(sitsModuleCode).map(_.toLowerCase)
 
   def notionalKey: String = Seq(scjCode, sitsModuleCode, AcademicYear.parse(academicYear), scaled(cats), occurrence).mkString("-")
@@ -507,7 +492,7 @@ class ModuleRegistrationRow(
       .append(actualGrade)
       .append(agreedMark)
       .append(agreedGrade)
-      .append(passFail)
+      .append(marksCode)
       .build()
 
   override def hashCode(): Int =
@@ -523,18 +508,18 @@ class ModuleRegistrationRow(
       .append(actualGrade)
       .append(agreedMark)
       .append(agreedGrade)
-      .append(passFail)
+      .append(marksCode)
       .build()
 
   private def scaled(bg: JBigDecimal): JBigDecimal =
     JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
 
-  def matches(that: ModuleRegistration): Boolean = {
+  def matches(that: ModuleRegistration) : Boolean = {
     scjCode == that._scjCode &&
-      Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
-      AcademicYear.parse(academicYear) == that.academicYear &&
-      scaled(cats) == scaled(that.cats) &&
-      occurrence == that.occurrence
+    Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
+    AcademicYear.parse(academicYear) == that.academicYear &&
+    scaled(cats) == scaled(that.cats) &&
+    occurrence == that.occurrence
   }
 
   def toModuleRegistration(module: Module): ModuleRegistration = new ModuleRegistration(
@@ -543,7 +528,7 @@ class ModuleRegistrationRow(
     cats,
     AcademicYear.parse(academicYear),
     occurrence,
-    passFail
+    marksCode
   )
 
   override def equals(other: Any): Boolean = other match {
@@ -560,7 +545,7 @@ class ModuleRegistrationRow(
         .append(actualGrade, that.actualGrade)
         .append(agreedMark, that.agreedMark)
         .append(agreedGrade, that.agreedGrade)
-        .append(passFail, that.passFail)
+        .append(marksCode, that.marksCode)
         .append(endWeek, that.endWeek)
         .build()
     case _ => false
@@ -587,7 +572,7 @@ object ModuleRegistrationRow {
       actualGrade = coalesce(rows.map(_.actualGrade)),
       agreedMark = rows.flatMap(_.agreedMark).headOption,
       agreedGrade = coalesce(rows.map(_.agreedGrade)),
-      passFail = rows.exists(_.passFail),
+      marksCode = coalesce(rows.map(_.marksCode)),
       moduleResult = coalesce(rows.map(_.moduleResult)),
       endWeek = coalesce(rows.map(_.endWeek))
     )

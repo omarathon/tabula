@@ -43,13 +43,14 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
     case DegreeType.Postgraduate => ProgressionService.PostgraduatePassMark
     case _ => ProgressionService.DefaultPassMark
   }
+  scaledPassMark = passMark
 
   override def applyInternal(): Result = transactional() {
     studentsToSet.map { case (upstreamAssessmentGroupMember, mark, grade) =>
       val recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent =
         assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
 
-      val (scaledMark, scaledGrade) = scale(mark, grade)
+      val (scaledMark, scaledGrade) = scale(mark, grade, upstreamAssessmentGroupMember.resitExpected.getOrElse(false))
 
       recordedAssessmentComponentStudent.addMark(
         uploader = currentUser.apparentUser,
@@ -69,15 +70,28 @@ trait ComponentScalingRequest {
   var calculate: Boolean = false
 
   @NotNull
-  var passMarkAdjustment: Int = 0
-
-  @NotNull
-  var upperClassAdjustment: Int = 0
-
-  @NotNull
   @Min(40)
   @Max(50)
   var passMark: Int = ProgressionService.DefaultPassMark
+
+  // These Min/Max bounds are further validated below
+  @NotNull
+  @Min(0)
+  @Max(100)
+  var scaledPassMark: Int = passMark
+
+  def passMarkAdjustment: Int = passMark - scaledPassMark
+
+  // Can't be modified
+  val upperClassMark: Int = 70
+
+  // These Min/Max bounds are further validated below
+  @NotNull
+  @Min(0)
+  @Max(100)
+  var scaledUpperClassMark: Int = upperClassMark
+
+  def upperClassAdjustment: Int = upperClassMark - scaledUpperClassMark
 
   def comment(originalMark: Option[Int]): String = s"Assessment component scaled from original mark ${originalMark.getOrElse("-")} (pass mark: $passMark, pass mark adjustment: ${if (passMarkAdjustment > 0) "+" else ""}$passMarkAdjustment, upper class adjustment: ${if (upperClassAdjustment > 0) "+" else ""}$upperClassAdjustment)"
 }
@@ -94,11 +108,11 @@ trait ComponentScalingAlgorithm {
     case _ => true
   }
 
-  def scale(mark: Option[Int], grade: Option[String]): (Option[Int], Option[String]) =
+  def scale(mark: Option[Int], grade: Option[String], isResit: Boolean): (Option[Int], Option[String]) =
     if (shouldScale(mark, grade)) {
       val scaledMark = mark.map(scaleMark)
       val scaledGrade =
-        assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark)
+        assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark, isResit)
           .find(_.isDefault)
           .map(_.grade)
           .orElse(grade) // Use the old grade if necessary (it shouldn't be)
@@ -109,14 +123,13 @@ trait ComponentScalingAlgorithm {
   def scaleMark(mark: Int): Int = {
     require(mark >= 0 && mark <= 100)
 
-    val upperClassThreshold = 70
-    val passMarkRange = upperClassThreshold - passMark
+    val passMarkRange = upperClassMark - passMark
 
     val scaledMark: BigDecimal =
       if (mark <= passMark - passMarkAdjustment) {
         BigDecimal(mark * passMark) / (passMark - passMarkAdjustment)
-      } else if (mark >= upperClassThreshold - upperClassAdjustment) {
-        BigDecimal((mark * (100 - upperClassThreshold)) + 100 * upperClassAdjustment) / ((100 - upperClassThreshold) + upperClassAdjustment)
+      } else if (mark >= upperClassMark - upperClassAdjustment) {
+        BigDecimal((mark * (100 - upperClassMark)) + 100 * upperClassAdjustment) / ((100 - upperClassMark) + upperClassAdjustment)
       } else {
         passMark + passMarkRange * (BigDecimal(passMarkAdjustment + mark - passMark) / (passMarkRange - upperClassAdjustment + passMarkAdjustment))
       }
@@ -141,8 +154,30 @@ trait ComponentScalingValidation extends SelfValidating {
       errors.reject("scaling.noChanges")
     }
 
-    if (calculate && (passMarkAdjustment == 0 && upperClassAdjustment == 0)) {
-      errors.rejectValue("upperClassAdjustment", "scaling.noAdjustments")
+    if (calculate) {
+      if (passMarkAdjustment == 0 && upperClassAdjustment == 0) {
+        errors.rejectValue("scaledUpperClassMark", "scaling.noAdjustments")
+      }
+
+      if (scaledUpperClassMark <= scaledPassMark) {
+        errors.rejectValue("scaledUpperClassMark", "scaling.invalidParam")
+      }
+
+      if (passMarkAdjustment >= passMark) {
+        errors.rejectValue("scaledPassMark", "scaling.invalidParam")
+      } else if (passMarkAdjustment <= passMark - 100) {
+        errors.rejectValue("scaledPassMark", "scaling.invalidParam")
+      }
+
+      val upperClassThreshold = 70
+
+      if (upperClassAdjustment <= upperClassThreshold - 100) {
+        errors.rejectValue("scaledUpperClassMark", "scaling.invalidParam")
+      }
+
+      if (Math.abs(upperClassAdjustment - passMarkAdjustment) >= upperClassThreshold) {
+        errors.rejectValue("scaledUpperClassMark", "scaling.invalidParam")
+      }
     }
   }
 }

@@ -142,4 +142,15 @@ trait PropertyCopying extends Logging {
         else false
     }
   }
+
+  def copyOptionProperty[A](destinationBean: BeanWrapper, property: String, newValue: Option[A]): Boolean = {
+    val oldValue = destinationBean.getPropertyValue(property)
+
+    // null == null in Scala so this is safe for unset values
+    if (oldValue != newValue) {
+      logger.debug(s"Detected property change for $property: $oldValue -> $newValue; setting value")
+      destinationBean.setPropertyValue(property, newValue)
+      true
+    } else false
+  }
 }

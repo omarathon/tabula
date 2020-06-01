@@ -46,8 +46,8 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
       } else {
         def isFailed(mr: ModuleRegistration): Boolean = {
           if (mr.passFail) !mr.firstDefinedGrade.contains("F")
-          else if (Option(mr.agreedMark).isDefined) mr.agreedGrade != "F"
-          else mr.actualGrade != "F"
+          else if (mr.agreedMark.isDefined) !mr.agreedGrade.contains("F")
+          else !mr.actualGrade.contains("F")
         }
 
         ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(isFailed).map(mr => BigDecimal(mr.cats)).sum.underlying)
