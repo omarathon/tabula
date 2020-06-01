@@ -38,7 +38,7 @@
             <#assign scaledGrade = change._3()._2()!'-' />
             <#assign comment = change._4() />
 
-            <tr>
+            <tr<#if scaledGrade == 'F' && originalGrade != 'F'> class="danger"</#if>>
               <td class="col-md-2">${student.universityId}</td>
               <td class="col-md-2">
                 ${originalMark}

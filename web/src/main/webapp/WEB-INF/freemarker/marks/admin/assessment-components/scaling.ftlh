@@ -56,6 +56,16 @@
         to 100.
       </p>
 
+      <p>
+        Scaling down marks may lead to students failing who initially passed on the unscaled basis. If this occurs further academic judgment must be undertaken
+        to check this outcome is appropriate before these marks are approved. Departments can either:
+      </p>
+
+      <ul>
+        <li>keep the pass mark at the same level (e.g. 40% or 50%) and only lower the first class level when using the scale tool, or</li>
+        <li>make an academic judgment for each student affected (these students are highlighted on the preview screen)</li>
+      </ul>
+
       <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
         <@f.hidden path="calculate" value="true" />
 
