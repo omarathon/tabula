@@ -11,7 +11,7 @@
       <canvas id="chart"></canvas>
     </#if>
 
-    <div class="well">
+    <div class="panel panel-default panel-body scaling-guidance">
       <h2>Scaling guidance</h2>
 
       <p>

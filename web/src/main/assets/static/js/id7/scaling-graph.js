@@ -109,7 +109,14 @@ $(() => {
       options: {
         aspectRatio: 1.5,
         legend: false,
-        tooltips: true,
+        tooltips: {
+          callbacks: {
+            label(tooltipItem) {
+              const label = Object.keys(markData)[tooltipItem.index];
+              return `${tooltipItem.xLabel} raw maps to ${tooltipItem.yLabel} adjusted (${label})`;
+            },
+          },
+        },
         scales: {
           xAxes: [{
             ticks: {
