@@ -22,6 +22,10 @@ $(() => {
       throw new ScalingError('Pass mark out of range');
     }
 
+    if (scaledUpperClassMark <= scaledPassMark) {
+      throw new ScalingError('Scaled pass mark is less than scaled upper class mark');
+    }
+
     if (scaledPassMark < 0 || scaledPassMark > 100) {
       throw new ScalingError('Scaled pass mark out of range');
     }

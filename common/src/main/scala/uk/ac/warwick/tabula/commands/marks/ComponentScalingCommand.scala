@@ -159,6 +159,10 @@ trait ComponentScalingValidation extends SelfValidating {
         errors.rejectValue("scaledUpperClassMark", "scaling.noAdjustments")
       }
 
+      if (scaledUpperClassMark <= scaledPassMark) {
+        errors.rejectValue("scaledUpperClassMark", "scaling.invalidParam")
+      }
+
       if (passMarkAdjustment >= passMark) {
         errors.rejectValue("scaledPassMark", "scaling.invalidParam")
       } else if (passMarkAdjustment <= passMark - 100) {

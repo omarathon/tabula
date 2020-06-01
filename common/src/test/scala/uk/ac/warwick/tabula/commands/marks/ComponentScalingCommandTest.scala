@@ -143,7 +143,7 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
 
     // Just hammer it with various options and make sure:
     // - It doesn't blow with a div/0
-    // - 0 is 0 and 100 is 100
+    // - 0 is 0 and 100 is 100, scaledPassMark always goes to passMark and scaledUpperClassMark always goes to upperClassMark
     // - The scaled marks are contiguous
     for {
       passMark <- Seq(40, 50)
@@ -154,6 +154,9 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
     } {
       scaling.scaleMark(0) should be (0)
       scaling.scaleMark(100) should be (100)
+      scaling.scaleMark(scaling.scaledPassMark) should be (scaling.passMark)
+      scaling.scaleMark(scaling.scaledUpperClassMark) should be (70)
+
       (1 to 99).foreach { mark =>
         val scaled = scaling.scaleMark(mark)
         (scaled >= scaling.scaleMark(mark - 1)) should be (true)
