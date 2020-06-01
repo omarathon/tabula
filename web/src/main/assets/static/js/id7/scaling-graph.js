@@ -113,7 +113,10 @@ $(() => {
           callbacks: {
             label(tooltipItem) {
               const label = Object.keys(markData)[tooltipItem.index];
-              return `${tooltipItem.xLabel} raw maps to ${tooltipItem.yLabel} adjusted (${label})`;
+              if (tooltipItem.xLabel === tooltipItem.yLabel) {
+                return `${tooltipItem.xLabel} is unchanged (${label})`;
+              }
+              return `${tooltipItem.xLabel} scales to ${tooltipItem.yLabel} (${label})`;
             },
           },
         },
