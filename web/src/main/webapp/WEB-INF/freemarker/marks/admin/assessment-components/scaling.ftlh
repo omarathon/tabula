@@ -48,7 +48,7 @@
       <ul>
         <li>The normal pass mark for the assessment (40 for undergraduate assessments or 50 for postgraduate assessments, except in very unusual circumstances)</li>
         <li>A scaled pass mark for the assessment. If the pass mark is 40, a scaled pass mark of 35 will mean that students with a mark of 35 are scaled to 40.</li>
-        <li>A scaled upper class mark for the assessment. A scaled upper class mark of 65 will mean that students with a mark of 70 are scaled to 65.</li>
+        <li>A scaled upper class mark for the assessment. A scaled upper class mark of 75 will mean that students with a mark of 75 are scaled down to 70.</li>
       </ul>
 
       <p>

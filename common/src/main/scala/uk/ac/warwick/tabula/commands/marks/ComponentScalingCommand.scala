@@ -80,7 +80,7 @@ trait ComponentScalingRequest {
   @Max(100)
   var scaledPassMark: Int = passMark
 
-  def passMarkAdjustment: Int = scaledPassMark - passMark
+  def passMarkAdjustment: Int = passMark - scaledPassMark
 
   // Can't be modified
   val upperClassMark: Int = 70
@@ -91,7 +91,7 @@ trait ComponentScalingRequest {
   @Max(100)
   var scaledUpperClassMark: Int = upperClassMark
 
-  def upperClassAdjustment: Int = scaledUpperClassMark - upperClassMark
+  def upperClassAdjustment: Int = upperClassMark - scaledUpperClassMark
 
   def comment(originalMark: Option[Int]): String = s"Assessment component scaled from original mark ${originalMark.getOrElse("-")} (pass mark: $passMark, pass mark adjustment: ${if (passMarkAdjustment > 0) "+" else ""}$passMarkAdjustment, upper class adjustment: ${if (upperClassAdjustment > 0) "+" else ""}$upperClassAdjustment)"
 }

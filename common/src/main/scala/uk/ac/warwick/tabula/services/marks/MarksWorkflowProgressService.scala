@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.marks
 
 import enumeratum.{Enum, EnumEntry}
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
@@ -220,12 +221,17 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         upstreamAssessmentGroup.deadline.nonEmpty
 
       if (students.forall(s => s.mark.isEmpty && s.grade.isEmpty)) {
+        val isInPast = upstreamAssessmentGroup.deadline.exists(_.isBefore(LocalDate.now()))
+
         // No marks have been recorded
         StageProgress(
           stage = RecordMarks,
-          started = true,
+          started = isInPast,
           messageCode = "workflow.marks.component.RecordMarks.notStarted",
-          health = if (neededForGraduateBenchmark) WorkflowStageHealth.Danger else WorkflowStageHealth.Warning,
+          health =
+            if (neededForGraduateBenchmark) WorkflowStageHealth.Danger
+            else if (isInPast) WorkflowStageHealth.Warning
+            else WorkflowStageHealth.Good,
         )
       } else if (students.exists(_.needsWritingToSits)) {
         // Needs writing to SITS

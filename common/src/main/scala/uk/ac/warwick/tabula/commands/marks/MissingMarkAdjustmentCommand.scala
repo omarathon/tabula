@@ -71,7 +71,7 @@ trait MissingMarkAdjustmentStudentsToSet {
           .orElse(upstreamAssessmentGroupMember.firstDefinedGrade)
 
       (upstreamAssessmentGroupMember, latestMark, latestGrade)
-    }.toSeq
+    }.toSeq.sortBy(_._1.universityId)
   }
 
   // We don't let this happen if there are any existing student marks other 0/W or if it's a no-op

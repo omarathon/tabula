@@ -9,8 +9,8 @@ export default class ScalingAlgorithm {
     }
     const upperClassThreshold = 70;
     const passMarkRange = upperClassThreshold - passMark;
-    let scaledMark = 0;
 
+    let scaledMark;
     if (mark <= passMark - passMarkAdjustment) {
       scaledMark = (mark * passMark) / (passMark - passMarkAdjustment);
     } else if (mark >= upperClassThreshold - upperClassAdjustment) {

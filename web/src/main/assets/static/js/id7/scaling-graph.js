@@ -14,9 +14,9 @@ class ScalingError extends Error {
 
 $(() => {
   function validateScalingParams(passMark, scaledPassMark, scaledUpperClassMark) {
-    const passMarkAdjustment = scaledPassMark - passMark;
+    const passMarkAdjustment = passMark - scaledPassMark;
     const upperClassThreshold = 70;
-    const upperClassAdjustment = scaledUpperClassMark - upperClassThreshold;
+    const upperClassAdjustment = upperClassThreshold - scaledUpperClassMark;
 
     if (passMark < 0 || passMark > 100) {
       throw new ScalingError('Pass mark out of range');
@@ -53,8 +53,8 @@ $(() => {
 
     validateScalingParams(passMark, scaledPassMark, scaledUpperClassMark);
 
-    const passMarkAdjustment = scaledPassMark - passMark;
-    const upperClassAdjustment = scaledUpperClassMark - 70;
+    const passMarkAdjustment = passMark - scaledPassMark;
+    const upperClassAdjustment = 70 - scaledUpperClassMark;
     return marks.map(m => ({
       x: m,
       y: ScalingAlgorithm.doScaleMark(m, passMark, passMarkAdjustment, upperClassAdjustment),
@@ -68,8 +68,8 @@ $(() => {
 
     validateScalingParams(passMark, scaledPassMark, scaledUpperClassMark);
 
-    const passMarkAdjustment = scaledPassMark - passMark;
-    const upperClassAdjustment = scaledUpperClassMark - 70;
+    const passMarkAdjustment = passMark - scaledPassMark;
+    const upperClassAdjustment = 70 - scaledUpperClassMark;
     return [0, (passMark - passMarkAdjustment), (70 - upperClassAdjustment), 100].map(m => ({
       x: m,
       y: ScalingAlgorithm.doScaleMark(m, passMark, passMarkAdjustment, upperClassAdjustment),
