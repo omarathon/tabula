@@ -80,7 +80,7 @@
          data-name="${anchor}">
       <div class="clearfix">
         <div class="section-title row">
-          <div class="col-md-6">
+          <div class="col-md-6 col-xl-5">
             <span class="h4">
               <a class="collapse-trigger icon-container" href="#">
                 <#-- Can't use the standard fmt.module_name as we want full module code and occurrence -->
@@ -90,26 +90,30 @@
             </span>
           </div>
 
-          <div class="col-md-4">
-            <@stage_progress_bar item.stages?values />
-            <div class="next-action">
-              <#if item.nextStage??>
-                <#local nextStageUrl="" />
+          <div class="col-md-4 col-xl-6">
+            <div class="row">
+              <div class="col-xl-6">
+                <@stage_progress_bar item.stages?values />
+              </div>
+              <div class="col-xl-6 next-action">
+                <#if item.nextStage??>
+                  <#local nextStageUrl="" />
 
-                <#-- Set nextStage URL based on action code -->
+                  <#-- Set nextStage URL based on action code -->
 
-                <#if nextStageUrl?has_content>
-                  <a href="${nextStageUrl}"><#compress><@spring.message code=item.nextStage.actionCode /></#compress></a>
-                <#else>
-                  <@spring.message code=item.nextStage.actionCode />
+                  <#if nextStageUrl?has_content>
+                    <a href="${nextStageUrl}"><#compress><@spring.message code=item.nextStage.actionCode /></#compress></a>
+                  <#else>
+                    <@spring.message code=item.nextStage.actionCode />
+                  </#if>
+                <#elseif item.progress.percentage == 100>
+                  Complete
                 </#if>
-              <#elseif item.progress.percentage == 100>
-                Complete
-              </#if>
+              </div>
             </div>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 col-xl-1">
             <div class="pull-right">
               <@dropdown_menu "Module marks" "btn-xs">
                 <li>
@@ -146,13 +150,13 @@
 <#macro module_occurrence_inner item>
   <div class="row">
     <div class="col-md-3">Component</div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-xl-2">
       <div class="row">
         <div class="col-xs-6">Deadline</div>
         <div class="col-xs-6">Students</div>
       </div>
     </div>
-    <div class="col-md-6">Progress / Actions</div>
+    <div class="col-md-6 col-xl-7">Progress / Actions</div>
   </div>
 
   <#-- Fix nth-of-type zebra striping -->
@@ -171,7 +175,7 @@
 
           (${info.assessmentComponent.sequence}, ${info.assessmentComponent.assessmentType.name}, ${(info.assessmentComponent.scaledWeighting!0)?string["0.#"]}%)
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 col-xl-2">
           <div class="row">
             <div class="col-xs-6">
               <#if info.upstreamAssessmentGroup.deadline??>
@@ -186,26 +190,30 @@
           </div>
         </div>
 
-        <div class="col-md-4">
-          <@stage_progress_bar info.stages?values />
-          <div class="next-action">
-            <#if info.nextStage??>
-              <#local nextStageUrl="" />
+        <div class="col-md-4 col-xl-6">
+          <div class="row">
+            <div class="col-xl-6">
+              <@stage_progress_bar info.stages?values />
+            </div>
+            <div class="col-xl-6 next-action">
+              <#if info.nextStage??>
+                <#local nextStageUrl="" />
 
-              <#-- Set nextStage URL based on action code -->
+                <#-- Set nextStage URL based on action code -->
 
-              <#if nextStageUrl?has_content>
-                <a href="${nextStageUrl}"><#compress><@spring.message code=info.nextStage.actionCode /></#compress></a>
-              <#else>
-                <@spring.message code=info.nextStage.actionCode />
+                <#if nextStageUrl?has_content>
+                  <a href="${nextStageUrl}"><#compress><@spring.message code=info.nextStage.actionCode /></#compress></a>
+                <#else>
+                  <@spring.message code=info.nextStage.actionCode />
+                </#if>
+              <#elseif info.progress.percentage == 100>
+                Complete
               </#if>
-            <#elseif info.progress.percentage == 100>
-              Complete
-            </#if>
+            </div>
           </div>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-2 col-xl-1">
           <div class="pull-right">
             <@dropdown_menu "Component marks" "btn-xs">
               <li>
