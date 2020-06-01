@@ -5,12 +5,20 @@
 
 <div class="row">
   <div class="col-md-4 col-md-push-8">
-    <h2>Scaling guidance</h2>
+    <#if marks?has_content>
+      <p>Marks for this assessment are shown on the graph. If marks are scaled, the Y axis values will change.</p>
+      <script type="application/json" id="marks">${marks}</script>
+      <canvas id="chart"></canvas>
+    </#if>
 
-    <p>
-      Before scaling assessment component marks, please read the
-      <a target="_blank" href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/marks/#scaling">university guidance for mark adjustment and scaling</a>.
-    </p>
+    <div class="panel panel-default panel-body scaling-guidance">
+      <h2>Scaling guidance</h2>
+
+      <p>
+        Before scaling assessment component marks, please read the
+        <a target="_blank" href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/marks/#scaling">university guidance for mark adjustment and scaling</a>.
+      </p>
+    </div>
   </div>
 
   <div class="col-md-8 col-md-pull-4">
@@ -39,17 +47,13 @@
 
       <ul>
         <li>The normal pass mark for the assessment (40 for undergraduate assessments or 50 for postgraduate assessments, except in very unusual circumstances)</li>
-        <li>An adjustment factor, positive or negative, for the pass mark for the assessment. Positive numbers bring the pass mark down,
-          negative numbers raise the pass mark.</li>
-        <li>An adjustment factor, positive or negative, for the upper class mark (70) for the assessment. Positive numbers bring the mark required for upper class
-          down, negative numbers raise the mark required.</li>
+        <li>A scaled pass mark for the assessment. If the pass mark is 40, a scaled pass mark of 35 will mean that students with a mark of 35 are scaled to 40.</li>
+        <li>A scaled upper class mark for the assessment. A scaled upper class mark of 65 will mean that students with a mark of 70 are scaled to 65.</li>
       </ul>
 
       <p>
-        For example, a pass mark adjustment of <code>5</code> with a pass mark of <code>40</code> will scale a mark of <code>35</code> to be a pass mark of
-        <code>40</code>. An upper class mark adjustment of <code>-5</code> will scale a mark of <code>75</code> to be a mark of <code>70</code>. Marks are scaled
-        linearly between 0 and the adjusted pass mark threshold, the adjusted pass mark threshold and the adjusted upper class threshold, and the adjusted upper
-        class threshold to 100.
+        Marks are scaled linearly between 0 and the scaled pass mark, the scaled pass mark and the scaled upper class mark, and the scaled upper class mark
+        to 100.
       </p>
 
       <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
@@ -65,17 +69,17 @@
             </@bs3form.labelled_form_group>
           </div>
           <div class="col-lg-4">
-            <@bs3form.labelled_form_group path="passMarkAdjustment" labelText="Pass mark adjustment">
+            <@bs3form.labelled_form_group path="scaledPassMark" labelText="Scaled pass mark">
               <div class="input-group">
-                <@f.input path="passMarkAdjustment" cssClass="form-control" autocomplete="off" type="number" min="-30" max="30" />
+                <@f.input path="scaledPassMark" cssClass="form-control" autocomplete="off" type="number" min="1" max="100" />
                 <div class="input-group-addon">%</div>
               </div>
             </@bs3form.labelled_form_group>
           </div>
           <div class="col-lg-4">
-            <@bs3form.labelled_form_group path="upperClassAdjustment" labelText="Upper class mark adjustment">
+            <@bs3form.labelled_form_group path="scaledUpperClassMark" labelText="Scaled upper class mark">
               <div class="input-group">
-                <@f.input path="upperClassAdjustment" cssClass="form-control" autocomplete="off" type="number" min="-30" max="30" />
+                <@f.input path="scaledUpperClassMark" cssClass="form-control" autocomplete="off" type="number" min="41" max="100" />
                 <div class="input-group-addon">%</div>
               </div>
             </@bs3form.labelled_form_group>
@@ -89,4 +93,6 @@
       </@f.form>
     </#if>
   </div>
+
+
 </div>
