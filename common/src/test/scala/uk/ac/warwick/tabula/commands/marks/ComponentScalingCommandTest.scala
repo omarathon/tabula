@@ -27,8 +27,8 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
 
   @Test
   def defaults(): Unit = {
-    scaling.scaledPassMark = 45
-    scaling.scaledUpperClassMark = 75
+    scaling.scaledPassMark = 35
+    scaling.scaledUpperClassMark = 65
 
     scaling.scaleMark(0) should be (0)
     scaling.scaleMark(5) should be (6)
@@ -56,8 +56,8 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
   @Test
   def options(): Unit = {
     scaling.passMark = 50
-    scaling.scaledPassMark = 67
-    scaling.scaledUpperClassMark = 82
+    scaling.scaledPassMark = 33
+    scaling.scaledUpperClassMark = 58
 
     scaling.scaleMark(0) should be (0)
     scaling.scaleMark(5) should be (8)
