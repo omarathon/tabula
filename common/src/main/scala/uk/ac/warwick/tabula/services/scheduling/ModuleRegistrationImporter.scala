@@ -377,6 +377,7 @@ object ModuleRegistrationImporter {
   class ModuleRegistrationsByAcademicYearsQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForAcademicYear union $ConfirmedModuleRegistrationsForAcademicYear") {
     declareParameter(new SqlParameter("academicYears", Types.VARCHAR))
+    declareParameter(new SqlParameter("currentAcademicYears", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
@@ -385,6 +386,7 @@ object ModuleRegistrationImporter {
   class ModuleRegistrationsByUniversityIdsQuery(ds: DataSource)
     extends MappingSqlQuery[ModuleRegistrationRow](ds, s"$UnconfirmedModuleRegistrationsForUniversityIds union $ConfirmedModuleRegistrationsForUniversityIds") {
     declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    declareParameter(new SqlParameter("currentAcademicYears", Types.VARCHAR))
     compile()
 
     override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
