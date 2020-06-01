@@ -56,7 +56,7 @@ $(() => {
       },
       options: {
         legend: false,
-        tooltips: false,
+        tooltips: true,
         scales: {
           xAxes: [{
             ticks: {
