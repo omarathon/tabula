@@ -117,7 +117,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
         StageProgress(
           stage = CalculateModuleMarks,
           started = true,
-          messageCode = "workflow.marks.moduleOccurrence.RecordMarks.inProgress",
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.inProgress",
           health = WorkflowStageHealth.Warning,
         )
       }
