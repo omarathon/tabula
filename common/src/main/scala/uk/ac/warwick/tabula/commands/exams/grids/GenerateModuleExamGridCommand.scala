@@ -66,13 +66,13 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
             assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
               .filter(ac => isHistoricalGrid || ac.inUse) // TAB-8263 only filter 'not in use' components for this years grids
               .map { comp => AssessmentIdentity(code = code, name = comp.name) -> AssessmentComponentInfo(
-                mark = uagm.agreedMark.orElse(uagm.actualMark),
-                grade = uagm.agreedGrade.orElse(uagm.actualGrade),
+                mark = uagm.firstOriginalMark,
+                grade = uagm.firstOriginalGrade,
                 isActualMark = uagm.agreedMark.isEmpty,
                 isActualGrade = uagm.agreedGrade.isEmpty,
                 resitInfo = ResitComponentInfo(
-                  resitMark = uagm.resitAgreedMark.orElse(uagm.resitActualMark),
-                  resitGrade = uagm.resitAgreedGrade.orElse(uagm.resitActualGrade),
+                  resitMark = uagm.firstResitMark,
+                  resitGrade = uagm.firstResitGrade,
                   isActualResitMark = uagm.resitAgreedMark.isEmpty,
                   isActualResitGrade = uagm.resitAgreedGrade.isEmpty
                 )

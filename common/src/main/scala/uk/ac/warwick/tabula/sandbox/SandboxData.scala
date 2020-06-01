@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.sandbox
 
 import uk.ac.warwick.tabula.data.model._
-import uk.co.halfninja.randomnames.{CompositeNameGenerator, Name, NameGenerators}
 import uk.co.halfninja.randomnames.Gender._
+import uk.co.halfninja.randomnames.{CompositeNameGenerator, Name, NameGenerators}
 
 // scalastyle:off magic.number
 object SandboxData {
@@ -149,20 +149,40 @@ object SandboxData {
   )
 
   final val GradeBoundaries = Seq(
-    GradeBoundary("TABULA-UG", "1", Some(80), Some(100), "N"),
-    GradeBoundary("TABULA-UG", "1", Some(70), Some(79), "N"),
-    GradeBoundary("TABULA-UG", "21", Some(60), Some(69), "N"),
-    GradeBoundary("TABULA-UG", "22", Some(50), Some(59), "N"),
-    GradeBoundary("TABULA-UG", "3", Some(40), Some(49), "N"),
-    GradeBoundary("TABULA-UG", "F", Some(0), Some(39), "N"),
-    GradeBoundary("TABULA-PG", "A+", Some(80), Some(100), "N"),
-    GradeBoundary("TABULA-PG", "A", Some(70), Some(79), "N"),
-    GradeBoundary("TABULA-PG", "B", Some(60), Some(69), "N"),
-    GradeBoundary("TABULA-PG", "C", Some(50), Some(59), "N"),
-    GradeBoundary("TABULA-PG", "D", Some(40), Some(49), "N"),
-    GradeBoundary("TABULA-PG", "E", Some(0), Some(39), "N"),
-    GradeBoundary("TABULA-PF", "P", None, None, "S"),
-    GradeBoundary("TABULA-PF", "F", None, None, "S")
+    GradeBoundary("TABULA-UG", "SAS", 1, "1", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "SAS", 2, "1", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "SAS", 3, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "SAS", 4, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "SAS", 5, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "SAS", 6, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-UG", "SAS", 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-UG", "RAS", 1, "1", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "RAS", 2, "1", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "RAS", 3, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "RAS", 4, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "RAS", 5, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-UG", "RAS", 6, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-UG", "RAS", 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "SAS", 1, "A+", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "SAS", 2, "A", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "SAS", 3, "B", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "SAS", 4, "C", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "SAS", 5, "D", Some(40), Some(49), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "SAS", 6, "E", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "SAS", 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "RAS", 1, "A+", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "RAS", 2, "A", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "RAS", 3, "B", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "RAS", 4, "C", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PG", "RAS", 5, "D", Some(40), Some(49), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "RAS", 6, "E", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PG", "RAS", 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PF", "SAS", 1, "P", None, None, "S", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PF", "SAS", 2, "F", None, None, "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PF", "SAS", 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PF", "RAS", 1, "P", None, None, "S", Some(ModuleResult.Pass)),
+    GradeBoundary("TABULA-PF", "RAS", 2, "F", None, None, "S", Some(ModuleResult.Fail)),
+    GradeBoundary("TABULA-PF", "RAS", 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
   )
 
   def randomName(id: Long, gender: Gender): Name = {

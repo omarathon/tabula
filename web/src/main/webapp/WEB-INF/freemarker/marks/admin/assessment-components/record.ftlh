@@ -6,7 +6,7 @@
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
 </div>
 
-<p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank.</p>
+<p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank and use <a href="<@routes.marks.assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup />">missing mark adjustment</a>.</p>
 
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>
@@ -14,67 +14,12 @@
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" <#if (from_origin!"upload") == "upload">class="active"</#if>><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
-    <li role="presentation" <#if (from_origin!"upload") == "webform">class="active"</#if>><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
+    <li role="presentation" <#if (from_origin!"webform") == "webform">class="active"</#if>><a href="#webform" aria-controls="webform" role="tab" data-toggle="tab">Web Form</a></li>
+    <li role="presentation" <#if (from_origin!"webform") == "upload">class="active"</#if>><a href="#upload" aria-controls="upload" role="tab" data-toggle="tab">Upload</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "upload">active</#if>" id="upload">
-      <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
-        should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>,
-        <strong>Grade</strong> and <strong>Comments</strong>.
-        You can use this <a href="<@routes.marks.assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup />">generated spreadsheet</a> as a template.</p>
-
-      <p>Enter the corresponding results for each university ID in the following columns:</p>
-
-      <ul>
-        <li>Column B - Mark</li>
-        <li>Column C - Grade</li>
-        <li>Column D - Comments</li>
-      </ul>
-
-      <p>Note that you can upload any of the following: marks only; grades only (for pass/fail modules); marks and grades only; marks and comments only; marks, grades and comments.</p>
-
-      <#if assessmentComponent.module.adminDepartment??>
-        <#assign department = assessmentComponent.module.adminDepartment />
-        <h6>
-          Departmental settings for ${department.name}
-          <#if can.do("Department.ManageDisplaySettings", department)>
-            <a href="<@routes.admin.displaysettings department />">Change</a>
-          </#if>
-        </h6>
-
-        <ul>
-          <#if department.assignmentGradeValidation>
-            <li>Grade validation is currently <strong>ON</strong> - invalid grades cannot be saved. A grade must be provided if a mark is entered.</li>
-
-            <#if assessmentComponent.marksCode != 'PF'>
-              <#if department.assignmentGradeValidationUseDefaultForZero>
-                <li>The default grade for a mark of 0 is <strong>F</strong>. Please check grades carefully.</li>
-              <#else>
-                <li>A grade will <strong>NOT</strong> be pre-filled for a mark of 0. A valid grade must be provided.</li>
-              </#if>
-            </#if>
-          <#else>
-            <li>Grade validation is currently <strong>OFF</strong> - please make sure only valid grades are recorded.</li>
-          </#if>
-        </ul>
-      </#if>
-
-      <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
-        <h3>Select file</h3>
-
-        <@bs3form.labelled_form_group path="file" labelText="File">
-          <input type="file" name="file.upload" />
-        </@bs3form.labelled_form_group>
-
-        <div class="buttons form-group">
-          <button type="submit" class="btn btn-primary">Upload</button>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
-        </div>
-      </@f.form>
-    </div>
-    <div role="tabpanel" class="tab-pane <#if (from_origin!"upload") == "webform">active</#if>" id="webform">
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"webform") == "webform">active</#if>" id="webform">
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
@@ -167,7 +112,7 @@
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string />
+                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
                         <@f.select path="students[${student.universityId}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
                         <@f.input path="students[${student.universityId}].grade" cssClass="form-control grade-box" />
@@ -186,10 +131,65 @@
 
           <div class="submit-buttons fix-footer">
             <input type="submit" class="btn btn-primary" value="Save" />
-            <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.assessmentcomponents assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
+            <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.adminhome assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
           </div>
         </@f.form>
       </div>
+    </div>
+    <div role="tabpanel" class="tab-pane <#if (from_origin!"webform") == "upload">active</#if>" id="upload">
+      <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
+        should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>,
+        <strong>Grade</strong> and <strong>Comments</strong>.
+        You can use this <a href="<@routes.marks.assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup />">generated spreadsheet</a> as a template.</p>
+
+      <p>Enter the corresponding results for each university ID in the following columns:</p>
+
+      <ul>
+        <li>Column B - Mark</li>
+        <li>Column C - Grade</li>
+        <li>Column D - Comments</li>
+      </ul>
+
+      <p>Note that you can upload any of the following: marks only; grades only (for pass/fail modules); marks and grades only; marks and comments only; marks, grades and comments.</p>
+
+      <#if assessmentComponent.module.adminDepartment??>
+        <#assign department = assessmentComponent.module.adminDepartment />
+        <h6>
+          Departmental settings for ${department.name}
+          <#if can.do("Department.ManageDisplaySettings", department)>
+            <a href="<@routes.admin.displaysettings department />">Change</a>
+          </#if>
+        </h6>
+
+        <ul>
+          <#if department.assignmentGradeValidation>
+            <li>Grade validation is currently <strong>ON</strong> - invalid grades cannot be saved. A grade must be provided if a mark is entered.</li>
+
+            <#if assessmentComponent.marksCode != 'PF'>
+              <#if department.assignmentGradeValidationUseDefaultForZero>
+                <li>The default grade for a mark of 0 is <strong>F</strong>. Please check grades carefully.</li>
+              <#else>
+                <li>A grade will <strong>NOT</strong> be pre-filled for a mark of 0. A valid grade must be provided.</li>
+              </#if>
+            </#if>
+          <#else>
+            <li>Grade validation is currently <strong>OFF</strong> - please make sure only valid grades are recorded.</li>
+          </#if>
+        </ul>
+      </#if>
+
+      <@f.form method="post" enctype="multipart/form-data" action=submitUrl?markup_string modelAttribute="command">
+        <h3>Select file</h3>
+
+        <@bs3form.labelled_form_group path="file" labelText="File">
+          <input type="file" name="file.upload" />
+        </@bs3form.labelled_form_group>
+
+        <div class="buttons form-group">
+          <button type="submit" class="btn btn-primary">Upload</button>
+          <a class="btn btn-default dirty-check-ignore" href="<@routes.marks.adminhome assessmentComponent.module.adminDepartment upstreamAssessmentGroup.academicYear />">Cancel</a>
+        </div>
+      </@f.form>
     </div>
   </div>
 </div>

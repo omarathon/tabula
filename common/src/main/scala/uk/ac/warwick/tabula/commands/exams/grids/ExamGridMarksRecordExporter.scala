@@ -71,12 +71,12 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
           val row = moduleTable.getRow(index + 1)
           row.getCell(0).setText(s"${mr.module.code.toUpperCase} ${mr.module.name}")
           row.getCell(1).setText(mr.cats.toPlainString)
-          if (Option(mr.agreedMark).isDefined) {
-            row.getCell(2).setText(mr.agreedMark.toPlainString)
-            row.getCell(3).setText(mr.agreedGrade)
-          } else if (Option(mr.actualMark).isDefined) {
-            row.getCell(2).setText(mr.actualMark.toPlainString)
-            row.getCell(3).setText(mr.actualGrade)
+          if (mr.agreedMark.isDefined) {
+            row.getCell(2).setText(mr.agreedMark.get.toString)
+            row.getCell(3).setText(mr.agreedGrade.getOrElse(""))
+          } else if (mr.actualMark.isDefined) {
+            row.getCell(2).setText(mr.actualMark.get.toString)
+            row.getCell(3).setText(mr.actualGrade.getOrElse(""))
           }
         }
 

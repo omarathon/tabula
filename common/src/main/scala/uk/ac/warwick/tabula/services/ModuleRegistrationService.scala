@@ -32,6 +32,8 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
@@ -96,13 +98,16 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
+  override def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByModuleOccurrence(module, JBigDecimal(Some(cats)), academicYear, occurrence)
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYears(academicYears, includeDeleted)
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
-  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
+  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
       val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
@@ -128,15 +133,21 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.firstDefinedMark }
 
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.agreedMark }
 
-  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = moduleRegistration.componentsForBenchmark.map { uagm =>
-    val weighting = uagm.upstreamAssessmentGroup.assessmentComponent
-      .map(_.weighting.toInt)
-      .getOrElse(0)
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
+    lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
 
-    val cats = (BigDecimal(weighting) / 100) * moduleRegistration.cats
-    ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    moduleRegistration.componentsForBenchmark.map { uagm =>
+      val weighting: BigDecimal =
+        uagm.upstreamAssessmentGroup.assessmentComponent
+          .flatMap(_.weightingFor(marks))
+          .getOrElse(BigDecimal(0))
+
+      val cats = (weighting / 100) * moduleRegistration.cats
+      ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    }
   }
 
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
@@ -194,6 +205,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           ruleFilteredSubsets
         }
       }
+
+      // Explicitly specify how to order doubles
+      import Ordering.Double.TotalOrdering
       subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>

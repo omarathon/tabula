@@ -37,11 +37,11 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
   @Test
   def valid(): Unit = new Fixture {
     command.studentMarks = JHashMap(studentUser.getWarwickId -> "100")
-    val gb = GradeBoundary(null, "A", Some(0), Some(100), null)
-    mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, Some(100)) returns Seq(gb)
+    val gb = GradeBoundary(null, null, 0, "A", Some(0), Some(100), null, None)
+    mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, Some(100), isResit = false) returns Seq(gb)
     val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
     result should be(Map(studentUser.getWarwickId -> Seq(gb)))
-    verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, Some(100))
+    verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, Some(100), isResit = false)
   }
 
   @Test
@@ -77,10 +77,10 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
   @Test
   def noMarksFromService(): Unit = new Fixture {
     command.studentMarks = JHashMap(studentUser.getWarwickId -> "100")
-    mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, Some(100)) returns Seq()
+    mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, Some(100), isResit = false) returns Seq()
     val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
     result should be(Map(studentUser.getWarwickId -> Seq()))
-    verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, Some(100))
+    verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, Some(100), isResit = false)
   }
 
 }

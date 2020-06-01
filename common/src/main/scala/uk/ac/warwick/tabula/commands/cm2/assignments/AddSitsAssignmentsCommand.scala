@@ -169,8 +169,9 @@ trait AddSitsAssignmentsCommandOnBind extends BindListener {
   override def onBind(result: BindingResult): Unit = {
     // re-attach UpstreamAssessmentGroup objects based on the other properties
     for (item <- sitsAssignmentItems.asScala if item.assessmentGroup == null) {
+      val year = academicYear // Allow to break inner scope
       item.assessmentGroup = assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
-        this.academicYear = academicYear
+        this.academicYear = year
         this.occurrence = item.occurrence
         this.moduleCode = item.assessmentComponent.moduleCode
         this.sequence = item.assessmentComponent.sequence

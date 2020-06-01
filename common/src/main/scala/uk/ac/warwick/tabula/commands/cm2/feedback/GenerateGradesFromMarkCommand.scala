@@ -61,7 +61,7 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assignment)
     }
 
     studentMarks.asScala.map { case (uniId, mark) =>
-      uniId -> studentAssessmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.maybeText.map(_.toInt))).getOrElse(Seq())
+      uniId -> studentAssessmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.maybeText.map(_.toInt), assessment.resitAssessment)).getOrElse(Seq())
     }.toMap
   }
 

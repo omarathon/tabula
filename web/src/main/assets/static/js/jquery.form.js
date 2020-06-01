@@ -84,7 +84,7 @@
       return this;
     }
 
-    var method, action, url, $form = this;
+    var method, action, url, isMsie, $form = this;
 
     if (typeof options == 'function') {
       options = {success: options};
@@ -101,12 +101,12 @@
       // clean url (don't include hash vaue)
       url = (url.match(/^([^#]+)/) || [])[1];
     }
-
+    isMsie = /(MSIE|trident)/.test(navigator.userAgent || '');
     options = $.extend(true, {
       url: url,
       success: $.ajaxSettings.success,
       type: method || $.ajaxSettings.type,
-      iframeSrc: /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank'
+      iframeSrc: (isMsie && /^https/i.test(window.location.href || '')) ? 'javascript:false' : 'about:blank'
     }, options);
 
     // hook for manipulating the form data before it is extracted;

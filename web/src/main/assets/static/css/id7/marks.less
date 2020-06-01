@@ -1,6 +1,9 @@
 @import (reference) "bootstrap/less/variables";
 @import (reference) "bootstrap/less/mixins/vendor-prefixes";
 @import (reference) "@universityofwarwick/id7/less/variables";
+@import (inline) "chart.js/dist/Chart.min.css";
+
+@import "stage-progress-bar";
 
 // Could use :out-of-range here but that doesn't catch invalid step (i.e. where someone puts 70.1 for a mark but step="1")
 .form-control:invalid {
@@ -22,4 +25,34 @@
     background-color: @background-color;
     border-color: @border-color;
   }
+}
+
+.striped-section .section-title .next-action {
+  color: @text-color;
+}
+
+.marks-form {
+  > .table, > .id7-wide-table-wrapper-container > .table-responsive > .table {
+    > tbody > tr > td {
+      white-space: nowrap;
+
+      .modal, .has-error {
+        white-space: normal;
+      }
+    }
+  }
+
+  .table {
+    colgroup.assessment-component, colgroup.module-mark-calculation {
+      border-left: 2px solid @table-border-color;
+
+      + colgroup.assessment-component {
+        border-left: 1px solid @table-border-color;
+      }
+    }
+  }
+}
+
+.scaling-guidance {
+  margin-top: 2rem;
 }

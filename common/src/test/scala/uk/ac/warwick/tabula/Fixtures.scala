@@ -151,16 +151,17 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A", marksCode: String = null): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
     a.moduleCode = "%s-30" format module.code.toUpperCase
-    a.assessmentGroup = "A"
+    a.assessmentGroup = assessmentGroup
     a.sequence = "%s%02d".format(assessmentType.subtype.code, number)
     a.assessmentType = assessmentType
     a.inUse = true
-    a.weighting = weighting
+    a.rawWeighting = weighting
+    a.marksCode = marksCode
     a
   }
 
@@ -208,8 +209,19 @@ object Fixtures extends Mockito {
     group.deadline = Option(deadline)
     val groupMember = new UpstreamAssessmentGroupMember(group, "0123456")
     groupMember.actualMark = Option(actualMark)
+    group.members.clear()
     group.members.addAll(Seq(groupMember).asJava)
     group
+  }
+
+  def variableAssessmentWeightingRule(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A"): VariableAssessmentWeightingRule = {
+    val rule = new VariableAssessmentWeightingRule
+    rule.moduleCode = "%s-30" format module.code.toUpperCase
+    rule.assessmentGroup = assessmentGroup
+    rule.ruleSequence = "%03d".format(number)
+    rule.assessmentType = assessmentType
+    rule.rawWeighting = weighting
+    rule
   }
 
   def feedbackTemplate(name: String): FeedbackTemplate = {
@@ -364,13 +376,14 @@ object Fixtures extends Mockito {
     cats: JBigDecimal,
     year: AcademicYear,
     occurrence: String = "",
-    agreedMark: BigDecimal = BigDecimal(0),
-    status: ModuleSelectionStatus = ModuleSelectionStatus.Core
+    agreedMark: Option[Int] = None,
+    status: ModuleSelectionStatus = ModuleSelectionStatus.Core,
+    marksCode: String = null,
   ): ModuleRegistration = {
     val scjCode = Option(scd).map(_.scjCode).orNull
-    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence)
+    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence, marksCode)
     mr.studentCourseDetails = scd
-    mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+    mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr
   }

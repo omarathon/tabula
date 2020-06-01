@@ -32,15 +32,17 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       "in304" -> Fixtures.module("in304"),
       "in305" -> Fixtures.module("in305"),
       "in306" -> Fixtures.module("in306"),
+      "in307" -> Fixtures.module("in307"),
     )
 
     val moduleRegistrations = Seq(
-      Fixtures.moduleRegistration(scd, modules("in301"), BigDecimal(30).underlying, academicYear, "", BigDecimal(55), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in302"), BigDecimal(30).underlying, academicYear, "", BigDecimal(60), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in303"), BigDecimal(30).underlying, academicYear, "", BigDecimal(67), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in304"), BigDecimal(15).underlying, academicYear, "", BigDecimal(56), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in305"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(77), ModuleSelectionStatus.Core),
-      Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(7.5).underlying, academicYear, "", BigDecimal(88), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in301"), BigDecimal(30).underlying, academicYear, "", Some(55), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in302"), BigDecimal(30).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in303"), BigDecimal(15).underlying, academicYear, "", Some(67), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in304"), BigDecimal(15).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in305"), BigDecimal(7.5).underlying, academicYear, "", Some(77), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in306"), BigDecimal(7.5).underlying, academicYear, "", Some(88), ModuleSelectionStatus.Core),
+      Fixtures.moduleRegistration(scd, modules("in307"), BigDecimal(15).underlying, academicYear, "", Some(80), ModuleSelectionStatus.Core),
     )
 
     val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
@@ -68,8 +70,32 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
         Fixtures.assessmentComponent(modules("in305"), 2, AssessmentType.SummerExam, 80),
       ),
 
-      "in306" -> Seq( Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam) )
+      "in306" -> Seq(Fixtures.assessmentComponent(modules("in306"), 1, AssessmentType.SummerExam)),
+
+      // VAW, best 2 of 3 assessments
+      "in307" -> Seq(
+        Fixtures.assessmentComponent(modules("in307"), 1, AssessmentType.Essay, 50),
+        Fixtures.assessmentComponent(modules("in307"), 2, AssessmentType.Essay, 50),
+        Fixtures.assessmentComponent(modules("in307"), 3, AssessmentType.Essay, 50),
+      )
     )
+    components.values.foreach(_.foreach(_.membershipService = mockMembershipService))
+
+    mockMembershipService.getVariableAssessmentWeightingRules("IN301-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN302-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN303-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN304-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN305-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN306-30", "A") returns Seq.empty
+    mockMembershipService.getVariableAssessmentWeightingRules("IN307-30", "A") returns Seq(
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 50),
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 50),
+      Fixtures.variableAssessmentWeightingRule(modules("in307"), 1, AssessmentType.Essay, 0),
+    )
+
+    mockMembershipService.getAssessmentComponents(anyString, isEq(false)) answers { args: Array[AnyRef] =>
+      components(Module.stripCats(args(0).asInstanceOf[String]).get.toLowerCase)
+    }
 
     val componentMarks = Seq(
       55,
@@ -82,7 +108,10 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       66,
       50,
       65,
-      63
+      63,
+      60,
+      70,
+      90
     )
 
     val upstreamAssessmentGroups: Map[String, Seq[UpstreamAssessmentGroup]] = components.zipWithIndex.map { case ((mc, components), i) =>
@@ -111,12 +140,12 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
     val module6 = Fixtures.module("xx106")
     new Fixture {
       val moduleRegistrations = Seq(
-        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
-        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
-        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
-        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(0)),
-        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
-        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = Some(100)),
+        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = Some(58)),
+        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = Some(30)),
+        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = Some(0)),
+        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = Some(97)),
+        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = Some(64))
       )
       val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map(), allowEmpty = false)
       result.isRight should be (true)
@@ -124,23 +153,23 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       result.toOption.get.doubleValue should be(64.6)
 
       val moduleRegistrationsWithMissingAgreedMark = Seq(
-        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
-        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
-        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
-        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = null),
-        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
-        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = Some(100)),
+        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = Some(58)),
+        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = Some(30)),
+        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = None),
+        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = Some(97)),
+        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = Some(64))
       )
       val noResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map(), allowEmpty = false)
       noResult.isRight should be (false)
 
       val moduleRegistrationsWithOverriddenMark = Seq(
-        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
-        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
-        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
-        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = null),
-        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
-        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+        Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = Some(100)),
+        Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = Some(58)),
+        Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = Some(30)),
+        Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = None),
+        Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = Some(97)),
+        Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = Some(64))
       )
       val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0), allowEmpty = false)
       overriddenResult.isRight should be (true)
@@ -168,15 +197,15 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       val academicYear: AcademicYear = AcademicYear(2014)
       scd.latestStudentCourseYearDetails.academicYear = academicYear
       val moduleRegistrations = Seq(
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3c5"), BigDecimal(6).underlying, academicYear, "", BigDecimal(78), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f2"), BigDecimal(15).underlying, academicYear, "", BigDecimal(79), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f3"), BigDecimal(30).underlying, academicYear, "", BigDecimal(86), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3c3"), BigDecimal(30).underlying, academicYear, "", BigDecimal(70), ModuleSelectionStatus.Core),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f4"), BigDecimal(15).underlying, academicYear, "", BigDecimal(79), ModuleSelectionStatus.Option),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3c5"), BigDecimal(6).underlying, academicYear, "", Some(78), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f2"), BigDecimal(15).underlying, academicYear, "", Some(79), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f3"), BigDecimal(30).underlying, academicYear, "", Some(86), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3c3"), BigDecimal(30).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f4"), BigDecimal(15).underlying, academicYear, "", Some(79), ModuleSelectionStatus.Option),
 
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f6"), BigDecimal(15).underlying, academicYear, "", BigDecimal(65), ModuleSelectionStatus.Option),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f7"), BigDecimal(15).underlying, academicYear, "", BigDecimal(69), ModuleSelectionStatus.Option),
-        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Option)
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f6"), BigDecimal(15).underlying, academicYear, "", Some(65), ModuleSelectionStatus.Option),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f7"), BigDecimal(15).underlying, academicYear, "", Some(69), ModuleSelectionStatus.Option),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Option)
       )
       moduleRegistrations.foreach(scd.addModuleRegistration)
       val result: Seq[(BigDecimal, Seq[ModuleRegistration])] = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.moduleRegistrations, Map(), 120, Seq()) // TODO check route rules
@@ -200,14 +229,14 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   @Test
   def benchmarkWeightedAssessmentMark(): Unit = {
     new GraduationBenchmarkFixture {
-      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(60.0))
+      service.benchmarkWeightedAssessmentMark(moduleRegistrations) should be (BigDecimal(60.6))
     }
   }
 
   @Test
   def percentageOfAssessmentTaken(): Unit = {
     new GraduationBenchmarkFixture {
-      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(52.5))
+      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(60.0))
     }
   }
 }

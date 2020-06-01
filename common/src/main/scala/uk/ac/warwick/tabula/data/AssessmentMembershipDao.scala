@@ -5,7 +5,7 @@ import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -129,7 +129,7 @@ trait AssessmentMembershipDao {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
+  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
@@ -550,13 +550,17 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .seq
   }
 
-  def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
-    session.newCriteria[UpstreamAssessmentGroup]
-      // TODO Is there a way to do not-in with multiple queries?
-      .add(not(safeIn("id", ids)))
+  def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] = {
+    val c = session.newCriteria[UpstreamAssessmentGroup]
       .add(safeIn("academicYear", academicYears))
-      .seq
-      .map(_.id)
+
+    if (ids.nonEmpty) {
+      // TODO Is there a way to do not-in with multiple queries?
+      c.add(not(safeIn("id", ids)))
+    }
+
+    c.project[String](Projections.id()).seq
+  }
 
   // Get only current members
   private def currentMembersByGroup(upstreamGroups: Seq[UpstreamAssessmentGroup]): Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
@@ -656,15 +660,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     session.save(gb)
   }
 
-  def deleteGradeBoundaries(marksCode: String): Unit = {
-    getGradeBoundaries(marksCode).foreach(session.delete)
-  }
+  def deleteGradeBoundaries(marksCode: String): Unit =
+    session.newUpdateQuery("delete GradeBoundary gb where gb.marksCode = :marksCode")
+      .setParameter("marksCode", marksCode)
+      .run()
 
-  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] = {
+  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary] =
     session.newCriteria[GradeBoundary]
       .add(is("marksCode", marksCode))
+      .add(is("process", process))
       .seq
-  }
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
     val assignments = session.createSQLQuery(

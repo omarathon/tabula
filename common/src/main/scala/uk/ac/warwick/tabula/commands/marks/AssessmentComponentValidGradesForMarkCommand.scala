@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.marks.ValidGradesForMarkCommand._
+import uk.ac.warwick.tabula.commands.marks.AssessmentComponentValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 import scala.util.Try
 
-object ValidGradesForMarkCommand {
+object AssessmentComponentValidGradesForMarkCommand {
   // Tuple of all valid grades and the default
   type Result = (Seq[GradeBoundary], Option[GradeBoundary])
   type Command = Appliable[Result] with SelfValidating
@@ -19,29 +19,29 @@ object ValidGradesForMarkCommand {
   val AdminPermission: Permission = Permissions.Feedback.Publish
 
   def apply(assessmentComponent: AssessmentComponent): Command =
-    new ValidGradesForMarkCommandInternal(assessmentComponent)
+    new AssessmentComponentValidGradesForMarkCommandInternal(assessmentComponent)
       with ComposableCommand[Result]
-      with ValidGradesForMarkPermissions
-      with ValidGradesForMarkValidation
-      with ValidGradesForMarkRequest
+      with AssessmentComponentValidGradesForMarkPermissions
+      with AssessmentComponentValidGradesForMarkValidation
+      with AssessmentComponentValidGradesForMarkRequest
       with Unaudited with ReadOnly
       with AutowiringAssessmentMembershipServiceComponent
 }
 
-abstract class ValidGradesForMarkCommandInternal(val assessmentComponent: AssessmentComponent)
+abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessmentComponent: AssessmentComponent)
   extends CommandInternal[Result]
-    with ValidGradesForMarkState {
-  self: ValidGradesForMarkRequest
+    with AssessmentComponentValidGradesForMarkState {
+  self: AssessmentComponentValidGradesForMarkRequest
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) = {
     val validGrades = mark.maybeText match {
       case Some(m) =>
         Try(m.toInt).toOption
-          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt)))
+          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), resit))
           .getOrElse(Seq.empty)
 
-      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None)
+      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, resit)
     }
 
     val default =
@@ -59,25 +59,26 @@ abstract class ValidGradesForMarkCommandInternal(val assessmentComponent: Assess
   }
 }
 
-trait ValidGradesForMarkState {
+trait AssessmentComponentValidGradesForMarkState {
   def assessmentComponent: AssessmentComponent
 }
 
-trait ValidGradesForMarkRequest {
+trait AssessmentComponentValidGradesForMarkRequest {
   var mark: String = _
   var existing: String = _
+  var resit: Boolean = false
 }
 
-trait ValidGradesForMarkValidation extends SelfValidating {
-  self: ValidGradesForMarkRequest =>
+trait AssessmentComponentValidGradesForMarkValidation extends SelfValidating {
+  self: AssessmentComponentValidGradesForMarkRequest =>
 
   override def validate(errors: Errors): Unit = {
     // Prefer to just filter out invalid input in applyInternal() in this case so we still get the default
   }
 }
 
-trait ValidGradesForMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: ValidGradesForMarkState =>
+trait AssessmentComponentValidGradesForMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  self: AssessmentComponentValidGradesForMarkState =>
 
   override def permissionsCheck(p: PermissionsChecking): Unit =
     p.PermissionCheck(AdminPermission, mandatory(assessmentComponent.module))
