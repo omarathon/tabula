@@ -16,6 +16,9 @@
     <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
       <@f.hidden name="confirm" value="true" />
       <@f.hidden path="calculate" />
+      <@f.hidden path="passMark" />
+      <@f.hidden path="scaledPassMark" />
+      <@f.hidden path="scaledUpperClassMark" />
 
       <table class="table table-striped">
         <thead>
