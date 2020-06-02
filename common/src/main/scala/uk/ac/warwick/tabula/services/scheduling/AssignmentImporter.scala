@@ -849,8 +849,8 @@ object AssignmentImporter {
     s"""
     select
       mkc.mks_code as marks_code,
-      mkc.mks_proc as process,
-      coalesce(mkc.mks_rank, mkc.mks_seq) as rank,
+      mkc.mkc_proc as process,
+      coalesce(mkc.mkc_rank, mkc.mkc_seq) as rank,
       mkc.mkc_grade as grade,
       mkc.mkc_minm as minimum_mark,
       mkc.mkc_maxm as maximum_mark,
