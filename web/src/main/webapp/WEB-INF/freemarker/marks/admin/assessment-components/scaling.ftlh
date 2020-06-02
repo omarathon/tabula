@@ -56,6 +56,11 @@
         to 100.
       </p>
 
+      <p>
+        Scaling down marks may lead to students failing who initially passed. If so, departments can either keep the pass mark at the same level and only lower
+        the first class level when using the scaling tool, or make an academic judgement for each student affected.
+      </p>
+
       <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
         <@f.hidden path="calculate" value="true" />
 

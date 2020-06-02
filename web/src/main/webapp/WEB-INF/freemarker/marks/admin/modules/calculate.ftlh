@@ -99,7 +99,7 @@
                     </#if>
 
                     <#if student.history?has_content>
-                      <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#mark-history-modal-${student.scjCode}"><i class="fal fa-history"></i> View history</button>
+                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.scjCode}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
                       <@modal.modal id="mark-history-modal-${student.scjCode}">
                         <@modal.wrapper cssClass="modal-lg">
