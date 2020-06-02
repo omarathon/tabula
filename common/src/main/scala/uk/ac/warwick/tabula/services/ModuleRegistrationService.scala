@@ -32,6 +32,8 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
@@ -96,13 +98,16 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
+  override def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByModuleOccurrence(module, JBigDecimal(Some(cats)), academicYear, occurrence)
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYears(academicYears, includeDeleted)
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
-  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
+  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
       val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
@@ -128,7 +133,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.firstDefinedMark }
 
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.agreedMark }
 
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
     // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting

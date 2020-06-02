@@ -849,12 +849,15 @@ object AssignmentImporter {
     s"""
     select
       mkc.mks_code as marks_code,
+      mkc.mks_proc as process,
+      coalesce(mkc.mks_rank, mkc.mks_seq) as rank,
       mkc.mkc_grade as grade,
       mkc.mkc_minm as minimum_mark,
       mkc.mkc_maxm as maximum_mark,
-      mkc.mkc_sigs as signal_status
+      mkc.mkc_sigs as signal_status,
+      mkc.mkc_rslt as result
     from $sitsSchema.cam_mkc mkc
-    where mkc_proc = 'SAS'
+    where mkc_proc in ('SAS', 'RAS')
   """
 
   def GetAllVariableAssessmentWeightingRules: String =
@@ -1011,10 +1014,13 @@ object AssignmentImporter {
 
       GradeBoundary(
         rs.getString("marks_code"),
+        rs.getString("process"),
+        rs.getInt("rank"),
         rs.getString("grade"),
         getNullableInt("minimum_mark"),
         getNullableInt("maximum_mark"),
-        rs.getString("signal_status")
+        rs.getString("signal_status"),
+        rs.getString("result").maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
       )
     }
   }

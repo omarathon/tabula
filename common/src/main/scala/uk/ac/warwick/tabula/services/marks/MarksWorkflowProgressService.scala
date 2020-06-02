@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.services.marks
 
 import enumeratum.{Enum, EnumEntry}
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, UpstreamAssessmentGroup}
 
 @Service
 class MarksWorkflowProgressService {
@@ -28,26 +30,24 @@ class MarksWorkflowProgressService {
 
   def moduleOccurrenceStages(): Seq[ModuleOccurrenceMarkWorkflowStage] = ModuleOccurrenceMarkWorkflowStage.values
 
-  def moduleOccurrenceProgress(components: Seq[AssessmentComponentInfo]): WorkflowProgress = {
+  def moduleOccurrenceProgress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): WorkflowProgress = {
     val allStages = moduleOccurrenceStages()
-    val progresses = allStages.map(_.progress(components))
+    val progresses = allStages.map(_.progress(students, components))
 
     WorkflowProgress(progresses, allStages)
   }
 }
 
 sealed abstract class ModuleOccurrenceMarkWorkflowStage extends WorkflowStage with EnumEntry {
-  def progress(components: Seq[AssessmentComponentInfo]): WorkflowStages.StageProgress
+  def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): WorkflowStages.StageProgress
   override val actionCode: String = s"workflow.marks.moduleOccurrence.$entryName.action"
 }
 
 object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkflowStage] {
   case object RecordComponentMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(components: Seq[AssessmentComponentInfo]): StageProgress = {
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
       // Infer this from the component stage progress
       val stages = components.map(_.stages(ComponentMarkWorkflowStage.RecordMarks.entryName))
-
-      // TODO can this stage be skipped entirely by MMA for the module as a whole?
 
       StageProgress(
         stage = RecordComponentMarks,
@@ -72,45 +72,110 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
   }
 
   case object CalculateModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(components: Seq[AssessmentComponentInfo]): StageProgress = {
-      // TODO We don't have access to module marks here yet so we don't know whether there's actuals/agreed
-
-      StageProgress(
-        stage = CalculateModuleMarks,
-        started = false,
-        messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.notStarted"
-      )
-    }
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
+      if (students.forall(s => s.mark.isEmpty && s.grade.isEmpty && s.result.isEmpty)) {
+        // No marks have been recorded
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = false,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.notStarted",
+          health = WorkflowStageHealth.Warning,
+        )
+      } else if (students.exists(_.needsWritingToSits)) {
+        // Needs writing to SITS
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.needsWritingToSits",
+        )
+      } else if (students.exists(_.outOfSync)) {
+        // Out of sync with SITS
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.outOfSync",
+          health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.exists(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) && students.forall(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) || s.grade.contains(GradeBoundary.WithdrawnGrade))) {
+        // Component is MMA
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.missed",
+          skipped = true,
+        )
+      } else if (students.forall(s => s.mark.nonEmpty || s.grade.nonEmpty || s.result.nonEmpty)) {
+        // All marks have been recorded
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.completed",
+          completed = true,
+        )
+      } else {
+        // Some marks have been recorded
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.inProgress",
+          health = WorkflowStageHealth.Warning,
+        )
+      }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(RecordComponentMarks))
   }
 
   case object ConfirmModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(components: Seq[AssessmentComponentInfo]): StageProgress = {
-      // TODO We don't have access to module marks here yet so we don't know whether there's actuals/agreed
-
-      StageProgress(
-        stage = ConfirmModuleMarks,
-        started = false,
-        messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.notStarted"
-      )
-    }
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
+      if (students.nonEmpty && students.forall(_.agreed)) {
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.completed",
+          completed = true,
+        )
+      } else if (students.exists(_.agreed)) {
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.inProgress",
+        )
+      } else {
+        // TODO module mark confirmation not done yet
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = false,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.notStarted",
+        )
+      }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(CalculateModuleMarks))
   }
 
   case object ProcessModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(components: Seq[AssessmentComponentInfo]): StageProgress = {
-      // TODO We don't have access to module marks here yet so we don't know whether there's actuals/agreed
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
+      if (students.nonEmpty && students.forall(_.agreed)) {
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.completed",
+          completed = true,
+        )
+      } else if (students.exists(_.agreed)) {
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.inProgress",
+        )
+      } else {
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = false,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.notStarted",
+        )
+      }
 
-      StageProgress(
-        stage = ProcessModuleMarks,
-        started = false,
-        messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.notStarted"
-      )
-    }
-
-    override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(ConfirmModuleMarks))
+    override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(CalculateModuleMarks), Seq(ConfirmModuleMarks))
   }
 
   override val values: IndexedSeq[ModuleOccurrenceMarkWorkflowStage] = findValues
@@ -155,14 +220,18 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate) &&
         upstreamAssessmentGroup.deadline.nonEmpty
 
-      // TODO check MMA and mark as skipped
       if (students.forall(s => s.mark.isEmpty && s.grade.isEmpty)) {
+        val isInPast = upstreamAssessmentGroup.deadline.exists(_.isBefore(LocalDate.now()))
+
         // No marks have been recorded
         StageProgress(
           stage = RecordMarks,
-          started = true,
+          started = isInPast,
           messageCode = "workflow.marks.component.RecordMarks.notStarted",
-          health = if (neededForGraduateBenchmark) WorkflowStageHealth.Danger else WorkflowStageHealth.Warning,
+          health =
+            if (neededForGraduateBenchmark) WorkflowStageHealth.Danger
+            else if (isInPast) WorkflowStageHealth.Warning
+            else WorkflowStageHealth.Good,
         )
       } else if (students.exists(_.needsWritingToSits)) {
         // Needs writing to SITS
@@ -178,6 +247,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           started = true,
           messageCode = "workflow.marks.component.RecordMarks.outOfSync",
           health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.exists(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) && students.forall(s => s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) || s.grade.contains(GradeBoundary.WithdrawnGrade))) {
+        // Component is MMA
+        StageProgress(
+          stage = RecordMarks,
+          started = true,
+          messageCode = "workflow.marks.component.RecordMarks.missed",
+          skipped = true,
         )
       } else if (students.forall(s => s.mark.nonEmpty || s.grade.nonEmpty)) {
         // All marks have been recorded

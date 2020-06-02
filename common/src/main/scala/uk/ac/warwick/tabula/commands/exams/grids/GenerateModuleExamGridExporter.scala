@@ -82,18 +82,18 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
       //detail rows
       entities.foreach { entity =>
-        val (mark, markStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
-          (entity.moduleRegistration.agreedMark.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
-        } else if (Option(entity.moduleRegistration.actualMark).isDefined) {
-          (entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark, entity.moduleRegistration.module.degreeType))
+        val (mark, markStyle) = if (entity.moduleRegistration.agreedMark.isDefined) {
+          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType))
+        } else if (entity.moduleRegistration.actualMark.isDefined) {
+          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType))
         } else {
           ("X", None)
         }
 
-        val (grade, gradeStyle) = if (Option(entity.moduleRegistration.agreedGrade).isDefined) {
-          (entity.moduleRegistration.agreedGrade, None)
-        } else if (Option(entity.moduleRegistration.actualGrade).isDefined) {
-          (entity.moduleRegistration.actualGrade, Option(cellStyleMap(ActualMark)))
+        val (grade, gradeStyle) = if (entity.moduleRegistration.agreedGrade.isDefined) {
+          (entity.moduleRegistration.agreedGrade.get, None)
+        } else if (entity.moduleRegistration.actualGrade.isDefined) {
+          (entity.moduleRegistration.actualGrade.get, Option(cellStyleMap(ActualMark)))
         } else {
           ("X", None)
         }
@@ -112,15 +112,15 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
           cSeqColumnIndex = cSeqColumnIndex + 1
           val (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
-            case Some(cInfo) => if (Option(cInfo.resitInfo.resitMark).isDefined) {
-              if (Option(cInfo.mark).isDefined) {
-                //will use resit style because of the limitation of multiple sytle application to single excel cell for SXSSFWorkbook
-                (s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+            case Some(cInfo) => if (cInfo.resitInfo.resitMark.isDefined) {
+              if (cInfo.mark.isDefined) {
+                //will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
+                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               } else {
-                (s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
               }
-            } else if (Option(cInfo.mark).isDefined) {
-              (cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+            } else if (cInfo.mark.isDefined) {
+              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
             } else {
               ("X", None)
             }
@@ -128,14 +128,14 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
           }
           createCell(row, currentColumnIndex + 6 + cSeqColumnIndex, cMark, cMarkStyle)
           val (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
-            case Some(cInfo) => if (Option(cInfo.resitInfo.resitGrade).isDefined) {
-              if (Option(cInfo.grade).isDefined) {
-                (s"[${cInfo.resitInfo.resitGrade.toString}(${cInfo.grade.toString})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+            case Some(cInfo) => if (cInfo.resitInfo.resitGrade.isDefined) {
+              if (cInfo.grade.isDefined) {
+                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
               } else {
-                (s"[${cInfo.resitInfo.resitGrade.toString}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
               }
-            } else if (Option(cInfo.grade).isDefined) {
-              (cInfo.grade.toString, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
+            } else if (cInfo.grade.isDefined) {
+              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
             } else {
               ("X", None)
             }

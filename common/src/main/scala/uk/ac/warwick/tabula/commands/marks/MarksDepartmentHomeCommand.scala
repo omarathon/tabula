@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.marks
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.AssessmentComponentInfo
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand._
-import uk.ac.warwick.tabula.data.model.{Department, Module}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringMarksWorkflowProgressServiceComponent, MarksWorkflowProgressServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.marks._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
 import scala.collection.immutable.ListMap
@@ -16,6 +16,7 @@ object MarksDepartmentHomeCommand {
   case class ModuleOccurrence(
     moduleCode: String,
     module: Module,
+    cats: BigDecimal,
     occurrence: String,
 
     // Progress
@@ -27,6 +28,54 @@ object MarksDepartmentHomeCommand {
     assessmentComponents: Seq[(String, Seq[AssessmentComponentInfo])],
   )
 
+  case class StudentModuleMarkRecord(
+    scjCode: String,
+    mark: Option[Int],
+    grade: Option[String],
+    result: Option[ModuleResult],
+    needsWritingToSits: Boolean,
+    outOfSync: Boolean,
+    agreed: Boolean,
+    history: Seq[RecordedModuleMark] // Most recent first
+  )
+  object StudentModuleMarkRecord {
+    def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord =
+      StudentModuleMarkRecord(
+        scjCode = moduleRegistration._scjCode,
+        mark =
+          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestMark)
+            .orElse(moduleRegistration.agreedMark)
+            .orElse(recordedModuleRegistration.flatMap(_.latestMark))
+            .orElse(moduleRegistration.firstDefinedMark),
+        grade =
+          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestGrade)
+            .orElse(moduleRegistration.agreedGrade)
+            .orElse(recordedModuleRegistration.flatMap(_.latestGrade))
+            .orElse(moduleRegistration.firstDefinedGrade),
+        result =
+          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestResult)
+            .orElse(Option(moduleRegistration.moduleResult))
+            .orElse(recordedModuleRegistration.flatMap(_.latestResult)),
+        needsWritingToSits = recordedModuleRegistration.exists(_.needsWritingToSits),
+        outOfSync = recordedModuleRegistration.exists(!_.needsWritingToSits) && (
+          recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
+            recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g))
+        ),
+        agreed = recordedModuleRegistration.forall(!_.needsWritingToSits) && moduleRegistration.agreedMark.nonEmpty,
+        history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
+      )
+  }
+
+  def studentModuleMarkRecords(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {
+    val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(module, cats, academicYear, occurrence)
+
+    moduleRegistrations.sortBy(_._scjCode).map { moduleRegistration =>
+      val recordedModuleRegistration = recordedModuleRegistrations.find(_.scjCode == moduleRegistration._scjCode)
+
+      StudentModuleMarkRecord(moduleRegistration, recordedModuleRegistration)
+    }
+  }
+
   type Result = Seq[ModuleOccurrence]
   type Command = Appliable[Result]
 
@@ -37,6 +86,8 @@ object MarksDepartmentHomeCommand {
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringMarksWorkflowProgressServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -50,17 +101,26 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with MarksWorkflowProgressServiceComponent
-    with ListAssessmentComponentsModulesWithPermission =>
+    with ListAssessmentComponentsModulesWithPermission
+    with ModuleRegistrationServiceComponent
+    with ModuleRegistrationMarksServiceComponent =>
 
   override def applyInternal(): Result = {
     assessmentComponentInfos
       .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
       .map { case ((moduleCode, occurrence), infos) =>
-        val progress = workflowProgressService.moduleOccurrenceProgress(infos)
+        val module = infos.head.assessmentComponent.module
+        val cats = infos.head.assessmentComponent.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).get
+
+        val moduleRegistrations = moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
+        val students = studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+
+        val progress = workflowProgressService.moduleOccurrenceProgress(students, infos)
 
         ModuleOccurrence(
           moduleCode = moduleCode,
-          module = infos.head.assessmentComponent.module,
+          module = module,
+          cats = cats,
           occurrence = occurrence,
 
           progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),

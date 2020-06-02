@@ -36,6 +36,8 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
@@ -83,14 +85,23 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .setParameterList("usercodes", userCodes)
       .seq
 
-  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] = {
+  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
       .add(is("module", module))
       .add(is("academicYear", academicYear))
       .add(is("deleted", false))
       .addOrder(asc("_scjCode"))
       .seq
-  }
+
+  override def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+    session.newCriteria[ModuleRegistration]
+      .add(is("module", module))
+      .add(is("cats", cats))
+      .add(is("academicYear", academicYear))
+      .add(is("occurrence", occurrence))
+      .add(is("deleted", false))
+      .addOrder(asc("_scjCode"))
+      .seq
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] = {
     safeInSeq(() => {
