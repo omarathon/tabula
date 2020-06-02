@@ -66,7 +66,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           else if (stages.exists(_.health == WorkflowStageHealth.Warning)) WorkflowStageHealth.Warning
           else WorkflowStageHealth.Good,
         skipped = stages.forall(_.skipped),
-        completed = stages.forall(_.completed),
+        completed = stages.exists(_.completed) && stages.forall(s => s.completed || s.skipped),
       )
     }
   }
