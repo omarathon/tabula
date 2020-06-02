@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.exams.grids
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.GraduationBenchmarkBreakdownCommand
 import uk.ac.warwick.tabula.data.model._
@@ -12,7 +11,8 @@ import uk.ac.warwick.tabula.services.exams.grids.AutowiringNormalCATSLoadService
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.controllers.exams.{ExamsController, StudentCourseYearDetailsBreadcrumbs}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
-import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes, Breadcrumbs => BaseBreadcumbs}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 
 @Controller
@@ -46,12 +46,21 @@ class GraduationBenchmarkBreakdownController extends ExamsController
     @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command
   ): Mav = {
     if(!features.graduationBenchmarkStudentView) throw new ItemNotFoundException() // 404 if the feature is off
-    if(!studentCourseDetails.student.isUG) throw new ItemNotFoundException("The graduation benchmark only applies to undergraduate students")
 
-    Mav("exams/grids/generate/graduationBenchmarkDetails",
-      "breakdown" -> cmd.apply(),
-      "member" -> studentCourseDetails.student,
-    ).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
+    val mav = cmd.apply() match {
+      case Left(ugBreakdown) =>
+        Mav("exams/grids/generate/graduationBenchmarkDetails",
+          "breakdown" -> ugBreakdown,
+          "member" -> studentCourseDetails.student,
+        )
+      case Right(pgBreakdown) =>
+        Mav("exams/grids/generate/pgGraduationBenchmarkDetails",
+          "breakdown" -> pgBreakdown,
+          "member" -> studentCourseDetails.student,
+        )
+    }
+
+    mav.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
       .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
   }
 
