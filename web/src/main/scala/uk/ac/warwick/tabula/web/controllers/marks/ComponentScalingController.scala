@@ -10,13 +10,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ComponentScalingCommand
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/scaling"))
-class ComponentScalingController extends BaseController {
+class ComponentScalingController extends BaseController
+  with AutowiringAssessmentComponentMarksServiceComponent {
 
   validatesSelf[SelfValidating]
 
@@ -48,6 +50,12 @@ class ComponentScalingController extends BaseController {
       json.writeValueAsString(markValues)
     }
   }
+
+  @ModelAttribute("previousScaling")
+  def previousScaling(@PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): Option[RecordedAssessmentComponentStudentMark] =
+    assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup)
+      .flatMap(_.marks.filter(_.source == RecordedAssessmentComponentStudentMarkSource.Scaling))
+      .maxByOption(_.updatedDate)
 
   private val formView: String = "marks/admin/assessment-components/scaling"
 
