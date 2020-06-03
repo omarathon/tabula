@@ -61,6 +61,10 @@
         the first class level when using the scaling tool, or make an academic judgement for each student affected.
       </p>
 
+      <div class="alert alert-info">
+        You should only run the scaling function against component marks at most once per assessment.
+      </div>
+
       <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
         <@f.hidden path="calculate" value="true" />
 

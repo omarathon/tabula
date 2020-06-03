@@ -158,7 +158,7 @@ $(() => {
       },
     });
 
-    $('.form-control').on('change', () => {
+    const onChange = () => {
       try {
         chart.data.datasets[0].data = computeNewMarks(marks);
         chart.data.datasets[1].data = scaleLine();
@@ -168,6 +168,9 @@ $(() => {
         log.error('Invalid scaling parameters', e);
         document.getElementById('chart').style.opacity = 0.4;
       }
-    });
+    };
+
+    $('.form-control').on('change', onChange);
+    onChange();
   });
 });
