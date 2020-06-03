@@ -214,13 +214,12 @@ class SandboxAssignmentImporter extends AssignmentImporter
   with AutowiringAssessmentComponentMarksServiceComponent
   with AutowiringAssessmentMembershipServiceComponent {
 
-  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
-    if (members.map(_.universityId).contains(umr.universityId)) {
-      callback(umr)
-    }
-  }
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit =
+    allMembersWithFilter(yearsToImport, uniId => members.map(_.universityId).contains(uniId.toString))(callback)
 
-  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
+  override def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembersWithFilter(yearsToImport, _ => true)(callback)
+
+  private def allMembersWithFilter(yearsToImport: Seq[AcademicYear], universityIdFilter: Int => Boolean)(callback: UpstreamModuleRegistration => Unit): Unit = {
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
@@ -241,7 +240,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
         academicYear <- yearsToImport
         range <- ranges
-        uniId <- range
+        uniId <- range if universityIdFilter(uniId)
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       } yield {
         val yearOfStudy = (uniId % 3) + 1
