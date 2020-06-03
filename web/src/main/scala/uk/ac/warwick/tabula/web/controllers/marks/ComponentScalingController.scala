@@ -39,7 +39,7 @@ class ComponentScalingController extends BaseController {
   }
 
   @ModelAttribute("marks")
-  def marks(@ModelAttribute("command") cmd: ComponentScalingCommand.Command): String = {
+  def marks(@ModelAttribute("command") cmd: ComponentScalingCommand.Command, errors: Errors): String = {
     val markValues = cmd.studentsToSet.filter(s => s._2.isDefined).map { case (upstreamAssessmentGroupMember, originalMark, grd) =>
       upstreamAssessmentGroupMember.universityId -> originalMark
     }.toMap
@@ -73,7 +73,7 @@ class ComponentScalingController extends BaseController {
         }
 
       model.addAttribute("changes", changes)
-      model.addAttribute("returnTo", getReturnTo(Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup)))
+      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup)}?passMark=${cmd.passMark}&scaledPassMark=${cmd.scaledPassMark}&scaledUpperClassMark=${cmd.scaledUpperClassMark}"))
 
       "marks/admin/assessment-components/scaling_preview"
     }

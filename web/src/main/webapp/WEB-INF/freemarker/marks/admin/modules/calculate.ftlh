@@ -52,7 +52,7 @@
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
                 </#list>
 
-                <th colspan="3">Overall</th>
+                <th colspan="3">Calculation</th>
 
                 <th class="col-sm-2" rowspan="2">Mark</th>
                 <th class="col-sm-1" rowspan="2">Grade</th>
