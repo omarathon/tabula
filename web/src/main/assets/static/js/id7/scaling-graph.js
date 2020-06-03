@@ -114,6 +114,9 @@ $(() => {
         aspectRatio: 1.5,
         legend: false,
         tooltips: {
+          filter(tooltipItem) {
+            return tooltipItem.datasetIndex === 0;
+          },
           callbacks: {
             label(tooltipItem) {
               const label = Object.keys(markData)[tooltipItem.index];
@@ -132,7 +135,7 @@ $(() => {
             },
             scaleLabel: {
               display: true,
-              labelString: 'Pre-scaled mark',
+              labelString: 'Original mark',
             },
             gridLines: {
               color: '#eee',
