@@ -4,12 +4,19 @@ import java.sql.Types
 
 import javax.sql.DataSource
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.SqlUpdate
 import org.springframework.jdbc.core.SqlParameter
+import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JHashMap
-import uk.ac.warwick.tabula.data.model.RecordedModuleMark
-import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.ExportStudentModuleResultToSitsInsertQuery
+import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, _}
+import uk.ac.warwick.tabula.ScjCode
+import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
+import uk.ac.warwick.tabula.data.model.{ModuleResult, RecordedModuleMark, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
+import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrProcessCompletedCountQuery}
 
 trait ExportStudentModuleResultToSitsServiceComponent {
   def exportStudentModuleResultToSitsService: ExportStudentModuleResultToSitsService
@@ -20,27 +27,22 @@ trait AutowiringExportStudentModuleResultToSitsServiceComponent extends ExportSt
 }
 
 trait ExportStudentModuleResultToSitsService {
-  //TODO based on RecordedModuleMarke for the student
   def exportToSits(recordedModuleRegistrationMark: RecordedModuleMark): Int
+
+  def SmoRecordExists(recordedModuleRegistrationMark: RecordedModuleMark): Boolean
+
+  def SmrProcessCompleted(recordedModuleRegistrationMark: RecordedModuleMark): Boolean
 
 }
 
-class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService {
+class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
   self: SitsDataSourceComponent =>
 
   /**
-   * SMR_UDF2 - date when marks updated
-   * SMR_UDF3/Final Assess Attended - This flag has been included in the overall module mark upload to provide the necessary information for our statutory
-   * return to the Higher Education Funding Council of England (HEFCE), submitted on the University’s behalf by the Academic Registrar’s Office.
-   * The value should be “Y” if the studentattended the chronologically last assessment for the module, and “N” otherwise.
-   * SMR_UDF5 - if (true set by dept) value as smr.setUdf5("SRAs by dept");
-   * else smr.setUdf5("SRAs by EO");
-   *
-   * Overallmarks cane be amended as long as  -
-   *  SMR record exists in SITS, if not we can't update. Exams Office may not yet have run SAS process.
-   *  SMR_PROC value should not be null and COM - completed - (the Exams Office needs to any further changes if COM)
-   *  SMO record has to exist.
-   *
+   * Student result record  can be amended as long as  -
+   * SMR record exists in SITS. Exams Office may not yet have run SAS process if no SMR record found.
+   * SMR_PROC value should not be COM - completed - (the Exams Office needs to do any further changes if COM status)
+   * SMO record has to exist.
    *
    * moduleResult -if (grade.matches("[P13ABC]")  || grade.equals("CP") // compensated pass
    * || grade.equals("21") // 2:1
@@ -49,17 +51,13 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
    * // moduleResult - it's a pass  smr.setRslt("P")/smr.setSass("A") / smr.setPrcs("A");
    * if (agreed )    smr.setProc("COM")
    *
-   *
    * if (grade.matches("[DEFNWX]")  || grade.equals("QF"))  // qualified fail
-   * // fail
    * // moduleResult - it's a fail  smr.setRslt("F")/smr.setSass("A") / smr.setPrcs("A"), 0 credits
    * if (agreed )    smr.setProc("COM")
    *
-   *
-   *  if (grade.matches("[SR]")) { // resit (permitted or forced)
-   *  // moduleResult - smr.setRslt("D")/smr.setSass("R") / smr.setPrcs(null), 0 credits
+   * if (grade.matches("[SR]")) { // resit (permitted or forced)
+   * // moduleResult - smr.setRslt("D")/smr.setSass("R") / smr.setPrcs(null), 0 credits
    * if (agreed )    smr.setProc("RAS")
-   *
    *
    * else if (grade.matches("[LM]") // late submission or mitigating circumstance
    * || grade.equals("PL") // plagiarism
@@ -68,101 +66,202 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
    * // moduleResult - smr.setRslt("D")/smr.setSass("H") / smr.setPrcs("H"), 0 credits
    * if (agreed)  	smr.setProc("SAS");
    */
+  case class SmrSubset(sasStatus: Option[String], processStatus: Option[String], process: Option[String], credits: JBigDecimal)
 
+
+  private def extractInitialSASStatus(recordedModuleMark: RecordedModuleMark, actualMarks: Boolean = true): SmrSubset = {
+
+    def smrCredits(result: Option[ModuleResult]): JBigDecimal = result match {
+      case Some(Pass) => recordedModuleMark.recordedModuleRegistration.cats
+      case _ => new JBigDecimal(0)
+    }
+
+    def smrProcess(result: Option[ModuleResult]): Option[String] = {
+      if (actualMarks) {
+        None
+      } else {
+        result match {
+          case Some(Pass) | Some(Fail) => Some("COM")
+          case Some(Deferred) => if (recordedModuleMark.grade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
+          case _ => None
+        }
+      }
+    }
+
+    recordedModuleMark.result match {
+      case Some(Pass) | Some(Fail) => {
+        SmrSubset(Some("A"), Some("A"), smrProcess(recordedModuleMark.result), smrCredits(recordedModuleMark.result))
+      }
+      case Some(Deferred) => if (recordedModuleMark.grade.exists(_.matches(("[SR]")))) { //resit (permitted or forced)
+
+        SmrSubset(Some("R"), None, smrProcess(recordedModuleMark.result), new JBigDecimal(0))
+      } else {
+        SmrSubset(Some("H"), Some("H"), smrProcess(recordedModuleMark.result), new JBigDecimal(0))
+      }
+      case _ => SmrSubset(None, None, None, new JBigDecimal(0))
+    }
+
+  }
+
+  def keysParamaterMap(recordedModuleRegistration: RecordedModuleRegistration): JMap[String, Any] = {
+    JHashMap(
+      "studentId" -> ScjCode.getUniversityId(recordedModuleRegistration.scjCode),
+      "moduleCodeMatcher" -> (recordedModuleRegistration.module.code.toUpperCase + "%"),
+      "occurrence" -> recordedModuleRegistration.occurrence,
+      "academicYear" -> recordedModuleRegistration.academicYear.toString,
+    )
+  }
+
+  def SmoRecordExists(recordedModuleMark: RecordedModuleMark): Boolean = {
+    val countQuery = new SmoCountQuery(sitsDataSource)
+    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+    countQuery.getCount(parameterMap) > 0
+
+  }
+
+  def SmrProcessCompleted(recordedModuleMark: RecordedModuleMark): Boolean = {
+    val countQuery = new SmrProcessCompletedCountQuery(sitsDataSource)
+    val recordedModuleRegistration = recordedModuleMark.recordedModuleRegistration
+    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+    countQuery.getCount(parameterMap) > 0
+
+  }
 
   def exportToSits(recordedModuleMark: RecordedModuleMark): Int = {
-
-    val insertQuery = new ExportStudentModuleResultToSitsInsertQuery(sitsDataSource)
     val recordedModuleRegistration = recordedModuleMark.recordedModuleRegistration
-    //select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId
-    val parameterMap = JHashMap(
-      ("sprCode", recordedModuleRegistration.scjCode),  //TODO they may vary for course transfer,  extract spr -Need injecting ProfileService  on RecordedModuleMark and then extract -getStudentCourseDetailsByScjCode on
-      ("modCode", recordedModuleRegistration.module.code),
-      ("mavOccur", recordedModuleRegistration.occurrence),
-      ("academicYear", recordedModuleRegistration.academicYear.toString),
-      ("attemptNumber", 1), //TODO set 1 currently, 2 and onwards means resits (mandatory by dept xml)
-      ("overallModuleMarks", recordedModuleMark.mark), //TODO set as actual currently
-        ("overallActualMarks", recordedModuleMark.mark),
-        ("moduleResult", "P"), //TODO based on grade
-        ("initialSASStatus", "A"),//TODO based on grade as 'P' set 'A'
-        ("processStatus", "A"),//TODO based on grade as 'P' set 'A'
-        ("process", "CON"),//TODO only when agreed marks/grades filled, for grade `SR` it is `RAS`
-        ("credits", recordedModuleRegistration.cats),//TODO - for pass result set to credits otherwise 0 credits
-        ("agreedGrade", recordedModuleMark.grade), //TODO does this need setting?
-        ("actualGrade", recordedModuleMark.grade),
-        ("dateTime", DateTime.now.toDate),
-        ("finalAssesmentsAttended", "Y"), //TODO valid values  Y/N ( mandatory and provided  by dept xml)
-        ("sraInfo", DateTime.now.toDate),
-        ("dateTimeMarksUploaded",  DateTime.now.toDate)
-    )
-    //TODO
-   1
+    //If required we can throw an exception in case want to report dedicated errors to  user via UI
+    if (!SmoRecordExists(recordedModuleMark)) {
+      logger.warn(s"SMO doesn't exists. Unable to update module mark record for ${recordedModuleRegistration.scjCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}")
+      0 //can throw an exception in case we want to report this to  user via UI
+    } else if (SmrProcessCompleted(recordedModuleMark)) {
+      logger.warn(s"The SMR (mark) record is already set to completed (COM). Exam office can do further changes. Unable to update module mark record for ${recordedModuleRegistration.scjCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}")
+      0
+    } else {
+      val updateQuery = new ExportStudentModuleResultToSitsUpdateQuery(sitsDataSource)
+      val recordedModuleRegistration = recordedModuleMark.recordedModuleRegistration
+      //TODO currently dealing with actual marks
+      val subsetData = extractInitialSASStatus(recordedModuleMark)
+
+      val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+      parameterMap.putAll(JHashMap(
+        "currentAttemptNumber" -> 1, //TODO set 1 currently (mandatory as per MRM  dept xml and set same value for current/completed attempt number fields)
+        "completedAttemptNumber" -> 1,
+        "moduleMarks" -> JInteger(recordedModuleMark.mark),
+        "moduleGrade" -> recordedModuleMark.grade.orNull,
+        "credits" -> subsetData.credits,
+        "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
+        "finalAssesmentsAttended" -> "Y", //TODO  Required for `HEFCE` return by ARO. MRM gathers it via xml. Value should be “Y” if the studentattended the chronologically last assessment for the module, and “N” otherwise
+        "dateTimeMarksUploaded" -> DateTime.now.toDate,
+        "moduleResult" -> recordedModuleMark.result.map(_.dbValue).orNull,
+        "initialSASStatus" -> subsetData.sasStatus.orNull,
+        "processStatus" -> subsetData.processStatus.orNull,
+        "process" -> subsetData.process.orNull,
+        "dateTimeMarksUploaded" -> DateTime.now.toDate
+      ))
+      val rowUpdated = updateQuery.updateByNamedParam(parameterMap)
+      if (rowUpdated == 0) {
+        logger.warn(s"No SMR record found to update. Possible SAS hasn't generated initial SMR for ${recordedModuleRegistration.scjCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}, ${recordedModuleRegistration.occurrence}")
+      }
+      rowUpdated
+    }
+
   }
+
 }
 
 object ExportStudentModuleResultToSitsService {
   val sitsSchema: String = Wire.property("${schema.sits}")
 
-  // insert into Student Absence (SAB) table
-  final def InsertToSITSSql =
+  final def rootWhereClause =
     f"""
-		insert into $sitsSchema.ins_smr
-		(SPR_CODE,MOD_CODE,MAV_OCCUR,AYR_CODE,PSL_CODE,SMR_CURA,SMR_COMA,SMR_AGRM,SMR_ACTM,SMR_RSLT,SMR_SASS, SMR_PRCS, SMR_PROC, SMR_CRED, SMR_AGRG, SMR_ACTG, SMR_UDF2, SMR_UDF3, SMR_UDF5, SMR_FASD)
-		values (:sprCode, :modCode, :mavOccur, :academicYear, :pslCode, :attemptNumber, :attemptNumber, :overallModuleMarks,
-		:overallActualMarks, :moduleResult, :initialSASStatus, :processStatus, :process, :credits, :agreedGrade, :actualGrade, :dateTime, :finalAssesmentsAttended, :sraInfo, :dateTimeMarksUploaded)
-	"""
+       |where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
+       |    and mod_code like :moduleCodeMatcher
+       |    and mav_occur = :occurrence
+       |    and ayr_code = :academicYear
+       |    and psl_code = 'Y'
+       |""".stripMargin
 
-  class ExportStudentModuleResultToSitsInsertQuery(ds: DataSource) extends SqlUpdate(ds, InsertToSITSSql) {
+  final def CountSmoRecordsSql =
+    f"""
+    select count(*) from $sitsSchema.cam_smo $rootWhereClause
+    """
 
-    declareParameter(new SqlParameter("sprCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("modCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("macOccur", Types.DATE))
+
+  final def CountSmrProcessCompletedSql =
+    f"""
+    select count(*) from $sitsSchema.ins_smr $rootWhereClause  and smr_proc = 'COM'
+    """
+
+  //TODO -Currently dealing with actual grade/marks only.
+  final def UpdateModuleResultSql: String =
+    s"""
+       |update $sitsSchema.ins_smr
+       |  set SMR_CURA = :currentAttemptNumber,
+       |      SMR_COMA = :completedAttemptNumber, -- MRM currently sets both current and completed attempt as same  for SMR but this may not be correct?
+       |      SMR_ACTM = :moduleMarks,
+       |      SMR_ACTG = :moduleGrade,
+       |      SMR_CRED = :credits,
+       |      SMR_UDF2 = :currentDateTime, -- dd/MM/yy:HHmm format used by MRM. We store the same date time in fasd. May be we don't need this?
+       |      SMR_UDF3 = :finalAssesmentsAttended,
+       |      SMR_UDF5 = 'SRAs by dept', -- MRM rule: If true  via xml value as "SRAs by dept" else "SRAs by EO". This will always be by dept now. May be we can leave the field?
+       |      SMR_FASD = :dateTimeMarksUploaded,
+       |      SMR_RSLT = :moduleResult, -- P/F/D/null values
+       |      SMR_SASS = :initialSASStatus,
+       |      SMR_PRCS = :processStatus,
+       |      SMR_PROC = :process
+       |  $rootWhereClause
+       |""".stripMargin
+
+  class ExportStudentModuleResultToSitsUpdateQuery(ds: DataSource) extends SqlUpdate(ds, UpdateModuleResultSql) {
+
+    declareParameter(new SqlParameter("studentId", Types.VARCHAR))
+    declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("occurrence", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
-    declareParameter(new SqlParameter("pslCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("attemptNumber", Types.VARCHAR))
-    declareParameter(new SqlParameter("overallModuleMarks", Types.VARCHAR))
-    declareParameter(new SqlParameter("overallActualMarks", Types.VARCHAR))
+    declareParameter(new SqlParameter("currentAttemptNumber", Types.INTEGER))
+    declareParameter(new SqlParameter("completedAttemptNumber", Types.INTEGER))
+    declareParameter(new SqlParameter("moduleMarks", Types.INTEGER))
+    declareParameter(new SqlParameter("moduleGrade", Types.VARCHAR))
+    declareParameter(new SqlParameter("credits", Types.DECIMAL))
+    declareParameter(new SqlParameter("currentDateTime", Types.VARCHAR))
+    declareParameter(new SqlParameter("finalAssesmentsAttended", Types.VARCHAR))
+    declareParameter(new SqlParameter("dateTimeMarksUploaded", Types.DATE))
     declareParameter(new SqlParameter("moduleResult", Types.VARCHAR))
     declareParameter(new SqlParameter("initialSASStatus", Types.VARCHAR))
     declareParameter(new SqlParameter("processStatus", Types.VARCHAR))
     declareParameter(new SqlParameter("process", Types.VARCHAR))
-    declareParameter(new SqlParameter("credits", Types.VARCHAR))
-    declareParameter(new SqlParameter("agreedGrade", Types.VARCHAR))
-    declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
-    declareParameter(new SqlParameter("dateTime", Types.VARCHAR))
-    declareParameter(new SqlParameter("finalAssesmentsAttended", Types.VARCHAR))
-    declareParameter(new SqlParameter("sraInfo", Types.VARCHAR))
-    declareParameter(new SqlParameter("dateTimeMarksUploaded", Types.DATE))
 
     compile()
 
   }
 
-
-  class ExportExistingStudentModuleResultToSitsService(ds: DataSource) extends SqlUpdate(ds, InsertToSITSSql) {
-
-    declareParameter(new SqlParameter("sprCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("modCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("macOccur", Types.DATE))
-    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
-    declareParameter(new SqlParameter("pslCode", Types.VARCHAR))
-    declareParameter(new SqlParameter("attemptNumber", Types.VARCHAR))
-    declareParameter(new SqlParameter("overallModuleMarks", Types.VARCHAR))
-    declareParameter(new SqlParameter("overallActualMarks", Types.VARCHAR))
-    declareParameter(new SqlParameter("moduleResult", Types.VARCHAR))
-    declareParameter(new SqlParameter("initialSASStatus", Types.VARCHAR))
-    declareParameter(new SqlParameter("processStatus", Types.VARCHAR))
-    declareParameter(new SqlParameter("credits", Types.VARCHAR))
-    declareParameter(new SqlParameter("agreedGrade", Types.VARCHAR))
-    declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
-    declareParameter(new SqlParameter("dateTime", Types.VARCHAR))
-    declareParameter(new SqlParameter("finalAssesmentsAttended", Types.VARCHAR))
-    declareParameter(new SqlParameter("sraInfo", Types.VARCHAR))
-    declareParameter(new SqlParameter("dateTimeMarksUploaded", Types.DATE))
-
-    compile()
-
+  class SmoCountQuery(ds: DataSource) extends CountQuery(ds) {
+    def getCount(params: JMap[String, Any]): Int = {
+      this.queryForObject(CountSmoRecordsSql, params, classOf[JInteger]).asInstanceOf[Int]
+    }
   }
+
+  class SmrProcessCompletedCountQuery(ds: DataSource) extends CountQuery(ds) {
+    def getCount(params: JMap[String, Any]): Int = {
+      this.queryForObject(CountSmrProcessCompletedSql, params, classOf[JInteger]).asInstanceOf[Int]
+    }
+  }
+
+}
+
+@Profile(Array("dev", "test", "production"))
+@Service
+class ExportStudentModuleResultToSitsServiceImpl
+  extends AbstractExportStudentModuleResultToSitsService with AutowiringSitsDataSourceComponent
+
+@Profile(Array("sandbox"))
+@Service
+class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
+  def exportToSits(recordedModuleRegistrationMark: RecordedModuleMark): Int = 0
+
+  def SmoRecordExists(recordedModuleRegistrationMark: RecordedModuleMark): Boolean = true
+
+  def SmrProcessCompleted(recordedModuleRegistrationMark: RecordedModuleMark): Boolean = true
 
 }
 
