@@ -44,9 +44,22 @@
         the first class level when using the scaling tool, or make an academic judgement for each student affected.
       </p>
 
-      <div class="alert alert-info">
-        You should only run the scaling function against component marks at most once per assessment.
-      </div>
+      <#if previousScaling?has_content>
+        <div class="alert alert-danger">
+          <p>
+            Marks on this assessment were previously scaled <@fmt.date date=previousScaling.updatedDate at=true />
+            by ${(previousScaling.updatedBy.fullName)!(previousScaling.updatedBy.userId)}.
+          </p>
+
+          <p>
+            Assessment components should not be scaled multiple times.
+          </p>
+        </div>
+      <#else>
+        <div class="alert alert-info">
+          You should only run the scaling function against component marks at most once per assessment.
+        </div>
+      </#if>
 
       <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
         <@f.hidden path="calculate" value="true" />

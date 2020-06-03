@@ -99,7 +99,8 @@ abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats:
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
           result = item.result.maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
-          comments = item.comments
+          comments = item.comments,
+          source = RecordedModuleMarkSource.ComponentMarkCalculation
         )
 
         moduleRegistrationMarksService.saveOrUpdate(recordedModuleRegistration)

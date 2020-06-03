@@ -41,7 +41,8 @@ abstract class MissingMarkAdjustmentCommandInternal(val assessmentComponent: Ass
         uploader = currentUser.apparentUser,
         mark = None,
         grade = Some(GradeBoundary.ForceMajeureMissingComponentGrade),
-        comments = "Assessment did not take place because of force majeure"
+        comments = "Assessment did not take place because of force majeure",
+        source = RecordedAssessmentComponentStudentMarkSource.MissingMarkAdjustment
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
