@@ -132,7 +132,7 @@ $(() => {
             },
             scaleLabel: {
               display: true,
-              labelString: 'Pre-scaled mark',
+              labelString: 'Original mark',
             },
             gridLines: {
               color: '#eee',
