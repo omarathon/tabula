@@ -39,11 +39,14 @@ class ComponentScalingController extends BaseController {
   }
 
   @ModelAttribute("marks")
-  def marks(@ModelAttribute("command") cmd: ComponentScalingCommand.Command, errors: Errors): String = {
-    val markValues = cmd.studentsToSet.filter(s => s._2.isDefined).map { case (upstreamAssessmentGroupMember, originalMark, grd) =>
-      upstreamAssessmentGroupMember.universityId -> originalMark
-    }.toMap
-    json.writeValueAsString(markValues)
+  def marks(@Valid @ModelAttribute("command") cmd: ComponentScalingCommand.Command, errors: Errors): String = {
+    if (errors.hasGlobalErrors) ""
+    else {
+      val markValues = cmd.studentsToSet.filter(s => s._2.isDefined).map { case (upstreamAssessmentGroupMember, originalMark, grd) =>
+        upstreamAssessmentGroupMember.universityId -> originalMark
+      }.toMap
+      json.writeValueAsString(markValues)
+    }
   }
 
   private val formView: String = "marks/admin/assessment-components/scaling"

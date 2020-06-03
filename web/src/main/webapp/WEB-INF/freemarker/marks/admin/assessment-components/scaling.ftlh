@@ -4,24 +4,7 @@
 </div>
 
 <div class="row">
-  <div class="col-md-4 col-md-push-8">
-    <#if marks?has_content>
-      <p>Marks for this assessment are shown on the graph. If marks are scaled, the Y axis values will change.</p>
-      <script type="application/json" id="marks">${marks}</script>
-      <canvas id="chart"></canvas>
-    </#if>
-
-    <div class="panel panel-default panel-body scaling-guidance">
-      <h2>Scaling guidance</h2>
-
-      <p>
-        Before scaling assessment component marks, please read the
-        <a target="_blank" href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/marks/#scaling">university guidance for mark adjustment and scaling</a>.
-      </p>
-    </div>
-  </div>
-
-  <div class="col-md-8 col-md-pull-4">
+  <div class="col-md-6 col-lg-8">
     <#assign hasErrors = false />
     <@spring.hasBindErrors name="command">
       <#assign hasErrors = errors.hasGlobalErrors() />
@@ -77,7 +60,7 @@
               </@f.select>
             </@bs3form.labelled_form_group>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4 col-md-6">
             <@bs3form.labelled_form_group path="scaledPassMark" labelText="Scaled pass mark">
               <div class="input-group">
                 <@f.input path="scaledPassMark" cssClass="form-control" autocomplete="off" type="number" min="1" max="100" />
@@ -85,7 +68,7 @@
               </div>
             </@bs3form.labelled_form_group>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4 col-md-6">
             <@bs3form.labelled_form_group path="scaledUpperClassMark" labelText="Scaled upper class mark">
               <div class="input-group">
                 <@f.input path="scaledUpperClassMark" cssClass="form-control" autocomplete="off" type="number" min="41" max="100" />
@@ -102,6 +85,20 @@
       </@f.form>
     </#if>
   </div>
+  <div class="col-md-6 col-lg-4">
+    <#if marks?has_content>
+      <p>Marks for this assessment are shown on the graph. If marks are scaled, the Y axis values will change.</p>
+      <script type="application/json" id="marks">${marks}</script>
+      <canvas id="chart"></canvas>
+    </#if>
 
+    <div class="panel panel-default panel-body scaling-guidance">
+      <h2>Scaling guidance</h2>
 
+      <p>
+        Before scaling assessment component marks, please read the
+        <a target="_blank" href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/marks/#scaling">university guidance for mark adjustment and scaling</a>.
+      </p>
+    </div>
+  </div>
 </div>
