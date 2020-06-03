@@ -125,18 +125,18 @@ trait CalculateModuleMarksLoadModuleRegistrations {
     with ModuleRegistrationMarksServiceComponent =>
 
   lazy val assessmentComponents: Seq[AssessmentComponent] =
-    assessmentMembershipService.getAssessmentComponents(module)
+    assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false)
       .filter { ac =>
         ac.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).contains(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)) &&
-          ac.assessmentGroup != "AO" &&
-          ac.sequence != AssessmentComponent.NoneAssessmentGroup
+        ac.assessmentGroup != "AO" &&
+        ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 
   lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
       .filter { info =>
         info.upstreamAssessmentGroup.occurrence == occurrence &&
-          info.allMembers.nonEmpty
+        info.allMembers.nonEmpty
       }
       .map { info =>
         info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
