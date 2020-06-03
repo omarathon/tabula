@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import enumeratum.{Enum, EnumEntry}
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -63,12 +64,13 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   private val _marks: JList[RecordedAssessmentComponentStudentMark] = JArrayList()
   def marks: Seq[RecordedAssessmentComponentStudentMark] = _marks.asScala.toSeq
 
-  def addMark(uploader: User, mark: Option[Int], grade: Option[String], comments: String = null): RecordedAssessmentComponentStudentMark = {
+  def addMark(uploader: User, mark: Option[Int], grade: Option[String], comments: String, source: RecordedAssessmentComponentStudentMarkSource): RecordedAssessmentComponentStudentMark = {
     val newMark = new RecordedAssessmentComponentStudentMark
     newMark.recordedAssessmentComponentStudent = this
     newMark.mark = mark
     newMark.grade = grade
     newMark.comments = comments
+    newMark.source = source
     newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
     _marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
@@ -120,6 +122,9 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
 
   var comments: String = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.RecordedAssessmentComponentStudentMarkSourceUserType")
+  var source: RecordedAssessmentComponentStudentMarkSource = _
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   @Column(name = "updated_by", nullable = false)
   var updatedBy: User = _
@@ -130,6 +135,18 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
   override def toStringProps: Seq[(String, Any)] = Seq(
     "mark" -> mark,
     "grade" -> grade,
-    "comments" -> comments
+    "comments" -> comments,
+    "source" -> source
   )
 }
+
+sealed trait RecordedAssessmentComponentStudentMarkSource extends EnumEntry
+object RecordedAssessmentComponentStudentMarkSource extends Enum[RecordedAssessmentComponentStudentMarkSource] {
+  case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource
+  case object Scaling extends RecordedAssessmentComponentStudentMarkSource
+  case object MissingMarkAdjustment extends RecordedAssessmentComponentStudentMarkSource
+
+  override def values: IndexedSeq[RecordedAssessmentComponentStudentMarkSource] = findValues
+}
+
+class RecordedAssessmentComponentStudentMarkSourceUserType extends EnumUserType(RecordedAssessmentComponentStudentMarkSource)

@@ -10,13 +10,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ComponentScalingCommand
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/scaling"))
-class ComponentScalingController extends BaseController {
+class ComponentScalingController extends BaseController
+  with AutowiringAssessmentComponentMarksServiceComponent {
 
   validatesSelf[SelfValidating]
 
@@ -39,12 +41,21 @@ class ComponentScalingController extends BaseController {
   }
 
   @ModelAttribute("marks")
-  def marks(@ModelAttribute("command") cmd: ComponentScalingCommand.Command): String = {
-    val markValues = cmd.studentsToSet.filter(s => s._2.isDefined).map { case (upstreamAssessmentGroupMember, originalMark, grd) =>
-      upstreamAssessmentGroupMember.universityId -> originalMark
-    }.toMap
-    json.writeValueAsString(markValues)
+  def marks(@Valid @ModelAttribute("command") cmd: ComponentScalingCommand.Command, errors: Errors): String = {
+    if (errors.hasGlobalErrors) ""
+    else {
+      val markValues = cmd.studentsToSet.filter(s => s._2.isDefined).map { case (upstreamAssessmentGroupMember, originalMark, grd) =>
+        upstreamAssessmentGroupMember.universityId -> originalMark
+      }.toMap
+      json.writeValueAsString(markValues)
+    }
   }
+
+  @ModelAttribute("previousScaling")
+  def previousScaling(@PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): Option[RecordedAssessmentComponentStudentMark] =
+    assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup)
+      .flatMap(_.marks.filter(_.source == RecordedAssessmentComponentStudentMarkSource.Scaling))
+      .maxByOption(_.updatedDate)
 
   private val formView: String = "marks/admin/assessment-components/scaling"
 
@@ -73,7 +84,7 @@ class ComponentScalingController extends BaseController {
         }
 
       model.addAttribute("changes", changes)
-      model.addAttribute("returnTo", getReturnTo(Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup)))
+      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup)}?passMark=${cmd.passMark}&scaledPassMark=${cmd.scaledPassMark}&scaledUpperClassMark=${cmd.scaledUpperClassMark}"))
 
       "marks/admin/assessment-components/scaling_preview"
     }

@@ -52,7 +52,7 @@
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
                 </#list>
 
-                <th colspan="3">Overall</th>
+                <th colspan="3">Calculation</th>
 
                 <th class="col-sm-2" rowspan="2">Mark</th>
                 <th class="col-sm-1" rowspan="2">Grade</th>
@@ -99,9 +99,9 @@
                     </#if>
 
                     <#if student.history?has_content>
-                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.scjCode}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.scjCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
-                      <@modal.modal id="mark-history-modal-${student.scjCode}">
+                      <@modal.modal id="mark-history-modal-${student.scjCode?replace('/', '_')}">
                         <@modal.wrapper cssClass="modal-lg">
                           <@modal.header>
                             <h3 class="modal-title">Mark history for ${student.scjCode}</h3>

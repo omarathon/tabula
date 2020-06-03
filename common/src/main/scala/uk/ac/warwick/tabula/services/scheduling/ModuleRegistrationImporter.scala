@@ -4,6 +4,7 @@ import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
+import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, PropertyAccessorFactory}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -16,16 +17,17 @@ import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, Im
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.marks.AutowiringModuleRegistrationMarksServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearsQuery, ModuleRegistrationsByUniversityIdsQuery}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
 
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Import module registration data from SITS.
@@ -101,18 +103,21 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 @Profile(Array("sandbox"))
 @Service
-class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
+class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter
+  with AutowiringModuleRegistrationMarksServiceComponent {
+
   override def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
     SandboxData.Departments.values
       .flatMap(_.routes.values)
       .flatMap(route => route.studentsStartId to route.studentsEndId)
       .flatMap(universityId => studentModuleRegistrationRows(universityId.toString))
+      .filter(mr => academicYears.map(_.toString).contains(mr.academicYear))
       .toSeq
 
   override def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow] =
     universityIds.flatMap(studentModuleRegistrationRows)
 
-  def studentModuleRegistrationRows(universityId: String): Seq[ModuleRegistrationRow] = {
+  def studentModuleRegistrationRows(universityId: String): Seq[ModuleRegistrationRow] = uk.ac.warwick.tabula.data.Transactions.transactional() {
     val yearOfStudy = ((universityId.toLong % 3) + 1).toInt
 
     (for {
@@ -132,6 +137,10 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       val level = moduleCode.substring(3, 4).toInt
       val academicYear = AcademicYear.now - (yearOfStudy - level)
 
+      val recordedModuleRegistration: Option[RecordedModuleRegistration] =
+        moduleRegistrationMarksService.getAllRecordedModuleRegistrations(new Module(moduleCode), BigDecimal(15), academicYear, "A")
+          .find(_.scjCode == "%s/1".format(universityId))
+
       val (mark, grade, result) =
         if (academicYear < AcademicYear.now()) {
           val randomMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
@@ -150,6 +159,12 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
           (Some(m), g, if (m < 40) "F" else "P")
         } else (None: Option[Int], null: String, null: String)
 
+      recordedModuleRegistration.filter(_.needsWritingToSits).foreach { r =>
+        r.needsWritingToSits = false
+        r.lastWrittenToSits = Some(DateTime.now)
+        moduleRegistrationMarksService.saveOrUpdate(r)
+      }
+
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
         sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
@@ -161,10 +176,10 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         },
         occurrence = "A",
         academicYear = academicYear.toString,
-        actualMark = mark,
-        actualGrade = grade,
-        agreedMark = mark,
-        agreedGrade = grade,
+        actualMark = recordedModuleRegistration.flatMap(_.latestMark).orElse(mark),
+        actualGrade = recordedModuleRegistration.flatMap(_.latestGrade).getOrElse(grade),
+        agreedMark = if (academicYear < AcademicYear.now()) mark else None,
+        agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
         marksCode = marksCode,
         moduleResult = result,
         endWeek = None

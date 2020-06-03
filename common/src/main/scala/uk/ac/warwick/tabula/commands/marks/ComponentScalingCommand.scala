@@ -56,7 +56,8 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
         uploader = currentUser.apparentUser,
         mark = scaledMark,
         grade = scaledGrade,
-        comments = comment(mark)
+        comments = comment(mark),
+        source = RecordedAssessmentComponentStudentMarkSource.Scaling
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
@@ -104,15 +105,23 @@ trait ComponentScalingAlgorithm {
 
   def shouldScale(mark: Option[Int], grade: Option[String]): Boolean = (mark, grade) match {
     case (None, _) => false
-    case (_, Some(GradeBoundary.ForceMajeureMissingComponentGrade)) | (_, Some(GradeBoundary.WithdrawnGrade)) => false
+    case (Some(0), Some(GradeBoundary.WithdrawnGrade)) => false
     case _ => true
   }
 
   def scale(mark: Option[Int], grade: Option[String], isResit: Boolean): (Option[Int], Option[String]) =
     if (shouldScale(mark, grade)) {
       val scaledMark = mark.map(scaleMark)
+
+      val isIndicatorGrade = grade.exists { g =>
+        assessmentMembershipService.gradesForMark(assessmentComponent, mark, isResit)
+          .find(_.grade == g)
+          .exists(!_.isDefault)
+      }
+
       val scaledGrade =
-        assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark, isResit)
+        if (isIndicatorGrade) grade // Don't change indicator grades
+        else assessmentMembershipService.gradesForMark(assessmentComponent, scaledMark, isResit)
           .find(_.isDefault)
           .map(_.grade)
           .orElse(grade) // Use the old grade if necessary (it shouldn't be)

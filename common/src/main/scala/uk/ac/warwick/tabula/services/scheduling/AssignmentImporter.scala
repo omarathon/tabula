@@ -35,7 +35,7 @@ trait AssignmentImporterComponent {
 }
 
 trait AutowiringAssignmentImporterComponent extends AssignmentImporterComponent {
-  val assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
+  var assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
 }
 
 trait AssignmentImporter {
@@ -214,13 +214,12 @@ class SandboxAssignmentImporter extends AssignmentImporter
   with AutowiringAssessmentComponentMarksServiceComponent
   with AutowiringAssessmentMembershipServiceComponent {
 
-  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(yearsToImport) { umr =>
-    if (members.map(_.universityId).contains(umr.universityId)) {
-      callback(umr)
-    }
-  }
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit =
+    allMembersWithFilter(yearsToImport, uniId => members.map(_.universityId).contains(uniId.toString))(callback)
 
-  def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
+  override def allMembers(yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembersWithFilter(yearsToImport, _ => true)(callback)
+
+  private def allMembersWithFilter(yearsToImport: Seq[AcademicYear], universityIdFilter: Int => Boolean)(callback: UpstreamModuleRegistration => Unit): Unit = {
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
@@ -232,7 +231,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
 
       moduleCodesToIds = moduleCodesToIds + (
         moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-        )
+      )
     }
 
     val upstreamModuleRegistrations: Seq[UpstreamModuleRegistration] =
@@ -241,7 +240,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
         academicYear <- yearsToImport
         range <- ranges
-        uniId <- range
+        uniId <- range if universityIdFilter(uniId)
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       } yield {
         val yearOfStudy = (uniId % 3) + 1
@@ -474,23 +473,24 @@ class SandboxAssignmentImporter extends AssignmentImporter
       a
     }
 
-  override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] = {
-    var students: Seq[AssessmentComponentExamScheduleStudent] = Seq()
+  override def getScheduledExamStudents(schedule: AssessmentComponentExamSchedule): Seq[AssessmentComponentExamScheduleStudent] =
+    (for {
+      (_, d) <- SandboxData.Departments.toSeq
+      route <- d.routes.values.toSeq
+      moduleCode <- route.moduleCodes if schedule.moduleCode == "%s-15".format(moduleCode.toUpperCase)
+      uniId <- route.studentsStartId to route.studentsEndId if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
+      yearOfStudy = (uniId % 3) + 1
+      level = moduleCode.substring(3, 4).toInt
+      if level <= yearOfStudy && schedule.academicYear == (AcademicYear.now - (yearOfStudy - level))
+    } yield uniId).zipWithIndex.map { case (uniId, index) =>
+      val student = new AssessmentComponentExamScheduleStudent
+      student.seatNumber = Some(index + 1)
+      student.universityId = uniId.toString
+      student.sprCode = "%d/1".format(uniId)
+      student.occurrence = "A"
 
-    allMembers(Seq(schedule.academicYear)) { modReg =>
-      if (modReg.moduleCode == schedule.moduleCode && modReg.sequence == schedule.assessmentComponentSequence) {
-        val student = new AssessmentComponentExamScheduleStudent
-        student.seatNumber = Some(students.size + 1)
-        student.universityId = modReg.universityId
-        student.sprCode = modReg.sprCode
-        student.occurrence = modReg.occurrence
-
-        students = students :+ student
-      }
+      student
     }
-
-    students
-  }
 
   override def publishedExamProfiles(yearsToImport: Seq[AcademicYear]): Seq[String] =
     yearsToImport.map(year => s"EXSUM${year.endYear % 100}")
@@ -849,8 +849,8 @@ object AssignmentImporter {
     s"""
     select
       mkc.mks_code as marks_code,
-      mkc.mks_proc as process,
-      coalesce(mkc.mks_rank, mkc.mks_seq) as rank,
+      mkc.mkc_proc as process,
+      coalesce(mkc.mkc_rank, mkc.mkc_seq) as rank,
       mkc.mkc_grade as grade,
       mkc.mkc_minm as minimum_mark,
       mkc.mkc_maxm as maximum_mark,
