@@ -93,6 +93,7 @@ $(() => {
           data: computeNewMarks(marks),
           pointBackgroundColor: '#3e7a73',
           fill: false,
+          borderWidth: 0,
           tension: 0,
         }, {
           fill: false,
@@ -114,6 +115,7 @@ $(() => {
         aspectRatio: 1.5,
         legend: false,
         tooltips: {
+          position: 'nearest',
           filter(tooltipItem) {
             return tooltipItem.datasetIndex === 0;
           },
