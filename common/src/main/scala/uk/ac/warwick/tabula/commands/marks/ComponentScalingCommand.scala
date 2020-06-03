@@ -56,7 +56,8 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
         uploader = currentUser.apparentUser,
         mark = scaledMark,
         grade = scaledGrade,
-        comments = comment(mark)
+        comments = comment(mark),
+        source = RecordedAssessmentComponentStudentMarkSource.Scaling
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
