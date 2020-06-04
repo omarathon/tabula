@@ -27,15 +27,15 @@ class RecordedModuleRegistration extends GeneratedId
 
   def this(mr: ModuleRegistration) {
     this()
-    this.scjCode = mr._scjCode
+    this.sprCode = mr.sprCode
     this.module = mr.module
     this.cats = mr.cats
     this.academicYear = mr.academicYear
     this.occurrence = mr.occurrence
   }
 
-  @Column(name = "scj_code", nullable = false)
-  var scjCode: String = _
+  @Column(name = "spr_code", nullable = false)
+  var sprCode: String = _
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "module_code", referencedColumnName = "code")
@@ -85,9 +85,8 @@ class RecordedModuleRegistration extends GeneratedId
   def lastWrittenToSits: Option[DateTime] = Option(_lastWrittenToSits)
   def lastWrittenToSits_=(lastWrittenToSits: Option[DateTime]): Unit = _lastWrittenToSits = lastWrittenToSits.orNull
 
-
   override def toStringProps: Seq[(String, Any)] = Seq(
-    "scjCode" -> scjCode,
+    "sprCode" -> sprCode,
     "moduleCode" -> module.code,
     "cats" -> cats,
     "academicYear" -> academicYear,

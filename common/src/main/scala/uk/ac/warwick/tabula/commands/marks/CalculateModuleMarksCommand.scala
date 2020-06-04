@@ -34,14 +34,14 @@ object CalculateModuleMarksCommand {
     case class Failure(message: String) extends ModuleMarkCalculation { override val isSuccessful: Boolean = false }
   }
 
-  type ScjCode = String
+  type SprCode = String
   class StudentModuleMarksItem {
-    def this(scjCode: ScjCode) {
+    def this(sprCode: SprCode) {
       this()
-      this.scjCode = scjCode
+      this.sprCode = sprCode
     }
 
-    var scjCode: ScjCode = _
+    var sprCode: SprCode = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var grade: String = _
     var result: String = _
@@ -88,7 +88,7 @@ abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats:
     students.asScala.values.toSeq
       .map { item =>
         val moduleRegistration =
-          moduleRegistrations.find(_._scjCode == item.scjCode)
+          moduleRegistrations.find(_.sprCode == item.sprCode)
             .get // We validate that this exists
 
         val recordedModuleRegistration: RecordedModuleRegistration =
@@ -148,7 +148,7 @@ trait CalculateModuleMarksLoadModuleRegistrations {
   lazy val studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
     MarksDepartmentHomeCommand.studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService).map { student =>
       val (componentMarks, calculation) =
-        moduleRegistrations.find(_._scjCode == student.scjCode).map { moduleRegistration =>
+        moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
           val universityId = moduleRegistration.studentCourseDetails.student.universityId
 
           val componentMarks: Map[AssessmentComponent, StudentMarkRecord] =
@@ -165,8 +165,8 @@ trait CalculateModuleMarksLoadModuleRegistrations {
 }
 
 trait CalculateModuleMarksRequest {
-  var students: JMap[ScjCode, StudentModuleMarksItem] =
-    LazyMaps.create { scjCode: ScjCode => new StudentModuleMarksItem(scjCode) }
+  var students: JMap[SprCode, StudentModuleMarksItem] =
+    LazyMaps.create { sprCode: SprCode => new StudentModuleMarksItem(sprCode) }
       .asJava
 
   // For uploading a spreadsheet
@@ -212,8 +212,9 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                     columnMap(col) = formattedValue
                   } else if (columnMap.asJava.containsKey(col) && formattedValue.hasText) {
                     columnMap(col) match {
-                      case "SCJ Code" | "SCJ" =>
-                        currentItem.scjCode = formattedValue
+                      // Support the old format in the hope that SPR and SCJ codes match
+                      case "SPR Code" | "SPR" | "SCJ Code" | "SCJ" =>
+                        currentItem.sprCode = formattedValue
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
@@ -235,8 +236,8 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                 result.rejectValue("file", "file.tooManyRows", Array(MAX_MARKS_ROWS.toString), "")
                 items.clear()
               } else {
-                items.asScala.filter(_.scjCode.hasText).foreach { item =>
-                  students.put(item.scjCode, item)
+                items.asScala.filter(_.sprCode.hasText).foreach { item =>
+                  students.put(item.sprCode, item)
                 }
               }
             }
@@ -261,7 +262,7 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
 
   override def populate(): Unit = {
     studentModuleMarkRecords.foreach { case (student, _, calculation) =>
-      val s = new StudentModuleMarksItem(student.scjCode)
+      val s = new StudentModuleMarksItem(student.sprCode)
       student.mark.foreach(m => s.mark = m.toString)
       student.grade.foreach(s.grade = _)
       student.result.foreach(r => s.result = r.dbValue)
@@ -276,7 +277,7 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
         case _ => // Do nothing
       }
 
-      students.put(student.scjCode, s)
+      students.put(student.sprCode, s)
     }
   }
 }
@@ -440,15 +441,15 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = module.adminDepartment.assignmentGradeValidation
-    students.asScala.foreach { case (scjCode, item) =>
-      errors.pushNestedPath(s"students[$scjCode]")
+    students.asScala.foreach { case (sprCode, item) =>
+      errors.pushNestedPath(s"students[$sprCode]")
 
       // Check that there's a module registration for the student
-      val moduleRegistration = moduleRegistrations.find(_._scjCode == scjCode)
+      val moduleRegistration = moduleRegistrations.find(_.sprCode == sprCode)
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (moduleRegistration.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(scjCode), "")
+        errors.reject("uniNumber.unacceptable", Array(sprCode), "")
       }
 
       val isResitting = moduleRegistration.exists { modReg =>
@@ -538,10 +539,10 @@ trait CalculateModuleMarksDescription extends Describable[Result] {
   override def describeResult(d: Description, result: Result): Unit =
     d.properties(
       "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
-        student.scjCode -> student.latestMark.get
+        student.sprCode -> student.latestMark.get
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
-        student.scjCode -> student.latestGrade.get
+        student.sprCode -> student.latestGrade.get
       }.toMap
     )
 }

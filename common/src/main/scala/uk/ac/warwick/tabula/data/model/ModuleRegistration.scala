@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
@@ -34,9 +34,9 @@ object ModuleRegistration {
 @Access(AccessType.FIELD)
 class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 
-  def this(scjCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
+  def this(sprCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
-    this._scjCode = scjCode
+    this.sprCode = sprCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
@@ -45,6 +45,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  @transient var profileService: ProfileService = Wire[ProfileService]
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "moduleCode", referencedColumnName = "code")
@@ -58,16 +59,21 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "scjCode", insertable = false, updatable = false)
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var studentCourseDetails: StudentCourseDetails = _
+  def studentCourseDetails: StudentCourseDetails =
+    RequestLevelCache.cachedBy("ModuleRegistration.studentCourseDetails", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+      val allBySprCode = profileService.getStudentCourseDetailsBySprCode(sprCode)
 
-  @Column(name = "scjCode")
-  var _scjCode: String = _
+      allBySprCode.find(_.mostSignificant)
+        .getOrElse(allBySprCode.maxBy(_.scjCode))
+    }
 
-  // get the integer part of the SCJ code so we can sort registrations to the same module by it
-  def scjSequence: Int = _scjCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
+  // I'd love for this to be _sprCode but Hibernate won't let you mix logical and physical column names (even with @Column)
+  // and it's needed for the @JoinColumn on StudentCourseDetails._moduleRegistrations
+  var sprCode: String = _
+
+  // get the integer part of the SPR code so we can sort registrations to the same module by it
+  def sprSequence: Int = sprCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _
@@ -152,14 +158,14 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       }
     }
 
-  override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
+  override def toString: String = s"${sprCode}-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
 
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()
-      .append(studentCourseDetails, that.studentCourseDetails)
+      .append(sprCode, that.sprCode)
       .append(module, that.module)
       .append(cats, that.cats)
       .append(academicYear, that.academicYear)

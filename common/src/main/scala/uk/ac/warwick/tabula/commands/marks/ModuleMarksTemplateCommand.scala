@@ -58,7 +58,7 @@ abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: 
 
     // add header row
     val header = sheet.createRow(0)
-    header.createCell(0).setCellValue("SCJ Code")
+    header.createCell(0).setCellValue("SPR Code")
     header.createCell(1).setCellValue("Mark")
     header.createCell(2).setCellValue("Grade")
     header.createCell(3).setCellValue("Result")
@@ -67,7 +67,7 @@ abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: 
     // populate the mark sheet with ids and existing data
     studentModuleMarkRecords.zipWithIndex.foreach { case ((student, _, _), i) =>
       val row = sheet.createRow(i + 1)
-      row.createCell(0).setCellValue(student.scjCode)
+      row.createCell(0).setCellValue(student.sprCode)
 
       val markCell = createUnprotectedCell(row, 1)
       val gradeCell = createUnprotectedCell(row, 2)
