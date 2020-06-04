@@ -7,9 +7,10 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.AssessmentMembershipService
-import uk.ac.warwick.tabula.system.permissions._
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService}
+import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
@@ -18,6 +19,9 @@ import scala.util.Try
 
 object ModuleRegistration {
   final val GraduationBenchmarkCutoff: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+
+  // a list of all the markscheme codes that we consider to be pass/fail modules
+  final val PassFailMarkSchemeCodes = Seq("PF")
 }
 
 /*
@@ -28,19 +32,20 @@ object ModuleRegistration {
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
-class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
+class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 
-  def this(scjCode: String, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String, passFail: Boolean = false) {
+  def this(sprCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
-    this._scjCode = scjCode
+    this.sprCode = sprCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
     this.occurrence = occurrence
-    this.passFail = passFail
+    this.marksCode = marksCode.maybeText.orNull
   }
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  @transient var profileService: ProfileService = Wire[ProfileService]
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "moduleCode", referencedColumnName = "code")
@@ -54,16 +59,21 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "scjCode", insertable = false, updatable = false)
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var studentCourseDetails: StudentCourseDetails = _
+  def studentCourseDetails: StudentCourseDetails =
+    RequestLevelCache.cachedBy("ModuleRegistration.studentCourseDetails", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+      val allBySprCode = profileService.getStudentCourseDetailsBySprCode(sprCode)
 
-  @Column(name = "scjCode")
-  var _scjCode: String = _
+      allBySprCode.find(_.mostSignificant)
+        .getOrElse(allBySprCode.maxBy(_.scjCode))
+    }
 
-  // get the integer part of the SCJ code so we can sort registrations to the same module by it
-  def scjSequence: Int = _scjCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
+  // I'd love for this to be _sprCode but Hibernate won't let you mix logical and physical column names (even with @Column)
+  // and it's needed for the @JoinColumn on StudentCourseDetails._moduleRegistrations
+  var sprCode: String = _
+
+  // get the integer part of the SPR code so we can sort registrations to the same module by it
+  def sprSequence: Int = sprCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _
@@ -72,22 +82,26 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   var occurrence: String = _
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var actualMark: JBigDecimal = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var actualMark: Option[Int] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var actualGrade: String = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  var actualGrade: Option[String] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var agreedMark: JBigDecimal = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var agreedMark: Option[Int] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var agreedGrade: String = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  var agreedGrade: Option[String] = None
 
-  def firstDefinedMark: Option[JBigDecimal] = Option(agreedMark).orElse(Option(actualMark))
+  def firstDefinedMark: Option[Int] = agreedMark.orElse(actualMark)
 
-  def firstDefinedGrade: Option[String] = Option(agreedGrade).orElse(Option(actualGrade))
+  def firstDefinedGrade: Option[String] = agreedGrade.orElse(actualGrade)
 
-  def hasAgreedMarkOrGrade: Boolean = Option(agreedMark).isDefined || Option(agreedGrade).isDefined
+  def hasAgreedMarkOrGrade: Boolean = agreedMark.isDefined || agreedGrade.isDefined
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
   @Column(name = "selectionstatuscode")
@@ -98,7 +112,10 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   var lastUpdatedDate: DateTime = DateTime.now
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var passFail: Boolean = _
+  var marksCode: String = _
+
+  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+  def passFail: Boolean = marksCode.maybeText.exists(ModuleRegistration.PassFailMarkSchemeCodes.contains)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
   @Column(name = "moduleresult")
@@ -141,14 +158,14 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
       }
     }
 
-  override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
+  override def toString: String = s"$sprCode-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
 
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()
-      .append(studentCourseDetails, that.studentCourseDetails)
+      .append(sprCode, that.sprCode)
       .append(module, that.module)
       .append(cats, that.cats)
       .append(academicYear, that.academicYear)
@@ -189,9 +206,9 @@ case class UpstreamModuleRegistration(
   // Assessment group membership doesn't vary by sequence - for groups that are null we want to return same group -TAB-5615
   def differentGroup(other: UpstreamModuleRegistration): Boolean =
     year != other.year ||
-      (occurrence != other.occurrence && assessmentGroup != AssessmentComponent.NoneAssessmentGroup) ||
-      moduleCode != other.moduleCode ||
-      assessmentGroup != other.assessmentGroup
+    (occurrence != other.occurrence && assessmentGroup != AssessmentComponent.NoneAssessmentGroup) ||
+    moduleCode != other.moduleCode ||
+    assessmentGroup != other.assessmentGroup
 
   /**
     * Returns UpstreamAssessmentGroups matching the group attributes.

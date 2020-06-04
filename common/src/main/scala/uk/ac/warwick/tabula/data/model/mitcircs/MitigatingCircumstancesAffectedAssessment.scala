@@ -35,7 +35,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.name = item.name
     this.assessmentType = item.assessmentType
     this.deadline = item.deadline
-    this.boardRecommendations = item.boardRecommendations.asScala.toSeq
+    this.boardRecommendations = Option(item.boardRecommendations).map(_.asScala.toSeq).orNull
     this.extensionDeadline = item.extensionDeadline
   }
 

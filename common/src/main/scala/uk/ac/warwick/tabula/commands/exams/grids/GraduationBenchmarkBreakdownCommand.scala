@@ -10,14 +10,15 @@ import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 object GraduationBenchmarkBreakdownCommand {
 
-  type Result = GraduationBenchmarkBreakdown
+  type Result = Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]
   type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState
 
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
     new GraduationBenchmarkBreakdownCommandInternal(studentCourseDetails, academicYear)
-      with ComposableCommand[GraduationBenchmarkBreakdown]
+      with ComposableCommand[Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]]
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
+      with AutowiringProgressionServiceComponent
       with AutowiringCourseAndRouteServiceComponent
       with AutowiringUpstreamRouteRuleServiceComponent
       with GraduationBenchmarkBreakdownPermissions
@@ -26,30 +27,72 @@ object GraduationBenchmarkBreakdownCommand {
       with ReadOnly with Unaudited
 }
 
-case class GraduationBenchmarkBreakdown (
+case class UGGraduationBenchmarkBreakdown (
   modules: Map[ModuleRegistration, Seq[ComponentAndMarks]],
   graduationBenchmark: BigDecimal,
   totalCats: BigDecimal,
   percentageOfAssessmentTaken: BigDecimal,
 )
 
+case class PGGraduationBenchmarkBreakdown (
+  modules: Seq[ModuleRegistration],
+  graduationBenchmark: BigDecimal,
+  totalCats: BigDecimal,
+  totalCatsTaken: BigDecimal,
+  usedModulesWithCumulativeSums: Seq[(ModuleRegistration, CumulativeCatsAndMarks)],
+  unusedModules: Seq[ModuleRegistration],
+  catsConsidered: BigDecimal
+)
+
+case class CumulativeCatsAndMarks (
+  cumulativeCats: BigDecimal,
+  cumulativeMarks: BigDecimal
+)
+
+
 class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
-  extends CommandInternal[GraduationBenchmarkBreakdown] with TaskBenchmarking {
+  extends CommandInternal[Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]] with TaskBenchmarking {
   self: GraduationBenchmarkBreakdownCommandState
     with StudentModuleRegistrationAndComponents
     with ModuleRegistrationServiceComponent
+    with ProgressionServiceComponent
     with CourseAndRouteServiceComponent
     with UpstreamRouteRuleServiceComponent
     with AssessmentMembershipServiceComponent =>
 
-  override def applyInternal(): GraduationBenchmarkBreakdown = {
-    val modules = studentCourseYearDetails.moduleRegistrations.map { mr => mr -> moduleRegistrationService.benchmarkComponentsAndMarks(mr) }.toMap
-    GraduationBenchmarkBreakdown(
-      modules.filter{ case (_, components) => components.nonEmpty },
-      moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations),
-      studentCourseYearDetails.totalCats,
-      moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations),
-    )
+  override def applyInternal(): Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown] = {
+    val moduleRegistrations = studentCourseYearDetails.moduleRegistrations
+    val modules = moduleRegistrations.map { mr => mr -> moduleRegistrationService.benchmarkComponentsAndMarks(mr) }.toMap
+    if (studentCourseDetails.student.isUG) {
+      Left(UGGraduationBenchmarkBreakdown(
+        modules.filter{ case (_, components) => components.nonEmpty },
+        moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations),
+        studentCourseYearDetails.totalCats,
+        moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations),
+      ))
+    } else {
+      val bestCats = progressionService.numberCatsToConsiderPG(studentCourseYearDetails)
+      val (bestPGModules, catsConsidered) = progressionService.bestPGModules(moduleRegistrations, bestCats)
+      Right(PGGraduationBenchmarkBreakdown(
+        moduleRegistrations.sortBy(_.firstDefinedMark).reverse,
+        progressionService.postgraduateBenchmark(studentCourseYearDetails, moduleRegistrations),
+        bestCats,
+        moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+        {
+          val (usedModulesWithCumulativeSums, _, _) = bestPGModules.foldLeft((Map.empty[ModuleRegistration, CumulativeCatsAndMarks], BigDecimal(0), BigDecimal(0))) {
+            (acc, module) =>
+              val (mapAcc, totalAcc, totalMarksAcc) = acc
+              val newCatsTotal = totalAcc + module.cats
+              val newMarksTotal = totalMarksAcc + (BigDecimal(module.firstDefinedMark.get) * BigDecimal(module.cats))
+              val newMap = mapAcc + (module -> CumulativeCatsAndMarks(newCatsTotal, newMarksTotal))
+              (newMap, newCatsTotal, newMarksTotal)
+          }
+          usedModulesWithCumulativeSums.toSeq.sortBy(m => m._1.cats )
+        },
+        (moduleRegistrations diff bestPGModules).sortBy(_.cats).reverse,
+        catsConsidered,
+      ))
+    }
   }
 }
 

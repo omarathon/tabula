@@ -23,7 +23,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     session.saveOrUpdate(mod)
     session.flush()
 
-    val mr = new ModuleRegistration(scd.scjCode, mod, new JBigDecimal(30), AcademicYear(2013), "A")
+    val mr = new ModuleRegistration(scd.sprCode, mod, new JBigDecimal(30), AcademicYear(2013), "A", null)
     session.saveOrUpdate(mr)
     session.flush()
 
@@ -34,10 +34,10 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     val madService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
     madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
-    val modRegRow1 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
-      Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A", "PF", "P", None)
-    val modRegRow2 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
-      Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C", "WAR", "P", None)
+    val modRegRow1 = new ModuleRegistrationRow(scd.sprCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
+      Some(90), "A", Some(90), "A", "PF", "P", None)
+    val modRegRow2 = new ModuleRegistrationRow(scd.sprCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
+      Some(50), "C", Some(50), "C", "WAR", "P", None)
 
     val scdDao: StudentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
     scdDao.getByScjCode("0000001/1") returns Some(scd)
@@ -64,9 +64,13 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
       newModRegs.head.cats should be(cats)
       newModRegs.head.occurrence should be(occurrence)
       newModRegs.head.selectionStatus.description should be("Core")
-      newModRegs.head._scjCode should be(scd.scjCode)
+      newModRegs.head.sprCode should be(scd.sprCode)
       newModRegs.head.lastUpdatedDate.getDayOfMonth should be(LocalDate.now.getDayOfMonth)
       newModRegs.head.passFail should be (true)
+      newModRegs.head.actualMark should be (Some(90))
+      newModRegs.head.actualGrade should be (Some("A"))
+      newModRegs.head.agreedMark should be (Some(90))
+      newModRegs.head.agreedGrade should be (Some("A"))
 
       // now reset the last updated date to 10 days ago:
       val tenDaysAgo: DateTime = DateTime.now.minusDays(10)

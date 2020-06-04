@@ -133,7 +133,9 @@ trait AssessmentMembershipService {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary]
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary]
+
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary]
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
@@ -358,14 +360,20 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  def gradesForMark(component: AssessmentComponent, mark: Option[Int]): Seq[GradeBoundary] =
-    component.marksCode match {
-      case code: String if code.hasText =>
-        dao.getGradeBoundaries(code).filter(_.isValidForMark(mark))
-          .sortBy { gb => (!gb.isDefault, gb.grade) } // Defaults first, then alphabetical
-      case _ =>
-        Seq()
-    }
+  private def gradesForMark(marksCode: String, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
+    dao.getGradeBoundaries(marksCode, if (isResit) "RAS" else "SAS")
+      .filter(_.isValidForMark(mark))
+      .sorted
+
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
+    component.marksCode.maybeText.map { marksCode =>
+      gradesForMark(marksCode, mark, isResit)
+    }.getOrElse(Seq.empty)
+
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
+    moduleRegistration.marksCode.maybeText.map { marksCode =>
+      gradesForMark(marksCode, mark, isResit)
+    }.getOrElse(Seq.empty)
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 

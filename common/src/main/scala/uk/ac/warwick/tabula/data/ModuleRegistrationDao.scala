@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.Order._
-import org.hibernate.criterion.{Projections, Restrictions}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -36,6 +35,8 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
@@ -62,7 +63,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
     occurrence: String
   ): Option[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
-      .add(is("studentCourseDetails", studentCourseDetails))
+      .add(is("sprCode", studentCourseDetails.sprCode))
       .add(is("module", module))
       .add(is("academicYear", academicYear))
       .add(is("cats", cats))
@@ -74,28 +75,39 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       """
         select distinct mr
           from ModuleRegistration mr
-          where academicYear = :academicYear
-          and studentCourseDetails.missingFromImportSince is null
-          and studentCourseDetails.student.userId in :usercodes
-          and mr.deleted is false
+          join StudentCourseDetails studentCourseDetails
+            on studentCourseDetails.sprCode = mr.sprCode
+          where mr.academicYear = :academicYear
+            and studentCourseDetails.missingFromImportSince is null
+            and studentCourseDetails.student.userId in :usercodes
+            and mr.deleted is false
         """)
       .setParameter("academicYear", academicYear)
       .setParameterList("usercodes", userCodes)
       .seq
 
-  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] = {
+  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
       .add(is("module", module))
       .add(is("academicYear", academicYear))
       .add(is("deleted", false))
-      .addOrder(asc("_scjCode"))
+      .addOrder(asc("sprCode"))
       .seq
-  }
+
+  override def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+    session.newCriteria[ModuleRegistration]
+      .add(is("module", module))
+      .add(is("cats", cats))
+      .add(is("academicYear", academicYear))
+      .add(is("occurrence", occurrence))
+      .add(is("deleted", false))
+      .addOrder(asc("sprCode"))
+      .seq
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] = {
     safeInSeq(() => {
       val criteria = session.newCriteria[ModuleRegistration]
-        .addOrder(asc("_scjCode"))
+        .addOrder(asc("sprCode"))
       if (!includeDeleted) {
         criteria.add(is("deleted", false))
       }
@@ -106,9 +118,11 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     session.newQuery[ModuleRegistration](
       """
-         select distinct mr
-         from ModuleRegistration mr
-         where studentCourseDetails.missingFromImportSince is null
+        select distinct mr
+        from ModuleRegistration mr
+        join StudentCourseDetails studentCourseDetails
+          on studentCourseDetails.sprCode = mr.sprCode
+        where studentCourseDetails.missingFromImportSince is null
           and studentCourseDetails.student.universityId in :universityIds
           and (mr.deleted is false or :includeDeleted is true)
       """)
@@ -125,34 +139,31 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
   }
 
   def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String] = {
-    def applyAndSeq(extraCriteria: ScalaCriteria[ModuleRegistration] => Unit): Seq[String] = {
-      val c = session.newCriteria[ModuleRegistration]
-        .createAlias("studentCourseDetails", "studentCourseDetails")
-        .createAlias("studentCourseDetails.student", "student")
-        .add(is("module", module))
-        .add(is("deleted", false))
-      occurrence.map(o =>
-        c.add(is("occurrence", o))
-      )
-      extraCriteria(c)
-      c.project[String](Projections.property("student.userId")).seq
-    }
+    val query = session.newQuery[String](
+      s"""
+        select distinct studentCourseDetails.student.userId
+        from ModuleRegistration mr
+        join StudentCourseDetails studentCourseDetails
+          on studentCourseDetails.sprCode = mr.sprCode
+        where
+          mr.module = :module and
+          mr.deleted is :deleted and
+          ${if (occurrence.nonEmpty) "mr.occurrence = :occurrence and" else ""}
+          ${
+            if (endDate.nonEmpty) "((mr.academicYear = :academicYear and mr.endDate = null) or mr.endDate >= :endDate)"
+            else "mr.academicYear = :academicYear"
+          }
+       """
+    )
 
-    if (endDate.isEmpty) {
-      applyAndSeq { c =>
-        c.add(is("academicYear", academicYear))
-      }
-    } else {
-      val mrWithNoEndDate = applyAndSeq { c =>
-        c.add(is("academicYear", academicYear))
-          .add(is("endDate", null))
-      }
+    query
+      .setParameter("module", module)
+      .setParameter("deleted", false)
+      .setParameter("academicYear", academicYear)
 
-      val mrWithEndDate = applyAndSeq { c =>
-        c.add(Restrictions.ge("endDate", endDate.get))
-      }
+    occurrence.foreach(query.setParameter("occurrence", _))
+    endDate.foreach(query.setParameter("endDate", _))
 
-      (mrWithNoEndDate ++ mrWithEndDate).distinct
-    }
+    query.seq
   }
 }

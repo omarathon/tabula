@@ -151,7 +151,7 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A"): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A", marksCode: String = null): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
@@ -161,6 +161,7 @@ object Fixtures extends Mockito {
     a.assessmentType = assessmentType
     a.inUse = true
     a.rawWeighting = weighting
+    a.marksCode = marksCode
     a
   }
 
@@ -375,13 +376,13 @@ object Fixtures extends Mockito {
     cats: JBigDecimal,
     year: AcademicYear,
     occurrence: String = "",
-    agreedMark: BigDecimal = BigDecimal(0),
-    status: ModuleSelectionStatus = ModuleSelectionStatus.Core
+    agreedMark: Option[Int] = None,
+    status: ModuleSelectionStatus = ModuleSelectionStatus.Core,
+    marksCode: String = null,
   ): ModuleRegistration = {
-    val scjCode = Option(scd).map(_.scjCode).orNull
-    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence)
-    mr.studentCourseDetails = scd
-    mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+    val sprCode = Option(scd).map(_.sprCode).orNull
+    val mr = new ModuleRegistration(sprCode, mod, cats, year, occurrence, marksCode)
+    mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr
   }

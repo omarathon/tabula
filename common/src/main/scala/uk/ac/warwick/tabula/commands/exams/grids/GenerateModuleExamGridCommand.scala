@@ -56,8 +56,8 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
     val result: Seq[(AssessmentIdentity, ModuleGridDetailRecord)] = benchmarkTask("GenerateMRComponents") {
       moduleRegistrationService.getByModuleAndYear(module, academicYear)
         .groupBy(_.studentCourseDetails.student)
-        .view.mapValues(_.sortBy(_.scjSequence).reverse).toMap
-        // multiple registrations here should only be the result of a course transfer - pick the highest scj
+        .view.mapValues(_.sortBy(_.sprSequence).reverse).toMap
+        // multiple registrations here should only be the result of a course transfer - pick the highest spr
         .flatMap { case (_, registrations) => registrations.headOption }.toSeq
         .flatMap { mr =>
           val student: StudentMember = mr.studentCourseDetails.student

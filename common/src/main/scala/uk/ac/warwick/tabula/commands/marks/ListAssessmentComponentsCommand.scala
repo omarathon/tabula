@@ -2,24 +2,30 @@ package uk.ac.warwick.tabula.commands.marks
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand._
+import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.MarksWorkflowProgress
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksService, AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
+
+import scala.collection.immutable.ListMap
 
 object ListAssessmentComponentsCommand {
   case class StudentMarkRecord(
     universityId: String,
     position: Option[Int],
     currentMember: Boolean,
+    resitExpected: Boolean,
     mark: Option[Int],
     grade: Option[String],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    markState: Option[MarkState],
     agreed: Boolean,
-    history: Seq[RecordedAssessmentComponentStudentMark] // Most recent first
+    history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
+    upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   )
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
@@ -27,6 +33,7 @@ object ListAssessmentComponentsCommand {
         universityId = member.universityId,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
+        resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty),
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(member.firstAgreedMark)
@@ -43,8 +50,11 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
+        markState = recordedStudent.flatMap(_.latestState),
+        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
         agreed = recordedStudent.forall(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
+        member
       )
   }
 
@@ -61,7 +71,12 @@ object ListAssessmentComponentsCommand {
   case class AssessmentComponentInfo(
     assessmentComponent: AssessmentComponent,
     upstreamAssessmentGroup: UpstreamAssessmentGroup,
-    students: Seq[StudentMarkRecord]
+    students: Seq[StudentMarkRecord],
+
+    // Progress
+    progress: MarksWorkflowProgress,
+    nextStage: Option[WorkflowStage],
+    stages: ListMap[String, WorkflowStages.StageProgress],
   ) {
     val studentsWithMarks: Seq[StudentMarkRecord] = students.filter(s => s.mark.nonEmpty || s.grade.nonEmpty)
 
@@ -80,6 +95,7 @@ object ListAssessmentComponentsCommand {
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringMarksWorkflowProgressServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -88,20 +104,31 @@ object ListAssessmentComponentsCommand {
 
 abstract class ListAssessmentComponentsCommandInternal(val department: Department, val academicYear: AcademicYear, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with ListAssessmentComponentsState {
+    with ListAssessmentComponentsState
+    with ListAssessmentComponentsForModulesWithPermission {
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
-    with ListAssessmentComponentsModulesWithPermission
-    with SecurityServiceComponent
-    with ModuleAndDepartmentServiceComponent =>
+    with MarksWorkflowProgressServiceComponent
+    with ListAssessmentComponentsModulesWithPermission =>
 
-  override def applyInternal(): Result = {
+  override def applyInternal(): Result = assessmentComponentInfos
+
+}
+
+trait ListAssessmentComponentsForModulesWithPermission {
+  self: ListAssessmentComponentsState
+    with AssessmentMembershipServiceComponent
+    with AssessmentComponentMarksServiceComponent
+    with MarksWorkflowProgressServiceComponent
+    with ListAssessmentComponentsModulesWithPermission =>
+
+  lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
     val assessmentComponents: Seq[AssessmentComponent] =
       assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false)
         .filter { ac =>
           ac.assessmentGroup != "AO" &&
-          ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
-          (canAdminDepartment || modulesWithPermission.contains(ac.module))
+            ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
+            (canAdminDepartment || modulesWithPermission.contains(ac.module))
         }
 
     val assessmentComponentsByKey: Map[AssessmentComponentKey, AssessmentComponent] =
@@ -112,10 +139,19 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
       .filter(_.allMembers.nonEmpty)
       .map { upstreamAssessmentGroupInfo =>
+        val assessmentComponent = assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup))
+        val upstreamAssessmentGroup = upstreamAssessmentGroupInfo.upstreamAssessmentGroup
+        val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+
+        val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students)
+
         AssessmentComponentInfo(
-          assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup)),
-          upstreamAssessmentGroupInfo.upstreamAssessmentGroup,
-          studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+          assessmentComponent,
+          upstreamAssessmentGroup,
+          students,
+          progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),
+          nextStage = progress.nextStage,
+          stages = progress.stages,
         )
       }
       .sortBy { info =>
@@ -123,7 +159,6 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
         (info.assessmentComponent.moduleCode, info.assessmentComponent.assessmentGroup, info.assessmentComponent.sequence, info.upstreamAssessmentGroup.occurrence)
       }
   }
-
 }
 
 trait ListAssessmentComponentsState {

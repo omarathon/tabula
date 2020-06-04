@@ -157,6 +157,7 @@ abstract class Features {
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
   @Value("${features.marksManagement:true}") var marksManagement: Boolean = defaults.marksManagement
+  @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -311,6 +312,8 @@ class FeaturesMessage {
   @BeanProperty var enforceCsp = true
   @BeanProperty var notificationBatching = false
   @BeanProperty var marksManagement = true
+  @BeanProperty var includeSMSForCurrentYear = false
+
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

@@ -11,7 +11,8 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -71,7 +72,6 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
 
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq
-      .filter(s => s.mark.nonEmpty || s.grade.nonEmpty || s.comments.nonEmpty)
       .map { item =>
         val upstreamAssessmentGroupMember =
           upstreamAssessmentGroup.members.asScala
@@ -85,7 +85,9 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
           uploader = currentUser.apparentUser,
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
-          comments = item.comments
+          source = RecordedAssessmentComponentStudentMarkSource.MarkEntry,
+          markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
+          comments = item.comments,
         )
 
         assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
@@ -219,11 +221,11 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
     students.asScala.foreach { case (universityID, item) =>
       errors.pushNestedPath(s"students[$universityID]")
 
+      val upstreamAssessmentGroupMember = upstreamAssessmentGroup.members.asScala.find(_.universityId == universityID)
+
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
-      if (!upstreamAssessmentGroup.members.asScala.exists(_.universityId == universityID)) {
-        errors.popNestedPath()
-        errors.rejectValue("", "uniNumber.unacceptable", Array(universityID), null)
-        errors.pushNestedPath(s"students[$universityID]")
+      if (upstreamAssessmentGroupMember.isEmpty) {
+        errors.reject("uniNumber.unacceptable", Array(universityID), "")
       }
 
       if (item.mark.hasText) {
@@ -232,7 +234,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
           } else if (doGradeValidation) {
-            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt))
+            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.flatMap(_.resitExpected).getOrElse(false))
             if (item.grade.hasText) {
               if (!validGrades.exists(_.grade == item.grade)) {
                 errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -251,7 +253,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
             errors.rejectValue("mark", "actualMark.format")
         }
       } else if (doGradeValidation&& item.grade.hasText) {
-        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None)
+        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.flatMap(_.resitExpected).getOrElse(false))
         if (!validGrades.exists(_.grade == item.grade)) {
           errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
         }
@@ -287,6 +289,9 @@ trait RecordAssessmentComponentMarksDescription extends Describable[Result] {
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
         student.universityId -> student.latestGrade.get
+      }.toMap,
+      "state" -> result.filter(_.latestState.nonEmpty).map { student =>
+        student.universityId -> student.latestState.get.entryName
       }.toMap
     )
 }

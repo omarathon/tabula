@@ -149,6 +149,10 @@ trait ProgressionService {
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
+  def bestPGModules(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): (Seq[ModuleRegistration], BigDecimal)
+
+  def numberCatsToConsiderPG(scyd: StudentCourseYearDetails): BigDecimal
+
   def suggestedResult(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, applyBenchmark: Boolean, yearWeightings: Seq[CourseYearWeighting]): ProgressionResult
 
   def suggestedFinalYearGrade(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, applyBenchmark: Boolean, yearWeightings: Seq[CourseYearWeighting]): FinalYearGrade
@@ -202,9 +206,13 @@ abstract class AbstractProgressionService extends ProgressionService {
   }
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
-    val bestCats =
-      if (Option(scyd.studentCourseDetails.award).map(_.code).contains("PGDIP")) BigDecimal(90)
-      else BigDecimal(120)
+    val bestCats = numberCatsToConsiderPG(scyd)
+    val bestModules = bestPGModules(moduleRegistrations, bestCats)
+    val total = bestModules._1.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
+    (total / bestModules._2).setScale(1, RoundingMode.HALF_UP)
+  }
+
+  def bestPGModules(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): (Seq[ModuleRegistration], BigDecimal) = {
     val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.cats)).reverse
     var catsConsidered = BigDecimal(0)
     val bestModules = sortedByMark.takeWhile { mr =>
@@ -212,8 +220,12 @@ abstract class AbstractProgressionService extends ProgressionService {
       if(takeMore) catsConsidered += mr.cats
       takeMore
     }
-    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
-    (total / catsConsidered).setScale(1, RoundingMode.HALF_UP)
+    (bestModules, catsConsidered)
+  }
+
+  def numberCatsToConsiderPG(scyd: StudentCourseYearDetails): BigDecimal = {
+    if (Option(scyd.studentCourseDetails.award).map(_.code).contains("PGDIP")) BigDecimal(90)
+    else BigDecimal(120)
   }
 
   private def calculateBenchmark(entityPerYear: Map[Int, ExamGridEntityYear], marksPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting]): BigDecimal = {

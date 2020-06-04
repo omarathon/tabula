@@ -218,6 +218,7 @@
     <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatusConverter"/>
     <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaErrorCodeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.FiniteDurationConverter" />
+    <bean class="uk.ac.warwick.tabula.data.convert.BigDecimalConverter"/>
   </util:list>
 
   <bean id="typeConverter"
@@ -249,6 +250,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
         <bean class="uk.ac.warwick.tabula.data.convert.FiniteDurationConverter" />
+        <bean class="uk.ac.warwick.tabula.data.convert.BigDecimalConverter" />
       </list>
     </property>
   </bean>
