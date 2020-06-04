@@ -100,6 +100,9 @@
                   <#local nextStageUrl="" />
 
                   <#-- Set nextStage URL based on action code -->
+                  <#if item.nextStage.actionCode == "workflow.marks.moduleOccurrence.CalculateModuleMarks.action">
+                    <#local nextStageUrl><@routes.marks.module_marks item.module item.cats academicYear item.occurrence /></#local>
+                  </#if>
 
                   <#if nextStageUrl?has_content>
                     <a href="${nextStageUrl}"><#compress><@spring.message code=item.nextStage.actionCode /></#compress></a>
@@ -126,8 +129,8 @@
                   <a href="<@routes.marks.module_marks item.module item.cats academicYear item.occurrence />">Calculate module marks</a>
                 </li>
 
-                <li class="disabled">
-                  <a>Confirm module marks</a>
+                <li>
+                  <a href="<@routes.marks.module_marks_confirm item.module item.cats academicYear item.occurrence />" >Confirm module marks</a>
                 </li>
 
                 <li class="disabled">

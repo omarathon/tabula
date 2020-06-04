@@ -29,19 +29,20 @@ object MarksDepartmentHomeCommand {
   )
 
   case class StudentModuleMarkRecord(
-    scjCode: String,
+    sprCode: String,
     mark: Option[Int],
     grade: Option[String],
     result: Option[ModuleResult],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    markState: Option[MarkState],
     agreed: Boolean,
     history: Seq[RecordedModuleMark] // Most recent first
   )
   object StudentModuleMarkRecord {
     def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord =
       StudentModuleMarkRecord(
-        scjCode = moduleRegistration._scjCode,
+        sprCode = moduleRegistration.sprCode,
         mark =
           recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(moduleRegistration.agreedMark)
@@ -61,6 +62,8 @@ object MarksDepartmentHomeCommand {
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
             recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g))
         ),
+        markState = recordedModuleRegistration.flatMap(_.latestState),
+        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
         agreed = recordedModuleRegistration.forall(!_.needsWritingToSits) && moduleRegistration.agreedMark.nonEmpty,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
       )
@@ -69,8 +72,8 @@ object MarksDepartmentHomeCommand {
   def studentModuleMarkRecords(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {
     val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(module, cats, academicYear, occurrence)
 
-    moduleRegistrations.sortBy(_._scjCode).map { moduleRegistration =>
-      val recordedModuleRegistration = recordedModuleRegistrations.find(_.scjCode == moduleRegistration._scjCode)
+    moduleRegistrations.sortBy(_.sprCode).map { moduleRegistration =>
+      val recordedModuleRegistration = recordedModuleRegistrations.find(_.sprCode == moduleRegistration.sprCode)
 
       StudentModuleMarkRecord(moduleRegistration, recordedModuleRegistration)
     }

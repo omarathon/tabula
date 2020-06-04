@@ -41,10 +41,19 @@ object MarksBreadcrumbs {
       val url = Some(Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup))
     }
 
-    case class ModuleOccurrenceRecordMarks(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false) extends BreadCrumb {
+    abstract class ModuleOccurrenceBookmark(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean) extends BreadCrumb {
       val title: String = s"${module.code.toUpperCase}-${new DecimalFormat("0.#").format(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP))} ${module.name} (${academicYear.toString}, $occurrence)"
-      val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(module, cats, academicYear, occurrence))
     }
+
+    case class ModuleOccurrenceRecordMarks(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
+      extends ModuleOccurrenceBookmark(module, cats, academicYear, occurrence, active) {
+        val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(module, cats, academicYear, occurrence))
+      }
+
+    case class ModuleOccurrenceConfirmMarks(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
+      extends ModuleOccurrenceBookmark(module, cats, academicYear, occurrence, active) {
+        val url = Some(Routes.marks.Admin.ModuleOccurrences.confirmMarks(module, cats, academicYear, occurrence))
+      }
   }
 
 }

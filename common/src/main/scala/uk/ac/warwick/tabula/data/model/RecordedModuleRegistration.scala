@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
+import enumeratum.{Enum, EnumEntry}
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
@@ -26,15 +28,15 @@ class RecordedModuleRegistration extends GeneratedId
 
   def this(mr: ModuleRegistration) {
     this()
-    this.scjCode = mr._scjCode
+    this.sprCode = mr.sprCode
     this.module = mr.module
     this.cats = mr.cats
     this.academicYear = mr.academicYear
     this.occurrence = mr.occurrence
   }
 
-  @Column(name = "scj_code", nullable = false)
-  var scjCode: String = _
+  @Column(name = "spr_code", nullable = false)
+  var sprCode: String = _
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "module_code", referencedColumnName = "code")
@@ -56,13 +58,23 @@ class RecordedModuleRegistration extends GeneratedId
   private val _marks: JList[RecordedModuleMark] = JArrayList()
   def marks: Seq[RecordedModuleMark] = _marks.asScala.toSeq
 
-  def addMark(uploader: User, mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: String = null): RecordedModuleMark = {
+  def addMark(
+    uploader: User,
+    mark: Option[Int],
+    grade: Option[String],
+    result: Option[ModuleResult],
+    source: RecordedModuleMarkSource,
+    markState: MarkState,
+    comments: String = null
+  ): RecordedModuleMark = {
     val newMark = new RecordedModuleMark
     newMark.recordedModuleRegistration = this
     newMark.mark = mark
     newMark.grade = grade
     newMark.result = result
     newMark.comments = comments
+    newMark.source = source
+    newMark.markState = markState
     newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
     _marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
@@ -73,6 +85,7 @@ class RecordedModuleRegistration extends GeneratedId
   def latestMark: Option[Int] = marks.headOption.flatMap(_.mark)
   def latestGrade: Option[String] = marks.headOption.flatMap(_.grade)
   def latestResult: Option[ModuleResult] = marks.headOption.flatMap(_.result)
+  def latestState: Option[MarkState] = marks.headOption.map(_.markState)
 
   @Column(name = "needs_writing_to_sits", nullable = false)
   var needsWritingToSits: Boolean = false
@@ -83,9 +96,8 @@ class RecordedModuleRegistration extends GeneratedId
   def lastWrittenToSits: Option[DateTime] = Option(_lastWrittenToSits)
   def lastWrittenToSits_=(lastWrittenToSits: Option[DateTime]): Unit = _lastWrittenToSits = lastWrittenToSits.orNull
 
-
   override def toStringProps: Seq[(String, Any)] = Seq(
-    "scjCode" -> scjCode,
+    "sprCode" -> sprCode,
     "moduleCode" -> module.code,
     "cats" -> cats,
     "academicYear" -> academicYear,
@@ -118,6 +130,13 @@ class RecordedModuleMark extends GeneratedId
 
   var comments: String = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.RecordedModuleMarkSourceUserType")
+  var source: RecordedModuleMarkSource = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.MarkStateUserType")
+  @Column(name = "mark_state")
+  var markState: MarkState = UnconfirmedActual
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   @Column(name = "updated_by", nullable = false)
   var updatedBy: User = _
@@ -129,6 +148,17 @@ class RecordedModuleMark extends GeneratedId
     "mark" -> mark,
     "grade" -> grade,
     "result" -> result,
-    "comments" -> comments
+    "comments" -> comments,
+    "source" -> source
   )
 }
+
+sealed trait RecordedModuleMarkSource extends EnumEntry
+object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
+  case object ComponentMarkCalculation extends RecordedModuleMarkSource
+  case object MarkConfirmation extends RecordedModuleMarkSource
+
+  override def values: IndexedSeq[RecordedModuleMarkSource] = findValues
+}
+
+class RecordedModuleMarkSourceUserType extends EnumUserType(RecordedModuleMarkSource)

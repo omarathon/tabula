@@ -98,6 +98,7 @@ class ComponentScalingCommandTest extends TestBase with Mockito {
 
   @Test
   def validationNoChanges(): Unit = {
+    scaling.upstreamAssessmentGroup.members.get(0).actualMark = Some(0)
     scaling.upstreamAssessmentGroup.members.get(0).actualGrade = Some(GradeBoundary.WithdrawnGrade)
     scaling.scaledPassMark = 45
     scaling.scaledUpperClassMark = 75
