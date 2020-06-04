@@ -29,7 +29,7 @@ object MarksDepartmentHomeCommand {
   )
 
   case class StudentModuleMarkRecord(
-    scjCode: String,
+    sprCode: String,
     mark: Option[Int],
     grade: Option[String],
     result: Option[ModuleResult],
@@ -42,7 +42,7 @@ object MarksDepartmentHomeCommand {
   object StudentModuleMarkRecord {
     def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord =
       StudentModuleMarkRecord(
-        scjCode = moduleRegistration._scjCode,
+        sprCode = moduleRegistration.sprCode,
         mark =
           recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(moduleRegistration.agreedMark)
@@ -72,8 +72,8 @@ object MarksDepartmentHomeCommand {
   def studentModuleMarkRecords(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {
     val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(module, cats, academicYear, occurrence)
 
-    moduleRegistrations.sortBy(_._scjCode).map { moduleRegistration =>
-      val recordedModuleRegistration = recordedModuleRegistrations.find(_.scjCode == moduleRegistration._scjCode)
+    moduleRegistrations.sortBy(_.sprCode).map { moduleRegistration =>
+      val recordedModuleRegistration = recordedModuleRegistrations.find(_.sprCode == moduleRegistration.sprCode)
 
       StudentModuleMarkRecord(moduleRegistration, recordedModuleRegistration)
     }

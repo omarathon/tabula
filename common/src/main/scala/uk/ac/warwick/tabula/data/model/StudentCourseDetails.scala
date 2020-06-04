@@ -76,7 +76,8 @@ class StudentCourseDetails
     studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
   }
 
-  @OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "sprCode", referencedColumnName = "sprCode", insertable = false, updatable = false)
   @BatchSize(size = 200)
   private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 

@@ -289,6 +289,9 @@ trait RecordAssessmentComponentMarksDescription extends Describable[Result] {
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
         student.universityId -> student.latestGrade.get
+      }.toMap,
+      "state" -> result.filter(_.latestState.nonEmpty).map { student =>
+        student.universityId -> student.latestState.get.entryName
       }.toMap
     )
 }

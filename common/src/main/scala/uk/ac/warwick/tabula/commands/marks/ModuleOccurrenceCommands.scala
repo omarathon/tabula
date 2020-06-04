@@ -88,10 +88,16 @@ trait ModuleOccurrenceDescription extends Describable[Result] {
   override def describeResult(d: Description, result: Result): Unit =
     d.properties(
       "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
-        student.scjCode -> student.latestMark.get
+        student.sprCode -> student.latestMark.get
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
-        student.scjCode -> student.latestGrade.get
+        student.sprCode -> student.latestGrade.get
+      }.toMap,
+      "results" -> result.filter(_.latestResult.nonEmpty).map { student =>
+        student.sprCode -> student.latestResult.get.entryName
+      }.toMap,
+      "state" -> result.filter(_.latestState.nonEmpty).map { student =>
+        student.sprCode -> student.latestState.get.entryName
       }.toMap
     )
 }

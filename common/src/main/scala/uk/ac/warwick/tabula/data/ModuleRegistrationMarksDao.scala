@@ -25,7 +25,7 @@ abstract class AbstractModuleRegistrationMarksDao extends ModuleRegistrationMark
 
   override def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]
-      .add(is("scjCode", reg._scjCode))
+      .add(is("sprCode", reg.sprCode))
       .add(is("module", reg.module))
       .add(is("cats", reg.cats))
       .add(is("academicYear", reg.academicYear))

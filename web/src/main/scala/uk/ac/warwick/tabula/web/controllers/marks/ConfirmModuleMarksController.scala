@@ -42,15 +42,15 @@ class ConfirmModuleMarksController extends BaseController
 
   @ModelAttribute("studentModuleRecords")
   def studentModuleRecords(@ModelAttribute("command") command: ConfirmModuleMarksCommand.Command, errors: Errors): Seq[(MarksDepartmentHomeCommand.StudentModuleMarkRecord, Map[AssessmentComponent, ListAssessmentComponentsCommand.StudentMarkRecord])] =
-    command.studentModuleRecords.sortBy(_._1.scjCode)
+    command.studentModuleRecords.sortBy(_._1.sprCode)
 
   @ModelAttribute("alreadyConfirmed")
   def alreadyConfirmed(@ModelAttribute("command") command: ConfirmModuleMarksCommand.Command, errors: Errors): Seq[(MarksDepartmentHomeCommand.StudentModuleMarkRecord, Map[AssessmentComponent, ListAssessmentComponentsCommand.StudentMarkRecord])] =
-    command.alreadyConfirmed.sortBy(_._1.scjCode)
+    command.alreadyConfirmed.sortBy(_._1.sprCode)
 
   @ModelAttribute("studentsToConfirm")
   def studentsToConfirm(@ModelAttribute("command") command: ConfirmModuleMarksCommand.Command, errors: Errors): Seq[(MarksDepartmentHomeCommand.StudentModuleMarkRecord, Map[AssessmentComponent, ListAssessmentComponentsCommand.StudentMarkRecord])] =
-    command.studentsToConfirm.sortBy(_._1.scjCode)
+    command.studentsToConfirm.sortBy(_._1.sprCode)
 
   private val formView: String = "marks/admin/modules/confirm"
 

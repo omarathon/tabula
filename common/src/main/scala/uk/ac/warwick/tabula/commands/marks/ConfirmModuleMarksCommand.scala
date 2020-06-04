@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.marks
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand.{Comment, Result, ScjCode}
+import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand.{Comment, Result, SprCode}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.Transactions._
@@ -26,7 +26,7 @@ object ConfirmModuleMarksCommand {
     with ConfirmModuleMarksRequest
     with ModuleOccurrenceLoadModuleRegistrations
     with SelfValidating
-  type ScjCode = String
+  type SprCode = String
   type Comment = String
 
   def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser) =
@@ -58,7 +58,7 @@ class ConfirmModuleMarksCommandInternal(val module: Module, val cats: BigDecimal
 
       require(module.markState.forall(_ == UnconfirmedActual))
 
-      val moduleRegistration = moduleRegistrations.find(_._scjCode == module.scjCode).get
+      val moduleRegistration = moduleRegistrations.find(_.sprCode == module.sprCode).get
       val recordedModuleRegistration = moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
 
       recordedModuleRegistration.addMark(
@@ -67,7 +67,7 @@ class ConfirmModuleMarksCommandInternal(val module: Module, val cats: BigDecimal
         grade = module.grade,
         result = module.result,
         source =  MarkConfirmation,
-        comments = comments.asScala(recordedModuleRegistration.scjCode),
+        comments = comments.asScala(recordedModuleRegistration.sprCode),
         markState = ConfirmedActual
       )
 
@@ -105,7 +105,7 @@ trait ConfirmModuleMarksValidation extends SelfValidating {
     }
 
     if(studentsWithMissingGrade.nonEmpty)
-      errors.reject( "moduleMarks.confirm.missingGrade", Array(studentsWithMissingGrade.map(_._1.scjCode).mkString(", ")), "")
+      errors.reject( "moduleMarks.confirm.missingGrade", Array(studentsWithMissingGrade.map(_._1.sprCode).mkString(", ")), "")
   }
 }
 
@@ -116,7 +116,7 @@ trait ConfirmModuleMarksState extends ModuleOccurrenceState {
   def currentUser: CurrentUser
 
   lazy val studentModuleRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleMarkRecords.map { student =>
-    moduleRegistrations.find(_._scjCode == student.scjCode).map { moduleRegistration =>
+    moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
       student -> componentMarks(moduleRegistration.studentCourseDetails.student.universityId)
     }.getOrElse(student -> Map.empty[AssessmentComponent, StudentMarkRecord])
   }
@@ -132,8 +132,8 @@ trait ConfirmModuleMarksState extends ModuleOccurrenceState {
 trait ConfirmModuleMarksRequest {
   self: ConfirmModuleMarksState =>
 
-  var comments: JMap[ScjCode, Comment] = LazyMaps.create { scjCode: ScjCode =>
-    studentModuleRecords.map(_._1).find(_.scjCode == scjCode).flatMap(_.history.headOption).map(_.comments).orNull
+  var comments: JMap[SprCode, Comment] = LazyMaps.create { sprCode: SprCode =>
+    studentModuleRecords.map(_._1).find(_.sprCode == sprCode).flatMap(_.history.headOption).map(_.comments).orNull
   }.asJava
 
 }
