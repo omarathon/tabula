@@ -4,11 +4,13 @@ import org.joda.time.{DateTime, LocalDate}
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, StudentCourseDetailsDao}
+import uk.ac.warwick.tabula.data.{ModuleRegistrationDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationRow
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+
+import scala.jdk.CollectionConverters._
 
 class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mockito with Logging {
 
@@ -42,8 +44,11 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
     val scdDao: StudentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
     scdDao.getByScjCode("0000001/1") returns Some(scd)
 
-    val mrDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
-    mrDao.getByNotionalKey(scd, mod, cats, year, occurrence) returns Some(mr)
+    val mrDao: ModuleRegistrationDaoImpl = new ModuleRegistrationDaoImpl
+    mrDao.sessionFactory = sessionFactory
+
+    scd._moduleRegistrations.clear()
+    scd._moduleRegistrations.addAll(mrDao.getByUniversityIds(Seq(stu.universityId), includeDeleted = true).toSet.asJava)
   }
 
   @Transactional
@@ -56,8 +61,12 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 
       val newModRegs: Seq[ModuleRegistration] = command.applyInternal()
 
+      scd._moduleRegistrations.clear()
+      scd._moduleRegistrations.addAll(mrDao.getByUniversityIds(Seq(stu.universityId), includeDeleted = true).toSet.asJava)
+
       // check results
       newModRegs.size should be(1)
+      newModRegs.head.id should not be null
       newModRegs.head.academicYear should be(AcademicYear(2013))
       newModRegs.head.assessmentGroup should be("A")
       newModRegs.head.module should be(mod)
@@ -76,12 +85,10 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
       val tenDaysAgo: DateTime = DateTime.now.minusDays(10)
       newModRegs.head.lastUpdatedDate = tenDaysAgo
       newModRegs.head.lastUpdatedDate.getDayOfMonth should be(tenDaysAgo.getDayOfMonth)
-      session.flush()
 
       // now re-import the same mod reg - the lastupdateddate shouldn't change
       val command2 = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow1), Set(mod))
       command2.moduleRegistrationDao = mrDao
-
 
       val newModRegs2: Seq[ModuleRegistration] = command2.applyInternal()
       newModRegs2.head.lastUpdatedDate.getDayOfMonth should be(tenDaysAgo.getDayOfMonth)

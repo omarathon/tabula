@@ -1074,7 +1074,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     resultWhenSomeMR.size should be(2)
 
     // one of the modules is for this course and the other for none - should still get both assignments back
-    scd.addModuleRegistration(mr)
+    scd._moduleRegistrations.add(mr)
     val resultWhenOneMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
     resultWhenOneMR.size should be(2)
 

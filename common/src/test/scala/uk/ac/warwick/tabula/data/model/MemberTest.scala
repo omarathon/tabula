@@ -48,8 +48,8 @@ class MemberTest extends TestBase with Mockito {
     mod2.adminDepartment = homeDept
     val modReg1 = new ModuleRegistration(studentCourseDetails.sprCode, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A", null)
     val modReg2 = new ModuleRegistration(studentCourseDetails.sprCode, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A", null)
-    studentCourseDetails.addModuleRegistration(modReg1)
-    studentCourseDetails.addModuleRegistration(modReg2)
+    studentCourseDetails._moduleRegistrations.add(modReg1)
+    studentCourseDetails._moduleRegistrations.add(modReg2)
 
     member.mostSignificantCourseDetails.get.department = courseDept
 
@@ -97,8 +97,8 @@ class MemberTest extends TestBase with Mockito {
     val mod2 = new Module("cs102")
     val modReg1 = new ModuleRegistration(scd1.sprCode, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A", null)
     val modReg2 = new ModuleRegistration(scd1.sprCode, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A", null)
-    scd1.addModuleRegistration(modReg1)
-    scd1.addModuleRegistration(modReg2)
+    scd1._moduleRegistrations.add(modReg1)
+    scd1._moduleRegistrations.add(modReg2)
 
     member.registeredModulesByYear(Some(AcademicYear(2013))) should be(Set(mod2))
     member.registeredModulesByYear(None) should be(Set(mod1, mod2))
@@ -111,8 +111,8 @@ class MemberTest extends TestBase with Mockito {
     val mod4 = new Module("cs104")
     val modReg3 = new ModuleRegistration(scd2.sprCode, mod3, new JBigDecimal("12.0"), AcademicYear(2012), "A", null)
     val modReg4 = new ModuleRegistration(scd2.sprCode, mod4, new JBigDecimal("12.0"), AcademicYear(2013), "A", null)
-    scd2.addModuleRegistration(modReg3)
-    scd2.addModuleRegistration(modReg4)
+    scd2._moduleRegistrations.add(modReg3)
+    scd2._moduleRegistrations.add(modReg4)
 
     member.registeredModulesByYear(Some(AcademicYear(2013))) should be(Set(mod2, mod4))
     member.registeredModulesByYear(None) should be(Set(mod1, mod2, mod3, mod4))
