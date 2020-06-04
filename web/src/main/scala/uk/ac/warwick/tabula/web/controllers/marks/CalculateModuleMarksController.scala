@@ -48,7 +48,7 @@ class CalculateModuleMarksController extends BaseController
 
   @ModelAttribute("studentModuleMarkRecords")
   def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
-    command.studentModuleMarkRecords
+    command.studentModuleMarkRecordsAndCalculations
 
   @ModelAttribute("assessmentComponents")
   def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)]): Seq[AssessmentComponent] =

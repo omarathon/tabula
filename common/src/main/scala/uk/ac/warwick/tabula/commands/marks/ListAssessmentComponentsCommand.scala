@@ -22,8 +22,10 @@ object ListAssessmentComponentsCommand {
     grade: Option[String],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    markState: Option[MarkState],
     agreed: Boolean,
-    history: Seq[RecordedAssessmentComponentStudentMark] // Most recent first
+    history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
+    upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   )
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
@@ -48,8 +50,11 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
+        markState = recordedStudent.flatMap(_.latestState),
+        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
         agreed = recordedStudent.forall(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
+        member
       )
   }
 

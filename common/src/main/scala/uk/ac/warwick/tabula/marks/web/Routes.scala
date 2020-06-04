@@ -30,7 +30,9 @@ object Routes {
     }
 
     object ModuleOccurrences {
-      def recordMarks(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): String = s"$context/admin/module/${encoded(module.code)}-${cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)}/${encoded(academicYear.startYear.toString)}/${encoded(occurrence)}/marks"
+      def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): String = s"$context/admin/module/${encoded(module.code)}-${cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)}/${encoded(academicYear.startYear.toString)}/${encoded(occurrence)}"
+      def recordMarks(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): String = s"${apply(module, cats, academicYear, occurrence)}/marks"
+      def confirmMarks(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): String = s"${apply(module, cats, academicYear, occurrence)}/confirm"
     }
   }
 }

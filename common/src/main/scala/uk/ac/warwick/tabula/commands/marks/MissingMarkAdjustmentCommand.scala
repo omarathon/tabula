@@ -4,6 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.marks.MissingMarkAdjustmentCommand.Result
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, SelfValidating}
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
@@ -41,8 +42,9 @@ abstract class MissingMarkAdjustmentCommandInternal(val assessmentComponent: Ass
         uploader = currentUser.apparentUser,
         mark = None,
         grade = Some(GradeBoundary.ForceMajeureMissingComponentGrade),
+        source = RecordedAssessmentComponentStudentMarkSource.MissingMarkAdjustment,
+        markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
         comments = "Assessment did not take place because of force majeure",
-        source = RecordedAssessmentComponentStudentMarkSource.MissingMarkAdjustment
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)

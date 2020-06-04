@@ -6,6 +6,7 @@ import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
@@ -57,7 +58,15 @@ class RecordedModuleRegistration extends GeneratedId
   private val _marks: JList[RecordedModuleMark] = JArrayList()
   def marks: Seq[RecordedModuleMark] = _marks.asScala.toSeq
 
-  def addMark(uploader: User, mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: String, source: RecordedModuleMarkSource): RecordedModuleMark = {
+  def addMark(
+    uploader: User,
+    mark: Option[Int],
+    grade: Option[String],
+    result: Option[ModuleResult],
+    source: RecordedModuleMarkSource,
+    markState: MarkState,
+    comments: String = null
+  ): RecordedModuleMark = {
     val newMark = new RecordedModuleMark
     newMark.recordedModuleRegistration = this
     newMark.mark = mark
@@ -65,6 +74,7 @@ class RecordedModuleRegistration extends GeneratedId
     newMark.result = result
     newMark.comments = comments
     newMark.source = source
+    newMark.markState = markState
     newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
     _marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
@@ -75,6 +85,7 @@ class RecordedModuleRegistration extends GeneratedId
   def latestMark: Option[Int] = marks.headOption.flatMap(_.mark)
   def latestGrade: Option[String] = marks.headOption.flatMap(_.grade)
   def latestResult: Option[ModuleResult] = marks.headOption.flatMap(_.result)
+  def latestState: Option[MarkState] = marks.headOption.map(_.markState)
 
   @Column(name = "needs_writing_to_sits", nullable = false)
   var needsWritingToSits: Boolean = false
@@ -122,6 +133,10 @@ class RecordedModuleMark extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.RecordedModuleMarkSourceUserType")
   var source: RecordedModuleMarkSource = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.MarkStateUserType")
+  @Column(name = "mark_state")
+  var markState: MarkState = UnconfirmedActual
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   @Column(name = "updated_by", nullable = false)
   var updatedBy: User = _
@@ -141,6 +156,7 @@ class RecordedModuleMark extends GeneratedId
 sealed trait RecordedModuleMarkSource extends EnumEntry
 object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
   case object ComponentMarkCalculation extends RecordedModuleMarkSource
+  case object MarkConfirmation extends RecordedModuleMarkSource
 
   override def values: IndexedSeq[RecordedModuleMarkSource] = findValues
 }
