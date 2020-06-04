@@ -45,6 +45,10 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       Fixtures.moduleRegistration(scd, modules("in307"), BigDecimal(15).underlying, academicYear, "", Some(80), ModuleSelectionStatus.Core),
     )
 
+    val mockProfileService: ProfileService = smartMock[ProfileService]
+    mockProfileService.getStudentCourseDetailsBySprCode(scd.sprCode) returns Seq(scd)
+    moduleRegistrations.foreach(_.profileService = mockProfileService)
+
     val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
       "in301" -> Seq(Fixtures.assessmentComponent(modules("in301"), 1, AssessmentType.Essay)),
 

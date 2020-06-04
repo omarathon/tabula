@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
-@RequestMapping(value = Array("/marks/admin/module/{module}-{cats}/{academicYear}/{occurrence}/generate-grades"), params = Array("scjCode"))
+@RequestMapping(value = Array("/marks/admin/module/{module}-{cats}/{academicYear}/{occurrence}/generate-grades"), params = Array("sprCode"))
 class ModuleRegistrationValidGradesForMarkController
   extends BaseController
     with AutowiringModuleRegistrationServiceComponent {
@@ -21,10 +21,10 @@ class ModuleRegistrationValidGradesForMarkController
   validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
-  def command(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String, @RequestParam scjCode: String): ModuleRegistrationValidGradesForMarkCommand.Command = {
+  def command(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String, @RequestParam sprCode: String): ModuleRegistrationValidGradesForMarkCommand.Command = {
     val moduleRegistration = mandatory {
       moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
-        .find(_._scjCode == scjCode)
+        .find(_.sprCode == sprCode)
     }
 
     ModuleRegistrationValidGradesForMarkCommand(moduleRegistration)
