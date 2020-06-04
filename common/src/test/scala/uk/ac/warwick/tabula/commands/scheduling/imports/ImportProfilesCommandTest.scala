@@ -49,7 +49,6 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
     // register the student on the module
     val existingMr = new ModuleRegistration(scd.sprCode, existingMod, new JBigDecimal(30), AcademicYear(2013), "A", null)
     session.saveOrUpdate(existingMr)
-//    existingMr.studentCourseDetails = scd
     scd.addModuleRegistration(existingMr)
     session.saveOrUpdate(scd)
     session.flush()

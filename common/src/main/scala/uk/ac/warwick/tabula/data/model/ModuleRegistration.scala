@@ -158,7 +158,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       }
     }
 
-  override def toString: String = s"${sprCode}-${module.code}-$cats-$academicYear"
+  override def toString: String = s"$sprCode-${module.code}-$cats-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
