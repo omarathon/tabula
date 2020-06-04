@@ -10,7 +10,7 @@ import org.springframework.jdbc.`object`.SqlUpdate
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, _}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleResult, RecordedModuleMark, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
