@@ -28,7 +28,7 @@
           <table class="table table-striped table-sortable">
             <thead>
             <tr>
-              <th class="sortable">SCJ Code</th>
+              <th class="sortable">SPR Code</th>
               <th class="sortable">Mark</th>
               <th class="sortable">Grade</th>
               <th class="sortable">Result</th>
@@ -39,7 +39,7 @@
             <#list studentsToConfirm as record>
                 <#assign student = record._1() />
               <tr>
-                <td class="col-md-2">${student.scjCode}</td>
+                <td class="col-md-2">${student.sprCode}</td>
             <td class="col-md-2">
                 ${student.mark!'-'}
             </td>
@@ -49,13 +49,13 @@
             <td class="col-md-2">
                 ${(student.result.dbValue)!'-'}
             </td>
-            <td class="col-md-4"><@f.input path="comments[${student.scjCode}]" cssClass="form-control" /></td>
+            <td class="col-md-4"><@f.input path="comments[${student.sprCode}]" cssClass="form-control" /></td>
           </tr>
         </#list>
         <#list alreadyConfirmed as record>
           <#assign student = record._1() />
           <tr class="info">
-            <td class="col-md-2">${student.scjCode} - already confirmed</td>
+            <td class="col-md-2">${student.sprCode} - already confirmed</td>
             <td class="col-md-2">
                 ${student.mark!'-'}
             </td>
@@ -65,7 +65,7 @@
             <td class="col-md-2">
               ${(student.result.dbValue)!'-'}
             </td>
-            <td class="col-md-4"><@f.input path="comments[${student.scjCode}]" cssClass="form-control" readonly=true /></td>
+            <td class="col-md-4"><@f.input path="comments[${student.sprCode}]" cssClass="form-control" readonly=true /></td>
           </tr>
         </#list>
         </tbody>
