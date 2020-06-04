@@ -55,8 +55,8 @@
       </table>
 
       <div class="submit-buttons fix-footer">
-        <input type="submit" class="btn btn-primary" value="Confirm" />
-        <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
+        <input type="submit" class="btn btn-primary" name="action" value="Confirm" />
+        <button type="submit" class="btn btn-default dirty-check-ignore" name="action" value="Cancel">Cancel</button>
       </div>
     </@f.form>
   </div>
