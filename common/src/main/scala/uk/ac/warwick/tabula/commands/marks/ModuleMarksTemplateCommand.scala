@@ -22,7 +22,7 @@ object ModuleMarksTemplateCommand {
   def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Command =
     new ModuleMarksTemplateCommandInternal(module, cats, academicYear, occurrence)
       with CalculateModuleMarksLoadModuleRegistrations
-      with CalculateModuleMarksPermissions
+      with ModuleOccurrenceUpdateMarksPermissions
       with CalculateModuleMarksAlgorithm
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
@@ -34,7 +34,7 @@ object ModuleMarksTemplateCommand {
 
 abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String)
   extends CommandInternal[Result]
-    with CalculateModuleMarksState {
+    with ModuleOccurrenceState {
   self: CalculateModuleMarksLoadModuleRegistrations =>
 
   override def applyInternal(): Result = {
@@ -58,16 +58,16 @@ abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: 
 
     // add header row
     val header = sheet.createRow(0)
-    header.createCell(0).setCellValue("SCJ Code")
+    header.createCell(0).setCellValue("SPR Code")
     header.createCell(1).setCellValue("Mark")
     header.createCell(2).setCellValue("Grade")
     header.createCell(3).setCellValue("Result")
     header.createCell(4).setCellValue("Comments")
 
     // populate the mark sheet with ids and existing data
-    studentModuleMarkRecords.zipWithIndex.foreach { case ((student, _, _), i) =>
+    studentModuleMarkRecordsAndCalculations.zipWithIndex.foreach { case ((student, _, _), i) =>
       val row = sheet.createRow(i + 1)
-      row.createCell(0).setCellValue(student.scjCode)
+      row.createCell(0).setCellValue(student.sprCode)
 
       val markCell = createUnprotectedCell(row, 1)
       val gradeCell = createUnprotectedCell(row, 2)

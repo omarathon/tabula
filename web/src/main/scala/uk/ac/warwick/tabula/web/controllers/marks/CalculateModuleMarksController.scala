@@ -48,7 +48,7 @@ class CalculateModuleMarksController extends BaseController
 
   @ModelAttribute("studentModuleMarkRecords")
   def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
-    command.studentModuleMarkRecords
+    command.studentModuleMarkRecordsAndCalculations
 
   @ModelAttribute("assessmentComponents")
   def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)]): Seq[AssessmentComponent] =
@@ -76,9 +76,9 @@ class CalculateModuleMarksController extends BaseController
     model: ModelMap,
     @ModelAttribute("command") command: CalculateModuleMarksCommand.Command,
   ): String = {
-    val scjCodes = studentModuleMarkRecords.map(_._1.scjCode)
-    lazy val members = scjCodes.flatMap(profileService.getStudentCourseDetailsByScjCode).map(_.student)
-    lazy val universityIds = members.map(_.universityId)
+    val sprCodes = studentModuleMarkRecords.map(_._1.sprCode)
+    lazy val members = sprCodes.flatMap(profileService.getStudentCourseDetailsBySprCode).map(_.student)
+    lazy val universityIds = members.map(_.universityId).distinct
 
     if (!maintenanceModeService.enabled && (studentModuleMarkRecords.exists(_._1.outOfSync) || members.flatMap(m => Option(m.lastImportDate)).exists(_.isBefore(DateTime.now.minusMinutes(5))))) {
       stopOngoingImportForStudents(universityIds)
@@ -168,7 +168,7 @@ class CalculateModuleMarksController extends BaseController
       val changes: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation, StudentModuleMarksItem)] =
         cmd.students.asScala.values.toSeq.flatMap { student =>
           // We know the .get is safe because it's validated
-          val (studentModuleMarkRecord, componentMarks, calculation) = studentModuleMarkRecords.find(_._1.scjCode == student.scjCode).get
+          val (studentModuleMarkRecord, componentMarks, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get
 
           // Mark and grade and result haven't changed and no comment
           if (

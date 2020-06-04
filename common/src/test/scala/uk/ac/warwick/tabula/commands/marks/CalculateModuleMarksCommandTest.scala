@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMem
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.ModuleMarkCalculation
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, ModuleResult}
 
 class CalculateModuleMarksCommandTest extends TestBase with Mockito {
@@ -31,8 +32,10 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
       grade = grade,
       needsWritingToSits = false,
       outOfSync = false,
+      markState = Some(UnconfirmedActual),
       agreed = false,
       history = Seq.empty,
+      upstreamAssessmentGroupMember = null
     )
   }
 
