@@ -4,20 +4,22 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.model.CourseType.{PGT, UG}
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringProgressionServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
+
+import scala.math.BigDecimal.RoundingMode
 
 @Component
-class GraduationBenchmarkBreakdownColumnOption extends ChosenYearExamGridColumnOption with AutowiringProgressionServiceComponent with AutowiringModuleRegistrationServiceComponent {
+class UGPercentageAssessmentsTakenColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
-  override val identifier: ExamGridColumnOption.Identifier = "graduationBenchmarkBreakdown"
+  override val identifier: ExamGridColumnOption.Identifier = "percentageAssessmentsTaken"
 
-  override val label: String = "Marking: Current year graduation benchmark breakdown"
+  override val label: String = "Marking: Percentage of assessments taken used in graduation benchmark breakdown"
 
-  override val sortOrder: Int = ExamGridColumnOption.SortOrders.GraduationBenchmarkBreakdown
+  override val sortOrder: Int = ExamGridColumnOption.SortOrders.PercentageAssessmentsTaken
 
   case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-    override val title: String = "Graduation benchmark breakdown"
+    override val title: String = "Percentage Assessments Taken"
 
     override val category: String = "Marking"
 
@@ -31,7 +33,7 @@ class GraduationBenchmarkBreakdownColumnOption extends ChosenYearExamGridColumnO
               ExamGridColumnValueMissing(s"Percentage of assessments taken isn't defined for PGTs")
             case Some(UG) =>
               val scyd = entityYear.studentCourseYearDetails.get
-              ExamGridColumnValueDecimal(moduleRegistrationService.percentageOfAssessmentTaken(scyd.moduleRegistrations))
+              ExamGridColumnValueDecimal(moduleRegistrationService.percentageOfAssessmentTaken(scyd.moduleRegistrations).setScale(1, RoundingMode.HALF_UP))
             case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
             case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
           }
