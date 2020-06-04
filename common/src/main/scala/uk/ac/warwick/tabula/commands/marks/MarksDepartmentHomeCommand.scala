@@ -35,6 +35,7 @@ object MarksDepartmentHomeCommand {
     result: Option[ModuleResult],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    markState: Option[MarkState],
     agreed: Boolean,
     history: Seq[RecordedModuleMark] // Most recent first
   )
@@ -61,6 +62,8 @@ object MarksDepartmentHomeCommand {
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
             recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g))
         ),
+        markState = recordedModuleRegistration.flatMap(_.latestState),
+        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
         agreed = recordedModuleRegistration.forall(!_.needsWritingToSits) && moduleRegistration.agreedMark.nonEmpty,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
       )

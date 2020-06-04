@@ -5,6 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.marks.ComponentScalingCommand.Result
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, SelfValidating}
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
@@ -56,8 +57,9 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
         uploader = currentUser.apparentUser,
         mark = scaledMark,
         grade = scaledGrade,
+        source = RecordedAssessmentComponentStudentMarkSource.Scaling,
+        markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
         comments = comment(mark),
-        source = RecordedAssessmentComponentStudentMarkSource.Scaling
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)

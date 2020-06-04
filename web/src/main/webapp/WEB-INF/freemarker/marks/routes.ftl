@@ -31,3 +31,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro module_marks_importComplete module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/import-complete" /></#macro>
 <#macro module_marks_template module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/template.xlsx" /></#macro>
 <#macro module_generateGrades module cats academicYear occurrence scjCode><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/generate-grades?scjCode=${scjCode?url}" /></#macro>
+<#macro module_marks_confirm module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/confirm" /></#macro>
