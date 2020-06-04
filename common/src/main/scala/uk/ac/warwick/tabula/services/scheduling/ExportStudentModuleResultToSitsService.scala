@@ -144,7 +144,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       ))
       val rowUpdated = updateQuery.updateByNamedParam(parameterMap)
       if (rowUpdated == 0) {
-        logger.warn(s"No SMR record found to update. Possible SAS hasn't generated initial SMR for ${recordedModuleRegistration.scjCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}, ${recordedModuleRegistration.occurrence}")
+        logger.warn(s"No SMR record found to update. Possible SAS hasn't generated initial SMR for ${recordedModuleRegistration.sprCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}, ${recordedModuleRegistration.occurrence}")
       }
       rowUpdated
     }
