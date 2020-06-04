@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
-import org.hibernate.annotations.{Proxy, Type}
+import org.hibernate.annotations.{BatchSize, JoinColumnOrFormula, JoinColumnsOrFormulas, JoinFormula, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService}
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
@@ -32,7 +32,7 @@ object ModuleRegistration {
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
-class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
+class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] with Serializable {
 
   def this(sprCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
@@ -45,7 +45,6 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
-  @transient var profileService: ProfileService = Wire[ProfileService]
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "moduleCode", referencedColumnName = "code")
@@ -59,14 +58,20 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "StudentCourseDetails_ModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "scjcode", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "scjcode", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  var _allStudentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
+
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   def studentCourseDetails: StudentCourseDetails =
-    RequestLevelCache.cachedBy("ModuleRegistration.studentCourseDetails", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
-      val allBySprCode = profileService.getStudentCourseDetailsBySprCode(sprCode)
-
-      allBySprCode.find(_.mostSignificant)
-        .getOrElse(allBySprCode.maxBy(_.scjCode))
-    }
+    _allStudentCourseDetails.asScala.find(_.mostSignificant)
+      .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
+      .orNull
 
   // I'd love for this to be _sprCode but Hibernate won't let you mix logical and physical column names (even with @Column)
   // and it's needed for the @JoinColumn on StudentCourseDetails._moduleRegistrations
