@@ -45,7 +45,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
     @PathVariable academicYear: AcademicYear,
     @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command
   ): Mav = {
-    if(!features.graduationBenchmarkStudentView) throw new ItemNotFoundException() // 404 if the feature is off
+    if(!features.graduationBenchmark) throw new ItemNotFoundException() // 404 if the feature is off
 
     val mav = cmd.apply() match {
       case Left(ugBreakdown) =>
