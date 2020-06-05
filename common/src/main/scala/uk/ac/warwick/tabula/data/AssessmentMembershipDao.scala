@@ -526,7 +526,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     val criteria =
       session.newCriteria[UpstreamAssessmentGroup]
         .add(is("academicYear", registration.academicYear))
-        .add(is("moduleCode", registration.toSITSCode))
+        .add(is("moduleCode", registration.sitsModuleCode))
         .add(is("assessmentGroup", registration.assessmentGroup))
         .add(is("occurrence", registration.occurrence))
 

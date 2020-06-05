@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{Describable, Description}
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.Result
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 // Traits for commands that act on a specific run of a module - extend as required
 
 trait ModuleOccurrenceState {
+  def sitsModuleCode: String
   def module: Module
-  def cats: BigDecimal
   def academicYear: AcademicYear
   def occurrence: String
 }
@@ -28,18 +28,17 @@ trait ModuleOccurrenceLoadModuleRegistrations {
     with ModuleRegistrationMarksServiceComponent =>
 
   lazy val assessmentComponents: Seq[AssessmentComponent] =
-    assessmentMembershipService.getAssessmentComponents(module)
+    assessmentMembershipService.getAssessmentComponents(sitsModuleCode, inUseOnly = false)
       .filter { ac =>
-        ac.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).contains(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)) &&
-          ac.assessmentGroup != "AO" &&
-          ac.sequence != AssessmentComponent.NoneAssessmentGroup
+        ac.assessmentGroup != "AO" &&
+        ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 
   lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
       .filter { info =>
         info.upstreamAssessmentGroup.occurrence == occurrence &&
-          info.allMembers.nonEmpty
+        info.allMembers.nonEmpty
       }
       .map { info =>
         info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
@@ -50,10 +49,10 @@ trait ModuleOccurrenceLoadModuleRegistrations {
     .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
     .toMap
 
-  lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
+  lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 
   lazy val studentModuleMarkRecords: Seq[StudentModuleMarkRecord] =
-    MarksDepartmentHomeCommand.studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+    MarksDepartmentHomeCommand.studentModuleMarkRecords(sitsModuleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
 }
 
 trait ModuleOccurrenceUpdateMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -62,8 +61,13 @@ trait ModuleOccurrenceUpdateMarksPermissions extends RequiresPermissionsChecking
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.Feedback.Publish, mandatory(module))
 
+    // Make sure sitsModuleCode is for the same module
+    if (mandatory(Module.stripCats(mandatory(sitsModuleCode))).toLowerCase != mandatory(module.code)) {
+      logger.info("Not displaying module as it doesn't match SITS module code")
+      throw new ItemNotFoundException(module, "Not displaying module as it doesn't match SITS module code")
+    }
+
     // Make sure that the module occurrence actually exists
-    mandatory(cats)
     mandatory(academicYear)
     mandatory(occurrence)
     mandatory(moduleRegistrations.headOption)
@@ -80,7 +84,7 @@ trait ModuleOccurrenceDescription extends Describable[Result] {
   override def describe(d: Description): Unit =
     d.module(module)
       .properties(
-        "cats" -> cats.setScale(1, BigDecimal.RoundingMode.HALF_UP).toString,
+        "sitsModuleCode" -> sitsModuleCode,
         "academicYear" -> academicYear.toString,
         "occurrence" -> occurrence,
       )

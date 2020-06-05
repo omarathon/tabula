@@ -29,8 +29,8 @@ object ConfirmModuleMarksCommand {
   type SprCode = String
   type Comment = String
 
-  def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser) =
-    new ConfirmModuleMarksCommandInternal(module, cats, academicYear, occurrence, currentUser)
+  def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser) =
+    new ConfirmModuleMarksCommandInternal(sitsModuleCode, module, academicYear, occurrence, currentUser)
       with ConfirmModuleMarksRequest
       with ConfirmModuleMarksValidation
       with ModuleOccurrenceUpdateMarksPermissions
@@ -44,7 +44,7 @@ object ConfirmModuleMarksCommand {
 }
 
 
-class ConfirmModuleMarksCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
+class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
   extends CommandInternal[Result] with ConfirmModuleMarksState with ConfirmModuleMarksValidation {
 
   self: ConfirmModuleMarksRequest with ModuleOccurrenceLoadModuleRegistrations with ModuleRegistrationMarksServiceComponent

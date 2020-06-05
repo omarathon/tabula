@@ -140,7 +140,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       val academicYear = AcademicYear.now - (yearOfStudy - level)
 
       val recordedModuleRegistration: Option[RecordedModuleRegistration] =
-        moduleRegistrationMarksService.getAllRecordedModuleRegistrations(new Module(moduleCode), BigDecimal(15), academicYear, "A")
+        moduleRegistrationMarksService.getAllRecordedModuleRegistrations("%s-15".format(moduleCode.toUpperCase), academicYear, "A")
           .find(_.sprCode == "%s/1".format(universityId))
 
       val (mark, grade, result) =
@@ -418,13 +418,13 @@ trait CopyModuleRegistrationProperties {
     val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
 
     copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
-      copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
-      copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
-      copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
-      copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
-      copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
-      copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
-      copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
+    copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+    copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
+    copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+    copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
+    copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+    copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
+    copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
   }
 
   private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
@@ -459,7 +459,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "assessmentGroup", "occurrence", "marksCode"
+    "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
   )
 }
 
@@ -531,6 +531,7 @@ class ModuleRegistrationRow(
     sprCode,
     module,
     cats,
+    sitsModuleCode,
     AcademicYear.parse(academicYear),
     occurrence,
     marksCode

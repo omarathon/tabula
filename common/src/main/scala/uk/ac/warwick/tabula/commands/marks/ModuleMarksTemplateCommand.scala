@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import java.text.DecimalFormat
-
 import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -19,8 +17,8 @@ object ModuleMarksTemplateCommand {
 
   val SheetPassword = "roygbiv"
 
-  def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Command =
-    new ModuleMarksTemplateCommandInternal(module, cats, academicYear, occurrence)
+  def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String): Command =
+    new ModuleMarksTemplateCommandInternal(sitsModuleCode, module, academicYear, occurrence)
       with CalculateModuleMarksLoadModuleRegistrations
       with ModuleOccurrenceUpdateMarksPermissions
       with CalculateModuleMarksAlgorithm
@@ -32,14 +30,14 @@ object ModuleMarksTemplateCommand {
       with Unaudited with ReadOnly
 }
 
-abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String)
+abstract class ModuleMarksTemplateCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String)
   extends CommandInternal[Result]
     with ModuleOccurrenceState {
   self: CalculateModuleMarksLoadModuleRegistrations =>
 
   override def applyInternal(): Result = {
     val workbook = new SXSSFWorkbook
-    val fullSheetName = s"Marks for ${module.code.toUpperCase()}-${new DecimalFormat("0.#").format(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP))} ${module.name} (${academicYear.toString}, $occurrence)"
+    val fullSheetName = s"Marks for $sitsModuleCode ${module.name} (${academicYear.toString}, $occurrence)"
     val sheetName = WorkbookUtil.createSafeSheetName(fullSheetName)
     val sheet = workbook.createSheet(sheetName)
 

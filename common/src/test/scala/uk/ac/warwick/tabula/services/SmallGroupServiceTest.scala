@@ -97,9 +97,9 @@ class SmallGroupServiceTest extends TestBase with Mockito {
     // user  0123456 is in both groups - group and group2
     group2.addEvent(event2)
 
-    val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module, new JBigDecimal(30), AcademicYear(2013), "A", null)
+    val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module, new JBigDecimal(30), "AM101-30", AcademicYear(2013), "A", null)
     modreg._allStudentCourseDetails = JHashSet(student.mostSignificantCourseDetails.get)
-    val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module2, new JBigDecimal(30), AcademicYear(2013), "A", null)
+    val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module2, new JBigDecimal(30), "CS123-30", AcademicYear(2013), "A", null)
     modreg2._allStudentCourseDetails = JHashSet(student.mostSignificantCourseDetails.get)
     val userLookup = new MockUserLookup(true)
 

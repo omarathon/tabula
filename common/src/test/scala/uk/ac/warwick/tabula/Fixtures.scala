@@ -381,7 +381,7 @@ object Fixtures extends Mockito {
     marksCode: String = null,
   ): ModuleRegistration = {
     val sprCode = Option(scd).map(_.sprCode).orNull
-    val mr = new ModuleRegistration(sprCode, mod, cats, year, occurrence, marksCode)
+    val mr = new ModuleRegistration(sprCode, mod, cats, "%s-%s".format(mod.code.toUpperCase, cats.stripTrailingZeros().toPlainString), year, occurrence, marksCode)
     mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr

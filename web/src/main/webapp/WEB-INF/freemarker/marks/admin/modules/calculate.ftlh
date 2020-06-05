@@ -3,12 +3,12 @@
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
 <p>Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students.</p>
 
-<#assign submitUrl><@routes.marks.module_marks module cats academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
 <div>
   <!-- Nav tabs -->
@@ -256,7 +256,7 @@
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
                       <#if isGradeValidation>
-                        <#assign generateUrl><@routes.marks.module_generateGrades module cats academicYear occurrence student.sprCode /></#assign>
+                        <#assign generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#assign>
 
                         <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
                         <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
@@ -296,7 +296,7 @@
       <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
         should have the following column headings: <strong>SPR Code</strong>, <strong>Mark</strong>,
         <strong>Grade</strong>, <strong>Result</strong> and <strong>Comments</strong>.
-        You can use this <a href="<@routes.marks.module_marks_template module cats academicYear occurrence />">generated spreadsheet</a> as a template.
+        You can use this <a href="<@routes.marks.module_marks_template sitsModuleCode academicYear occurrence />">generated spreadsheet</a> as a template.
       </p>
 
       <p>Enter the corresponding results for each student in the following columns:</p>
