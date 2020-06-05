@@ -159,7 +159,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						Route as route
 					where
 						module.id = registration.module.id
-						scd.sprCode = registration.sprCode
+						and scd.sprCode = registration.sprCode
 						and scyd.studentCourseDetails = scd
 						and student.mostSignificantCourse = scd
 						and scd.currentRoute.id = route.id
