@@ -5,7 +5,6 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model._
 
 trait ModuleRegistrationDaoComponent {
@@ -25,8 +24,7 @@ trait ModuleRegistrationDao {
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration]
@@ -35,7 +33,7 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+  def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
@@ -57,16 +55,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
       .add(is("sprCode", studentCourseDetails.sprCode))
-      .add(is("module", module))
+      .add(is("sitsModuleCode", sitsModuleCode))
       .add(is("academicYear", academicYear))
-      .add(is("cats", cats))
       .add(is("occurrence", occurrence))
       .uniqueResult
 
@@ -94,10 +90,9 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .addOrder(asc("sprCode"))
       .seq
 
-  override def getByModuleOccurrence(module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+  override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
-      .add(is("module", module))
-      .add(is("cats", cats))
+      .add(is("sitsModuleCode", sitsModuleCode))
       .add(is("academicYear", academicYear))
       .add(is("occurrence", occurrence))
       .add(is("deleted", false))

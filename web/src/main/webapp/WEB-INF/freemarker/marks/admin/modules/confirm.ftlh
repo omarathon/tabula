@@ -1,9 +1,9 @@
 <div class="deptheader">
   <h1>Confirm module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<#assign submitUrl><@routes.marks.module_marks_confirm module cats academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks_confirm sitsModuleCode academicYear occurrence /></#assign>
 <#assign cancelUrl><@routes.marks.adminhome module.adminDepartment academicYear /></#assign>
 
 <#if alreadyConfirmed?has_content>

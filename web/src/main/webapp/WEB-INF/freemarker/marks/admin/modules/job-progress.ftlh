@@ -2,10 +2,10 @@
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<#assign calculateMarksSkipImportAction><@routes.marks.module_marks_skipImport module cats academicYear occurrence /></#assign>
+<#assign calculateMarksSkipImportAction><@routes.marks.module_marks_skipImport sitsModuleCode academicYear occurrence /></#assign>
 <@f.form action=calculateMarksSkipImportAction?markup_string cssClass="dirty-check" method="post">
   <@f.hidden name="jobId" value=jobId />
 
@@ -59,7 +59,7 @@
     var updateProgress = function () {
       $.ajax({
         type: "POST",
-        url: '<@routes.marks.module_marks_progress module cats academicYear occurrence />',
+        url: '<@routes.marks.module_marks_progress sitsModuleCode academicYear occurrence />',
         data: {'jobId': '${jobId}'},
         error: function (jqXHR, textstatus, message) {
           if (textstatus === "timeout") {
@@ -74,7 +74,7 @@
         },
         success: function (data) {
           if (data.finished) {
-            window.location = '<@routes.marks.module_marks_importComplete module cats academicYear occurrence />';
+            window.location = '<@routes.marks.module_marks_importComplete sitsModuleCode academicYear occurrence />';
           } else {
             if (data.progress) {
               $('.progress .progress-bar').css('width', data.progress + '%');

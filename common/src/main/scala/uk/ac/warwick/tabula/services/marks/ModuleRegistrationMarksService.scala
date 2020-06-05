@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationMarksDaoComponent,
 
 trait ModuleRegistrationMarksService {
   def getOrCreateRecordedModuleRegistration(reg: ModuleRegistration): RecordedModuleRegistration
-  def getAllRecordedModuleRegistrations(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
+  def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
   def allNeedingWritingToSits: Seq[RecordedModuleRegistration]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
   def saveOrUpdate(reg: RecordedModuleRegistration): RecordedModuleRegistration
@@ -24,8 +24,8 @@ abstract class AbstractModuleRegistrationMarksService extends ModuleRegistration
       .getOrElse(new RecordedModuleRegistration(reg))
   }
 
-  override def getAllRecordedModuleRegistrations(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration] = transactional(readOnly = true) {
-    moduleRegistrationMarksDao.getAllRecordedModuleRegistrations(module, cats, academicYear, occurrence)
+  override def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration] = transactional(readOnly = true) {
+    moduleRegistrationMarksDao.getAllRecordedModuleRegistrations(sitsModuleCode, academicYear, occurrence)
   }
 
   override def allNeedingWritingToSits: Seq[RecordedModuleRegistration] = transactional(readOnly = true) {

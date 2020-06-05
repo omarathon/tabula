@@ -72,7 +72,7 @@ class UpstreamRouteRuleEntry extends GeneratedId {
   def maxModules: Option[Int] = if (_maxModules == null) None else Option(_maxModules)
 
   def passes(moduleRegistrations: Seq[ModuleRegistration]): Boolean = {
-    val registrationsInList = moduleRegistrations.filter(mr => list.matches(mr.toSITSCode))
+    val registrationsInList = moduleRegistrations.filter(mr => list.matches(mr.sitsModuleCode))
     val cats = registrationsInList.map(mr => BigDecimal(mr.cats)).sum
     val quantity = registrationsInList.size
     (minCats.isEmpty || minCats.get <= cats) &&

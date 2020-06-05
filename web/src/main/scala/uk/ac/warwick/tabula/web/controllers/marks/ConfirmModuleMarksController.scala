@@ -10,29 +10,34 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, ConfirmModuleMarksCommand, ListAssessmentComponentsCommand, MarksDepartmentHomeCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
-@RequestMapping(Array("/marks/admin/module/{module}-{cats}/{academicYear}/{occurrence}/confirm"))
+@RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/confirm"))
 class ConfirmModuleMarksController extends BaseController
   with AutowiringProfileServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent
+  with AutowiringModuleAndDepartmentServiceComponent {
 
   validatesSelf[SelfValidating]
 
+  @ModelAttribute("module")
+  def module(@PathVariable sitsModuleCode: String): Module =
+    mandatory(moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode))
+
   @ModelAttribute("command")
-  def command(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): ConfirmModuleMarksCommand.Command =
-    ConfirmModuleMarksCommand(module, cats, academicYear, occurrence, user)
+  def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): ConfirmModuleMarksCommand.Command =
+    ConfirmModuleMarksCommand(sitsModuleCode, module, academicYear, occurrence, user)
 
   @ModelAttribute("breadcrumbs")
-  def breadcrumbs(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): Seq[BreadCrumb] = {
+  def breadcrumbs(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): Seq[BreadCrumb] = {
     val department = module.adminDepartment
 
     Seq(
       MarksBreadcrumbs.Admin.HomeForYear(department, academicYear),
-      MarksBreadcrumbs.Admin.ModuleOccurrenceConfirmMarks(module, cats, academicYear, occurrence, active = true),
+      MarksBreadcrumbs.Admin.ModuleOccurrenceConfirmMarks(sitsModuleCode, module, academicYear, occurrence, active = true),
     )
   }
 
@@ -55,21 +60,14 @@ class ConfirmModuleMarksController extends BaseController
   private val formView: String = "marks/admin/modules/confirm"
 
   @RequestMapping(params = Array("!confirm"))
-  def preview(
-    @ModelAttribute("command") cmd: ConfirmModuleMarksCommand.Command,
-    model: ModelMap,
-    @PathVariable module: Module,
-    @PathVariable cats: BigDecimal,
-    @PathVariable academicYear: AcademicYear,
-    @PathVariable occurrence: String
-  ): String = formView
+  def preview(): String = formView
 
   @RequestMapping(params = Array("confirm=true"))
   def save(
     @Valid @ModelAttribute("command") cmd: CalculateModuleMarksCommand.Command,
     errors: Errors,
     model: ModelMap,
-    @PathVariable module: Module,
+    @ModelAttribute("module") module: Module,
     @PathVariable academicYear: AcademicYear,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
