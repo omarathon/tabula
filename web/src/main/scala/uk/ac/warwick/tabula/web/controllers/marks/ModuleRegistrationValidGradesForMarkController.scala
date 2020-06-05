@@ -7,13 +7,12 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ModuleRegistrationValidGradesForMarkCommand
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
-@RequestMapping(value = Array("/marks/admin/module/{module}-{cats}/{academicYear}/{occurrence}/generate-grades"), params = Array("sprCode"))
+@RequestMapping(value = Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/generate-grades"), params = Array("sprCode"))
 class ModuleRegistrationValidGradesForMarkController
   extends BaseController
     with AutowiringModuleRegistrationServiceComponent {
@@ -21,9 +20,9 @@ class ModuleRegistrationValidGradesForMarkController
   validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
-  def command(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String, @RequestParam sprCode: String): ModuleRegistrationValidGradesForMarkCommand.Command = {
+  def command(@PathVariable sitsModuleCode: String, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String, @RequestParam sprCode: String): ModuleRegistrationValidGradesForMarkCommand.Command = {
     val moduleRegistration = mandatory {
-      moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
+      moduleRegistrationService.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
         .find(_.sprCode == sprCode)
     }
 

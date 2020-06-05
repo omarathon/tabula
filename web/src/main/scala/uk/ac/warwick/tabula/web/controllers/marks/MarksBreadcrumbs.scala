@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.marks
 
-import java.text.DecimalFormat
-
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
@@ -41,18 +39,18 @@ object MarksBreadcrumbs {
       val url = Some(Routes.marks.Admin.AssessmentComponents.scaling(assessmentComponent, upstreamAssessmentGroup))
     }
 
-    abstract class ModuleOccurrenceBookmark(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean) extends BreadCrumb {
-      val title: String = s"${module.code.toUpperCase}-${new DecimalFormat("0.#").format(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP))} ${module.name} (${academicYear.toString}, $occurrence)"
+    abstract class ModuleOccurrenceBookmark(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean) extends BreadCrumb {
+      val title: String = s"$sitsModuleCode ${module.name} (${academicYear.toString}, $occurrence)"
     }
 
-    case class ModuleOccurrenceRecordMarks(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
-      extends ModuleOccurrenceBookmark(module, cats, academicYear, occurrence, active) {
-        val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(module, cats, academicYear, occurrence))
+    case class ModuleOccurrenceRecordMarks(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
+      extends ModuleOccurrenceBookmark(sitsModuleCode, module, academicYear, occurrence, active) {
+        val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence))
       }
 
-    case class ModuleOccurrenceConfirmMarks(module: model.Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
-      extends ModuleOccurrenceBookmark(module, cats, academicYear, occurrence, active) {
-        val url = Some(Routes.marks.Admin.ModuleOccurrences.confirmMarks(module, cats, academicYear, occurrence))
+    case class ModuleOccurrenceConfirmMarks(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
+      extends ModuleOccurrenceBookmark(sitsModuleCode, module, academicYear, occurrence, active) {
+        val url = Some(Routes.marks.Admin.ModuleOccurrences.confirmMarks(sitsModuleCode, academicYear, occurrence))
       }
   }
 

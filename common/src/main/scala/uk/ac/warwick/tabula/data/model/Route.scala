@@ -51,7 +51,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
   def namedOptions(yearOfStudy: YearOfStudy, academicYear: AcademicYear, moduleRegistrations: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
     val namedModuleLists = upstreamModuleLists.asScala.filter(uml => !uml.genericAndUnusualOptions && uml.academicYear == academicYear && uml.yearOfStudy == yearOfStudy)
-    moduleRegistrations.filter(mr => namedModuleLists.exists(_.matches(mr.toSITSCode)))
+    moduleRegistrations.filter(mr => namedModuleLists.exists(_.matches(mr.sitsModuleCode)))
   }
 
   def teachingDepartments: mutable.Set[Department] =

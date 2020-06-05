@@ -52,7 +52,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
       StageProgress(
         stage = RecordComponentMarks,
-        started = stages.exists(_.started),
+        started = true, // This always has to be started in order to get nextAction
         messageCode =
           // Use the message from the most pressing component stage
           stages.find(_.health == WorkflowStageHealth.Danger)
@@ -199,7 +199,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
       if (upstreamAssessmentGroup.deadline.isEmpty) {
         StageProgress(
           stage = SetDeadline,
-          started = false,
+          started = true,
           messageCode = "workflow.marks.component.SetDeadline.notProvided",
           health = WorkflowStageHealth.Danger,
         )
@@ -226,7 +226,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         // No marks have been recorded
         StageProgress(
           stage = RecordMarks,
-          started = isInPast,
+          started = !neededForGraduateBenchmark || upstreamAssessmentGroup.deadline.nonEmpty,
           messageCode = "workflow.marks.component.RecordMarks.notStarted",
           health =
             if (neededForGraduateBenchmark) WorkflowStageHealth.Danger

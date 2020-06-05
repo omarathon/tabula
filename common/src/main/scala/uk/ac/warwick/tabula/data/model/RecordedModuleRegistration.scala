@@ -29,8 +29,7 @@ class RecordedModuleRegistration extends GeneratedId
   def this(mr: ModuleRegistration) {
     this()
     this.sprCode = mr.sprCode
-    this.module = mr.module
-    this.cats = mr.cats
+    this.sitsModuleCode = mr.sitsModuleCode
     this.academicYear = mr.academicYear
     this.occurrence = mr.occurrence
   }
@@ -38,12 +37,19 @@ class RecordedModuleRegistration extends GeneratedId
   @Column(name = "spr_code", nullable = false)
   var sprCode: String = _
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "module_code", referencedColumnName = "code")
-  var module: Module = _
+  // Lookup by notional key - sprcode, sitsmodulecode, academicyear, occurrence
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumns(value = Array(
+    new JoinColumn(name = "spr_code", referencedColumnName = "sprCode", insertable = false, updatable = false),
+    new JoinColumn(name = "sits_module_code", referencedColumnName = "sitsModuleCode", insertable = false, updatable = false),
+    new JoinColumn(name = "academic_year", referencedColumnName = "academicYear", insertable = false, updatable = false),
+    new JoinColumn(name = "occurrence", referencedColumnName = "occurrence", insertable = false, updatable = false)
+  ))
+  private val _moduleRegistration: ModuleRegistration = null
+  def moduleRegistration: Option[ModuleRegistration] = Option(_moduleRegistration)
 
-  @Column(nullable = false)
-  var cats: JBigDecimal = _
+  @Column(name = "sits_module_code", nullable = false)
+  var sitsModuleCode: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Column(name = "academic_year", nullable = false)
@@ -98,8 +104,7 @@ class RecordedModuleRegistration extends GeneratedId
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,
-    "moduleCode" -> module.code,
-    "cats" -> cats,
+    "sitsModuleCode" -> sitsModuleCode,
     "academicYear" -> academicYear,
     "occurrence" -> occurrence,
   )
