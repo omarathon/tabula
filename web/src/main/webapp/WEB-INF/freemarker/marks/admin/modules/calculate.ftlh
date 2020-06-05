@@ -143,8 +143,8 @@
                   </td>
 
                   <#list assessmentComponents as ac>
-                    <#assign marks = mapGet(componentMarks, ac) />
-                    <#if marks??>
+                    <#assign marks = (mapGet(componentMarks, ac))! />
+                    <#if marks?has_content>
                       <td>
                         ${marks.mark!'-'}
 
