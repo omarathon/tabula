@@ -132,7 +132,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						StudentMember as student
 					where
 						module.id = registration.module.id
-						and scd = registration.studentCourseDetails
+						and scd.sprCode = registration.sprCode
 						and scd.currentRoute.id = route.id
 						and student.mostSignificantCourse = scd
 						and route in (:routes)
@@ -159,7 +159,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						Route as route
 					where
 						module.id = registration.module.id
-						and scd = registration.studentCourseDetails
+						scd.sprCode = registration.sprCode
 						and scyd.studentCourseDetails = scd
 						and student.mostSignificantCourse = scd
 						and scd.currentRoute.id = route.id
@@ -192,7 +192,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						StudentCourseYearDetails as scyd
 					where
 						module.id = registration.module.id
-						and scd = registration.studentCourseDetails
+						and scd.sprCode = registration.sprCode
 						and scd.currentRoute.id = route.id
 						and student.mostSignificantCourse = scd
 						and scyd.studentCourseDetails = scd
