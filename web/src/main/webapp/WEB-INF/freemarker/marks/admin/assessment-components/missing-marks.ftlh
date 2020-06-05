@@ -1,5 +1,5 @@
 <div class="deptheader">
-  <h1>Missing mark adjustment</h1>
+  <h1>Missing marks adjustment</h1>
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
 </div>
 
