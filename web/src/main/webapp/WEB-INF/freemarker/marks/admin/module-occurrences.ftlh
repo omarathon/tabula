@@ -228,7 +228,7 @@
 
               <li>
                 <a href="<@routes.marks.assessmentcomponent_missingMarks info.assessmentComponent info.upstreamAssessmentGroup />">
-                  Missing mark adjustment
+                  Missing marks adjustment
                 </a>
               </li>
 
