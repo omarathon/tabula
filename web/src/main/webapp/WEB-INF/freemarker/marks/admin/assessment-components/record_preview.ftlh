@@ -56,7 +56,7 @@
 
       <div class="submit-buttons fix-footer">
         <input type="submit" class="btn btn-primary" name="action" value="Confirm" />
-        <button type="submit" class="btn btn-default dirty-check-ignore" name="action" value="Cancel">Cancel</button>
+        <button type="submit" class="btn btn-default dirty-check-ignore" name="action" value="Cancel">Back</button>
       </div>
     </@f.form>
   </div>
