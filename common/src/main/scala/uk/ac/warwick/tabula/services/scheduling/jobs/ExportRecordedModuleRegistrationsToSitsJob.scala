@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 class ExportRecordedModuleRegistrationsToSitsJob extends AutowiredJobBean {
 
   override def executeInternal(context: JobExecutionContext): Unit = {
-    //Do we need a separate feaure flag for this? Currently using same as we have used for export student component marks
+    //Used separate feaure flag for this so we can continue deploying on live. A couple of questions awaiting confirmation from exams
     if (features.schedulingExportRecordedModuleMarksToSits)
       exceptionResolver.reportExceptions {
         EarlyRequestInfo.wrap() {
