@@ -39,11 +39,10 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
     val moduleMarksToUpload = moduleRegistrationMarksService.allNeedingWritingToSits
 
     moduleMarksToUpload.flatMap { student =>
-      val module = student.module
-      val canUploadMarksToSitsForYear = student.module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
+      val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
 
       if (!canUploadMarksToSitsForYear) {
-        logger.warn(s"Not uploading module mark $student as department for ${student.module.code} is closed for ${student.academicYear}")
+        logger.warn(s"Not uploading module mark $student as department for ${student.sitsModuleCode} is closed for ${student.academicYear}")
         None
       } else {
         exportStudentModuleResultToSitsService.exportModuleMarksToSits(student) match {
