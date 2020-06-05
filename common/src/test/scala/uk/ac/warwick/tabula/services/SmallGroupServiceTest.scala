@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data._
@@ -97,13 +97,10 @@ class SmallGroupServiceTest extends TestBase with Mockito {
     // user  0123456 is in both groups - group and group2
     group2.addEvent(event2)
 
-    val profileService: ProfileService = smartMock[ProfileService]
-    profileService.getStudentCourseDetailsBySprCode(student.mostSignificantCourseDetails.get.sprCode) returns Seq(student.mostSignificantCourseDetails.get)
-
     val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module, new JBigDecimal(30), AcademicYear(2013), "A", null)
-    modreg.profileService = profileService
+    modreg._allStudentCourseDetails = JHashSet(student.mostSignificantCourseDetails.get)
     val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get.sprCode, module2, new JBigDecimal(30), AcademicYear(2013), "A", null)
-    modreg2.profileService = profileService
+    modreg2._allStudentCourseDetails = JHashSet(student.mostSignificantCourseDetails.get)
     val userLookup = new MockUserLookup(true)
 
     def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {

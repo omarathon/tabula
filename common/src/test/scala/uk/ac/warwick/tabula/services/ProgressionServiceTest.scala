@@ -43,7 +43,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
   @Test
   def suggestedResultNullModuleMark(): Unit = {
     new Fixture {
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -77,7 +77,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(30), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -99,7 +99,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -121,7 +121,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -143,14 +143,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(60).underlying,
         academicYear,
         agreedMark = Some(90)
       ))
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -175,7 +175,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(30.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -197,7 +197,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -219,14 +219,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(60).underlying,
         academicYear,
         agreedMark = Some(90)
       ))
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
@@ -326,8 +326,8 @@ class ProgressionServiceTest extends TestBase with Mockito {
         academicYear,
         agreedMark = Some(40)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
       scyd3.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
       scyd3.moduleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
       scyd3.moduleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
@@ -366,7 +366,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         academicYear,
         agreedMark = Some(50)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
@@ -386,7 +386,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         academicYear,
         agreedMark = Some(50)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
@@ -470,8 +470,8 @@ class ProgressionServiceTest extends TestBase with Mockito {
         scyd2.academicYear,
         agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].details.contains(module1.code.toUpperCase) should be(true)
@@ -507,10 +507,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
         scyd3.academicYear,
         agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
@@ -549,10 +549,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
         scyd3.academicYear,
         agreedMark = Some(35) // Failed in final year
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
@@ -591,10 +591,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
         scyd3.academicYear,
         agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
       // 1st year: 65 @ 20%, 2nd year: 60 @ 40%, 3rd year 80 @ 40%
       // Final grade 69 = 2.1, but on the grade boundary so borderline
@@ -626,14 +626,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
     val yearWeighting: CourseYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(100), student.mostSignificantCourse.sprStartAcademicYear, 1)
     service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
 
-    student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+    student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
       scd = student.mostSignificantCourse,
       mod = module1,
       cats = BigDecimal(40).underlying,
       year = scyd.academicYear,
       agreedMark = Some(70)
     ))
-    student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+    student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
       scd = student.mostSignificantCourse,
       mod = module2,
       cats = BigDecimal(40).underlying,
@@ -686,10 +686,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
         scyd3.academicYear,
         agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year2Weighting, year3Weighting))
       // 1st year: 65 @ 70%, 2nd year: 60 @ 0%, 3rd year 80 @ 30%
       // Final grade 69.5 = 2.1, but on the grade boundary so borderline

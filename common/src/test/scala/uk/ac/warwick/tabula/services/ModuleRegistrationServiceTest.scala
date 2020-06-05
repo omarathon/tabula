@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.TabulaAssessmentSubtype.Exam
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
@@ -45,9 +46,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       Fixtures.moduleRegistration(scd, modules("in307"), BigDecimal(15).underlying, academicYear, "", Some(80), ModuleSelectionStatus.Core),
     )
 
-    val mockProfileService: ProfileService = smartMock[ProfileService]
-    mockProfileService.getStudentCourseDetailsBySprCode(scd.sprCode) returns Seq(scd)
-    moduleRegistrations.foreach(_.profileService = mockProfileService)
+    moduleRegistrations.foreach(_._allStudentCourseDetails = JHashSet(scd))
 
     val components: SortedMap[String, Seq[AssessmentComponent]] = SortedMap(
       "in301" -> Seq(Fixtures.assessmentComponent(modules("in301"), 1, AssessmentType.Essay)),
@@ -128,7 +127,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
     }.toMap
 
     moduleRegistrations.foreach { mr =>
-      scd.addModuleRegistration(mr)
+      scd._moduleRegistrations.add(mr)
       mr.membershipService = mockMembershipService
       mockMembershipService.getUpstreamAssessmentGroups(mr, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
     }
@@ -211,7 +210,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
         Fixtures.moduleRegistration(scd, Fixtures.module("ch3f7"), BigDecimal(15).underlying, academicYear, "", Some(69), ModuleSelectionStatus.Option),
         Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Option)
       )
-      moduleRegistrations.foreach(scd.addModuleRegistration)
+      moduleRegistrations.foreach(scd._moduleRegistrations.add)
       val result: Seq[(BigDecimal, Seq[ModuleRegistration])] = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.moduleRegistrations, Map(), 120, Seq()) // TODO check route rules
       // There are 81 CATS of core modules, leaving 39 to reach the normal load of 120
       // All the options are 15 CATS, so there are 5 combinations of modules that are valid (4 with 3 in each and 1 with 4)

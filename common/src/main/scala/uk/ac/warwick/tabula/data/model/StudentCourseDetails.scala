@@ -76,18 +76,11 @@ class StudentCourseDetails
     studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
   }
 
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "sprCode", referencedColumnName = "sprCode", insertable = false, updatable = false)
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "_allStudentCourseDetails")
   @BatchSize(size = 200)
-  private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+  val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 
   def moduleRegistrations: Seq[ModuleRegistration] = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
-
-  def addModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.add(moduleRegistration)
-
-  def removeModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.remove(moduleRegistration)
-
-  def clearModuleRegistrations(): Unit = _moduleRegistrations.clear()
 
   def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
