@@ -124,7 +124,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
     } else {
       session.newQuery[Module](
         """
-					select module from
+					select distinct module from
 						Module as module,
 						ModuleRegistration as registration,
 						StudentCourseDetails as scd,
@@ -150,7 +150,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
     } else {
       session.newQuery[Module](
         """
-					select module from
+					select distinct module from
 						Module as module,
 						ModuleRegistration as registration,
 						StudentCourseDetails as scd,
