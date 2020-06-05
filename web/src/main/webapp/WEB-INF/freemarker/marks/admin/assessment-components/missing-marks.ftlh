@@ -12,13 +12,13 @@
 </p>
 
 <p>
-  Recording this assessment component as missing under MMA will record component marks for all students as <em>force majeure</em> (<code>FM</code>)
+  Recording this assessment component as missing under MMA will record component grades for all students as <em>force majeure</em> (<code>FM</code>)
   under <a href="https://warwick.ac.uk/regulation41" target="_blank">University regulation 41</a> without a mark being recorded.
   When module marks are calculated in Tabula, components with a grade of <code>FM</code> will be excluded from the calculation.
 </p>
 
 <p>
-  If all components for a module are recorded as missed under MMA and the a module cohort is missing a full module mark then a Missing
+  If all components for a module are recorded as missed under MMA and the module cohort is missing a full module mark then a Missing
   Marks Adjustment (MMA) will be made at the level of the year credit at the Examination Board. For example, if a 15-credit module has
   no marks then the classification for that year will be calculated based upon 120-15 = 105 credits. All MMAs must be approved by the
   Pre-exam Module Board and ratified by the Examination Board. Tabula will calculate a module grade in this instance as <em>force majeure</em>
