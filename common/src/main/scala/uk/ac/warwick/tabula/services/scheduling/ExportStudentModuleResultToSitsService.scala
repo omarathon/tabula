@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
-import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleResult, RecordedModuleMark, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
 import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrProcessCompletedCountQuery}
@@ -26,11 +26,12 @@ trait AutowiringExportStudentModuleResultToSitsServiceComponent extends ExportSt
 }
 
 trait ExportStudentModuleResultToSitsService {
-  def exportToSits(recordedModuleRegistrationMark: RecordedModuleMark): Int
 
-  def SmoRecordExists(recordedModuleRegistrationMark: RecordedModuleMark): Boolean
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int
 
-  def SmrProcessCompleted(recordedModuleRegistrationMark: RecordedModuleMark): Boolean
+  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean
+
+  def SmrProcessCompleted(recordedModuleRegistration: RecordedModuleRegistration): Boolean
 
 }
 
@@ -51,37 +52,35 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
   case class SmrSubset(sasStatus: Option[String], processStatus: Option[String], process: Option[String], credits: JBigDecimal)
 
 
-  private def extractInitialSASStatus(recordedModuleMark: RecordedModuleMark, actualMarks: Boolean = true): SmrSubset = {
+  private def extractInitialSASStatus(recordedModuleRegistration: RecordedModuleRegistration, actualMarks: Boolean = true): SmrSubset = {
 
-    def smrCredits(result: Option[ModuleResult], grade: Option[String]): JBigDecimal = result match {
+    val latestResult = recordedModuleRegistration.latestResult
+    val latestGrade = recordedModuleRegistration.latestGrade
+
+    def smrCredits: JBigDecimal = latestResult match {
 
       //GradeBoundary.ForceMajeureMissingComponentGrade must have a result of Pass but grant zero credits.
-      case Some(Pass) if !grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) =>  recordedModuleMark.recordedModuleRegistration.cats
-
+      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) =>  recordedModuleRegistration.cats
       case _ => new JBigDecimal(0)
     }
 
-    def smrProcess(result: Option[ModuleResult]): Option[String] = {
-      if (actualMarks) {
-        None
-      } else {
-        result match {
+    //Currently writing this status for agreed marks  (MRM leaves untouched  for agreed)
+    def smrProcess: Option[String] = {
+        latestResult match {
           case Some(Pass) | Some(Fail) => Some("COM")
-          case Some(Deferred) => if (recordedModuleMark.grade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
+          case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
           case _ => None
         }
-      }
     }
 
-    recordedModuleMark.result match {
+    latestResult match {
       case Some(Pass) | Some(Fail) => {
-        SmrSubset(Some("A"), Some("A"), smrProcess(recordedModuleMark.result), smrCredits(recordedModuleMark.result, recordedModuleMark.grade))
+        SmrSubset(Some("A"), Some("A"), smrProcess, smrCredits)
       }
-      case Some(Deferred) => if (recordedModuleMark.grade.exists(_.matches(("[SR]")))) { //resit (permitted or forced)
-
-        SmrSubset(Some("R"), None, smrProcess(recordedModuleMark.result), new JBigDecimal(0))
+      case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) { //resit (permitted or forced)
+        SmrSubset(Some("R"), None, smrProcess, new JBigDecimal(0))
       } else {
-        SmrSubset(Some("H"), Some("H"), smrProcess(recordedModuleMark.result), new JBigDecimal(0))
+        SmrSubset(Some("H"), Some("H"), smrProcess, new JBigDecimal(0))
       }
       case _ => SmrSubset(None, None, None, new JBigDecimal(0))
     }
@@ -97,46 +96,45 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     )
   }
 
-  def SmoRecordExists(recordedModuleMark: RecordedModuleMark): Boolean = {
+  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
     val countQuery = new SmoCountQuery(sitsDataSource)
-    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     countQuery.getCount(parameterMap) > 0
 
   }
 
-  def SmrProcessCompleted(recordedModuleMark: RecordedModuleMark): Boolean = {
+  //TODO - waiting for confirmation from exams if it is right to not overwrite when COM proc status
+  def SmrProcessCompleted(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
     val countQuery = new SmrProcessCompletedCountQuery(sitsDataSource)
-    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     countQuery.getCount(parameterMap) > 0
 
   }
 
-  def exportToSits(recordedModuleMark: RecordedModuleMark): Int = {
-    val recordedModuleRegistration = recordedModuleMark.recordedModuleRegistration
-    //If required we can throw an exception in case want to report dedicated errors to  user via UI
-    if (!SmoRecordExists(recordedModuleMark)) {
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = {
+    if (!SmoRecordExists(recordedModuleRegistration)) {
       logger.warn(s"SMO doesn't exists. Unable to update module mark record for ${recordedModuleRegistration.sprCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}")
       0 //can throw an exception in case we want to report this to  user via UI
-    } else if (SmrProcessCompleted(recordedModuleMark)) { //TODO confirmatio required from exams if still required
+    } else if (SmrProcessCompleted(recordedModuleRegistration)) { //TODO confirmation required from exams if still required
       logger.warn(s"The SMR (mark) record is already set to completed (COM). Exam office can do further changes. Unable to update module mark record for ${recordedModuleRegistration.sprCode}, ${recordedModuleRegistration.module}, ${recordedModuleRegistration.academicYear.toString}")
       0
     } else {
       val updateQuery = new ExportStudentModuleResultToSitsUpdateQuery(sitsDataSource)
-      val recordedModuleRegistration = recordedModuleMark.recordedModuleRegistration
-      //TODO currently dealing with actual marks
-      val subsetData = extractInitialSASStatus(recordedModuleMark)
 
-      val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleMark.recordedModuleRegistration)
+      //TODO currently dealing with actual marks
+      val subsetData = extractInitialSASStatus(recordedModuleRegistration)
+
+      val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
       parameterMap.putAll(JHashMap(
         "currentAttemptNumber" -> 1, //TODO set 1 currently (mandatory as per MRM  dept xml and set same value for current/completed attempt number fields).Waiting for confirmation from exams
         "completedAttemptNumber" -> 1,
-        "moduleMarks" -> JInteger(recordedModuleMark.mark),
-        "moduleGrade" -> recordedModuleMark.grade.orNull,
+        "moduleMarks" -> JInteger(recordedModuleRegistration.latestMark),
+        "moduleGrade" -> recordedModuleRegistration.latestGrade.orNull,
         "credits" -> subsetData.credits,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now), //TODO confirmation from exams if we need it
         "finalAssesmentsAttended" -> "Y", //TODO  Required for `HEFCE` return by ARO. MRM gathers it via xml. Value should be “Y” if the studentattended the chronologically last assessment for the module, and “N” otherwise
         "dateTimeMarksUploaded" -> DateTime.now.toDate,
-        "moduleResult" -> recordedModuleMark.result.map(_.dbValue).orNull,
+        "moduleResult" -> recordedModuleRegistration.latestResult.map(_.dbValue).orNull,
         "initialSASStatus" -> subsetData.sasStatus.orNull,
         "processStatus" -> subsetData.processStatus.orNull,
         "process" -> subsetData.process.orNull,
@@ -192,7 +190,7 @@ object ExportStudentModuleResultToSitsService {
        |      SMR_RSLT = :moduleResult, -- P/F/D/null values
        |      SMR_SASS = :initialSASStatus,
        |      SMR_PRCS = :processStatus,
-       |      SMR_PROC = :process
+       |      SMR_PROC = :process -- Updated for agreed marks also(mrm doesn't touch this field)
        |  $rootWhereClause
        |""".stripMargin
 
@@ -213,7 +211,7 @@ object ExportStudentModuleResultToSitsService {
     declareParameter(new SqlParameter("moduleResult", Types.VARCHAR))
     declareParameter(new SqlParameter("initialSASStatus", Types.VARCHAR))
     declareParameter(new SqlParameter("processStatus", Types.VARCHAR))
-    declareParameter(new SqlParameter("process", Types.VARCHAR))
+    declareParameter(new SqlParameter("process", Types.VARCHAR)) //TODO - crosscheking with exams if this fine to change fro agreed
 
     compile()
 
@@ -241,11 +239,12 @@ class ExportStudentModuleResultToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
-  def exportToSits(recordedModuleRegistrationMark: RecordedModuleMark): Int = 0
 
-  def SmoRecordExists(recordedModuleRegistrationMark: RecordedModuleMark): Boolean = true
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = 0
 
-  def SmrProcessCompleted(recordedModuleRegistrationMark: RecordedModuleMark): Boolean = true
+  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = true
+
+  def SmrProcessCompleted(recordedModuleRegistration: RecordedModuleRegistration): Boolean = true
 
 }
 

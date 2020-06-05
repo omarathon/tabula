@@ -130,6 +130,7 @@ abstract class Features {
   @Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes: Boolean = defaults.schedulingAttendanceUpdateSchemes
   @Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals: Boolean = defaults.schedulingAttendanceUpdateTotals
   @Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits: Boolean = defaults.schedulingExportFeedbackToSits
+  @Value("${features.scheduling.exportRecordedModuleMarksToSits:false}") var schedulingExportRecordedModuleMarksToSits: Boolean = defaults.schedulingExportRecordedModuleMarksToSits
   @Value("${features.scheduling.triggers:true}") var schedulingTriggers: Boolean = defaults.schedulingTriggers
   @Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration: Boolean = defaults.schedulingObjectStorageMigration
   @Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport: Boolean = defaults.schedulingModuleListsImport
@@ -279,6 +280,7 @@ class FeaturesMessage {
   @BeanProperty var schedulingExportAttendanceToSits = true
   @BeanProperty var schedulingSynchroniseAttendanceToSits = true
   @BeanProperty var schedulingExportFeedbackToSits = true
+  @BeanProperty var schedulingExportRecordedModuleMarksToSits = false
   @BeanProperty var schedulingAttendanceUpdateSchemes = true
   @BeanProperty var schedulingAttendanceUpdateTotals = true
   @BeanProperty var schedulingTriggers = true

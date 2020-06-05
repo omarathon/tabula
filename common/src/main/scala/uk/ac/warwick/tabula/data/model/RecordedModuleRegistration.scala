@@ -102,6 +102,10 @@ class RecordedModuleRegistration extends GeneratedId
     "cats" -> cats,
     "academicYear" -> academicYear,
     "occurrence" -> occurrence,
+    "marks" -> marks,
+    "needsWritingToSits" -> needsWritingToSits,
+    "lastWrittenToSits" -> lastWrittenToSits
+
   )
 
 }
