@@ -1,9 +1,9 @@
 <div class="deptheader">
   <h1>Calculate module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<#assign submitUrl><@routes.marks.module_marks module cats academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
 <#if changes?size == 0>
   <p>There were no changes to marks, grades or results.</p>

@@ -55,8 +55,8 @@ object CalculateModuleMarksCommand {
     with BindListener
     with PopulateOnForm
 
-  def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser): Command =
-    new CalculateModuleMarksCommandInternal(module, cats, academicYear, occurrence, currentUser)
+  def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser): Command =
+    new CalculateModuleMarksCommandInternal(sitsModuleCode, module, academicYear, occurrence, currentUser)
       with CalculateModuleMarksLoadModuleRegistrations
       with CalculateModuleMarksRequest
       with CalculateModuleMarksValidation
@@ -73,7 +73,7 @@ object CalculateModuleMarksCommand {
       with CalculateModuleMarksAlgorithm
 }
 
-abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String, currentUser: CurrentUser)
+abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, currentUser: CurrentUser)
   extends CommandInternal[Result]
     with ModuleOccurrenceState {
   self: CalculateModuleMarksRequest

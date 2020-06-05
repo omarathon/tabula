@@ -30,7 +30,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
           student <- memberDao.getByUniversityId(uniId).filter(_.isInstanceOf[StudentMember]).toSeq
           scd <- student.asInstanceOf[StudentMember].freshStudentCourseDetails
         } yield {
-          val modReg = new ModuleRegistration(scd.sprCode, module, cats, academicYear, "A", "WMR")
+          val modReg = new ModuleRegistration(scd.sprCode, module, cats, "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString), academicYear, "A", "WMR")
           session.save(modReg)
           session.save(scd)
           session.flush()

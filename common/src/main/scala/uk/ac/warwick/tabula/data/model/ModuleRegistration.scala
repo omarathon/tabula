@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
-import org.hibernate.annotations.{BatchSize, JoinColumnOrFormula, JoinColumnsOrFormulas, JoinFormula, Proxy, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -25,7 +25,7 @@ object ModuleRegistration {
 }
 
 /*
- * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
+ * sprCode, fullModuleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */
@@ -34,12 +34,13 @@ object ModuleRegistration {
 @Access(AccessType.FIELD)
 class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] with Serializable {
 
-  def this(sprCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
+  def this(sprCode: String, module: Module, cats: JBigDecimal, sitsModuleCode: String, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
     this.sprCode = sprCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
+    this.sitsModuleCode = sitsModuleCode
     this.occurrence = occurrence
     this.marksCode = marksCode.maybeText.orNull
   }
@@ -51,8 +52,17 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var module: Module = _
 
+  /**
+   * This is the CATS value of the module registration, it does not *necessarily* match the CATS value
+   * of the module or what's in the fullModuleCode.
+   */
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var cats: JBigDecimal = _
+
+  /**
+   * Uppercase module code, with CATS. Doesn't necessarily match the cats property (which is the credits registered)
+   */
+  var sitsModuleCode: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
@@ -136,12 +146,12 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
     }
 
   def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
     }.filter(_.universityId == studentCourseDetails.student.universityId)
 
@@ -163,7 +173,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       }
     }
 
-  override def toString: String = s"$sprCode-${module.code}-$cats-$academicYear"
+  override def toString: String = s"$sprCode-$sitsModuleCode-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
@@ -171,17 +181,16 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()
       .append(sprCode, that.sprCode)
+      .append(sitsModuleCode, that.sitsModuleCode)
       .append(module, that.module)
       .append(cats, that.cats)
       .append(academicYear, that.academicYear)
       .append(occurrence, that.occurrence)
       .build()
 
-  def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
-
   def moduleList(route: Route): Option[UpstreamModuleList] = route.upstreamModuleLists.asScala
     .filter(_.academicYear == academicYear)
-    .find(_.matches(toSITSCode))
+    .find(_.matches(sitsModuleCode))
 }
 
 /**

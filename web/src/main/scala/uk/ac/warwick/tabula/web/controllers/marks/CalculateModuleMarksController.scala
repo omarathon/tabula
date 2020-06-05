@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentMod
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleResult}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
@@ -24,25 +24,30 @@ import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import scala.jdk.CollectionConverters._
 
 @Controller
-@RequestMapping(Array("/marks/admin/module/{module}-{cats}/{academicYear}/{occurrence}/marks"))
+@RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/marks"))
 class CalculateModuleMarksController extends BaseController
   with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent
+  with AutowiringModuleAndDepartmentServiceComponent {
 
   validatesSelf[SelfValidating]
 
+  @ModelAttribute("module")
+  def module(@PathVariable sitsModuleCode: String): Module =
+    mandatory(moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode))
+
   @ModelAttribute("command")
-  def command(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): CalculateModuleMarksCommand.Command =
-    CalculateModuleMarksCommand(module, cats, academicYear, occurrence, user)
+  def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): CalculateModuleMarksCommand.Command =
+    CalculateModuleMarksCommand(sitsModuleCode, module, academicYear, occurrence, user)
 
   @ModelAttribute("breadcrumbs")
-  def breadcrumbs(@PathVariable module: Module, @PathVariable cats: BigDecimal, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): Seq[BreadCrumb] = {
+  def breadcrumbs(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): Seq[BreadCrumb] = {
     val department = module.adminDepartment
 
     Seq(
       MarksBreadcrumbs.Admin.HomeForYear(department, academicYear),
-      MarksBreadcrumbs.Admin.ModuleOccurrenceRecordMarks(module, cats, academicYear, occurrence, active = true),
+      MarksBreadcrumbs.Admin.ModuleOccurrenceRecordMarks(sitsModuleCode, module, academicYear, occurrence, active = true),
     )
   }
 
@@ -55,7 +60,7 @@ class CalculateModuleMarksController extends BaseController
     studentModuleMarkRecords.flatMap(_._2.keySet).distinct.sortBy(_.sequence)
 
   @ModelAttribute("isGradeValidation")
-  def isGradeValidation(@PathVariable module: Module): Boolean =
+  def isGradeValidation(@ModelAttribute("module") module: Module): Boolean =
     module.adminDepartment.assignmentGradeValidation
 
   @ModelAttribute("moduleResults")
@@ -150,8 +155,7 @@ class CalculateModuleMarksController extends BaseController
     errors: Errors,
     model: ModelMap,
     @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)],
-    @PathVariable module: Module,
-    @PathVariable cats: BigDecimal,
+    @PathVariable sitsModuleCode: String,
     @PathVariable academicYear: AcademicYear,
     @PathVariable occurrence: String
   ): String =
@@ -180,7 +184,7 @@ class CalculateModuleMarksController extends BaseController
         }
 
       model.addAttribute("changes", changes)
-      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.ModuleOccurrences.recordMarks(module, cats, academicYear, occurrence)}/skip-import"))
+      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence)}/skip-import"))
 
       "marks/admin/modules/calculate_preview"
     }
@@ -190,7 +194,7 @@ class CalculateModuleMarksController extends BaseController
     @Valid @ModelAttribute("command") cmd: CalculateModuleMarksCommand.Command,
     errors: Errors,
     model: ModelMap,
-    @PathVariable module: Module,
+    @ModelAttribute("module") module: Module,
     @PathVariable academicYear: AcademicYear,
   )(implicit redirectAttributes: RedirectAttributes): String =
     if (errors.hasErrors) {
