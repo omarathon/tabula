@@ -16,10 +16,10 @@
     <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
       <@f.hidden name="confirm" value="true" />
 
-      <table class="table table-striped">
+      <table class="table table-striped table-sortable">
         <thead>
           <tr>
-            <th>University ID</th>
+            <th class="sortable">University ID</th>
             <th>Mark</th>
             <th>Grade</th>
             <th>Comment</th>

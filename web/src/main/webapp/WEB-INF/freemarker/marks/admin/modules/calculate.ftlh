@@ -22,7 +22,7 @@
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
-          <table class="table table-striped">
+          <table class="table table-striped table-sortable">
             <colgroup class="student">
               <col class="student-info" />
             </colgroup>
@@ -46,7 +46,7 @@
 
             <thead>
               <tr>
-                <th class="col-sm-1" rowspan="2">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc">SPR Code</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
@@ -62,13 +62,13 @@
 
               <tr>
                 <#list assessmentComponents as ac>
-                  <th>Mark</th>
-                  <th>Grade</th>
+                  <th class="sortable">Mark</th>
+                  <th class="sortable">Grade</th>
                 </#list>
 
-                <th>Mark</th>
-                <th>Grade</th>
-                <th>Result</th>
+                <th class="sortable">Mark</th>
+                <th class="sortable">Grade</th>
+                <th class="sortable">Result</th>
               </tr>
             </thead>
             <tbody>
@@ -148,6 +148,7 @@
                       <#assign marks = marksAndWeighting._1() />
                       <#assign weighting = (marksAndWeighting._2())! />
                       <td>
+                      <td data-sortby="${marks.mark!-1}">
                         ${marks.mark!'-'}
 
                         <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
@@ -221,21 +222,21 @@
                   </#list>
 
                   <#if calculation.successful>
-                    <td>
+                    <td data-sortby="${calculation.mark!-1}">
                       <#if (student.mark!-1) != (calculation.mark!-1)>
                         ${student.mark!'-'}
                         <i class="fal fa-arrow-right"></i>
                       </#if>
                       ${calculation.mark!'-'}
                     </td>
-                    <td>
+                    <td data-sortby="${calculation.grade!}">
                       <#if student.grade! != calculation.grade!>
                         ${student.grade!'-'}
                         <i class="fal fa-arrow-right"></i>
                       </#if>
                       ${calculation.grade!'-'}
                     </td>
-                    <td>
+                    <td data-sortby="${(calculation.result.dbValue)!}">
                       <#if (student.result.description)! != (calculation.result.description)!>
                         ${(student.result.description)!'-'}
                         <i class="fal fa-arrow-right"></i>

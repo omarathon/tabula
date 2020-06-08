@@ -23,12 +23,12 @@
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
-          <table class="table table-striped">
+          <table class="table table-striped table-sortable">
             <thead>
               <tr>
-                <th class="col-sm-1">University ID</th>
-                <th class="col-sm-2">Mark</th>
-                <th class="col-sm-1">Grade</th>
+                <th class="col-sm-1 sortable">University ID</th>
+                <th class="col-sm-2 sortable">Mark</th>
+                <th class="col-sm-1 sortable">Grade</th>
                 <th class="col-sm-2">New mark</th>
                 <th class="col-sm-2">New grade</th>
                 <th class="col-sm-4">Comments</th>
@@ -38,7 +38,7 @@
               <#list studentMarkRecords as student>
                 <tr>
                   <td>${student.universityId}<#if !student.currentMember> <span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if></td>
-                  <td>
+                  <td data-sortby="${student.mark!-1}">
                     ${student.mark!}
                     <#if student.needsWritingToSits>
                       <span class="tabula-tooltip" data-title="Waiting to be written to SITS">

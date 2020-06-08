@@ -22,32 +22,32 @@
 </#if>
 
 <div class="fix-area">
-    <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
-        <@f.hidden name="confirm" value="true" />
-        <#if studentModuleRecords?has_content>
-          <table class="table table-striped table-sortable">
-            <thead>
-            <tr>
-              <th class="sortable">SPR Code</th>
-              <th class="sortable">Mark</th>
-              <th class="sortable">Grade</th>
-              <th class="sortable">Result</th>
-              <th>Comment</th>
-            </tr>
-            </thead>
-            <tbody>
-            <#list studentsToConfirm as record>
-                <#assign student = record._1() />
-              <tr>
-                <td class="col-md-2">${student.sprCode}</td>
-            <td class="col-md-2">
-                ${student.mark!'-'}
+  <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
+    <@f.hidden name="confirm" value="true" />
+    <#if studentModuleRecords?has_content>
+      <table class="table table-striped table-sortable">
+        <thead>
+        <tr>
+          <th class="sortable">SPR Code</th>
+          <th class="sortable">Mark</th>
+          <th class="sortable">Grade</th>
+          <th class="sortable">Result</th>
+          <th>Comment</th>
+        </tr>
+        </thead>
+        <tbody>
+        <#list studentsToConfirm as record>
+          <#assign student = record._1() />
+          <tr>
+            <td class="col-md-2">${student.sprCode}</td>
+            <td class="col-md-2" data-sortby="${student.mark!-1}">
+              ${student.mark!'-'}
             </td>
-            <td class="col-md-2">
-                ${student.grade!'-'}
+            <td class="col-md-2" data-sortby="${student.grade!}">
+              ${student.grade!'-'}
             </td>
-            <td class="col-md-2">
-                ${(student.result.dbValue)!'-'}
+            <td class="col-md-2" data-sortby="${(student.result.dbValue)!}">
+              ${(student.result.dbValue)!'-'}
             </td>
             <td class="col-md-4"><@f.input path="comments[${student.sprCode}]" cssClass="form-control" /></td>
           </tr>
@@ -56,13 +56,13 @@
           <#assign student = record._1() />
           <tr class="info">
             <td class="col-md-2">${student.sprCode} - already confirmed</td>
-            <td class="col-md-2">
-                ${student.mark!'-'}
+            <td class="col-md-2" data-sortby="${student.mark!-1}">
+              ${student.mark!'-'}
             </td>
-            <td class="col-md-2">
+            <td class="col-md-2" data-sortby="${student.grade!}">
               ${student.grade!'-'}
             </td>
-            <td class="col-md-2">
+            <td class="col-md-2" data-sortby="${(student.result.dbValue)!}">
               ${(student.result.dbValue)!'-'}
             </td>
             <td class="col-md-4"><@f.input path="comments[${student.sprCode}]" cssClass="form-control" readonly=true /></td>
