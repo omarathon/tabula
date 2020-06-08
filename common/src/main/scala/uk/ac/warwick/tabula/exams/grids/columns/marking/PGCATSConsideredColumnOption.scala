@@ -33,7 +33,7 @@ class PGCATSConsideredColumnOption extends ChosenYearExamGridColumnOption with A
               val (_, catsConsidered) = progressionService.bestPGModules(scyd.moduleRegistrations, maxCATSToConsider)
               ExamGridColumnValueDecimal(catsConsidered)
             case Some(UG) =>
-              ExamGridColumnValueMissing(s"CATS considered isn't defined for UGs")
+              ExamGridColumnValueMissing("CATS considered isn't defined for UGs")
             case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
             case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
           }
