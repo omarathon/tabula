@@ -388,7 +388,7 @@ trait CalculateModuleMarksAlgorithm {
 trait CalculateModuleMarksValidation extends SelfValidating {
   self: ModuleOccurrenceState
     with CalculateModuleMarksRequest
-    with ModuleOccurrenceLoadModuleRegistrations
+    with CalculateModuleMarksLoadModuleRegistrations
     with AssessmentMembershipServiceComponent =>
 
   override def validate(errors: Errors): Unit = {
@@ -461,6 +461,23 @@ trait CalculateModuleMarksValidation extends SelfValidating {
               errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.dbValue), "")
             }
           }
+        }
+      }
+
+      // TAB-8428 if the mark, grade or result differ from the current mark, grade or result AND they differ from the calculated
+      // mark, grade and result, comment becomes mandatory
+      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, componentMarks, calculation) =>
+        lazy val doesntMatchCalculation = calculation match {
+          case ModuleMarkCalculation.Success(calculatedMark, calculatedGrade, calculatedResult) =>
+            item.mark.maybeText.exists(m => m != calculatedMark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
+            item.grade.maybeText.exists(g => g != calculatedGrade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
+            item.result.maybeText.exists(r => r != calculatedResult.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
+
+          case _ => false // If the calculation was a failure, allow it through
+        }
+
+        if (!item.comments.hasText && doesntMatchCalculation) {
+          errors.rejectValue("comments", "moduleMarkCalculation.mismatch.noComment")
         }
       }
 
