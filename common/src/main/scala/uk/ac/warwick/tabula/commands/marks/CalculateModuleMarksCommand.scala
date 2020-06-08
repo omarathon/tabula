@@ -265,8 +265,8 @@ trait CalculateModuleMarksAlgorithm {
 
       if (componentsWithMissingMarkOrGrades.nonEmpty) ModuleMarkCalculation.Failure(s"Marks and grades are missing for ${componentsWithMissingMarkOrGrades.map(_.sequence).mkString(", ")}")
       else {
-        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) }
-        if (componentsForCalculation.isEmpty) ModuleMarkCalculation.Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), None)
+        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) && !s.grade.contains(GradeBoundary.MitigatingCircumstancesGrade) }
+        if (componentsForCalculation.isEmpty && components.forall(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) ModuleMarkCalculation.Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), None)
         else {
           def validGradesForMark(m: Option[Int]) =
             assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.exists(_._2.resitExpected))
