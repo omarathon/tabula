@@ -14,6 +14,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JList, JMap}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, ImportModuleRegistrationsCommand}
+import uk.ac.warwick.tabula.data.model.CourseType.PGT
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -126,8 +127,9 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       (_, d) <- SandboxData.Departments
       route <- d.routes.values.toSeq
       if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
-      moduleCode <- route.moduleCodes if moduleCode.substring(3, 4).toInt <= yearOfStudy
+      moduleCode <- route.moduleCodes if route.courseType == PGT || moduleCode.substring(3, 4).toInt <= yearOfStudy
     } yield {
+      val module = SandboxData.module(moduleCode)
       val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
       val marksCode =
         if (isPassFail) "TABULA-PF"
@@ -136,15 +138,15 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
           case _ => "TABULA-UG"
         }
 
-      val level = moduleCode.substring(3, 4).toInt
-      val academicYear = AcademicYear.now - (yearOfStudy - level)
+      val academicYear = if (route.courseType == PGT) AcademicYear.now() else AcademicYear.now() - (yearOfStudy - moduleCode.substring(3, 4).toInt)
 
       val recordedModuleRegistration: Option[RecordedModuleRegistration] =
-        moduleRegistrationMarksService.getAllRecordedModuleRegistrations("%s-15".format(moduleCode.toUpperCase), academicYear, "A")
+        moduleRegistrationMarksService.getAllRecordedModuleRegistrations(module.fullModuleCode,  academicYear, "A")
           .find(_.sprCode == "%s/1".format(universityId))
 
       val (mark, grade, result) =
-        if (academicYear < AcademicYear.now()) {
+        // generate marks for all years for HOM students
+        if (route.code.substring(0, 2) == "hm" || academicYear < AcademicYear.now()) {
           val randomMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
             Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
           ).sum % 100
@@ -169,13 +171,10 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
       new ModuleRegistrationRow(
         sprCode = "%s/1".format(universityId),
-        sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
-        cats = new JBigDecimal(15),
+        sitsModuleCode = module.fullModuleCode,
+        cats = module.cats.underlying(),
         assessmentGroup = "A",
-        selectionStatusCode = (universityId.toInt + Try(moduleCode.substring(3).toInt).getOrElse(0)) % 2 match {
-          case 0 => "C"
-          case _ => "O"
-        },
+        selectionStatusCode = if (route.coreModules.contains(moduleCode)) "C" else "O",
         occurrence = "A",
         academicYear = academicYear.toString,
         actualMark = recordedModuleRegistration.flatMap(_.latestMark).orElse(mark),
