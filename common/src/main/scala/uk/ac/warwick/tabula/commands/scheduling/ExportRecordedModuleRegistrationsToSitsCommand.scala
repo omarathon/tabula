@@ -78,6 +78,12 @@ trait ExportRecordedModuleRegistrationsToSitsDescription extends Describable[Res
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
         student.sprCode -> student.latestGrade.get
+      }.toMap,
+      "results" -> result.filter(_.latestResult.nonEmpty).map { student =>
+        student.sprCode -> student.latestResult.get.entryName
+      }.toMap,
+      "state" -> result.filter(_.latestState.nonEmpty).map { student =>
+        student.sprCode -> student.latestState.get.entryName
       }.toMap
     )
 }

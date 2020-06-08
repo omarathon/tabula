@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
-import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrProcessCompletedCountQuery}
+import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery}
 
 trait ExportStudentModuleResultToSitsServiceComponent {
   def exportStudentModuleResultToSitsService: ExportStudentModuleResultToSitsService
@@ -29,9 +29,6 @@ trait ExportStudentModuleResultToSitsService {
 
   def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int
 
-  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean
-
-
 }
 
 class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
@@ -41,7 +38,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
    * Student result record  can be amended as long as  -
    * SMR record exists in SITS. Exams Office may not yet have run SAS process if no SMR record found.
    * SMO record has to exist.
-
+   *
    * Pass moduleResult -  smr.setSass("A") / smr.setPrcs("A"). O credits for ForceMajeureMissingComponentGrade. For agreed, smr.setProc("COM") ;
    * Fail moduleResult -  smr.setSass("A") / smr.setPrcs("A"), 0 credits. For agreed, smr.setProc("COM")
    * Deferred  moduleResult with  grade.matches("[SR]" -  smr.setSass("R") / smr.setPrcs(null), 0 credits. For agreed, smr.setProc("RAS")
@@ -58,16 +55,18 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     def smrCredits: JBigDecimal = latestResult match {
 
       //GradeBoundary.ForceMajeureMissingComponentGrade must have a result of Pass but grant zero credits.
-      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) =>  recordedModuleRegistration.moduleRegistration.map(_.cats).getOrElse(new JBigDecimal(0))
+      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => {
+        recordedModuleRegistration.moduleRegistration.map(_.cats).getOrElse(throw new IllegalStateException(s"Expected ModuleRegistration record but 0 found for module mark $recordedModuleRegistration"))
+      }
       case _ => new JBigDecimal(0)
     }
 
     def smrProcess: Option[String] = {
-        latestResult match {
-          case Some(Pass) | Some(Fail) => Some("COM")
-          case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
-          case _ => None
-        }
+      latestResult match {
+        case Some(Pass) | Some(Fail) => Some("COM")
+        case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
+        case _ => None
+      }
     }
 
     latestResult match {
@@ -113,7 +112,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
 
       val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
       parameterMap.putAll(JHashMap(
-        "currentAttemptNumber" -> 1, //TODO set 1 currently (mandatory as per MRM  dept xml and set same value for current/completed attempt number fields).Waiting for confirmation from exams
+        "currentAttemptNumber" -> 1, //TAB-8437
         "completedAttemptNumber" -> 1,
         "moduleMarks" -> JInteger(recordedModuleRegistration.latestMark),
         "moduleGrade" -> recordedModuleRegistration.latestGrade.orNull,
@@ -121,7 +120,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         "agreedModuleGrade" -> null,
         "credits" -> subsetData.credits,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
-        "finalAssesmentsAttended" -> "Y", //TODO  Required for `HEFCE` return by ARO. MRM gathers it via xml. Value should be “Y” if the studentattended the chronologically last assessment for the module, and “N” otherwise
+        "finalAssesmentsAttended" -> "Y", //TAB-8438
         "dateTimeMarksUploaded" -> DateTime.now.toDate,
         "moduleResult" -> recordedModuleRegistration.latestResult.map(_.dbValue).orNull,
         "initialSASStatus" -> subsetData.sasStatus.orNull,
@@ -131,7 +130,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       ))
       val rowUpdated = updateQuery.updateByNamedParam(parameterMap)
       if (rowUpdated == 0) {
-        logger.warn(s"No SMR record found to update. Possible SAS hasn't generated initial SMR for ${recordedModuleRegistration.sprCode}, ${recordedModuleRegistration.sitsModuleCode}, ${recordedModuleRegistration.academicYear.toString}, ${recordedModuleRegistration.occurrence}")
+        logger.warn(s"No SMR record found to update. Possible SAS hasn't yet generated initial SMR for $recordedModuleRegistration")
       }
       rowUpdated
     }
@@ -157,11 +156,6 @@ object ExportStudentModuleResultToSitsService {
     select count(*) from $sitsSchema.cam_smo $rootWhereClause
     """
 
-
-  final def CountSmrProcessCompletedSql =
-    f"""
-    select count(*) from $sitsSchema.ins_smr $rootWhereClause  and smr_proc = 'COM'
-    """
 
   //TODO -Currently dealing with actual grade/marks only.
   final def UpdateModuleResultSql: String =
@@ -216,12 +210,6 @@ object ExportStudentModuleResultToSitsService {
     }
   }
 
-  class SmrProcessCompletedCountQuery(ds: DataSource) extends CountQuery(ds) {
-    def getCount(params: JMap[String, Any]): Int = {
-      this.queryForObject(CountSmrProcessCompletedSql, params, classOf[JInteger]).asInstanceOf[Int]
-    }
-  }
-
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -234,8 +222,6 @@ class ExportStudentModuleResultToSitsServiceImpl
 class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
 
   def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = 0
-
-  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = true
 
 }
 
