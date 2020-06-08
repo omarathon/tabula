@@ -28,6 +28,7 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
+import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 trait AssignmentImporterComponent {
@@ -244,12 +245,12 @@ class SandboxAssignmentImporter extends AssignmentImporter
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       } yield {
         val yearOfStudy = (uniId % 3) + 1
+        val module = SandboxData.module(moduleCode)
         val level = moduleCode.substring(3, 4).toInt
 
         if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) uk.ac.warwick.tabula.data.Transactions.transactional() {
           val universityId = uniId.toString
-
-          val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
+          val moduleCodeFull = module.fullModuleCode
           val assessmentGroup = "A"
           val sequence = assessmentType.subtype match {
             case TabulaAssessmentSubtype.Assignment => "A01"
@@ -352,8 +353,9 @@ class SandboxAssignmentImporter extends AssignmentImporter
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- yearsToImport
     } yield (moduleCode, assessmentType, academicYear)).zipWithIndex.map { case ((moduleCode, assessmentType, academicYear), index) =>
+      val module = SandboxData.module(moduleCode)
       val ag = new UpstreamAssessmentGroup()
-      ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      ag.moduleCode = module.fullModuleCode
       ag.academicYear = academicYear
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
@@ -393,7 +395,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
     } yield assessmentType match {
       case AssessmentType.Essay =>
         val a = new AssessmentComponent
-        a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        a.moduleCode = module.fullModuleCode
         a.sequence = "A01"
         a.name = "Report (2,000 words)"
         a.assessmentGroup = "A"
@@ -419,7 +421,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
 
       case AssessmentType.SummerExam =>
         val e = new AssessmentComponent
-        e.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        e.moduleCode = module.fullModuleCode
         e.sequence = "E01"
         e.name = "2 hour examination (Summer)"
         e.assessmentGroup = "A"
@@ -453,10 +455,11 @@ class SandboxAssignmentImporter extends AssignmentImporter
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq
       year <- yearsToImport
-    } yield (moduleCode, year)).distinct.zipWithIndex.map { case ((moduleCode, year), index) =>
+    } yield (module, year)).distinct.zipWithIndex.map { case ((module, year), index) =>
       val a = new AssessmentComponentExamSchedule
-      a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      a.moduleCode = module.fullModuleCode
       a.assessmentComponentSequence = "E01"
       a.examProfileCode = s"EXSUM${year.endYear % 100}"
       a.slotId = f"${(index / 5) + 1}%03d"
@@ -467,7 +470,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         new LocalDate(year.endYear, DateTimeConstants.APRIL, 27)
           .plusDays(index / 10)
           .toDateTime(if (index % 10 < 5) new LocalTime(9, 0) else new LocalTime(14, 0))
-      a.examPaperCode = s"${moduleCode.toUpperCase}0"
+      a.examPaperCode = s"${module.code.toUpperCase}0"
       a.examPaperSection = Some("n/a")
       a.location = Some(NamedLocation("Panorama Room"))
       a
@@ -477,7 +480,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
     (for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
-      moduleCode <- route.moduleCodes if schedule.moduleCode == "%s-15".format(moduleCode.toUpperCase)
+      moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq if schedule.moduleCode == module.fullModuleCode
       uniId <- route.studentsStartId to route.studentsEndId if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       yearOfStudy = (uniId % 3) + 1
       level = moduleCode.substring(3, 4).toInt

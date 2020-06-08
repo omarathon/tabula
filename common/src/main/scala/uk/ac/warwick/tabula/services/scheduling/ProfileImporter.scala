@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports._
 import uk.ac.warwick.tabula.commands.{Command, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.CourseType.{PGR, PGT}
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, Daoisms}
@@ -239,14 +240,14 @@ class SandboxProfileImporter extends ProfileImporter with AutowiringProfileServi
         "second_nationality" -> (if (member.universityId.toLong % 3 == 0) "Syrian" else null),
         "tier4_visa_requirement" -> (if (member.universityId.toLong % 3 == 0) 1 else 0),
         "course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
-        "course_year_length" -> "3",
+        "course_year_length" -> (if(route.courseType == PGT) "1" else "3"),
         "spr_code" -> "%s/1".format(member.universityId),
         "route_code" -> route.code.toUpperCase,
         "department_code" -> member.departmentCode.toUpperCase,
         "award_code" -> route.awardCode,
         "spr_status_code" -> "C",
         "scj_status_code" -> "C",
-        "level_code" -> thisYearOfStudy.toString,
+        "level_code" -> (if(route.courseType == PGT) "M1" else if(route.courseType == PGR) "M2" else  thisYearOfStudy.toString),
         "spr_tutor1" -> null,
         "spr_academic_year_start" -> (AcademicYear.now() - yearOfStudy + 1).toString,
         "scj_tutor1" -> null,
@@ -259,7 +260,7 @@ class SandboxProfileImporter extends ProfileImporter with AutowiringProfileServi
         "funding_source" -> null,
         "enrolment_status_code" -> "C",
         "study_block" -> thisYearOfStudy,
-        "study_level" -> thisYearOfStudy.toString,
+        "study_level" -> (if(route.courseType == PGT) "M1" else if(route.courseType == PGR) "M2" else  thisYearOfStudy.toString),
         "mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
         "block_occurrence" -> (if (member.universityId.toLong % 5 == 0) "I" else "C"),
         "sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
