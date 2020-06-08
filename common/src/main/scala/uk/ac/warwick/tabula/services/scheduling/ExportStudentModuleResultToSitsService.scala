@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
-import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrProcessCompletedCountQuery}
+import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery}
 
 trait ExportStudentModuleResultToSitsServiceComponent {
   def exportStudentModuleResultToSitsService: ExportStudentModuleResultToSitsService
@@ -38,7 +38,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
    * Student result record  can be amended as long as  -
    * SMR record exists in SITS. Exams Office may not yet have run SAS process if no SMR record found.
    * SMO record has to exist.
-
+   *
    * Pass moduleResult -  smr.setSass("A") / smr.setPrcs("A"). O credits for ForceMajeureMissingComponentGrade. For agreed, smr.setProc("COM") ;
    * Fail moduleResult -  smr.setSass("A") / smr.setPrcs("A"), 0 credits. For agreed, smr.setProc("COM")
    * Deferred  moduleResult with  grade.matches("[SR]" -  smr.setSass("R") / smr.setPrcs(null), 0 credits. For agreed, smr.setProc("RAS")
@@ -55,18 +55,18 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     def smrCredits: JBigDecimal = latestResult match {
 
       //GradeBoundary.ForceMajeureMissingComponentGrade must have a result of Pass but grant zero credits.
-      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) =>  {
+      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => {
         recordedModuleRegistration.moduleRegistration.map(_.cats).getOrElse(throw new IllegalStateException(s"Expected ModuleRegistration record but 0 found for module mark $recordedModuleRegistration"))
       }
       case _ => new JBigDecimal(0)
     }
 
     def smrProcess: Option[String] = {
-        latestResult match {
-          case Some(Pass) | Some(Fail) => Some("COM")
-          case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
-          case _ => None
-        }
+      latestResult match {
+        case Some(Pass) | Some(Fail) => Some("COM")
+        case Some(Deferred) => if (latestGrade.exists(_.matches(("[SR]")))) Some("RAS") else Some("SAS")
+        case _ => None
+      }
     }
 
     latestResult match {
