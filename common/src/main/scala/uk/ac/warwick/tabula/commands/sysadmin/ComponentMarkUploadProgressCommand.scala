@@ -50,7 +50,6 @@ class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Resul
     moduleAndDepartmentService.allDepartments.toSet.map { department:Department =>
       val assessmentComponents = assessmentMembershipService.getAssessmentComponents(moduleAndDepartmentService.getDepartmentByCode(department.code).head, includeSubDepartments = false)
         .filter { ac =>
-          ac.assessmentGroup != "AO" &&
           ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 

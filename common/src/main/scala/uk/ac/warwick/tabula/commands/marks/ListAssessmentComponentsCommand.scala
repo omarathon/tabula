@@ -126,9 +126,8 @@ trait ListAssessmentComponentsForModulesWithPermission {
     val assessmentComponents: Seq[AssessmentComponent] =
       assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false)
         .filter { ac =>
-          ac.assessmentGroup != "AO" &&
-            ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
-            (canAdminDepartment || modulesWithPermission.contains(ac.module))
+          ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
+          (canAdminDepartment || modulesWithPermission.contains(ac.module))
         }
 
     val assessmentComponentsByKey: Map[AssessmentComponentKey, AssessmentComponent] =

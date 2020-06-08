@@ -143,10 +143,16 @@
                   </td>
 
                   <#list assessmentComponents as ac>
-                    <#assign marks = (mapGet(componentMarks, ac))! />
-                    <#if marks?has_content>
+                    <#assign marksAndWeighting = (mapGet(componentMarks, ac))! />
+                    <#if marksAndWeighting?has_content>
+                      <#assign marks = marksAndWeighting._1() />
+                      <#assign weighting = marksAndWeighting._2() />
                       <td>
                         ${marks.mark!'-'}
+
+                        <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
+                          <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
+                        </#if>
 
                         <#if marks.needsWritingToSits>
                           <span class="tabula-tooltip" data-title="Waiting to be written to SITS">

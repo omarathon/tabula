@@ -30,7 +30,6 @@ trait ModuleOccurrenceLoadModuleRegistrations {
   lazy val assessmentComponents: Seq[AssessmentComponent] =
     assessmentMembershipService.getAssessmentComponents(sitsModuleCode, inUseOnly = false)
       .filter { ac =>
-        ac.assessmentGroup != "AO" &&
         ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 
@@ -44,10 +43,11 @@ trait ModuleOccurrenceLoadModuleRegistrations {
         info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
       }
 
-  def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] = studentComponentMarkRecords
-    .filter(_._2.exists(_.universityId == universityId))
-    .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
-    .toMap
+  def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] =
+    studentComponentMarkRecords
+      .filter(_._2.exists(_.universityId == universityId))
+      .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
+      .toMap
 
   lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 
