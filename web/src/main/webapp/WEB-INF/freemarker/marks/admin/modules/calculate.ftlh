@@ -146,7 +146,7 @@
                     <#assign marksAndWeighting = (mapGet(componentMarks, ac))! />
                     <#if marksAndWeighting?has_content>
                       <#assign marks = marksAndWeighting._1() />
-                      <#assign weighting = marksAndWeighting._2() />
+                      <#assign weighting = (marksAndWeighting._2())! />
                       <td>
                         ${marks.mark!'-'}
 
