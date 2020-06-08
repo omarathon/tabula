@@ -118,13 +118,27 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
     with ModuleRegistrationServiceComponent
     with ModuleRegistrationMarksServiceComponent =>
 
-  lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
+  lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)] =
     studentModuleMarkRecords.map { student =>
       val (cm, calculation) =
         moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
           val universityId = moduleRegistration.studentCourseDetails.student.universityId
-          (componentMarks(universityId), calculate(moduleRegistration, componentMarks(universityId).toSeq))
-        }.getOrElse((Map.empty[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation.Failure("No module registration found")))
+          val components: Seq[(AssessmentComponent, StudentMarkRecord)] = componentMarks(universityId).toSeq
+
+          // Also get the weighting by passing all marks in
+          val marksForWeighting: Seq[(AssessmentType, String, Option[Int])] =
+            components.map { case (ac, s) =>
+              (ac.assessmentType, ac.sequence, s.mark)
+            }
+
+          val weightedComponents =
+            components.map { case (ac, s) =>
+              val weighting = ac.weightingFor(marksForWeighting)
+              ac -> (s, weighting)
+            }.toMap
+
+          (weightedComponents, calculate(moduleRegistration, components))
+        }.getOrElse((Map.empty[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation.Failure("No module registration found")))
 
       (student, cm, calculation)
     }
