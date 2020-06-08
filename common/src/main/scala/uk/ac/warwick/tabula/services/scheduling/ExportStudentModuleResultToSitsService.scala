@@ -117,6 +117,8 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         "completedAttemptNumber" -> 1,
         "moduleMarks" -> JInteger(recordedModuleRegistration.latestMark),
         "moduleGrade" -> recordedModuleRegistration.latestGrade.orNull,
+        "agreedModuleMarks" -> null,
+        "agreedModuleGrade" -> null,
         "credits" -> subsetData.credits,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
         "finalAssesmentsAttended" -> "Y", //TODO  Required for `HEFCE` return by ARO. MRM gathers it via xml. Value should be “Y” if the studentattended the chronologically last assessment for the module, and “N” otherwise
@@ -169,6 +171,8 @@ object ExportStudentModuleResultToSitsService {
        |      SMR_COMA = :completedAttemptNumber,
        |      SMR_ACTM = :moduleMarks,
        |      SMR_ACTG = :moduleGrade,
+       |      SMR_AGRM = :agreedModuleMarks,
+       |      SMR_AGRG = :agreedModuleGrade,
        |      SMR_CRED = :credits,
        |      SMR_UDF2 = :currentDateTime, -- dd/MM/yy:HHmm format used by MRM. We store the same date time in fasd. May be we don't need this?
        |      SMR_UDF3 = :finalAssesmentsAttended,
@@ -191,6 +195,8 @@ object ExportStudentModuleResultToSitsService {
     declareParameter(new SqlParameter("completedAttemptNumber", Types.INTEGER))
     declareParameter(new SqlParameter("moduleMarks", Types.INTEGER))
     declareParameter(new SqlParameter("moduleGrade", Types.VARCHAR))
+    declareParameter(new SqlParameter("agreedModuleMarks", Types.INTEGER))
+    declareParameter(new SqlParameter("agreedModuleGrade", Types.VARCHAR))
     declareParameter(new SqlParameter("credits", Types.DECIMAL))
     declareParameter(new SqlParameter("currentDateTime", Types.VARCHAR))
     declareParameter(new SqlParameter("finalAssesmentsAttended", Types.VARCHAR))
