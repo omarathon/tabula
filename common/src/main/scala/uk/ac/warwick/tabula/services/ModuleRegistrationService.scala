@@ -22,8 +22,7 @@ trait ModuleRegistrationService {
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration]
@@ -32,7 +31,7 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
-  def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+  def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
@@ -85,12 +84,11 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration] =
-    moduleRegistrationDao.getByNotionalKey(studentCourseDetails, module, cats, academicYear, occurrence)
+    moduleRegistrationDao.getByNotionalKey(studentCourseDetails, sitsModuleCode, academicYear, occurrence)
 
   def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
@@ -98,8 +96,8 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-  override def getByModuleOccurrence(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
-    moduleRegistrationDao.getByModuleOccurrence(module, JBigDecimal(Some(cats)), academicYear, occurrence)
+  override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYears(academicYears, includeDeleted)

@@ -6,7 +6,7 @@
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
 </div>
 
-<p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank and use <a href="<@routes.marks.assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup />">missing mark adjustment</a>.</p>
+<p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank and apply a <a href="<@routes.marks.assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup />">missing marks adjustment</a>.</p>
 
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>

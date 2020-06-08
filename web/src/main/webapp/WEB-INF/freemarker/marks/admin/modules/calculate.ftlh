@@ -3,12 +3,12 @@
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
 <p>Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students.</p>
 
-<#assign submitUrl><@routes.marks.module_marks module cats academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
 <div>
   <!-- Nav tabs -->
@@ -46,13 +46,13 @@
 
             <thead>
               <tr>
-                <th class="col-sm-1" rowspan="2">SCJ Code</th>
+                <th class="col-sm-1" rowspan="2">SPR Code</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
                 </#list>
 
-                <th colspan="3">Overall</th>
+                <th colspan="3">Calculation</th>
 
                 <th class="col-sm-2" rowspan="2">Mark</th>
                 <th class="col-sm-1" rowspan="2">Grade</th>
@@ -79,7 +79,7 @@
 
                 <tr>
                   <td>
-                    ${student.scjCode}
+                    ${student.sprCode}
 
                     <#if student.needsWritingToSits>
                       <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
@@ -99,12 +99,12 @@
                     </#if>
 
                     <#if student.history?has_content>
-                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.scjCode}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
-                      <@modal.modal id="mark-history-modal-${student.scjCode}">
+                      <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
                         <@modal.wrapper cssClass="modal-lg">
                           <@modal.header>
-                            <h3 class="modal-title">Mark history for ${student.scjCode}</h3>
+                            <h3 class="modal-title">Mark history for ${student.sprCode}</h3>
                           </@modal.header>
                           <@modal.body>
                             <table class="table table-condensed table-striped">
@@ -143,8 +143,8 @@
                   </td>
 
                   <#list assessmentComponents as ac>
-                    <#assign marks = mapGet(componentMarks, ac) />
-                    <#if marks??>
+                    <#assign marks = (mapGet(componentMarks, ac))! />
+                    <#if marks?has_content>
                       <td>
                         ${marks.mark!'-'}
 
@@ -246,28 +246,28 @@
                   </#if>
 
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.scjCode}].mark">
+                    <@bs3form.labelled_form_group path="students[${student.sprCode}].mark">
                       <div class="input-group">
-                        <@f.input path="students[${student.scjCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+                        <@f.input path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
                         <div class="input-group-addon">%</div>
                       </div>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.scjCode}].grade">
+                    <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
                       <#if isGradeValidation>
-                        <#assign generateUrl><@routes.marks.module_generateGrades module cats academicYear occurrence student.scjCode /></#assign>
+                        <#assign generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#assign>
 
-                        <@f.input path="students[${student.scjCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.scjCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
-                        <@f.select path="students[${student.scjCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+                        <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
+                        <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
-                        <@f.input path="students[${student.scjCode}].grade" cssClass="form-control grade-box" />
+                        <@f.input path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
                       </#if>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.scjCode}].result">
-                      <@f.select path="students[${student.scjCode}].result" cssClass="form-control">
+                    <@bs3form.labelled_form_group path="students[${student.sprCode}].result">
+                      <@f.select path="students[${student.sprCode}].result" cssClass="form-control">
                         <@f.option value="" />
                         <#list moduleResults as result>
                           <@f.option value=result.entryName label=result.description />
@@ -276,8 +276,8 @@
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.scjCode}].comments">
-                      <@f.input path="students[${student.scjCode}].comments" cssClass="form-control" />
+                    <@bs3form.labelled_form_group path="students[${student.sprCode}].comments">
+                      <@f.input path="students[${student.sprCode}].comments" cssClass="form-control" />
                     </@bs3form.labelled_form_group>
                   </td>
                 </tr>
@@ -294,9 +294,9 @@
     </div>
     <div role="tabpanel" class="tab-pane <#if (from_origin!"webform") == "upload">active</#if>" id="upload">
       <p>You can upload marks and grades in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet
-        should have the following column headings: <strong>SCJ Code</strong>, <strong>Mark</strong>,
+        should have the following column headings: <strong>SPR Code</strong>, <strong>Mark</strong>,
         <strong>Grade</strong>, <strong>Result</strong> and <strong>Comments</strong>.
-        You can use this <a href="<@routes.marks.module_marks_template module cats academicYear occurrence />">generated spreadsheet</a> as a template.
+        You can use this <a href="<@routes.marks.module_marks_template sitsModuleCode academicYear occurrence />">generated spreadsheet</a> as a template.
       </p>
 
       <p>Enter the corresponding results for each student in the following columns:</p>

@@ -380,9 +380,8 @@ object Fixtures extends Mockito {
     status: ModuleSelectionStatus = ModuleSelectionStatus.Core,
     marksCode: String = null,
   ): ModuleRegistration = {
-    val scjCode = Option(scd).map(_.scjCode).orNull
-    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence, marksCode)
-    mr.studentCourseDetails = scd
+    val sprCode = Option(scd).map(_.sprCode).orNull
+    val mr = new ModuleRegistration(sprCode, mod, cats, if (cats != null) "%s-%s".format(mod.code.toUpperCase, cats.stripTrailingZeros().toPlainString) else mod.code.toUpperCase, year, occurrence, marksCode)
     mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr

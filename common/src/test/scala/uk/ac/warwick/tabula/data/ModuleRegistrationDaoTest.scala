@@ -34,7 +34,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       module.code = "ab123"
       moduleDao.saveOrUpdate(module)
 
-      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
+      val modReg = new ModuleRegistration(scd.sprCode, module, new JBigDecimal("10.0"), "AB123-10", AcademicYear(2012), "A", null)
       modReg.assessmentGroup = "D"
       modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
       modRegDao.saveOrUpdate(modReg)
@@ -42,7 +42,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       val retrievedModReg = modRegDao.getByUsercodesAndYear(Seq("abcde"), AcademicYear(2012)).head
 
       retrievedModReg.isInstanceOf[ModuleRegistration] should be(true)
-      retrievedModReg._scjCode should be ("0123456/1")
+      retrievedModReg.sprCode should be ("0123456/2")
       retrievedModReg.module.code should be("ab123")
       retrievedModReg.cats should be(new JBigDecimal("10.0"))
       retrievedModReg.academicYear should be(AcademicYear(2012))
@@ -54,7 +54,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
       module2.code = "cd456"
       moduleDao.saveOrUpdate(module2)
 
-      val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A", null)
+      val modReg2 = new ModuleRegistration(scd.sprCode, module2, new JBigDecimal("30.0"), "CD456-30", AcademicYear(2012), "A", null)
       modReg2.assessmentGroup = "E"
       modReg2.selectionStatus = ModuleSelectionStatus.Core
       modRegDao.saveOrUpdate(modReg2)
@@ -85,25 +85,25 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
       val module = new Module
 
-      val nonexistantModReg = modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+      val nonexistantModReg = modRegDao.getByNotionalKey(scd, "AB123-10", AcademicYear(2012), "A")
       nonexistantModReg should be(None)
 
       module.code = "ab123"
       moduleDao.saveOrUpdate(module)
 
-      val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
+      val modReg = new ModuleRegistration(scd.sprCode, module, new JBigDecimal("10.0"), "AB123-10", AcademicYear(2012), "A", null)
       modReg.assessmentGroup = "D"
       modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
       modRegDao.saveOrUpdate(modReg)
 
-      scd.addModuleRegistration(modReg)
+      scd._moduleRegistrations.add(modReg)
 
       scdDao.saveOrUpdate(scd)
 
-      val retrievedModReg = modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A").get
+      val retrievedModReg = modRegDao.getByNotionalKey(scd, "AB123-10", AcademicYear(2012), "A").get
 
       retrievedModReg.isInstanceOf[ModuleRegistration] should be(true)
-      retrievedModReg._scjCode should be("0123456/1")
+      retrievedModReg.sprCode should be("0123456/2")
       retrievedModReg.module.code should be("ab123")
       retrievedModReg.cats should be(new JBigDecimal("10.0"))
       retrievedModReg.academicYear should be(AcademicYear(2012))
@@ -126,7 +126,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     module.code = "ab123"
     moduleDao.saveOrUpdate(module)
 
-    val modReg = new ModuleRegistration(scd.scjCode, module, new JBigDecimal("10.0"), AcademicYear(2012), "A", null)
+    val modReg = new ModuleRegistration(scd.sprCode, module, new JBigDecimal("10.0"), "AB123-10", AcademicYear(2012), "A", null)
     modReg.assessmentGroup = "D"
     modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
     modRegDao.saveOrUpdate(modReg)
@@ -136,7 +136,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
     module2.code = "cd456"
     moduleDao.saveOrUpdate(module2)
 
-    val modReg2 = new ModuleRegistration(scd.scjCode, module2, new JBigDecimal("30.0"), AcademicYear(2012), "A", null)
+    val modReg2 = new ModuleRegistration(scd.sprCode, module2, new JBigDecimal("30.0"), "CD456-30", AcademicYear(2012), "A", null)
     modReg2.assessmentGroup = "E"
     modReg2.selectionStatus = ModuleSelectionStatus.Core
     modRegDao.saveOrUpdate(modReg2)

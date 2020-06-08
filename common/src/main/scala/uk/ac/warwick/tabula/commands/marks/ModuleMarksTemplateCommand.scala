@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import java.text.DecimalFormat
-
 import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -19,10 +17,10 @@ object ModuleMarksTemplateCommand {
 
   val SheetPassword = "roygbiv"
 
-  def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Command =
-    new ModuleMarksTemplateCommandInternal(module, cats, academicYear, occurrence)
+  def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String): Command =
+    new ModuleMarksTemplateCommandInternal(sitsModuleCode, module, academicYear, occurrence)
       with CalculateModuleMarksLoadModuleRegistrations
-      with CalculateModuleMarksPermissions
+      with ModuleOccurrenceUpdateMarksPermissions
       with CalculateModuleMarksAlgorithm
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
@@ -32,14 +30,14 @@ object ModuleMarksTemplateCommand {
       with Unaudited with ReadOnly
 }
 
-abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String)
+abstract class ModuleMarksTemplateCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String)
   extends CommandInternal[Result]
-    with CalculateModuleMarksState {
+    with ModuleOccurrenceState {
   self: CalculateModuleMarksLoadModuleRegistrations =>
 
   override def applyInternal(): Result = {
     val workbook = new SXSSFWorkbook
-    val fullSheetName = s"Marks for ${module.code.toUpperCase()}-${new DecimalFormat("0.#").format(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP))} ${module.name} (${academicYear.toString}, $occurrence)"
+    val fullSheetName = s"Marks for $sitsModuleCode ${module.name} (${academicYear.toString}, $occurrence)"
     val sheetName = WorkbookUtil.createSafeSheetName(fullSheetName)
     val sheet = workbook.createSheet(sheetName)
 
@@ -58,16 +56,16 @@ abstract class ModuleMarksTemplateCommandInternal(val module: Module, val cats: 
 
     // add header row
     val header = sheet.createRow(0)
-    header.createCell(0).setCellValue("SCJ Code")
+    header.createCell(0).setCellValue("SPR Code")
     header.createCell(1).setCellValue("Mark")
     header.createCell(2).setCellValue("Grade")
     header.createCell(3).setCellValue("Result")
     header.createCell(4).setCellValue("Comments")
 
     // populate the mark sheet with ids and existing data
-    studentModuleMarkRecords.zipWithIndex.foreach { case ((student, _, _), i) =>
+    studentModuleMarkRecordsAndCalculations.zipWithIndex.foreach { case ((student, _, _), i) =>
       val row = sheet.createRow(i + 1)
-      row.createCell(0).setCellValue(student.scjCode)
+      row.createCell(0).setCellValue(student.sprCode)
 
       val markCell = createUnprotectedCell(row, 1)
       val gradeCell = createUnprotectedCell(row, 2)

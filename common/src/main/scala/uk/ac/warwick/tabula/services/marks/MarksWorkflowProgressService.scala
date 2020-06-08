@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
+import uk.ac.warwick.tabula.data.model.MarkState.ConfirmedActual
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, UpstreamAssessmentGroup}
 
 @Service
@@ -51,7 +52,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
       StageProgress(
         stage = RecordComponentMarks,
-        started = stages.exists(_.started),
+        started = true, // This always has to be started in order to get nextAction
         messageCode =
           // Use the message from the most pressing component stage
           stages.find(_.health == WorkflowStageHealth.Danger)
@@ -127,21 +128,20 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
   case object ConfirmModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
     override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
-      if (students.nonEmpty && students.forall(_.agreed)) {
+      if (students.nonEmpty && students.forall(s => s.agreed || s.markState.contains(ConfirmedActual))) {
         StageProgress(
           stage = ConfirmModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.agreed)) {
+      } else if (students.exists(_.markState.contains(ConfirmedActual))) {
         StageProgress(
           stage = ConfirmModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.inProgress",
         )
       } else {
-        // TODO module mark confirmation not done yet
         StageProgress(
           stage = ConfirmModuleMarks,
           started = false,
@@ -199,7 +199,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
       if (upstreamAssessmentGroup.deadline.isEmpty) {
         StageProgress(
           stage = SetDeadline,
-          started = false,
+          started = true,
           messageCode = "workflow.marks.component.SetDeadline.notProvided",
           health = WorkflowStageHealth.Danger,
         )
@@ -226,7 +226,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         // No marks have been recorded
         StageProgress(
           stage = RecordMarks,
-          started = isInPast,
+          started = !neededForGraduateBenchmark || upstreamAssessmentGroup.deadline.nonEmpty,
           messageCode = "workflow.marks.component.RecordMarks.notStarted",
           health =
             if (neededForGraduateBenchmark) WorkflowStageHealth.Danger
@@ -278,21 +278,20 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
 
   case object ConfirmMarks extends ComponentMarkWorkflowStage {
     override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): StageProgress =
-      if (students.nonEmpty && students.forall(_.agreed)) {
+      if (students.nonEmpty && students.forall(s => s.agreed || s.markState.contains(ConfirmedActual))) {
         StageProgress(
           stage = ConfirmMarks,
           started = true,
           messageCode = "workflow.marks.component.ConfirmMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.agreed)) {
+      } else if (students.exists(_.markState.contains(ConfirmedActual))) {
         StageProgress(
           stage = ConfirmMarks,
           started = true,
           messageCode = "workflow.marks.component.ConfirmMarks.inProgress",
         )
       } else {
-        // TODO module mark confirmation not done yet
         StageProgress(
           stage = ConfirmMarks,
           started = false,

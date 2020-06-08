@@ -7,8 +7,8 @@ trait StudentUpstreamExamPapersToJsonConverter extends UpstreamAssessmentsAndExa
   self: TopLevelUrlComponent =>
   def jsonUpstreamExamPapersObject(moduleRegAndComponents: ModuleRegistrationAndComponents): Map[String, Any] = {
     Map(
-      "scjCode" -> moduleRegAndComponents.moduleRegistration._scjCode,
-      "moduleCode" -> s"${moduleRegAndComponents.moduleRegistration.toSITSCode}",
+      "sprCode" -> moduleRegAndComponents.moduleRegistration.sprCode,
+      "moduleCode" -> s"${moduleRegAndComponents.moduleRegistration.sitsModuleCode}",
       "examComponents" -> moduleRegAndComponents.components.map { component =>
         val ac = component.upstreamGroup.assessmentComponent
         val academicYear = moduleRegAndComponents.moduleRegistration.academicYear

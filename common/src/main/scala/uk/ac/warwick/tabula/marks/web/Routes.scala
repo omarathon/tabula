@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.marks.web
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -30,7 +30,9 @@ object Routes {
     }
 
     object ModuleOccurrences {
-      def recordMarks(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): String = s"$context/admin/module/${encoded(module.code)}-${cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)}/${encoded(academicYear.startYear.toString)}/${encoded(occurrence)}/marks"
+      def apply(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"$context/admin/module/${encoded(sitsModuleCode)}/${encoded(academicYear.startYear.toString)}/${encoded(occurrence)}"
+      def recordMarks(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"${apply(sitsModuleCode, academicYear, occurrence)}/marks"
+      def confirmMarks(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"${apply(sitsModuleCode, academicYear, occurrence)}/confirm"
     }
   }
 }

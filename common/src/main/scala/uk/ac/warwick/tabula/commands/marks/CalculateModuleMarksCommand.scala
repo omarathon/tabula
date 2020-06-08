@@ -11,16 +11,15 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.jdk.CollectionConverters._
@@ -34,14 +33,14 @@ object CalculateModuleMarksCommand {
     case class Failure(message: String) extends ModuleMarkCalculation { override val isSuccessful: Boolean = false }
   }
 
-  type ScjCode = String
+  type SprCode = String
   class StudentModuleMarksItem {
-    def this(scjCode: ScjCode) {
+    def this(sprCode: SprCode) {
       this()
-      this.scjCode = scjCode
+      this.sprCode = sprCode
     }
 
-    var scjCode: ScjCode = _
+    var sprCode: SprCode = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var grade: String = _
     var result: String = _
@@ -56,39 +55,39 @@ object CalculateModuleMarksCommand {
     with BindListener
     with PopulateOnForm
 
-  val AdminPermission: Permission = Permissions.Feedback.Publish
-
-  def apply(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser): Command =
-    new CalculateModuleMarksCommandInternal(module, cats, academicYear, occurrence, currentUser)
+  def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser): Command =
+    new CalculateModuleMarksCommandInternal(sitsModuleCode, module, academicYear, occurrence, currentUser)
       with CalculateModuleMarksLoadModuleRegistrations
       with CalculateModuleMarksRequest
       with CalculateModuleMarksValidation
-      with CalculateModuleMarksPermissions
+      with ModuleOccurrenceUpdateMarksPermissions
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringTransactionalComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
-      with CalculateModuleMarksDescription
+      with ModuleOccurrenceDescription
       with CalculateModuleMarksSpreadsheetBindListener
       with CalculateModuleMarksPopulateOnForm
       with CalculateModuleMarksAlgorithm
 }
 
-abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats: BigDecimal, val academicYear: AcademicYear, val occurrence: String, currentUser: CurrentUser)
+abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with CalculateModuleMarksState {
+    with ModuleOccurrenceState {
   self: CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
     with TransactionalComponent =>
 
+  val mandatoryEventName: String = "CalculateModuleMarks"
+
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq
       .map { item =>
         val moduleRegistration =
-          moduleRegistrations.find(_._scjCode == item.scjCode)
+          moduleRegistrations.find(_.sprCode == item.sprCode)
             .get // We validate that this exists
 
         val recordedModuleRegistration: RecordedModuleRegistration =
@@ -99,7 +98,9 @@ abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats:
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
           result = item.result.maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
-          comments = item.comments
+          source = RecordedModuleMarkSource.ComponentMarkCalculation,
+          markState = recordedModuleRegistration.latestState.getOrElse(UnconfirmedActual),
+          comments = item.comments,
         )
 
         moduleRegistrationMarksService.saveOrUpdate(recordedModuleRegistration)
@@ -109,63 +110,30 @@ abstract class CalculateModuleMarksCommandInternal(val module: Module, val cats:
   }
 }
 
-trait CalculateModuleMarksState {
-  def module: Module
-  def cats: BigDecimal
-  def academicYear: AcademicYear
-  def occurrence: String
-}
-
-trait CalculateModuleMarksLoadModuleRegistrations {
-  self: CalculateModuleMarksState
+trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadModuleRegistrations {
+  self: ModuleOccurrenceState
     with CalculateModuleMarksAlgorithm
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
     with ModuleRegistrationServiceComponent
     with ModuleRegistrationMarksServiceComponent =>
 
-  lazy val assessmentComponents: Seq[AssessmentComponent] =
-    assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false)
-      .filter { ac =>
-        ac.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).contains(cats.setScale(1, BigDecimal.RoundingMode.HALF_UP)) &&
-        ac.assessmentGroup != "AO" &&
-        ac.sequence != AssessmentComponent.NoneAssessmentGroup
-      }
-
-  lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
-    assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
-      .filter { info =>
-        info.upstreamAssessmentGroup.occurrence == occurrence &&
-        info.allMembers.nonEmpty
-      }
-      .map { info =>
-        info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
-      }
-
-  lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
-
-  lazy val studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
-    MarksDepartmentHomeCommand.studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService).map { student =>
-      val (componentMarks, calculation) =
-        moduleRegistrations.find(_._scjCode == student.scjCode).map { moduleRegistration =>
+  lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
+    studentModuleMarkRecords.map { student =>
+      val (cm, calculation) =
+        moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
           val universityId = moduleRegistration.studentCourseDetails.student.universityId
-
-          val componentMarks: Map[AssessmentComponent, StudentMarkRecord] =
-            studentComponentMarkRecords
-              .filter(_._2.exists(_.universityId == universityId))
-              .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
-              .toMap
-
-          (componentMarks, calculate(moduleRegistration, componentMarks.toSeq))
+          (componentMarks(universityId), calculate(moduleRegistration, componentMarks(universityId).toSeq))
         }.getOrElse((Map.empty[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation.Failure("No module registration found")))
 
-      (student, componentMarks, calculation)
+      (student, cm, calculation)
     }
+
 }
 
 trait CalculateModuleMarksRequest {
-  var students: JMap[ScjCode, StudentModuleMarksItem] =
-    LazyMaps.create { scjCode: ScjCode => new StudentModuleMarksItem(scjCode) }
+  var students: JMap[SprCode, StudentModuleMarksItem] =
+    LazyMaps.create { sprCode: SprCode => new StudentModuleMarksItem(sprCode) }
       .asJava
 
   // For uploading a spreadsheet
@@ -211,8 +179,9 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                     columnMap(col) = formattedValue
                   } else if (columnMap.asJava.containsKey(col) && formattedValue.hasText) {
                     columnMap(col) match {
-                      case "SCJ Code" | "SCJ" =>
-                        currentItem.scjCode = formattedValue
+                      // Support the old format in the hope that SPR and SCJ codes match
+                      case "SPR Code" | "SPR" | "SCJ Code" | "SCJ" =>
+                        currentItem.sprCode = formattedValue
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
@@ -234,8 +203,8 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                 result.rejectValue("file", "file.tooManyRows", Array(MAX_MARKS_ROWS.toString), "")
                 items.clear()
               } else {
-                items.asScala.filter(_.scjCode.hasText).foreach { item =>
-                  students.put(item.scjCode, item)
+                items.asScala.filter(_.sprCode.hasText).foreach { item =>
+                  students.put(item.sprCode, item)
                 }
               }
             }
@@ -249,7 +218,7 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
 }
 
 trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
-  self: CalculateModuleMarksState
+  self: ModuleOccurrenceState
     with CalculateModuleMarksRequest
     with CalculateModuleMarksAlgorithm
     with CalculateModuleMarksLoadModuleRegistrations
@@ -259,8 +228,8 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
     with AssessmentComponentMarksServiceComponent =>
 
   override def populate(): Unit = {
-    studentModuleMarkRecords.foreach { case (student, _, calculation) =>
-      val s = new StudentModuleMarksItem(student.scjCode)
+    studentModuleMarkRecordsAndCalculations.foreach { case (student, _, calculation) =>
+      val s = new StudentModuleMarksItem(student.sprCode)
       student.mark.foreach(m => s.mark = m.toString)
       student.grade.foreach(s.grade = _)
       student.result.foreach(r => s.result = r.dbValue)
@@ -275,7 +244,7 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
         case _ => // Do nothing
       }
 
-      students.put(student.scjCode, s)
+      students.put(student.sprCode, s)
     }
   }
 }
@@ -416,49 +385,28 @@ trait CalculateModuleMarksAlgorithm {
   }
 }
 
-trait CalculateModuleMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: CalculateModuleMarksState
-    with CalculateModuleMarksLoadModuleRegistrations =>
-
-  override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheck(AdminPermission, mandatory(module))
-
-    // Make sure that the module occurrence actually exists
-    mandatory(cats)
-    mandatory(academicYear)
-    mandatory(occurrence)
-    mandatory(moduleRegistrations.headOption)
-  }
-}
-
 trait CalculateModuleMarksValidation extends SelfValidating {
-  self: CalculateModuleMarksState
+  self: ModuleOccurrenceState
     with CalculateModuleMarksRequest
-    with CalculateModuleMarksLoadModuleRegistrations
+    with ModuleOccurrenceLoadModuleRegistrations
     with AssessmentMembershipServiceComponent =>
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = module.adminDepartment.assignmentGradeValidation
-    students.asScala.foreach { case (scjCode, item) =>
-      errors.pushNestedPath(s"students[$scjCode]")
+    students.asScala.foreach { case (sprCode, item) =>
+      errors.pushNestedPath(s"students[$sprCode]")
 
       // Check that there's a module registration for the student
-      val moduleRegistration = moduleRegistrations.find(_._scjCode == scjCode)
+      val moduleRegistration = moduleRegistrations.find(_.sprCode == sprCode)
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (moduleRegistration.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(scjCode), "")
+        errors.reject("uniNumber.unacceptable", Array(sprCode), "")
       }
 
       val isResitting = moduleRegistration.exists { modReg =>
         val universityId = modReg.studentCourseDetails.student.universityId
-
-        val componentMarks: Seq[(AssessmentComponent, StudentMarkRecord)] =
-          studentComponentMarkRecords
-            .filter(_._2.exists(_.universityId == universityId))
-            .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
-
-        componentMarks.exists(_._2.resitExpected)
+        componentMarks(universityId).exists(_._2.resitExpected)
       }
 
       if (item.mark.hasText) {
@@ -519,28 +467,4 @@ trait CalculateModuleMarksValidation extends SelfValidating {
       errors.popNestedPath()
     }
   }
-}
-
-trait CalculateModuleMarksDescription extends Describable[Result] {
-  self: CalculateModuleMarksState =>
-
-  override lazy val eventName: String = "CalculateModuleMarks"
-
-  override def describe(d: Description): Unit =
-    d.module(module)
-     .properties(
-       "cats" -> cats.setScale(1, BigDecimal.RoundingMode.HALF_UP).toString,
-       "academicYear" -> academicYear.toString,
-       "occurrence" -> occurrence,
-     )
-
-  override def describeResult(d: Description, result: Result): Unit =
-    d.properties(
-      "marks" -> result.filter(_.latestMark.nonEmpty).map { student =>
-        student.scjCode -> student.latestMark.get
-      }.toMap,
-      "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
-        student.scjCode -> student.latestGrade.get
-      }.toMap
-    )
 }

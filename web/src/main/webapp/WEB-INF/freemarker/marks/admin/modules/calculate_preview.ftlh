@@ -1,9 +1,9 @@
 <div class="deptheader">
   <h1>Calculate module marks</h1>
-  <h4 class="with-related">for ${module.code?upper_case}-${cats?string["0.#"]} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
+  <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<#assign submitUrl><@routes.marks.module_marks module cats academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
 <#if changes?size == 0>
   <p>There were no changes to marks, grades or results.</p>
@@ -19,7 +19,7 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>SCJ Code</th>
+            <th>SPR Code</th>
             <th>Mark</th>
             <th>Grade</th>
             <th>Result</th>
@@ -32,9 +32,9 @@
             <#assign c = change._4() />
 
             <tr>
-              <td class="col-md-2">${student.scjCode}</td>
+              <td class="col-md-2">${student.sprCode}</td>
               <td class="col-md-2">
-                <@f.hidden path="students[${student.scjCode}].mark" />
+                <@f.hidden path="students[${student.sprCode}].mark" />
                 ${student.mark!'-'}
                 <#if "${student.mark!}" != c.mark!>
                   <i class="fal fa-arrow-right"></i>
@@ -42,7 +42,7 @@
                 </#if>
               </td>
               <td class="col-md-2">
-                <@f.hidden path="students[${student.scjCode}].grade" />
+                <@f.hidden path="students[${student.sprCode}].grade" />
                 ${student.grade!'-'}
                 <#if student.grade! != c.grade!>
                   <i class="fal fa-arrow-right"></i>
@@ -50,14 +50,14 @@
                 </#if>
               </td>
               <td class="col-md-2">
-                <@f.hidden path="students[${student.scjCode}].result" />
+                <@f.hidden path="students[${student.sprCode}].result" />
                 ${(student.result.dbValue)!'-'}
                 <#if (student.result.dbValue)! != c.result!>
                   <i class="fal fa-arrow-right"></i>
                   ${c.result!}
                 </#if>
               </td>
-              <td class="col-md-4"><@f.input path="students[${student.scjCode}].comments" cssClass="form-control" readonly=true /></td>
+              <td class="col-md-4"><@f.input path="students[${student.sprCode}].comments" cssClass="form-control" readonly=true /></td>
             </tr>
           </#list>
         </tbody>

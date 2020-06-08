@@ -32,7 +32,6 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
           moduleRegistration
         case _ =>
           val mr = modRegRow.toModuleRegistration(module)
-          course.addModuleRegistration(mr)
           mr
       }
 
@@ -47,8 +46,8 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
       }
 
       moduleRegistration
-
     }
+
     markDeleted(course, courseRows)
     records
   }

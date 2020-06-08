@@ -11,7 +11,8 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -84,7 +85,9 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
           uploader = currentUser.apparentUser,
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
-          comments = item.comments
+          source = RecordedAssessmentComponentStudentMarkSource.MarkEntry,
+          markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
+          comments = item.comments,
         )
 
         assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
@@ -286,6 +289,9 @@ trait RecordAssessmentComponentMarksDescription extends Describable[Result] {
       }.toMap,
       "grades" -> result.filter(_.latestGrade.nonEmpty).map { student =>
         student.universityId -> student.latestGrade.get
+      }.toMap,
+      "state" -> result.filter(_.latestState.nonEmpty).map { student =>
+        student.universityId -> student.latestState.get.entryName
       }.toMap
     )
 }

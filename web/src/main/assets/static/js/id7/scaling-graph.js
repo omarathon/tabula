@@ -114,6 +114,9 @@ $(() => {
         aspectRatio: 1.5,
         legend: false,
         tooltips: {
+          filter(tooltipItem) {
+            return tooltipItem.datasetIndex === 0;
+          },
           callbacks: {
             label(tooltipItem) {
               const label = Object.keys(markData)[tooltipItem.index];
@@ -132,7 +135,7 @@ $(() => {
             },
             scaleLabel: {
               display: true,
-              labelString: 'Pre-scaled mark',
+              labelString: 'Original mark',
             },
             gridLines: {
               color: '#eee',
@@ -158,7 +161,7 @@ $(() => {
       },
     });
 
-    $('.form-control').on('change', () => {
+    const onChange = () => {
       try {
         chart.data.datasets[0].data = computeNewMarks(marks);
         chart.data.datasets[1].data = scaleLine();
@@ -168,6 +171,9 @@ $(() => {
         log.error('Invalid scaling parameters', e);
         document.getElementById('chart').style.opacity = 0.4;
       }
-    });
+    };
+
+    $('.form-control').on('change', onChange);
+    onChange();
   });
 });

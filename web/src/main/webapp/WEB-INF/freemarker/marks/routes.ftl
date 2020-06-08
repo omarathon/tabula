@@ -25,9 +25,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/missing-marks" /></#macro>
 <#macro assessmentcomponent_scaling assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/scaling" /></#macro>
 
-<#macro module_marks module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks" /></#macro>
-<#macro module_marks_skipImport module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/skip-import" /></#macro>
-<#macro module_marks_progress module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/progress" /></#macro>
-<#macro module_marks_importComplete module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/import-complete" /></#macro>
-<#macro module_marks_template module cats academicYear occurrence><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/marks/template.xlsx" /></#macro>
-<#macro module_generateGrades module cats academicYear occurrence scjCode><@_u page="/admin/module/${module.code}-${cats}/${academicYear.startYear?c}/${occurrence?url}/generate-grades?scjCode=${scjCode?url}" /></#macro>
+<#macro module_marks sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks" /></#macro>
+<#macro module_marks_skipImport sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/skip-import" /></#macro>
+<#macro module_marks_progress sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/progress" /></#macro>
+<#macro module_marks_importComplete sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/import-complete" /></#macro>
+<#macro module_marks_template sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/template.xlsx" /></#macro>
+<#macro module_generateGrades sitsModuleCode academicYear occurrence sprCode><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/generate-grades?sprCode=${sprCode?url}" /></#macro>
+<#macro module_marks_confirm sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/confirm" /></#macro>

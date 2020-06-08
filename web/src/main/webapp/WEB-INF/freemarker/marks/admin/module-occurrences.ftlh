@@ -101,7 +101,7 @@
 
                   <#-- Set nextStage URL based on action code -->
                   <#if item.nextStage.actionCode == "workflow.marks.moduleOccurrence.CalculateModuleMarks.action">
-                    <#local nextStageUrl><@routes.marks.module_marks item.module item.cats academicYear item.occurrence /></#local>
+                    <#local nextStageUrl><@routes.marks.module_marks item.moduleCode academicYear item.occurrence /></#local>
                   </#if>
 
                   <#if nextStageUrl?has_content>
@@ -126,11 +126,11 @@
                 </li>
 
                 <li>
-                  <a href="<@routes.marks.module_marks item.module item.cats academicYear item.occurrence />">Calculate module marks</a>
+                  <a href="<@routes.marks.module_marks item.moduleCode academicYear item.occurrence />">Calculate module marks</a>
                 </li>
 
-                <li class="disabled">
-                  <a>Confirm module marks</a>
+                <li>
+                  <a href="<@routes.marks.module_marks_confirm item.moduleCode academicYear item.occurrence />" >Confirm module marks</a>
                 </li>
 
                 <li class="disabled">
@@ -228,7 +228,7 @@
 
               <li>
                 <a href="<@routes.marks.assessmentcomponent_missingMarks info.assessmentComponent info.upstreamAssessmentGroup />">
-                  Missing mark adjustment
+                  Missing marks adjustment
                 </a>
               </li>
 

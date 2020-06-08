@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.AssessmentComponentInfo
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage, WorkflowStages}
 
 import scala.collection.immutable.ListMap
@@ -16,7 +16,6 @@ object MarksDepartmentHomeCommand {
   case class ModuleOccurrence(
     moduleCode: String,
     module: Module,
-    cats: BigDecimal,
     occurrence: String,
 
     // Progress
@@ -29,19 +28,20 @@ object MarksDepartmentHomeCommand {
   )
 
   case class StudentModuleMarkRecord(
-    scjCode: String,
+    sprCode: String,
     mark: Option[Int],
     grade: Option[String],
     result: Option[ModuleResult],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    markState: Option[MarkState],
     agreed: Boolean,
     history: Seq[RecordedModuleMark] // Most recent first
   )
   object StudentModuleMarkRecord {
     def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord =
       StudentModuleMarkRecord(
-        scjCode = moduleRegistration._scjCode,
+        sprCode = moduleRegistration.sprCode,
         mark =
           recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(moduleRegistration.agreedMark)
@@ -61,16 +61,18 @@ object MarksDepartmentHomeCommand {
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
             recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g))
         ),
+        markState = recordedModuleRegistration.flatMap(_.latestState),
+        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
         agreed = recordedModuleRegistration.forall(!_.needsWritingToSits) && moduleRegistration.agreedMark.nonEmpty,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
       )
   }
 
-  def studentModuleMarkRecords(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {
-    val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(module, cats, academicYear, occurrence)
+  def studentModuleMarkRecords(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {
+    val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(sitsModuleCode, academicYear, occurrence)
 
-    moduleRegistrations.sortBy(_._scjCode).map { moduleRegistration =>
-      val recordedModuleRegistration = recordedModuleRegistrations.find(_.scjCode == moduleRegistration._scjCode)
+    moduleRegistrations.sortBy(_.sprCode).map { moduleRegistration =>
+      val recordedModuleRegistration = recordedModuleRegistrations.find(_.sprCode == moduleRegistration.sprCode)
 
       StudentModuleMarkRecord(moduleRegistration, recordedModuleRegistration)
     }
@@ -110,17 +112,15 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
       .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
       .map { case ((moduleCode, occurrence), infos) =>
         val module = infos.head.assessmentComponent.module
-        val cats = infos.head.assessmentComponent.cats.map(BigDecimal(_).setScale(1, BigDecimal.RoundingMode.HALF_UP)).get
 
-        val moduleRegistrations = moduleRegistrationService.getByModuleOccurrence(module, cats, academicYear, occurrence)
-        val students = studentModuleMarkRecords(module, cats, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+        val moduleRegistrations = moduleRegistrationService.getByModuleOccurrence(moduleCode, academicYear, occurrence)
+        val students = studentModuleMarkRecords(moduleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
 
         val progress = workflowProgressService.moduleOccurrenceProgress(students, infos)
 
         ModuleOccurrence(
           moduleCode = moduleCode,
           module = module,
-          cats = cats,
           occurrence = occurrence,
 
           progress = MarksWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),

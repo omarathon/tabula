@@ -495,6 +495,15 @@
 
         <div class="col-md-3">
           <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>checked</#if>
+              /> Percentage assessments used in benchmark (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken used in the graduation benchmark (applies to UG students only)." />
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="checkbox">
             <label>
               <input type="checkbox" name="applyBenchmark" <#if gridOptionsCommand.applyBenchmark>checked</#if> />
               Apply graduation benchmark <@fmt.help_popover id="applyBenchmark" content="The graduation benchmark will be used to calculate the final degree mark and classification." />

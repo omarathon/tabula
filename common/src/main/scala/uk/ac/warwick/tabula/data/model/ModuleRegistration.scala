@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
-import org.hibernate.annotations.{Proxy, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -25,21 +25,22 @@ object ModuleRegistration {
 }
 
 /*
- * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
+ * sprCode, fullModuleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
-class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
+class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] with Serializable {
 
-  def this(scjCode: String, module: Module, cats: JBigDecimal, academicYear: AcademicYear, occurrence: String, marksCode: String) {
+  def this(sprCode: String, module: Module, cats: JBigDecimal, sitsModuleCode: String, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
-    this._scjCode = scjCode
+    this.sprCode = sprCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
+    this.sitsModuleCode = sitsModuleCode
     this.occurrence = occurrence
     this.marksCode = marksCode.maybeText.orNull
   }
@@ -51,23 +52,43 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var module: Module = _
 
+  /**
+   * This is the CATS value of the module registration, it does not *necessarily* match the CATS value
+   * of the module or what's in the fullModuleCode.
+   */
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var cats: JBigDecimal = _
+
+  /**
+   * Uppercase module code, with CATS. Doesn't necessarily match the cats property (which is the credits registered)
+   */
+  var sitsModuleCode: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "scjCode", insertable = false, updatable = false)
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "StudentCourseDetails_ModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "scjcode", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "scjcode", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  var _allStudentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
+
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var studentCourseDetails: StudentCourseDetails = _
+  def studentCourseDetails: StudentCourseDetails =
+    _allStudentCourseDetails.asScala.find(_.mostSignificant)
+      .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
+      .orNull
 
-  @Column(name = "scjCode")
-  var _scjCode: String = _
+  // I'd love for this to be _sprCode but Hibernate won't let you mix logical and physical column names (even with @Column)
+  // and it's needed for the @JoinColumn on StudentCourseDetails._moduleRegistrations
+  var sprCode: String = _
 
-  // get the integer part of the SCJ code so we can sort registrations to the same module by it
-  def scjSequence: Int = _scjCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
+  // get the integer part of the SPR code so we can sort registrations to the same module by it
+  def sprSequence: Int = sprCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _
@@ -125,12 +146,12 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
     }
 
   def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
     }.filter(_.universityId == studentCourseDetails.student.universityId)
 
@@ -152,25 +173,24 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       }
     }
 
-  override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
+  override def toString: String = s"$sprCode-$sitsModuleCode-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
 
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()
-      .append(studentCourseDetails, that.studentCourseDetails)
+      .append(sprCode, that.sprCode)
+      .append(sitsModuleCode, that.sitsModuleCode)
       .append(module, that.module)
       .append(cats, that.cats)
       .append(academicYear, that.academicYear)
       .append(occurrence, that.occurrence)
       .build()
 
-  def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
-
   def moduleList(route: Route): Option[UpstreamModuleList] = route.upstreamModuleLists.asScala
     .filter(_.academicYear == academicYear)
-    .find(_.matches(toSITSCode))
+    .find(_.matches(sitsModuleCode))
 }
 
 /**

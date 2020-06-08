@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, RecordedModu
 
 trait ModuleRegistrationMarksDao {
   def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration]
-  def getAllRecordedModuleRegistrations(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
+  def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
   def allNeedingWritingToSits: Seq[RecordedModuleRegistration]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
   def saveOrUpdate(reg: RecordedModuleRegistration): RecordedModuleRegistration
@@ -25,18 +25,16 @@ abstract class AbstractModuleRegistrationMarksDao extends ModuleRegistrationMark
 
   override def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]
-      .add(is("scjCode", reg._scjCode))
-      .add(is("module", reg.module))
-      .add(is("cats", reg.cats))
+      .add(is("sprCode", reg.sprCode))
+      .add(is("sitsModuleCode", reg.sitsModuleCode))
       .add(is("academicYear", reg.academicYear))
       .add(is("occurrence", reg.occurrence))
       .uniqueResult
 
-  override def getAllRecordedModuleRegistrations(module: Module, cats: BigDecimal, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration] =
+  override def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]
       .setFetchMode("_marks", FetchMode.JOIN)
-      .add(is("module", module))
-      .add(is("cats", JBigDecimal(Some(cats))))
+      .add(is("sitsModuleCode", sitsModuleCode))
       .add(is("academicYear", academicYear))
       .add(is("occurrence", occurrence))
       .distinct

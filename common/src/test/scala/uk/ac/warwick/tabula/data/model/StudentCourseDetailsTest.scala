@@ -46,11 +46,11 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
     val mod1 = new Module("cs101")
     val mod2 = new Module("cs102")
-    val modReg1 = new ModuleRegistration(scd1.scjCode, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A", null)
-    val modReg2 = new ModuleRegistration(scd1.scjCode, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A", null)
+    val modReg1 = new ModuleRegistration(scd1.sprCode, mod1, new JBigDecimal("12.0"), "CS101-12", AcademicYear(2012), "A", null)
+    val modReg2 = new ModuleRegistration(scd1.sprCode, mod2, new JBigDecimal("12.0"), "CS102-12", AcademicYear(2013), "A", null)
 
-    scd1.addModuleRegistration(modReg1)
-    scd1.addModuleRegistration(modReg2)
+    scd1._moduleRegistrations.add(modReg1)
+    scd1._moduleRegistrations.add(modReg2)
 
     scd1.registeredModulesByYear(Some(AcademicYear(2013))) should be(Seq(mod2))
     scd1.registeredModulesByYear(None) should be(Seq(mod1, mod2))
