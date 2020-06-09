@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportStudentModuleResultToSitsServiceComponent, ExportStudentModuleResultToSitsServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object ExportRecordedModuleRegistrationsToSitsCommand {
@@ -23,6 +23,7 @@ object ExportRecordedModuleRegistrationsToSitsCommand {
       with ExportRecordedModuleRegistrationsToSitsDescription
       with AutowiringExportStudentModuleResultToSitsServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringTransactionalComponent
 }
@@ -32,6 +33,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
     with Logging {
   self: ExportStudentModuleResultToSitsServiceComponent
     with ModuleRegistrationMarksServiceComponent
+    with ModuleRegistrationServiceComponent
     with ModuleAndDepartmentServiceComponent
     with TransactionalComponent =>
 
@@ -59,6 +61,8 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
               moduleRegistration.agreedMark = None
               moduleRegistration.agreedGrade = None
               moduleRegistration.moduleResult = student.latestResult.orNull
+
+              moduleRegistrationService.saveOrUpdate(moduleRegistration)
             }
 
             Some(moduleRegistrationMarksService.saveOrUpdate(student))
