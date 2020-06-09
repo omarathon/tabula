@@ -131,7 +131,8 @@ trait GenerateExamGridSelectCourseCommandRequest {
   var resitOnly: Boolean = false
   var includePermWithdrawn: Boolean = true
 
-  def pgCourseIncluded: Boolean = courses.asScala.exists(_.courseType.equals(CourseType.PGT))
+  def pgCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.PGT)
+  def ugCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.UG)
   def ugCourseIncluded: Boolean = courses.asScala.exists(_.courseType.equals(CourseType.UG))
 
   def isLevelGrid: Boolean = levelCode != null
