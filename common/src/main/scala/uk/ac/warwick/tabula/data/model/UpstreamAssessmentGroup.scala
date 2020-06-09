@@ -166,6 +166,11 @@ trait UpstreamAssessmentGroupMemberProperties {
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBooleanUserType")
   var resitExpected:  Option[Boolean] = None
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var currentAttemptNumber: Option[Int] = None
+
+
 }
 
 /** currentMembers are all members excluding PWD)  **/
