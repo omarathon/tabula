@@ -3,8 +3,36 @@
 <#assign completedCatsCalculation>
     <#list breakdown.modules?keys as module>
         <#list mapGet(breakdown.modules, module) as component>
-            <span class="use-tooltip" title="${component.assessmentComponent.moduleCode} - ${component.assessmentComponent.sequence}">${component.cats}</span> <#if component_has_next> + </#if>
+            <span
+              class="use-tooltip"
+              title="${component.assessmentComponent.moduleCode} - ${component.assessmentComponent.sequence}">${component.cats}</span> <#if component_has_next> + </#if>
         </#list> <#if module_has_next> + </#if>
+    </#list>
+</#assign>
+
+<#assign yearWeighingNumerator>
+    <#list breakdown.marksAndWeightingsPerYear?keys as year>
+            (
+              <#assign markTitle><#if year == command.yearOfStudy>Year ${year} weighted assessment mark<#else>Year ${year} average</#if></#assign>
+              <span class="use-tooltip" title="${markTitle}">${mapGet(breakdown.marksAndWeightingsPerYear, year)._1()}</span> ×
+              <span class="use-tooltip" title="Weighting of year ${year}">${mapGet(breakdown.marksAndWeightingsPerYear, year)._2()}</span>
+              <#if year == command.yearOfStudy> × <span class="use-tooltip" title="Percentage of assessment taken in year ${year}">${breakdown.percentageOfAssessmentTakenDecimal}</span></#if>
+            )
+        <#if year_has_next> + </#if>
+    </#list>
+</#assign>
+
+<#assign yearWeighingDenominator>
+    <#list breakdown.marksAndWeightingsPerYear?keys as year>
+        <#if year == command.yearOfStudy>
+          (
+            <span class="use-tooltip" title="Weighting of year ${year}">${mapGet(breakdown.marksAndWeightingsPerYear, year)._2()}</span>  ×
+            <span class="use-tooltip" title="Percentage of assessment taken in ${year}">${breakdown.percentageOfAssessmentTakenDecimal}</span>
+          )
+        <#else>
+          <span class="use-tooltip" title="Weighting of year ${year}">${mapGet(breakdown.marksAndWeightingsPerYear, year)._2()}</span>
+        </#if>
+        <#if year_has_next> + </#if>
     </#list>
 </#assign>
 
@@ -19,37 +47,79 @@
   </div>
 
   <section>
-    <h3>Weighted assessment mark</h3>
-    <div class="benchmark-breakdown-calculation">
-      <div class="formula">
-        <div class="numerator">
-          <#list breakdown.modules?keys as module>
-            <#list mapGet(breakdown.modules, module) as component>
-              <span class="use-tooltip" title="${component.assessmentComponent.moduleCode} - ${component.assessmentComponent.sequence}">
-                (${component.cats} × ${component.member.firstDefinedMark!"X"})
-              </span>
-              <#if component_has_next> + </#if>
-            </#list><#if module_has_next> + </#if>
-          </#list>
+    <h4>How is the weighted assessment mark calculated for the year?</h4>
+    <p>Modules all have one or more forms of summative assessment that contribute to the overall module mark. We call each of these an ‘assessment component’ of the module and give each of them a weighting to determine how much they should influence the overall module mark. For example, a module might be assessed by an essay worth 40% and an exam worth 60%. It is the overall module mark which determines whether the module is passed which we would normally use to inform the degree classification.</p>
+    <p>For the purpose of calculating weighted assessment marks for the graduation benchmark, we use the actual assessment component weightings within a module (see example below), rather than the overall module mark. This is therefore based upon the assessment components taken within the year, NOT the whole modules passed up to 13 March 2020.</p>
+
+    <div class="panel panel-info">
+      <div class="panel-heading"><div class="panel-title">Weighted assessment mark</div></div>
+      <div class="panel-body">
+        <div class="benchmark-breakdown-calculation">
+          <div class="formula">
+            <div class="numerator">
+                <#list breakdown.modules?keys as module>
+                    <#list mapGet(breakdown.modules, module) as component>
+                      <span class="use-tooltip" title="${component.assessmentComponent.moduleCode} - ${component.assessmentComponent.sequence}">
+                        (${component.cats} × ${component.member.firstDefinedMark!"X"})
+                      </span>
+                      <#if component_has_next> + </#if>
+                    </#list><#if module_has_next> + </#if>
+                </#list>
+            </div>
+            <div class="denominator">${completedCatsCalculation}</div>
+          </div>
+          <div>=</div>
+          <div class="result">
+              ${breakdown.weightedAssessmentMark}%
+          </div>
         </div>
-        <div class="denominator">${completedCatsCalculation}</div>
-      </div>
-      <div>=</div>
-      <div class="result">
-         ${breakdown.graduationBenchmark}%
       </div>
     </div>
   </section>
+
   <section>
-    <h3>Percentage of assessment taken</h3>
-    <div class="benchmark-breakdown-calculation">
-      <div class="formula">
-        <div class="numerator">${completedCatsCalculation}</div>
-        <div class="denominator">${breakdown.totalCats}</div>
+    <h4>How do we calculate the percentage of assessment taken in the year?</h4>
+    <p>In order to determine the percentage of assessment taken in the year for the graduation benchmark calculation, you divide the total component mark weightings used in the weighted assessment mark calculation by the whole number of credits in the year (normally 120 credits, although this may be higher in some degree programmes).</p>
+    <div class="panel panel-info">
+      <div class="panel-heading"><div class="panel-title">Percentage of assessment taken</div></div>
+      <div class="panel-body">
+        <div class="benchmark-breakdown-calculation">
+          <div class="formula">
+            <div class="numerator">${completedCatsCalculation}</div>
+            <div class="denominator">${breakdown.totalCats}</div>
+          </div>
+          <div>=</div>
+          <div class="result">
+              ${breakdown.percentageOfAssessmentTaken}% = ${breakdown.percentageOfAssessmentTakenDecimal}
+          </div>
+        </div>
       </div>
-      <div>=</div>
-      <div class="result">
-          ${breakdown.percentageOfAssessmentTaken}%
+    </div>
+  </section>
+
+  <section>
+    <h4>Calculating the Graduation Benchmark</h4>
+    <p>For final year students, the safety net policy will determine a ‘graduation benchmark’ that will be calculated by determining the average weighted marks for assessments counting towards their degree submitted up to the end of term 2 (13/3/20).1 For clarity, this will be determined by considering assessments in previous years where these would be considered as part of the final degree calculation.</p>
+
+    <div class="panel panel-info">
+      <div class="panel-heading"><div class="panel-title">Graduation benchmark</div></div>
+      <div class="panel-body">
+        <#if breakdown.benchmarkErrors?has_content>
+          <div class="alert">
+            Unable to calculate the graduate benchmark. ${benchmarkErrors?join(" ")}
+          </div>
+        <#else>
+          <div class="benchmark-breakdown-calculation">
+            <div class="formula">
+              <div class="numerator">${yearWeighingNumerator}</div>
+              <div class="denominator">${yearWeighingDenominator}</div>
+            </div>
+            <div>=</div>
+            <div class="result">
+                ${breakdown.graduationBenchmark}%
+            </div>
+          </div>
+        </#if>
       </div>
     </div>
   </section>

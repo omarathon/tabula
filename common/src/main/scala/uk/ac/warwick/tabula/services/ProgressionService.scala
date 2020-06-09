@@ -145,7 +145,9 @@ object ProgressionService {
 trait ProgressionService {
   def getYearMark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
-  def graduationBenchmark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
+  def marksPerYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, Map[Int, BigDecimal]]
+
+  def graduationBenchmark(studentCourseYearDetails: Option[StudentCourseYearDetails], yearOfStudy: Int, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
@@ -189,10 +191,16 @@ abstract class AbstractProgressionService extends ProgressionService {
     }
   }
 
-  def graduationBenchmark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {
-    entityYear.studentCourseYearDetails.map(scyd => {
+  def marksPerYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, Map[Int, BigDecimal]] = {
+    val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
+    lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
+    getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings)
+  }
+
+  def graduationBenchmark(studentCourseYearDetails: Option[StudentCourseYearDetails], yearOfStudy: Int, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {
+    studentCourseYearDetails.map(scyd => {
       val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
-      if (entityYear.yearOfStudy >= finalYearOfStudy) {
+      if (yearOfStudy >= finalYearOfStudy) {
         lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
         lazy val markPerYear = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
@@ -202,7 +210,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       } else {
         Left("Only applies to the final year of study")
       }
-    }).getOrElse(Left(s"Missing year details for ${entityYear.level.map(_.code).getOrElse("an unknown level")}"))
+    }).getOrElse(Left(s"Missing year details for $yearOfStudy}"))
   }
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {

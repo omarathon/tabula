@@ -4,9 +4,11 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.exams.grids.{AutowiringUpstreamRouteRuleServiceComponent, UpstreamRouteRuleServiceComponent}
+import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, NormalLoadLookup, UpstreamRouteRuleServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+
+import scala.math.BigDecimal.RoundingMode
 
 object GraduationBenchmarkBreakdownCommand {
 
@@ -21,17 +23,23 @@ object GraduationBenchmarkBreakdownCommand {
       with AutowiringProgressionServiceComponent
       with AutowiringCourseAndRouteServiceComponent
       with AutowiringUpstreamRouteRuleServiceComponent
+      with AutowiringNormalCATSLoadServiceComponent
       with GraduationBenchmarkBreakdownPermissions
       with GraduationBenchmarkBreakdownCommandState
+      with GraduationBenchmarkBreakdownCommandRequest
       with StudentModuleRegistrationAndComponents
       with ReadOnly with Unaudited
 }
 
 case class UGGraduationBenchmarkBreakdown (
   modules: Map[ModuleRegistration, Seq[ComponentAndMarks]],
-  graduationBenchmark: BigDecimal,
+  weightedAssessmentMark: BigDecimal,
   totalCats: BigDecimal,
   percentageOfAssessmentTaken: BigDecimal,
+  percentageOfAssessmentTakenDecimal: BigDecimal,
+  marksAndWeightingsPerYear: Map[Int, (BigDecimal, BigDecimal)],
+  graduationBenchmark: Option[BigDecimal],
+  benchmarkErrors: Seq[String]
 )
 
 case class PGGraduationBenchmarkBreakdown (
@@ -53,7 +61,9 @@ case class CumulativeCatsAndMarks (
 
 class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]] with TaskBenchmarking {
+
   self: GraduationBenchmarkBreakdownCommandState
+    with GraduationBenchmarkBreakdownCommandRequest
     with StudentModuleRegistrationAndComponents
     with ModuleRegistrationServiceComponent
     with ProgressionServiceComponent
@@ -65,11 +75,30 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
     val moduleRegistrations = studentCourseYearDetails.moduleRegistrations
     val modules = moduleRegistrations.map { mr => mr -> moduleRegistrationService.benchmarkComponentsAndMarks(mr) }.toMap
     if (studentCourseDetails.student.isUG) {
+
+      val weightedAssessmentMark = moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations)
+
+      val  percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
+      val percentageOfAssessmentTakenDecimal =(percentageOfAssessmentTaken / 100)
+
+      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
+        .map { _.map { case (year, weightedMark) =>
+          val yearWeighting = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
+          val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark
+          year -> (mark, yearWeighting)
+        }}
+
+      val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
+
       Left(UGGraduationBenchmarkBreakdown(
-        modules.filter{ case (_, components) => components.nonEmpty },
-        moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations),
-        studentCourseYearDetails.totalCats,
-        moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations),
+        modules = modules.filter{ case (_, components) => components.nonEmpty },
+        weightedAssessmentMark,
+        totalCats = studentCourseYearDetails.totalCats,
+        percentageOfAssessmentTaken,
+        percentageOfAssessmentTakenDecimal,
+        marksAndWeightingsPerYear = yearMarks.toOption.getOrElse(Map()),
+        graduationBenchmark = benchmark.toOption,
+        benchmarkErrors = yearMarks.swap.toSeq ++ benchmark.swap.toSeq
       ))
     } else {
       val minCatsToConsider = progressionService.numberCatsToConsiderPG(studentCourseYearDetails)
@@ -108,10 +137,30 @@ trait GraduationBenchmarkBreakdownPermissions extends RequiresPermissionsCheckin
 }
 
 trait GraduationBenchmarkBreakdownCommandState {
+
+  self: GraduationBenchmarkBreakdownCommandRequest with NormalCATSLoadServiceComponent with CourseAndRouteServiceComponent
+    with UpstreamRouteRuleServiceComponent =>
+
   def academicYear: AcademicYear
   def studentCourseDetails: StudentCourseDetails
 
   lazy val studentCourseYearDetails: StudentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetailsForYear(academicYear)
     .orElse(studentCourseDetails.freshOrStaleStudentCourseYearDetailsForYear(academicYear))
     .getOrElse(throw new ItemNotFoundException())
+
+  lazy val yearOfStudy: Int = if(groupByLevel) studentCourseYearDetails.level.map(_.toYearOfStudy).getOrElse(1) else studentCourseYearDetails.yearOfStudy
+
+  lazy val normalLoad: BigDecimal = NormalLoadLookup(academicYear, yearOfStudy, normalCATSLoadService).apply(studentCourseYearDetails.route)
+
+  lazy val weightings: Seq[CourseYearWeighting] = courseAndRouteService
+    .findAllCourseYearWeightings(Seq(studentCourseDetails.course), studentCourseDetails.sprStartAcademicYear)
+
+  lazy val routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]] = studentCourseDetails.freshOrStaleStudentCourseYearDetails.flatMap(_.level)
+    .map(level => level.toYearOfStudy -> UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService).apply(studentCourseYearDetails.route, Option(level)))
+    .toMap
+}
+
+trait GraduationBenchmarkBreakdownCommandRequest {
+  var groupByLevel: Boolean = false
+  var calculateYearMarks: Boolean = false
 }

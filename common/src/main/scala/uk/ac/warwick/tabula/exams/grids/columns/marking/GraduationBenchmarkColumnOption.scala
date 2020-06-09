@@ -34,10 +34,11 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
               ExamGridColumnGraduationBenchmarkDecimal(
                 progressionService.postgraduateBenchmark(scyd, entityYear.moduleRegistrations),
                 isActual = false,
-                toplevelUrl+Routes.Grids.benchmarkdetails(scyd)
+                toplevelUrl+Routes.Grids.benchmarkdetails(scyd, state.calculateYearMarks, state.isLevelGrid)
               )
             case Some(UG) => progressionService.graduationBenchmark(
-              entityYear,
+              entityYear.studentCourseYearDetails,
+              entityYear.yearOfStudy,
               state.normalLoadLookup(entityYear.route),
               entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
               state.calculateYearMarks,
@@ -46,7 +47,7 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
             ).fold(ExamGridColumnValueMissing.apply, gb => ExamGridColumnGraduationBenchmarkDecimal(
               gb,
               isActual = false,
-              toplevelUrl+Routes.Grids.benchmarkdetails(entityYear.studentCourseYearDetails.get)
+              toplevelUrl+Routes.Grids.benchmarkdetails(entityYear.studentCourseYearDetails.get, state.calculateYearMarks, state.isLevelGrid)
             ))
             case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
             case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
