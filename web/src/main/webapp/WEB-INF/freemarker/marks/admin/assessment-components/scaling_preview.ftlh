@@ -20,12 +20,12 @@
       <@f.hidden path="scaledPassMark" />
       <@f.hidden path="scaledUpperClassMark" />
 
-      <table class="table table-striped">
+      <table class="table table-striped table-sortable">
         <thead>
           <tr>
-            <th>University ID</th>
-            <th>Mark</th>
-            <th>Grade</th>
+            <th class="sortable">University ID</th>
+            <th class="sortable">Mark</th>
+            <th class="sortable">Grade</th>
             <th>Comment</th>
           </tr>
         </thead>
@@ -40,14 +40,14 @@
 
             <tr<#if scaledGrade == 'F' && originalGrade != 'F'> class="danger"</#if>>
               <td class="col-md-2">${student.universityId}</td>
-              <td class="col-md-2">
+              <td class="col-md-2" data-sortby="${change._2()._2()!-1}">
                 ${originalMark}
                 <#if originalMark != scaledMark>
                   <i class="fal fa-arrow-right"></i>
                   ${scaledMark}
                 </#if>
               </td>
-              <td class="col-md-2">
+              <td class="col-md-2" data-sortby="${scaledGrade}">
                 ${originalGrade}
                 <#if originalGrade != scaledGrade>
                   <i class="fal fa-arrow-right"></i>

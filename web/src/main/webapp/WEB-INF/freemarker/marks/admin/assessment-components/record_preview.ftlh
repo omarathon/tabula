@@ -16,12 +16,12 @@
     <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
       <@f.hidden name="confirm" value="true" />
 
-      <table class="table table-striped">
+      <table class="table table-striped table-sortable">
         <thead>
           <tr>
-            <th>University ID</th>
-            <th>Mark</th>
-            <th>Grade</th>
+            <th class="sortable">University ID</th>
+            <th class="sortable">Mark</th>
+            <th class="sortable">Grade</th>
             <th>Comment</th>
           </tr>
         </thead>
@@ -32,7 +32,7 @@
 
             <tr>
               <td class="col-md-2">${student.universityId}<#if !student.currentMember> <span class="very-subtle">(not current)</span></#if></td>
-              <td class="col-md-2">
+              <td class="col-md-2" data-sortby="${c.mark!-1}">
                 <@f.hidden path="students[${student.universityId}].mark" />
                 ${student.mark!'-'}
                 <#if "${student.mark!}" != c.mark!>
@@ -40,7 +40,7 @@
                   ${c.mark!}
                 </#if>
               </td>
-              <td class="col-md-2">
+              <td class="col-md-2" data-sortby="${c.grade!}">
                 <@f.hidden path="students[${student.universityId}].grade" />
                 ${student.grade!'-'}
                 <#if student.grade! != c.grade!>

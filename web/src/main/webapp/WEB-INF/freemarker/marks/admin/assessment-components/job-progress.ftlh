@@ -31,18 +31,18 @@
   <@modal.modal id="student-import-dates">
     <@modal.wrapper>
       <@modal.body>
-        <table class="table table-condensed table-striped table-hover">
+        <table class="table table-condensed table-striped table-hover table-sortable">
           <thead>
           <tr>
-            <th>Name</th>
-            <th>Last imported date</th>
+            <th class="sortable">Name</th>
+            <th class="sortable">Last imported date</th>
           </tr>
           </thead>
           <tbody>
           <#list studentLastImportDates as studentDate>
             <tr>
               <td>${studentDate._1()}</td>
-              <td><@fmt.date studentDate._2() /></td>
+              <td data-sortby="${studentDate._2().millis}"><@fmt.date studentDate._2() /></td>
             </tr>
           </#list>
           </tbody>
