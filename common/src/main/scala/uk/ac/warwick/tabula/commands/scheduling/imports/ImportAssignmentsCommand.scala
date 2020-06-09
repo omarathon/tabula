@@ -374,7 +374,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitAgreedMark = Try(studentRegistrations.head.resitAgreedMark.toInt).toOption
                   resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
                   resitExpected = Option(studentRegistrations.head.resitExpected)
-                  currentAttemptNumber = Try(studentRegistrations.head.currentAttemptNumber.toInt).toOption
+                  currentResitAttempt = Try(studentRegistrations.head.currentResitAttempt.toInt).toOption
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
@@ -407,7 +407,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitAgreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
                   resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
                   resitExpected = resolveDuplicates(studentRegistrations.map(_.resitExpected), "resit expected")
-                  currentAttemptNumber = resolveDuplicates(validInts(studentRegistrations.map(_.currentAttemptNumber)), "current attempt number")
+                  currentResitAttempt = resolveDuplicates(validInts(studentRegistrations.map(_.currentResitAttempt)), "current attempt number")
                 }
               }
             }
@@ -426,7 +426,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.resitAgreedMark != properties.resitAgreedMark ||
                 member.resitAgreedGrade != properties.resitAgreedGrade ||
                 member.resitExpected != properties.resitExpected ||
-                member.currentAttemptNumber != properties.currentAttemptNumber
+                member.currentResitAttempt != properties.currentResitAttempt
               )
 
               if (memberHasChanged) {
@@ -442,7 +442,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.resitAgreedMark = properties.resitAgreedMark
                 member.resitAgreedGrade = properties.resitAgreedGrade
                 member.resitExpected = properties.resitExpected
-                member.currentAttemptNumber = properties.currentAttemptNumber
+                member.currentResitAttempt = properties.currentResitAttempt
                 assessmentMembershipService.save(member)
               }
             }

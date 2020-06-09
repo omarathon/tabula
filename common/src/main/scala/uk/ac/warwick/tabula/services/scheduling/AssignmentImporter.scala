@@ -164,7 +164,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
         resitAgreedMark = rs.getString("resit_agreed_mark"),
         resitAgreedGrade = rs.getString("resit_agreed_grade"),
         resitExpected = rs.getBoolean("resit_expected"),
-        currentAttemptNumber = rs.getString("current_attempt_number")
+        currentResitAttempt = rs.getString("current_attempt_number")
       ))
     }
   }
@@ -338,7 +338,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
             resitAgreedMark = null,
             resitAgreedGrade = null,
             resitExpected = false,
-            currentAttemptNumber = "1"
+            currentResitAttempt = "1"
           ))
         } else None
       }).flatten.toSeq

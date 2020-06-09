@@ -1,1 +1,1 @@
-alter table upstreamassessmentgroupmember add column currentAttemptNumber int ;
+alter table upstreamassessmentgroupmember add column currentResitAttempt int ;

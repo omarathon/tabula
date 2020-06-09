@@ -168,7 +168,7 @@ trait UpstreamAssessmentGroupMemberProperties {
   var resitExpected:  Option[Boolean] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-  var currentAttemptNumber: Option[Int] = None
+  var currentResitAttempt: Option[Int] = None
 
 
 }
