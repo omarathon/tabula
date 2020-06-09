@@ -374,6 +374,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitAgreedMark = Try(studentRegistrations.head.resitAgreedMark.toInt).toOption
                   resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
                   resitExpected = Option(studentRegistrations.head.resitExpected)
+                  currentResitAttempt = Try(studentRegistrations.head.currentResitAttempt.toInt).toOption
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
@@ -406,6 +407,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitAgreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
                   resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
                   resitExpected = resolveDuplicates(studentRegistrations.map(_.resitExpected), "resit expected")
+                  currentResitAttempt = resolveDuplicates(validInts(studentRegistrations.map(_.currentResitAttempt)), "current attempt number")
                 }
               }
             }
@@ -423,7 +425,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.resitActualGrade != properties.resitActualGrade ||
                 member.resitAgreedMark != properties.resitAgreedMark ||
                 member.resitAgreedGrade != properties.resitAgreedGrade ||
-                member.resitExpected != properties.resitExpected
+                member.resitExpected != properties.resitExpected ||
+                member.currentResitAttempt != properties.currentResitAttempt
               )
 
               if (memberHasChanged) {
@@ -439,6 +442,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.resitAgreedMark = properties.resitAgreedMark
                 member.resitAgreedGrade = properties.resitAgreedGrade
                 member.resitExpected = properties.resitExpected
+                member.currentResitAttempt = properties.currentResitAttempt
                 assessmentMembershipService.save(member)
               }
             }

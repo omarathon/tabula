@@ -28,7 +28,6 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
-import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 trait AssignmentImporterComponent {
@@ -164,7 +163,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
         resitActualGrade = rs.getString("resit_actual_grade"),
         resitAgreedMark = rs.getString("resit_agreed_mark"),
         resitAgreedGrade = rs.getString("resit_agreed_grade"),
-        resitExpected = rs.getBoolean("resit_expected")
+        resitExpected = rs.getBoolean("resit_expected"),
+        currentResitAttempt = rs.getString("current_attempt_number")
       ))
     }
   }
@@ -337,7 +337,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
             resitActualGrade = null,
             resitAgreedMark = null,
             resitAgreedGrade = null,
-            resitExpected = false
+            resitExpected = false,
+            currentResitAttempt = "1"
           ))
         } else None
       }).flatten.toSeq
@@ -663,7 +664,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
           join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
             on scj.scj_sprc = spr.spr_code and
@@ -689,6 +691,11 @@ object AssignmentImporter {
           left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = sms.spr_code and sra.ayr_code = sms.ayr_code and sra.mod_code = sms.mod_code
               and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         sms.ayr_code in (:current_academic_year_code)"""
@@ -712,7 +719,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -739,6 +747,11 @@ object AssignmentImporter {
            left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
               and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         smo.ayr_code in (:academic_year_code)"""
@@ -761,7 +774,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -788,6 +802,11 @@ object AssignmentImporter {
           left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
               and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         smo.ayr_code in (:academic_year_code) and
