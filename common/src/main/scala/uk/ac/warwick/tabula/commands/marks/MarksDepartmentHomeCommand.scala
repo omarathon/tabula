@@ -59,7 +59,8 @@ object MarksDepartmentHomeCommand {
         needsWritingToSits = recordedModuleRegistration.exists(_.needsWritingToSits),
         outOfSync = recordedModuleRegistration.exists(!_.needsWritingToSits) && (
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
-            recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g))
+          recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g)) ||
+          recordedModuleRegistration.flatMap(_.latestResult).exists(r => moduleRegistration.moduleResult != r)
         ),
         markState = recordedModuleRegistration.flatMap(_.latestState),
         // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense

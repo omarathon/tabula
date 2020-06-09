@@ -51,6 +51,16 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
           case 1 =>
             student.needsWritingToSits = false
             student.lastWrittenToSits = Some(DateTime.now)
+
+            // Update the ModuleRegistration so it doesn't show as out of sync
+            student.moduleRegistration.foreach { moduleRegistration =>
+              moduleRegistration.actualMark = student.latestMark
+              moduleRegistration.actualGrade = student.latestGrade
+              moduleRegistration.agreedMark = None
+              moduleRegistration.agreedGrade = None
+              moduleRegistration.moduleResult = student.latestResult.orNull
+            }
+
             Some(moduleRegistrationMarksService.saveOrUpdate(student))
           case _ =>
             None
