@@ -1,5 +1,6 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
+<#import "*/_profile_link.ftl" as pl />
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
@@ -10,6 +11,7 @@
 
 <#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
@@ -24,6 +26,8 @@
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
           <table class="table table-striped table-sortable">
             <colgroup class="student">
+              <col class="student-info" />
+              <col class="student-info" />
               <col class="student-info" />
             </colgroup>
             <#list assessmentComponents as ac>
@@ -47,6 +51,8 @@
             <thead>
               <tr>
                 <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2">First name</th>
+                <th class="col-sm-1 sortable" rowspan="2">Last name</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
@@ -76,9 +82,11 @@
                 <#assign student = studentMarkRecord._1() />
                 <#assign componentMarks = studentMarkRecord._2() />
                 <#assign calculation = studentMarkRecord._3() />
+                <#assign member = membersBySprCode[student.sprCode] />
 
                 <tr>
-                  <td>
+                  <td data-sortby="${student.sprCode}">
+                    <@pl.profile_link member.universityId />
                     ${student.sprCode}
 
                     <#if student.needsWritingToSits>
@@ -141,6 +149,8 @@
                       </@modal.modal>
                     </#if>
                   </td>
+                  <td>${member.firstName}</td>
+                  <td>${member.lastName}</td>
 
                   <#list assessmentComponents as ac>
                     <#assign marksAndWeighting = (mapGet(componentMarks, ac))! />

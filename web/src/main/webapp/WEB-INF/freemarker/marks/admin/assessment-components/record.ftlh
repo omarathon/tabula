@@ -1,5 +1,6 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
+<#import "*/_profile_link.ftl" as pl />
 
 <div class="deptheader">
   <h1>Record marks</h1>
@@ -11,6 +12,7 @@
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>
 
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
@@ -27,17 +29,27 @@
             <thead>
               <tr>
                 <th class="col-sm-1 sortable">University ID</th>
-                <th class="col-sm-2 sortable">Mark</th>
+                <th class="col-sm-1 sortable">First name</th>
+                <th class="col-sm-1 sortable">Last name</th>
+                <th class="col-sm-1 sortable">Mark</th>
                 <th class="col-sm-1 sortable">Grade</th>
                 <th class="col-sm-2">New mark</th>
                 <th class="col-sm-2">New grade</th>
-                <th class="col-sm-4">Comments</th>
+                <th class="col-sm-3">Comments</th>
               </tr>
             </thead>
             <tbody>
               <#list studentMarkRecords as student>
+                <#assign member = membersByUniversityId[student.universityId] />
+
                 <tr>
-                  <td>${student.universityId}<#if !student.currentMember> <span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if></td>
+                  <td data-sortby="u${student.universityId}">
+                    <@pl.profile_link member.universityId />
+                    ${student.universityId}
+                    <#if !student.currentMember><span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if>
+                  </td>
+                  <td>${member.firstName}</td>
+                  <td>${member.lastName}</td>
                   <td data-sortby="${student.mark!-1}">
                     ${student.mark!}
                     <#if student.needsWritingToSits>
