@@ -1,3 +1,6 @@
+<#import "*/modal_macros.ftlh" as modal />
+<#import "*/_profile_link.ftl" as pl />
+
 <div class="deptheader">
   <h1>Record marks</h1>
   <h4 class="with-related">for ${assessmentComponent.name} (${assessmentComponent.module.code?upper_case}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})</h4>
@@ -5,6 +8,7 @@
 
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <#if changes?size == 0>
   <p>There were no changes to marks or grades.</p>
 
@@ -19,20 +23,29 @@
       <table class="table table-striped table-sortable">
         <thead>
           <tr>
-            <th class="sortable">University ID</th>
-            <th class="sortable">Mark</th>
-            <th class="sortable">Grade</th>
-            <th>Comment</th>
+            <th class="col-sm-1 sortable">University ID</th>
+            <th class="col-sm-2 sortable">First name</th>
+            <th class="col-sm-2 sortable">Last name</th>
+            <th class="col-sm-2 sortable">Mark</th>
+            <th class="col-sm-2 sortable">Grade</th>
+            <th class="col-sm-4">Comment</th>
           </tr>
         </thead>
         <tbody>
           <#list changes as change>
             <#assign student = change._1() />
             <#assign c = change._2() />
+            <#assign member = membersByUniversityId[student.universityId] />
 
             <tr>
-              <td class="col-md-2">${student.universityId}<#if !student.currentMember> <span class="very-subtle">(not current)</span></#if></td>
-              <td class="col-md-2" data-sortby="${c.mark!-1}">
+              <td data-sortby="u${student.universityId}">
+                <@pl.profile_link member.universityId />
+                ${student.universityId}
+                <#if !student.currentMember><span class="very-subtle">(not current)</span></#if>
+              </td>
+              <td>${member.firstName}</td>
+              <td>${member.lastName}</td>
+              <td data-sortby="${c.mark!-1}">
                 <@f.hidden path="students[${student.universityId}].mark" />
                 ${student.mark!'-'}
                 <#if "${student.mark!}" != c.mark!>
@@ -40,7 +53,7 @@
                   ${c.mark!}
                 </#if>
               </td>
-              <td class="col-md-2" data-sortby="${c.grade!}">
+              <td data-sortby="${c.grade!}">
                 <@f.hidden path="students[${student.universityId}].grade" />
                 ${student.grade!'-'}
                 <#if student.grade! != c.grade!>
@@ -48,7 +61,7 @@
                   ${c.grade!}
                 </#if>
               </td>
-              <td class="col-md-4"><@f.input path="students[${student.universityId}].comments" cssClass="form-control" readonly=true /></td>
+              <td><@f.input path="students[${student.universityId}].comments" cssClass="form-control" readonly=true /></td>
             </tr>
           </#list>
         </tbody>

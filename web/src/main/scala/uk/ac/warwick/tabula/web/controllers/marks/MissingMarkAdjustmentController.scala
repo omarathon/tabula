@@ -16,9 +16,7 @@ import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/missing-marks"))
-class MissingMarkAdjustmentController extends BaseController {
-
-  validatesSelf[SelfValidating]
+class MissingMarkAdjustmentController extends BaseComponentMarksController {
 
   @ModelAttribute("command")
   def command(@PathVariable assessmentComponent: AssessmentComponent, @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): MissingMarkAdjustmentCommand.Command =

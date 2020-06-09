@@ -18,9 +18,8 @@ object MemberOrUser {
 
   def apply(user: User): MemberOrUser = WrappedUser(user)
 
-  def apply(member: Option[Member], user: User): MemberOrUser = member map {
-    WrappedMember
-  } getOrElse WrappedUser(user)
+  def apply(member: Option[Member], user: => User): MemberOrUser =
+    member.map(apply).getOrElse(apply(user))
 }
 
 sealed trait MemberOrUser {
