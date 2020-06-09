@@ -157,7 +157,6 @@
                     <#if marksAndWeighting?has_content>
                       <#assign marks = marksAndWeighting._1() />
                       <#assign weighting = (marksAndWeighting._2())! />
-                      <td>
                       <td data-sortby="${marks.mark!-1}">
                         ${marks.mark!'-'}
 
