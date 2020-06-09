@@ -133,7 +133,6 @@ trait GenerateExamGridSelectCourseCommandRequest {
 
   def pgCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.PGT)
   def ugCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.UG)
-  def ugCourseIncluded: Boolean = courses.asScala.exists(_.courseType.equals(CourseType.UG))
 
   def isLevelGrid: Boolean = levelCode != null
 
