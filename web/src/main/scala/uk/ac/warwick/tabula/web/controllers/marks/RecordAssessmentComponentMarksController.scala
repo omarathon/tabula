@@ -25,14 +25,12 @@ import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
-class RecordAssessmentComponentMarksController extends BaseController
+class RecordAssessmentComponentMarksController extends BaseComponentMarksController
   with AutowiringAssessmentComponentMarksServiceComponent
   with AutowiringAssessmentMembershipServiceComponent
   with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
   with AutowiringMaintenanceModeServiceComponent {
-
-  validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
   def command(@PathVariable assessmentComponent: AssessmentComponent, @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): RecordAssessmentComponentMarksCommand.Command =

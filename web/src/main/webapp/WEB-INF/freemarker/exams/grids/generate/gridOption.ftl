@@ -504,6 +504,15 @@
 
         <div class="col-md-3">
           <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>checked</#if>
+              /> Number of CATS considered in benchmark (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered in the graduation benchmark (applies to PG students only)." />
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="checkbox">
             <label>
               <input type="checkbox" name="applyBenchmark" <#if gridOptionsCommand.applyBenchmark>checked</#if> />
               Apply graduation benchmark <@fmt.help_popover id="applyBenchmark" content="The graduation benchmark will be used to calculate the final degree mark and classification." />

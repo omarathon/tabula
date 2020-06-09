@@ -7,25 +7,16 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, ConfirmModuleMarksCommand, ListAssessmentComponentsCommand, MarksDepartmentHomeCommand}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/confirm"))
-class ConfirmModuleMarksController extends BaseController
+class ConfirmModuleMarksController extends BaseModuleMarksController
   with AutowiringProfileServiceComponent
-  with AutowiringMaintenanceModeServiceComponent
-  with AutowiringModuleAndDepartmentServiceComponent {
-
-  validatesSelf[SelfValidating]
-
-  @ModelAttribute("module")
-  def module(@PathVariable sitsModuleCode: String): Module =
-    mandatory(moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode))
+  with AutowiringMaintenanceModeServiceComponent {
 
   @ModelAttribute("command")
   def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): ConfirmModuleMarksCommand.Command =

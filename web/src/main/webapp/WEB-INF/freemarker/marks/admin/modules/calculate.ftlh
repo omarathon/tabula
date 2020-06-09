@@ -1,5 +1,6 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
+<#import "*/_profile_link.ftl" as pl />
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
@@ -10,6 +11,7 @@
 
 <#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <div>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
@@ -22,8 +24,10 @@
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
-          <table class="table table-striped">
+          <table class="table table-striped table-sortable">
             <colgroup class="student">
+              <col class="student-info" />
+              <col class="student-info" />
               <col class="student-info" />
             </colgroup>
             <#list assessmentComponents as ac>
@@ -46,7 +50,9 @@
 
             <thead>
               <tr>
-                <th class="col-sm-1" rowspan="2">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2">First name</th>
+                <th class="col-sm-1 sortable" rowspan="2">Last name</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
@@ -62,13 +68,13 @@
 
               <tr>
                 <#list assessmentComponents as ac>
-                  <th>Mark</th>
-                  <th>Grade</th>
+                  <th class="sortable">Mark</th>
+                  <th class="sortable">Grade</th>
                 </#list>
 
-                <th>Mark</th>
-                <th>Grade</th>
-                <th>Result</th>
+                <th class="sortable">Mark</th>
+                <th class="sortable">Grade</th>
+                <th class="sortable">Result</th>
               </tr>
             </thead>
             <tbody>
@@ -76,9 +82,11 @@
                 <#assign student = studentMarkRecord._1() />
                 <#assign componentMarks = studentMarkRecord._2() />
                 <#assign calculation = studentMarkRecord._3() />
+                <#assign member = membersBySprCode[student.sprCode] />
 
                 <tr>
-                  <td>
+                  <td data-sortby="${student.sprCode}">
+                    <@pl.profile_link member.universityId />
                     ${student.sprCode}
 
                     <#if student.needsWritingToSits>
@@ -141,12 +149,20 @@
                       </@modal.modal>
                     </#if>
                   </td>
+                  <td>${member.firstName}</td>
+                  <td>${member.lastName}</td>
 
                   <#list assessmentComponents as ac>
-                    <#assign marks = (mapGet(componentMarks, ac))! />
-                    <#if marks?has_content>
-                      <td>
+                    <#assign marksAndWeighting = (mapGet(componentMarks, ac))! />
+                    <#if marksAndWeighting?has_content>
+                      <#assign marks = marksAndWeighting._1() />
+                      <#assign weighting = (marksAndWeighting._2())! />
+                      <td data-sortby="${marks.mark!-1}">
                         ${marks.mark!'-'}
+
+                        <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
+                          <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
+                        </#if>
 
                         <#if marks.needsWritingToSits>
                           <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
@@ -215,21 +231,21 @@
                   </#list>
 
                   <#if calculation.successful>
-                    <td>
+                    <td data-sortby="${calculation.mark!-1}">
                       <#if (student.mark!-1) != (calculation.mark!-1)>
                         ${student.mark!'-'}
                         <i class="fal fa-arrow-right"></i>
                       </#if>
                       ${calculation.mark!'-'}
                     </td>
-                    <td>
+                    <td data-sortby="${calculation.grade!}">
                       <#if student.grade! != calculation.grade!>
                         ${student.grade!'-'}
                         <i class="fal fa-arrow-right"></i>
                       </#if>
                       ${calculation.grade!'-'}
                     </td>
-                    <td>
+                    <td data-sortby="${(calculation.result.dbValue)!}">
                       <#if (student.result.description)! != (calculation.result.description)!>
                         ${(student.result.description)!'-'}
                         <i class="fal fa-arrow-right"></i>

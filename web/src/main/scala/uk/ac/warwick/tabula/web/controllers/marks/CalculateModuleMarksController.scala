@@ -7,7 +7,6 @@ import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.{ModuleMarkCalculation, StudentModuleMarksItem}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
@@ -15,8 +14,7 @@ import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentMod
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleResult}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -25,17 +23,10 @@ import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/marks"))
-class CalculateModuleMarksController extends BaseController
+class CalculateModuleMarksController extends BaseModuleMarksController
   with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
-  with AutowiringMaintenanceModeServiceComponent
-  with AutowiringModuleAndDepartmentServiceComponent {
-
-  validatesSelf[SelfValidating]
-
-  @ModelAttribute("module")
-  def module(@PathVariable sitsModuleCode: String): Module =
-    mandatory(moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode))
+  with AutowiringMaintenanceModeServiceComponent {
 
   @ModelAttribute("command")
   def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): CalculateModuleMarksCommand.Command =
@@ -52,11 +43,11 @@ class CalculateModuleMarksController extends BaseController
   }
 
   @ModelAttribute("studentModuleMarkRecords")
-  def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)] =
+  def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)] =
     command.studentModuleMarkRecordsAndCalculations
 
   @ModelAttribute("assessmentComponents")
-  def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)]): Seq[AssessmentComponent] =
+  def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)]): Seq[AssessmentComponent] =
     studentModuleMarkRecords.flatMap(_._2.keySet).distinct.sortBy(_.sequence)
 
   @ModelAttribute("isGradeValidation")
@@ -76,7 +67,7 @@ class CalculateModuleMarksController extends BaseController
    */
   @RequestMapping
   def triggerImportIfNecessary(
-    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)],
+    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)],
     @PathVariable academicYear: AcademicYear,
     model: ModelMap,
     @ModelAttribute("command") command: CalculateModuleMarksCommand.Command,
@@ -154,7 +145,7 @@ class CalculateModuleMarksController extends BaseController
     @Valid @ModelAttribute("command") cmd: CalculateModuleMarksCommand.Command,
     errors: Errors,
     model: ModelMap,
-    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation)],
+    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)],
     @PathVariable sitsModuleCode: String,
     @PathVariable academicYear: AcademicYear,
     @PathVariable occurrence: String
@@ -169,7 +160,7 @@ class CalculateModuleMarksController extends BaseController
       formView
     } else {
       // Filter down to just changes
-      val changes: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord], ModuleMarkCalculation, StudentModuleMarksItem)] =
+      val changes: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation, StudentModuleMarksItem)] =
         cmd.students.asScala.values.toSeq.flatMap { student =>
           // We know the .get is safe because it's validated
           val (studentModuleMarkRecord, componentMarks, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get

@@ -3,6 +3,16 @@ import $ from 'jquery';
 
 $(() => {
   $('.fix-area').fixHeaderFooter();
+  $('.table-sortable').sortableTable({
+    textExtraction: (node) => {
+      const $el = $(node);
+      if ($el.data('sortby')) {
+        return $el.data('sortby').toString();
+      }
+
+      return $el.text().trim();
+    },
+  });
 
   // Auto grade generator
   $('.auto-grade[data-mark][data-generate-url]').each((i, el) => {

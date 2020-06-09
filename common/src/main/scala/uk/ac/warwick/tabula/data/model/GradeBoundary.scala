@@ -32,6 +32,12 @@ object GradeBoundary {
    */
   val ForceMajeureMissingComponentGrade = "FM"
 
+  /**
+   * The value of the grade field (with any mark) that should be set if a student's component should be waived due to
+   * mitigating circumstances.
+   */
+  val MitigatingCircumstancesGrade = "M"
+
   implicit val defaultOrdering: Ordering[GradeBoundary] = Ordering.by { gb: GradeBoundary => (gb.rank, !gb.isDefault, gb.grade) }
 }
 
