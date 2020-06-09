@@ -51,7 +51,7 @@
                   <td>${member.firstName}</td>
                   <td>${member.lastName}</td>
                   <td data-sortby="${student.mark!-1}">
-                    ${student.mark!}
+                    ${student.mark!'-'}
                     <#if student.needsWritingToSits>
                       <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
                         <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
@@ -111,7 +111,7 @@
                     </#if>
                   </td>
                   <td>
-                    ${student.grade!}
+                    ${student.grade!'-'}
                   </td>
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].mark">

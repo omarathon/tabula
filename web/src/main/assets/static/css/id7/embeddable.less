@@ -730,21 +730,22 @@ table.tablesorter {
       background-color: transparent;
       padding-right: 20px;
 
-      &.header {
+      &.header, &.tablesorter-header {
         background: transparent url(/static/images/tablesorter/bg.gif) no-repeat center right;
         cursor: pointer;
-        .user-select(none);
       }
 
-      &.headerSortUp {
+      &.headerSortUp, &.tablesorter-headerAsc {
         background-image: url(/static/images/tablesorter/asc.gif);
       }
 
-      &.headerSortDown {
+      &.headerSortDown, &.tablesorter-headerDesc {
         background-image: url(/static/images/tablesorter/desc.gif);
       }
 
-      &.no-sort {
+      &.no-sort, &.tablesorter-header.sorter-false {
+        background-image: none;
+        cursor: default;
         padding-right: @table-condensed-cell-padding;
       }
     }
