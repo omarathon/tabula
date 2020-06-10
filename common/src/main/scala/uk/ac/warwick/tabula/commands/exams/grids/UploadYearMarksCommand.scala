@@ -105,7 +105,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
                 marks.clear()
               }
             } catch {
-              case e: InvalidFormatException =>
+              case _: InvalidFormatException =>
                 result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), validAttachmentStrings.mkString(", ")), "")
             }
           }
