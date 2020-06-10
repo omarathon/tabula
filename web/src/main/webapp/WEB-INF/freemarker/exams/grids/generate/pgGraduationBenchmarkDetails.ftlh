@@ -4,6 +4,17 @@
   </div>
 
   <section>
+    <div class="alert alert-info ">
+      <p>The weighted average has been calculated following the
+      <a href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/pgt/" target = "_blank">
+        Teaching Continuity Policy Guidance for Postgraduate Taught students</a>, which includes
+      <a href="https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/pgt/examples/" target="_blank">
+        specific examples of calculating the best credits for those students</a>.
+      </p>
+    </div>
+  </section>
+
+  <section>
     <p>
       <#if department.examGridOptions.nameToShow.toString != 'none'>
           ${member.fullName!} (${member.universityId})
