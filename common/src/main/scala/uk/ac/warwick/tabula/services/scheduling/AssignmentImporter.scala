@@ -411,6 +411,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         a.examPaperDuration = Some(Duration.standardMinutes(120))
         a.examPaperReadingTime = None
         a.examPaperType = Some(ExaminationType.Standard)
+        a.finalChronologicalAssessment = true
       } else {
         a.examPaperCode = None
         a.examPaperTitle = None
@@ -418,6 +419,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         a.examPaperDuration = None
         a.examPaperReadingTime = None
         a.examPaperType = None
+        a.finalChronologicalAssessment = false
       }
       a
     }
@@ -519,7 +521,8 @@ object AssignmentImporter {
       null as exam_paper_section,
       null as exam_paper_duration,
       null as exam_paper_reading_time,
-      null as exam_paper_type
+      null as exam_paper_type,
+      'Y' as final_chronological_assessment
       from $sitsSchema.cam_sms sms
         join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -541,7 +544,8 @@ object AssignmentImporter {
       null as exam_paper_section,
       null as exam_paper_duration,
       null as exam_paper_reading_time,
-      null as exam_paper_type
+      null as exam_paper_type,
+      'Y' as final_chronological_assessment
       from $sitsSchema.cam_smo smo
         left outer join $sitsSchema.cam_ssn ssn
           on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -565,7 +569,8 @@ object AssignmentImporter {
       case when (mab.mab_advc = 'X') then 'n/a' else ${castToString("mab.mab_advc")} end as exam_paper_section,
       coalesce(mab.mab_hohm, adv.adv_dura) as exam_paper_duration,
       adv.adv_rdtm as exam_paper_reading_time,
-      ${castToString("apa.apa_aptc")} as exam_paper_type
+      ${castToString("apa.apa_aptc")} as exam_paper_type,
+      ${castToString("mab.mab_fayn")} as final_chronological_assessment
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
         join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
           on mab.map_code = mav.mod_code and
@@ -978,6 +983,10 @@ object AssignmentImporter {
       a.examPaperDuration = Option(rs.getTimestamp("exam_paper_duration")).map(dateToDuration)
       a.examPaperReadingTime = if (rs.getTimestamp("exam_paper_reading_time") != null) Some(Duration.standardMinutes(15)) else None
       a.examPaperType = Option(rs.getString("exam_paper_type")).map(ExaminationType.withName)
+      a.finalChronologicalAssessment = rs.getString("final_chronological_assessment") match {
+        case "Y" | "y" => true
+        case _ => false
+      }
       a
     }
   }

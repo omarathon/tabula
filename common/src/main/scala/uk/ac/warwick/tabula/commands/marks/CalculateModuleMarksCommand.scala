@@ -375,7 +375,7 @@ trait CalculateModuleMarksAlgorithm {
 
                 val componentsWithIndicatorGrades = componentsForCalculation.filter { case (ac, s) => isIndicatorGrade(ac, s) }.sortBy(_._1.sequence)
 
-                if (componentsWithIndicatorGrades.size == componentsForCalculation.size && componentsForCalculation.forall(_._2.grade == componentsForCalculation.head._2.grade)) {
+                if (componentsWithIndicatorGrades.size == componentsForCalculation.size && componentsForCalculation.nonEmpty && componentsForCalculation.forall(_._2.grade == componentsForCalculation.head._2.grade)) {
                   val grade = componentsForCalculation.head._2.grade.get
 
                   validGrades.find(_.grade == grade) match {
@@ -384,6 +384,8 @@ trait CalculateModuleMarksAlgorithm {
                   }
                 } else if (componentsWithIndicatorGrades.nonEmpty) {
                   ModuleMarkCalculation.Failure(s"Mis-matched indicator grades ${componentsWithIndicatorGrades.map(_._2.grade.get).mkString(", ")} for ${componentsWithIndicatorGrades.map(_._1.sequence).mkString(", ")}")
+                } else if (componentsForCalculation.isEmpty) {
+                  ModuleMarkCalculation.Failure("Couldn't automatically calculate a module result")
                 } else {
                   validGrades.find(_.isDefault) match {
                     case None => ModuleMarkCalculation.Success(Some(calculatedMark), None, None)

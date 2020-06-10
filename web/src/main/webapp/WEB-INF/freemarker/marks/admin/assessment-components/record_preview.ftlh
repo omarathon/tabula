@@ -53,7 +53,7 @@
                   ${c.mark!}
                 </#if>
               </td>
-              <td data-sortby="${c.grade!}">
+              <td data-sortby="g${c.grade!}">
                 <@f.hidden path="students[${student.universityId}].grade" />
                 ${student.grade!'-'}
                 <#if student.grade! != c.grade!>
