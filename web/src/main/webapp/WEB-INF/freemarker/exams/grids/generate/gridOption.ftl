@@ -498,7 +498,7 @@
             <div class="checkbox">
               <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
                             <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>checked</#if>
-                /> Percentage assessments used in benchmark (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken used in the graduation benchmark (applies to UG students only)." />
+                /> Percentage of assessments taken (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken in the year, used in the graduation benchmark calculation (applies to UG students only)." />
               </label>
             </div>
           </div>
@@ -509,7 +509,7 @@
             <div class="checkbox">
               <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
                             <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>checked</#if>
-                /> Number of CATS considered in benchmark (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered in the graduation benchmark (applies to PG students only)." />
+                /> Number of CATS considered (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered, used in the graduation benchmark calculation (applies to PG students only)." />
               </label>
             </div>
           </div>
