@@ -56,13 +56,15 @@ object SandboxData {
       "hom103" -> Module("The Long Nineteenth Century", "HOM103", "hom103", BigDecimal(15)),
       "hom106" -> Module("History of Composition", "HOM106", "hom106", BigDecimal(15)),
       "hom115" -> Module("20th Century Music", "HOM115", "hom115", BigDecimal(30)),
-      "hom128" -> Module("Theory and Analysis", "HOM128", "hom128", BigDecimal(30)),
+      "hom128" -> Module("Theory of Music", "HOM128", "hom128", BigDecimal(30)),
+      "hom129" -> Module("Theory and Analysis", "HOM129", "hom129", BigDecimal(30)),
 
       "hom201" -> Module("Russian and Soviet Music, 1890-1975", "HOM201", "hom201", BigDecimal(15)),
       "hom203" -> Module("Studies in Popular Music", "HOM203", "hom203", BigDecimal(15)),
       "hom204" -> Module("History of Opera", "HOM204", "hom204", BigDecimal(15)),
       "hom210" -> Module("Writing Practices in Music", "HOM210", "hom210", BigDecimal(15)),
-      "hom218" -> Module("Popular Music and Theories of Mass Culture", "HOM218", "hom218", BigDecimal(30)),
+      "hom218" -> Module("Popular Music", "HOM218", "hom218", BigDecimal(30)),
+      "hom219" -> Module("Popular Music and Theories of Mass Culture", "HOM219", "hom219", BigDecimal(30)),
       "hom222" -> Module("Late 19th and Early 20th Century English Song", "HOM222", "hom222", BigDecimal(30)),
 
       "hom3a1" -> Module("Britten's Chamber Operas", "HOM3A1", "hom3a1", BigDecimal(30)),
@@ -71,7 +73,8 @@ object SandboxData {
       "hom334" -> Module("Music and Ideas from Romanticism to the Late Twentieth Century", "HOM334", "hom334", BigDecimal(10)),
       "hom335" -> Module("Creative Music Technology", "HOM335", "hom335", BigDecimal(10), equalSplits),
       "hom336" -> Module("Topics in Popular Music", "HOM336", "hom336", BigDecimal(10), smallAssessments),
-      "hom340" -> Module("Dissertation (History of Music)", "HOM340", "hom340", BigDecimal(60)),
+      "hom339" -> Module("Dissertation (History of Music)", "HOM339", "hom339", BigDecimal(60)),
+      "hom340" -> Module("Dissertation", "HOM340", "hom340", BigDecimal(60)),
 
       "hom401" -> Module("Advanced Theory and Analysis", "HOM401", "hom401", BigDecimal(15)),
       "hom402" -> Module("Baroque composers", "HOM402", "hom402", BigDecimal(15)),
