@@ -89,8 +89,8 @@ object Routes {
     def uploadYearMarks(department: Department, academicYear: AcademicYear): String =
       s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/upload"
 
-    def benchmarkdetails(scyd: StudentCourseYearDetails): String =
-      s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/benchmarkdetails"
+    def benchmarkdetails(scyd: StudentCourseYearDetails, calculateYearMarks: Boolean, groupByLevel: Boolean): String =
+      s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/benchmarkdetails?calculateYearMarks=${calculateYearMarks}&groupByLevel=${groupByLevel}"
 
     def assessmentdetails(scyd: StudentCourseYearDetails): String =
       s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"

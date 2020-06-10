@@ -28,7 +28,6 @@ import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features
 
 import scala.jdk.CollectionConverters._
 import scala.math.BigDecimal.RoundingMode
-import scala.util.Try
 
 /**
  * Import module registration data from SITS.
@@ -147,9 +146,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       val (mark, grade, result) =
         // generate marks for all years for HOM students
         if (route.code.substring(0, 2) == "hm" || academicYear < AcademicYear.now()) {
-          val randomMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-            Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-          ).sum % 100
+          val randomMark = SandboxData.randomMarkSeed(universityId, moduleCode) % 100
 
           val m =
             if (isPassFail) {
