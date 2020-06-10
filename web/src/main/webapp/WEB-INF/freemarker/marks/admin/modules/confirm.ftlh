@@ -6,13 +6,29 @@
   <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
+<#assign hasErrors = false />
+<@spring.hasBindErrors name="command">
+  <#assign hasErrors = errors.hasGlobalErrors() />
+  <#if errors.hasErrors()>
+    <div class="alert alert-danger">
+      <#if errors.hasGlobalErrors()>
+        <#list errors.globalErrors as e>
+          <div><@spring.message message=e /></div>
+        </#list>
+      <#else>
+        <div>See the errors below.</div>
+      </#if>
+    </div>
+  </#if>
+</@spring.hasBindErrors>
+
 <#assign submitUrl><@routes.marks.module_marks_confirm sitsModuleCode academicYear occurrence /></#assign>
 <#assign cancelUrl><@routes.marks.adminhome module.adminDepartment academicYear /></#assign>
 
 <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <#if alreadyConfirmed?has_content>
   <div class="alert alert-success">
-      <@fmt.p number=alreadyConfirmed?size singular="student" plural="students" /> marks are already confirmed
+    <@fmt.p number=alreadyConfirmed?size singular="student" plural="students" /> marks are already confirmed
   </div>
 </#if>
 <#if studentsToConfirm?has_content>
