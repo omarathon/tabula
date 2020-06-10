@@ -30,7 +30,7 @@ class ExamGridsUploadYearMarksController extends ExamsController
 
   private def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
     view.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(department, academicYear))
-      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.generate(department, year)): _*)
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.uploadYearMarks(department, year)): _*)
 
   @ModelAttribute("command")
   def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
