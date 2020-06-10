@@ -311,6 +311,38 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass)))
   }
 
+  @Test def calculatePartialMitCircs(): Unit = new UGModuleFixture {
+    val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 30)
+    ac1.membershipService = algorithm.assessmentMembershipService
+    val smr1 = markRecord(Some(65), Some("21"))
+
+    val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR", weighting = 70)
+    ac2.membershipService = algorithm.assessmentMembershipService
+    val smr2 = markRecord(Some(0), Some(GradeBoundary.MitigatingCircumstancesGrade))
+
+    algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
+    algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
+
+    // Non-mit circs components only are used to calculate
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass)))
+  }
+
+  @Test def calculateMitCircsAndMMA(): Unit = new UGModuleFixture {
+    val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 30)
+    ac1.membershipService = algorithm.assessmentMembershipService
+    val smr1 = markRecord(Some(65), Some(GradeBoundary.MitigatingCircumstancesGrade))
+
+    val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR", weighting = 70)
+    ac2.membershipService = algorithm.assessmentMembershipService
+    val smr2 = markRecord(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade))
+
+    algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
+    algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
+
+    // Non-mit circs components only are used to calculate
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Couldn't automatically calculate a module result"))
+  }
+
   @Test def calculatePartialMMAMultipleComponents(): Unit = new UGModuleFixture {
     val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 10)
     ac1.membershipService = algorithm.assessmentMembershipService
@@ -329,6 +361,46 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
     // Non-MMA components only are used to calculate. (64 * (10/30)) + (71 * (20/30)) = 68.67
     algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(69), Some("21"), Some(ModuleResult.Pass)))
+  }
+
+  @Test def calculatePartialMitCircsMultipleComponents(): Unit = new UGModuleFixture {
+    val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 10)
+    ac1.membershipService = algorithm.assessmentMembershipService
+    val smr1 = markRecord(Some(64), Some("21"))
+
+    val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR", weighting = 20)
+    ac2.membershipService = algorithm.assessmentMembershipService
+    val smr2 = markRecord(Some(71), Some("1"))
+
+    val ac3 = Fixtures.assessmentComponent(module, 3, marksCode = "WAR", weighting = 70)
+    ac3.membershipService = algorithm.assessmentMembershipService
+    val smr3 = markRecord(None, Some(GradeBoundary.MitigatingCircumstancesGrade))
+
+    algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
+    algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
+
+    // Non-mit circs components only are used to calculate. (64 * (10/30)) + (71 * (20/30)) = 68.67
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(69), Some("21"), Some(ModuleResult.Pass)))
+  }
+
+  @Test def calculatePartialMMAAndMitCircsMultipleComponents(): Unit = new UGModuleFixture {
+    val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 10)
+    ac1.membershipService = algorithm.assessmentMembershipService
+    val smr1 = markRecord(Some(64), Some(GradeBoundary.MitigatingCircumstancesGrade))
+
+    val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR", weighting = 20)
+    ac2.membershipService = algorithm.assessmentMembershipService
+    val smr2 = markRecord(Some(71), Some("1"))
+
+    val ac3 = Fixtures.assessmentComponent(module, 3, marksCode = "WAR", weighting = 70)
+    ac3.membershipService = algorithm.assessmentMembershipService
+    val smr3 = markRecord(None, Some(GradeBoundary.MitigatingCircumstancesGrade))
+
+    algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
+    algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
+
+    // The only component is used to calculate
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(71), Some("1"), Some(ModuleResult.Pass)))
   }
 
   @Test def calculate(): Unit = new UGModuleFixture {

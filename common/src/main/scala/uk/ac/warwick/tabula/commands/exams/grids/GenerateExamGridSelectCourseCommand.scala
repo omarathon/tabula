@@ -131,6 +131,9 @@ trait GenerateExamGridSelectCourseCommandRequest {
   var resitOnly: Boolean = false
   var includePermWithdrawn: Boolean = true
 
+  def pgCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.PGT)
+  def ugCourseIncluded: Boolean = courses.asScala.exists(_.courseType == CourseType.UG)
+
   def isLevelGrid: Boolean = levelCode != null
 
   // parses undergrad level codes into year of study as if the degree was being taken full time - otherwise returns 1 as other courses don't have multiple levels

@@ -25,14 +25,12 @@ import scala.jdk.CollectionConverters._
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/marks"))
-class RecordAssessmentComponentMarksController extends BaseController
+class RecordAssessmentComponentMarksController extends BaseComponentMarksController
   with AutowiringAssessmentComponentMarksServiceComponent
   with AutowiringAssessmentMembershipServiceComponent
   with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
   with AutowiringMaintenanceModeServiceComponent {
-
-  validatesSelf[SelfValidating]
 
   @ModelAttribute("command")
   def command(@PathVariable assessmentComponent: AssessmentComponent, @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): RecordAssessmentComponentMarksCommand.Command =
@@ -179,12 +177,11 @@ class RecordAssessmentComponentMarksController extends BaseController
         }
 
       model.addAttribute("changes", changes)
-      model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.AssessmentComponents.recordMarks(assessmentComponent, upstreamAssessmentGroup)}/skip-import"))
 
       "marks/admin/assessment-components/record_preview"
     }
 
-  @PostMapping(params = Array("confirm=true"))
+  @PostMapping(params = Array("confirm=true", "action=Confirm"))
   def save(
     @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
     errors: Errors,
@@ -201,5 +198,17 @@ class RecordAssessmentComponentMarksController extends BaseController
 
       RedirectFlashing(Routes.marks.Admin.home(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
     }
+
+  @PostMapping(params = Array("confirm=true", "action!=Confirm"))
+  def cancelPreview(
+    @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
+    errors: Errors,
+    @PathVariable assessmentComponent: AssessmentComponent,
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup
+  ): String = {
+    cmd.populate()
+    formView
+  }
+
 
 }

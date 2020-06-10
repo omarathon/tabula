@@ -38,4 +38,6 @@ class Course {
 
   override def toString: String = name
 
+  def courseType:CourseType = CourseType.fromCourseCode(code)
+
 }

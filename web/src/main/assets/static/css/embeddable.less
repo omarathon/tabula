@@ -1020,27 +1020,27 @@ summary {
           background-color: lighten(@tabulaGrayLightTint, 5%);
           padding-right: 20px;
 
-          &.header {
+          &.header, &.tablesorter-header {
             background-image: url(/static/images/tablesorter/bg.gif);
             background-repeat: no-repeat;
             background-position: center right;
             .cursor-pointer();
           }
 
-          &.headerSortUp {
+          &.headerSortUp, &.tablesorter-headerAsc {
             background-image: url(/static/images/tablesorter/asc.gif);
           }
 
-          &.headerSortDown {
+          &.headerSortDown, &.tablesorter-headerDesc {
             background-image: url(/static/images/tablesorter/desc.gif);
           }
 
-          &.headerSortDown,
-          &.headerSortUp {
+          &.headerSortDown, &.tablesorter-headerDesc,
+          &.headerSortUp, &.tablesorter-headerAsc {
             background-color: @tabulaGrayLightTint;
           }
 
-          &.no-sort {
+          &.no-sort, &.tablesorter-header.sorter-false {
             padding-right: 0px;
           }
         }

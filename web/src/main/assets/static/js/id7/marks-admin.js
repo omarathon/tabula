@@ -3,6 +3,10 @@ import $ from 'jquery';
 
 $(() => {
   $('.fix-area').fixHeaderFooter();
+  $('.table-sortable').sortableTable({
+    sortLocaleCompare: true,
+    textAttribute: 'data-sortby',
+  });
 
   // Auto grade generator
   $('.auto-grade[data-mark][data-generate-url]').each((i, el) => {

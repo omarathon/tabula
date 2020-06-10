@@ -17,10 +17,8 @@ import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
 @RequestMapping(Array("/marks/admin/assessment-component/{assessmentComponent}/{upstreamAssessmentGroup}/scaling"))
-class ComponentScalingController extends BaseController
+class ComponentScalingController extends BaseComponentMarksController
   with AutowiringAssessmentComponentMarksServiceComponent {
-
-  validatesSelf[SelfValidating]
 
   var json: ObjectMapper = Wire[ObjectMapper]
 

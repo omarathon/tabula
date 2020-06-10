@@ -1,0 +1,1 @@
+alter table upstreamassessmentgroupmember add column currentResitAttempt int ;

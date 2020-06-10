@@ -179,7 +179,7 @@ class AddMarksRequest extends JsonApiRequest[AddMarksCommand] {
   @BeanProperty var students: JList[FeedbackItem] = _
 
   override def copyTo(state: AddMarksCommand, errors: Errors) = {
-    state.students = students;
+    state.students = students
   }
 }
 

@@ -163,7 +163,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
         resitActualGrade = rs.getString("resit_actual_grade"),
         resitAgreedMark = rs.getString("resit_agreed_mark"),
         resitAgreedGrade = rs.getString("resit_agreed_grade"),
-        resitExpected = rs.getBoolean("resit_expected")
+        resitExpected = rs.getBoolean("resit_expected"),
+        currentResitAttempt = rs.getString("current_attempt_number")
       ))
     }
   }
@@ -244,12 +245,12 @@ class SandboxAssignmentImporter extends AssignmentImporter
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       } yield {
         val yearOfStudy = (uniId % 3) + 1
+        val module = SandboxData.module(moduleCode)
         val level = moduleCode.substring(3, 4).toInt
 
         if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) uk.ac.warwick.tabula.data.Transactions.transactional() {
           val universityId = uniId.toString
-
-          val moduleCodeFull = "%s-15".format(moduleCode.toUpperCase)
+          val moduleCodeFull = module.fullModuleCode
           val assessmentGroup = "A"
           val sequence = assessmentType.subtype match {
             case TabulaAssessmentSubtype.Assignment => "A01"
@@ -336,7 +337,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
             resitActualGrade = null,
             resitAgreedMark = null,
             resitAgreedGrade = null,
-            resitExpected = false
+            resitExpected = false,
+            currentResitAttempt = "1"
           ))
         } else None
       }).flatten.toSeq
@@ -352,8 +354,9 @@ class SandboxAssignmentImporter extends AssignmentImporter
       assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
       academicYear <- yearsToImport
     } yield (moduleCode, assessmentType, academicYear)).zipWithIndex.map { case ((moduleCode, assessmentType, academicYear), index) =>
+      val module = SandboxData.module(moduleCode)
       val ag = new UpstreamAssessmentGroup()
-      ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      ag.moduleCode = module.fullModuleCode
       ag.academicYear = academicYear
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
@@ -393,7 +396,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
     } yield assessmentType match {
       case AssessmentType.Essay =>
         val a = new AssessmentComponent
-        a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        a.moduleCode = module.fullModuleCode
         a.sequence = "A01"
         a.name = "Report (2,000 words)"
         a.assessmentGroup = "A"
@@ -415,11 +418,12 @@ class SandboxAssignmentImporter extends AssignmentImporter
         a.examPaperDuration = None
         a.examPaperReadingTime = None
         a.examPaperType = None
+        a.finalChronologicalAssessment = false
         a
 
       case AssessmentType.SummerExam =>
         val e = new AssessmentComponent
-        e.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        e.moduleCode = module.fullModuleCode
         e.sequence = "E01"
         e.name = "2 hour examination (Summer)"
         e.assessmentGroup = "A"
@@ -441,6 +445,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         e.examPaperDuration = Some(Duration.standardMinutes(120))
         e.examPaperReadingTime = None
         e.examPaperType = Some(ExaminationType.Standard)
+        e.finalChronologicalAssessment = true
         e
     }
 
@@ -453,10 +458,11 @@ class SandboxAssignmentImporter extends AssignmentImporter
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq
       year <- yearsToImport
-    } yield (moduleCode, year)).distinct.zipWithIndex.map { case ((moduleCode, year), index) =>
+    } yield (module, year)).distinct.zipWithIndex.map { case ((module, year), index) =>
       val a = new AssessmentComponentExamSchedule
-      a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      a.moduleCode = module.fullModuleCode
       a.assessmentComponentSequence = "E01"
       a.examProfileCode = s"EXSUM${year.endYear % 100}"
       a.slotId = f"${(index / 5) + 1}%03d"
@@ -467,7 +473,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         new LocalDate(year.endYear, DateTimeConstants.APRIL, 27)
           .plusDays(index / 10)
           .toDateTime(if (index % 10 < 5) new LocalTime(9, 0) else new LocalTime(14, 0))
-      a.examPaperCode = s"${moduleCode.toUpperCase}0"
+      a.examPaperCode = s"${module.code.toUpperCase}0"
       a.examPaperSection = Some("n/a")
       a.location = Some(NamedLocation("Panorama Room"))
       a
@@ -477,7 +483,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
     (for {
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
-      moduleCode <- route.moduleCodes if schedule.moduleCode == "%s-15".format(moduleCode.toUpperCase)
+      moduleCode <- route.moduleCodes
+      module <- d.modules.get(moduleCode).toSeq if schedule.moduleCode == module.fullModuleCode
       uniId <- route.studentsStartId to route.studentsEndId if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       yearOfStudy = (uniId % 3) + 1
       level = moduleCode.substring(3, 4).toInt
@@ -539,7 +546,8 @@ object AssignmentImporter {
       null as exam_paper_section,
       null as exam_paper_duration,
       null as exam_paper_reading_time,
-      null as exam_paper_type
+      null as exam_paper_type,
+      'Y' as final_chronological_assessment
       from $sitsSchema.cam_sms sms
         join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
           on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -561,7 +569,8 @@ object AssignmentImporter {
       null as exam_paper_section,
       null as exam_paper_duration,
       null as exam_paper_reading_time,
-      null as exam_paper_type
+      null as exam_paper_type,
+      'Y' as final_chronological_assessment
       from $sitsSchema.cam_smo smo
         left outer join $sitsSchema.cam_ssn ssn
           on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -585,7 +594,8 @@ object AssignmentImporter {
       case when (mab.mab_advc = 'X') then 'n/a' else ${castToString("mab.mab_advc")} end as exam_paper_section,
       coalesce(mab.mab_hohm, adv.adv_dura) as exam_paper_duration,
       adv.adv_rdtm as exam_paper_reading_time,
-      ${castToString("apa.apa_aptc")} as exam_paper_type
+      ${castToString("apa.apa_aptc")} as exam_paper_type,
+      ${castToString("mab.mab_fayn")} as final_chronological_assessment
       from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
         join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
           on mab.map_code = mav.mod_code and
@@ -659,7 +669,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
           join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
             on scj.scj_sprc = spr.spr_code and
@@ -685,6 +696,11 @@ object AssignmentImporter {
           left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = sms.spr_code and sra.ayr_code = sms.ayr_code and sra.mod_code = sms.mod_code
               and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         sms.ayr_code in (:current_academic_year_code)"""
@@ -708,7 +724,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -735,6 +752,11 @@ object AssignmentImporter {
            left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
               and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         smo.ayr_code in (:academic_year_code)"""
@@ -757,7 +779,8 @@ object AssignmentImporter {
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
       sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
+      sra.sra_cura as current_attempt_number
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -784,6 +807,11 @@ object AssignmentImporter {
           left join $sitsSchema.cam_sra sra -- Where resit marks go
             on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
               and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
+              and sra.sra_rseq = (
+                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
+                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
+                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
+              )
 
       where
         smo.ayr_code in (:academic_year_code) and
@@ -980,6 +1008,10 @@ object AssignmentImporter {
       a.examPaperDuration = Option(rs.getTimestamp("exam_paper_duration")).map(dateToDuration)
       a.examPaperReadingTime = if (rs.getTimestamp("exam_paper_reading_time") != null) Some(Duration.standardMinutes(15)) else None
       a.examPaperType = Option(rs.getString("exam_paper_type")).map(ExaminationType.withName)
+      a.finalChronologicalAssessment = rs.getString("final_chronological_assessment") match {
+        case "Y" | "y" => true
+        case _ => false
+      }
       a
     }
   }

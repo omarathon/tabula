@@ -207,9 +207,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
     val bestCats = numberCatsToConsiderPG(scyd)
-    val bestModules = bestPGModules(moduleRegistrations, bestCats)
-    val total = bestModules._1.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
-    (total / bestModules._2).setScale(1, RoundingMode.HALF_UP)
+    val (bestModules, catsConsidered) = bestPGModules(moduleRegistrations, bestCats)
+    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
+    if(catsConsidered > 0) (total / catsConsidered).setScale(1, RoundingMode.HALF_UP) else BigDecimal(0)
   }
 
   def bestPGModules(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): (Seq[ModuleRegistration], BigDecimal) = {
