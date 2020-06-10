@@ -164,7 +164,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       val existingRow = smrExistingRowQuery.getExsitingSmrRow(parameterMap)
       Some(SmrSubset(Option(existingRow.get("SMR_SASS").asInstanceOf[String]), Option(existingRow.get("SMR_PRCS").asInstanceOf[String]),
         Option(existingRow.get("SMR_PROC").asInstanceOf[String]), Option(existingRow.get("SMR_CRED").asInstanceOf[JBigDecimal]),
-        Option(existingRow.get("SMR_CURA").asInstanceOf[JInteger]), Option(existingRow.get("SMR_COMA").asInstanceOf[JInteger])))
+        Option(existingRow.get("SMR_CURA").asInstanceOf[JBigDecimal].intValue), Option(existingRow.get("SMR_COMA").asInstanceOf[JBigDecimal].intValue)))
     } catch {
       case e: EmptyResultDataAccessException => None
     }
