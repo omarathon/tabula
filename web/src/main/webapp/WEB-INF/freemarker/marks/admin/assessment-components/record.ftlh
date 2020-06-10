@@ -32,7 +32,7 @@
                 <th class="col-sm-1 sortable">First name</th>
                 <th class="col-sm-1 sortable">Last name</th>
                 <th class="col-sm-1 sortable">Mark</th>
-                <th class="col-sm-1 sortable">Grade</th>
+                <th class="col-sm-1 sortable" data-sorter="text">Grade</th>
                 <th class="col-sm-2">New mark</th>
                 <th class="col-sm-2">New grade</th>
                 <th class="col-sm-3">Comments</th>
@@ -110,7 +110,7 @@
                       </@modal.modal>
                     </#if>
                   </td>
-                  <td>
+                  <td data-sortby="g${student.grade!'-'}">
                     ${student.grade!'-'}
                   </td>
                   <td>

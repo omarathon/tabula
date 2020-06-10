@@ -59,7 +59,7 @@
                   ${scaledMark}
                 </#if>
               </td>
-              <td data-sortby="${scaledGrade}">
+              <td data-sortby="g${scaledGrade}">
                 ${originalGrade}
                 <#if originalGrade != scaledGrade>
                   <i class="fal fa-arrow-right"></i>
