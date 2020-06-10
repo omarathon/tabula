@@ -26,9 +26,7 @@ trait AutowiringExportStudentModuleResultToSitsServiceComponent extends ExportSt
 }
 
 trait ExportStudentModuleResultToSitsService {
-
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int
-
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int
 }
 
 class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
@@ -100,7 +98,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
   }
 
 
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = {
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = {
     if (!SmoRecordExists(recordedModuleRegistration)) {
       logger.warn(s"SMO doesn't exists. Unable to update module mark record for ${recordedModuleRegistration.sprCode}, ${recordedModuleRegistration.sitsModuleCode}, ${recordedModuleRegistration.academicYear.toString}")
       0 //can throw an exception in case we want to report this to  user via UI
@@ -120,7 +118,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         "agreedModuleGrade" -> null,
         "credits" -> subsetData.credits,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
-        "finalAssesmentsAttended" -> "Y", //TAB-8438
+        "finalAssesmentsAttended" -> (if (finalAssessmentAttended) "Y" else "N"),
         "dateTimeMarksUploaded" -> DateTime.now.toDate,
         "moduleResult" -> recordedModuleRegistration.latestResult.map(_.dbValue).orNull,
         "initialSASStatus" -> subsetData.sasStatus.orNull,
@@ -221,7 +219,7 @@ class ExportStudentModuleResultToSitsServiceImpl
 @Service
 class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
 
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = 0
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = 0
 
 }
 
