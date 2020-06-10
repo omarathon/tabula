@@ -197,6 +197,13 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
   def examPaperType_=(examPaperType: Option[ExaminationType]): Unit = _examPaperType = examPaperType.orNull
 
   /**
+   * Whether this assessment component represents the final chronological assessment for this assessment group. This
+   * will (should) be set to true for exactly one AssessmentComponent for a combination of [[moduleCode]] and [[assessmentGroup]].
+   */
+  @Column(name = "final_chronological_assessment")
+  var finalChronologicalAssessment: Boolean = _
+
+  /**
     * Returns moduleCode without CATS. e.g. in304
     */
   def moduleCodeBasic: String = Module.stripCats(moduleCode).getOrElse(throw new IllegalArgumentException(s"$moduleCode did not fit expected module code pattern"))
@@ -223,7 +230,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     this.examPaperSection != other.examPaperSection ||
     this.examPaperDuration != other.examPaperDuration ||
     this.examPaperReadingTime != other.examPaperReadingTime ||
-    this.examPaperType != other.examPaperType
+    this.examPaperType != other.examPaperType ||
+    this.finalChronologicalAssessment != other.finalChronologicalAssessment
 
   override def preSave(newRecord: Boolean): Unit = {
     ensureNotNull("name", name)
@@ -250,6 +258,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     examPaperDuration = other.examPaperDuration
     examPaperReadingTime = other.examPaperReadingTime
     examPaperType = other.examPaperType
+    finalChronologicalAssessment = other.finalChronologicalAssessment
   }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
@@ -267,7 +276,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     "examPaperSection" -> examPaperSection,
     "examPaperDuration" -> examPaperDuration,
     "examPaperReadingTime" -> examPaperReadingTime,
-    "examPaperType" -> examPaperType
+    "examPaperType" -> examPaperType,
+    "finalChronologicalAssessment" -> finalChronologicalAssessment
   )
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
