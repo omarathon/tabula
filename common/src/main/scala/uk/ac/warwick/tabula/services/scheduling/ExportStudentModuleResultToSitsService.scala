@@ -249,7 +249,7 @@ object ExportStudentModuleResultToSitsService {
        |      SMR_CRED = :credits,
        |      SMR_UDF2 = :currentDateTime, -- dd/MM/yy:HHmm format used by MRM. We store the same date time in fasd. May be we don't need this?
        |      SMR_UDF3 = :finalAssesmentsAttended,
-       |      SMR_UDF4 = 'TABULA',    --TODO- waiting confirmation from Roger but  doesn't look like anyone using it.
+       |      SMR_UDFA = 'TABULA',
        |      SMR_UDF5 = 'SRAs by dept',
        |      SMR_FASD = :dateTimeMarksUploaded,
        |      SMR_RSLT = :moduleResult, -- P/F/D/null values
