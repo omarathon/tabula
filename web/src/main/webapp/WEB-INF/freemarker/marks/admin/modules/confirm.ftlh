@@ -71,7 +71,7 @@
             <td data-sortby="${student.mark!-1}">
               ${student.mark!'-'}
             </td>
-            <td data-sortby="${student.grade!}">
+            <td data-sortby="g${student.grade!}">
               ${student.grade!'-'}
             </td>
             <td data-sortby="${(student.result.dbValue)!}">
@@ -93,7 +93,7 @@
             <td data-sortby="${student.mark!-1}">
               ${student.mark!'-'}
             </td>
-            <td data-sortby="${student.grade!}">
+            <td data-sortby="g${student.grade!}">
               ${student.grade!'-'}
             </td>
             <td data-sortby="${(student.result.dbValue)!}">
