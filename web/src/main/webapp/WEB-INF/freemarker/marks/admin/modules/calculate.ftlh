@@ -224,7 +224,7 @@
                           </@modal.modal>
                         </#if>
                       </td>
-                      <td>${marks.grade!'-'}</td>
+                      <td data-sortby="g${marks.grade!'-'}">${marks.grade!'-'}</td>
                     <#else>
                       <td colspan="2"><span class="very-subtle">N/A</span></td>
                     </#if>
@@ -238,7 +238,7 @@
                       </#if>
                       ${calculation.mark!'-'}
                     </td>
-                    <td data-sortby="${calculation.grade!}">
+                    <td data-sortby="g${calculation.grade!}">
                       <#if student.grade! != calculation.grade!>
                         ${student.grade!'-'}
                         <i class="fal fa-arrow-right"></i>

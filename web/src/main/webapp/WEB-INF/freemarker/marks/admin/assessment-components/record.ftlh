@@ -32,7 +32,7 @@
                 <th class="col-sm-1 sortable">First name</th>
                 <th class="col-sm-1 sortable">Last name</th>
                 <th class="col-sm-1 sortable">Mark</th>
-                <th class="col-sm-1 sortable">Grade</th>
+                <th class="col-sm-1 sortable" data-sorter="text">Grade</th>
                 <th class="col-sm-2">New mark</th>
                 <th class="col-sm-2">New grade</th>
                 <th class="col-sm-3">Comments</th>
@@ -51,7 +51,7 @@
                   <td>${member.firstName}</td>
                   <td>${member.lastName}</td>
                   <td data-sortby="${student.mark!-1}">
-                    ${student.mark!}
+                    ${student.mark!'-'}
                     <#if student.needsWritingToSits>
                       <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
                         <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
@@ -110,8 +110,8 @@
                       </@modal.modal>
                     </#if>
                   </td>
-                  <td>
-                    ${student.grade!}
+                  <td data-sortby="g${student.grade!'-'}">
+                    ${student.grade!'-'}
                   </td>
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}].mark">

@@ -28,9 +28,7 @@ trait AutowiringExportStudentModuleResultToSitsServiceComponent extends ExportSt
 }
 
 trait ExportStudentModuleResultToSitsService {
-
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int
-
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int
 }
 
 class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
@@ -171,7 +169,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
   }
 
 
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = {
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = {
     val existingSmr = SmrRecordSubdata(recordedModuleRegistration)
 
     if (!SmoRecordExists(recordedModuleRegistration)) {
@@ -196,7 +194,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         "agreedModuleGrade" -> null,
         "credits" -> subsetData.credits.orNull,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
-        "finalAssesmentsAttended" -> "Y", //TAB-8438
+        "finalAssesmentsAttended" -> (if (finalAssessmentAttended) "Y" else "N"),
         "dateTimeMarksUploaded" -> DateTime.now.toDate,
         "moduleResult" -> recordedModuleRegistration.latestResult.map(_.dbValue).orNull,
         "initialSASStatus" -> subsetData.sasStatus.orNull,
@@ -309,7 +307,7 @@ class ExportStudentModuleResultToSitsServiceImpl
 @Service
 class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
 
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration): Int = 0
+  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = 0
 
 }
 

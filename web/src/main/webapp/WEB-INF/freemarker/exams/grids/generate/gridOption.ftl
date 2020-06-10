@@ -493,23 +493,27 @@
           </div>
         </div>
 
-        <div class="col-md-3">
-          <div class="checkbox">
-            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
-                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>checked</#if>
-              /> Percentage assessments used in benchmark (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken used in the graduation benchmark (applies to UG students only)." />
-            </label>
+        <#if selectCourseCommand.ugCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>
+          <div class="col-md-3">
+            <div class="checkbox">
+              <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
+                            <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>checked</#if>
+                /> Percentage assessments used in benchmark (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken used in the graduation benchmark (applies to UG students only)." />
+              </label>
+            </div>
           </div>
-        </div>
+        </#if>
 
-        <div class="col-md-3">
-          <div class="checkbox">
-            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
-                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>checked</#if>
-              /> Number of CATS considered in benchmark (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered in the graduation benchmark (applies to PG students only)." />
-            </label>
+        <#if selectCourseCommand.pgCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>
+          <div class="col-md-3">
+            <div class="checkbox">
+              <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
+                            <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>checked</#if>
+                /> Number of CATS considered in benchmark (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered in the graduation benchmark (applies to PG students only)." />
+              </label>
+            </div>
           </div>
-        </div>
+        </#if>
 
         <div class="col-md-3">
           <div class="checkbox">
