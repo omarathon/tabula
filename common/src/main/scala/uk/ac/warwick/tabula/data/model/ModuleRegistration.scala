@@ -155,6 +155,9 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
     }.filter(_.universityId == studentCourseDetails.student.universityId)
 
+
+  def currentResitAttempt = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).sorted.lastOption
+
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
     val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))
     upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
