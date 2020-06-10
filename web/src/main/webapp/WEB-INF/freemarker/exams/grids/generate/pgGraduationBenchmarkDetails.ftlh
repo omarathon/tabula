@@ -125,6 +125,8 @@
       </#list>
     </table>
   </section>
-  <h2>*Weighted average</h2>
+  <#if breakdown.usedModulesWithCumulativeSums?has_content>
+    <h2>*Weighted average</h2>
     ${breakdown.usedModulesWithCumulativeSums?last.marks}/${breakdown.catsConsidered}=${breakdown.usedModulesWithCumulativeSums?last.marks / breakdown.catsConsidered}
+  </#if>
 </div>
