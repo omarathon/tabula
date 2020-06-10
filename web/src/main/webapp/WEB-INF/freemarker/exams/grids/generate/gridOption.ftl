@@ -504,7 +504,7 @@
           </div>
         </#if>
 
-        <#if selectCourseCommand.pgCourseIncluded>
+        <#if selectCourseCommand.pgCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>
           <div class="col-md-3">
             <div class="checkbox">
               <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
