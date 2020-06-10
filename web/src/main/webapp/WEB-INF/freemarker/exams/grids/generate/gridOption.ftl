@@ -493,7 +493,7 @@
           </div>
         </div>
 
-        <#if selectCourseCommand.ugCourseIncluded>
+        <#if selectCourseCommand.ugCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>
           <div class="col-md-3">
             <div class="checkbox">
               <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
