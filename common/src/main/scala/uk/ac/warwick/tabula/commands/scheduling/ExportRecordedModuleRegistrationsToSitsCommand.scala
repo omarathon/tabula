@@ -9,8 +9,9 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportStudentModuleResultToSitsServiceComponent, ExportStudentModuleResultToSitsServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import scala.jdk.CollectionConverters._
 
 object ExportRecordedModuleRegistrationsToSitsCommand {
   type Result = Seq[RecordedModuleRegistration]
@@ -25,6 +26,7 @@ object ExportRecordedModuleRegistrationsToSitsCommand {
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
       with AutowiringTransactionalComponent
 }
 
@@ -35,6 +37,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
     with ModuleRegistrationMarksServiceComponent
     with ModuleRegistrationServiceComponent
     with ModuleAndDepartmentServiceComponent
+    with AssessmentMembershipServiceComponent
     with TransactionalComponent =>
 
   override def applyInternal(): Result = transactional() {
@@ -47,7 +50,22 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
         logger.warn(s"Not uploading module mark $student as department for ${student.sitsModuleCode} is closed for ${student.academicYear}")
         None
       } else {
-        exportStudentModuleResultToSitsService.exportModuleMarksToSits(student) match {
+        // TAB-8438 we set that the student has attended the final assessment for a module if they have a non-0 component mark
+        // TODO How do we handle where there's no component mark? (Currently will be false)
+        // TODO What should we do if the final assessment was cancelled (i.e. has a grade of FM) or where the student has mitigation (grade M)? (Currently will be false)
+
+        // Find the final assessment component for a module
+        val finalAssessmentAttended =
+          student.moduleRegistration.exists { moduleRegistration =>
+            moduleRegistration.upstreamAssessmentGroupMembers
+              .find(_.upstreamAssessmentGroup.assessmentComponent.exists(_.finalChronologicalAssessment))
+              .exists { uagm =>
+                if (moduleRegistration.passFail) uagm.firstDefinedGrade.contains("P")
+                else uagm.firstDefinedMark.exists(_ > 0)
+              }
+          }
+
+        exportStudentModuleResultToSitsService.exportModuleMarksToSits(student, finalAssessmentAttended) match {
           case r if r > 1 =>
             throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
           case 1 =>
