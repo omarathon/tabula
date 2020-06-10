@@ -99,7 +99,7 @@
 
   <section>
     <h4>Calculating the Graduation Benchmark</h4>
-    <p>For final year students, the safety net policy will determine a ‘graduation benchmark’ that will be calculated by determining the average weighted marks for assessments counting towards their degree submitted up to the end of term 2 (13/3/20).1 For clarity, this will be determined by considering assessments in previous years where these would be considered as part of the final degree calculation.</p>
+    <p>For final year students, the safety net policy will determine a ‘graduation benchmark’ that will be calculated by determining the average weighted marks for assessments counting towards their degree submitted up to the end of term 2 (13/03/20). For clarity, this will be determined by considering assessments in previous years where these would be considered as part of the final degree calculation.</p>
 
     <div class="panel panel-info">
       <div class="panel-heading"><div class="panel-title">Graduation benchmark</div></div>
