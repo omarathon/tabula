@@ -288,15 +288,9 @@ object SandboxData {
   }
 
   def randomMarkSeed(universityId: String, moduleCode:String): Int = {
-    val seed = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+    (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
       Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
     ).sum
-
-    // bump up half of all fails so they aren't as common
-    seed % 100 match {
-      case i if i < 40 && i % 2 == 0 => seed + 30
-      case i => seed
-    }
   }
 
 }

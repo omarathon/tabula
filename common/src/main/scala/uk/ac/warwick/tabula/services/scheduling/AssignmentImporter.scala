@@ -277,34 +277,38 @@ class SandboxAssignmentImporter extends AssignmentImporter
 
           val (mark, grade) =
             if (generateMarks) {
-              val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+              if (moduleCode == "hom336" && component.sequence == "A05") {
+                (null, "FM")
+              } else {
+                val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
 
-              val randomModuleMark = SandboxData.randomMarkSeed(universityId, moduleCode) % 100
+                val randomModuleMark = SandboxData.randomMarkSeed(universityId, moduleCode) % 100
 
-              val m =
-                if (isPassFail) {
-                  if (randomModuleMark < 40) 0 else 100
-                } else {
-                  val markVariance = SandboxData.randomMarkSeed(universityId, moduleCode) % 15
+                val m =
+                  if (isPassFail) {
+                    if (randomModuleMark < 40) 0 else 100
+                  } else {
+                    val markVariance = SandboxData.randomMarkSeed(universityId, moduleCode) % 15
 
-                  val sequenceNumber = component.sequence.substring(1,3).toInt
-                  val assessmentMark = component.assessmentType.subtype match {
-                    case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance + sequenceNumber
-                    case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                    val sequenceNumber = component.sequence.substring(1,3).toInt
+                    val assessmentMark = component.assessmentType.subtype match {
+                      case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance + sequenceNumber
+                      case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                    }
+
+                    Math.max(0, Math.min(100, assessmentMark))
                   }
 
-                  Math.max(0, Math.min(100, assessmentMark))
-                }
+                val marksCode =
+                  if (isPassFail) "TABULA-PF"
+                  else "TABULA-UG"
 
-              val marksCode =
-                if (isPassFail) "TABULA-PF"
-                else "TABULA-UG"
+                val g =
+                  if (isPassFail) if (m == 100) "P" else "F"
+                  else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
-              val g =
-                if (isPassFail) if (m == 100) "P" else "F"
-                else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
-
-              (if (isPassFail) null else m.toString, g)
+                (if (isPassFail) null else m.toString, g)
+              }
             } else (null: String, null: String)
 
           recordedStudent.filter(_.needsWritingToSits).foreach { s =>
