@@ -134,7 +134,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
             if (state.showZeroWeightedComponents)
               componentsAndWeights
             else {
-              componentsAndWeights.filter(_._2 == 0)
+              componentsAndWeights.filter(_._2 > 0)
             }
           }
 
