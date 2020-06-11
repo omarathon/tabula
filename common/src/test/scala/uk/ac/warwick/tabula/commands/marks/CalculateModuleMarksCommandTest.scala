@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.ModuleMarkCalculation
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, ModuleResult}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, ModuleRegistration, ModuleResult}
 
 class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
@@ -28,6 +28,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
       position = None,
       currentMember = true,
       resitExpected = resit,
+      furtherFirstSit = false,
       mark = mark,
       grade = grade,
       needsWritingToSits = false,
@@ -494,6 +495,24 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     // Total weighting of considered components (after VAW) is 175 + 300 = 475
     // (38 * (175/475)) + (55 * (300/475)) = 48.74
     algorithm.calculate(modReg, Seq(a01 -> marksA01, a02 -> marksA02, a03 -> marksA03, e01 -> marksE01)) should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(49), Some("3"), Some(ModuleResult.Pass))))
+  }
+
+  @Test def calculateResitCap(): Unit = new UGModuleFixture {
+
+    val ac1 = Fixtures.assessmentComponent(module, 1, marksCode = "WAR", weighting = 30)
+    ac1.membershipService = algorithm.assessmentMembershipService
+    val smr1 = markRecord(Some(64), Some("21"))
+
+    val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR", weighting = 70)
+    ac2.membershipService = algorithm.assessmentMembershipService
+    val smr2 = markRecord(Some(71), Some("1"), resit = true)
+
+    algorithm.assessmentMembershipService.passMark(any[ModuleRegistration], any[Boolean]) returns Some(40)
+    algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
+    algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
+
+    // (64 * (30/100)) + (40 * (70/100)) = 47.2
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(47), Some("3"), Some(ModuleResult.Pass)))
   }
 
 }

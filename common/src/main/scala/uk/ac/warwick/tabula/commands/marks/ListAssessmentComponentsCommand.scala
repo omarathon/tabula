@@ -18,6 +18,7 @@ object ListAssessmentComponentsCommand {
     position: Option[Int],
     currentMember: Boolean,
     resitExpected: Boolean,
+    furtherFirstSit: Boolean,
     mark: Option[Int],
     grade: Option[String],
     needsWritingToSits: Boolean,
@@ -28,12 +29,14 @@ object ListAssessmentComponentsCommand {
     upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   )
   object StudentMarkRecord {
-    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
+    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
+      val resit = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty)
       StudentMarkRecord(
         universityId = member.universityId,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
-        resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty),
+        resitExpected = resit,
+        furtherFirstSit = resit && member.currentResitAttempt.exists(_ <= 1),
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(member.firstAgreedMark)
@@ -56,6 +59,7 @@ object ListAssessmentComponentsCommand {
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member
       )
+    }
   }
 
   def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
