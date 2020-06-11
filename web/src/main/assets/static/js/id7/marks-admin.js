@@ -79,5 +79,27 @@ $(() => {
         $tabbable.eq(currentIndex + 1).focus();
       }
     });
+
+    $form.on('click', '[data-toggle="copy-values"][data-target]', (e) => {
+      const $button = $(e.target);
+      const $target = $($button.data('target'), $form);
+
+      $target.find('input[type="hidden"][data-target]').each((j, data) => {
+        const $data = $(data);
+        const $dataTarget = $($data.data('target'), $form);
+        const value = $data.val();
+
+        if ($dataTarget.is('select')) {
+          const $option = $dataTarget.find('option').filter((k, option) => $(option).val() === value);
+          if ($option.length === 0) {
+            $dataTarget.append($('<option />').attr('value', value).text(value));
+          }
+
+          $dataTarget.val(value);
+        } else {
+          $dataTarget.val(value);
+        }
+      });
+    });
   });
 });

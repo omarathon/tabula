@@ -27,10 +27,66 @@ import scala.util.Using
 import scala.xml.InputSource
 
 object CalculateModuleMarksCommand {
-  sealed trait ModuleMarkCalculation { def isSuccessful: Boolean }
+  sealed trait ModuleMarkCalculation {
+    def isSuccessful: Boolean
+    def isMultiple: Boolean
+  }
   object ModuleMarkCalculation {
-    case class Success(mark: Option[Int], grade: Option[String], result: Option[ModuleResult]) extends ModuleMarkCalculation { override val isSuccessful: Boolean = true }
-    case class Failure(message: String) extends ModuleMarkCalculation { override val isSuccessful: Boolean = false }
+    case class Success(mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: Option[String] = None) extends ModuleMarkCalculation {
+      override val isSuccessful: Boolean = true
+      override val isMultiple: Boolean = false
+    }
+    case class Multiple(suggestions: Seq[(String, ModuleMarkCalculation)], reason: String) extends ModuleMarkCalculation {
+      override val isSuccessful: Boolean = true
+      override val isMultiple: Boolean = true
+    }
+    case class Failure(message: String) extends ModuleMarkCalculation {
+      override val isSuccessful: Boolean = false
+      override val isMultiple: Boolean = false
+    }
+
+    // Some reusable results (just trying to keep these together)
+    object Success {
+      def apply(mark: Option[Int], gradeBoundary: Option[GradeBoundary]): Success = Success(mark, gradeBoundary.map(_.grade), gradeBoundary.flatMap(_.result))
+      def PassFail(gradeBoundary: GradeBoundary): Success = Success(None, Some(gradeBoundary.grade), gradeBoundary.result)
+    }
+
+    object MissingMarkAdjustment {
+      val NoCalculationPossible: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.Pass), comments = Some("Missing mark adjustment - learning outcomes assessed, unable to calculate an overall module mark"))
+      val AllComponentsMissing: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.NoResult), comments = Some("Missing mark adjustment - learning outcomes not assessed"))
+
+      // Option 1) Use the remaining components to calculate a mark, with credit
+      // Option 2) A force majeure pass, with credit
+      // Option 3) No result, no credit
+      def SomeComponentsMissing(calculation: ModuleMarkCalculation): Multiple = Multiple(Seq(
+        "One or more assessments have been cancelled but the module learning outcomes have still been delivered, so the module mark is calculated from a weighted average of the remaining components." -> (calculation match {
+          case s: ModuleMarkCalculation.Success => s.copy(comments = Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))
+          case o => o
+        }),
+        "One or more assessments have been cancelled, and the weighting or nature of the cancelled assessments is such that an overall module mark cannot be calculated to differentiate student performance, or provide a realistic assessment of student achievement against the learning outcomes." -> NoCalculationPossible,
+        "One or more assessments have been cancelled and there is insufficient evidence available that the student has achieved the learning outcomes of the module, so no credit can be awarded." -> AllComponentsMissing
+      ), "At least one component has been recorded as missed due to force majeure. Which calculation to use depends on whether there have been sufficient other components to deliver the learning outcomes for the module.")
+    }
+
+    object Failure {
+      val NoModuleRegistration: Failure = Failure("No module registration found")
+      val NoComponentMarks: Failure = Failure("There were no component marks")
+      val NoMarkScheme: Failure = Failure("There is no mark scheme associated with the module registration")
+      def MarksAndGradesMissingFor(sequences: Seq[String]): Failure = Failure(s"Marks and grades are missing for ${sequences.mkString(", ")}")
+
+      object PassFail {
+        val MismatchedMarkScheme: Failure = Failure("Not all components are pass/fail but module is")
+        def GradesMissingFor(sequences: Seq[String]): Failure = Failure(s"Grades are missing for ${sequences.mkString(", ")}")
+        val NoDefaultGrade: Failure = Failure("Unable to select a valid grade")
+        def MismatchedGrades(grades: Seq[String]): Failure = Failure(s"Couldn't automatically select a result from component grades ${grades.mkString(", ")}")
+      }
+
+      def MarksMissingFor(sequences: Seq[String]): Failure = Failure(s"Marks are missing for ${sequences.mkString(", ")}")
+      def WeightingsMissingFor(sequences: Seq[String]): Failure = Failure(s"Weightings are missing for ${sequences.mkString(", ")}")
+      def NoGradeBoundary(grade: String): Failure = Failure(s"Unable to find grade boundary for $grade grade")
+      def MismatchedIndicatorGrades(grades: Seq[String], sequences: Seq[String]): Failure = Failure(s"Mis-matched indicator grades ${grades.mkString(", ")} for ${sequences.mkString(", ")}")
+      val General: Failure = Failure("Couldn't automatically calculate a module result")
+    }
   }
 
   type SprCode = String
@@ -138,7 +194,7 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
             }.toMap
 
           (weightedComponents, calculate(moduleRegistration, components))
-        }.getOrElse((Map.empty[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation.Failure("No module registration found")))
+        }.getOrElse((Map.empty[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation.Failure.NoModuleRegistration))
 
       (student, cm, calculation)
     }
@@ -250,10 +306,11 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
 
       // If we can make a calculation we always use it, but make it clear that we have done
       calculation match {
-        case ModuleMarkCalculation.Success(mark, grade, result) =>
+        case ModuleMarkCalculation.Success(mark, grade, result, comments) =>
           mark.foreach(m => s.mark = m.toString)
           grade.foreach(s.grade = _)
           result.foreach(r => s.result = r.dbValue)
+          comments.foreach(s.comments = _)
 
         case _ => // Do nothing
       }
@@ -272,129 +329,138 @@ trait CalculateModuleMarksAlgorithm {
       s.universityId == components.head._2.universityId
     })
 
-    if (components.isEmpty) ModuleMarkCalculation.Failure("There were no component marks")
-    else if (!moduleRegistration.marksCode.hasText) ModuleMarkCalculation.Failure("There is no mark scheme associated with the module registration")
+    if (components.isEmpty) ModuleMarkCalculation.Failure.NoComponentMarks
+    else if (!moduleRegistration.marksCode.hasText) ModuleMarkCalculation.Failure.NoMarkScheme
     else {
       val componentsWithMissingMarkOrGrades = components.filter { case (_, s) => s.mark.isEmpty && s.grade.isEmpty }.map(_._1).sortBy(_.sequence)
 
-      if (componentsWithMissingMarkOrGrades.nonEmpty) ModuleMarkCalculation.Failure(s"Marks and grades are missing for ${componentsWithMissingMarkOrGrades.map(_.sequence).mkString(", ")}")
+      if (componentsWithMissingMarkOrGrades.nonEmpty) ModuleMarkCalculation.Failure.MarksAndGradesMissingFor(componentsWithMissingMarkOrGrades.map(_.sequence))
       else {
         val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) && !s.grade.contains(GradeBoundary.MitigatingCircumstancesGrade) }
-        if (componentsForCalculation.isEmpty && components.forall(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) ModuleMarkCalculation.Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), None)
-        else {
-          def validGradesForMark(m: Option[Int]) =
-            assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.exists(_._2.resitExpected))
+        if (componentsForCalculation.isEmpty && components.forall(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
+          // No components have been assessed, so it is not possible to grant credit.
+          ModuleMarkCalculation.MissingMarkAdjustment.AllComponentsMissing
+        } else {
+          lazy val calculation = {
+            def validGradesForMark(m: Option[Int]) =
+              assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.exists(_._2.resitExpected))
 
-          // Is this a pass/fail module?
-          if (moduleRegistration.passFail) {
-            // All the components must also be passFail
-            if (componentsForCalculation.exists { case (c, _) => !moduleRegistration.marksCode.maybeText.contains(c.marksCode) }) {
-              ModuleMarkCalculation.Failure("Not all components are pass/fail but module is")
-            } else {
-              val validGrades = validGradesForMark(None)
-              def passFailResult(grade: String): ModuleMarkCalculation =
-                validGrades.find(_.grade == grade) match {
-                  case None => ModuleMarkCalculation.Failure(s"Unable to find grade boundary for $grade grade")
-                  case Some(gradeBoundary) => ModuleMarkCalculation.Success(None, Some(gradeBoundary.grade), gradeBoundary.result)
+            // Is this a pass/fail module?
+            if (moduleRegistration.passFail) {
+              // All the components must also be passFail
+              if (componentsForCalculation.exists { case (c, _) => !moduleRegistration.marksCode.maybeText.contains(c.marksCode) }) {
+                ModuleMarkCalculation.Failure.PassFail.MismatchedMarkScheme
+              } else {
+                val validGrades = validGradesForMark(None)
+                def passFailResult(grade: String): ModuleMarkCalculation =
+                  validGrades.find(_.grade == grade) match {
+                    case None => ModuleMarkCalculation.Failure.NoGradeBoundary(grade)
+                    case Some(gradeBoundary) => ModuleMarkCalculation.Success.PassFail(gradeBoundary)
+                  }
+
+                // Each component must have a grade
+                val componentsWithMissingGrades = componentsForCalculation.filter(_._2.grade.isEmpty).map(_._1).sortBy(_.sequence)
+
+                if (componentsWithMissingGrades.nonEmpty) ModuleMarkCalculation.Failure.PassFail.GradesMissingFor(componentsWithMissingGrades.map(_.sequence))
+                else if (componentsForCalculation.size == 1) {
+                  // If there's a single component and it's valid, just copy it over
+                  val gb: Option[GradeBoundary] = componentsForCalculation.head._2.grade match {
+                    case Some(existing) => validGrades.find(_.grade == existing)
+                    case _ => validGrades.find(_.isDefault)
+                  }
+
+                  gb match {
+                    case None => ModuleMarkCalculation.Failure.PassFail.NoDefaultGrade
+                    case Some(gradeBoundary) => ModuleMarkCalculation.Success.PassFail(gradeBoundary)
+                  }
+                } else if (componentsForCalculation.exists(_._2.grade.contains("F"))) {
+                  // Any fail grades in lead to a fail grade out
+                  passFailResult("F")
+                } else if (componentsForCalculation.exists(_._2.grade.contains("R"))) {
+                  // Any resit grades in to a resit grade out
+                  passFailResult("R")
+                } else if (componentsForCalculation.forall(_._2.grade.contains("P"))) {
+                  // All passes in leads to a pass out
+                  passFailResult("P")
+                } else {
+                  // ¯\_(ツ)_/¯
+                  ModuleMarkCalculation.Failure.PassFail.MismatchedGrades(componentsForCalculation.flatMap(_._2.grade))
                 }
+              }
+            } else {
+              // Each component must have a mark
+              val componentsWithMissingMarks = componentsForCalculation.filter(_._2.mark.isEmpty).map(_._1).sortBy(_.sequence)
 
-              // Each component must have a grade
-              val componentsWithMissingGrades = componentsForCalculation.filter(_._2.grade.isEmpty).map(_._1).sortBy(_.sequence)
-
-              if (componentsWithMissingGrades.nonEmpty) ModuleMarkCalculation.Failure(s"Grades are missing for ${componentsWithMissingGrades.map(_.sequence).mkString(", ")}")
+              if (componentsWithMissingMarks.nonEmpty) ModuleMarkCalculation.Failure.MarksMissingFor(componentsWithMissingMarks.map(_.sequence))
               else if (componentsForCalculation.size == 1) {
                 // If there's a single component and it's valid, just copy it over
+                val validGrades = validGradesForMark(componentsForCalculation.head._2.mark)
+
                 val gb: Option[GradeBoundary] = componentsForCalculation.head._2.grade match {
                   case Some(existing) => validGrades.find(_.grade == existing)
                   case _ => validGrades.find(_.isDefault)
                 }
 
                 gb match {
-                  case None => ModuleMarkCalculation.Failure("Unable to select a valid grade")
-                  case Some(gradeBoundary) => ModuleMarkCalculation.Success(None, Some(gradeBoundary.grade), gradeBoundary.result)
+                  case None => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, None)
+                  case Some(gradeBoundary) => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, Some(gradeBoundary))
                 }
-              } else if (componentsForCalculation.exists(_._2.grade.contains("F"))) {
-                // Any fail grades in lead to a fail grade out
-                passFailResult("F")
-              } else if (componentsForCalculation.exists(_._2.grade.contains("R"))) {
-                // Any resit grades in to a resit grade out
-                passFailResult("R")
-              } else if (componentsForCalculation.forall(_._2.grade.contains("P"))) {
-                // All passes in leads to a pass out
-                passFailResult("P")
               } else {
-                // ¯\_(ツ)_/¯
-                ModuleMarkCalculation.Failure(s"Couldn't automatically select a result from component grades ${componentsForCalculation.flatMap(_._2.grade).mkString(", ")}")
-              }
-            }
-          } else {
-            // Each component must have a mark
-            val componentsWithMissingMarks = componentsForCalculation.filter(_._2.mark.isEmpty).map(_._1).sortBy(_.sequence)
+                val componentsWithMissingWeighting = components.filter(_._1.scaledWeighting.isEmpty).map(_._1).sortBy(_.sequence)
 
-            if (componentsWithMissingMarks.nonEmpty) ModuleMarkCalculation.Failure(s"Marks are missing for ${componentsWithMissingMarks.map(_.sequence).mkString(", ")}")
-            else if (componentsForCalculation.size == 1) {
-              // If there's a single component and it's valid, just copy it over
-              val validGrades = validGradesForMark(componentsForCalculation.head._2.mark)
+                if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure.WeightingsMissingFor(componentsWithMissingWeighting.map(_.sequence))
+                else {
+                  // If there are any indicator grades, just fail out unless all the grades are the same
+                  def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean =
+                    s.grade.exists(g => assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected).find(_.grade == g).exists(!_.isDefault))
 
-              val gb: Option[GradeBoundary] = componentsForCalculation.head._2.grade match {
-                case Some(existing) => validGrades.find(_.grade == existing)
-                case _ => validGrades.find(_.isDefault)
-              }
+                  // We know that all weightings are defined and all marks are defined at this point
+                  val calculatedMark = {
+                    // We need to consider all components for marks for weighting, including FM marks
+                    val marksForWeighting: Seq[(AssessmentType, String, Option[Int])] =
+                      components.map { case (ac, s) =>
+                        (ac.assessmentType, ac.sequence, s.mark)
+                      }
 
-              gb match {
-                case None => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, None, None)
-                case Some(gradeBoundary) => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, Some(gradeBoundary.grade), gradeBoundary.result)
-              }
-            } else {
-              val componentsWithMissingWeighting = components.filter(_._1.scaledWeighting.isEmpty).map(_._1).sortBy(_.sequence)
+                    val totalWeighting: BigDecimal = componentsForCalculation.map(_._1.weightingFor(marksForWeighting).get).sum
 
-              if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure(s"Weightings are missing for ${componentsWithMissingWeighting.map(_.sequence).mkString(", ")}")
-              else {
-                // If there are any indicator grades, just fail out unless all the grades are the same
-                def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean =
-                  s.grade.exists(g => assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected).find(_.grade == g).exists(!_.isDefault))
+                    componentsForCalculation.map { case (ac, s) =>
+                      val mark = s.mark.get
+                      val weighting = ac.weightingFor(marksForWeighting).get
 
-                // We know that all weightings are defined and all marks are defined at this point
-                val calculatedMark = {
-                  // We need to consider all components for marks for weighting, including FM marks
-                  val marksForWeighting: Seq[(AssessmentType, String, Option[Int])] =
-                    components.map { case (ac, s) =>
-                      (ac.assessmentType, ac.sequence, s.mark)
+                      mark * (weighting / totalWeighting)
+                    }.sum
+                  }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
+                  val validGrades = validGradesForMark(Some(calculatedMark))
+
+                  val componentsWithIndicatorGrades = componentsForCalculation.filter { case (ac, s) => isIndicatorGrade(ac, s) }.sortBy(_._1.sequence)
+
+                  if (componentsWithIndicatorGrades.size == componentsForCalculation.size && componentsForCalculation.nonEmpty && componentsForCalculation.forall(_._2.grade == componentsForCalculation.head._2.grade)) {
+                    val grade = componentsForCalculation.head._2.grade.get
+
+                    validGrades.find(_.grade == grade) match {
+                      case None => ModuleMarkCalculation.Failure.NoGradeBoundary(grade)
+                      case Some(gradeBoundary) => ModuleMarkCalculation.Success(Some(calculatedMark), Some(gradeBoundary))
                     }
-
-                  val totalWeighting: BigDecimal = componentsForCalculation.map(_._1.weightingFor(marksForWeighting).get).sum
-
-                  componentsForCalculation.map { case (ac, s) =>
-                    val mark = s.mark.get
-                    val weighting = ac.weightingFor(marksForWeighting).get
-
-                    mark * (weighting / totalWeighting)
-                  }.sum
-                }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
-                val validGrades = validGradesForMark(Some(calculatedMark))
-
-                val componentsWithIndicatorGrades = componentsForCalculation.filter { case (ac, s) => isIndicatorGrade(ac, s) }.sortBy(_._1.sequence)
-
-                if (componentsWithIndicatorGrades.size == componentsForCalculation.size && componentsForCalculation.nonEmpty && componentsForCalculation.forall(_._2.grade == componentsForCalculation.head._2.grade)) {
-                  val grade = componentsForCalculation.head._2.grade.get
-
-                  validGrades.find(_.grade == grade) match {
-                    case None => ModuleMarkCalculation.Failure(s"Unable to find grade boundary for $grade grade")
-                    case Some(gradeBoundary) => ModuleMarkCalculation.Success(Some(calculatedMark), Some(gradeBoundary.grade), gradeBoundary.result)
-                  }
-                } else if (componentsWithIndicatorGrades.nonEmpty) {
-                  ModuleMarkCalculation.Failure(s"Mis-matched indicator grades ${componentsWithIndicatorGrades.map(_._2.grade.get).mkString(", ")} for ${componentsWithIndicatorGrades.map(_._1.sequence).mkString(", ")}")
-                } else if (componentsForCalculation.isEmpty) {
-                  ModuleMarkCalculation.Failure("Couldn't automatically calculate a module result")
-                } else {
-                  validGrades.find(_.isDefault) match {
-                    case None => ModuleMarkCalculation.Success(Some(calculatedMark), None, None)
-                    case Some(gradeBoundary) => ModuleMarkCalculation.Success(Some(calculatedMark), Some(gradeBoundary.grade), gradeBoundary.result)
+                  } else if (componentsWithIndicatorGrades.nonEmpty) {
+                    ModuleMarkCalculation.Failure.MismatchedIndicatorGrades(componentsWithIndicatorGrades.flatMap(_._2.grade), componentsWithIndicatorGrades.map(_._1.sequence))
+                  } else if (componentsForCalculation.isEmpty) {
+                    ModuleMarkCalculation.Failure.General
+                  } else {
+                    validGrades.find(_.isDefault) match {
+                      case None => ModuleMarkCalculation.Success(Some(calculatedMark), None, None)
+                      case Some(gradeBoundary) => ModuleMarkCalculation.Success(Some(calculatedMark), Some(gradeBoundary))
+                    }
                   }
                 }
               }
             }
           }
+
+          if (componentsForCalculation.nonEmpty && components.exists(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
+            // We have at least one FM component but not all, so we can't do a single calculation. We need to offer multiple options
+            ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(calculation)
+          } else calculation
         }
       }
     }
@@ -482,13 +548,15 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
       // TAB-8428 if the mark, grade or result differ from the current mark, grade or result AND they differ from the calculated
       // mark, grade and result, comment becomes mandatory
-      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, componentMarks, calculation) =>
-        lazy val doesntMatchCalculation = calculation match {
-          case ModuleMarkCalculation.Success(calculatedMark, calculatedGrade, calculatedResult) =>
-            item.mark.maybeText.exists(m => m != calculatedMark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
-            item.grade.maybeText.exists(g => g != calculatedGrade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
-            item.result.maybeText.exists(r => r != calculatedResult.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
+      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, _, calculation) =>
+        def matchesCalculation(calculation: ModuleMarkCalculation.Success): Boolean =
+          item.mark.maybeText.exists(m => m != calculation.mark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
+          item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
+          item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
 
+        lazy val doesntMatchCalculation = calculation match {
+          case c: ModuleMarkCalculation.Success => matchesCalculation(c)
+          case m: ModuleMarkCalculation.Multiple => m.suggestions.collect { case (_, c: ModuleMarkCalculation.Success) => c }.exists(matchesCalculation)
           case _ => false // If the calculation was a failure, allow it through
         }
 
