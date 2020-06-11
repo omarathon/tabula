@@ -179,7 +179,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         agreedMark = if (academicYear < AcademicYear.now()) mark else None,
         agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
         marksCode = marksCode,
-        moduleResult = result,
+        moduleResult = recordedModuleRegistration.flatMap(_.latestResult).map(_.dbValue).getOrElse(result),
         endWeek = None
       )
     }).toSeq
