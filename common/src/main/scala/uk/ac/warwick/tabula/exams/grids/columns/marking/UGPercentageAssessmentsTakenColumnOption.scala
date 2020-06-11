@@ -19,7 +19,7 @@ class UGPercentageAssessmentsTakenColumnOption extends ChosenYearExamGridColumnO
 
   case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-    override val title: String = "Percentage Assessments Taken"
+    override val title: String = "Percentage of assessments taken"
 
     override val category: String = "Marking"
 

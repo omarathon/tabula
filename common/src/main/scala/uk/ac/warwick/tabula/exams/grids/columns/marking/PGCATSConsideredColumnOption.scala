@@ -17,7 +17,7 @@ class PGCATSConsideredColumnOption extends ChosenYearExamGridColumnOption with A
 
   case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-    override val title: String = "CATS Considered"
+    override val title: String = "CATS considered"
 
     override val category: String = "Marking"
 
