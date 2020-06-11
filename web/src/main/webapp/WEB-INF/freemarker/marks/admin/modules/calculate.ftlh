@@ -7,7 +7,330 @@
   <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<p>Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students.</p>
+<p>
+  Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students.
+  <#if has_mma_calculation(studentModuleMarkRecords)>
+    Because there are Force Majeure assessment components, you will need to perform a missing marks adjustment.
+  </#if>
+</p>
+
+<#macro moduleMarkStatusIcon student>
+  <#if student.needsWritingToSits>
+    <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
+      <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
+      <span class="sr-only">Waiting to be written to SITS</span>
+    </span>
+  <#elseif student.outOfSync>
+    <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
+      <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
+      <span class="sr-only">Mark is out of sync with current mark in SITS</span>
+    </span>
+  <#elseif student.agreed>
+    <span class="tabula-tooltip" data-title="Agreed mark published to student">
+      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
+      <span class="sr-only">Agreed mark published to student</span>
+    </span>
+  </#if>
+</#macro>
+
+<#macro componentMarkStatusIcon marks>
+  <#if marks.needsWritingToSits>
+    <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
+      <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
+      <span class="sr-only">Waiting to be written to SITS</span>
+    </span>
+  <#elseif marks.outOfSync>
+    <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
+      <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
+      <span class="sr-only">Mark is out of sync with current mark in SITS</span>
+    </span>
+  <#elseif marks.agreed>
+    <span class="tabula-tooltip" data-title="Agreed mark published to student">
+      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
+      <span class="sr-only">Agreed mark published to student</span>
+    </span>
+  </#if>
+</#macro>
+
+<#macro moduleMarkHistory student member>
+  <#if student.history?has_content>
+    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+
+    <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
+      <@modal.wrapper cssClass="modal-lg">
+        <@modal.header>
+          <h3 class="modal-title">Mark history for ${member.fullName}, ${student.sprCode}</h3>
+        </@modal.header>
+        <@modal.body>
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th class="col-sm-3">Date</th>
+                <th class="col-sm-3">User</th>
+                <th class="col-sm-1">Mark</th>
+                <th class="col-sm-1">Grade</th>
+                <th class="col-sm-1">Result</th>
+                <th class="col-sm-3">Comments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <#list student.history as history>
+                <tr>
+                  <td>
+                    <@fmt.date date=history.updatedDate />
+                  </td>
+                  <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
+                  <td>${history.mark!'-'}</td>
+                  <td>${history.grade!'-'}</td>
+                  <td>${(history.result.description)!'-'}</td>
+                  <td>${history.comments!}</td>
+                </tr>
+              </#list>
+            </tbody>
+          </table>
+        </@modal.body>
+        <@modal.footer>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </@modal.footer>
+      </@modal.wrapper>
+    </@modal.modal>
+  </#if>
+</#macro>
+
+<#macro componentMarkHistory marks ac member>
+  <#if marks.history?has_content>
+    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${marks.universityId}-${ac.sequence}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+
+    <@modal.modal id="mark-history-modal-${marks.universityId}-${ac.sequence}">
+      <@modal.wrapper cssClass="modal-lg">
+        <@modal.header>
+          <h3 class="modal-title">Mark history for ${member.fullName}, ${marks.universityId}, ${ac.name}</h3>
+        </@modal.header>
+        <@modal.body>
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th class="col-sm-3">Date</th>
+                <th class="col-sm-3">User</th>
+                <th class="col-sm-1">Mark</th>
+                <th class="col-sm-1">Grade</th>
+                <th class="col-sm-1">Result</th>
+                <th class="col-sm-3">Comments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <#list marks.history as history>
+                <tr>
+                  <td>
+                    <@fmt.date date=history.updatedDate />
+                  </td>
+                  <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
+                  <td>${history.mark!'-'}</td>
+                  <td>${history.grade!'-'}</td>
+                  <td>${(history.result.description)!'-'}</td>
+                  <td>${history.comments!}</td>
+                </tr>
+              </#list>
+            </tbody>
+          </table>
+        </@modal.body>
+        <@modal.footer>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </@modal.footer>
+      </@modal.wrapper>
+    </@modal.modal>
+  </#if>
+</#macro>
+
+<#macro calculationCells calculation student member>
+  <#if calculation.successful>
+    <#if calculation.multiple>
+      <td colspan="3">
+        <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#mma-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-ballot-check" aria-hidden="true"></i> Missing mark adjustment</button>
+
+        <@modal.modal id="mma-modal-${student.sprCode?replace('/', '_')}">
+          <@modal.wrapper cssClass="modal-lg">
+            <@modal.header>
+              <h3 class="modal-title">Missing mark adjustment for ${member.fullName}, ${student.sprCode}</h3>
+            </@modal.header>
+            <@modal.body>
+              <p>${calculation.reason}</p>
+
+              <p>Please select from one of the ${calculation.suggestions?size} possible calculations:</p>
+
+              <#local colours = ['success', 'info', 'warning'] />
+              <#list calculation.suggestions as s>
+                <#local explanation = s._1() />
+                <#local suggestion = s._2() />
+                <#if suggestion.successful && !suggestion.multiple>
+                  <div class="panel panel-${colours[s_index % 3]} no-wide-tables">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Option ${s_index + 1}</h3>
+                    </div>
+                    <div class="panel-body">
+                      <p>${explanation}</p>
+                    </div>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th class="col-xs-4">Mark</th>
+                          <th class="col-xs-4">Grade</th>
+                          <th class="col-xs-4">Result</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <@calculationCells suggestion student member />
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${s_index}">
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${suggestion.mark!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${suggestion.grade!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(suggestion.result.dbValue)!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${suggestion.comments!}" />
+                      <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${s_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                </#if>
+              </#list>
+            </@modal.body>
+            <@modal.footer>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </@modal.footer>
+          </@modal.wrapper>
+        </@modal.modal>
+      </td>
+    <#else>
+      <td data-sortby="${calculation.mark!-1}">
+        <#if (student.mark!-1) != (calculation.mark!-1)>
+          ${student.mark!'-'}
+          <i class="fal fa-arrow-right"></i>
+        </#if>
+        ${calculation.mark!'-'}
+      </td>
+      <td data-sortby="g${calculation.grade!}">
+        <#if student.grade! != calculation.grade!>
+          ${student.grade!'-'}
+          <i class="fal fa-arrow-right"></i>
+        </#if>
+        ${calculation.grade!'-'}
+      </td>
+      <td data-sortby="${(calculation.result.dbValue)!}">
+        <#if (student.result.description)! != (calculation.result.description)!>
+          ${(student.result.description)!'-'}
+          <i class="fal fa-arrow-right"></i>
+        </#if>
+        ${(calculation.result.description)!'-'}
+      </td>
+    </#if>
+  <#else>
+    <td colspan="3">
+      <span class="tabula-tooltip" data-title="${calculation.message}">
+        <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
+        <span class="sr-only">${calculation.message}</span>
+      </span>
+    </td>
+  </#if>
+</#macro>
+
+<#macro studentMarkRecordRow studentMarkRecord>
+  <#local student = studentMarkRecord._1() />
+  <#local componentMarks = studentMarkRecord._2() />
+  <#local calculation = studentMarkRecord._3() />
+  <#local member = membersBySprCode[student.sprCode] />
+
+  <tr>
+    <td data-sortby="${student.sprCode}">
+      <@pl.profile_link member.universityId />
+      ${student.sprCode}
+      <@moduleMarkStatusIcon student />
+      <@moduleMarkHistory student member />
+    </td>
+    <td>${member.firstName}</td>
+    <td>${member.lastName}</td>
+
+    <#list assessmentComponents as ac>
+      <#local marksAndWeighting = (mapGet(componentMarks, ac))! />
+      <#if marksAndWeighting?has_content>
+        <#local marks = marksAndWeighting._1() />
+        <#local weighting = (marksAndWeighting._2())! />
+        <td data-sortby="${marks.mark!-1}">
+          ${marks.mark!'-'}
+
+          <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
+            <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
+          </#if>
+
+          <@componentMarkStatusIcon marks />
+          <@componentMarkHistory marks ac member />
+        </td>
+        <td data-sortby="g${marks.grade!'-'}">${marks.grade!'-'}</td>
+      <#else>
+        <td colspan="2"><span class="very-subtle">N/A</span></td>
+      </#if>
+    </#list>
+
+    <@calculationCells calculation student member />
+
+    <td>
+      <@bs3form.labelled_form_group path="students[${student.sprCode}].mark">
+        <div class="input-group">
+          <@f.input path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+          <div class="input-group-addon">%</div>
+        </div>
+      </@bs3form.labelled_form_group>
+    </td>
+    <td>
+      <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
+        <#if isGradeValidation>
+          <#local generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#local>
+
+          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
+          <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+        <#else>
+          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
+        </#if>
+      </@bs3form.labelled_form_group>
+    </td>
+    <td>
+      <@bs3form.labelled_form_group path="students[${student.sprCode}].result">
+        <@f.select path="students[${student.sprCode}].result" cssClass="form-control">
+          <@f.option value="" />
+          <#list moduleResults as result>
+            <@f.option value=result.entryName label=result.description />
+          </#list>
+        </@f.select>
+      </@bs3form.labelled_form_group>
+    </td>
+    <td>
+      <@bs3form.labelled_form_group path="students[${student.sprCode}].comments">
+        <@f.input path="students[${student.sprCode}].comments" cssClass="form-control" />
+      </@bs3form.labelled_form_group>
+    </td>
+  </tr>
+</#macro>
+
+<#function has_mma_calculation studentModuleMarkRecords>
+  <#list studentModuleMarkRecords as studentMarkRecord>
+    <#local calculation = studentMarkRecord._3() />
+    <#if calculation.successful && calculation.multiple>
+      <#return true />
+    </#if>
+  </#list>
+  <#return false />
+</#function>
+
+<#function get_mma_records studentModuleMarkRecords>
+  <#local result = [] />
+  <#list studentModuleMarkRecords as studentMarkRecord>
+    <#local calculation = studentMarkRecord._3() />
+    <#if calculation.successful && calculation.multiple>
+      <#local result = result + [studentMarkRecord] />
+    </#if>
+  </#list>
+  <#return result />
+</#function>
 
 <#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
 
@@ -58,7 +381,60 @@
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
                 </#list>
 
-                <th colspan="3">Calculation</th>
+                <th colspan="3">
+                  Calculation
+                  <#if has_mma_calculation(studentModuleMarkRecords)>
+                    <#assign mmaModuleMarkRecords = get_mma_records(studentModuleMarkRecords) />
+                    <#assign baseCalculation = mmaModuleMarkRecords[0]._3() />
+                    <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#mma-modal-all"><i class="fal fa-ballot-check" aria-hidden="true"></i> Missing mark adjustment (all students)</button>
+
+                    <@modal.modal id="mma-modal-all">
+                      <@modal.wrapper cssClass="modal-lg">
+                        <@modal.header>
+                          <h3 class="modal-title">Missing mark adjustment for all students</h3>
+                        </@modal.header>
+                        <@modal.body>
+                          <p>${baseCalculation.reason}</p>
+
+                          <p>You can change the calculation for one or more individual students after you've chosen a default calculation for all students.</p>
+
+                          <p>Please select from one of the ${baseCalculation.suggestions?size} possible calculations:</p>
+
+                          <#assign colours = ['success', 'info', 'warning'] />
+                          <#list baseCalculation.suggestions as s>
+                            <#assign explanation = s._1() />
+                            <#assign suggestion = s._2() />
+                            <#if suggestion.successful && !suggestion.multiple>
+                              <div class="panel panel-${colours[s_index % 3]} no-wide-tables">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">Option ${s_index + 1}</h3>
+                                </div>
+                                <div class="panel-body">
+                                  <p>${explanation}</p>
+                                </div>
+                                <div class="panel-footer clearfix" id="mma-modal-all-suggestion-${s_index}">
+                                  <#list mmaModuleMarkRecords as studentMarkRecord>
+                                    <#assign student = studentMarkRecord._1() />
+                                    <#assign calculation = studentMarkRecord._3().suggestions[s_index]._2() />
+
+                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${calculation.mark!}" />
+                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${calculation.grade!}" />
+                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(calculation.result.dbValue)!}" />
+                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${calculation.comments!}" />
+                                  </#list>
+                                  <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-all-suggestion-${s_index}" data-dismiss="modal">Use this calculation for all students <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                                </div>
+                              </div>
+                            </#if>
+                          </#list>
+                        </@modal.body>
+                        <@modal.footer>
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        </@modal.footer>
+                      </@modal.wrapper>
+                    </@modal.modal>
+                  </#if>
+                </th>
 
                 <th class="col-sm-2" rowspan="2">Mark</th>
                 <th class="col-sm-1" rowspan="2">Grade</th>
@@ -79,224 +455,7 @@
             </thead>
             <tbody>
               <#list studentModuleMarkRecords as studentMarkRecord>
-                <#assign student = studentMarkRecord._1() />
-                <#assign componentMarks = studentMarkRecord._2() />
-                <#assign calculation = studentMarkRecord._3() />
-                <#assign member = membersBySprCode[student.sprCode] />
-
-                <tr>
-                  <td data-sortby="${student.sprCode}">
-                    <@pl.profile_link member.universityId />
-                    ${student.sprCode}
-
-                    <#if student.needsWritingToSits>
-                      <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
-                        <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
-                        <span class="sr-only">Waiting to be written to SITS</span>
-                      </span>
-                    <#elseif student.outOfSync>
-                      <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
-                        <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
-                        <span class="sr-only">Mark is out of sync with current mark in SITS</span>
-                      </span>
-                    <#elseif student.agreed>
-                      <span class="tabula-tooltip" data-title="Agreed mark published to student">
-                        <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
-                        <span class="sr-only">Agreed mark published to student</span>
-                      </span>
-                    </#if>
-
-                    <#if student.history?has_content>
-                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
-
-                      <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
-                        <@modal.wrapper cssClass="modal-lg">
-                          <@modal.header>
-                            <h3 class="modal-title">Mark history for ${student.sprCode}</h3>
-                          </@modal.header>
-                          <@modal.body>
-                            <table class="table table-condensed table-striped">
-                              <thead>
-                                <tr>
-                                  <th class="col-sm-3">Date</th>
-                                  <th class="col-sm-3">User</th>
-                                  <th class="col-sm-1">Mark</th>
-                                  <th class="col-sm-1">Grade</th>
-                                  <th class="col-sm-1">Result</th>
-                                  <th class="col-sm-3">Comments</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <#list student.history as history>
-                                  <tr>
-                                    <td>
-                                      <@fmt.date date=history.updatedDate />
-                                    </td>
-                                    <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
-                                    <td>${history.mark!'-'}</td>
-                                    <td>${history.grade!'-'}</td>
-                                    <td>${(history.result.description)!'-'}</td>
-                                    <td>${history.comments!}</td>
-                                  </tr>
-                                </#list>
-                              </tbody>
-                            </table>
-                          </@modal.body>
-                          <@modal.footer>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </@modal.footer>
-                        </@modal.wrapper>
-                      </@modal.modal>
-                    </#if>
-                  </td>
-                  <td>${member.firstName}</td>
-                  <td>${member.lastName}</td>
-
-                  <#list assessmentComponents as ac>
-                    <#assign marksAndWeighting = (mapGet(componentMarks, ac))! />
-                    <#if marksAndWeighting?has_content>
-                      <#assign marks = marksAndWeighting._1() />
-                      <#assign weighting = (marksAndWeighting._2())! />
-                      <td data-sortby="${marks.mark!-1}">
-                        ${marks.mark!'-'}
-
-                        <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
-                          <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
-                        </#if>
-
-                        <#if marks.needsWritingToSits>
-                          <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
-                            <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
-                            <span class="sr-only">Waiting to be written to SITS</span>
-                          </span>
-                        <#elseif marks.outOfSync>
-                          <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
-                            <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
-                            <span class="sr-only">Mark is out of sync with current mark in SITS</span>
-                          </span>
-                        <#elseif marks.agreed>
-                          <span class="tabula-tooltip" data-title="Agreed mark published to student">
-                            <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
-                            <span class="sr-only">Agreed mark published to student</span>
-                          </span>
-                        </#if>
-
-                        <#if marks.history?has_content>
-                          <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${marks.universityId}-${ac.sequence}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
-
-                          <@modal.modal id="mark-history-modal-${marks.universityId}-${ac.sequence}">
-                            <@modal.wrapper cssClass="modal-lg">
-                              <@modal.header>
-                                <h3 class="modal-title">Mark history for ${marks.universityId}, ${ac.name}</h3>
-                              </@modal.header>
-                              <@modal.body>
-                                <table class="table table-condensed table-striped">
-                                  <thead>
-                                    <tr>
-                                      <th class="col-sm-3">Date</th>
-                                      <th class="col-sm-3">User</th>
-                                      <th class="col-sm-1">Mark</th>
-                                      <th class="col-sm-1">Grade</th>
-                                      <th class="col-sm-1">Result</th>
-                                      <th class="col-sm-3">Comments</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <#list marks.history as history>
-                                      <tr>
-                                        <td>
-                                          <@fmt.date date=history.updatedDate />
-                                        </td>
-                                        <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
-                                        <td>${history.mark!'-'}</td>
-                                        <td>${history.grade!'-'}</td>
-                                        <td>${(history.result.description)!'-'}</td>
-                                        <td>${history.comments!}</td>
-                                      </tr>
-                                    </#list>
-                                  </tbody>
-                                </table>
-                              </@modal.body>
-                              <@modal.footer>
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                              </@modal.footer>
-                            </@modal.wrapper>
-                          </@modal.modal>
-                        </#if>
-                      </td>
-                      <td data-sortby="g${marks.grade!'-'}">${marks.grade!'-'}</td>
-                    <#else>
-                      <td colspan="2"><span class="very-subtle">N/A</span></td>
-                    </#if>
-                  </#list>
-
-                  <#if calculation.successful>
-                    <td data-sortby="${calculation.mark!-1}">
-                      <#if (student.mark!-1) != (calculation.mark!-1)>
-                        ${student.mark!'-'}
-                        <i class="fal fa-arrow-right"></i>
-                      </#if>
-                      ${calculation.mark!'-'}
-                    </td>
-                    <td data-sortby="g${calculation.grade!}">
-                      <#if student.grade! != calculation.grade!>
-                        ${student.grade!'-'}
-                        <i class="fal fa-arrow-right"></i>
-                      </#if>
-                      ${calculation.grade!'-'}
-                    </td>
-                    <td data-sortby="${(calculation.result.dbValue)!}">
-                      <#if (student.result.description)! != (calculation.result.description)!>
-                        ${(student.result.description)!'-'}
-                        <i class="fal fa-arrow-right"></i>
-                      </#if>
-                      ${(calculation.result.description)!'-'}
-                    </td>
-                  <#else>
-                    <td colspan="3">
-                      <span class="tabula-tooltip" data-title="${calculation.message}">
-                        <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
-                        <span class="sr-only">${calculation.message}</span>
-                      </span>
-                    </td>
-                  </#if>
-
-                  <td>
-                    <@bs3form.labelled_form_group path="students[${student.sprCode}].mark">
-                      <div class="input-group">
-                        <@f.input path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
-                        <div class="input-group-addon">%</div>
-                      </div>
-                    </@bs3form.labelled_form_group>
-                  </td>
-                  <td>
-                    <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
-                      <#if isGradeValidation>
-                        <#assign generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#assign>
-
-                        <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
-                        <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
-                      <#else>
-                        <@f.input path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
-                      </#if>
-                    </@bs3form.labelled_form_group>
-                  </td>
-                  <td>
-                    <@bs3form.labelled_form_group path="students[${student.sprCode}].result">
-                      <@f.select path="students[${student.sprCode}].result" cssClass="form-control">
-                        <@f.option value="" />
-                        <#list moduleResults as result>
-                          <@f.option value=result.entryName label=result.description />
-                        </#list>
-                      </@f.select>
-                    </@bs3form.labelled_form_group>
-                  </td>
-                  <td>
-                    <@bs3form.labelled_form_group path="students[${student.sprCode}].comments">
-                      <@f.input path="students[${student.sprCode}].comments" cssClass="form-control" />
-                    </@bs3form.labelled_form_group>
-                  </td>
-                </tr>
+                <@studentMarkRecordRow studentMarkRecord />
               </#list>
             </tbody>
           </table>
