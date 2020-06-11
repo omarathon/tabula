@@ -109,8 +109,13 @@
       <div class="panel-heading"><div class="panel-title">Graduation benchmark</div></div>
       <div class="panel-body">
         <#if breakdown.benchmarkErrors?has_content>
-          <div class="alert">
-            Unable to calculate the graduate benchmark. ${benchmarkErrors?join(" ")}
+          <div class="alert alert-info">
+            Unable to calculate the graduate benchmark.
+            <ul>
+              <#list breakdown.benchmarkErrors as benchmarkError>
+                <li>${benchmarkError}</li>
+              </#list>
+              </ul>
           </div>
         <#else>
           <div class="benchmark-breakdown-calculation">
