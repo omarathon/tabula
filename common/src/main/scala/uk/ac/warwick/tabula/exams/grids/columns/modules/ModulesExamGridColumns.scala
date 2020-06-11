@@ -138,7 +138,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
             }
           }
 
-          val (exams, assignments) = assessmentComponents.partition(_.assessmentType.subtype == TabulaAssessmentSubtype.Exam)
+          val (exams, assignments) = assessmentComponents.partition(_._1.upstreamAssessmentGroup.assessmentComponent.exists(_.assessmentType.subtype == TabulaAssessmentSubtype.Exam))
 
           ExamGridColumnValueType.toMap(
             overall = overallMark,
