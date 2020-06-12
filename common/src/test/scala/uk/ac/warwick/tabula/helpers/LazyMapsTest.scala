@@ -26,7 +26,7 @@ class LazyMapsTest extends TestBase {
 
     // .contains() just delegates to .get() so we'd expect it to get created
     map.contains(1) should be (true)
-    map.asJava.containsKey(1) should be (true)
+    map.asJava.containsKey(2) should be (true)
   }
 
   @Test def keySet(): Unit = {
@@ -34,14 +34,14 @@ class LazyMapsTest extends TestBase {
 
     // keySet is a view onto the Map, so .keySet.contains will delegate to .contains
     map.keySet.contains(1) should be (true)
-    map.asJava.keySet().contains(1) should be (true)
+    map.asJava.keySet().contains(2) should be (true)
   }
 
   @Test def keysIterator(): Unit = {
     val map: mutable.Map[Int, Int] = LazyMaps.create { (i: Int) => i + 1 }
 
     map.keysIterator.contains(1) should be (false)
-    map.asJava.asScala.keysIterator.contains(1) should be (false)
+    map.asJava.asScala.keysIterator.contains(2) should be (false)
   }
 
 }
