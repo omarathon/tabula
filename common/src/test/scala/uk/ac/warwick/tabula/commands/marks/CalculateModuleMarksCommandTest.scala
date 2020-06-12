@@ -175,7 +175,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "PF")
     val smr2 = markRecord(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade))
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(None, Some("P"), Some(ModuleResult.Pass))))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(None, Some("P"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
   private trait UGModuleFixture extends Fixture {
@@ -308,7 +309,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
     // Non-MMA components only are used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass))))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
   @Test def calculatePartialMitCircs(): Unit = new UGModuleFixture {
@@ -493,7 +495,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
     // Total weighting of considered components (after VAW) is 175 + 300 = 475
     // (38 * (175/475)) + (55 * (300/475)) = 48.74
-    algorithm.calculate(modReg, Seq(a01 -> marksA01, a02 -> marksA02, a03 -> marksA03, e01 -> marksE01)) should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(49), Some("3"), Some(ModuleResult.Pass))))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(a01 -> marksA01, a02 -> marksA02, a03 -> marksA03, e01 -> marksE01)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(49), Some("3"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
 }

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.marks
 
+import freemarker.core.TemplateHTMLOutputModel
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.util.CellReference
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.Stude
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -36,7 +38,8 @@ object CalculateModuleMarksCommand {
       override val isSuccessful: Boolean = true
       override val isMultiple: Boolean = false
     }
-    case class Multiple(suggestions: Seq[(String, ModuleMarkCalculation)], reason: String) extends ModuleMarkCalculation {
+    case class SuggestedModuleMarkCalculation(title: String, description: TemplateHTMLOutputModel, calculation: ModuleMarkCalculation)
+    case class Multiple(reason: TemplateHTMLOutputModel, suggestions: Seq[SuggestedModuleMarkCalculation]) extends ModuleMarkCalculation {
       override val isSuccessful: Boolean = true
       override val isMultiple: Boolean = true
     }
@@ -58,14 +61,35 @@ object CalculateModuleMarksCommand {
       // Option 1) Use the remaining components to calculate a mark, with credit
       // Option 2) A force majeure pass, with credit
       // Option 3) No result, no credit
-      def SomeComponentsMissing(calculation: ModuleMarkCalculation): Multiple = Multiple(Seq(
-        "One or more assessments have been cancelled but the module learning outcomes have still been delivered, so the module mark is calculated from a weighted average of the remaining components." -> (calculation match {
-          case s: ModuleMarkCalculation.Success => s.copy(comments = Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))
-          case o => o
-        }),
-        "One or more assessments have been cancelled, and the weighting or nature of the cancelled assessments is such that an overall module mark cannot be calculated to differentiate student performance, or provide a realistic assessment of student achievement against the learning outcomes." -> NoCalculationPossible,
-        "One or more assessments have been cancelled and there is insufficient evidence available that the student has achieved the learning outcomes of the module, so no credit can be awarded." -> AllComponentsMissing
-      ), "At least one component has been recorded as missed due to force majeure. Which calculation to use depends on whether there have been sufficient other components to deliver the learning outcomes for the module.")
+      def SomeComponentsMissing(calculation: ModuleMarkCalculation): Multiple = Multiple(
+        reason = FormattedHtml(
+          """
+            |At least one component has been recorded as missed due to force majeure.
+            |Which calculation to use depends on whether there have been sufficient other components completed to assess the learning outcomes.
+            |[Guidance on the options in 2019/20 is available on the Teaching Continuity site](https://warwick.ac.uk/insite/coronavirus/staff/teaching/marksandexamboards/guidance/decisions-first-year/#credit).
+            |""".stripMargin
+        ),
+        suggestions = Seq(
+          SuggestedModuleMarkCalculation(
+            title = "Option 1 (Overall Mark and Credit Awarded)",
+            description = FormattedHtml("One or more assessments have been cancelled but the module learning outcomes have still been assessed. Sufficient assessment has taken place for student performance to be differentiated, so a module mark is calculated from a weighted average of the remaining components and pass/fail result is determined accordingly. Students will be awarded credit for the module where they pass."),
+            calculation = calculation match {
+              case s: ModuleMarkCalculation.Success => s.copy(comments = Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))
+              case o => o
+            },
+          ),
+          SuggestedModuleMarkCalculation(
+            title = "Option 2 (Pass/fail and Credit Awarded)",
+            description = FormattedHtml("One or more assessments have been cancelled and the module learning outcomes have still been assessed. However, sufficient assessment has not taken place for student performance to be differentiated, so a module mark will not be calculated and only a pass/fail result will be determined. Students will be awarded credit for the module where they pass."),
+            calculation = NoCalculationPossible,
+          ),
+          SuggestedModuleMarkCalculation(
+            title = "Option 3 (No Result, No Credit)",
+            description = FormattedHtml("All or most assessment has been cancelled and there is insufficient evidence available that the student has achieved the learning outcomes of the module, so no result can be recorded and no credit can be awarded."),
+            calculation = AllComponentsMissing,
+          ),
+        ),
+      )
     }
 
     object Failure {
@@ -556,7 +580,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
         lazy val doesntMatchCalculation = calculation match {
           case c: ModuleMarkCalculation.Success => matchesCalculation(c)
-          case m: ModuleMarkCalculation.Multiple => m.suggestions.collect { case (_, c: ModuleMarkCalculation.Success) => c }.exists(matchesCalculation)
+          case m: ModuleMarkCalculation.Multiple => m.suggestions.map(_.calculation).collect { case c: ModuleMarkCalculation.Success => c }.exists(matchesCalculation)
           case _ => false // If the calculation was a failure, allow it through
         }
 
