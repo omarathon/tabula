@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.ModuleResult.{Deferred, Fail, Pass}
+import uk.ac.warwick.tabula.data.model.ModuleResult._
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleRegistration, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
@@ -58,8 +58,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     val noResits = currentResitAttempt.isEmpty
 
     def smrCredits: Option[JBigDecimal] = latestResult match {
-      //GradeBoundary.ForceMajeureMissingComponentGrade must have a result of Pass but grant zero credits.
-      case Some(Pass) if !latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => Some(mr.cats)
+      case Some(Pass) => Some(mr.cats)
       case _ => Some(new JBigDecimal(0))
     }
 
@@ -68,7 +67,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         existingSmr.process
       } else {
         latestResult match {
-          case Some(Pass) => Some("COM")
+          case Some(Pass) | Some(NoResult) => Some("COM")
           case Some(Fail) => Some("RAS")
           case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) Some("RAS") else Some("SAS")
           case _ => None
@@ -82,7 +81,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       } else {
         val attempt = latestResult match {
           //Possibility of 1 or 2 currentResitAttempt value depending on Ist attempt or Resit  SRA record
-          case Some(Pass) => if (noResits) Some(1) else mr.currentResitAttempt
+          case Some(Pass) | Some(NoResult) => if (noResits) Some(1) else mr.currentResitAttempt
           case Some(Fail) => mr.currentResitAttempt
           case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) {
             mr.currentResitAttempt // Ideally 1 value. The grade of S for further first attempt creates an SRA with an current attempt of 1.  SRA record generation is pending -TODO
@@ -102,7 +101,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       } else {
 
         val attempt = latestResult match {
-          case Some(Pass) => if (noResits) Some(1) else mr.currentResitAttempt
+          case Some(Pass) | Some(NoResult) => if (noResits) Some(1) else mr.currentResitAttempt
           case Some(Fail) => mr.currentResitAttempt.map(a => a - 1) //1 less than current attempt. CurrentResitAttempt(Ideally 2)  at this stage by SRA generation
           case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) {
             mr.currentResitAttempt // Ideally 1 value and both current and completed same
@@ -116,13 +115,13 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     }
 
     def smrSasStatus: Option[String] = latestResult match {
-      case Some(Pass) | Some(Fail) => if (noResits) Some("A") else Some("R")
+      case Some(Pass) | Some(Fail) | Some(NoResult) => if (noResits) Some("A") else Some("R")
       case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) Some("R") else Some("H")
       case _ => None
     }
 
     def smrProcStatus: Option[String] = latestResult match {
-      case Some(Pass) => Some("A")
+      case Some(Pass) | Some(NoResult) => Some("A")
       case Some(Fail) => None
       case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) None else Some("H")
       case _ => None

@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.sandbox
 
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{AssessmentType, _}
 import uk.co.halfninja.randomnames.Gender._
 import uk.co.halfninja.randomnames.{CompositeNameGenerator, Name, NameGenerators}
 
 import scala.math.BigDecimal.RoundingMode
+import scala.util.Try
 
 // scalastyle:off magic.number
 object SandboxData {
@@ -55,18 +56,25 @@ object SandboxData {
       "hom103" -> Module("The Long Nineteenth Century", "HOM103", "hom103", BigDecimal(15)),
       "hom106" -> Module("History of Composition", "HOM106", "hom106", BigDecimal(15)),
       "hom115" -> Module("20th Century Music", "HOM115", "hom115", BigDecimal(30)),
+      "hom128" -> Module("Theory of Music", "HOM128", "hom128", BigDecimal(30)),
       "hom129" -> Module("Theory and Analysis", "HOM129", "hom129", BigDecimal(30)),
 
       "hom201" -> Module("Russian and Soviet Music, 1890-1975", "HOM201", "hom201", BigDecimal(15)),
       "hom203" -> Module("Studies in Popular Music", "HOM203", "hom203", BigDecimal(15)),
       "hom204" -> Module("History of Opera", "HOM204", "hom204", BigDecimal(15)),
       "hom210" -> Module("Writing Practices in Music", "HOM210", "hom210", BigDecimal(15)),
-      "hom219" -> Module("Popular Music and Theories of Mass Culture", "HOM222", "hom219", BigDecimal(30)),
+      "hom218" -> Module("Popular Music", "HOM218", "hom218", BigDecimal(30)),
+      "hom219" -> Module("Popular Music and Theories of Mass Culture", "HOM219", "hom219", BigDecimal(30)),
       "hom222" -> Module("Late 19th and Early 20th Century English Song", "HOM222", "hom222", BigDecimal(30)),
 
       "hom3a1" -> Module("Britten's Chamber Operas", "HOM3A1", "hom3a1", BigDecimal(30)),
       "hom332" -> Module("Influences of Hip-hop on Popular Culture", "HOM332", "hom332", BigDecimal(30)),
+
+      "hom334" -> Module("Music and Ideas from Romanticism to the Late Twentieth Century", "HOM334", "hom334", BigDecimal(10)),
+      "hom335" -> Module("Creative Music Technology", "HOM335", "hom335", BigDecimal(10), equalSplits),
+      "hom336" -> Module("Topics in Popular Music", "HOM336", "hom336", BigDecimal(10), smallAssessments),
       "hom339" -> Module("Dissertation (History of Music)", "HOM339", "hom339", BigDecimal(60)),
+      "hom340" -> Module("Dissertation", "HOM340", "hom340", BigDecimal(60)),
 
       "hom401" -> Module("Advanced Theory and Analysis", "HOM401", "hom401", BigDecimal(15)),
       "hom402" -> Module("Baroque composers", "HOM402", "hom402", BigDecimal(15)),
@@ -76,13 +84,13 @@ object SandboxData {
     ), Map(
       "hm801" ->
         Route("History of Music", "hm801", DegreeType.Undergraduate, CourseType.UG, awardCode = "BA", isResearch = false,
-          Seq("hom101", "hom102", "hom103",  "hom201", "hom203", "hom204", "hom210",  "hom339"),
-          Seq("hom106", "hom115", "hom129", "hom219", "hom222", "hom3a1", "hom332"),
+          Seq("hom101", "hom102", "hom103",  "hom201", "hom203", "hom204", "hom210",  "hom340"),
+          Seq("hom106", "hom115", "hom128", "hom218", "hom222", "hom3a1", "hom334", "hom335", "hom336"),
           4300001, 4300100),
       "hm802" ->
         Route("History of Music with Intercalated Year", "hm802", DegreeType.Undergraduate, CourseType.UG, awardCode = "BA", isResearch = false,
-          Seq("hom101", "hom102", "hom103",  "hom201", "hom203", "hom204", "hom210",  "hom339"),
-          Seq("hom106", "hom115", "hom129", "hom219", "hom222", "hom3a1", "hom332"),
+          Seq("hom101", "hom102", "hom103",  "hom201", "hom203", "hom204", "hom210",  "hom340"),
+          Seq("hom106", "hom115", "hom128", "hom218", "hom222", "hom3a1", "hom334", "hom335", "hom336"),
           4300101, 4300130),
       "hm8p0" ->
         Route("History of Music (Research)", "hm8p0", DegreeType.Postgraduate, CourseType.PGR, awardCode = "PHD", isResearch = true, Seq(), Seq(), 4300201, 4300300),
@@ -232,7 +240,34 @@ object SandboxData {
     staffEndId: Int
   )
 
-  case class Module(name: String, shortName: String, code: String, cats: BigDecimal) {
+  case class AssessmentComponent(
+    name: String,
+    sequence: String,
+    assessmentType: AssessmentType,
+    weighting: Int
+  )
+
+  def defaultComponents: Seq[AssessmentComponent] = Seq(
+    AssessmentComponent("Report (2,000 words)", "A01", AssessmentType.Essay, 30),
+    AssessmentComponent("2 hour examination (Summer)", "E01", AssessmentType.SummerExam, 70)
+  )
+
+  def equalSplits: Seq[AssessmentComponent] = Seq(
+    AssessmentComponent("Report (2,000 words)", "A01", AssessmentType.Essay, 33),
+    AssessmentComponent("Essay", "A02", AssessmentType.Essay, 33),
+    AssessmentComponent("2 hour examination (Summer)", "E01", AssessmentType.SummerExam, 34)
+  )
+
+  def smallAssessments: Seq[AssessmentComponent] = Seq(
+    AssessmentComponent("Report 1 (2,000 words)", "A01", AssessmentType.Essay, 10),
+    AssessmentComponent("Report 2 (2,000 words)", "A02", AssessmentType.Essay, 10),
+    AssessmentComponent("Report 3 (2,000 words)", "A03", AssessmentType.Essay, 10),
+    AssessmentComponent("Report 4 (2,000 words)", "A04", AssessmentType.Essay, 10),
+    AssessmentComponent("Report 5 (2,000 words)", "A05", AssessmentType.Essay, 10),
+    AssessmentComponent("2 hour examination (Summer)", "E01", AssessmentType.SummerExam, 50)
+  )
+
+  case class Module(name: String, shortName: String, code: String, cats: BigDecimal, components: Seq[AssessmentComponent] = defaultComponents) {
     def catsString: String = JBigDecimal(Option(cats).map(_.setScale(1, RoundingMode.HALF_UP))).toPlainString
     def fullModuleCode: String = "%s-%s".format(code.toUpperCase, catsString)
   }
@@ -250,6 +285,12 @@ object SandboxData {
     studentsEndId: Int,
   ) {
     def moduleCodes: Seq[String] = coreModules ++ optionalModules
+  }
+
+  def randomMarkSeed(universityId: String, moduleCode:String): Int = {
+    (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+      Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+    ).sum
   }
 
 }

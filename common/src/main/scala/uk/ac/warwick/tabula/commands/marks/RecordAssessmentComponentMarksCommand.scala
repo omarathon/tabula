@@ -200,7 +200,7 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
     )
 
     ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService).foreach { student =>
-      if (student.mark.nonEmpty || student.grade.nonEmpty) {
+      if ((student.mark.nonEmpty || student.grade.nonEmpty) && !students.keySet().stream().filter(_.equals(student.universityId)).findAny().isPresent) {
         val s = new StudentMarksItem(student.universityId)
         student.mark.foreach(m => s.mark = m.toString)
         student.grade.foreach(s.grade = _)

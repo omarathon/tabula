@@ -135,7 +135,7 @@ class StringToExamGridDisplayModuleNameColumnValue extends TwoWayConverter[Strin
   override def convertLeft(source: ExamGridDisplayModuleNameColumnValue): String = Option(source).map(_.value).orNull
 }
 
-case class ExamGridColumnState(
+case class ExamGridColumnState (
   entities: Seq[ExamGridEntity],
   overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
   coreRequiredModuleLookup: CoreRequiredModuleLookup,

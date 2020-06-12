@@ -54,10 +54,10 @@ class MarkdownRendererTest extends TestBase {
       			""".stripMargin
     val output1: String = renderer.renderMarkdown(input1)
 
-    output1.contains("javascript:") should be(false)
-    output1.contains("<a") should be(false)
-    output1.contains("document.") should be(false)
-    output1.contains("xss.pe") should be(false)
+    output1.trim should be(
+      """
+        				|<p>Unable to load Tabula. Click to try again</p>
+      			""".stripMargin.trim)
 
     val input2 =
       """
@@ -65,9 +65,10 @@ class MarkdownRendererTest extends TestBase {
       			""".stripMargin
     val output2: String = renderer.renderMarkdown(input2)
 
-    output2.contains("<script") should be(false)
-    output2.contains("/script>") should be(false)
-    output2.contains("xss.pe") should be(false)
+    output2.trim should be(
+      """
+        				|<p><em>foo</em>ï¼œ</p>
+      			""".stripMargin.trim)
 
 
     // fine within *.warwick.ac.uk domain
@@ -80,7 +81,7 @@ class MarkdownRendererTest extends TestBase {
 
     output3.trim should be(
       """
-        				|<p>thisisfine <a href="https://www.warwick.ac.uk" title="isthisfine">magiclink</a>.</p>
+        				|<p>thisisfine <a href="https://www.warwick.ac.uk" title="isthisfine" target="_blank" rel="nofollow noopener noreferrer">magiclink</a>.</p>
       			""".stripMargin.trim)
 
 
@@ -94,7 +95,7 @@ class MarkdownRendererTest extends TestBase {
 
     output4.trim should be(
       """
-        				|<p>thisisfine <a href="https://shylock.warwick.ac.uk" title="isthisfine">magiclink</a>.</p>
+        				|<p>thisisfine <a href="https://shylock.warwick.ac.uk" title="isthisfine" target="_blank" rel="nofollow noopener noreferrer">magiclink</a>.</p>
       			""".stripMargin.trim)
 
 
@@ -108,7 +109,7 @@ class MarkdownRendererTest extends TestBase {
 
     output5.trim should be(
       """
-        				|<p>thisIsNotFine <a title="notFineNotFine">darkMagicLink</a>.</p>
+        				|<p>thisIsNotFine darkMagicLink.</p>
       			""".stripMargin.trim)
 
     // fine within warwick.ac.uk
@@ -121,7 +122,7 @@ class MarkdownRendererTest extends TestBase {
 
     output6.trim should be(
       """
-        				|<p>thisisfine <a href="https://warwick.ac.uk" title="isthisfine">magiclink</a>.</p>
+        				|<p>thisisfine <a href="https://warwick.ac.uk" title="isthisfine" target="_blank" rel="nofollow noopener noreferrer">magiclink</a>.</p>
       			""".stripMargin.trim)
 
     // not fine
@@ -134,7 +135,7 @@ class MarkdownRendererTest extends TestBase {
 
     output7.trim should be(
       """
-        				|<p>notFine <a title="notFineNotFine">darkMagicLink</a>.</p>
+        				|<p>notFine darkMagicLink.</p>
       			""".stripMargin.trim)
 
 

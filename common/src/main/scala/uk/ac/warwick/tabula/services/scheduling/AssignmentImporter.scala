@@ -28,7 +28,6 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.concurrent.Await
 import scala.jdk.CollectionConverters._
-import scala.util.Try
 
 trait AssignmentImporterComponent {
   def assignmentImporter: AssignmentImporter
@@ -139,9 +138,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
     )
     if (includeSMS(yearsToImport)) {
       params.putAll(JMap("current_academic_year_code" -> yearsToImportArray(yearsToImport.intersect(AcademicYear.allCurrent()))))
-      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, false), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, excludeSMS = false), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     } else {
-      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, true), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+      jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1, excludeSMS = true), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
     }
   }
 
@@ -238,24 +237,22 @@ class SandboxAssignmentImporter extends AssignmentImporter
     val upstreamModuleRegistrations: Seq[UpstreamModuleRegistration] =
       (for {
         (moduleCode, ranges) <- moduleCodesToIds
-        assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
+        module <- Seq(SandboxData.module(moduleCode))
+        component <- module.components
         academicYear <- yearsToImport
         range <- ranges
         uniId <- range if universityIdFilter(uniId)
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
       } yield {
         val yearOfStudy = (uniId % 3) + 1
-        val module = SandboxData.module(moduleCode)
         val level = moduleCode.substring(3, 4).toInt
-
-        if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) uk.ac.warwick.tabula.data.Transactions.transactional() {
+        val registrationForPreviousYear = level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))
+        // always import full component marks for History of Music students
+        if (module.code.substring(0, 3) == "hom" || registrationForPreviousYear) uk.ac.warwick.tabula.data.Transactions.transactional() {
           val universityId = uniId.toString
           val moduleCodeFull = module.fullModuleCode
           val assessmentGroup = "A"
-          val sequence = assessmentType.subtype match {
-            case TabulaAssessmentSubtype.Assignment => "A01"
-            case TabulaAssessmentSubtype.Exam => "E01"
-          }
+          val sequence = component.sequence
           val occurrence = "A"
 
           val template = new UpstreamAssessmentGroup
@@ -276,40 +273,42 @@ class SandboxAssignmentImporter extends AssignmentImporter
               assessmentComponentMarksService.getAllRecordedStudents(uagm.upstreamAssessmentGroup)
                 .find(_.universityId == uagm.universityId)
             }
+          val generateMarks = module.code.substring(0, 3) == "hom" || academicYear < AcademicYear.now()
 
           val (mark, grade) =
-            if (academicYear < AcademicYear.now()) {
-              val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+            if (generateMarks) {
+              if (moduleCode == "hom336" && component.sequence == "A05") {
+                (null, "FM")
+              } else {
+                val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
 
-              val randomModuleMark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-              ).sum % 100
+                val randomModuleMark = SandboxData.randomMarkSeed(universityId, moduleCode) % 100
 
-              val m =
-                if (isPassFail) {
-                  if (randomModuleMark < 40) 0 else 100
-                } else {
-                  val markVariance = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-                    Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-                  ).sum % 15
+                val m =
+                  if (isPassFail) {
+                    if (randomModuleMark < 40) 0 else 100
+                  } else {
+                    val markVariance = SandboxData.randomMarkSeed(universityId, moduleCode) % 15
 
-                  val assessmentMark = assessmentType.subtype match {
-                    case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance
-                    case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                    val sequenceNumber = component.sequence.substring(1,3).toInt
+                    val assessmentMark = component.assessmentType.subtype match {
+                      case TabulaAssessmentSubtype.Assignment => randomModuleMark + markVariance + sequenceNumber
+                      case TabulaAssessmentSubtype.Exam => randomModuleMark - markVariance
+                    }
+
+                    Math.max(0, Math.min(100, assessmentMark))
                   }
 
-                  Math.max(0, Math.min(100, assessmentMark))
-                }
+                val marksCode =
+                  if (isPassFail) "TABULA-PF"
+                  else "TABULA-UG"
 
-              val marksCode =
-                if (isPassFail) "TABULA-PF"
-                else "TABULA-UG"
+                val g =
+                  if (isPassFail) if (m == 100) "P" else "F"
+                  else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
 
-              val g =
-                if (isPassFail) if (m == 100) "P" else "F"
-                else SandboxData.GradeBoundaries.find(gb => gb.marksCode == marksCode && gb.isValidForMark(Some(m))).map(_.grade).getOrElse("F")
-
-              (if (isPassFail) null else m.toString, g)
+                (if (isPassFail) null else m.toString, g)
+              }
             } else (null: String, null: String)
 
           recordedStudent.filter(_.needsWritingToSits).foreach { s =>
@@ -321,7 +320,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
           Some(UpstreamModuleRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
-            seatNumber = assessmentType.subtype match {
+            seatNumber = component.assessmentType.subtype match {
               case TabulaAssessmentSubtype.Exam => ((uniId % 300) + 1).toString
               case _ => null
             },
@@ -331,8 +330,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
             assessmentGroup = assessmentGroup,
             actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
             actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
-            agreedMark = if (academicYear < AcademicYear.now()) mark else null,
-            agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
+            agreedMark = if (generateMarks) mark else null,
+            agreedGrade = if (generateMarks) grade else null,
             resitActualMark = null,
             resitActualGrade = null,
             resitAgreedMark = null,
@@ -351,21 +350,19 @@ class SandboxAssignmentImporter extends AssignmentImporter
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
-      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
+      module <- d.modules.get(moduleCode).toSeq
+      component <- module.components
       academicYear <- yearsToImport
-    } yield (moduleCode, assessmentType, academicYear)).zipWithIndex.map { case ((moduleCode, assessmentType, academicYear), index) =>
+    } yield (moduleCode, component, academicYear)).zipWithIndex.map { case ((moduleCode, component, academicYear), index) =>
       val module = SandboxData.module(moduleCode)
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = module.fullModuleCode
       ag.academicYear = academicYear
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
-      ag.sequence = assessmentType match {
-        case AssessmentType.Essay => "A01"
-        case AssessmentType.SummerExam => "E01"
-      }
-      ag.deadline = Some(assessmentType match {
-        case AssessmentType.Essay =>
+      ag.sequence = component.sequence
+      ag.deadline = Some(component.assessmentType.subtype match {
+        case TabulaAssessmentSubtype.Assignment =>
           index % 20 match {
             case i if i > 10 =>
               academicYear.termOrVacation(PeriodType.springTerm)
@@ -378,7 +375,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
                 .plusWeeks(i)
           }
 
-        case AssessmentType.SummerExam =>
+        case TabulaAssessmentSubtype.Exam =>
           new LocalDate(academicYear.endYear, DateTimeConstants.APRIL, 27)
             .plusDays(index / 10)
       })
@@ -392,26 +389,34 @@ class SandboxAssignmentImporter extends AssignmentImporter
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       module <- d.modules.get(moduleCode).toSeq
-      assessmentType <- Seq(AssessmentType.Essay, AssessmentType.SummerExam)
-    } yield assessmentType match {
-      case AssessmentType.Essay =>
-        val a = new AssessmentComponent
-        a.moduleCode = module.fullModuleCode
-        a.sequence = "A01"
-        a.name = "Report (2,000 words)"
-        a.assessmentGroup = "A"
-        a.assessmentType = AssessmentType.Essay
-        a.inUse = true
-        a.rawWeighting = 30
+      component <- module.components
+    } yield {
+      val a = new AssessmentComponent
+      a.moduleCode = module.fullModuleCode
+      a.sequence = component.sequence
+      a.name = component.name
+      a.assessmentGroup = "A"
+      a.assessmentType = component.assessmentType
+      a.inUse = true
+      a.rawWeighting = component.weighting
 
-        val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
-        a.marksCode =
-          if (isPassFail) "TABULA-PF"
-          else route.degreeType match {
-            case DegreeType.Postgraduate => "TABULA-PG"
-            case _ => "TABULA-UG"
-          }
+      val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+      a.marksCode =
+        if (isPassFail) "TABULA-PF"
+        else route.degreeType match {
+          case DegreeType.Postgraduate => "TABULA-PG"
+          case _ => "TABULA-UG"
+        }
 
+      if (component.assessmentType.subtype == TabulaAssessmentSubtype.Exam) {
+        a.examPaperCode = Some(s"${moduleCode.toUpperCase}0")
+        a.examPaperTitle = Some(module.name)
+        a.examPaperSection = Some("n/a")
+        a.examPaperDuration = Some(Duration.standardMinutes(120))
+        a.examPaperReadingTime = None
+        a.examPaperType = Some(ExaminationType.Standard)
+        a.finalChronologicalAssessment = true
+      } else {
         a.examPaperCode = None
         a.examPaperTitle = None
         a.examPaperSection = None
@@ -419,34 +424,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
         a.examPaperReadingTime = None
         a.examPaperType = None
         a.finalChronologicalAssessment = false
-        a
-
-      case AssessmentType.SummerExam =>
-        val e = new AssessmentComponent
-        e.moduleCode = module.fullModuleCode
-        e.sequence = "E01"
-        e.name = "2 hour examination (Summer)"
-        e.assessmentGroup = "A"
-        e.assessmentType = AssessmentType.SummerExam
-        e.inUse = true
-        e.rawWeighting = 70
-
-        val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
-        e.marksCode =
-          if (isPassFail) "TABULA-PF"
-          else route.degreeType match {
-            case DegreeType.Postgraduate => "TABULA-PG"
-            case _ => "TABULA-UG"
-          }
-
-        e.examPaperCode = Some(s"${moduleCode.toUpperCase}0")
-        e.examPaperTitle = Some(module.name)
-        e.examPaperSection = Some("n/a")
-        e.examPaperDuration = Some(Duration.standardMinutes(120))
-        e.examPaperReadingTime = None
-        e.examPaperType = Some(ExaminationType.Standard)
-        e.finalChronologicalAssessment = true
-        e
+      }
+      a
     }
 
   override def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
@@ -817,7 +796,7 @@ object AssignmentImporter {
         smo.ayr_code in (:academic_year_code) and
         ssn.ssn_sprc is null -- no matching SSN"""
 
-  def GetAllAssessmentGroupMembers(excludeSMS: Boolean) = {
+  def GetAllAssessmentGroupMembers(excludeSMS: Boolean): String = {
     if (excludeSMS) {
       s"""
       $GetConfirmedModuleRegistrations

@@ -42,7 +42,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
   @Test def calculateNoComponents(): Unit = new Fixture {
     val modReg = Fixtures.moduleRegistration(studentCourseDetails, module, JBigDecimal(Some(cats)), academicYear, occurrence)
 
-    algorithm.calculate(modReg, Seq.empty) should be (ModuleMarkCalculation.Failure("There were no component marks"))
+    algorithm.calculate(modReg, Seq.empty) should be (ModuleMarkCalculation.Failure.NoComponentMarks)
   }
 
   @Test def calculateNoMarkScheme(): Unit = new Fixture {
@@ -50,7 +50,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac = Fixtures.assessmentComponent(module, 1)
     val smr = markRecord(Some(70), Some("1"))
 
-    algorithm.calculate(modReg, Seq(ac -> smr)) should be (ModuleMarkCalculation.Failure("There is no mark scheme associated with the module registration"))
+    algorithm.calculate(modReg, Seq(ac -> smr)) should be (ModuleMarkCalculation.Failure.NoMarkScheme)
   }
 
   private trait PassFailModuleFixture extends Fixture {
@@ -80,7 +80,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2)
     val smr2 = markRecord(None, None)
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Marks and grades are missing for A02"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.MarksAndGradesMissingFor(Seq("A02")))
   }
 
   @Test def calculateMMA(): Unit = new PassFailModuleFixture {
@@ -91,7 +91,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val smr2 = markRecord(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade))
 
     // No mark, FM grade, no result https://warwick.slack.com/archives/CTF8JH60L/p1590667231178600
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), None))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.MissingMarkAdjustment.AllComponentsMissing)
   }
 
   @Test def calculatePFMismatchedMarksCode(): Unit = new PassFailModuleFixture {
@@ -101,7 +101,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR")
     val smr2 = markRecord(Some(70), Some("1"))
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Not all components are pass/fail but module is"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.PassFail.MismatchedMarkScheme)
   }
 
   @Test def calculatePFMissingGrades(): Unit = new PassFailModuleFixture {
@@ -111,14 +111,14 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "PF")
     val smr2 = markRecord(Some(0), None) // Mark set just to check this branch, otherwise would get caught by calculateMissingMarksAndGrades()
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Grades are missing for A02"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.PassFail.GradesMissingFor(Seq("A02")))
   }
 
   @Test def calculatePFSingleComponentMissingGradeBoundary(): Unit = new PassFailModuleFixture {
     val ac = Fixtures.assessmentComponent(module, 1, marksCode = "PF")
     val smr = markRecord(None, Some("??"))
 
-    algorithm.calculate(modReg, Seq(ac -> smr)) should be (ModuleMarkCalculation.Failure("Unable to select a valid grade"))
+    algorithm.calculate(modReg, Seq(ac -> smr)) should be (ModuleMarkCalculation.Failure.PassFail.NoDefaultGrade)
   }
 
   @Test def calculatePFSingleComponent(): Unit = new PassFailModuleFixture {
@@ -165,7 +165,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "PF")
     val smr2 = markRecord(None, Some(GradeBoundary.WithdrawnGrade))
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Couldn't automatically select a result from component grades P, W"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.PassFail.MismatchedGrades(Seq("P", "W")))
   }
 
   @Test def calculatePFPartialMMA(): Unit = new PassFailModuleFixture {
@@ -175,7 +175,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "PF")
     val smr2 = markRecord(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade))
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(None, Some("P"), Some(ModuleResult.Pass)))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(None, Some("P"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
   private trait UGModuleFixture extends Fixture {
@@ -231,7 +232,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val ac2 = Fixtures.assessmentComponent(module, 2, marksCode = "WAR")
     val smr2 = markRecord(None, Some(GradeBoundary.WithdrawnGrade)) // Mark is required for W
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Marks are missing for A02"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.MarksMissingFor(Seq("A02")))
   }
 
   @Test def calculateMissingWeightings(): Unit = new UGModuleFixture {
@@ -247,7 +248,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Weightings are missing for A02"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.WeightingsMissingFor(Seq("A02")))
   }
 
   @Test def calculateIndicatorGradesMatching(): Unit = new UGModuleFixture {
@@ -277,7 +278,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Mis-matched indicator grades W, R for A01, A02"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.MismatchedIndicatorGrades(Seq("W", "R"), Seq("A01", "A02")))
   }
 
   @Test def calculateMissingGradeBoundary(): Unit = new UGModuleFixture {
@@ -292,7 +293,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Unable to find grade boundary for AB grade"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.NoGradeBoundary("AB"))
   }
 
   @Test def calculatePartialMMA(): Unit = new UGModuleFixture {
@@ -308,7 +309,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
     // Non-MMA components only are used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass)))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
   @Test def calculatePartialMitCircs(): Unit = new UGModuleFixture {
@@ -340,7 +342,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
     // Non-mit circs components only are used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure("Couldn't automatically calculate a module result"))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.General)
   }
 
   @Test def calculatePartialMMAMultipleComponents(): Unit = new UGModuleFixture {
@@ -493,7 +495,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
     // Total weighting of considered components (after VAW) is 175 + 300 = 475
     // (38 * (175/475)) + (55 * (300/475)) = 48.74
-    algorithm.calculate(modReg, Seq(a01 -> marksA01, a02 -> marksA02, a03 -> marksA03, e01 -> marksE01)) should be (ModuleMarkCalculation.Success(Some(49), Some("3"), Some(ModuleResult.Pass)))
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(a01 -> marksA01, a02 -> marksA02, a03 -> marksA03, e01 -> marksE01)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(49), Some("3"), Some(ModuleResult.Pass), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
 }

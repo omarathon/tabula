@@ -941,7 +941,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(50))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(65))
 
-      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(60.3))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(60.3))
     }
 
     new FixtureWithYearsAndMarks(
@@ -950,7 +950,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     ) {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(76))
-      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(70))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(70))
     }
 
     new FixtureWithYearsAndMarks(
@@ -960,7 +960,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(72))
 
-      service.graduationBenchmark(entityYear, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(71.5))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(71.5))
     }
   }
 

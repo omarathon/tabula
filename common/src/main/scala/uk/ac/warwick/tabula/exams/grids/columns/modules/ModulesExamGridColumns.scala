@@ -29,7 +29,8 @@ object ModuleExamGridColumn {
     SITSIndicator("CP", "Compensated Pass"),
     SITSIndicator("N", "Resit refused/not taken"),
     SITSIndicator("QF", "Qualified Fail"),
-    SITSIndicator("T", "Temporary Withdraw")
+    SITSIndicator("T", "Temporary Withdraw"),
+    SITSIndicator("FM", "Force majeure")
   )
 }
 
@@ -73,10 +74,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
               }
               if (grade == null) {
                 ExamGridColumnValueMissing("Agreed and actual grade missing")
-              } else if (grade == "F") {
-                ExamGridColumnValueFailedString(grade, isActual)
               } else {
-                ExamGridColumnValueString(grade, isActual)
+                ExamGridColumnValueString(grade, isActual, isFail = grade == "F")
               }
             } else {
               val (mark, isActual) = mr.agreedMark match {
@@ -86,7 +85,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
               if (mark == null) {
                 ExamGridColumnValueMissing("Agreed and actual mark missing")
               } else if (isActual && mr.actualGrade.contains("F") || mr.agreedGrade.contains("F")) {
-                ExamGridColumnValueFailedDecimal(mark, isActual)
+                ExamGridColumnValueDecimal(mark, isActual, isFail = true)
               } else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
                 ExamGridColumnValueOvercatDecimal(mark, isActual)
               } else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.exists(_.grade == g))) {
@@ -99,7 +98,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
           }
         }
         if (state.showComponentMarks) {
-          def toValue(member: UpstreamAssessmentGroupMember): ExamGridColumnValue = {
+          def toValue(member: UpstreamAssessmentGroupMember, weighting: BigDecimal): ExamGridColumnValue = {
             val (mark, isActual) = (member.firstDefinedMark, !member.isAgreedMark)
 
             def markAsString: String = {
@@ -111,44 +110,40 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
             if (mark.isEmpty) {
               ExamGridColumnValueMissing("Agreed and actual mark missing")
-            } else if (member.firstDefinedGrade.contains("F")) {
-              if (state.showComponentSequence || member.isResitMark) {
-                ExamGridColumnValueFailedString(markAsString, isActual)
-              } else {
-                ExamGridColumnValueFailedDecimal(BigDecimal(mark.get), isActual)
-              }
             } else {
-              if (state.showComponentSequence || member.isResitMark) {
-                ExamGridColumnValueString(markAsString, isActual)
-              }
-              else ExamGridColumnValueDecimal(BigDecimal(mark.get), isActual)
+              val sequence = member.upstreamAssessmentGroup.sequence
+              val name = member.upstreamAssessmentGroup.assessmentComponent.map(_.name).getOrElse("")
+              val tooltip = s"$sequence $name - $weighting%"
+              val isFail = member.firstDefinedGrade.contains("F")
+              ExamGridColumnValueWithTooltip(markAsString, isActual, tooltip, isFail)
             }
           }
 
           val assessmentComponents = {
-            // We don't currently show the weighting on the drill-down page so this is a bit wasteful really.
             lazy val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = true)
 
-            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.firstDefinedMark.isDefined)
+            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.firstDefinedMark.isDefined).sortBy(_.upstreamAssessmentGroup.sequence)
+            val componentsAndWeights = allComponents.map { uagm => uagm ->
+              _assessmentComponents.find { component =>
+                component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
+                component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
+                component.sequence == uagm.upstreamAssessmentGroup.sequence
+              }.flatMap(ac => ac.weightingFor(marks))
+            }.toMap.collect { case (key, Some(value)) => (key, value) }
+
             if (state.showZeroWeightedComponents)
-              allComponents
+              componentsAndWeights
             else {
-              allComponents.filter { uagm =>
-                _assessmentComponents.find { component =>
-                  component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
-                  component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
-                  component.sequence == uagm.upstreamAssessmentGroup.sequence
-                }.flatMap(ac => ac.weightingFor(marks)).exists(_ > 0)
-              }
+              componentsAndWeights.filter(_._2 > 0)
             }
           }
 
-          val (exams, assignments) = assessmentComponents.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
+          val (exams, assignments) = assessmentComponents.partition(_._1.upstreamAssessmentGroup.assessmentComponent.exists(_.assessmentType.subtype == TabulaAssessmentSubtype.Exam))
 
           ExamGridColumnValueType.toMap(
             overall = overallMark,
-            assignments = assignments.map(toValue),
-            exams = exams.map(toValue)
+            assignments = assignments.map { case (uagm, w) => toValue(uagm, w) }.toSeq,
+            exams = exams.map { case (uagm, w) => toValue(uagm, w) }.toSeq
           )
         } else {
           ExamGridColumnValueType.toMap(overallMark)
