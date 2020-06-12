@@ -154,21 +154,19 @@
               <h3 class="modal-title">Missing mark adjustment for ${member.fullName}, ${student.sprCode}</h3>
             </@modal.header>
             <@modal.body>
-              <p>${calculation.reason}</p>
+              ${calculation.reason}
 
               <p>Please select from one of the ${calculation.suggestions?size} possible calculations:</p>
 
               <#local colours = ['success', 'info', 'warning'] />
-              <#list calculation.suggestions as s>
-                <#local explanation = s._1() />
-                <#local suggestion = s._2() />
-                <#if suggestion.successful && !suggestion.multiple>
-                  <div class="panel panel-${colours[s_index % 3]} no-wide-tables">
+              <#list calculation.suggestions as suggestion>
+                <#if suggestion.calculation.successful && !suggestion.calculation.multiple>
+                  <div class="panel panel-${colours[suggestion_index % 3]} no-wide-tables">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Option ${s_index + 1}</h3>
+                      <h3 class="panel-title">${suggestion.title}</h3>
                     </div>
                     <div class="panel-body">
-                      <p>${explanation}</p>
+                      ${suggestion.description}
                     </div>
                     <table class="table">
                       <thead>
@@ -180,16 +178,16 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <@calculationCells suggestion student member />
+                          <@calculationCells suggestion.calculation student member />
                         </tr>
                       </tbody>
                     </table>
-                    <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${s_index}">
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${suggestion.mark!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${suggestion.grade!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(suggestion.result.dbValue)!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${suggestion.comments!}" />
-                      <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${s_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                    <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}">
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${suggestion.calculation.mark!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${suggestion.calculation.grade!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(suggestion.calculation.result.dbValue)!}" />
+                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${suggestion.calculation.comments!}" />
+                      <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                   </div>
                 </#if>
@@ -391,38 +389,36 @@
                     <@modal.modal id="mma-modal-all">
                       <@modal.wrapper cssClass="modal-lg">
                         <@modal.header>
-                          <h3 class="modal-title">Missing mark adjustment for all students</h3>
+                          <h3 class="modal-title">Missing mark adjustment for all students on ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h3>
                         </@modal.header>
                         <@modal.body>
-                          <p>${baseCalculation.reason}</p>
+                          ${baseCalculation.reason}
 
                           <p>You can change the calculation for one or more individual students after you've chosen a default calculation for all students.</p>
 
                           <p>Please select from one of the ${baseCalculation.suggestions?size} possible calculations:</p>
 
                           <#assign colours = ['success', 'info', 'warning'] />
-                          <#list baseCalculation.suggestions as s>
-                            <#assign explanation = s._1() />
-                            <#assign suggestion = s._2() />
-                            <#if suggestion.successful && !suggestion.multiple>
-                              <div class="panel panel-${colours[s_index % 3]} no-wide-tables">
+                          <#list baseCalculation.suggestions as suggestion>
+                            <#if suggestion.calculation.successful && !suggestion.calculation.multiple>
+                              <div class="panel panel-${colours[suggestion_index % 3]} no-wide-tables">
                                 <div class="panel-heading">
-                                  <h3 class="panel-title">Option ${s_index + 1}</h3>
+                                  <h3 class="panel-title">${suggestion.title}</h3>
                                 </div>
                                 <div class="panel-body">
-                                  <p>${explanation}</p>
+                                  ${suggestion.description}
                                 </div>
-                                <div class="panel-footer clearfix" id="mma-modal-all-suggestion-${s_index}">
+                                <div class="panel-footer clearfix" id="mma-modal-all-suggestion-${suggestion_index}">
                                   <#list mmaModuleMarkRecords as studentMarkRecord>
                                     <#assign student = studentMarkRecord._1() />
-                                    <#assign calculation = studentMarkRecord._3().suggestions[s_index]._2() />
+                                    <#assign calculation = studentMarkRecord._3().suggestions[suggestion_index].calculation />
 
                                     <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${calculation.mark!}" />
                                     <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${calculation.grade!}" />
                                     <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(calculation.result.dbValue)!}" />
                                     <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${calculation.comments!}" />
                                   </#list>
-                                  <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-all-suggestion-${s_index}" data-dismiss="modal">Use this calculation for all students <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                                  <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-all-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation for all students <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                                 </div>
                               </div>
                             </#if>

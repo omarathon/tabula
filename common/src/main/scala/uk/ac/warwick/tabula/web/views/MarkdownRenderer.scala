@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.views
 import java.net.URI
 
 import com.google.common.base.Predicate
-import org.owasp.html.{HtmlPolicyBuilder, PolicyFactory, Sanitizers}
+import org.owasp.html.{ElementPolicy, HtmlPolicyBuilder, PolicyFactory, Sanitizers}
 import org.commonmark.ext.autolink.AutolinkExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
@@ -29,11 +29,26 @@ object MarkdownRenderer {
     }.getOrElse(false)
   }
 
+  private val addTargetBlankOnLinks: ElementPolicy = (elementName: String, attrs: JList[String]) => {
+    if (attrs.isEmpty || !attrs.contains("href")) {
+      // Reject the element
+      null
+    } else {
+      if (!attrs.contains("target")) {
+        attrs.add("target")
+        attrs.add("_blank")
+      }
+
+      elementName
+    }
+  }
+
   private val sanitisePolicy: PolicyFactory = new HtmlPolicyBuilder()
-    .allowElements("a")
+    .allowElements(addTargetBlankOnLinks, "a")
     .allowUrlProtocols("https", "http")
-    .allowAttributes("title").onElements("a")
+    .allowAttributes("title", "target").onElements("a")
     .allowAttributes("href").matching(warwickUrlPredicate).onElements("a")
+    .requireRelNofollowOnLinks()
     .allowCommonBlockElements
     .allowCommonInlineFormattingElements
     .disallowElements("script") // this should not be needed, but just being explicit here
