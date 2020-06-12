@@ -364,7 +364,7 @@ trait GeneratesNotificationsForAssignment {
 trait ModifyAssignmentScheduledNotifications
   extends SchedulesNotifications[Assignment, Assignment] with GeneratesNotificationsForAssignment {
 
-  override def transformResult(assignment: Assignment) = Seq(assignment)
+  override def transformResult(assignment: Assignment) = Seq(assignment).filterNot(_.createdByAEP)
 
   override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
     generateNotifications(assignment)
