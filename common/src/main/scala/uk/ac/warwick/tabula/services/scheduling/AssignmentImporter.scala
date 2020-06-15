@@ -687,7 +687,7 @@ object AssignmentImporter {
 
       where
         sms.ayr_code in (:current_academic_year_code) and
-        sms.psl_code = 'Y' and sms.spr_code is null -- no matching SMO """
+        sms.psl_code = 'Y' and smo.spr_code is null -- no matching SMO """
 
   // this gets a student's assessments from the SMO table, which stores confirmed module choices (they could be confirmed choices either as part of eVision MRM workfloe or direct MRM upload
   def GetAllConfirmedModuleRegistrations =
