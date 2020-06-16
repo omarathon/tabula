@@ -166,6 +166,7 @@ sealed trait RecordedModuleMarkSource extends EnumEntry
 object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
   case object ComponentMarkCalculation extends RecordedModuleMarkSource
   case object MarkConfirmation extends RecordedModuleMarkSource
+  case object ComponentMarkChange extends RecordedModuleMarkSource
 
   override def values: IndexedSeq[RecordedModuleMarkSource] = findValues
 }
