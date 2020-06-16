@@ -434,10 +434,10 @@
                   </#if>
                 </th>
 
-                <th class="col-sm-2" rowspan="2" data-sorter="digit">Mark</th>
-                <th class="col-sm-1" rowspan="2" data-sorter="text">Grade</th>
-                <th class="col-sm-1" rowspan="2" data-sorter="text">Result</th>
-                <th class="col-sm-2" rowspan="2" data-sorter="text">Comments</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Mark</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Grade</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Result</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Comments</th>
               </tr>
 
               <tr>
