@@ -18,8 +18,8 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -58,17 +58,22 @@ object RecordAssessmentComponentMarksCommand {
       with RecordAssessmentComponentMarksDescription
       with RecordAssessmentComponentMarksSpreadsheetBindListener
       with RecordAssessmentComponentMarksPopulateOnForm
+      with ClearRecordedModuleMarks
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringTransactionalComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
 }
 
-abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, currentUser: CurrentUser)
+abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with RecordAssessmentComponentMarksState {
+    with RecordAssessmentComponentMarksState
+    with ClearRecordedModuleMarksState {
   self: RecordAssessmentComponentMarksRequest
     with AssessmentComponentMarksServiceComponent
-    with TransactionalComponent =>
+    with TransactionalComponent
+    with ClearRecordedModuleMarks =>
 
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq
@@ -91,6 +96,8 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
         )
 
         assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
+
+        clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
 
         recordedAssessmentComponentStudent
       }
