@@ -67,6 +67,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
           GradeBoundary("PF", process, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
           GradeBoundary("PF", process, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
           GradeBoundary("PF", process, 4, "R", None, None, "S", Some(ModuleResult.Fail)),
+          GradeBoundary("PF", process, 5, GradeBoundary.MitigatingCircumstancesGrade, None, None, "S", Some(ModuleResult.Deferred)),
           GradeBoundary("PF", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
         )
       }
@@ -194,6 +195,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
         GradeBoundary("WMR", process, 5, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
         GradeBoundary("WMR", process, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
         GradeBoundary("WMR", process, 20, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", process, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", Some(ModuleResult.Deferred)),
         GradeBoundary("WMR", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
       )
 
@@ -215,6 +217,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
             GradeBoundary("WAR", process, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", None),
             GradeBoundary("WAR", process, 20, "R", Some(0), Some(100), "S", None),
             GradeBoundary("WAR", process, 30, "AB", Some(0), Some(100), "S", None), // Only a valid grade for components, not modules
+            GradeBoundary("WAR", process, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", None),
             GradeBoundary("WAR", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
           )
 
@@ -325,8 +328,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    // Non-mit circs components only are used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(65), Some("21"), Some(ModuleResult.Pass)))
+    // TAB-8489 shouldn't be special cased, should show a failed calculation
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.MismatchedIndicatorGrades(Seq(GradeBoundary.MitigatingCircumstancesGrade), Seq("A02")))
   }
 
   @Test def calculateMitCircsAndMMA(): Unit = new UGModuleFixture {
@@ -341,8 +344,9 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    // Non-mit circs components only are used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.General)
+    // Copies the M component over and excludes the FM one
+    // We compare .toString because TemplateHTMLOutput isn't .equals() for the same HTML
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)).toString should be (ModuleMarkCalculation.MissingMarkAdjustment.SomeComponentsMissing(ModuleMarkCalculation.Success(Some(65), Some(GradeBoundary.MitigatingCircumstancesGrade), Some(ModuleResult.Deferred), Some("Missing mark adjustment - learning outcomes assessed, weighted mark"))).toString)
   }
 
   @Test def calculatePartialMMAMultipleComponents(): Unit = new UGModuleFixture {
@@ -376,13 +380,13 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
     val ac3 = Fixtures.assessmentComponent(module, 3, marksCode = "WAR", weighting = 70)
     ac3.membershipService = algorithm.assessmentMembershipService
-    val smr3 = markRecord(None, Some(GradeBoundary.MitigatingCircumstancesGrade))
+    val smr3 = markRecord(Some(30), Some(GradeBoundary.MitigatingCircumstancesGrade))
 
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    // Non-mit circs components only are used to calculate. (64 * (10/30)) + (71 * (20/30)) = 68.67
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(69), Some("21"), Some(ModuleResult.Pass)))
+    // Can't calculate where there is a mit circs indicator
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2, ac3 -> smr3)) should be (ModuleMarkCalculation.Failure.MismatchedIndicatorGrades(Seq(GradeBoundary.MitigatingCircumstancesGrade), Seq("A03")))
   }
 
   @Test def calculatePartialMMAAndMitCircsMultipleComponents(): Unit = new UGModuleFixture {
@@ -401,8 +405,8 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
-    // The only component is used to calculate
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(71), Some("1"), Some(ModuleResult.Pass)))
+    // No suggestion when mit circs
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Failure.MismatchedIndicatorGrades(Seq(GradeBoundary.MitigatingCircumstancesGrade), Seq("A01")))
   }
 
   @Test def calculate(): Unit = new UGModuleFixture {

@@ -362,7 +362,7 @@ trait CalculateModuleMarksAlgorithm {
 
       if (componentsWithMissingMarkOrGrades.nonEmpty) ModuleMarkCalculation.Failure.MarksAndGradesMissingFor(componentsWithMissingMarkOrGrades.map(_.sequence))
       else {
-        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) && !s.grade.contains(GradeBoundary.MitigatingCircumstancesGrade) }
+        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) }
         if (componentsForCalculation.isEmpty && components.forall(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
           // No components have been assessed, so it is not possible to grant credit.
           ModuleMarkCalculation.MissingMarkAdjustment.AllComponentsMissing
@@ -437,8 +437,13 @@ trait CalculateModuleMarksAlgorithm {
                 if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure.WeightingsMissingFor(componentsWithMissingWeighting.map(_.sequence))
                 else {
                   // If there are any indicator grades, just fail out unless all the grades are the same
-                  def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean =
-                    s.grade.exists(g => assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected).find(_.grade == g).exists(!_.isDefault))
+                  def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean = {
+                    s.grade.exists { g =>
+                      assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected)
+                        .find(_.grade == g)
+                        .exists(!_.isDefault)
+                    }
+                  }
 
                   // We know that all weightings are defined and all marks are defined at this point
                   val calculatedMark = {
