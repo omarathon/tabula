@@ -84,9 +84,9 @@ $(() => {
       const $button = $(e.target);
       const $target = $($button.data('target'), $form);
 
-      $target.find('input[type="hidden"][data-target]').each((j, data) => {
+      $target.find('.mma-suggestion-field').each((j, data) => {
         const $data = $(data);
-        const $dataTarget = $($data.data('target'), $form);
+        const $dataTarget = $(document.getElementById($data.data('target')));
         const value = $data.val();
 
         if ($dataTarget.is('select')) {
