@@ -202,7 +202,6 @@
         Coursework.wirePDFDownload();
 
         $('.marking-table')
-          .bigList(bigListOptions)
           .on('show.bs.collapse', function (e) {
             var $target = $(e.target);
             var id = $target.attr('id');
@@ -222,7 +221,8 @@
               var $row = $(this);
               $($row.data('target')).detach().insertAfter($row);
             });
-          });
+          })
+          .bigList(bigListOptions);
 
         if (firstTime && window.location.hash && $(window.location.hash).length) {
           var $target = $(window.location.hash);
