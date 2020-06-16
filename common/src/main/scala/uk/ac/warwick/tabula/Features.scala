@@ -141,6 +141,7 @@ abstract class Features {
   @Value("${features.scheduling.bulkModuleRegistrationsImport:true}") var schedulingBulkModuleRegistrationsImport: Boolean = defaults.schedulingBulkModuleRegistrationsImport
   @Value("${features.scheduling.combinedModuleMembershipDataImport:true}") var schedulingCombinedModuleMembershipDataImport: Boolean = defaults.schedulingCombinedModuleMembershipDataImport
   @Value("${features.scheduling.departmentMandatoryPermissionsWarning:false}") var schedulingDepartmentMandatoryPermissionsWarning: Boolean = defaults.schedulingDepartmentMandatoryPermissionsWarning
+  @Value("${features.scheduling.bulkProgressionDecisionsImport:true}") var schedulingBulkProgressionDecisionsImport: Boolean = defaults.schedulingBulkProgressionDecisionsImport
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
   @Value("${features.exams.graduationBenchmark:false}") var graduationBenchmark: Boolean = defaults.graduationBenchmark
@@ -293,6 +294,7 @@ class FeaturesMessage {
   @BeanProperty var schedulingBulkModuleRegistrationsImport = true
   @BeanProperty var schedulingCombinedModuleMembershipDataImport = true
   @BeanProperty var schedulingDepartmentMandatoryPermissionsWarning = false
+  @BeanProperty var schedulingBulkProgressionDecisionsImport = true
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
