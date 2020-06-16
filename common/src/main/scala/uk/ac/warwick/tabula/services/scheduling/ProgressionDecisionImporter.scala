@@ -76,7 +76,8 @@ class SandboxProgressionDecisionImporter extends ProgressionDecisionImporter {
             resitPeriod = false,
             academicYear = academicYear,
             outcome = ProgressionDecisionOutcome.UndergraduateProceedHonours,
-            notes = None
+            notes = None,
+            minutes = None,
           )
         }
       }
@@ -89,7 +90,7 @@ object ProgressionDecisionImporter {
 
   var features: Features = Wire[Features]
 
-  final def BaseSql =
+  final def BaseSql: String =
     s"""
       |select
       |   spi.spi_sprc as spr_code,
@@ -97,7 +98,8 @@ object ProgressionDecisionImporter {
       |   spi.spi_pslc as scope_period,         -- 'S' for September resit period
       |   spi.spi_payr as academic_year_period, -- Period of study this applies to, so for resits it would be the previous year
       |   spi.spi_pit1 as agreed_outcome,
-      |   spi.spi_note as notes
+      |   spi.spi_note as notes,
+      |   spi.spi_mint as minutes
       |from $sitsSchema.cam_spi spi
       |where spi.spi_prcs = 2                   -- Process completed only
       |""".stripMargin
@@ -115,7 +117,8 @@ object ProgressionDecisionImporter {
       resitPeriod = rs.getString("scope_period").maybeText.contains("S"),
       academicYear = AcademicYear.parse(rs.getString("academic_year_period")),
       outcome = ProgressionDecisionOutcome.forPitCode(rs.getString("agreed_outcome")),
-      notes = rs.getString("notes").maybeText
+      notes = rs.getString("notes").maybeText,
+      minutes = rs.getString("minutes").maybeText
     )
   }
 
@@ -152,6 +155,7 @@ class ProgressionDecisionRow(
   var academicYear: AcademicYear,
   var outcome: ProgressionDecisionOutcome,
   var notes: Option[String],
+  var minutes: Option[String],
   var resitPeriod: Boolean,
 ) extends ToString {
   def toProgressionDecision: ProgressionDecision = {
@@ -161,6 +165,7 @@ class ProgressionDecisionRow(
     pd.academicYear = academicYear
     pd.outcome = outcome
     pd.notes = notes
+    pd.minutes = minutes
     pd.resitPeriod = resitPeriod
     pd
   }
@@ -172,6 +177,7 @@ class ProgressionDecisionRow(
       .append(academicYear)
       .append(outcome)
       .append(notes)
+      .append(minutes)
       .append(resitPeriod)
       .build()
 
@@ -183,6 +189,7 @@ class ProgressionDecisionRow(
         .append(academicYear, other.academicYear)
         .append(outcome, other.outcome)
         .append(notes, other.notes)
+        .append(minutes, other.minutes)
         .append(resitPeriod, other.resitPeriod)
         .build()
   }
@@ -193,6 +200,7 @@ class ProgressionDecisionRow(
     "academicYear" -> academicYear,
     "outcome" -> outcome,
     "notes" -> notes,
+    "minutes" -> minutes,
     "resitPeriod" -> resitPeriod
   )
 }

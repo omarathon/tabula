@@ -88,6 +88,8 @@ class StudentCourseDetails
 
   def progressionDecisions: Seq[ProgressionDecision] = _progressionDecisions.asScala.toSeq.sortBy(_.sequence)
 
+  def progressionDecisionsByYear(year: AcademicYear): Seq[ProgressionDecision] = progressionDecisions.filter(_.academicYear == year)
+
   def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
   def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
