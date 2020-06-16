@@ -398,9 +398,9 @@
 
             <thead>
               <tr>
-                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc">SPR Code</th>
-                <th class="col-sm-1 sortable" rowspan="2">First name</th>
-                <th class="col-sm-1 sortable" rowspan="2">Last name</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc" data-sorter="text">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">First name</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">Last name</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
@@ -461,21 +461,21 @@
                   </#if>
                 </th>
 
-                <th class="col-sm-2" rowspan="2">Mark</th>
-                <th class="col-sm-1" rowspan="2">Grade</th>
-                <th class="col-sm-1" rowspan="2">Result</th>
-                <th class="col-sm-2" rowspan="2">Comments</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Mark</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Grade</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Result</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Comments</th>
               </tr>
 
               <tr>
                 <#list assessmentComponents as ac>
-                  <th class="sortable">Mark</th>
-                  <th class="sortable">Grade</th>
+                  <th class="sortable" data-sorter="digit">Mark</th>
+                  <th class="sortable" data-sorter="text">Grade</th>
                 </#list>
 
-                <th class="sortable">Mark</th>
-                <th class="sortable">Grade</th>
-                <th class="sortable">Result</th>
+                <th class="sortable" data-sorter="digit">Mark</th>
+                <th class="sortable" data-sorter="text">Grade</th>
+                <th class="sortable" data-sorter="text">Result</th>
               </tr>
             </thead>
             <tbody>
