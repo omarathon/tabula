@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import java.sql.Types
+import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
 import org.joda.time.DateTime
@@ -16,8 +16,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult._
 import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
-import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrQuery}
+import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrQuery, SmrSubset}
 
 trait ExportStudentModuleResultToSitsServiceComponent {
   def exportStudentModuleResultToSitsService: ExportStudentModuleResultToSitsService
@@ -33,26 +34,6 @@ trait ExportStudentModuleResultToSitsService {
 
 class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
   self: SitsDataSourceComponent =>
-
-  /**
-   * Student result record  can be amended as long as  -
-   * SMR record exists in SITS. Exams Office may not yet have run SAS process if no SMR record found.
-   * SMO record has to exist.
-   */
-  case class SmrSubset(
-    sasStatus: Option[String],
-    processStatus: Option[String],
-    process: Option[String],
-    credits: Option[JBigDecimal],
-    currentAttempt: Option[JInteger],
-    completedAttempt: Option[JInteger],
-    agreedMark: Option[JInteger],
-    agreedGrade: Option[String],
-    actualMark: Option[JInteger],
-    actualGrade: Option[String],
-    result: Option[String],
-  )
-
 
   private def extractSmrSubsetData(recordedModuleRegistration: RecordedModuleRegistration): SmrSubset = {
     val latestResult = recordedModuleRegistration.latestResult
@@ -84,9 +65,9 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       }
     }
 
-    val smrCurrentAttempt: Option[JInteger] = if (isResitting) Some(JInteger(mr.currentResitAttempt)) else Some(1)
+    val smrCurrentAttempt: Option[Int] = if (isResitting) mr.currentResitAttempt else Some(1)
 
-    val smrCompletedAttempt: Option[JInteger] =
+    val smrCompletedAttempt: Option[Int] =
       if (isAgreedMark) smrCurrentAttempt
       else smrCurrentAttempt.map(_ - 1)
 
@@ -115,8 +96,8 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       recordedModuleRegistration.marks.find(_.markState != MarkState.Agreed)
         .getOrElse(recordedModuleRegistration.marks.head)
 
-    val smrActualMark: Option[JInteger] = Some(JInteger(actualRecordedMark.mark))
-    val smrAgreedMark: Option[JInteger] = Some(JInteger(recordedModuleRegistration.latestMark)).filter(_ => isAgreedMark)
+    val smrActualMark: Option[Int] = actualRecordedMark.mark
+    val smrAgreedMark: Option[Int] = recordedModuleRegistration.latestMark.filter(_ => isAgreedMark)
 
     val smrActualGrade: Option[String] = actualRecordedMark.grade
     val smrAgreedGrade: Option[String] = latestGrade.filter(_ => isAgreedMark)
@@ -157,21 +138,10 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     val smrExistingRowQuery = new SmrQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     try {
-      val existingRow = smrExistingRowQuery.getExsitingSmrRow(parameterMap)
-      Some(SmrSubset(
-        sasStatus  = Option(existingRow.get("SMR_SASS").asInstanceOf[String]),
-        processStatus =  Option(existingRow.get("SMR_PRCS").asInstanceOf[String]),
-        process =  Option(existingRow.get("SMR_PROC").asInstanceOf[String]),
-        credits =  Option(existingRow.get("SMR_CRED").asInstanceOf[JBigDecimal]),
-        currentAttempt = Option(existingRow.get("SMR_CURA").asInstanceOf[JInteger]),
-        completedAttempt = Option(existingRow.get("SMR_COMA").asInstanceOf[JInteger]),
-        agreedMark = Option(existingRow.get("SMR_AGRM").asInstanceOf[JInteger]),
-        agreedGrade = Option(existingRow.get("SMR_AGRG").asInstanceOf[String]),
-        actualMark = Option(existingRow.get("SMR_ACTM").asInstanceOf[JInteger]),
-        actualGrade = Option(existingRow.get("SMR_ACTG").asInstanceOf[String]),
-        result = Option(existingRow.get("SMR_RSLT").asInstanceOf[String])))
+      val existingRow = smrExistingRowQuery.getExistingSmrRow(parameterMap)
+      Some(existingRow)
     } catch {
-      case e: EmptyResultDataAccessException => None
+      case _: EmptyResultDataAccessException => None
     }
   }
 
@@ -222,7 +192,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
 object ExportStudentModuleResultToSitsService {
   var sitsSchema: String = Wire.property("${schema.sits}")
 
-  final def rootWhereClause =
+  final def rootWhereClause: String =
     f"""
        |where spr_code = :sprCode
        |    and mod_code = :moduleCode
@@ -231,13 +201,13 @@ object ExportStudentModuleResultToSitsService {
        |    and psl_code = 'Y'
        |""".stripMargin
 
-  final def CountSmoRecordsSql =
+  final def CountSmoRecordsSql: String =
     f"""
     select count(*) from $sitsSchema.cam_smo $rootWhereClause
     """
 
 
-  final def SmrRecordSql =
+  final def SmrRecordSql: String =
     f"""
     select SMR_SASS, SMR_PRCS, SMR_PROC, SMR_CRED, SMR_CURA, SMR_COMA, SMR_ACTM, SMR_ACTG, SMR_AGRM, SMR_AGRG, SMR_RSLT from $sitsSchema.ins_smr $rootWhereClause
     """
@@ -296,9 +266,47 @@ object ExportStudentModuleResultToSitsService {
     }
   }
 
+  /**
+   * Student result record  can be amended as long as  -
+   * SMR record exists in SITS. Exams Office may not yet have run SAS process if no SMR record found.
+   * SMO record has to exist.
+   */
+  case class SmrSubset(
+    sasStatus: Option[String],
+    processStatus: Option[String],
+    process: Option[String],
+    credits: Option[JBigDecimal],
+    currentAttempt: Option[Int],
+    completedAttempt: Option[Int],
+    agreedMark: Option[Int],
+    agreedGrade: Option[String],
+    actualMark: Option[Int],
+    actualGrade: Option[String],
+    result: Option[String],
+  )
+
   class SmrQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
-    def getExsitingSmrRow(params: JMap[String, Any]): JMap[String, AnyRef] = {
-      this.queryForMap(SmrRecordSql, params)
+    def getExistingSmrRow(params: JMap[String, Any]): SmrSubset = {
+      this.queryForObject(SmrRecordSql, params, (rs: ResultSet, _: Int) => {
+        def getNullableInt(column: String): Option[Int] = {
+          val intValue = rs.getInt(column)
+          if (rs.wasNull()) None else Some(intValue)
+        }
+
+        SmrSubset(
+          sasStatus = rs.getString("SMR_SASS").maybeText,
+          processStatus = rs.getString("SMR_PRCS").maybeText,
+          process = rs.getString("SMR_PROC").maybeText,
+          credits = Option(rs.getBigDecimal("SMR_CRED")),
+          currentAttempt = getNullableInt("SMR_CURA"),
+          completedAttempt = getNullableInt("SMR_COMA"),
+          agreedMark = getNullableInt("SMR_AGRM"),
+          agreedGrade = rs.getString("SMR_AGRG").maybeText,
+          actualMark = getNullableInt("SMR_ACTM"),
+          actualGrade = rs.getString("SMR_ACTG").maybeText,
+          result = rs.getString("SMR_RSLT").maybeText
+        )
+      })
     }
   }
 

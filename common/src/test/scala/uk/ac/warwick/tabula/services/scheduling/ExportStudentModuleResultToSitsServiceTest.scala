@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.data.model.ModuleResult._
 import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.SmrSubset
 
-class ExportStudentModuleResultToSitsServiceTest  extends PersistenceTestBase  with Mockito with EmbeddedSits {
+class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  with Mockito with EmbeddedSits {
 
   val smrExporter = new ExportStudentModuleResultToSitsServiceImpl
   smrExporter.sitsDataSource = sits
@@ -131,7 +132,7 @@ class ExportStudentModuleResultToSitsServiceTest  extends PersistenceTestBase  w
         session.flush()
         session.clear()
         cnt should be(1)
-        val existingSmr: Option[smrExporter.SmrSubset] = smrExporter.smrRecordSubdata(dbRmr1)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr1)
         existingSmr.size should be(1)
         existingSmr.get.actualMark should be(Some(40))
         existingSmr.get.actualGrade should be(Some("2"))
@@ -160,7 +161,7 @@ class ExportStudentModuleResultToSitsServiceTest  extends PersistenceTestBase  w
         session.flush()
         session.clear()
         cnt should be(1)
-        val existingSmr: Option[smrExporter.SmrSubset] = smrExporter.smrRecordSubdata(dbRmr2)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr2)
         existingSmr.size should be(1)
         existingSmr.get.actualMark should be(None)
         existingSmr.get.actualGrade should be(None)
@@ -187,7 +188,7 @@ class ExportStudentModuleResultToSitsServiceTest  extends PersistenceTestBase  w
         session.flush()
         session.clear()
         cnt should be(1)
-        val existingSmr: Option[smrExporter.SmrSubset] = smrExporter.smrRecordSubdata(dbRmr3)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr3)
         existingSmr.size should be(1)
         existingSmr.get.actualMark should be(Some(61))
         existingSmr.get.actualGrade should be(Some("21"))
@@ -225,7 +226,7 @@ class ExportStudentModuleResultToSitsServiceTest  extends PersistenceTestBase  w
         session.flush()
         session.clear()
         cnt should be(1)
-        val existingSmr: Option[smrExporter.SmrSubset] = smrExporter.smrRecordSubdata(dbRmr4)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr4)
         existingSmr.size should be(1)
         existingSmr.get.actualMark should be(Some(20))
         existingSmr.get.actualGrade should be(Some("F"))
