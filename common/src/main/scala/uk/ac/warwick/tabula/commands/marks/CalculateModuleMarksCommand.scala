@@ -280,6 +280,8 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                         currentItem.mark = formattedValue
                       case "Grade" =>
                         currentItem.grade = formattedValue
+                      case "Result" =>
+                        currentItem.result = formattedValue
                       case "Comments" =>
                         currentItem.comments = formattedValue
                       case _ => // ignore anything else
