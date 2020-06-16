@@ -274,7 +274,7 @@
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].mark">
         <div class="input-group">
-          <@f.input path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.mark" path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
           <div class="input-group-addon">%</div>
         </div>
       </@bs3form.labelled_form_group>
@@ -284,16 +284,16 @@
         <#if isGradeValidation>
           <#local generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#local>
 
-          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
-          <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
+          <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
         <#else>
-          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
         </#if>
       </@bs3form.labelled_form_group>
     </td>
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].result">
-        <@f.select path="students[${student.sprCode}].result" cssClass="form-control">
+        <@f.select id="students${student.sprCode?replace('/', '_')}.result" path="students[${student.sprCode}].result" cssClass="form-control">
           <@f.option value="" />
           <#list moduleResults as result>
             <@f.option value=result.entryName label=result.description />
@@ -303,7 +303,7 @@
     </td>
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].comments">
-        <@f.input path="students[${student.sprCode}].comments" cssClass="form-control" />
+        <@f.input id="students${student.sprCode?replace('/', '_')}.comments" path="students[${student.sprCode}].comments" cssClass="form-control" />
       </@bs3form.labelled_form_group>
     </td>
   </tr>
@@ -413,10 +413,11 @@
                                     <#assign student = studentMarkRecord._1() />
                                     <#assign calculation = studentMarkRecord._3().suggestions[suggestion_index].calculation />
 
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${calculation.mark!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${calculation.grade!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(calculation.result.dbValue)!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${calculation.comments!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${calculation.mark!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${calculation.grade!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${calculation.grade!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.result" value="${(calculation.result.dbValue)!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.comments" value="${calculation.comments!}" />
                                   </#list>
                                   <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-all-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation for all students <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                                 </div>
