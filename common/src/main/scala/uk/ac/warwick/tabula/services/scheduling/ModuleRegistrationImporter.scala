@@ -187,7 +187,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = sms.spr_code
 
-      join ins_mod mod on mod.mod_code = sms.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = sms.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on sms.spr_code = smr.spr_code
@@ -226,7 +226,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = smo.spr_code
 
-      join ins_mod mod on mod.mod_code = smo.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = smo.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on smo.spr_code = smr.spr_code
@@ -266,7 +266,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = sms.spr_code
 
-      join ins_mod mod on mod.mod_code = sms.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = sms.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on sms.spr_code = smr.spr_code
@@ -305,7 +305,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = smo.spr_code
 
-      join ins_mod mod on mod.mod_code = smo.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = smo.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on smo.spr_code = smr.spr_code
@@ -417,7 +417,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
+    "cats", "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
   )
 }
 
@@ -479,9 +479,8 @@ class ModuleRegistrationRow(
 
   def matches(that: ModuleRegistration) : Boolean = {
     sprCode == that.sprCode &&
-    Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
+    sitsModuleCode == that.sitsModuleCode &&
     AcademicYear.parse(academicYear) == that.academicYear &&
-    scaled(cats) == scaled(that.cats) &&
     occurrence == that.occurrence
   }
 
