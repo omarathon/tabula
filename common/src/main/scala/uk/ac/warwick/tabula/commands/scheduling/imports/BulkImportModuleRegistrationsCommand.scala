@@ -67,8 +67,8 @@ abstract class BulkImportModuleRegistrationsCommandInternal extends CommandInter
     }
 
     // key the existing registrations by scj code and module to make finding them faster
-    val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by spr, module code and academic year") {
-      existingRegistrations.groupBy(mr => (mr.sprCode, mr.module.code, mr.academicYear.toString))
+    val existingRegistrationsGrouped = benchmarkTask("Keying module registrations by spr, module code, academic year") {
+      existingRegistrations.groupBy(mr => (mr.sprCode, mr.sitsModuleCode, mr.academicYear.toString))
     }
 
     var created: Int = 0
@@ -76,7 +76,7 @@ abstract class BulkImportModuleRegistrationsCommandInternal extends CommandInter
 
     // registrations that we found in SITS that already existed in Tabula (don't delete these)
     val foundRegistrations = benchmarkTask("Updating registrations") { rows.flatMap(row => {
-      val existing = existingRegistrationsGrouped.getOrElse((row.sprCode, row.moduleCode.orNull, row.academicYear), Nil).find(row.matches)
+      val existing = existingRegistrationsGrouped.getOrElse((row.sprCode, row.sitsModuleCode, row.academicYear), Nil).find(row.matches)
       val registration = existing.orElse(modulesBySitsCode.get(row.sitsModuleCode).map(row.toModuleRegistration))
 
       registration match {
