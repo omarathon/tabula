@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult._
-import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleRegistration, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
 import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrQuery}
@@ -45,87 +45,81 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     process: Option[String],
     credits: Option[JBigDecimal],
     currentAttempt: Option[JInteger],
-    completedAttempt: Option[JInteger])
+    completedAttempt: Option[JInteger],
+    agreedMark: Option[JInteger],
+    agreedGrade: Option[String],
+    actualMark: Option[JInteger],
+    actualGrade: Option[String],
+    result: Option[String],
+  )
 
 
-  private def extractSmrSubsetData(existingSmr: SmrSubset, recordedModuleRegistration: RecordedModuleRegistration, actualMarks: Boolean = true): SmrSubset = {
-
+  private def extractSmrSubsetData(recordedModuleRegistration: RecordedModuleRegistration): SmrSubset = {
     val latestResult = recordedModuleRegistration.latestResult
     val latestGrade = recordedModuleRegistration.latestGrade
-    val mr: ModuleRegistration = recordedModuleRegistration.moduleRegistration.getOrElse(throw new IllegalStateException(s"Expected ModuleRegistration record but 0 found for module mark $recordedModuleRegistration"))
-    //if there is any resit row
-    val currentResitAttempt = mr.currentResitAttempt
-    val noResits = currentResitAttempt.isEmpty
+    val isAgreedMark = recordedModuleRegistration.latestState.contains(MarkState.Agreed)
 
-    def smrCredits: Option[JBigDecimal] = latestResult match {
+    val mr: ModuleRegistration = recordedModuleRegistration.moduleRegistration.getOrElse(throw new IllegalStateException(s"Expected ModuleRegistration record but 0 found for module mark $recordedModuleRegistration"))
+
+    // if there is any resit row
+    val currentResitAttempt = mr.currentResitAttempt
+    val isResitting = currentResitAttempt.nonEmpty
+
+    val smrCredits: Option[JBigDecimal] = latestResult match {
       case Some(Pass) => Some(mr.cats)
+      case None => None // null this field if we don't have a result yet
       case _ => Some(new JBigDecimal(0))
     }
 
-    def smrProcess: Option[String] = {
-      if (actualMarks) {
-        existingSmr.process
-      } else {
+    val smrProcess: Option[String] = {
+      if (isAgreedMark) {
         latestResult match {
           case Some(Pass) | Some(NoResult) => Some("COM")
           case Some(Fail) => Some("RAS")
-          case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) Some("RAS") else Some("SAS")
-          case _ => None
+          case Some(Deferred) => if (latestGrade.contains("S")) Some("RAS") else Some("SAS") // S is further first sit
+          case _ => Some("SAS")
         }
-      }
-    }
-
-    def smrCurrentAttempt: Option[JInteger] = {
-      if (actualMarks) {
-        existingSmr.currentAttempt
       } else {
-        val attempt = latestResult match {
-          //Possibility of 1 or 2 currentResitAttempt value depending on Ist attempt or Resit  SRA record
-          case Some(Pass) | Some(NoResult) => if (noResits) Some(1) else mr.currentResitAttempt
-          case Some(Fail) => mr.currentResitAttempt
-          case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) {
-            mr.currentResitAttempt // Ideally 1 value. The grade of S for further first attempt creates an SRA with an current attempt of 1.  SRA record generation is pending -TODO
-          } else {
-            existingSmr.currentAttempt.map(_.intValue) // Possible something on hold so we can leave it as it is
-          }
-          case _ => None
-        }
-        Some(JInteger(attempt))
+        if (isResitting) Some("RAS") else Some("SAS")
       }
     }
 
+    val smrCurrentAttempt: Option[JInteger] = if (isResitting) Some(JInteger(mr.currentResitAttempt)) else Some(1)
 
-    def smrCompletedAttempt: Option[JInteger] = {
-      if (actualMarks) {
-        existingSmr.completedAttempt
+    val smrCompletedAttempt: Option[JInteger] =
+      if (isAgreedMark) smrCurrentAttempt
+      else smrCurrentAttempt.map(_ - 1)
+
+    val smrSasStatus: Option[String] =
+      if (isResitting) Some("R")
+      else if (isAgreedMark) Some("A")
+      else None
+
+    val smrProcStatus: Option[String] = {
+      if (isAgreedMark) {
+        latestResult match {
+          case Some(Pass) => Some("A")
+          case _ => None
+        }
       } else {
-
-        val attempt = latestResult match {
-          case Some(Pass) | Some(NoResult) => if (noResits) Some(1) else mr.currentResitAttempt
-          case Some(Fail) => mr.currentResitAttempt.map(a => a - 1) //1 less than current attempt. CurrentResitAttempt(Ideally 2)  at this stage by SRA generation
-          case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) {
-            mr.currentResitAttempt // Ideally 1 value and both current and completed same
-          } else {
-            existingSmr.completedAttempt.map(_.intValue)
-          }
+        latestResult match {
+          case r if r.nonEmpty => Some("C")
           case _ => None
         }
-        Some(JInteger(attempt))
       }
     }
 
-    def smrSasStatus: Option[String] = latestResult match {
-      case Some(Pass) | Some(Fail) | Some(NoResult) => if (noResits) Some("A") else Some("R")
-      case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) Some("R") else Some("H")
-      case _ => None
-    }
+    // Use the latest non-agreed mark (which may be the current) as the actual mark/grade
+    // If we can't find a non-agreed mark, just use the agreed mark
+    val actualRecordedMark =
+      recordedModuleRegistration.marks.find(_.markState != MarkState.Agreed)
+        .getOrElse(recordedModuleRegistration.marks.head)
 
-    def smrProcStatus: Option[String] = latestResult match {
-      case Some(Pass) | Some(NoResult) => Some("A")
-      case Some(Fail) => None
-      case Some(Deferred) => if (latestGrade.exists(_.matches(("[S]")))) None else Some("H")
-      case _ => None
-    }
+    val smrActualMark: Option[JInteger] = Some(JInteger(actualRecordedMark.mark))
+    val smrAgreedMark: Option[JInteger] = Some(JInteger(recordedModuleRegistration.latestMark)).filter(_ => isAgreedMark)
+
+    val smrActualGrade: Option[String] = actualRecordedMark.grade
+    val smrAgreedGrade: Option[String] = latestGrade.filter(_ => isAgreedMark)
 
     SmrSubset(
       sasStatus = smrSasStatus,
@@ -133,7 +127,12 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       process = smrProcess,
       credits = smrCredits,
       currentAttempt = smrCurrentAttempt,
-      completedAttempt = smrCompletedAttempt
+      completedAttempt = smrCompletedAttempt,
+      actualMark = smrActualMark,
+      actualGrade = smrActualGrade,
+      agreedMark = smrAgreedMark,
+      agreedGrade = smrAgreedGrade,
+      result = recordedModuleRegistration.latestResult.map(_.dbValue)
     )
   }
 
@@ -146,7 +145,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     )
   }
 
-  def SmoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
+  def smoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
     val countQuery = new SmoCountQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     countQuery.getCount(parameterMap) > 0
@@ -154,14 +153,23 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
   }
 
 
-  def SmrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset] = {
+  def smrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset] = {
     val smrExistingRowQuery = new SmrQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     try {
       val existingRow = smrExistingRowQuery.getExsitingSmrRow(parameterMap)
-      Some(SmrSubset(Option(existingRow.get("SMR_SASS").asInstanceOf[String]), Option(existingRow.get("SMR_PRCS").asInstanceOf[String]),
-        Option(existingRow.get("SMR_PROC").asInstanceOf[String]), Option(existingRow.get("SMR_CRED").asInstanceOf[JBigDecimal]),
-        Option(existingRow.get("SMR_CURA").asInstanceOf[JBigDecimal].intValue), Option(existingRow.get("SMR_COMA").asInstanceOf[JBigDecimal].intValue)))
+      Some(SmrSubset(
+        sasStatus  = Option(existingRow.get("SMR_SASS").asInstanceOf[String]),
+        processStatus =  Option(existingRow.get("SMR_PRCS").asInstanceOf[String]),
+        process =  Option(existingRow.get("SMR_PROC").asInstanceOf[String]),
+        credits =  Option(existingRow.get("SMR_CRED").asInstanceOf[JBigDecimal]),
+        currentAttempt = Option(existingRow.get("SMR_CURA").asInstanceOf[JInteger]),
+        completedAttempt = Option(existingRow.get("SMR_COMA").asInstanceOf[JInteger]),
+        agreedMark = Option(existingRow.get("SMR_AGRM").asInstanceOf[JInteger]),
+        agreedGrade = Option(existingRow.get("SMR_AGRG").asInstanceOf[String]),
+        actualMark = Option(existingRow.get("SMR_ACTM").asInstanceOf[JInteger]),
+        actualGrade = Option(existingRow.get("SMR_ACTG").asInstanceOf[String]),
+        result = Option(existingRow.get("SMR_RSLT").asInstanceOf[String])))
     } catch {
       case e: EmptyResultDataAccessException => None
     }
@@ -169,9 +177,9 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
 
 
   def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = {
-    val existingSmr = SmrRecordSubdata(recordedModuleRegistration)
+    val existingSmr = smrRecordSubdata(recordedModuleRegistration)
 
-    if (!SmoRecordExists(recordedModuleRegistration)) {
+    if (!smoRecordExists(recordedModuleRegistration)) {
       logger.warn(s"SMO doesn't exists. Unable to update module mark record for $recordedModuleRegistration")
       0 //can throw an exception in case we want to report this to  user via UI
     } else if (existingSmr.isEmpty) {
@@ -180,22 +188,21 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     } else {
       val updateQuery = new ExportStudentModuleResultToSitsUpdateQuery(sitsDataSource)
 
-      //TODO currently dealing with actual marks
-      val subsetData = extractSmrSubsetData(existingSmr.get, recordedModuleRegistration)
-
+      val subsetData = extractSmrSubsetData(recordedModuleRegistration)
       val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
       parameterMap.putAll(JHashMap(
         "currentAttemptNumber" -> subsetData.currentAttempt.orNull,
         "completedAttemptNumber" -> subsetData.completedAttempt.orNull,
-        "moduleMarks" -> JInteger(recordedModuleRegistration.latestMark),
-        "moduleGrade" -> recordedModuleRegistration.latestGrade.orNull,
-        "agreedModuleMarks" -> null,
-        "agreedModuleGrade" -> null,
+        "moduleMarks" -> subsetData.actualMark.orNull,
+        "moduleGrade" -> subsetData.actualGrade.orNull,
+        "agreedModuleMarks" -> subsetData.agreedMark.orNull,
+        "agreedModuleGrade" -> subsetData.agreedGrade.orNull,
         "credits" -> subsetData.credits.orNull,
         "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
-        "finalAssesmentsAttended" -> (if (finalAssessmentAttended) "Y" else "N"),
+        "finalAssesmentsAttended" -> recordedModuleRegistration.latestMark.map(_ => if (finalAssessmentAttended) "Y" else "N").orNull,
         "dateTimeMarksUploaded" -> DateTime.now.toDate,
-        "moduleResult" -> recordedModuleRegistration.latestResult.map(_.dbValue).orNull,
+        "sraByDept" -> recordedModuleRegistration.latestMark.map(_ => "SRAs by dept").orNull,
+        "moduleResult" -> subsetData.result.orNull,
         "initialSASStatus" -> subsetData.sasStatus.orNull,
         "processStatus" -> subsetData.processStatus.orNull,
         "process" -> subsetData.process.orNull,
@@ -213,12 +220,12 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
 }
 
 object ExportStudentModuleResultToSitsService {
-  val sitsSchema: String = Wire.property("${schema.sits}")
+  var sitsSchema: String = Wire.property("${schema.sits}")
 
   final def rootWhereClause =
     f"""
        |where spr_code = :sprCode
-       |    and mod_code like :moduleCode
+       |    and mod_code = :moduleCode
        |    and mav_occur = :occurrence
        |    and ayr_code = :academicYear
        |    and psl_code = 'Y'
@@ -232,10 +239,9 @@ object ExportStudentModuleResultToSitsService {
 
   final def SmrRecordSql =
     f"""
-    select SMR_PROC, SMR_PRCS, SMR_SASS, SMR_CURA, SMR_COMA, SMR_CRED from $sitsSchema.ins_smr $rootWhereClause
+    select SMR_SASS, SMR_PRCS, SMR_PROC, SMR_CRED, SMR_CURA, SMR_COMA, SMR_ACTM, SMR_ACTG, SMR_AGRM, SMR_AGRG, SMR_RSLT from $sitsSchema.ins_smr $rootWhereClause
     """
 
-  //TODO -Currently dealing with actual grade/marks only.
   final def UpdateModuleResultSql: String =
     s"""
        |update $sitsSchema.ins_smr
@@ -249,7 +255,7 @@ object ExportStudentModuleResultToSitsService {
        |      SMR_UDF2 = :currentDateTime, -- dd/MM/yy:HHmm format used by MRM. We store the same date time in fasd. May be we don't need this?
        |      SMR_UDF3 = :finalAssesmentsAttended,
        |      SMR_UDFA = 'TABULA',
-       |      SMR_UDF5 = 'SRAs by dept',
+       |      SMR_UDF5 = :sraByDept,
        |      SMR_FASD = :dateTimeMarksUploaded,
        |      SMR_RSLT = :moduleResult, -- P/F/D/null values
        |      SMR_SASS = :initialSASStatus,
@@ -273,6 +279,7 @@ object ExportStudentModuleResultToSitsService {
     declareParameter(new SqlParameter("credits", Types.DECIMAL))
     declareParameter(new SqlParameter("currentDateTime", Types.VARCHAR))
     declareParameter(new SqlParameter("finalAssesmentsAttended", Types.VARCHAR))
+    declareParameter(new SqlParameter("sraByDept", Types.VARCHAR))
     declareParameter(new SqlParameter("dateTimeMarksUploaded", Types.DATE))
     declareParameter(new SqlParameter("moduleResult", Types.VARCHAR))
     declareParameter(new SqlParameter("initialSASStatus", Types.VARCHAR))
