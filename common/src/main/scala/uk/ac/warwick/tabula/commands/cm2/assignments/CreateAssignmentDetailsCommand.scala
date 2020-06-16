@@ -269,7 +269,7 @@ trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidatio
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
       for (duplicate <- duplicates.headOption) {
-        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name), "")
+        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name, academicYear.toString), "")
       }
     }
 
