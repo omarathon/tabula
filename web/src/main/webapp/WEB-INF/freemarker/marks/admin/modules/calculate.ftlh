@@ -183,10 +183,11 @@
                       </tbody>
                     </table>
                     <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}">
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${suggestion.calculation.mark!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${suggestion.calculation.grade!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(suggestion.calculation.result.dbValue)!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${suggestion.calculation.comments!}" />
+                      <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${suggestion.calculation.mark!}" />
+                      <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${suggestion.calculation.grade!}" />
+                      <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${suggestion.calculation.grade!}" />
+                      <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.result" value="${(suggestion.calculation.result.dbValue)!}" />
+                      <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.comments" value="${suggestion.calculation.comments!}" />
                       <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                   </div>
