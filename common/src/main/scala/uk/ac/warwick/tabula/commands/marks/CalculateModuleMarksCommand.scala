@@ -593,3 +593,45 @@ trait CalculateModuleMarksValidation extends SelfValidating {
     }
   }
 }
+
+trait ClearRecordedModuleMarksState {
+  def currentUser: CurrentUser
+}
+
+/**
+ * A mixin trait for component mark operations which mutate actual or agreed component marks, and therefore
+ * mean the module mark/grade needs clearing for recalculation.
+ */
+trait ClearRecordedModuleMarks {
+  self: ClearRecordedModuleMarksState
+    with ModuleRegistrationMarksServiceComponent
+    with ModuleRegistrationServiceComponent =>
+
+  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): RecordedModuleRegistration = {
+    // There might be multiple module registrations here, for different SPR codes. Just blat them all
+    moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
+      .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
+      .map { moduleRegistration =>
+        val recordedModuleRegistration: RecordedModuleRegistration =
+          moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
+
+        recordedModuleRegistration.addMark(
+          uploader = currentUser.apparentUser,
+          mark = None,
+          grade = None,
+          result = None,
+          source = RecordedModuleMarkSource.ComponentMarkChange,
+          markState = MarkState.UnconfirmedActual,
+          comments = "Module mark calculation reset by component mark change",
+        )
+
+        moduleRegistrationMarksService.saveOrUpdate(recordedModuleRegistration)
+
+        recordedModuleRegistration
+      }
+      .headOption
+      // This is potentially frustrating, and might happen if the assignment importer and mod reg importer got out of sync
+      // but better to blow up than let marks get out of sync
+      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module registration for $recordedAssessmentComponentStudent"))
+  }
+}

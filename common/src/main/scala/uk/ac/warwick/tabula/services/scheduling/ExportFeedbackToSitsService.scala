@@ -190,16 +190,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
       if (resit) (new ExportResitFeedbackToSitsQuery(sitsDataSource), "RAS")
       else (new ExportFeedbackToSitsQuery(sitsDataSource), "SAS")
 
-    // Write a null mark/grade if requested, so don't need to check if mark/grade set
-    val rowsUpdated = updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
-    if (rowsUpdated == 1) {
-      val resetModuleResultQuery = new ResetModuleResultQuery(sitsDataSource)
-      if (resetModuleResultQuery.updateByNamedParam(parameterGetter.getResetModuleResultParams(process)) != 1) {
-        logger.warn(s"Unable to reset module mark record for $student")
-      }
-
-      rowsUpdated
-    } else rowsUpdated
+    updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
 
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
@@ -376,32 +367,6 @@ object ExportFeedbackToSitsService {
     actualGrade: String,
     uploader: String
   )
-
-  final def ResetModuleResultSql: String =
-    s"""
-       |update $sitsSchema.ins_smr
-       |  set SMR_ACTM = null,
-       |      SMR_ACTG = null,
-       |      SMR_AGRM = null,
-       |      SMR_AGRG = null,
-       |      SMR_PRCS = null,
-       |      SMR_PROC = :process
-       |  where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
-       |    and mod_code like :moduleCodeMatcher
-       |    and mav_occur in (:occurrences)
-       |    and ayr_code = :academicYear
-       |    and psl_code = 'Y'
-       |""".stripMargin
-
-  class ResetModuleResultQuery(ds: DataSource) extends SqlUpdate(ds, ResetModuleResultSql) {
-    declareParameter(new SqlParameter("studentId", Types.VARCHAR))
-    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
-    declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
-    declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
-    declareParameter(new SqlParameter("process", Types.VARCHAR))
-
-    compile()
-  }
 
 }
 
