@@ -46,7 +46,9 @@
             <h3 class="panel-title">
               Progression decision
               <#if progressionDecision.resitPeriod>
-                <span class="label label-info">September</span>
+                <span class="label label-info">Summer vacation exam period</span>
+              <#else>
+                <span class="label label-info">Summer exam period</span>
               </#if>
             </h3>
           </div>

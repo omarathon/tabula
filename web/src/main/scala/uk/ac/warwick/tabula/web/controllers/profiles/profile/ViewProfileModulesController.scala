@@ -52,7 +52,7 @@ class ViewProfileModulesController extends AbstractViewProfileController {
       "yearWeighting" -> studentBreakdown.flatMap(_.yearWeighting),
       "yearAbroad" -> scyd.exists(_.yearAbroad),
       "moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq.empty),
-      "progressionDecisions" -> studentBreakdown.map(_.progressionDecisions).getOrElse(Seq.empty),
+      "progressionDecisions" -> studentBreakdown.map(_.progressionDecisions.reverse).getOrElse(Seq.empty), // Most recent first
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
       "member" -> studentCourseDetails.student
     ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.ModulesIdentifier): _*)
