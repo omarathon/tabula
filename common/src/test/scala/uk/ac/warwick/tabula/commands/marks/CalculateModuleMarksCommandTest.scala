@@ -35,6 +35,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
       outOfSync = false,
       markState = Some(UnconfirmedActual),
       agreed = false,
+      resitMark = false,
       history = Seq.empty,
       upstreamAssessmentGroupMember = null
     )
