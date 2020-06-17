@@ -108,7 +108,6 @@
                 <th class="col-sm-3">User</th>
                 <th class="col-sm-1">Mark</th>
                 <th class="col-sm-1">Grade</th>
-                <th class="col-sm-1">Result</th>
                 <th class="col-sm-3">Comments</th>
               </tr>
             </thead>
@@ -121,7 +120,6 @@
                   <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
                   <td>${history.mark!'-'}</td>
                   <td>${history.grade!'-'}</td>
-                  <td>${(history.result.description)!'-'}</td>
                   <td>${history.comments!}</td>
                 </tr>
               </#list>
