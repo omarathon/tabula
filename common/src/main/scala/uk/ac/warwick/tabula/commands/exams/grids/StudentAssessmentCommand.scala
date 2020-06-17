@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.exams.grids.StudentAssessmentCommand.Command
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
@@ -12,7 +13,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 object StudentAssessmentCommand {
-  type Command = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
+  type Command = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState with PermissionsChecking
 
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new StudentAssessmentCommandInternal(studentCourseDetails, academicYear)
@@ -34,8 +35,7 @@ object StudentAssessmentCommand {
 }
 
 object StudentAssessmentProfileCommand {
-
-  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
+  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new StudentAssessmentCommandInternal(studentCourseDetails, academicYear)
       with ComposableCommand[StudentMarksBreakdown]
       with AutowiringAssessmentMembershipServiceComponent
@@ -54,7 +54,8 @@ case class StudentMarksBreakdown(
   weightedMeanYearMark: Option[BigDecimal],
   yearWeighting: Option[CourseYearWeighting],
   modules: Seq[ModuleRegistrationAndComponents],
-  mitigatingCircumstances: Option[Seq[MitigatingCircumstancesSubmission]]
+  mitigatingCircumstances: Option[Seq[MitigatingCircumstancesSubmission]],
+  progressionDecisions: Seq[ProgressionDecision],
 )
 
 case class ModuleRegistrationAndComponents(
@@ -118,7 +119,12 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentCourseYearDetails.yearOfStudy
     )
 
-    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions)
+    // We only show progression decisions that are visible to the student, to prevent tutors accidentally leaking this
+    val progressionDecisions =
+      studentCourseDetails.progressionDecisionsByYear(academicYear)
+        .filter(_.isVisibleToStudent)
+
+    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions)
   }
 }
 

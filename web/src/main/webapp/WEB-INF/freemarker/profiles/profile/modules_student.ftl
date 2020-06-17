@@ -13,15 +13,15 @@
         View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif" />
         </a>
       </div>
-    </#if>
 
-    <p>Module Registration Status:
-      <#if command.studentCourseYearDetails.moduleRegistrationStatus??>
-        ${(command.studentCourseYearDetails.moduleRegistrationStatus.description)!}
-      <#else>
-        Unknown (not in SITS)
-      </#if>
-    </p>
+      <p>Module Registration Status:
+        <#if command.studentCourseYearDetails.moduleRegistrationStatus??>
+          ${(command.studentCourseYearDetails.moduleRegistrationStatus.description)!}
+        <#else>
+          Unknown (not in SITS)
+        </#if>
+      </p>
+    </#if>
 
     <h3>
       <#if moduleRegistrationsAndComponents?has_content>
@@ -38,6 +38,32 @@
       <strong>Year Weighting:</strong>
       <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
     </h3>
+
+    <#if progressionDecisions?has_content>
+      <#list progressionDecisions as progressionDecision>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              Progression decision
+              <#if progressionDecision.resitPeriod>
+                <span class="label label-info">Summer vacation exam period</span>
+              <#else>
+                <span class="label label-info">Summer exam period</span>
+              </#if>
+            </h3>
+          </div>
+          <div class="panel-body">
+            <h4>Board decision: ${progressionDecision.outcome.description}</h4>
+
+            <#if progressionDecision.minutes?has_content>
+              <p>${progressionDecision.minutes}</p>
+            <#elseif progressionDecision.notes?has_content>
+              <p>${progressionDecision.notes}</p>
+            </#if>
+          </div>
+        </div>
+      </#list>
+    </#if>
 
     <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
