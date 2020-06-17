@@ -69,7 +69,7 @@
                   ${c.result!}
                 </#if>
               </td>
-              <td><@f.input path="students[${student.sprCode}].comments" cssClass="form-control" readonly=true /></td>
+              <td><@f.input path="students[${student.sprCode}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>
             </tr>
           </#list>
         </tbody>
