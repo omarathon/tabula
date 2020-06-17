@@ -57,8 +57,6 @@
 
             <#if progressionDecision.minutes?has_content>
               <p>${progressionDecision.minutes}</p>
-            <#elseif progressionDecision.notes?has_content>
-              <p>${progressionDecision.notes}</p>
             </#if>
           </div>
         </div>
