@@ -39,14 +39,12 @@ object ListAssessmentComponentsCommand {
         furtherFirstSit = resit && member.currentResitAttempt.exists(_ <= 1),
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstAgreedMark)
-            .orElse(recordedStudent.flatMap(_.latestMark))
-            .orElse(member.firstDefinedMark),
+            .orElse(member.firstDefinedMark)
+            .orElse(recordedStudent.flatMap(_.latestMark)),
         grade =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(member.firstAgreedGrade)
-            .orElse(recordedStudent.flatMap(_.latestGrade))
-            .orElse(member.firstDefinedGrade),
+            .orElse(member.firstDefinedGrade)
+            .orElse(recordedStudent.flatMap(_.latestGrade)),
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
