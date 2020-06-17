@@ -69,6 +69,8 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
 
+      clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
+
       recordedAssessmentComponentStudent
     }
   }
