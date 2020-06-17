@@ -173,6 +173,7 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ImportModuleMembershipDataJob]("scheduling.importModuleMembershipData"),
     propertiesConfiguredJob[ManualMembershipWarningJob]("scheduling.manualMembershipWarning"),
     propertiesConfiguredJob[ImportModuleListsJob]("scheduling.importModuleLists"),
+    propertiesConfiguredJob[BulkImportProgressionDecisionsJob]("scheduling.bulkImportProgressionDecisions"),
 
     propertiesConfiguredJob[RemoveAgedApplicantsJob]("scheduling.removeAgedApplicants"),
 

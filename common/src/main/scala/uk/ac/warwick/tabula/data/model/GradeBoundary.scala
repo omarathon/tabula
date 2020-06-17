@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.{Column, Entity}
 import javax.validation.constraints.NotNull
 import org.hibernate.annotations.{Proxy, Type}
+import uk.ac.warwick.tabula.ToString
 
 object GradeBoundary {
   def apply(marksCode: String, process: String, rank: Int, grade: String, minimumMark: Option[Int], maximumMark: Option[Int], signalStatus: String, result: Option[ModuleResult]): GradeBoundary = {
@@ -43,7 +44,7 @@ object GradeBoundary {
 
 @Entity
 @Proxy
-class GradeBoundary extends GeneratedId {
+class GradeBoundary extends GeneratedId with ToString {
 
   @NotNull
   var marksCode: String = _
@@ -77,4 +78,15 @@ class GradeBoundary extends GeneratedId {
     (minimumMark.isEmpty && maximumMark.isEmpty) ||
     mark.exists { m => minimumMark.exists(_ <= m) && maximumMark.exists(_ >= m) }
 
+  override def toStringProps: Seq[(String, Any)] = Seq(
+    "marksCode" -> marksCode,
+    "process" -> process,
+    "rank" -> rank,
+    "grade" -> grade,
+    "result" -> result,
+    "minimumMark" -> minimumMark,
+    "maximumMark" -> maximumMark,
+    "signalStatus" -> signalStatus,
+    "isDefault" -> isDefault,
+  )
 }

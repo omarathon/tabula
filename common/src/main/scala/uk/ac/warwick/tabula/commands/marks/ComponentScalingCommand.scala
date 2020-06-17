@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableComm
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, ProgressionService}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, ProgressionService}
 
 object ComponentScalingCommand {
   type Result = RecordAssessmentComponentMarksCommand.Result
@@ -24,19 +24,24 @@ object ComponentScalingCommand {
       with ComponentScalingDescription
       with MissingMarkAdjustmentStudentsToSet
       with RecordAssessmentComponentMarksPermissions
+      with ClearRecordedModuleMarks
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringTransactionalComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
 }
 
-abstract class ComponentScalingCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, currentUser: CurrentUser)
+abstract class ComponentScalingCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with RecordAssessmentComponentMarksState {
+    with RecordAssessmentComponentMarksState
+    with ClearRecordedModuleMarksState {
   self: AssessmentComponentMarksServiceComponent
     with ComponentScalingRequest
     with ComponentScalingAlgorithm
     with MissingMarkAdjustmentStudentsToSet
-    with TransactionalComponent =>
+    with TransactionalComponent
+    with ClearRecordedModuleMarks =>
 
   // Set the default pass mark depending on the module
   passMark = assessmentComponent.module.degreeType match {
@@ -63,6 +68,8 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
+
+      clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
 
       recordedAssessmentComponentStudent
     }

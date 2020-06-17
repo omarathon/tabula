@@ -13,15 +13,14 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JList, JMap}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportMemberHelpers, ImportModuleRegistrationsCommand}
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
+import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.CourseType.PGT
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.marks.AutowiringModuleRegistrationMarksServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ModuleRegistrationsByAcademicYearsQuery, ModuleRegistrationsByUniversityIdsQuery}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features}
@@ -38,39 +37,9 @@ trait ModuleRegistrationImporter {
   def getModuleRegistrationRowsForUniversityIds(universityIds: Seq[String]): Seq[ModuleRegistrationRow]
 }
 
-trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with Logging {
-
-  var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
-  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-
-  protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Seq[ImportModuleRegistrationsCommand] = {
-    val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
-      moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
-        case None =>
-          logger.warn(s"No stem module for $sitsModuleCode found in Tabula for SPR: ${moduleRows.map(_.sprCode).distinct.mkString(", ")}")
-          None
-        case Some(module) => Some(module)
-      }
-    }.toSet
-    val tabulaModuleCodes = tabulaModules.map(_.code)
-    val rowsBySCD: Map[StudentCourseDetails, Seq[ModuleRegistrationRow]] = rows.groupBy(_.sprCode).map { case (sprCode, sprRows) =>
-      val allBySpr = studentCourseDetailsDao.getBySprCode(sprCode)
-
-      allBySpr.find(_.mostSignificant).orElse(allBySpr.headOption).getOrElse {
-        logger.error("Can't record module registration - could not find a StudentCourseDetails for SPR " + sprCode)
-        null
-      } -> sprRows.filter(row => {
-        val moduleCode = Module.stripCats(row.sitsModuleCode)
-        moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
-      })
-    }
-    rowsBySCD.view.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }.toSeq
-  }
-}
-
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking with AutowiringFeaturesComponent {
+class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with AutowiringSitsDataSourceComponent with TaskBenchmarking with AutowiringFeaturesComponent {
   lazy val moduleRegistrationsByAcademicYearsQuery: ModuleRegistrationsByAcademicYearsQuery = new ModuleRegistrationsByAcademicYearsQuery(sitsDataSource)
   lazy val moduleRegistrationsByUniversityIdsQuery: ModuleRegistrationsByUniversityIdsQuery = new ModuleRegistrationsByUniversityIdsQuery(sitsDataSource)
 
@@ -105,7 +74,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 @Profile(Array("sandbox"))
 @Service
-class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter
+class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter
   with AutowiringModuleRegistrationMarksServiceComponent {
 
   override def getModuleRegistrationRowsForAcademicYears(academicYears: Seq[AcademicYear]): Seq[ModuleRegistrationRow] =
@@ -218,7 +187,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = sms.spr_code
 
-      join ins_mod mod on mod.mod_code = sms.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = sms.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on sms.spr_code = smr.spr_code
@@ -257,7 +226,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = smo.spr_code
 
-      join ins_mod mod on mod.mod_code = smo.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = smo.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on smo.spr_code = smr.spr_code
@@ -297,7 +266,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = sms.spr_code
 
-      join ins_mod mod on mod.mod_code = sms.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = sms.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on sms.spr_code = smr.spr_code
@@ -336,7 +305,7 @@ object ModuleRegistrationImporter {
       join $sitsSchema.ins_spr spr
         on spr.spr_code = smo.spr_code
 
-      join ins_mod mod on mod.mod_code = smo.mod_code
+      join $sitsSchema.ins_mod mod on mod.mod_code = smo.mod_code
 
       left join $sitsSchema.ins_smr smr -- Student Module Result
         on smo.spr_code = smr.spr_code
@@ -413,14 +382,7 @@ trait CopyModuleRegistrationProperties {
     val rowBean = PropertyAccessorFactory.forBeanPropertyAccess(modRegRow)
     val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
 
-    copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
-    copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
-    copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
-    copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
-    copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
-    copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
-    copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
-    copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
+    copyBasicProperties(properties, rowBean, moduleRegistrationBean)
   }
 
   private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
@@ -455,7 +417,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
+    "cats", "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
   )
 }
 
@@ -517,9 +479,8 @@ class ModuleRegistrationRow(
 
   def matches(that: ModuleRegistration) : Boolean = {
     sprCode == that.sprCode &&
-    Module.stripCats(sitsModuleCode).get.toLowerCase == that.module.code &&
+    sitsModuleCode == that.sitsModuleCode &&
     AcademicYear.parse(academicYear) == that.academicYear &&
-    scaled(cats) == scaled(that.cats) &&
     occurrence == that.occurrence
   }
 

@@ -8,31 +8,59 @@ DROP TABLE CAM_SSN IF EXISTS;
 CREATE TABLE IF NOT EXISTS CAM_SMS
 (
   MOD_CODE VARCHAR(10) NOT NULL,
-  SMS_AGRP VARCHAR(2),
-  SMS_OCCL VARCHAR(6)  NOT NULL,
   AYR_CODE VARCHAR(6)  NOT NULL,
   SPR_CODE VARCHAR(12) NOT NULL,
+  PSL_CODE VARCHAR(1),
+  SMS_AGRP VARCHAR(2),
+  SMS_OCCL VARCHAR(6),
   SMS_MCRD INTEGER,
-  SES_CODE VARCHAR(12),
+  SES_CODE VARCHAR(12)
 );
 
 CREATE TABLE IF NOT EXISTS CAM_SMO
 (
   MOD_CODE  VARCHAR(10) NOT NULL,
-  SMO_AGRP  VARCHAR(2),
   MAV_OCCUR VARCHAR(6)  NOT NULL,
   AYR_CODE  VARCHAR(6)  NOT NULL,
   SPR_CODE  VARCHAR(12) NOT NULL,
+  PSL_CODE  VARCHAR(1) NOT NULL,
+  SMO_AGRP  VARCHAR(2),
   SMO_MCRD  INTEGER,
   SES_CODE  VARCHAR(12),
   SMO_RTSC  VARCHAR(6)
 );
+
 
 CREATE TABLE IF NOT EXISTS CAM_SSN
 (
   SSN_SPRC VARCHAR(12) NOT NULL,
   SSN_AYRC VARCHAR(6)  NOT NULL,
   SSN_MRGS VARCHAR(6)  NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS INS_SMR
+(
+  SPR_CODE VARCHAR(12) NOT NULL,
+  MOD_CODE VARCHAR(10) NOT NULL,
+  MAV_OCCUR VARCHAR(6) NOT NULL,
+  AYR_CODE VARCHAR(6) NOT NULL,
+  PSL_CODE VARCHAR(1) NOT NULL,
+  SMR_ACTM INTEGER,
+  SMR_ACTG VARCHAR(2),
+  SMR_AGRM INTEGER,
+  SMR_AGRG VARCHAR(2),
+  SMR_CRED DECIMAL ,
+  SMR_RSLT VARCHAR(1),
+  SMR_CURA INTEGER,
+  SMR_COMA INTEGER,
+  SMR_SASS VARCHAR(1),
+  SMR_PROC VARCHAR(6),
+  SMR_PRCS VARCHAR(1),
+  SMR_UDF2 VARCHAR(15),
+  SMR_UDF3 VARCHAR(15),
+  SMR_UDF5 VARCHAR(15),
+  SMR_UDFA VARCHAR(15),
+  SMR_FASD DATE
 );
 
 -- Module availability and assessment details
@@ -310,14 +338,14 @@ VALUES ('UDFA-G500', 'G500');
 
 -- unconfirmed registrations
 INSERT INTO CAM_SMS
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123456/1', 30, 'C');
+VALUES ('CH115-30', '11/12', '0123456/1', 'Y', 'A', 'A', 30, 'C');
 INSERT INTO CAM_SSN
 VALUES ('0123456/1', '11/12', 'GEN');
 INSERT INTO CAM_WSS
 VALUES ('EXJUN-12', '0123456/1', '11/12', 'CH115-30', 'Y', '1', 'A01');
 
 INSERT INTO CAM_SMS
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123457/1', 30, 'C');
+VALUES ('CH115-30', '11/12', '0123457/1', 'Y', 'A', 'A', 30, 'C');
 INSERT INTO CAM_SSN
 VALUES ('0123457/1', '11/12', 'GEN');
 INSERT INTO CAM_WSS
@@ -325,11 +353,11 @@ VALUES ('EXJUN-12', '0123457/1', '11/12', 'CH115-30', 'Y', '2', 'A01');
 
 -- confirmed registrations
 INSERT INTO CAM_SMO
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123458/1', 30, 'C', null);
+VALUES ('CH115-30', 'A', '11/12', '0123458/1', 'Y', 'A', 30, 'C', null);
 INSERT INTO CAM_WSS
 VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH115-30', 'Y', '3', 'A01');
 INSERT INTO CAM_SMO
-VALUES ('CH120-15', 'A', 'A', '11/12', '0123458/1', 30, 'C', null);
+VALUES ('CH120-15', 'A', '11/12', '0123458/1', 'Y', 'A', 30, 'C', null);
 INSERT INTO CAM_WSS
 VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH120-15', 'Y', '1', 'A01');
 INSERT INTO CAM_SSN
@@ -337,13 +365,14 @@ VALUES ('0123458/1', '11/12', 'CON');
 
 -- auto-uploaded confirmed registrations
 INSERT INTO CAM_SMO
-VALUES ('CH115-30', null, 'A', '11/12', '0123460/1', 30, 'C', null);
+VALUES ('CH115-30', 'A', '11/12', '0123460/1', 'Y', null, 30, 'C', null);
 INSERT INTO CAM_WSS
 VALUES ('EXJUN-12', '0123460/1', '11/12', 'CH115-30', 'Y', '4', 'A01');
 
 -- Some data from other years that the import should ignore
 INSERT INTO CAM_SMO
-VALUES ('CH130-20', 'A', 'A', '10/11', '0123458/1', 30, 'C', null);
+VALUES ('CH130-20', 'A', '10/11', '0123458/1','Y','A', 30, 'C', null);
+
 INSERT INTO CAM_WSS
 VALUES ('EXJUN-11', '0123458/1', '10/11', 'CH130-20', 'Y', '1', 'A01');
 INSERT INTO CAM_SSN
@@ -361,3 +390,56 @@ VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', 32, 'F', 33, 'F', 'R');
 INSERT INTO CAM_SRA
 VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', '001',40, '3', 40, '3', 1);
 
+
+
+
+--test data for Export SMR functionality
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123401/2', 'Y', 'A', 30, 'C', null);
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123451/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123453/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123452/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123461/2', 'Y', 'A', 30, 'C', null);
+
+--test data for Export SMR functionality
+--Straightforward pass student
+INSERT INTO INS_SMR
+VALUES ('0123451/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null, null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123452/2', 'CH118-30', 'A', '18/19', 'Y', 61, '21', null, null, 30, 'P', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123453/2', 'CH118-30', 'A', '18/19', 'Y', 61, '21', 61, '21', 30, 'P', 1,1, 'A', 'COM', 'A', null, 'Y', 'SRAs by dept', null, null);
+
+
+ --Failed student data with initial SMR
+INSERT INTO INS_SMR
+VALUES ('0123461/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123462/2', 'CH118-30', 'A', '18/19', 'Y', 29, 'F', null, null, 0, 'F', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123463/2', 'CH118-30', 'A', '18/19', 'Y', 29, 'F', 29, 'F', 0, 'F', 2,1, 'R', 'RAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123464/2', 'CH118-30', 'A', '18/19', 'Y', 29, '2', null, null, 30, 'P', 2,1, 'R', 'RAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123465/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', 40, '2', 30, 'P', 2,2, 'R', 'COM', 'A',  null, null, null, null, null);
+
+
+
+ --Further Ist attempt student data with initial SMR
+INSERT INTO INS_SMR
+VALUES ('0123471/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123472/2', 'CH118-30', 'A', '18/19', 'Y', 15, 'S', null, null, 0, 'D', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123473/2', 'CH118-30', 'A', '18/19', 'Y', 15, 'S', 15, 'S', 0, 'D', 1,1, 'R', 'RAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123474/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', null, null, 30, 'P', 1,1, 'R', 'RAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123475/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', 40, '2', 30, 'P', 1,1, 'R', 'COM', 'A',  null, null, null, null, null);

@@ -186,20 +186,11 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 
   override def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = {
     val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
-    val (updateQuery, process) =
-      if (resit) (new ExportResitFeedbackToSitsQuery(sitsDataSource), "RAS")
-      else (new ExportFeedbackToSitsQuery(sitsDataSource), "SAS")
+    val updateQuery =
+      if (resit) new ExportResitFeedbackToSitsQuery(sitsDataSource)
+      else new ExportFeedbackToSitsQuery(sitsDataSource)
 
-    // Write a null mark/grade if requested, so don't need to check if mark/grade set
-    val rowsUpdated = updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
-    if (rowsUpdated == 1) {
-      val resetModuleResultQuery = new ResetModuleResultQuery(sitsDataSource)
-      if (resetModuleResultQuery.updateByNamedParam(parameterGetter.getResetModuleResultParams(process)) != 1) {
-        logger.warn(s"Unable to reset module mark record for $student")
-      }
-
-      rowsUpdated
-    } else rowsUpdated
+    updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
 
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
@@ -238,31 +229,14 @@ object ExportFeedbackToSitsService {
   def whereClause = s"$rootWhereClause and mab_seq in (:sequences)" // mab_seq = sequence code determining an assessment component
   def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences)" // sra_seq = sequence code determining an assessment component
 
-  // Only upload when the mark/grade is empty or was previously uploaded by Tabula
-  def writeableWhereClause =
-    f"""$whereClause
-    and (
-      sas_actm is null and sas_actg is null
-      or sas_udf1 = '$tabulaIdentifier'
-    )
-    """
-
-  def resitWriteableWhereClause =
-    f"""$resitWhereClause
-    and (
-      sra_actm is null and sra_actg is null
-      or sra_udf2 = '$tabulaIdentifier'
-    )
-    """
-
   final def CountMatchingBlankSasRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sas $writeableWhereClause
+    select count(*) from $sitsSchema.cam_sas $whereClause
     """
 
   final def CountMatchingBlankSraRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sra $resitWriteableWhereClause
+    select count(*) from $sitsSchema.cam_sra $resitWhereClause
     """
 
   abstract class CountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
@@ -296,7 +270,7 @@ object ExportFeedbackToSitsService {
       sas_proc = 'SAS',
       sas_udf1 = '$tabulaIdentifier',
       sas_udf2 = :now
-    $writeableWhereClause
+    $whereClause
   """
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
@@ -314,7 +288,7 @@ object ExportFeedbackToSitsService {
       sra_proc = 'RAS',
       sra_udf2 = '$tabulaIdentifier',
       sra_udf3 = :now
-    $resitWriteableWhereClause
+    $resitWhereClause
   """
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
@@ -376,32 +350,6 @@ object ExportFeedbackToSitsService {
     actualGrade: String,
     uploader: String
   )
-
-  final def ResetModuleResultSql: String =
-    s"""
-       |update $sitsSchema.ins_smr
-       |  set SMR_ACTM = null,
-       |      SMR_ACTG = null,
-       |      SMR_AGRM = null,
-       |      SMR_AGRG = null,
-       |      SMR_PRCS = null,
-       |      SMR_PROC = :process
-       |  where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
-       |    and mod_code like :moduleCodeMatcher
-       |    and mav_occur in (:occurrences)
-       |    and ayr_code = :academicYear
-       |    and psl_code = 'Y'
-       |""".stripMargin
-
-  class ResetModuleResultQuery(ds: DataSource) extends SqlUpdate(ds, ResetModuleResultSql) {
-    declareParameter(new SqlParameter("studentId", Types.VARCHAR))
-    declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
-    declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
-    declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
-    declareParameter(new SqlParameter("process", Types.VARCHAR))
-
-    compile()
-  }
 
 }
 

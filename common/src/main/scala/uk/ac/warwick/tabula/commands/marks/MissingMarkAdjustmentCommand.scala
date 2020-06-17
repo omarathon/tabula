@@ -7,7 +7,8 @@ import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableComm
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
 
 import scala.jdk.CollectionConverters._
 
@@ -22,16 +23,21 @@ object MissingMarkAdjustmentCommand {
       with MissingMarkAdjustmentDescription
       with MissingMarkAdjustmentStudentsToSet
       with RecordAssessmentComponentMarksPermissions
+      with ClearRecordedModuleMarks
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringTransactionalComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
 }
 
-abstract class MissingMarkAdjustmentCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, currentUser: CurrentUser)
+abstract class MissingMarkAdjustmentCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with RecordAssessmentComponentMarksState {
+    with RecordAssessmentComponentMarksState
+    with ClearRecordedModuleMarksState {
   self: AssessmentComponentMarksServiceComponent
     with MissingMarkAdjustmentStudentsToSet
-    with TransactionalComponent =>
+    with TransactionalComponent
+    with ClearRecordedModuleMarks =>
 
   override def applyInternal(): Result = transactional() {
     studentsToSet.map { case (upstreamAssessmentGroupMember, _, _) =>
@@ -48,6 +54,8 @@ abstract class MissingMarkAdjustmentCommandInternal(val assessmentComponent: Ass
       )
 
       assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
+
+      clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
 
       recordedAssessmentComponentStudent
     }

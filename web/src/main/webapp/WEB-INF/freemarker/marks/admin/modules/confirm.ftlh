@@ -99,7 +99,7 @@
             <td data-sortby="${(student.result.dbValue)!}">
               ${(student.result.dbValue)!'-'}
             </td>
-            <td><@f.input path="comments[${student.sprCode}]" cssClass="form-control" readonly=true /></td>
+            <td><@f.input path="comments[${student.sprCode}]" cssClass="form-control" readonly=true tabindex="-1" /></td>
           </tr>
         </#list>
         </tbody>

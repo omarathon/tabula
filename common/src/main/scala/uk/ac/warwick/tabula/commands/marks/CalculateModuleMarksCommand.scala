@@ -280,6 +280,8 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
                         currentItem.mark = formattedValue
                       case "Grade" =>
                         currentItem.grade = formattedValue
+                      case "Result" =>
+                        currentItem.result = formattedValue
                       case "Comments" =>
                         currentItem.comments = formattedValue
                       case _ => // ignore anything else
@@ -360,7 +362,7 @@ trait CalculateModuleMarksAlgorithm {
 
       if (componentsWithMissingMarkOrGrades.nonEmpty) ModuleMarkCalculation.Failure.MarksAndGradesMissingFor(componentsWithMissingMarkOrGrades.map(_.sequence))
       else {
-        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) && !s.grade.contains(GradeBoundary.MitigatingCircumstancesGrade) }
+        val componentsForCalculation = components.filter { case (_, s) => !s.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) }
         if (componentsForCalculation.isEmpty && components.forall(_._2.grade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
           // No components have been assessed, so it is not possible to grant credit.
           ModuleMarkCalculation.MissingMarkAdjustment.AllComponentsMissing
@@ -435,8 +437,13 @@ trait CalculateModuleMarksAlgorithm {
                 if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure.WeightingsMissingFor(componentsWithMissingWeighting.map(_.sequence))
                 else {
                   // If there are any indicator grades, just fail out unless all the grades are the same
-                  def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean =
-                    s.grade.exists(g => assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected).find(_.grade == g).exists(!_.isDefault))
+                  def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean = {
+                    s.grade.exists { g =>
+                      assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected)
+                        .find(_.grade == g)
+                        .exists(!_.isDefault)
+                    }
+                  }
 
                   // We know that all weightings are defined and all marks are defined at this point
                   val calculatedMark = {
@@ -591,5 +598,47 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
       errors.popNestedPath()
     }
+  }
+}
+
+trait ClearRecordedModuleMarksState {
+  def currentUser: CurrentUser
+}
+
+/**
+ * A mixin trait for component mark operations which mutate actual or agreed component marks, and therefore
+ * mean the module mark/grade needs clearing for recalculation.
+ */
+trait ClearRecordedModuleMarks {
+  self: ClearRecordedModuleMarksState
+    with ModuleRegistrationMarksServiceComponent
+    with ModuleRegistrationServiceComponent =>
+
+  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): RecordedModuleRegistration = {
+    // There might be multiple module registrations here, for different SPR codes. Just blat them all
+    moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
+      .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
+      .map { moduleRegistration =>
+        val recordedModuleRegistration: RecordedModuleRegistration =
+          moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
+
+        recordedModuleRegistration.addMark(
+          uploader = currentUser.apparentUser,
+          mark = None,
+          grade = None,
+          result = None,
+          source = RecordedModuleMarkSource.ComponentMarkChange,
+          markState = MarkState.UnconfirmedActual,
+          comments = "Module mark calculation reset by component mark change",
+        )
+
+        moduleRegistrationMarksService.saveOrUpdate(recordedModuleRegistration)
+
+        recordedModuleRegistration
+      }
+      .headOption
+      // This is potentially frustrating, and might happen if the assignment importer and mod reg importer got out of sync
+      // but better to blow up than let marks get out of sync
+      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module registration for $recordedAssessmentComponentStudent"))
   }
 }

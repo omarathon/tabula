@@ -82,6 +82,14 @@ class StudentCourseDetails
 
   def moduleRegistrations: Seq[ModuleRegistration] = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
 
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "_allStudentCourseDetails")
+  @BatchSize(size = 200)
+  val _progressionDecisions: JSet[ProgressionDecision] = JHashSet()
+
+  def progressionDecisions: Seq[ProgressionDecision] = _progressionDecisions.asScala.toSeq.sortBy(_.sequence)
+
+  def progressionDecisionsByYear(year: AcademicYear): Seq[ProgressionDecision] = progressionDecisions.filter(_.academicYear == year)
+
   def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
   def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =

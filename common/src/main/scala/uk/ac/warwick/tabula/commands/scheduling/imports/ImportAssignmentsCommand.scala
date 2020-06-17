@@ -472,11 +472,20 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     transactional() {
       val sitsBoundaries = assignmentImporter.getAllGradeBoundaries
 
-      // Inject the FM grade if it doesn't exist already
-      val allBoundaries = sitsBoundaries ++ sitsBoundaries.map(gb => (gb.marksCode, gb.process)).distinct.flatMap { case (marksCode, process) =>
-        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade)) None
-        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None))
+      val marksAndProcess = sitsBoundaries.map(gb => (gb.marksCode, gb.process)).distinct
+
+      val fmBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process)) None
+        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", Some(ModuleResult.NoResult)))
       }
+
+      val wBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) None
+        else Some(GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Deferred)))
+      }
+
+      // Inject the FM and W grades if they don't exist already
+      val allBoundaries = sitsBoundaries ++ fmBoundary ++ wBoundary
 
       allBoundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
       for (gradeBoundary <- logSize(allBoundaries)) {

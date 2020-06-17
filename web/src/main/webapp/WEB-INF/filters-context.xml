@@ -15,6 +15,7 @@
       <url-pattern>/groups/*</url-pattern>
       <url-pattern>/attendance/*</url-pattern>
       <url-pattern>/profiles/*</url-pattern>
+      <url-pattern>/exams/*</url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
       <excluded-url-pattern>*.ftlh</excluded-url-pattern>
       <excluded-url-pattern>/test/*</excluded-url-pattern>

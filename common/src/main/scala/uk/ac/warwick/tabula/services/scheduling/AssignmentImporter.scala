@@ -628,11 +628,15 @@ object AssignmentImporter {
             mab.mab_agrp is not null and
             mav.ayr_code in (:academic_year_code)"""
 
-  // for students who register for modules through SITS,this gets their assessments before their choices are confirmed
-  // We only refer to unconfirmed choices for current academic year based on the feature flag.
+  /**
+   *
+   * For students who register for modules through SITS,this gets their assessments before their choices are confirmed
+   * We only refer to unconfirmed choices for current academic year based on the feature flag.
+   * Pick up SMS record  that don't exists in SMO.
+   */
   def GetUnconfirmedModuleRegistrations =
     s"""
-    select
+    select distinct
       sms.ayr_code as academic_year_code,
       spr.spr_code as spr_code,
       wss.wss_seat as seat_number,
@@ -658,8 +662,8 @@ object AssignmentImporter {
           join $sitsSchema.cam_sms sms -- Student Module Selection table, storing unconfirmed module registrations
             on sms.spr_code = scj.scj_sprc
 
-          join $sitsSchema.cam_ssn ssn -- SSN holds module registration status
-            on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
+          left join $sitsSchema.cam_smo smo
+            on sms.spr_code = smo.spr_code and sms.mod_code = smo.mod_code   and sms.ayr_code = smo.ayr_code  and sms.psl_code = smo.psl_code
 
           left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
             on mab.map_code = sms.mod_code and mab.mab_agrp = sms.sms_agrp
@@ -682,10 +686,11 @@ object AssignmentImporter {
               )
 
       where
-        sms.ayr_code in (:current_academic_year_code)"""
+        sms.ayr_code in (:current_academic_year_code) and
+        sms.psl_code = 'Y' and smo.spr_code is null -- no matching SMO """
 
-  // this gets a student's assessments from the SMO table, which stores confirmed module choices
-  def GetConfirmedModuleRegistrations =
+  // this gets a student's assessments from the SMO table, which stores confirmed module choices (they could be confirmed choices either as part of eVision MRM workfloe or direct MRM upload
+  def GetAllConfirmedModuleRegistrations =
     s"""
     select
       smo.ayr_code as academic_year_code,
@@ -714,9 +719,6 @@ object AssignmentImporter {
             on smo.spr_code = spr.spr_code and
               (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
 
-          join $sitsSchema.cam_ssn ssn
-            on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
-
           left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
             on mab.map_code = smo.mod_code and mab.mab_agrp = smo.smo_agrp
 
@@ -740,77 +742,18 @@ object AssignmentImporter {
       where
         smo.ayr_code in (:academic_year_code)"""
 
-  def GetAutoUploadedConfirmedModuleRegistrations =
-    s"""
-    select
-      smo.ayr_code as academic_year_code,
-      spr.spr_code as spr_code,
-      wss.wss_seat as seat_number,
-      smo.mav_occur as mav_occurrence,
-      smo.mod_code as module_code,
-      smo.smo_agrp as assessment_group,
-      mab.mab_seq as sequence,
-      sas.sas_actm as actual_mark,
-      sas.sas_actg as actual_grade,
-      sas.sas_agrm as agreed_mark,
-      sas.sas_agrg as agreed_grade,
-      sra.sra_actm as resit_actual_mark,
-      sra.sra_actg as resit_actual_grade,
-      sra.sra_agrm as resit_agreed_mark,
-      sra.sra_agrg as resit_agreed_grade,
-      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected,
-      sra.sra_cura as current_attempt_number
-        from $sitsSchema.srs_scj scj
-          join $sitsSchema.ins_spr spr
-            on scj.scj_sprc = spr.spr_code and
-              (spr.sts_code is null or spr.sts_code != 'D') -- no deceased students
-
-          join $sitsSchema.cam_smo smo
-            on smo.spr_code = spr.spr_code and
-              (smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
-
-          left outer join $sitsSchema.cam_ssn ssn
-            on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
-
-          left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
-            on mab.map_code = smo.mod_code and mab.mab_agrp = smo.smo_agrp
-
-          left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-            on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-              and wss.wss_mabs = mab.mab_seq and wss.wss_wspc in (:seat_number_exam_profiles)
-
-          left join $sitsSchema.cam_sas sas -- Where component marks go
-            on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
-              and sas.mav_occur = smo.mav_occur and sas.mab_seq = mab.mab_seq
-
-          left join $sitsSchema.cam_sra sra -- Where resit marks go
-            on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
-              and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
-              and sra.sra_rseq = (
-                    select max(sra2.sra_rseq) from $sitsSchema.cam_sra sra2
-                    where sra.spr_code = sra2.spr_code and sra.ayr_code = sra2.ayr_code and sra.mod_code = sra2.mod_code
-                      and sra.mav_occur = sra2.mav_occur and sra.sra_seq = sra2.sra_seq
-              )
-
-      where
-        smo.ayr_code in (:academic_year_code) and
-        ssn.ssn_sprc is null -- no matching SSN"""
 
   def GetAllAssessmentGroupMembers(excludeSMS: Boolean): String = {
     if (excludeSMS) {
       s"""
-      $GetConfirmedModuleRegistrations
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
+      $GetAllConfirmedModuleRegistrations
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
     } else {
       s"""
       $GetUnconfirmedModuleRegistrations
-        union all
-      $GetConfirmedModuleRegistrations
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
+        union
+      $GetAllConfirmedModuleRegistrations
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
     }
@@ -830,10 +773,7 @@ object AssignmentImporter {
     val sprClause = GetModuleRegistrationsByUniversityIdSprClause(multipleUniIds)
     if (excludeSMS) {
       s"""
-      $GetConfirmedModuleRegistrations
-        $sprClause
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
+      $GetAllConfirmedModuleRegistrations
         $sprClause
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
@@ -841,12 +781,10 @@ object AssignmentImporter {
       s"""
       $GetUnconfirmedModuleRegistrations
         $sprClause
-        union all
-      $GetConfirmedModuleRegistrations
+        union
+      $GetAllConfirmedModuleRegistrations
         $sprClause
-        union all
-      $GetAutoUploadedConfirmedModuleRegistrations
-        $sprClause
+
     order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
     }
 

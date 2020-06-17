@@ -223,7 +223,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     for (item <- items) {
       for (existingAssignment <- assessmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.assessmentComponent.moduleCodeBasic))) {
         val path = "sitsAssignmentItems[%d]".format(sitsAssignmentItems.indexOf(item))
-        errors.rejectValue(path, "name.duplicate.assignment", Array(item.name), null)
+        errors.rejectValue(path, "name.duplicate.assignment", Array(item.name, academicYear.toString), null)
       }
 
       def sameNameAs(item: SitsAssignmentItem)(other: SitsAssignmentItem) = {

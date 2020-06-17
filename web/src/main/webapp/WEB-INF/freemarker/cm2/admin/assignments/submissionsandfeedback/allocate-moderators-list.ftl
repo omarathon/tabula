@@ -119,7 +119,6 @@
     };
 
     $('.marking-table')
-      .bigList(bigListOptions)
       .sortableTable()
       .on('sortEnd', function () {
         // reposition detail rows after the sort
@@ -128,7 +127,8 @@
           var $row = $(this);
           $($row.data('target')).detach().insertAfter($row);
         });
-      });
+      })
+      .bigList(bigListOptions);
 
   })(jQuery);
 </script>

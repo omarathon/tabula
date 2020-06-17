@@ -83,8 +83,6 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
       .orNull
 
-  // I'd love for this to be _sprCode but Hibernate won't let you mix logical and physical column names (even with @Column)
-  // and it's needed for the @JoinColumn on StudentCourseDetails._moduleRegistrations
   var sprCode: String = _
 
   // get the integer part of the SPR code so we can sort registrations to the same module by it

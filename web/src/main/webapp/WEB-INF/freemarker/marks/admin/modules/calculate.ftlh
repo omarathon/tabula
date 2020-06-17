@@ -142,7 +142,7 @@
   </#if>
 </#macro>
 
-<#macro calculationCells calculation student member>
+<#macro calculationCells calculation student member expand_failure_message=false>
   <#if calculation.successful>
     <#if calculation.multiple>
       <td colspan="3">
@@ -160,7 +160,7 @@
 
               <#local colours = ['success', 'info', 'warning'] />
               <#list calculation.suggestions as suggestion>
-                <#if suggestion.calculation.successful && !suggestion.calculation.multiple>
+                <#if !suggestion.calculation.multiple>
                   <div class="panel panel-${colours[suggestion_index % 3]} no-wide-tables">
                     <div class="panel-heading">
                       <h3 class="panel-title">${suggestion.title}</h3>
@@ -178,17 +178,20 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <@calculationCells suggestion.calculation student member />
+                          <@calculationCells suggestion.calculation student member true />
                         </tr>
                       </tbody>
                     </table>
-                    <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}">
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${suggestion.calculation.mark!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${suggestion.calculation.grade!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(suggestion.calculation.result.dbValue)!}" />
-                      <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${suggestion.calculation.comments!}" />
-                      <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
-                    </div>
+                    <#if suggestion.calculation.successful>
+                      <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}">
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${suggestion.calculation.mark!}" />
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${suggestion.calculation.grade!}" />
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${suggestion.calculation.grade!}" />
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.result" value="${(suggestion.calculation.result.dbValue)!}" />
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.comments" value="${suggestion.calculation.comments!}" />
+                        <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                      </div>
+                    </#if>
                   </div>
                 </#if>
               </#list>
@@ -224,10 +227,15 @@
     </#if>
   <#else>
     <td colspan="3">
-      <span class="tabula-tooltip" data-title="${calculation.message}">
+      <#if expand_failure_message>
         <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
-        <span class="sr-only">${calculation.message}</span>
-      </span>
+        ${calculation.message}
+      <#else>
+        <span class="tabula-tooltip" data-title="${calculation.message}">
+          <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
+          <span class="sr-only">${calculation.message}</span>
+        </span>
+      </#if>
     </td>
   </#if>
 </#macro>
@@ -274,7 +282,7 @@
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].mark">
         <div class="input-group">
-          <@f.input path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.mark" path="students[${student.sprCode}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
           <div class="input-group-addon">%</div>
         </div>
       </@bs3form.labelled_form_group>
@@ -284,16 +292,16 @@
         <#if isGradeValidation>
           <#local generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#local>
 
-          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
-          <@f.select path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=false /> <#-- TODO Resit module regs? -->
+          <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
         <#else>
-          <@f.input path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
         </#if>
       </@bs3form.labelled_form_group>
     </td>
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].result">
-        <@f.select path="students[${student.sprCode}].result" cssClass="form-control">
+        <@f.select id="students${student.sprCode?replace('/', '_')}.result" path="students[${student.sprCode}].result" cssClass="form-control">
           <@f.option value="" />
           <#list moduleResults as result>
             <@f.option value=result.entryName label=result.description />
@@ -303,7 +311,7 @@
     </td>
     <td>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].comments">
-        <@f.input path="students[${student.sprCode}].comments" cssClass="form-control" />
+        <@f.input id="students${student.sprCode?replace('/', '_')}.comments" path="students[${student.sprCode}].comments" cssClass="form-control" />
       </@bs3form.labelled_form_group>
     </td>
   </tr>
@@ -328,6 +336,25 @@
     </#if>
   </#list>
   <#return result />
+</#function>
+
+<#function get_base_mma_calculation studentModuleMarkRecords>
+  <#local baseCalculation = {} />
+  <#list studentModuleMarkRecords as studentMarkRecord>
+    <#local calculation = studentMarkRecord._3() />
+    <#if calculation.successful && calculation.multiple>
+      <#if !baseCalculation?has_content>
+        <#local baseCalculation = calculation />
+      <#else>
+        <#local baseCalculationSize = baseCalculation.suggestions?filter(s -> s.calculation.successful)?size />
+        <#local candidateCalculationSize = calculation.suggestions?filter(s -> s.calculation.successful)?size />
+        <#if candidateCalculationSize gt baseCalculationSize>
+          <#local baseCalculation = calculation />
+        </#if>
+      </#if>
+    </#if>
+  </#list>
+  <#return baseCalculation />
 </#function>
 
 <#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
@@ -371,9 +398,9 @@
 
             <thead>
               <tr>
-                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc">SPR Code</th>
-                <th class="col-sm-1 sortable" rowspan="2">First name</th>
-                <th class="col-sm-1 sortable" rowspan="2">Last name</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc" data-sorter="text">SPR Code</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">First name</th>
+                <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">Last name</th>
 
                 <#list assessmentComponents as ac>
                   <th colspan="2">${ac.name} (${ac.sequence}, ${(ac.scaledWeighting!0)?string["0.#"]}%)</th>
@@ -383,7 +410,8 @@
                   Calculation
                   <#if has_mma_calculation(studentModuleMarkRecords)>
                     <#assign mmaModuleMarkRecords = get_mma_records(studentModuleMarkRecords) />
-                    <#assign baseCalculation = mmaModuleMarkRecords[0]._3() />
+                    <#assign baseCalculation = get_base_mma_calculation(mmaModuleMarkRecords) />
+
                     <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#mma-modal-all"><i class="fal fa-ballot-check" aria-hidden="true"></i> Missing mark adjustment (all students)</button>
 
                     <@modal.modal id="mma-modal-all">
@@ -413,10 +441,11 @@
                                     <#assign student = studentMarkRecord._1() />
                                     <#assign calculation = studentMarkRecord._3().suggestions[suggestion_index].calculation />
 
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].mark']" value="${calculation.mark!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].grade']" value="${calculation.grade!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].result']" value="${(calculation.result.dbValue)!}" />
-                                    <@f.hidden data\-target=":input[name='students[${student.sprCode}].comments']" value="${calculation.comments!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${calculation.mark!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${calculation.grade!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${calculation.grade!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.result" value="${(calculation.result.dbValue)!}" />
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.comments" value="${calculation.comments!}" />
                                   </#list>
                                   <button type="button" class="btn btn-primary pull-right" data-toggle="copy-values" data-target="#mma-modal-all-suggestion-${suggestion_index}" data-dismiss="modal">Use this calculation for all students <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                                 </div>
@@ -432,21 +461,21 @@
                   </#if>
                 </th>
 
-                <th class="col-sm-2" rowspan="2">Mark</th>
-                <th class="col-sm-1" rowspan="2">Grade</th>
-                <th class="col-sm-1" rowspan="2">Result</th>
-                <th class="col-sm-2" rowspan="2">Comments</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Mark</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Grade</th>
+                <th class="col-sm-1" data-sorter="false" rowspan="2">Result</th>
+                <th class="col-sm-2" data-sorter="false" rowspan="2">Comments</th>
               </tr>
 
               <tr>
                 <#list assessmentComponents as ac>
-                  <th class="sortable">Mark</th>
-                  <th class="sortable">Grade</th>
+                  <th class="sortable" data-sorter="digit">Mark</th>
+                  <th class="sortable" data-sorter="text">Grade</th>
                 </#list>
 
-                <th class="sortable">Mark</th>
-                <th class="sortable">Grade</th>
-                <th class="sortable">Result</th>
+                <th class="sortable" data-sorter="digit">Mark</th>
+                <th class="sortable" data-sorter="text">Grade</th>
+                <th class="sortable" data-sorter="text">Result</th>
               </tr>
             </thead>
             <tbody>
