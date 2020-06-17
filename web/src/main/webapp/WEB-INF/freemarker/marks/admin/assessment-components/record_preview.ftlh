@@ -41,7 +41,7 @@
               <td data-sortby="u${student.universityId}">
                 <@pl.profile_link member.universityId />
                 ${student.universityId}
-                <#if !student.currentMember><span class="very-subtle">(not current)</span></#if>
+                <#if !student.currentMember><span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if>
               </td>
               <td>${member.firstName}</td>
               <td>${member.lastName}</td>
@@ -61,7 +61,7 @@
                   ${c.grade!}
                 </#if>
               </td>
-              <td><@f.input path="students[${student.universityId}].comments" cssClass="form-control" readonly=true /></td>
+              <td><@f.input path="students[${student.universityId}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>
             </tr>
           </#list>
         </tbody>
