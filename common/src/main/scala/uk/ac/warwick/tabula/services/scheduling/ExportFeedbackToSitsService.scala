@@ -186,9 +186,9 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 
   override def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = {
     val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
-    val (updateQuery, process) =
-      if (resit) (new ExportResitFeedbackToSitsQuery(sitsDataSource), "RAS")
-      else (new ExportFeedbackToSitsQuery(sitsDataSource), "SAS")
+    val updateQuery =
+      if (resit) new ExportResitFeedbackToSitsQuery(sitsDataSource)
+      else new ExportFeedbackToSitsQuery(sitsDataSource)
 
     updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
@@ -229,31 +229,14 @@ object ExportFeedbackToSitsService {
   def whereClause = s"$rootWhereClause and mab_seq in (:sequences)" // mab_seq = sequence code determining an assessment component
   def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences)" // sra_seq = sequence code determining an assessment component
 
-  // Only upload when the mark/grade is empty or was previously uploaded by Tabula
-  def writeableWhereClause =
-    f"""$whereClause
-    and (
-      sas_actm is null and sas_actg is null
-      or sas_udf1 = '$tabulaIdentifier'
-    )
-    """
-
-  def resitWriteableWhereClause =
-    f"""$resitWhereClause
-    and (
-      sra_actm is null and sra_actg is null
-      or sra_udf2 = '$tabulaIdentifier'
-    )
-    """
-
   final def CountMatchingBlankSasRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sas $writeableWhereClause
+    select count(*) from $sitsSchema.cam_sas $whereClause
     """
 
   final def CountMatchingBlankSraRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sra $resitWriteableWhereClause
+    select count(*) from $sitsSchema.cam_sra $resitWhereClause
     """
 
   abstract class CountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
@@ -287,7 +270,7 @@ object ExportFeedbackToSitsService {
       sas_proc = 'SAS',
       sas_udf1 = '$tabulaIdentifier',
       sas_udf2 = :now
-    $writeableWhereClause
+    $whereClause
   """
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
@@ -305,7 +288,7 @@ object ExportFeedbackToSitsService {
       sra_proc = 'RAS',
       sra_udf2 = '$tabulaIdentifier',
       sra_udf3 = :now
-    $resitWriteableWhereClause
+    $resitWhereClause
   """
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
