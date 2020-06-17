@@ -476,7 +476,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       val fmBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
         if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process)) None
-        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None))
+        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None)) // No suggested result for FM, all results are allowed
       }
 
       val wBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
