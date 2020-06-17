@@ -25,18 +25,20 @@ object ListAssessmentComponentsCommand {
     outOfSync: Boolean,
     markState: Option[MarkState],
     agreed: Boolean,
+    resitMark: Boolean, // the current mark is a resit mark (not the same as a resit being expected)
     history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
     upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   )
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
-      val resit = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty)
+      val resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty)
+      val furtherFirstSit = resitExpected && member.currentResitAttempt.exists(_ <= 1)
       StudentMarkRecord(
         universityId = member.universityId,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
-        resitExpected = resit,
-        furtherFirstSit = resit && member.currentResitAttempt.exists(_ <= 1),
+        resitExpected = resitExpected,
+        furtherFirstSit = furtherFirstSit,
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
             .orElse(member.firstDefinedMark)
@@ -52,8 +54,8 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
         markState = recordedStudent.flatMap(_.latestState),
-        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
-        agreed = recordedStudent.forall(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
+        agreed = recordedStudent.forall(!_.needsWritingToSits) && (if(resitExpected && !furtherFirstSit) member.resitAgreedMark.nonEmpty else member.agreedMark.nonEmpty),
+        resitMark = member.isResitMark,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member
       )
