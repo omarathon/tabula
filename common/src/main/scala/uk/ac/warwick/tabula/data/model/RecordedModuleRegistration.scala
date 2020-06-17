@@ -162,11 +162,11 @@ class RecordedModuleMark extends GeneratedId
   )
 }
 
-sealed trait RecordedModuleMarkSource extends EnumEntry
+sealed abstract class RecordedModuleMarkSource(val description: String) extends EnumEntry
 object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
-  case object ComponentMarkCalculation extends RecordedModuleMarkSource
-  case object MarkConfirmation extends RecordedModuleMarkSource
-  case object ComponentMarkChange extends RecordedModuleMarkSource
+  case object ComponentMarkCalculation extends RecordedModuleMarkSource("Calculate module marks")
+  case object MarkConfirmation extends RecordedModuleMarkSource("Confirm module marks")
+  case object ComponentMarkChange extends RecordedModuleMarkSource("Component mark changed")
 
   override def values: IndexedSeq[RecordedModuleMarkSource] = findValues
 }

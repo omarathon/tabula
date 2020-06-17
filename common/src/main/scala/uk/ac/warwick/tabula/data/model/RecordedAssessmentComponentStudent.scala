@@ -154,12 +154,12 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
   )
 }
 
-sealed trait RecordedAssessmentComponentStudentMarkSource extends EnumEntry
+sealed abstract class RecordedAssessmentComponentStudentMarkSource(val description: String) extends EnumEntry
 object RecordedAssessmentComponentStudentMarkSource extends Enum[RecordedAssessmentComponentStudentMarkSource] {
-  case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource
-  case object Scaling extends RecordedAssessmentComponentStudentMarkSource
-  case object MissingMarkAdjustment extends RecordedAssessmentComponentStudentMarkSource
-  case object ModuleMarkConfirmation extends RecordedAssessmentComponentStudentMarkSource
+  case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource("Record component marks")
+  case object Scaling extends RecordedAssessmentComponentStudentMarkSource("Scaling")
+  case object MissingMarkAdjustment extends RecordedAssessmentComponentStudentMarkSource("Missing mark adjustment")
+  case object ModuleMarkConfirmation extends RecordedAssessmentComponentStudentMarkSource("Module mark confirmation")
 
   override def values: IndexedSeq[RecordedAssessmentComponentStudentMarkSource] = findValues
 }

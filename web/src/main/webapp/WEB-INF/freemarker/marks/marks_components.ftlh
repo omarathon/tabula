@@ -51,7 +51,7 @@
     <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
     <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
-      <@modal.wrapper cssClass="modal-lg">
+      <@modal.wrapper cssClass="modal-xl">
         <@modal.header>
           <h3 class="modal-title">Mark history for ${member.fullName}, ${student.sprCode}</h3>
         </@modal.header>
@@ -59,8 +59,10 @@
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
-                <th class="col-sm-3">Date</th>
-                <th class="col-sm-3">User</th>
+                <th class="col-sm-2">Date</th>
+                <th class="col-sm-2">User</th>
+                <th class="col-sm-2">Operation</th>
+                <th class="col-sm-1">Status</th>
                 <th class="col-sm-1">Mark</th>
                 <th class="col-sm-1">Grade</th>
                 <th class="col-sm-1">Result</th>
@@ -74,6 +76,8 @@
                     <@fmt.date date=history.updatedDate />
                   </td>
                   <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
+                  <td>${history.source.description}</td>
+                  <td><span class="label label-${history.markState.cssClass}">${history.markState.description}</span></td>
                   <td>${history.mark!'-'}</td>
                   <td>${history.grade!'-'}</td>
                   <td>${(history.result.description)!'-'}</td>
@@ -96,7 +100,7 @@
     <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${marks.universityId}-${ac.sequence}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
     <@modal.modal id="mark-history-modal-${marks.universityId}-${ac.sequence}">
-      <@modal.wrapper cssClass="modal-lg">
+      <@modal.wrapper cssClass="modal-xl">
         <@modal.header>
           <h3 class="modal-title">Mark history for ${member.fullName}, ${marks.universityId}, ${ac.name}</h3>
         </@modal.header>
@@ -104,8 +108,10 @@
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
-                <th class="col-sm-3">Date</th>
-                <th class="col-sm-3">User</th>
+                <th class="col-sm-2">Date</th>
+                <th class="col-sm-2">User</th>
+                <th class="col-sm-2">Operation</th>
+                <th class="col-sm-1">Status</th>
                 <th class="col-sm-1">Mark</th>
                 <th class="col-sm-1">Grade</th>
                 <th class="col-sm-3">Comments</th>
@@ -118,6 +124,8 @@
                     <@fmt.date date=history.updatedDate />
                   </td>
                   <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
+                  <td>${history.source.description}</td>
+                  <td><span class="label label-${history.markState.cssClass}">${history.markState.description}</span></td>
                   <td>${history.mark!'-'}</td>
                   <td>${history.grade!'-'}</td>
                   <td>${history.comments!}</td>
