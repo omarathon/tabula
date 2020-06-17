@@ -210,7 +210,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       } else {
         Left("Only applies to the final year of study")
       }
-    }).getOrElse(Left(s"Missing year details for $yearOfStudy}"))
+    }).getOrElse(Left(s"Missing year details for $yearOfStudy"))
   }
 
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
