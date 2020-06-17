@@ -417,21 +417,9 @@ trait CalculateModuleMarksAlgorithm {
               // Each component must have a mark
               val componentsWithMissingMarks = componentsForCalculation.filter(_._2.mark.isEmpty).map(_._1).sortBy(_.sequence)
 
-              if (componentsWithMissingMarks.nonEmpty) ModuleMarkCalculation.Failure.MarksMissingFor(componentsWithMissingMarks.map(_.sequence))
-              else if (componentsForCalculation.size == 1) {
-                // If there's a single component and it's valid, just copy it over
-                val validGrades = validGradesForMark(componentsForCalculation.head._2.mark)
-
-                val gb: Option[GradeBoundary] = componentsForCalculation.head._2.grade match {
-                  case Some(existing) => validGrades.find(_.grade == existing)
-                  case _ => validGrades.find(_.isDefault)
-                }
-
-                gb match {
-                  case None => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, None)
-                  case Some(gradeBoundary) => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, Some(gradeBoundary))
-                }
-              } else {
+              if (componentsWithMissingMarks.nonEmpty)
+                ModuleMarkCalculation.Failure.MarksMissingFor(componentsWithMissingMarks.map(_.sequence))
+              else {
                 val componentsWithMissingWeighting = components.filter(_._1.scaledWeighting.isEmpty).map(_._1).sortBy(_.sequence)
 
                 if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure.WeightingsMissingFor(componentsWithMissingWeighting.map(_.sequence))
