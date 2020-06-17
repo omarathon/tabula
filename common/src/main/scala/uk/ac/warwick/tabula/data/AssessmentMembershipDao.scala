@@ -131,6 +131,8 @@ trait AssessmentMembershipDao {
 
   def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary]
 
+  def getPassMark(marksCode: String, process: String): Option[Int]
+
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
@@ -670,6 +672,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("marksCode", marksCode))
       .add(is("process", process))
       .seq
+
+  def getPassMark(marksCode: String, process: String): Option[Int] = {
+    session.newCriteria[GradeBoundary]
+      .add(is("marksCode", marksCode))
+      .add(is("process", process))
+      .add(is("_result", ModuleResult.Pass))
+      .add(is("signalStatus", "N"))
+      .project[Option[Int]](Projections.min("minimumMark"))
+      .uniqueResult.flatten
+  }
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
     val assignments = session.createSQLQuery(

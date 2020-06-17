@@ -459,7 +459,13 @@ trait CalculateModuleMarksAlgorithm {
                       val mark = s.mark.get
                       val weighting = ac.weightingFor(marksForWeighting).get
 
-                      mark * (weighting / totalWeighting)
+                      lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.resitExpected)
+
+                      val cappedMark = if(s.resitExpected && !s.furtherFirstSit) {
+                        markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
+                      } else mark
+
+                      cappedMark * (weighting / totalWeighting)
                     }.sum
                   }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
                   val validGrades = validGradesForMark(Some(calculatedMark))

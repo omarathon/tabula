@@ -302,6 +302,7 @@ object Fixtures extends Mockito {
     }
 
     val scd = new StudentCourseDetails(member, scjCodeToUse)
+    scd.course = Fixtures.course("UCSA-G500")
     scd.student = member
     scd.sprCode = member.universityId + "/2"
     scd.department = courseDepartment
@@ -382,6 +383,7 @@ object Fixtures extends Mockito {
   ): ModuleRegistration = {
     val sprCode = Option(scd).map(_.sprCode).orNull
     val mr = new ModuleRegistration(sprCode, mod, cats, if (cats != null) "%s-%s".format(mod.code.toUpperCase, cats.stripTrailingZeros().toPlainString) else mod.code.toUpperCase, year, occurrence, marksCode)
+    mr._allStudentCourseDetails.add(scd)
     mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr
