@@ -159,6 +159,7 @@ abstract class Features {
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
   @Value("${features.marksManagement:true}") var marksManagement: Boolean = defaults.marksManagement
   @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
+  @Value("${features.progressionDecisionsInStudentProfile:false}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -315,6 +316,7 @@ class FeaturesMessage {
   @BeanProperty var notificationBatching = false
   @BeanProperty var marksManagement = true
   @BeanProperty var includeSMSForCurrentYear = false
+  @BeanProperty var progressionDecisionsInStudentProfile = false
 
 }
 
