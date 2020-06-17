@@ -144,8 +144,8 @@ exports.bindButtonGroupHandler = function () {
   }
 };
 
-$(function () {
-  // SCRIPTS FOR RECORDING MONITORING POINTS
+// SCRIPTS FOR RECORDING MONITORING POINTS
+exports.recordMonitoringPointsScripts = function () {
 
   var $recordForm = $('.recordCheckpointForm'), enableCheckForCheckpoints = $recordForm.data('check-checkpoints');
   $recordForm.on('click.saveButtonPrompt', 'div.btn-group button', function () {
@@ -386,6 +386,12 @@ $(function () {
   });
 
   // END SCRIPTS FOR RECORDING MONITORING POINTS
-});
+};
 
 window.AttendanceRecording = jQuery.extend(window.AttendanceRecording, exports);
+
+$(function () {
+  AttendanceRecording.recordMonitoringPointsScripts();
+});
+
+
