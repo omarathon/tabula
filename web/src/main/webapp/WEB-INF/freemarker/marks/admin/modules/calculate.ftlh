@@ -1,6 +1,7 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
+<#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
@@ -13,134 +14,6 @@
     Because there are Force Majeure assessment components, you will need to perform a missing marks adjustment.
   </#if>
 </p>
-
-<#macro moduleMarkStatusIcon student>
-  <#if student.needsWritingToSits>
-    <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
-      <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
-      <span class="sr-only">Waiting to be written to SITS</span>
-    </span>
-  <#elseif student.outOfSync>
-    <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
-      <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
-      <span class="sr-only">Mark is out of sync with current mark in SITS</span>
-    </span>
-  <#elseif student.agreed>
-    <span class="tabula-tooltip" data-title="Agreed mark published to student">
-      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
-      <span class="sr-only">Agreed mark published to student</span>
-    </span>
-  </#if>
-</#macro>
-
-<#macro componentMarkStatusIcon marks>
-  <#if marks.needsWritingToSits>
-    <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
-      <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
-      <span class="sr-only">Waiting to be written to SITS</span>
-    </span>
-  <#elseif marks.outOfSync>
-    <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
-      <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
-      <span class="sr-only">Mark is out of sync with current mark in SITS</span>
-    </span>
-  <#elseif marks.agreed>
-    <span class="tabula-tooltip" data-title="Agreed mark published to student">
-      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
-      <span class="sr-only">Agreed mark published to student</span>
-    </span>
-  </#if>
-</#macro>
-
-<#macro moduleMarkHistory student member>
-  <#if student.history?has_content>
-    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
-
-    <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
-      <@modal.wrapper cssClass="modal-lg">
-        <@modal.header>
-          <h3 class="modal-title">Mark history for ${member.fullName}, ${student.sprCode}</h3>
-        </@modal.header>
-        <@modal.body>
-          <table class="table table-condensed table-striped">
-            <thead>
-              <tr>
-                <th class="col-sm-3">Date</th>
-                <th class="col-sm-3">User</th>
-                <th class="col-sm-1">Mark</th>
-                <th class="col-sm-1">Grade</th>
-                <th class="col-sm-1">Result</th>
-                <th class="col-sm-3">Comments</th>
-              </tr>
-            </thead>
-            <tbody>
-              <#list student.history as history>
-                <tr>
-                  <td>
-                    <@fmt.date date=history.updatedDate />
-                  </td>
-                  <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
-                  <td>${history.mark!'-'}</td>
-                  <td>${history.grade!'-'}</td>
-                  <td>${(history.result.description)!'-'}</td>
-                  <td>${history.comments!}</td>
-                </tr>
-              </#list>
-            </tbody>
-          </table>
-        </@modal.body>
-        <@modal.footer>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </@modal.footer>
-      </@modal.wrapper>
-    </@modal.modal>
-  </#if>
-</#macro>
-
-<#macro componentMarkHistory marks ac member>
-  <#if marks.history?has_content>
-    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${marks.universityId}-${ac.sequence}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
-
-    <@modal.modal id="mark-history-modal-${marks.universityId}-${ac.sequence}">
-      <@modal.wrapper cssClass="modal-lg">
-        <@modal.header>
-          <h3 class="modal-title">Mark history for ${member.fullName}, ${marks.universityId}, ${ac.name}</h3>
-        </@modal.header>
-        <@modal.body>
-          <table class="table table-condensed table-striped">
-            <thead>
-              <tr>
-                <th class="col-sm-3">Date</th>
-                <th class="col-sm-3">User</th>
-                <th class="col-sm-1">Mark</th>
-                <th class="col-sm-1">Grade</th>
-                <th class="col-sm-1">Result</th>
-                <th class="col-sm-3">Comments</th>
-              </tr>
-            </thead>
-            <tbody>
-              <#list marks.history as history>
-                <tr>
-                  <td>
-                    <@fmt.date date=history.updatedDate />
-                  </td>
-                  <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
-                  <td>${history.mark!'-'}</td>
-                  <td>${history.grade!'-'}</td>
-                  <td>${(history.result.description)!'-'}</td>
-                  <td>${history.comments!}</td>
-                </tr>
-              </#list>
-            </tbody>
-          </table>
-        </@modal.body>
-        <@modal.footer>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </@modal.footer>
-      </@modal.wrapper>
-    </@modal.modal>
-  </#if>
-</#macro>
 
 <#macro calculationCells calculation student member expand_failure_message=false>
   <#if calculation.successful>
@@ -250,8 +123,8 @@
     <td data-sortby="${student.sprCode}">
       <@pl.profile_link member.universityId />
       ${student.sprCode}
-      <@moduleMarkStatusIcon student />
-      <@moduleMarkHistory student member />
+      <@components.moduleMarkStatusIcon student />
+      <@components.moduleMarkHistory student member />
     </td>
     <td>${member.firstName}</td>
     <td>${member.lastName}</td>
@@ -268,8 +141,8 @@
             <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
           </#if>
 
-          <@componentMarkStatusIcon marks />
-          <@componentMarkHistory marks ac member />
+          <@components.componentMarkStatusIcon marks />
+          <@components.componentMarkHistory marks ac member />
         </td>
         <td data-sortby="g${marks.grade!'-'}">${marks.grade!'-'}</td>
       <#else>
