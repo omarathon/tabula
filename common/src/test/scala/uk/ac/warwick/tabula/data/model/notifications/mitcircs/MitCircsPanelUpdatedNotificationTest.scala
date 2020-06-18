@@ -35,7 +35,7 @@ class MitCircsPanelUpdatedNotificationTest extends TestBase with Mockito with Fr
     })
 
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(n.content.template), n.content.model)
-    notificationContent should be(
+    notificationContent.stripLineEnd should be(
       """The mitigating circumstances panel has been updated.
         |
         |The panel is now called Heron panel.""".stripMargin
@@ -54,7 +54,7 @@ class MitCircsPanelUpdatedNotificationTest extends TestBase with Mockito with Fr
     })
 
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(n.content.template), n.content.model)
-    notificationContent should be(
+    notificationContent.stripLineEnd should be(
       """The mitigating circumstances panel has been updated.
         |
         |The panel is now called Heron panel.
