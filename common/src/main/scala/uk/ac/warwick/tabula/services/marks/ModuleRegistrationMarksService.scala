@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationMarksDaoComponent,
 
 trait ModuleRegistrationMarksService {
   def getOrCreateRecordedModuleRegistration(reg: ModuleRegistration): RecordedModuleRegistration
+  def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration]
   def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
   def allNeedingWritingToSits: Seq[RecordedModuleRegistration]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
@@ -18,6 +19,10 @@ trait ModuleRegistrationMarksService {
 abstract class AbstractModuleRegistrationMarksService extends ModuleRegistrationMarksService {
   self: ModuleRegistrationMarksDaoComponent
     with TransactionalComponent =>
+
+  override def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration] = transactional(readOnly = true) {
+    moduleRegistrationMarksDao.getRecordedModuleRegistration(reg)
+  }
 
   override def getOrCreateRecordedModuleRegistration(reg: ModuleRegistration): RecordedModuleRegistration = transactional(readOnly = true) {
     moduleRegistrationMarksDao.getRecordedModuleRegistration(reg)

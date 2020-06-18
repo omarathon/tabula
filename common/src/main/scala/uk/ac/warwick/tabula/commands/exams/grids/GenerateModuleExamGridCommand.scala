@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 
@@ -18,6 +19,8 @@ object GenerateModuleExamGridCommand {
       with AutowiringStudentCourseYearDetailsDaoComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringAssessmentComponentMarksServiceComponent
       with ComposableCommand[ModuleExamGridResult]
       with GenerateModuleExamGridValidation
       with GenerateModuleExamGridPermissions
@@ -40,7 +43,7 @@ case class ModuleGridDetailRecord(
 )
 
 
-case class AssessmentComponentInfo(mark: Option[Int], grade: Option[String], isActualMark: Boolean, isActualGrade: Boolean, resitInfo: ResitComponentInfo)
+case class AssessmentComponentInfo(mark: Option[Int], grade: Option[String], isActualMark: Boolean, isActualGrade: Boolean, markState: Option[MarkState], resitInfo: ResitComponentInfo)
 
 case class ResitComponentInfo(resitMark: Option[Int], resitGrade: Option[String], isActualResitMark: Boolean, isActualResitGrade: Boolean)
 
@@ -49,7 +52,8 @@ case class AssessmentIdentity(code: String, name: String)
 class GenerateModuleExamGridCommandInternal(val department: Department, val academicYear: AcademicYear)
   extends CommandInternal[ModuleExamGridResult] with TaskBenchmarking {
 
-  self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent with AssessmentMembershipServiceComponent =>
+  self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent
+    with AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent =>
 
   override def applyInternal(): ModuleExamGridResult = {
     val isHistoricalGrid = academicYear != AcademicYear.now()
@@ -70,6 +74,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
                 grade = uagm.firstOriginalGrade,
                 isActualMark = uagm.agreedMark.isEmpty,
                 isActualGrade = uagm.agreedGrade.isEmpty,
+                markState = assessmentComponentMarksService.getRecordedStudent(uagm).flatMap(_.latestState),
                 resitInfo = ResitComponentInfo(
                   resitMark = uagm.firstResitMark,
                   resitGrade = uagm.firstResitGrade,
