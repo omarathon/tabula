@@ -39,14 +39,15 @@
 
             <tr>
               <td data-sortby="u${student.universityId}">
+                <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].resitSequence" />
                 <@pl.profile_link member.universityId />
                 ${student.universityId}
-                <#if !student.currentMember><span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if>
+                <@components.componentMarkStudentStatus student />
               </td>
               <td>${member.firstName}</td>
               <td>${member.lastName}</td>
               <td data-sortby="${c.mark!-1}">
-                <@f.hidden path="students[${student.universityId}].mark" />
+                <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].mark" />
                 ${student.mark!'-'}
                 <#if "${student.mark!}" != c.mark!>
                   <i class="fal fa-arrow-right"></i>
@@ -54,14 +55,14 @@
                 </#if>
               </td>
               <td data-sortby="g${c.grade!}">
-                <@f.hidden path="students[${student.universityId}].grade" />
+                <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].grade" />
                 ${student.grade!'-'}
                 <#if student.grade! != c.grade!>
                   <i class="fal fa-arrow-right"></i>
                   ${c.grade!}
                 </#if>
               </td>
-              <td><@f.input path="students[${student.universityId}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>
+              <td><@f.input path="students[${student.universityId}_${student.resitSequence!}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>
             </tr>
           </#list>
         </tbody>

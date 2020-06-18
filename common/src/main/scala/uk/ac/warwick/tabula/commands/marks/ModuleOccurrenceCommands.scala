@@ -43,11 +43,21 @@ trait ModuleOccurrenceLoadModuleRegistrations {
         info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
       }
 
-  def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] =
+  def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] = {
+    // Find the assessment group to filter by (this is for students who take multiple reassessments)
+    val assessmentGroup =
+      studentComponentMarkRecords
+        .flatMap(_._2.find(_.universityId == universityId))
+        .maxByOption(_.resitSequence)
+        .map(_.upstreamAssessmentGroupMember.upstreamAssessmentGroup.assessmentGroup)
+
     studentComponentMarkRecords
-      .filter(_._2.exists(_.universityId == universityId))
-      .map { case (ac, allStudents) => ac -> allStudents.find(_.universityId == universityId).get }
+      .filter { case (ac, allStudents) => assessmentGroup.contains(ac.assessmentGroup) && allStudents.exists(_.universityId == universityId) }
+      .map { case (ac, allStudents) =>
+        ac -> allStudents.filter(_.universityId == universityId).sortBy(_.resitSequence).reverse.head // Resits first, then latest by resit sequence
+      }
       .toMap
+  }
 
   lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 

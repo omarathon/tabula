@@ -34,11 +34,11 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     val uag = new UpstreamAssessmentGroup
     uag.assessmentGroup = "A"
     uag.moduleCode = "AM101"
-    uag.members.add(new UpstreamAssessmentGroupMember(uag, user3.getWarwickId))
-    uag.members.add(new UpstreamAssessmentGroupMember(uag, user1.getWarwickId))
-    uag.members.add(new UpstreamAssessmentGroupMember(uag, user2.getWarwickId))
+    uag.members.add(new UpstreamAssessmentGroupMember(uag, user3.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
+    uag.members.add(new UpstreamAssessmentGroupMember(uag, user1.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
+    uag.members.add(new UpstreamAssessmentGroupMember(uag, user2.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
     val usr4 = new AnonymousUser()
-    uag.members.add(new UpstreamAssessmentGroupMember(uag, usr4.getWarwickId))
+    uag.members.add(new UpstreamAssessmentGroupMember(uag, usr4.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
     val activeMembers = uag.members.asScala.filter(_.universityId != usr4.getWarwickId)
 
     val other = UserGroup.ofUsercodes
@@ -103,7 +103,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
     val upstream2 = Fixtures.assessmentGroup(Fixtures.assessmentComponent(module, 101))
     // Include the user in upstream2
-    upstream2.members.add(new UpstreamAssessmentGroupMember(upstream2, "0672089"))
+    upstream2.members.add(new UpstreamAssessmentGroupMember(upstream2, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
     val upstreamWithActiveMembers2 = UpstreamAssessmentGroupInfo(upstream2, upstream2.members.asScala.toSeq.filter(m => m.universityId != "0123458"))
 
     val upstream3 = Fixtures.assessmentGroup(Fixtures.assessmentComponent(module, 101))

@@ -43,7 +43,23 @@
       <span class="label label-success">Agreed</span>
       <span class="sr-only">Agreed mark published to student</span>
     </span>
-  <#elseif marks.resitMark && marks.furtherFirstSit>
+  </#if>
+
+  <#if marks.resitMark && marks.furtherFirstSit>
+    <span class="label label-info">Further first sit</span>
+  <#elseif marks.resitMark>
+    <span class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">
+      <span class="label label-warning">Resit</span>
+      <span class="sr-only">Resit mark will be capped at the pass mark when calculating the module mark</span>
+    </span>
+  </#if>
+</#macro>
+
+<#macro componentMarkStudentStatus marks>
+  <#if !marks.currentMember>
+    <span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span>
+  </#if>
+  <#if marks.resitMark && marks.furtherFirstSit>
     <span class="label label-info">Further first sit</span>
   <#elseif marks.resitMark>
     <span class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">

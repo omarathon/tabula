@@ -170,7 +170,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   def componentMarks(includeActualMarks: Boolean): Seq[(AssessmentType, String, Option[Int])] =
     upstreamAssessmentGroupMembers.flatMap { uagm =>
       uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
-        (ac.assessmentType, ac.sequence, if (includeActualMarks) uagm.firstDefinedMark else uagm.firstAgreedMark)
+        (ac.assessmentType, ac.sequence, if (includeActualMarks) uagm.firstDefinedMark else uagm.agreedMark)
       }
     }
 
@@ -197,7 +197,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
 /**
   * Holds data about an individual student's registration on a single module.
   */
-case class UpstreamModuleRegistration(
+case class UpstreamAssessmentRegistration(
   year: String,
   sprCode: String,
   seatNumber: String,
@@ -209,22 +209,19 @@ case class UpstreamModuleRegistration(
   actualGrade: String,
   agreedMark: String,
   agreedGrade: String,
-  resitActualMark: String,
-  resitActualGrade: String,
-  resitAgreedMark: String,
-  resitAgreedGrade: String,
-  resitExpected: Boolean,
-  currentResitAttempt: String
+  currentResitAttempt: String,
+  resitSequence: String,
 ) {
 
   def universityId: String = SprCode.getUniversityId(sprCode)
 
-  // Assessment group membership doesn't vary by sequence - for groups that are null we want to return same group -TAB-5615
-  def differentGroup(other: UpstreamModuleRegistration): Boolean =
+  // Assessment group membership doesn't vary by sequence for original assessment but does for re-assessment
+  def differentGroup(other: UpstreamAssessmentRegistration, assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Boolean =
     year != other.year ||
     (occurrence != other.occurrence && assessmentGroup != AssessmentComponent.NoneAssessmentGroup) ||
     moduleCode != other.moduleCode ||
-    assessmentGroup != other.assessmentGroup
+    assessmentGroup != other.assessmentGroup ||
+    (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && sequence != other.sequence)
 
   /**
     * Returns UpstreamAssessmentGroups matching the group attributes.

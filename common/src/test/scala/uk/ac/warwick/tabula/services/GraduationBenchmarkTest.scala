@@ -162,7 +162,7 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
       mc -> components.map { case (ac, deadline, mark) =>
         val group = assessmentGroup(ac, academicYear)
         group.deadline = deadline
-        val groupMember = new UpstreamAssessmentGroupMember(group, student.universityId)
+        val groupMember = new UpstreamAssessmentGroupMember(group, student.universityId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
         groupMember.actualMark = mark
         group.members.clear()
         group.members.addAll(Seq(groupMember).asJava)

@@ -26,7 +26,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
     val upstreamAssesmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
     val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2014), "A", module.code, null)
     assessmentGroup.membershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
-    upstreamAssesmentGroupInfo.upstreamAssessmentGroup.members.add(new UpstreamAssessmentGroupMember(upstreamAssesmentGroup, studentUser.getWarwickId))
+    upstreamAssesmentGroupInfo.upstreamAssessmentGroup.members.add(new UpstreamAssessmentGroupMember(upstreamAssesmentGroup, studentUser.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
     mockAssignmentMembershipService.determineMembershipUsersIncludingPWD(assignment) returns Seq(studentUser)
 
     val command = new GenerateGradesFromMarkCommandInternal(assignment) with CommandTestSupport {

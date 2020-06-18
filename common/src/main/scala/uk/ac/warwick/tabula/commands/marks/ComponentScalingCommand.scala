@@ -56,7 +56,7 @@ abstract class ComponentScalingCommandInternal(val assessmentComponent: Assessme
       val recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent =
         assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
 
-      val (scaledMark, scaledGrade) = scale(mark, grade, upstreamAssessmentGroupMember.resitExpected.getOrElse(false))
+      val (scaledMark, scaledGrade) = scale(mark, grade, upstreamAssessmentGroupMember.isReassessment)
 
       recordedAssessmentComponentStudent.addMark(
         uploader = currentUser.apparentUser,

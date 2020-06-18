@@ -134,8 +134,8 @@
                         <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
                         <td>${component.upstreamGroup.name}</td>
                         <td>${(component.weighting!0)?string["0.#"]}%</td>
-                        <td>${component.member.firstAgreedMark!}</td>
-                        <td>${component.member.firstAgreedGrade!}</td>
+                        <td>${component.member.agreedMark!}</td>
+                        <td>${component.member.agreedGrade!}</td>
                       </tr>
                     </#list>
                     </tbody>

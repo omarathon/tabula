@@ -93,7 +93,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   @Test def resitOnly(): Unit = {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
-    upstream.members.get(0).resitExpected = Some(true)
+    upstream.members.get(0).assessmentType = UpstreamAssessmentGroupMemberAssessmentType.Reassessment
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.toSeq.filter(_.universityId != "0000007"))
     val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = true).items
     membership.size should be(1)
@@ -168,7 +168,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   def newAssessmentGroup(uniIds: Seq[String]): UpstreamAssessmentGroup = {
     val upstream = new UpstreamAssessmentGroup
-    upstream.members.addAll(uniIds.map(uniId => new UpstreamAssessmentGroupMember(upstream, uniId)).asJava)
+    upstream.members.addAll(uniIds.map(uniId => new UpstreamAssessmentGroupMember(upstream, uniId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)).asJava)
     upstream
   }
 }

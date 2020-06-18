@@ -29,6 +29,8 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
       .add(is("sequence", uagm.upstreamAssessmentGroup.sequence))
       .add(is("academicYear", uagm.upstreamAssessmentGroup.academicYear))
       .add(is("universityId", uagm.universityId))
+      .add(is("assessmentType", uagm.assessmentType))
+      .add(is("resitSequence", uagm.resitSequence))
       .uniqueResult
 
   override def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent] =

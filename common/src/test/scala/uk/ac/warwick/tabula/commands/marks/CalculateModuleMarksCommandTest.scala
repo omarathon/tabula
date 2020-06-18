@@ -25,6 +25,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
     def markRecord(mark: Option[Int], grade: Option[String], resit: Boolean = false): StudentMarkRecord = StudentMarkRecord(
       universityId = student.universityId,
+      resitSequence = None,
       position = None,
       currentMember = true,
       resitExpected = resit,

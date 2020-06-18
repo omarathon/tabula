@@ -71,10 +71,10 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
                 isActualMark = uagm.agreedMark.isEmpty,
                 isActualGrade = uagm.agreedGrade.isEmpty,
                 resitInfo = ResitComponentInfo(
-                  resitMark = uagm.firstResitMark,
-                  resitGrade = uagm.firstResitGrade,
-                  isActualResitMark = uagm.resitAgreedMark.isEmpty,
-                  isActualResitGrade = uagm.resitAgreedGrade.isEmpty
+                  resitMark = uagm.firstDefinedMark.filter(_ => uagm.isReassessment),
+                  resitGrade = uagm.firstDefinedGrade.filter(_ => uagm.isReassessment),
+                  isActualResitMark = uagm.isReassessment && uagm.agreedMark.isEmpty,
+                  isActualResitGrade = uagm.isReassessment && uagm.agreedGrade.isEmpty
                 )
               )}
           }.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }

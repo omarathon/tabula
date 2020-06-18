@@ -34,6 +34,8 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     this.sequence = uagm.upstreamAssessmentGroup.sequence
     this.academicYear = uagm.upstreamAssessmentGroup.academicYear
     this.universityId = uagm.universityId
+    this.assessmentType = uagm.assessmentType
+    this.resitSequence = uagm.resitSequence
   }
 
   // Properties for linking through to AssessmentComponent/UpstreamAssessmentGroup/UpstreamAssessmentGroupMember
@@ -58,6 +60,20 @@ class RecordedAssessmentComponentStudent extends GeneratedId
 
   @Column(name = "university_id", nullable = false)
   var universityId: String = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroupMemberAssessmentTypeUserType")
+  @Column(name = "assessment_type", nullable = false)
+  var assessmentType: UpstreamAssessmentGroupMemberAssessmentType = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  @Column(name = "resit_sequence")
+  var resitSequence: Option[String] = None
+
+  /**
+   * Doesn't check that this is for the same group, just that it's for the same person on the group
+   */
+  def matchesIdentity(uagm: UpstreamAssessmentGroupMember): Boolean =
+    universityId == uagm.universityId && assessmentType == uagm.assessmentType && resitSequence == uagm.resitSequence
 
   @OneToMany(mappedBy = "recordedAssessmentComponentStudent", cascade = Array(ALL), fetch = FetchType.LAZY)
   @OrderBy("updated_date DESC")
@@ -107,6 +123,8 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     "sequence" -> sequence,
     "academicYear" -> academicYear,
     "universityId" -> universityId,
+    "assessmentType" -> assessmentType,
+    "resitSequence" -> resitSequence,
     "marks" -> marks,
     "needsWritingToSits" -> needsWritingToSits,
     "lastWrittenToSits" -> lastWrittenToSits

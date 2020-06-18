@@ -213,7 +213,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
   val sequence: String = assessmentComponent.sequence
   val assessmentType: String = assessmentComponent.assessmentType.value
 
-  def resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.resitExpected.exists(identity))
+  def resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.isReassessment)
 
   def isLinked(assessmentGroups: JList[AssessmentGroup]): Boolean = assessmentGroups.asScala.exists(ag =>
     ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)
