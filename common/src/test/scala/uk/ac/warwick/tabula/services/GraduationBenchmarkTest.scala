@@ -89,17 +89,16 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
       "ib3k7" -> Fixtures.module("ib3k7"),
     )
 
-    // TODO We give all of these a mark in order to calculate a final year mark but they _shouldn't_ be used
     val moduleRegistrations = Seq(
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib232"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib237"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib337"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib357"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib381"), BigDecimal(24).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3f2"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3f6"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3g4"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
-      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3k7"), BigDecimal(12).underlying, academicYear, agreedMark = Some(random.nextInt(101))),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib232"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib237"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib337"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib357"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib381"), BigDecimal(24).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3f2"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3f6"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3g4"), BigDecimal(12).underlying, academicYear, agreedMark = None),
+      Fixtures.moduleRegistration(student.mostSignificantCourse, modules("ib3k7"), BigDecimal(12).underlying, academicYear, agreedMark = None),
     )
 
     moduleRegistrations.foreach(_._allStudentCourseDetails = JHashSet(student.mostSignificantCourse))
@@ -168,11 +167,6 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
       }
     }.toMap
 
-    moduleRegistrations.foreach { mr =>
-      student.mostSignificantCourse._moduleRegistrations.add(mr)
-      mr.membershipService = assessmentMembershipService
-      assessmentMembershipService.getUpstreamAssessmentGroups(mr, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
-    }
 
     // Year 1 year mark
     student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(59.0).underlying
