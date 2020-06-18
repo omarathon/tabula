@@ -21,7 +21,7 @@
     </span>
   <#elseif student.agreed>
     <span class="tabula-tooltip" data-title="Agreed mark published to student">
-      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
+      <span class="label label-success">Agreed</span>
       <span class="sr-only">Agreed mark published to student</span>
     </span>
   </#if>
@@ -40,8 +40,15 @@
     </span>
   <#elseif marks.agreed>
     <span class="tabula-tooltip" data-title="Agreed mark published to student">
-      <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
+      <span class="label label-success">Agreed</span>
       <span class="sr-only">Agreed mark published to student</span>
+    </span>
+  <#elseif marks.resitMark && marks.furtherFirstSit>
+    <span class="label label-info">Further first sit</span>
+  <#elseif marks.resitMark>
+    <span class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">
+      <span class="label label-warning">Resit</span>
+      <span class="sr-only">Resit mark will be capped at the pass mark when calculating the module mark</span>
     </span>
   </#if>
 </#macro>
