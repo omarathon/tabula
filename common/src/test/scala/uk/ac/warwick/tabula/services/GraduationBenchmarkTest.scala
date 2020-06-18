@@ -105,7 +105,8 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
 
     val componentsWithDeadlineAndMark: SortedMap[String, Seq[(AssessmentComponent, Option[LocalDate], Option[Int])]] = SortedMap(
       "ib232" -> Seq(
-        (Fixtures.assessmentComponent(modules("ib232"), 1, AssessmentType.GroupPresentationMarkedCollectively, 10), Some(LocalDate.parse("2020-03-16")), Some(74)),
+        // Original deadline 2020-03-16 but WBS have special dispensation to include this in the GB
+        (Fixtures.assessmentComponent(modules("ib232"), 1, AssessmentType.GroupPresentationMarkedCollectively, 10), Some(LocalDate.parse("2020-03-12")), Some(74)),
         (Fixtures.assessmentComponent(modules("ib232"), 2, AssessmentType.Assignment, 90), Some(LocalDate.parse("2020-05-27")), None),
       ),
 
@@ -124,8 +125,10 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
       ),
 
       "ib381" ->  Seq(
-        (Fixtures.assessmentComponent(modules("ib381"), 1, AssessmentType.IndividualPresentation, 30), Some(LocalDate.parse("2020-03-16")), Some(58)),
-        (Fixtures.assessmentComponent(modules("ib381"), 2, AssessmentType.ContributionInLearningActivities, 20), Some(LocalDate.parse("2020-03-17")), Some(75)),
+        // Original deadline 2020-03-16 but WBS have special dispensation to include this in the GB
+        (Fixtures.assessmentComponent(modules("ib381"), 1, AssessmentType.IndividualPresentation, 30), Some(LocalDate.parse("2020-03-12")), Some(58)),
+        // Original deadline 2020-03-17 but WBS have special dispensation to include this in the GB
+        (Fixtures.assessmentComponent(modules("ib381"), 2, AssessmentType.ContributionInLearningActivities, 20), Some(LocalDate.parse("2020-03-12")), Some(75)),
         (Fixtures.assessmentComponent(modules("ib381"), 3, AssessmentType.Assignment, 50), Some(LocalDate.parse("2020-05-28")), None),
       ),
 
@@ -167,15 +170,20 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
       }
     }.toMap
 
+    moduleRegistrations.foreach { mr =>
+      student.mostSignificantCourse._moduleRegistrations.add(mr)
+      mr.membershipService = assessmentMembershipService
+      assessmentMembershipService.getUpstreamAssessmentGroups(mr, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
+    }
 
     // Year 1 year mark
-    student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(59.0).underlying
+    scyd1.agreedMark = BigDecimal(59.0).underlying
 
     // Year 2 year mark
-    student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(45.0).underlying
+    scyd2.agreedMark = BigDecimal(45.0).underlying
 
     progressionService.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, normalLoad, routeRules, calculateYearMarks = false, groupByLevel = false, yearWeightings) should be(
-      Right(47.4)
+      Right(49.0)
     )
   }
 
