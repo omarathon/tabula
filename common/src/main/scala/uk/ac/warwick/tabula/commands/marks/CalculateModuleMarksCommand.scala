@@ -56,7 +56,7 @@ object CalculateModuleMarksCommand {
 
     object MissingMarkAdjustment {
       val NoCalculationPossible: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.Pass), comments = Some("Missing mark adjustment - learning outcomes assessed, unable to calculate an overall module mark"))
-      val AllComponentsMissing: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.NoResult), comments = Some("Missing mark adjustment - learning outcomes not assessed"))
+      val AllComponentsMissing: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.Deferred), comments = Some("Missing mark adjustment - learning outcomes not assessed"))
 
       // Option 1) Use the remaining components to calculate a mark, with credit
       // Option 2) A force majeure pass, with credit

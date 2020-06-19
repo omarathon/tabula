@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult._
-import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, MarkState, ModuleRegistration, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
@@ -55,7 +55,8 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     val smrProcess: Option[String] = {
       if (isAgreedMark) {
         latestResult match {
-          case Some(Pass) | Some(NoResult) => Some("COM")
+          case Some(Pass) => Some("COM")
+          case Some(Deferred) if latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => Some("COM")
           case Some(Fail) => Some("RAS")
           case Some(Deferred) => if (latestGrade.contains("S")) Some("RAS") else Some("SAS") // S is further first sit
           case _ => Some("SAS")
