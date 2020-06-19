@@ -267,6 +267,10 @@ object SandboxData {
     AssessmentComponent("2 hour examination (Summer)", "E01", AssessmentType.SummerExam, 50)
   )
 
+  def resitAlternativeAssessment: Seq[AssessmentComponent] = Seq(
+    AssessmentComponent("2 hour resit exam (Summer)", "E02", AssessmentType.SummerExam, 100)
+  )
+
   case class Module(name: String, shortName: String, code: String, cats: BigDecimal, components: Seq[AssessmentComponent] = defaultComponents) {
     def catsString: String = JBigDecimal(Option(cats).map(_.setScale(1, RoundingMode.HALF_UP))).toPlainString
     def fullModuleCode: String = "%s-%s".format(code.toUpperCase, catsString)

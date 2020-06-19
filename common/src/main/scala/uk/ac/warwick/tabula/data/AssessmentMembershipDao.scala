@@ -70,7 +70,7 @@ trait AssessmentMembershipDao {
     */
   def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -181,7 +181,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           scd.student.universityId = :universityId and
           scd.statusOnCourse.code not like 'P%' and
           ${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
-          ((a.resitAssessment = true and a.resitAssessment = uagms.resitExpected) or  a.resitAssessment = false) and
+          ((a.resitAssessment = true and uagms.assessmentType = 'Reassessment') or a.resitAssessment = false) and
           a.deleted = false and a._hiddenFromStudents = false""")
         .setString("universityId", user.getWarwickId)
 
@@ -320,10 +320,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("member.universityId", student.universityId))
 
     if (resitOnly) {
-      criteria.add(or(
-        or(isNotNull("member.resitActualMark"), isNotNull("member.resitActualGrade")),
-        or(isNotNull("member.resitAgreedMark"), isNotNull("member.resitAgreedGrade"))
-      ))
+      criteria.add(is("assessmentType", UpstreamAssessmentGroupMemberAssessmentType.Reassessment))
     }
 
     criteria.add(is("academicYear", academicYear))
@@ -353,7 +350,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   private def modulesIncludingSubDepartments(d: Department): Seq[Module] =
     modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = {
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -361,8 +358,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     if (deptModules.isEmpty) Nil
     else {
       val components = safeInSeq(() => {
-        session.newCriteria[AssessmentComponent]
-          .add(is("inUse", true))
+        val c = session.newCriteria[AssessmentComponent]
+
+        if (inUseOnly) {
+          c.add(is("inUse", true))
+        }
+
+        c
           .addOrder(asc("moduleCode"))
           .addOrder(asc("sequence"))
       }, "module", deptModules)

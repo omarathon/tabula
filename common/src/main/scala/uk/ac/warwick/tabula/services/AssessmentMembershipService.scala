@@ -62,7 +62,7 @@ trait AssessmentMembershipService {
     */
   def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -102,7 +102,7 @@ trait AssessmentMembershipService {
   // empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
   def emptyMembers(groupsToEmpty: Seq[String]): Int
 
-  def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+  def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): UpstreamAssessmentGroup
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
@@ -205,11 +205,11 @@ class AssessmentMembershipServiceImpl
   def emptyMembers(groupsToEmpty: Seq[String]): Int =
     dao.emptyMembers(groupsToEmpty: Seq[String])
 
-  def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup = {
+  def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): UpstreamAssessmentGroup = {
     if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 
     getUpstreamAssessmentGroup(template).map { group =>
-      group.replaceMembers(registrations.map(_.universityId))
+      group.replaceMembers(registrations.map(r => (r.universityId, r.resitSequence.maybeText)), assessmentType)
       group
     } getOrElse {
       logger.warn("No such assessment group found: " + template.toString)
@@ -322,7 +322,7 @@ class AssessmentMembershipServiceImpl
   /**
     * Gets assessment components for this department.
     */
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments, inUseOnly)
 
   def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] =
     dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly, inUseOnly)

@@ -15,6 +15,7 @@ import scala.collection.immutable.ListMap
 object ListAssessmentComponentsCommand {
   case class StudentMarkRecord(
     universityId: String,
+    resitSequence: Option[String],
     position: Option[Int],
     currentMember: Boolean,
     resitExpected: Boolean,
@@ -31,13 +32,14 @@ object ListAssessmentComponentsCommand {
   )
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
-      val resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty)
-      val furtherFirstSit = resitExpected && member.currentResitAttempt.exists(_ <= 1)
+      val reassessment = member.isReassessment
+      val furtherFirstSit = reassessment && member.currentResitAttempt.exists(_ <= 1)
       StudentMarkRecord(
         universityId = member.universityId,
+        resitSequence = member.resitSequence,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
-        resitExpected = resitExpected,
+        resitExpected = reassessment,
         furtherFirstSit = furtherFirstSit,
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
@@ -54,8 +56,8 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
         markState = recordedStudent.flatMap(_.latestState),
-        agreed = recordedStudent.forall(!_.needsWritingToSits) && (if(resitExpected && !furtherFirstSit) member.resitAgreedMark.nonEmpty else member.agreedMark.nonEmpty),
-        resitMark = member.isResitMark,
+        agreed = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty),
+        resitMark = reassessment,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member
       )
@@ -65,8 +67,8 @@ object ListAssessmentComponentsCommand {
   def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
     val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
 
-    info.allMembers.sortBy(_.universityId).map { member =>
-      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
+    info.allMembers.sortBy { uagm => (uagm.universityId, uagm.resitSequence.getOrElse("000")) }.map { member =>
+      val recordedStudent = recordedStudents.find(_.matchesIdentity(member))
 
       StudentMarkRecord(info, member, recordedStudent)
     }
@@ -128,7 +130,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
 
   lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
     val assessmentComponents: Seq[AssessmentComponent] =
-      assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false)
+      assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false, inUseOnly = false)
         .filter { ac =>
           ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
           (canAdminDepartment || modulesWithPermission.contains(ac.module))

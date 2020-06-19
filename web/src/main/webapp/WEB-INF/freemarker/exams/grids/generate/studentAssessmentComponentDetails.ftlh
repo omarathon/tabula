@@ -154,11 +154,11 @@
                       <#assign class><#compress>
                         <#if component.member.firstDefinedMark?number < passMark>exam-grid-fail </#if>
                         <#if !component.member.isAgreedMark()>exam-grid-actual-mark </#if>
-                        <#if component.member.isResitMark()>exam-grid-resit </#if>
+                        <#if component.member.reassessment>exam-grid-resit </#if>
                       </#compress></#assign>
                       <span class="${class}"><#compress>
                             ${component.member.firstDefinedMark}
-                            <#if component.member.isResitMark() && component.member.firstOriginalMark??>
+                            <#if component.member.reassessment && component.member.firstOriginalMark??>
                           (${component.member.firstOriginalMark})
                         </#if>
                           </#compress></span>

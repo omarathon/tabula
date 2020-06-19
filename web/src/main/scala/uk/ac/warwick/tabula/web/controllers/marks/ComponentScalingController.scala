@@ -8,11 +8,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ComponentScalingCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 @Controller
@@ -76,7 +74,7 @@ class ComponentScalingController extends BaseComponentMarksController
     } else {
       val changes: Seq[(UpstreamAssessmentGroupMember, (Option[Int], Option[Int]), (Option[String], Option[String]), String)] =
         cmd.studentsToSet.map { case (upstreamAssessmentGroupMember, originalMark, originalGrade) =>
-          val (scaledMark, scaledGrade) = cmd.scale(originalMark, originalGrade, upstreamAssessmentGroupMember.resitExpected.getOrElse(false))
+          val (scaledMark, scaledGrade) = cmd.scale(originalMark, originalGrade, upstreamAssessmentGroupMember.isReassessment)
 
           (upstreamAssessmentGroupMember, originalMark -> scaledMark, originalGrade -> scaledGrade, cmd.comment(originalMark))
         }

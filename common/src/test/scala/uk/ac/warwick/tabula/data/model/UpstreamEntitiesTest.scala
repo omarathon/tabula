@@ -74,9 +74,9 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
       group2010.assessmentGroup = "A"
       group2010.academicYear = AcademicYear(2010)
       group2010.members = JArrayList(
-        new UpstreamAssessmentGroupMember(group2010, "rob"),
-        new UpstreamAssessmentGroupMember(group2010, "kev"),
-        new UpstreamAssessmentGroupMember(group2010, "bib")
+        new UpstreamAssessmentGroupMember(group2010, "rob", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(group2010, "kev", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(group2010, "bib", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
       )
 
       val group2011 = new UpstreamAssessmentGroup
@@ -85,9 +85,9 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
       group2011.assessmentGroup = "A"
       group2011.academicYear = AcademicYear(2011)
       group2011.members = JArrayList(
-        new UpstreamAssessmentGroupMember(group2011, "hog"),
-        new UpstreamAssessmentGroupMember(group2011, "dod"),
-        new UpstreamAssessmentGroupMember(group2011, "han")
+        new UpstreamAssessmentGroupMember(group2011, "hog", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(group2011, "dod", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(group2011, "han", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
       )
 
       // similar group but doesn't match the occurence of any assignment above, so ignored.
@@ -97,9 +97,9 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
       otherGroup.assessmentGroup = "A"
       otherGroup.academicYear = AcademicYear(2011)
       otherGroup.members = JArrayList(
-        new UpstreamAssessmentGroupMember(otherGroup, "hog"),
-        new UpstreamAssessmentGroupMember(otherGroup, "dod"),
-        new UpstreamAssessmentGroupMember(otherGroup, "han")
+        new UpstreamAssessmentGroupMember(otherGroup, "hog", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(otherGroup, "dod", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+        new UpstreamAssessmentGroupMember(otherGroup, "han", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
       )
 
       val member = new StaffMember

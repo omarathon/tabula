@@ -53,7 +53,7 @@ class AssessmentComponentMembersCommandInternal(val department: Department, val 
 trait AssessmentComponentMembersPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssessmentComponentMembersState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, department)
   }
 }

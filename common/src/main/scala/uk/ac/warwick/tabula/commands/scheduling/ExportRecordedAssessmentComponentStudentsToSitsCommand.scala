@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedAssessmentComponentStudentsToSitsCommand._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
-import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
@@ -53,16 +53,14 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
           this.moduleCode = student.moduleCode
           this.sequence = student.sequence
           this.assessmentGroup = student.assessmentGroup
-        }).flatMap(_.members.asScala.find(_.universityId == student.universityId))
-
-      val resit: Boolean = upstreamAssessmentGroupMember.exists(_.resitExpected.contains(true))
+        }).flatMap(_.members.asScala.find(uagm => uagm.universityId == student.universityId && uagm.assessmentType == student.assessmentType))
 
       if (!canUploadMarksToSitsForYear) {
         logger.warn(s"Not uploading assessment component mark $student as department for ${student.moduleCode} is closed for ${student.academicYear}")
         None
       } else {
         // first check to see if there is one and only one matching row
-        exportFeedbackToSitsService.countMatchingSitsRecords(student, resit) match {
+        exportFeedbackToSitsService.countMatchingSitsRecords(student) match {
           case 0 =>
             logger.warn(s"Not updating SITS for assessment component mark $student - found zero rows")
             None
@@ -73,7 +71,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
 
           case _ =>
             // update - expecting to update one row
-            exportFeedbackToSitsService.exportToSits(student, resit) match {
+            exportFeedbackToSitsService.exportToSits(student) match {
               case 0 =>
                 logger.warn(s"Upload to SITS for assessment component mark $student failed - found zero rows")
                 None
@@ -87,17 +85,10 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
 
                 // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync
                 upstreamAssessmentGroupMember.foreach { uagm =>
-                  if (resit) {
-                    uagm.resitActualMark = student.latestMark
-                    uagm.resitActualGrade = student.latestGrade
-                    uagm.resitAgreedMark = None
-                    uagm.resitAgreedGrade = None
-                  } else {
-                    uagm.actualMark = student.latestMark
-                    uagm.actualGrade = student.latestGrade
-                    uagm.agreedMark = None
-                    uagm.agreedGrade = None
-                  }
+                  uagm.actualMark = student.latestMark
+                  uagm.actualGrade = student.latestGrade
+                  uagm.agreedMark = None
+                  uagm.agreedGrade = None
 
                   assessmentMembershipService.save(uagm)
                 }

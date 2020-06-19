@@ -45,9 +45,10 @@
 
                 <tr>
                   <td data-sortby="u${student.universityId}">
+                    <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].resitSequence" />
                     <@pl.profile_link member.universityId />
                     ${student.universityId}
-                    <#if !student.currentMember><span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if>
+                    <@components.componentMarkStudentStatus student />
                   </td>
                   <td>${member.firstName}</td>
                   <td>${member.lastName}</td>
@@ -60,26 +61,26 @@
                     ${student.grade!'-'}
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].mark">
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].mark">
                       <div class="input-group">
-                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
                         <div class="input-group-addon">%</div>
                       </div>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].grade">
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
-                        <@f.select path="students[${student.universityId}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
+                        <@f.select path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control grade-box" />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control grade-box" />
                       </#if>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].comments">
-                      <@f.input path="students[${student.universityId}].comments" cssClass="form-control" />
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].comments">
+                      <@f.input path="students[${student.universityId}_${student.resitSequence!}].comments" cssClass="form-control" />
                     </@bs3form.labelled_form_group>
                   </td>
                 </tr>

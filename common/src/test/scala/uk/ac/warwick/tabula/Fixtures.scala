@@ -172,9 +172,9 @@ object Fixtures extends Mockito {
     group.moduleCode = module
     group.occurrence = occurrence
     group.members.addAll(Seq(
-      new UpstreamAssessmentGroupMember(group, "0123456"),
-      new UpstreamAssessmentGroupMember(group, "0123457"),
-      new UpstreamAssessmentGroupMember(group, "0123458")
+      new UpstreamAssessmentGroupMember(group, "0123456", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "0123457", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "0123458", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     ).asJava)
     group
   }
@@ -183,7 +183,7 @@ object Fixtures extends Mockito {
     val uag = assessmentGroup(academicYear, code, module, occurrence)
     val activeMembers = uag.members
     //add one PWD
-    val uagm = new UpstreamAssessmentGroupMember(uag, "1000006")
+    val uagm = new UpstreamAssessmentGroupMember(uag, "1000006", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     uag.members.add(uagm)
     UpstreamAssessmentGroupInfo(uag, activeMembers.asScala.toSeq)
   }
@@ -207,7 +207,7 @@ object Fixtures extends Mockito {
   ): UpstreamAssessmentGroup = {
     val group = assessmentGroup(assignment, academicYear)
     group.deadline = Option(deadline)
-    val groupMember = new UpstreamAssessmentGroupMember(group, "0123456")
+    val groupMember = new UpstreamAssessmentGroupMember(group, "0123456", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     groupMember.actualMark = Option(actualMark)
     group.members.clear()
     group.members.addAll(Seq(groupMember).asJava)

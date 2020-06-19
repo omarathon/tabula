@@ -72,12 +72,12 @@ trait MissingMarkAdjustmentStudentsToSet {
 
     upstreamAssessmentGroup.members.asScala.map { upstreamAssessmentGroupMember =>
       val latestMark =
-        allRecordedStudents.find(_.universityId == upstreamAssessmentGroupMember.universityId)
+        allRecordedStudents.find(_.matchesIdentity(upstreamAssessmentGroupMember))
           .flatMap(_.latestMark)
           .orElse(upstreamAssessmentGroupMember.firstDefinedMark)
 
       val latestGrade =
-        allRecordedStudents.find(_.universityId == upstreamAssessmentGroupMember.universityId)
+        allRecordedStudents.find(_.matchesIdentity(upstreamAssessmentGroupMember))
           .flatMap(_.latestGrade)
           .orElse(upstreamAssessmentGroupMember.firstDefinedGrade)
 
