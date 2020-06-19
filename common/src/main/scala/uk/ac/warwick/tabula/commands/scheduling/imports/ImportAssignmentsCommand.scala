@@ -212,10 +212,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
    */
   def doGroupMembers(): Unit = {
     benchmark("Import all group members") {
-      var registrations = List[UpstreamAssessmentRegistration]()
       var notEmptyGroupIds = Set[String]()
 
       def doGroupMembersForAssessmentType(assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Unit = {
+        var registrations = List[UpstreamAssessmentRegistration]()
         var count = 0
         benchmark(s"Process $assessmentType group members") {
           membersToImport(assessmentType) { r =>

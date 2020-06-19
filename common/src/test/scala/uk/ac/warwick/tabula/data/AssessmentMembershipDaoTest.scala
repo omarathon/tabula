@@ -217,7 +217,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         upstreamGroup5WithResitStudent.assessmentGroup = "A1"
         upstreamGroup5WithResitStudent.sequence = "A03"
         upstreamGroup5WithResitStudent.academicYear = AcademicYear(2010)
-        val uagMember1 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "0672089", UpstreamAssessmentGroupMemberAssessmentType.Reassessment)
+        val uagMember1 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "0672089", UpstreamAssessmentGroupMemberAssessmentType.Reassessment, Some("001"))
         val uagMember2 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "1000005", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
 
         upstreamGroup5WithResitStudent.members = JArrayList(

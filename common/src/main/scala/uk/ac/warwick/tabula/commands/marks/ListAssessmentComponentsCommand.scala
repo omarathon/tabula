@@ -56,7 +56,7 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
         markState = recordedStudent.flatMap(_.latestState),
-  agreed = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty),
+        agreed = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty),
         resitMark = reassessment,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member

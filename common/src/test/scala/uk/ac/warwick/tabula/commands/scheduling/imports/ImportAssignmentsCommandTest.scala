@@ -51,7 +51,8 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
     importer.allMembers(any[UpstreamAssessmentGroupMemberAssessmentType], any[Seq[AcademicYear]])(any[UpstreamAssessmentRegistration => Unit]) answers { args: Array[AnyRef] =>
       args match {
-        case Array(_, fn: (UpstreamAssessmentRegistration => Unit) @unchecked) => registrations.foreach(fn)
+        case Array(UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment, _, fn: (UpstreamAssessmentRegistration => Unit) @unchecked) => registrations.foreach(fn)
+        case Array(UpstreamAssessmentGroupMemberAssessmentType.Reassessment, _, _) =>
       }
     }
 
@@ -149,8 +150,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
       val registrations = Seq(
         UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
         UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null)
+
+        // We only set currentResitAttempt here so it passes the hasChanged check and calls .save() (for testing at the end)
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null)
       )
 
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
@@ -174,11 +177,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
         )
       ), isEq(UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
 
+      // 0100001/1 set to 1 (duplicate seat number)
+      members.find(_.universityId == "0100001").get.position should be(Option(1))
+
       // 0100002/1 not passed in (stays null).
       // Only called once as it only matches the _exact_ group (where sequence is A01)
-      // 0100001/1 set to 1 (duplicate seat number)
       members.find(_.universityId == "0100002").get.position should be(None)
-      members.find(_.universityId == "0100001").get.position should be(Option(1))
     }
   }
 

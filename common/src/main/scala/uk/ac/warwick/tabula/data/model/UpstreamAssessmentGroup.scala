@@ -87,7 +87,7 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 
   def this(upstreamAssessmentGroup: UpstreamAssessmentGroup, universityId: String, assessmentType: UpstreamAssessmentGroupMemberAssessmentType, resitSequence: Option[String] = None) = {
     this()
-    require(assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment || resitSequence.nonEmpty)
+    require(assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment == resitSequence.isEmpty, s"Resit sequence must be empty for original assessments and non-empty for reassessment but was $resitSequence for $assessmentType")
     this.upstreamAssessmentGroup = upstreamAssessmentGroup
     this.universityId = universityId
     this.assessmentType = assessmentType
