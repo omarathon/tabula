@@ -60,7 +60,7 @@ class UpstreamAssessmentGroup extends GeneratedId {
   def membersIncludes(universityId: String): Boolean = members.asScala.map(_.universityId).contains(universityId)
 
   def replaceMembers(universityIds: Seq[(String, Option[String])], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Unit = {
-    members.clear()
+    members.removeAll(members.asScala.filter(_.assessmentType == assessmentType).asJava)
     members.addAll(universityIds.distinct.map { case (universityId, resitSequence) =>
       new UpstreamAssessmentGroupMember(this, universityId, assessmentType, resitSequence)
     }.asJava)

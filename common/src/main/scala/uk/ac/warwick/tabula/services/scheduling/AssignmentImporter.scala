@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
@@ -226,7 +227,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
 @Service
 class SandboxAssignmentImporter extends AssignmentImporter
   with AutowiringAssessmentComponentMarksServiceComponent
-  with AutowiringAssessmentMembershipServiceComponent {
+  with AutowiringAssessmentMembershipServiceComponent
+  with Logging {
 
   override def specificMembers(members: Seq[MembershipMember], assessmentType: UpstreamAssessmentGroupMemberAssessmentType, yearsToImport: Seq[AcademicYear])(callback: UpstreamAssessmentRegistration => Unit): Unit =
     allMembersWithFilter(assessmentType, yearsToImport, uniId => members.map(_.universityId).contains(uniId.toString))(callback)
@@ -234,8 +236,6 @@ class SandboxAssignmentImporter extends AssignmentImporter
   override def allMembers(assessmentType: UpstreamAssessmentGroupMemberAssessmentType, yearsToImport: Seq[AcademicYear])(callback: UpstreamAssessmentRegistration => Unit): Unit = allMembersWithFilter(assessmentType, yearsToImport, _ => true)(callback)
 
   private def allMembersWithFilter(assessmentType: UpstreamAssessmentGroupMemberAssessmentType, yearsToImport: Seq[AcademicYear], universityIdFilter: Int => Boolean)(callback: UpstreamAssessmentRegistration => Unit): Unit = {
-    if (assessmentType != UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) return
-
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
@@ -253,12 +253,16 @@ class SandboxAssignmentImporter extends AssignmentImporter
     val upstreamModuleRegistrations: Seq[UpstreamAssessmentRegistration] =
       (for {
         (moduleCode, ranges) <- moduleCodesToIds
-        module <- Seq(SandboxData.module(moduleCode))
-        component <- module.components
-        academicYear <- yearsToImport
+        module = SandboxData.module(moduleCode)
         range <- ranges
         uniId <- range if universityIdFilter(uniId)
         if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
+        academicYear <- if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) yearsToImport else (yearsToImport.minBy(_.startYear).yearsSurrounding(3, 0) ++ yearsToImport).distinct
+        if assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment ||
+          (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && academicYear < AcademicYear.now() && (SandboxData.randomMarkSeed(uniId.toString, moduleCode) % 100) < 40)
+
+        // 40% resits are via the original method, the other 60% are via a single exam
+        component <- if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment || SandboxData.randomMarkSeed(uniId.toString, moduleCode) % 5 < 2) module.components else SandboxData.resitAlternativeAssessment
       } yield {
         val yearOfStudy = (uniId % 3) + 1
         val level = moduleCode.substring(3, 4).toInt
@@ -267,7 +271,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
         if (module.code.substring(0, 3) == "hom" || registrationForPreviousYear) uk.ac.warwick.tabula.data.Transactions.transactional() {
           val universityId = uniId.toString
           val moduleCodeFull = module.fullModuleCode
-          val assessmentGroup = "A"
+          val assessmentGroup = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment || SandboxData.randomMarkSeed(uniId.toString, moduleCode) % 5 < 2) "A" else "AR"
           val sequence = component.sequence
           val occurrence = "A"
 
@@ -282,7 +286,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
             assessmentMembershipService.getUpstreamAssessmentGroup(template)
 
           val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
-            upstreamAssessmentGroup.flatMap(_.members.asScala.find(_.universityId == universityId))
+            upstreamAssessmentGroup.flatMap(_.members.asScala.find(m => m.universityId == universityId && m.assessmentType == assessmentType))
 
           val recordedStudent: Option[RecordedAssessmentComponentStudent] =
             upstreamAssessmentGroupMember.flatMap { uagm =>
@@ -298,13 +302,20 @@ class SandboxAssignmentImporter extends AssignmentImporter
               } else {
                 val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
 
-                val randomModuleMark = SandboxData.randomMarkSeed(universityId, moduleCode) % 100
+                val randomModuleMark: Int = assessmentType match {
+                  case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+                    SandboxData.randomMarkSeed(universityId, moduleCode) % 100
+
+                  // Resits get a higher mark (though it'll get capped)
+                  case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+                    (SandboxData.randomMarkSeed(universityId, moduleCode) % 100) + ((SandboxData.randomMarkSeed(universityId, moduleCode) % 13) * 1.3).toInt
+                }
 
                 val m =
                   if (isPassFail) {
                     if (randomModuleMark < 40) 0 else 100
                   } else {
-                    val markVariance = SandboxData.randomMarkSeed(universityId, moduleCode) % 15
+                    val markVariance = SandboxData.randomMarkSeed(universityId, moduleCode) % 13
 
                     val sequenceNumber = component.sequence.substring(1,3).toInt
                     val assessmentMark = component.assessmentType.subtype match {
@@ -349,8 +360,8 @@ class SandboxAssignmentImporter extends AssignmentImporter
             actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
             agreedMark = if (generateMarks) mark else null,
             agreedGrade = if (generateMarks) grade else null,
-            currentResitAttempt = null,
-            resitSequence = null
+            currentResitAttempt = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else if (SandboxData.randomMarkSeed(universityId, moduleCode) % 13 < 5) "1" else "2",
+            resitSequence = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else "001",
           ))
         } else None
       }).flatten.toSeq
@@ -363,15 +374,14 @@ class SandboxAssignmentImporter extends AssignmentImporter
       (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
-      module <- d.modules.get(moduleCode).toSeq
-      component <- module.components
+      module = SandboxData.module(moduleCode)
+      (component, assessmentGroup) <- module.components.map(_ -> "A") ++ SandboxData.resitAlternativeAssessment.map(_ -> "AR")
       academicYear <- yearsToImport
-    } yield (moduleCode, component, academicYear)).zipWithIndex.map { case ((moduleCode, component, academicYear), index) =>
-      val module = SandboxData.module(moduleCode)
+    } yield (module, component, assessmentGroup, academicYear)).zipWithIndex.map { case ((module, component, assessmentGroup, academicYear), index) =>
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = module.fullModuleCode
       ag.academicYear = academicYear
-      ag.assessmentGroup = "A"
+      ag.assessmentGroup = assessmentGroup
       ag.occurrence = "A"
       ag.sequence = component.sequence
       ag.deadline = Some(component.assessmentType.subtype match {
@@ -404,13 +414,13 @@ class SandboxAssignmentImporter extends AssignmentImporter
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       module <- d.modules.get(moduleCode).toSeq
-      component <- module.components
+      (component, assessmentGroup) <- module.components.map(_ -> "A") ++ SandboxData.resitAlternativeAssessment.map(_ -> "AR")
     } yield {
       val a = new AssessmentComponent
       a.moduleCode = module.fullModuleCode
       a.sequence = component.sequence
       a.name = component.name
-      a.assessmentGroup = "A"
+      a.assessmentGroup = assessmentGroup
       a.assessmentType = component.assessmentType
       a.inUse = true
       a.rawWeighting = component.weighting
@@ -457,7 +467,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
     } yield (module, year)).distinct.zipWithIndex.map { case ((module, year), index) =>
       val a = new AssessmentComponentExamSchedule
       a.moduleCode = module.fullModuleCode
-      a.assessmentComponentSequence = "E01"
+      a.assessmentComponentSequence = "E01" // TODO we don't schedule the resit currently
       a.examProfileCode = s"EXSUM${year.endYear % 100}"
       a.slotId = f"${(index / 5) + 1}%03d"
       a.sequence = f"${(index % 5) + 1}%03d" // Five exams per slot
