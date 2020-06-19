@@ -33,6 +33,8 @@ trait ModuleRegistrationDao {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration]
+
   def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
 
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
@@ -88,6 +90,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .add(is("academicYear", academicYear))
       .add(is("deleted", false))
       .addOrder(asc("sprCode"))
+      .seq
+
+  override def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration] =
+    session.newCriteria[ModuleRegistration]
+      .createAlias("module", "module")
+      .add(is("module.adminDepartment", department))
+      .add(is("academicYear", academicYear))
+      .add(is("deleted", false))
       .seq
 
   override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =

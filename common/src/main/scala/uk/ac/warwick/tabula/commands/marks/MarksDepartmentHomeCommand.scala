@@ -100,7 +100,8 @@ object MarksDepartmentHomeCommand {
 abstract class MarksDepartmentHomeCommandInternal(val department: Department, val academicYear: AcademicYear, val currentUser: CurrentUser)
   extends CommandInternal[Result]
     with ListAssessmentComponentsState
-    with ListAssessmentComponentsForModulesWithPermission {
+    with ListAssessmentComponentsForModulesWithPermission
+    with TaskBenchmarking {
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with MarksWorkflowProgressServiceComponent
@@ -109,15 +110,24 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
     with ModuleRegistrationMarksServiceComponent =>
 
   override def applyInternal(): Result = {
-    assessmentComponentInfos
-      .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
-      .map { case ((moduleCode, occurrence), infos) =>
+    val groupedInfo = benchmarkTask("Fetch and group assessment component info") {
+      assessmentComponentInfos
+        .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
+    }
+
+    val allModuleRegistrations = benchmarkTask("Get module registrations for department grouped by SITS module code, academicYear and occurrence") {
+      moduleRegistrationService.getByDepartmentAndYear(department, academicYear)
+        .groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+    }
+
+    benchmarkTask("Calculate progress for module") {
+      groupedInfo.map { case ((moduleCode, occurrence), infos) => benchmarkTask(s"Process $moduleCode $occurrence") {
         val module = infos.head.assessmentComponent.module
 
-        val moduleRegistrations = moduleRegistrationService.getByModuleOccurrence(moduleCode, academicYear, occurrence)
-        val students = studentModuleMarkRecords(moduleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+        val moduleRegistrations = benchmarkTask("Get module registrations") { allModuleRegistrations.getOrElse((moduleCode, academicYear, occurrence), Seq.empty).sortBy(_.sprCode) }
+        val students = benchmarkTask("Get student module mark records") { studentModuleMarkRecords(moduleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService) }
 
-        val progress = workflowProgressService.moduleOccurrenceProgress(students, infos)
+        val progress = benchmarkTask("Progress") { workflowProgressService.moduleOccurrenceProgress(students, infos) }
 
         ModuleOccurrence(
           moduleCode = moduleCode,
@@ -133,7 +143,8 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
               .toSeq
               .sortBy { case (assessmentGroup, _) => assessmentGroup },
         )
-      }
+      }}
       .toSeq.sortBy { mo => (mo.moduleCode, mo.occurrence) }
+    }
   }
 }
