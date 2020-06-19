@@ -476,8 +476,22 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       }
 
       val wBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
-        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) None
-        else Some(GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Deferred)))
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) {
+          Seq.empty
+        } else if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty)) {
+          val passMark =
+            sitsBoundaries.find(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.result.contains(ModuleResult.Pass))
+              .flatMap(_.minimumMark)
+              .minOption
+              .getOrElse(ProgressionService.DefaultPassMark)
+
+          Seq(
+            GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, Some(passMark), Some(100), "S", Some(ModuleResult.Pass)),
+            GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, Some(0), Some(passMark - 1), "S", Some(ModuleResult.Fail))
+          )
+        } else {
+          Seq(GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)))
+        }
       }
 
       // Inject the FM and W grades if they don't exist already
