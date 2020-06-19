@@ -212,9 +212,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
    */
   def doGroupMembers(): Unit = {
     benchmark("Import all group members") {
-      var notEmptyGroupIds = Set[String]()
-
-      def doGroupMembersForAssessmentType(assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Unit = {
+      def doGroupMembersForAssessmentType(assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Set[UpstreamAssessmentGroup] = {
+        var notEmptyGroups = Set[UpstreamAssessmentGroup]()
         var registrations = List[UpstreamAssessmentRegistration]()
         var count = 0
         benchmark(s"Process $assessmentType group members") {
@@ -223,8 +222,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
               // This element r is for a new group, so save this group and start afresh
 
               transactional() {
-                save(registrations, assessmentType)
-                  .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+                notEmptyGroups = notEmptyGroups ++ save(registrations, assessmentType)
               }
               registrations = Nil
             }
@@ -241,16 +239,38 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         if (registrations.nonEmpty) {
           benchmark(s"Save final $assessmentType registrations") {
             transactional() {
-              save(registrations, assessmentType)
-                .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+              notEmptyGroups = notEmptyGroups ++ save(registrations, assessmentType)
             }
           }
         }
 
         logger.info(s"Imported $count $assessmentType group members")
+
+        notEmptyGroups
       }
 
-      UpstreamAssessmentGroupMemberAssessmentType.values.foreach(doGroupMembersForAssessmentType)
+      val notEmptyGroupIdsByAssessmentType: Map[UpstreamAssessmentGroupMemberAssessmentType, Set[UpstreamAssessmentGroup]] =
+        UpstreamAssessmentGroupMemberAssessmentType.values.map { assessmentType =>
+          assessmentType -> doGroupMembersForAssessmentType(assessmentType)
+        }.toMap
+
+      // We need to clear out groups we didn't see for each type; e.g. where a resit used to be against a sequence but not anymore
+      benchmark("Clearing out unseen groups per assessment type") {
+        UpstreamAssessmentGroupMemberAssessmentType.values.foreach { assessmentType =>
+          val seenIds = notEmptyGroupIdsByAssessmentType(assessmentType).map(_.id)
+
+          notEmptyGroupIdsByAssessmentType.view.filterKeys(_ != assessmentType)
+            .values.flatten
+            .filterNot(uag => seenIds.contains(uag.id))
+            .foreach { uag =>
+              transactional() {
+                assessmentMembershipService.replaceMembers(uag, Seq.empty, assessmentType)
+              }
+            }
+        }
+      }
+
+      val notEmptyGroupIds: Set[String] = notEmptyGroupIdsByAssessmentType.values.flatten.toSet.map((g: UpstreamAssessmentGroup) => g.id)
 
       if (importEverything) {
         // empty unseen groups - this is done in transactional batches
