@@ -102,7 +102,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
         UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "", null, null)
       )
       command.doGroupMembers()
-      verify(membershipService, times(4)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamAssessmentRegistration]], any[UpstreamAssessmentGroupMemberAssessmentType])
+      verify(membershipService, times(5)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamAssessmentRegistration]], any[UpstreamAssessmentGroupMemberAssessmentType])
     }
   }
 
