@@ -478,9 +478,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       val wBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
         if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) {
           Seq.empty
-        } else if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty)) {
+        } else if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.isDefault)) {
           val passMark =
-            sitsBoundaries.find(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.result.contains(ModuleResult.Pass))
+            sitsBoundaries.find(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.isDefault && gb.result.contains(ModuleResult.Pass))
               .flatMap(_.minimumMark)
               .minOption
               .getOrElse(ProgressionService.DefaultPassMark)
