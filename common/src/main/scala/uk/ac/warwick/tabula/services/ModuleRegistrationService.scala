@@ -4,7 +4,6 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
@@ -30,6 +29,8 @@ trait ModuleRegistrationService {
   def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration]
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
+
+  def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration]
 
   def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
 
@@ -90,19 +91,22 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   ): Option[ModuleRegistration] =
     moduleRegistrationDao.getByNotionalKey(studentCourseDetails, sitsModuleCode, academicYear, occurrence)
 
-  def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
+  override def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
 
-  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
+  override def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
   override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 
-  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
+  override def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByDepartmentAndYear(department, academicYear)
+
+  override def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYears(academicYears, includeDeleted)
 
-  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
+  override def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
   private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int]): Either[String, BigDecimal] = {
