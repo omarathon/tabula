@@ -320,10 +320,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("member.universityId", student.universityId))
 
     if (resitOnly) {
-      criteria.add(or(
-        or(isNotNull("member.resitActualMark"), isNotNull("member.resitActualGrade")),
-        or(isNotNull("member.resitAgreedMark"), isNotNull("member.resitAgreedGrade"))
-      ))
+      criteria.add(is("assessmentType", UpstreamAssessmentGroupMemberAssessmentType.Reassessment))
     }
 
     criteria.add(is("academicYear", academicYear))
