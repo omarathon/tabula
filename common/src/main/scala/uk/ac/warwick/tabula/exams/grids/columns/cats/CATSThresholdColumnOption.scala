@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.exams.grids.columns.cats
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleRegistration}
 import uk.ac.warwick.tabula.exams.grids.columns._
 
 abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolean = false, includeUnusual: Boolean = true)
@@ -42,7 +42,7 @@ abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolea
         entityYear.route.namedOptions(entityYear.yearOfStudy, academicYear, modulesWithMarks)
       }
 
-      if (modules.exists(_.firstDefinedMark.isEmpty)) {
+      if (modules.exists(mr => mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
         ExamGridColumnValueMissing("The total CATS cannot be calculated because the following module registrations have no mark: %s".format(
           modules.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
         ))

@@ -517,6 +517,10 @@ trait CalculateModuleMarksValidation extends SelfValidating {
       }
 
       if (item.mark.hasText) {
+        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
+        }
+
         try {
           val asInt = item.mark.toInt
           if (asInt < 0 || asInt > 100) {

@@ -4,13 +4,15 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueString, _}
+import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
+
 import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
 
 abstract class ModuleReportsColumn(state: ExamGridColumnState) extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue
 
 @Component
-class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
+class ModuleReportsColumnOption extends PerYearExamGridColumnOption with AutowiringProgressionServiceComponent {
 
   override val identifier: ExamGridColumnOption.Identifier = "modulereports"
 
@@ -37,7 +39,7 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
         val coreRequiredModules = state.coreRequiredModuleLookup(entity.route).map(_.module)
         val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
         val values = if (coreRequiredModules.nonEmpty) {
-          if (coreRequiredModuleRegistrations.exists(_.agreedGrade.contains("F"))) {
+          if (coreRequiredModuleRegistrations.exists(progressionService.isFailed)) {
             ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("N")), isEmpty = false)
           } else {
             ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("Y")), isEmpty = false)
