@@ -83,7 +83,7 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
           upstreamAssessmentGroup.members.asScala
             .find { m =>
               m.universityId == item.universityID && (
-                (item.resitSequence.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+                (item.resitSequence.maybeText.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
                 (m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(item.resitSequence))
               )
             }.get // We validate that this exists
@@ -246,7 +246,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       val upstreamAssessmentGroupMember = upstreamAssessmentGroup.members.asScala.find { m =>
         m.universityId == item.universityID && (
-          (item.resitSequence.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+          (item.resitSequence.maybeText.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
           (m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(item.resitSequence))
         )
       }

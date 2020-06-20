@@ -1,5 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
+<#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
   <h1>Record marks</h1>
