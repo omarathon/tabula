@@ -173,7 +173,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                       case "University ID" | "ID" =>
                         currentItem.universityID = formattedValue
                       case "Resit sequence" =>
-                        currentItem.resitSequence = formattedValue.maybeText.flatMap(v => Try(v.toInt).toOption).map("%s%02d".format(_)).getOrElse("")
+                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%s%02d".format(_)).getOrElse(v)).getOrElse("")
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
@@ -196,7 +196,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                 items.clear()
               } else {
                 items.asScala.filter(_.universityID.hasText).foreach { item =>
-                  students.put(s"${item.universityID}_${item.resitSequence}", item)
+                  students.put(s"${item.universityID}_${item.resitSequence.maybeText.getOrElse("")}", item)
                 }
               }
             }
