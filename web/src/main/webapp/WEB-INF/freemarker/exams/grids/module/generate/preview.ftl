@@ -88,6 +88,10 @@
             </thead>
             <tbody>
             <tr>
+              <td><span class="exam-grid-unconfirmed">#</span></td>
+              <td>Unconfirmed marks (subject to change)</td>
+            </tr>
+            <tr>
               <td><span class="exam-grid-fail">#</span></td>
               <td>Failed module or component</td>
             </tr>
@@ -158,7 +162,8 @@
                       <#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
                         <#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
                         <#assign componentResitDetails = componentDetails.resitInfo />
-                        <td>
+                        <#assign unconfirmedClass><#if componentDetails.markState?? && componentDetails.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+                        <td class="${unconfirmedClass}">
                           <#if componentResitDetails.resitMark??>
                             <#assign resitmark_class>
                               <#compress>
@@ -183,7 +188,7 @@
                             <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
                           </#if>
                         </td>
-                        <td>
+                        <td class="${unconfirmedClass}">
                           <#if componentResitDetails.resitGrade??>
                             <#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
                             <#if componentDetails.grade??>
@@ -203,7 +208,8 @@
                         <td></td>
                       </#if>
                     </#list>
-                    <td>
+                    <#assign unconfirmedClass><#if mr.markState?? && mr.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+                    <td class="${unconfirmedClass}">
                       <#if mr.agreedMark??>
                         <span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
                       <#elseif mr.actualMark??>
@@ -212,7 +218,7 @@
                         <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
                       </#if>
                     </td>
-                    <td>
+                    <td class="${unconfirmedClass}">
                       <#if mr.agreedGrade??>
                         <span>${mr.agreedGrade}</span>
                       <#elseif mr.actualGrade??>

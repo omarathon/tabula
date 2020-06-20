@@ -45,7 +45,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
     val workbook = new SXSSFWorkbook(null, -1)
 
     // Styles
-    val cellStyleMap = getCellStyleMap(workbook)
+    val cellStyleMap = new CellStyleMap(workbook)
 
     val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
@@ -84,12 +84,12 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
         // Header row
         val headerCell = headerRow.createCell(currentColumnIndex)
         headerCell.setCellValue(leftColumn.title)
-        headerCell.setCellStyle(cellStyleMap(Header))
+        headerCell.setCellStyle(cellStyleMap.getStyle(Header))
 
         // Nothing in secondary value row
         // Entity rows
         entities.foreach(entity =>
-          if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
+          if (chosenYearColumnValues.get(leftColumn).exists(_.contains(entity))) {
             val (header, valueRows) = entityRows(entity)
             val entityCell = header.createCell(currentColumnIndex)
             chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
@@ -135,7 +135,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           if (moduleColumnIndex == 1) {
             val headerCell = headerRow.createCell(currentColumnIndex)
             headerCell.setCellValue(s"Year $year")
-            headerCell.setCellStyle(cellStyleMap(Header))
+            headerCell.setCellStyle(cellStyleMap.getStyle(Header))
             headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
             val yearWidth = maxYearColumnSize(year) - 1
             if (yearWidth > 0)
@@ -183,7 +183,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           entityHeaderRowMaxCellWidth = Math.max(entityHeaderRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 
           entityRows.values.map { case (r, _) => r }.foreach { row =>
-            Option(row.getCell(currentColumnIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL)).foreach(_.setCellStyle(cellStyleMap(Rotated)))
+            Option(row.getCell(currentColumnIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL)).foreach(_.setCellStyle(cellStyleMap.getStyle(Rotated)))
           }
 
           // and finally ..
@@ -196,7 +196,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           // header row
           val headerCell = headerRow.createCell(currentColumnIndex)
           headerCell.setCellValue(reportColumn.title)
-          headerCell.setCellStyle(cellStyleMap(Rotated))
+          headerCell.setCellStyle(cellStyleMap.getStyle(Rotated))
           headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
           // Entity rows
           entities.foreach(entity => {
@@ -204,7 +204,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             val (header, valueRows) = entityRows(entity)
             header.createCell(currentColumnIndex)
             val overallCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-            if (perYearColumnValues.get(reportColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
+            if (perYearColumnValues.get(reportColumn).exists(_.get(entity).exists(_.contains(year)))) {
               perYearColumnValues(reportColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap, commentHelper)
             }
           })
@@ -228,7 +228,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             sheet.autoSizeColumn(currentColumnIndex)
 
             categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-            categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+            categoryCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
 
             // Guard against trying to create a merged region with only one cell in it
             val startColumn = categoryCell.getColumnIndex
@@ -247,15 +247,15 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
         headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 
         if (rightColumn.boldTitle)
-          headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+          headerCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
         else
-          headerCell.setCellStyle(cellStyleMap(Rotated))
+          headerCell.setCellStyle(cellStyleMap.getStyle(Rotated))
 
 
         // Entity rows
         entities.foreach(entity => {
           val (header, valueRows) = entityRows(entity)
-          if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
+          if (chosenYearColumnValues.get(rightColumn).exists(_.contains(entity))) {
             val entityCell = header.createCell(currentColumnIndex)
             chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
             if (mergedCells) {

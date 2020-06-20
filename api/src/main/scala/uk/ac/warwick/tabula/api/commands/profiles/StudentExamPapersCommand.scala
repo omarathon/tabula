@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.{ModuleRegistrationAndComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object StudentExamPapersCommand {
@@ -15,6 +16,8 @@ object StudentExamPapersCommand {
       with ComposableCommand[Seq[ModuleRegistrationAndComponents]]
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringAssessmentComponentMarksServiceComponent
       with StudentExamPapersPermissions
       with StudentExamPapersCommandState
       with StudentModuleRegistrationAndComponents
@@ -33,7 +36,7 @@ class StudentExamPapersCommandInternal(val studentMember: StudentMember, val aca
     generateModuleRegistrationAndComponents(studentCourseYearDetails).flatMap { moduleRegistrationAndComponents =>
       val examComponents = moduleRegistrationAndComponents.components.filter(c => c.upstreamGroup.assessmentComponent.examPaperCode.isDefined)
       if (examComponents.nonEmpty) {
-        Option(ModuleRegistrationAndComponents(moduleRegistrationAndComponents.moduleRegistration, examComponents))
+        Option(ModuleRegistrationAndComponents(moduleRegistrationAndComponents.moduleRegistration,  moduleRegistrationAndComponents.markState, examComponents))
       } else {
         None
       }

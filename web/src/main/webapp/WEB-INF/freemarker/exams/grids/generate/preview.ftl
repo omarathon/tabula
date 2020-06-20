@@ -267,6 +267,10 @@
             </thead>
             <tbody>
             <tr>
+              <td><span class="exam-grid-unconfirmed">#</span></td>
+              <td>Unconfirmed marks (subject to change)</td>
+            </tr>
+            <tr>
               <td><span class="exam-grid-fail">#</span></td>
               <td>Failed module or component</td>
             </tr>

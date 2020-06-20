@@ -72,6 +72,10 @@
       </thead>
       <tbody>
       <tr>
+        <td><span class="exam-grid-unconfirmed">#</span></td>
+        <td>Unconfirmed marks (subject to change)</td>
+      </tr>
+      <tr>
         <td><span class="exam-grid-fail">#</span></td>
         <td>Failed module or component</td>
       </tr>
@@ -147,8 +151,9 @@
             <table class="component_info">
               <tbody>
               <#list info.components as component>
+                <#assign unconfirmedClass><#if component.markState?? && component.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
                 <tr>
-                  <td>
+                  <td class="${unconfirmedClass}">
                     <#if component.member.firstDefinedMark??>
                       <#assign passMark =mapGet(passMarkMap, component.upstreamGroup.assessmentComponent.module) />
                       <#assign class><#compress>
@@ -175,10 +180,11 @@
             <table class="component_info">
               <tbody>
               <#list info.components as component>
+                <#assign unconfirmedClass><#if component.markState?? && component.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
                 <tr>
-                  <td>
+                  <td class="${unconfirmedClass}">
                     <#if component.member.firstDefinedGrade??>
-                      <span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${component.member.firstDefinedGrade}</span>
+                      <span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if> "> ${component.member.firstDefinedGrade}</span>
                     <#else>
                       <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Assessment component">X</span>
                     </#if>
@@ -188,7 +194,8 @@
               </tbody>
             </table>
           </td>
-          <td class="assessment_details_col assessment_details_col1">
+          <#assign unconfirmedClass><#if info.markState?? && info.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+          <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
             <#assign passMark = mapGet(passMarkMap, mr.module) />
             <#if mr.agreedMark??>
               <#if mr.agreedMark?number lt passMark>
@@ -206,7 +213,7 @@
               <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>
             </#if>
           </td>
-          <td class="assessment_details_col assessment_details_col1">
+          <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
             <#if mr.agreedGrade??>
               ${mr.agreedGrade}
             <#elseif mr.actualGrade??>

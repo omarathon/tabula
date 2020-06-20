@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, Upst
 import uk.ac.warwick.tabula.data.{AssessmentComponentMarksDaoComponent, AutowiringAssessmentComponentMarksDaoComponent, AutowiringTransactionalComponent, TransactionalComponent}
 
 trait AssessmentComponentMarksService {
+  def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
   def getOrCreateRecordedStudent(uagm: UpstreamAssessmentGroupMember): RecordedAssessmentComponentStudent
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
   def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
@@ -17,6 +18,10 @@ trait AssessmentComponentMarksService {
 abstract class AbstractAssessmentComponentMarksService extends AssessmentComponentMarksService {
   self: AssessmentComponentMarksDaoComponent
     with TransactionalComponent =>
+
+  override def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {
+    assessmentComponentMarksDao.getRecordedStudent(uagm)
+  }
 
   override def getOrCreateRecordedStudent(uagm: UpstreamAssessmentGroupMember): RecordedAssessmentComponentStudent = transactional(readOnly = true) {
     assessmentComponentMarksDao.getRecordedStudent(uagm)

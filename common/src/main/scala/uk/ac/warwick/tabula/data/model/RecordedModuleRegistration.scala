@@ -24,7 +24,7 @@ import scala.jdk.CollectionConverters._
 @Access(AccessType.FIELD)
 class RecordedModuleRegistration extends GeneratedId
   with HibernateVersioned
-  with ToString {
+  with ToString with Serializable {
 
   def this(mr: ModuleRegistration) {
     this()
