@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.apache.commons.lang3.builder.EqualsBuilder
-import org.hibernate.annotations.{BatchSize, Formula, Proxy, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -100,19 +100,6 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 
   @Column(name = "universityId")
   var universityId: String = _
-
-//  @Formula("""(select m.mark_state from RecordedAssessmentComponentStudentMark m
-//              join RecordedAssessmentComponentStudent s on m.recorded_assessment_component_student_id = s.id
-//              join UpstreamAssessmentGroup g on g.id = group_id
-//              where
-//                s.module_code = g.moduleCode and
-//                s.academic_year = g.academicYear and
-//                s.occurrence = g.occurrence and
-//                s.university_id = universityId
-//              order by m.updated_date desc limit 1)""")
-//  @Type(`type` = "uk.ac.warwick.tabula.data.model.MarkStateUserType")
-//  private var _markState: MarkState = _
-//  def markState: Option[MarkState] = Option(_markState)
 
   override def compare(that: UpstreamAssessmentGroupMember): Int =
     position.getOrElse(Int.MaxValue) - that.position.getOrElse(Int.MaxValue) match {
