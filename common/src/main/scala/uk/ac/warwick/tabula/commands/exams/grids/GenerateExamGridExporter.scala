@@ -466,7 +466,6 @@ object ExamGridExportStyles {
       cs.cloneStyleFrom(base)
       cs.setFillPattern(FillPatternType.SOLID_FOREGROUND)
       cs.setFillForegroundColor(new XSSFColor(new Color(255, 170, 170)))
-      cs.setFillBackgroundColor(new XSSFColor(new Color(255, 170, 170)))
       cs
     }
 
