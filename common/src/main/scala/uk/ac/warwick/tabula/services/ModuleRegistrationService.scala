@@ -182,7 +182,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
     val validRecords = moduleRegistrations
       .filterNot(_.deleted)
-      .filter(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) > 0) // 0 CAT modules don't count towards the overall mark so ignore them
+      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0)// 0 CAT modules don't count towards the overall mark so ignore them
     if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
         Seq((null, validRecords))
     } else {
