@@ -92,21 +92,21 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
                 val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
                 if (indicator.grade == GradeBoundary.ForceMajeureMissingComponentGrade) {
                   // This is the only grade where the module result can vary so we need to include that too
-                  ExamGridColumnValueWithTooltip(s"${indicator.grade} (${mr.moduleResult.description})", isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail))
+                  ExamGridColumnValueWithTooltip(s"${indicator.grade} (${mr.moduleResult.description})", isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), isUnconfirmed)
                 } else {
-                  ExamGridColumnValueWithTooltip(indicator.grade, isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail))
+                  ExamGridColumnValueWithTooltip(indicator.grade, isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), isUnconfirmed)
                 }
               } else if (mark == null) {
                 ExamGridColumnValueMissing("Agreed and actual mark missing")
               } else if (progressionService.isFailed(mr)) {
-                ExamGridColumnValueDecimal(mark, isActual, isFail = true, isUnconfirmed = isUnconfirmed)
+                ExamGridColumnValueDecimal(mark, isActual, isFail = true, isUnconfirmed)
               } else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
-                ExamGridColumnValueOvercatDecimal(mark, isActual, isUnconfirmed = isUnconfirmed)
+                ExamGridColumnValueOvercatDecimal(mark, isActual, isUnconfirmed)
               } else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.exists(_.grade == g))) {
                 val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
-                ExamGridColumnValueWithTooltip(s"${mr.firstDefinedGrade.get} ($mark)", isActual, indicator.description, unconfirmed = isUnconfirmed)
+                ExamGridColumnValueWithTooltip(s"${mr.firstDefinedGrade.get} ($mark)", isActual, indicator.description, isUnconfirmed)
               } else {
-                ExamGridColumnValueDecimal(mark, isActual, isUnconfirmed = isUnconfirmed)
+                ExamGridColumnValueDecimal(mark, isActual, isUnconfirmed)
               }
             }
           }
