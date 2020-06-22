@@ -4,6 +4,7 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.ModuleResult.Pass
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
@@ -179,7 +180,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     normalLoad: BigDecimal,
     rules: Seq[UpstreamRouteRule]
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
-    val validRecords = moduleRegistrations.filterNot(_.deleted)
+    val validRecords = moduleRegistrations
+      .filterNot(_.deleted)
+      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0)// 0 CAT modules don't count towards the overall mark so ignore them
     if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
         Seq((null, validRecords))
     } else {
@@ -195,7 +198,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           // Contains all the core modules
           coreModules.forall(modRegs.contains) &&
           // All the registrations have agreed or actual marks
-          modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
+          modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.contains(mr.module) && markOverrides(mr.module) != null)
       )
       val ruleFilteredSubsets = validSubsets.filter(modRegs => rules.forall(_.passes(modRegs.toSeq)))
       val subsetsToReturn = {
