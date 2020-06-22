@@ -168,8 +168,9 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
           // We know the .get is safe because it's validated
           val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
 
-          // Mark and grade haven't changed and no comment
+          // Mark and grade haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (
+            !studentMarkRecord.outOfSync &&
             !student.comments.hasText &&
             ((!student.mark.hasText && studentMarkRecord.mark.isEmpty) || studentMarkRecord.mark.map(_.toString).contains(student.mark)) &&
             ((!student.grade.hasText && studentMarkRecord.grade.isEmpty) || studentMarkRecord.grade.contains(student.grade))

@@ -107,7 +107,7 @@
     </#if>
 
     <div class="submit-buttons fix-footer">
-      <#if studentsToConfirm?has_content><input type="submit" class="btn btn-primary" value="Confirm" /></#if>
+      <#if studentsToConfirm?has_content && !hasErrors><input type="submit" class="btn btn-primary" value="Confirm" /></#if>
       <a class="btn btn-default dirty-check-ignore" href="${cancelUrl?markup_string}">Cancel</a>
     </div>
   </@f.form>

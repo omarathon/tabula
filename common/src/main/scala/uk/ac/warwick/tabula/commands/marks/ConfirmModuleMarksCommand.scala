@@ -100,12 +100,19 @@ trait ConfirmModuleMarksValidation extends SelfValidating {
 
     // TODO - is validation on grades even needed :superthinking:
     // cannot confirm module marks if any components or modules are missing a grade (marks may be missing but indicator grades should always be present)
-    lazy val studentsWithMissingGrade: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
-      case (module, components) => module.grade.isEmpty || components.values.exists(_.grade.isEmpty)
+    lazy val studentsWithMissingModuleGrade: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
+      case (module, _) => module.grade.isEmpty
     }
 
-    if(studentsWithMissingGrade.nonEmpty)
-      errors.reject( "moduleMarks.confirm.missingGrade", Array(studentsWithMissingGrade.map(_._1.sprCode).mkString(", ")), "")
+    lazy val studentsWithMissingComponentGrades: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
+      case (_, components) => components.values.exists(_.grade.isEmpty)
+    }
+
+    if (studentsWithMissingModuleGrade.nonEmpty)
+      errors.reject( "moduleMarks.confirm.missingGrade", Array(studentsWithMissingModuleGrade.map(_._1.sprCode).mkString(", ")), "")
+
+    if (studentsWithMissingComponentGrades.nonEmpty)
+      errors.reject( "moduleMarks.confirm.missingComponentGrade", Array(studentsWithMissingComponentGrades.map(_._1.sprCode).mkString(", ")), "")
   }
 }
 

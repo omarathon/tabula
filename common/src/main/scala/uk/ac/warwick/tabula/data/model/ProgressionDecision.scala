@@ -45,6 +45,9 @@ class ProgressionDecision extends GeneratedId with ToString {
   @Column(nullable = false)
   var outcome: ProgressionDecisionOutcome = _
 
+  /**
+   * These are *NOT* visible to students
+   */
   @Column(name = "notes")
   private var _notes: String = _
   def notes: Option[String] = _notes.maybeText
@@ -84,7 +87,6 @@ class ProgressionDecision extends GeneratedId with ToString {
     "sequence" -> sequence,
     "academicYear" -> academicYear,
     "outcome" -> outcome,
-    "notes" -> notes,
     "minutes" -> minutes,
     "resitPeriod" -> resitPeriod
   )

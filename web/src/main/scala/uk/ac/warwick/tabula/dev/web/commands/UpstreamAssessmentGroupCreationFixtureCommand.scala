@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.dev.web.commands
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
-import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
@@ -26,7 +26,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
     group.assessmentGroup = assessmentGroup
     group.sequence = sequence
     group.academicYear = AcademicYear.now()
-    group.members = JArrayList(universityIds.asScala.map(id => new UpstreamAssessmentGroupMember(group, id)))
+    group.members = JArrayList(universityIds.asScala.map(id => new UpstreamAssessmentGroupMember(group, id, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)))
 
     assessmentMembershipService.save(group)
     group

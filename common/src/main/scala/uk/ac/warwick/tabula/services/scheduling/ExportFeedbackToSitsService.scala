@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, RecordedAssessmentComponentStudent}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, RecordedAssessmentComponentStudent, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService._
 
@@ -28,9 +28,9 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 
 trait ExportFeedbackToSitsService {
   def countMatchingSitsRecords(feedback: Feedback): Int
-  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent, resit: Boolean): Int
+  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int
   def exportToSits(feedback: Feedback): Int
-  def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int
+  def exportToSits(student: RecordedAssessmentComponentStudent): Int
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow]
 }
 
@@ -45,6 +45,7 @@ class FeedbackParameterGetter(feedback: Feedback) {
       "studentId" -> feedback.studentIdentifier,
       "academicYear" -> feedback.academicYear.toString,
       "moduleCodeMatcher" -> (feedback.module.code.toUpperCase + "%"),
+      "resitSequenceMatcher" -> "%", // We don't hold this for Feedback
 
       // in theory we should look for a record with occurrence and sequence from the same pair,
       // but in practice there won't be any ambiguity since the record is already determined
@@ -61,6 +62,7 @@ class FeedbackParameterGetter(feedback: Feedback) {
       "studentId" -> feedback.studentIdentifier,
       "academicYear" -> feedback.academicYear.toString,
       "moduleCodeMatcher" -> (feedback.module.code.toUpperCase + "%"),
+      "resitSequenceMatcher" -> "%", // We don't hold this for Feedback
       "now" -> DateTime.now.toDate,
 
       // in theory we should look for a record with occurrence and sequence from the same pair,
@@ -82,6 +84,7 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "studentId" -> student.universityId,
     "academicYear" -> student.academicYear.toString,
     "moduleCodeMatcher" -> student.moduleCode,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
     "occurrences" -> Seq(student.occurrence).asJava,
     "sequences" -> Seq(student.sequence).asJava
   )
@@ -91,6 +94,7 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "studentId" -> student.universityId,
     "academicYear" -> student.academicYear.toString,
     "moduleCodeMatcher" -> student.moduleCode,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
     "occurrences" -> Seq(student.occurrence).asJava,
     "sequences" -> Seq(student.sequence).asJava,
 
@@ -98,14 +102,6 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "now" -> DateTime.now.toDate,
     "actualMark" -> JInteger(student.latestMark),
     "actualGrade" -> student.latestGrade.orNull
-  )
-
-  def getResetModuleResultParams(process: String): JMap[String, Any] = JHashMap(
-    "studentId" -> student.universityId,
-    "academicYear" -> student.academicYear.toString,
-    "moduleCodeMatcher" -> student.moduleCode,
-    "occurrences" -> Seq(student.occurrence).asJava,
-    "process" -> process,
   )
 }
 
@@ -154,9 +150,13 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     case _ => countMatchingSasRecords(feedback: Feedback)
   }
 
-  override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent, resit: Boolean): Int =
-    if (resit) countMatchingSraRecords(student)
-    else countMatchingSasRecords(student)
+  override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = student.assessmentType match {
+    case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+      countMatchingSasRecords(student)
+
+    case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+      countMatchingSraRecords(student)
+  }
 
   def exportToSits(feedback: Feedback): Int = {
     val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
@@ -184,11 +184,15 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     numRowsChanged
   }
 
-  override def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = {
+  override def exportToSits(student: RecordedAssessmentComponentStudent): Int = {
     val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
-    val updateQuery =
-      if (resit) new ExportResitFeedbackToSitsQuery(sitsDataSource)
-      else new ExportFeedbackToSitsQuery(sitsDataSource)
+    val updateQuery = student.assessmentType match {
+      case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+        new ExportFeedbackToSitsQuery(sitsDataSource)
+
+      case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+        new ExportResitFeedbackToSitsQuery(sitsDataSource)
+    }
 
     updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
@@ -226,8 +230,9 @@ object ExportFeedbackToSitsService {
     and psl_code = 'Y'
     """
 
-  def whereClause = s"$rootWhereClause and mab_seq in (:sequences)" // mab_seq = sequence code determining an assessment component
-  def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences)" // sra_seq = sequence code determining an assessment component
+  // :resitSequenceMatcher = '%' is stupid but necessary as the number of bind params needs to match
+  def whereClause = s"$rootWhereClause and mab_seq in (:sequences) and '%' = :resitSequenceMatcher" // mab_seq = sequence code determining an assessment component
+  def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences) and sra_rseq like :resitSequenceMatcher" // sra_seq = sequence code determining an assessment component
 
   final def CountMatchingBlankSasRecordsSql =
     f"""
@@ -297,6 +302,7 @@ object ExportFeedbackToSitsService {
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("now", Types.DATE))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
@@ -321,6 +327,7 @@ object ExportFeedbackToSitsService {
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
   }
@@ -362,8 +369,8 @@ class ExportFeedbackToSitsServiceImpl
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
   def countMatchingSitsRecords(feedback: Feedback) = 0
-  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = 0
+  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = 0
   def exportToSits(feedback: Feedback) = 0
-  def exportToSits(student: RecordedAssessmentComponentStudent, resit: Boolean): Int = 0
+  def exportToSits(student: RecordedAssessmentComponentStudent): Int = 0
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
 }

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
-import scala.util.Using
+import scala.util.{Try, Using}
 
 object RecordAssessmentComponentMarksCommand {
   type UniversityID = String
@@ -35,6 +35,7 @@ object RecordAssessmentComponentMarksCommand {
     }
 
     var universityID: UniversityID = _
+    var resitSequence: String = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var grade: String = _
     var comments: String = _
@@ -80,8 +81,12 @@ abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentCompo
       .map { item =>
         val upstreamAssessmentGroupMember =
           upstreamAssessmentGroup.members.asScala
-            .find(_.universityId == item.universityID)
-            .get // We validate that this exists
+            .find { m =>
+              m.universityId == item.universityID && (
+                (item.resitSequence.maybeText.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+                (m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(item.resitSequence))
+              )
+            }.get // We validate that this exists
 
         val recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent =
           assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
@@ -110,9 +115,17 @@ trait RecordAssessmentComponentMarksState {
 }
 
 trait RecordAssessmentComponentMarksRequest {
-  var students: JMap[UniversityID, StudentMarksItem] =
-    LazyMaps.create { id: String => new StudentMarksItem(id) }
-      .asJava
+  var students: JMap[String, StudentMarksItem] =
+    LazyMaps.create { id: String =>
+      id.split("_", 2) match {
+        case Array(universityID, resitSequence) =>
+          val item = new StudentMarksItem(universityID)
+          item.resitSequence = resitSequence
+          item
+
+        case Array(universityID) => new StudentMarksItem(universityID)
+      }
+    }.asJava
 
   // For uploading a spreadsheet
   var file: UploadedFile = new UploadedFile
@@ -159,6 +172,8 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                     columnMap(col) match {
                       case "University ID" | "ID" =>
                         currentItem.universityID = formattedValue
+                      case "Resit sequence" =>
+                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%s%02d".format(_)).getOrElse(v)).getOrElse("")
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
@@ -181,7 +196,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                 items.clear()
               } else {
                 items.asScala.filter(_.universityID.hasText).foreach { item =>
-                  students.put(item.universityID, item)
+                  students.put(s"${item.universityID}_${item.resitSequence.maybeText.getOrElse("")}", item)
                 }
               }
             }
@@ -209,10 +224,11 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
     ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService).foreach { student =>
       if ((student.mark.nonEmpty || student.grade.nonEmpty) && !students.asScala.keysIterator.contains(student.universityId)) {
         val s = new StudentMarksItem(student.universityId)
+        s.resitSequence = student.resitSequence.getOrElse("")
         student.mark.foreach(m => s.mark = m.toString)
         student.grade.foreach(s.grade = _)
 
-        students.put(student.universityId, s)
+        students.put(s"${student.universityId}_${student.resitSequence.getOrElse("")}", s)
       }
     }
   }
@@ -225,23 +241,32 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = assessmentComponent.module.adminDepartment.assignmentGradeValidation
-    students.asScala.foreach { case (universityID, item) =>
-      errors.pushNestedPath(s"students[$universityID]")
+    students.asScala.foreach { case (id, item) =>
+      errors.pushNestedPath(s"students[$id]")
 
-      val upstreamAssessmentGroupMember = upstreamAssessmentGroup.members.asScala.find(_.universityId == universityID)
+      val upstreamAssessmentGroupMember = upstreamAssessmentGroup.members.asScala.find { m =>
+        m.universityId == item.universityID && (
+          (item.resitSequence.maybeText.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+          (m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(item.resitSequence))
+        )
+      }
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (upstreamAssessmentGroupMember.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(universityID), "")
+        errors.reject("uniNumber.unacceptable", Array(item.universityID), "")
       }
 
       if (item.mark.hasText) {
+        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
+        }
+
         try {
           val asInt = item.mark.toInt
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
           } else if (doGradeValidation) {
-            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.flatMap(_.resitExpected).getOrElse(false))
+            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.exists(_.isReassessment))
             if (item.grade.hasText) {
               if (!validGrades.exists(_.grade == item.grade)) {
                 errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -260,7 +285,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
             errors.rejectValue("mark", "actualMark.format")
         }
       } else if (doGradeValidation&& item.grade.hasText) {
-        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.flatMap(_.resitExpected).getOrElse(false))
+        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.exists(_.isReassessment))
         if (!validGrades.exists(_.grade == item.grade)) {
           errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
         }

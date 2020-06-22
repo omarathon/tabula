@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -23,7 +24,7 @@ import scala.jdk.CollectionConverters._
   */
 @Entity
 @Proxy
-class UpstreamAssessmentGroup extends GeneratedId {
+class UpstreamAssessmentGroup extends GeneratedId with Serializable {
 
   // Long-form module code with hyphen and CATS value
   var moduleCode: String = _
@@ -58,9 +59,11 @@ class UpstreamAssessmentGroup extends GeneratedId {
 
   def membersIncludes(universityId: String): Boolean = members.asScala.map(_.universityId).contains(universityId)
 
-  def replaceMembers(universityIds: Seq[String]): Unit = {
-    members.clear()
-    members.addAll(universityIds.distinct.map(universityId => new UpstreamAssessmentGroupMember(this, universityId)).asJava)
+  def replaceMembers(universityIds: Seq[(String, Option[String])], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Unit = {
+    members.removeAll(members.asScala.filter(_.assessmentType == assessmentType).asJava)
+    members.addAll(universityIds.distinct.map { case (universityId, resitSequence) =>
+      new UpstreamAssessmentGroupMember(this, universityId, assessmentType, resitSequence)
+    }.asJava)
   }
 
   def isEquivalentTo(other: UpstreamAssessmentGroup): Boolean =
@@ -82,10 +85,13 @@ class UpstreamAssessmentGroup extends GeneratedId {
 class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAssessmentGroupMember]
   with UpstreamAssessmentGroupMemberProperties {
 
-  def this(upstreamAssessmentGroup: UpstreamAssessmentGroup, universityId: String) = {
+  def this(upstreamAssessmentGroup: UpstreamAssessmentGroup, universityId: String, assessmentType: UpstreamAssessmentGroupMemberAssessmentType, resitSequence: Option[String] = None) = {
     this()
+    require(assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment == resitSequence.isEmpty, s"Resit sequence must be empty for original assessments and non-empty for reassessment but was $resitSequence for $assessmentType")
     this.upstreamAssessmentGroup = upstreamAssessmentGroup
     this.universityId = universityId
+    this.assessmentType = assessmentType
+    this.resitSequence = resitSequence
   }
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -104,39 +110,28 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
   // FIXME - just inherits from the components deadline - leaving this here in case we need to do something fancy to support resits
   def deadline: Option[LocalDate] = upstreamAssessmentGroup.deadline
 
-  def isAgreedMark: Boolean = firstAgreedMark.isDefined
+  def isReassessment: Boolean = assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment
 
-  def isResitMark: Boolean = firstResitMark.isDefined
+  def isAgreedMark: Boolean = agreedMark.isDefined
 
-  def firstDefinedMark: Option[Int] = firstResitMark.orElse(firstOriginalMark)
+  def firstDefinedMark: Option[Int] = agreedMark.orElse(actualMark)
 
-  // doesn't include resit marks
-  def firstOriginalMark: Option[Int] = agreedMark.orElse(actualMark)
+  def isAgreedGrade: Boolean = agreedGrade.isDefined
 
-  // only includes resit marks
-  def firstResitMark: Option[Int] = resitAgreedMark.orElse(resitActualMark)
+  def firstDefinedGrade: Option[String] = agreedGrade.orElse(actualGrade)
 
-  // only includes board agreed marks
-  def firstAgreedMark: Option[Int] = resitAgreedMark.orElse(agreedMark)
+  def firstOriginalMark: Option[Int] =
+    upstreamAssessmentGroup.members.asScala
+      .find(uagm => uagm.universityId == universityId && !uagm.isReassessment)
+      .flatMap(_.firstDefinedMark)
 
-  def isAgreedGrade: Boolean = firstAgreedGrade.isDefined
-
-  def isResitGrade: Boolean = firstResitGrade.isDefined
-
-  def firstDefinedGrade: Option[String] = firstResitGrade.orElse(firstOriginalGrade)
-
-  // doesn't include resit grades
-  def firstOriginalGrade: Option[String] = agreedGrade.orElse(actualGrade)
-
-  // only includes resit grades
-  def firstResitGrade: Option[String] = resitAgreedGrade.orElse(resitActualGrade)
-
-  // only includes board agreed marks
-  def firstAgreedGrade: Option[String] = resitAgreedGrade.orElse(agreedGrade)
+  def firstOriginalGrade: Option[String] =
+    upstreamAssessmentGroup.members.asScala
+      .find(uagm => uagm.universityId == universityId && !uagm.isReassessment)
+      .flatMap(_.firstDefinedGrade)
 }
 
 trait UpstreamAssessmentGroupMemberProperties {
-
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var position: Option[Int] = None
 
@@ -152,29 +147,33 @@ trait UpstreamAssessmentGroupMemberProperties {
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var agreedGrade: Option[String] = None
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-  var resitActualMark: Option[Int] = None
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroupMemberAssessmentTypeUserType")
+  @Column(name = "assessment_type", nullable = false)
+  var assessmentType: UpstreamAssessmentGroupMemberAssessmentType = _
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
-  var resitActualGrade: Option[String] = None
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-  var resitAgreedMark: Option[Int] = None
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
-  var resitAgreedGrade: Option[String] = None
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBooleanUserType")
-  var resitExpected:  Option[Boolean] = None
-
+  // These two are only set for assessmentType == Reassessment
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var currentResitAttempt: Option[Int] = None
 
-
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  @Column(name = "resit_sequence")
+  var resitSequence: Option[String] = None
 }
 
 /** currentMembers are all members excluding PWD)  **/
 case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, currentMembers: Seq[UpstreamAssessmentGroupMember]) {
   lazy val allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala.toSeq
-  lazy val resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.resitExpected.exists(identity))
+  lazy val resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment)
 }
+
+sealed abstract class UpstreamAssessmentGroupMemberAssessmentType(val sitsProcess: String) extends EnumEntry
+object UpstreamAssessmentGroupMemberAssessmentType extends Enum[UpstreamAssessmentGroupMemberAssessmentType] {
+  case object OriginalAssessment extends UpstreamAssessmentGroupMemberAssessmentType("SAS")
+
+  // This covers both a further first sit and a resit, see currentResitAttempt
+  case object Reassessment extends UpstreamAssessmentGroupMemberAssessmentType("RAS")
+
+  override def values: IndexedSeq[UpstreamAssessmentGroupMemberAssessmentType] = findValues
+}
+
+class UpstreamAssessmentGroupMemberAssessmentTypeUserType extends EnumUserType(UpstreamAssessmentGroupMemberAssessmentType)

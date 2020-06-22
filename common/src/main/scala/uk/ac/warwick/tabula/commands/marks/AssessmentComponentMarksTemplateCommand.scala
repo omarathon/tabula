@@ -61,18 +61,21 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
     // add header row
     val header = sheet.createRow(0)
     header.createCell(0).setCellValue("University ID")
-    header.createCell(1).setCellValue("Mark")
-    header.createCell(2).setCellValue("Grade")
-    header.createCell(3).setCellValue("Comments")
+    header.createCell(1).setCellValue("Resit sequence")
+    header.createCell(2).setCellValue("Mark")
+    header.createCell(3).setCellValue("Grade")
+    header.createCell(4).setCellValue("Comments")
 
     // populate the mark sheet with ids and existing data
     students.zipWithIndex.foreach { case (student, i) =>
       val row = sheet.createRow(i + 1)
       row.createCell(0).setCellValue(student.universityId)
+      val resitSequenceCell = row.createCell(1)
+      student.resitSequence.foreach(resitSequenceCell.setCellValue)
 
-      val markCell = createUnprotectedCell(row, 1)
-      val gradeCell = createUnprotectedCell(row, 2)
-      createUnprotectedCell(row, 3)
+      val markCell = createUnprotectedCell(row, 2)
+      val gradeCell = createUnprotectedCell(row, 3)
+      createUnprotectedCell(row, 4)
 
       student.mark.foreach(markCell.setCellValue(_))
       student.grade.foreach(gradeCell.setCellValue)
@@ -86,7 +89,7 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
       fontFmt.setFontStyle(true, false)
       fontFmt.setFontColorIndex(IndexedColors.DARK_RED.index)
 
-      val marksColumn = Array(new CellRangeAddress(1, sheet.getLastRowNum, 1, 1))
+      val marksColumn = Array(new CellRangeAddress(1, sheet.getLastRowNum, 2, 2))
       sheetCF.addConditionalFormatting(marksColumn, invalidMarkRule)
     }
 

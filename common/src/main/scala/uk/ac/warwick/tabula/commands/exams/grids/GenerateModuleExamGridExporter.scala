@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.awt.Color
 
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.{SXSSFRow, SXSSFWorkbook}
-import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ProgressionService
 
 object GenerateModuleExamGridExporter extends TaskBenchmarking {
-
-  import ModuleExamGridExportStyles._
 
   private def createCell(row: SXSSFRow, colIndex: Int, colValue: String, cellStyle: Option[CellStyle]): Unit = {
     val cell = row.createCell(colIndex)
@@ -25,10 +23,10 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
     }
   }
 
-  private def getCellStyle(isActual: Boolean, styleMap: Map[Style, CellStyle], mark: BigDecimal, degreeType: DegreeType): Option[CellStyle] = {
+  private def getCellStyle(isActual: Boolean, styleMap: CellStyleMap, mark: BigDecimal, degreeType: DegreeType, isUnconfirmed: Boolean): Option[CellStyle] = {
     isActual match {
-      case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap(FailAndActualMark)) else Option(styleMap(ActualMark))
-      case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap(Fail))
+      case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap.getStyle(FailAndActualMark, isUnconfirmed)) else Option(styleMap.getStyle(ActualMark, isUnconfirmed))
+      case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap.getStyle(Fail, isUnconfirmed))
       case _ => None
     }
   }
@@ -43,7 +41,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
     val workbook = new SXSSFWorkbook(null, -1)
 
     // Styles
-    val cellStyleMap = getCellStyleMap(workbook)
+    val cellStyleMap = new CellStyleMap(workbook)
     val entities = examModuleGridResult.gridStudentDetailRecords
     val aGroupAndSequenceAndOccurrences = examModuleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName.map { case (aGroupAndSeqAndOcc, _) => aGroupAndSeqAndOcc }
     val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
@@ -54,7 +52,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
     val headerRow = sheet.createRow(sheet.getLastRowNum + 1)
     val entityRows: Map[ModuleGridDetailRecord, SXSSFRow] = entities.map(entity => entity -> sheet.createRow(sheet.getLastRowNum + 1)).toMap
-    val headerStyle = Option(cellStyleMap(Header))
+    val headerStyle = Option(cellStyleMap.getStyle(ExamGridExportStyles.Header))
 
     var currentColumnIndex = 2 // Move to the right of the key
 
@@ -83,9 +81,9 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
       //detail rows
       entities.foreach { entity =>
         val (mark, markStyle) = if (entity.moduleRegistration.agreedMark.isDefined) {
-          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType))
+          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
         } else if (entity.moduleRegistration.actualMark.isDefined) {
-          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType))
+          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
         } else {
           ("X", None)
         }
@@ -93,7 +91,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         val (grade, gradeStyle) = if (entity.moduleRegistration.agreedGrade.isDefined) {
           (entity.moduleRegistration.agreedGrade.get, None)
         } else if (entity.moduleRegistration.actualGrade.isDefined) {
-          (entity.moduleRegistration.actualGrade.get, Option(cellStyleMap(ActualMark)))
+          (entity.moduleRegistration.actualGrade.get, Option(cellStyleMap.getStyle(ActualMark)))
         } else {
           ("X", None)
         }
@@ -111,16 +109,17 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         cSeqColumnIndex = 0
         aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
           cSeqColumnIndex = cSeqColumnIndex + 1
+          val isUnconfirmed = entity.componentInfo.get(aGroupAndSequenceAndOcc).flatMap(_.markState).contains(UnconfirmedActual)
           val (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitMark.isDefined) {
               if (cInfo.mark.isDefined) {
-                //will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
-                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                // will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
+                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
               } else {
-                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
               }
             } else if (cInfo.mark.isDefined) {
-              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
             } else {
               ("X", None)
             }
@@ -130,12 +129,12 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
           val (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitGrade.isDefined) {
               if (cInfo.grade.isDefined) {
-                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
               } else {
-                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
               }
             } else if (cInfo.grade.isDefined) {
-              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
+              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
             } else {
               ("X", None)
             }
@@ -156,89 +155,11 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
 }
 
-object ModuleExamGridExportStyles {
-
-  sealed trait Style
-
-  case object Header extends Style
-
-  case object Fail extends Style
-
-  case object ActualMark extends Style
-
-  case object FailAndActualMark extends Style
-
-  case object BoldText extends Style
-
-
-  def getCellStyleMap(workbook: Workbook): Map[Style, CellStyle] = {
-    val headerStyle = {
-      val cs = workbook.createCellStyle()
-      val boldFont = workbook.createFont()
-      boldFont.setFontHeightInPoints(10)
-      boldFont.setBold(true)
-      cs.setFont(boldFont)
-      cs.setVerticalAlignment(VerticalAlignment.CENTER)
-      cs
-    }
-
-
-    val failStyle = {
-      val cs = workbook.createCellStyle()
-      val redFont = workbook.createFont().asInstanceOf[XSSFFont]
-      redFont.setFontHeightInPoints(10)
-      redFont.setColor(new XSSFColor(new Color(175, 39, 35)))
-      redFont.setUnderline(FontUnderline.DOUBLE)
-      cs.setFont(redFont)
-      cs
-    }
-
-    val actualMarkStyle = {
-      val cs = workbook.createCellStyle()
-      val blueFont = workbook.createFont().asInstanceOf[XSSFFont]
-      blueFont.setFontHeightInPoints(10)
-      blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
-      blueFont.setItalic(true)
-      cs.setFont(blueFont)
-      cs
-    }
-
-    val failAndActualMarkStyle = {
-      val cs = workbook.createCellStyle()
-      val redFont = workbook.createFont().asInstanceOf[XSSFFont]
-      redFont.setFontHeightInPoints(10)
-      redFont.setColor(new XSSFColor(new Color(175, 39, 35)))
-      redFont.setUnderline(FontUnderline.DOUBLE)
-      redFont.setItalic(true)
-      cs.setFont(redFont)
-      cs
-    }
-
-    val boldText = {
-      val cs = workbook.createCellStyle()
-      val boldFont = workbook.createFont()
-      boldFont.setFontHeightInPoints(10)
-      boldFont.setBold(true)
-      cs.setFont(boldFont)
-      cs
-    }
-
-
-    Map(
-      Header -> headerStyle,
-      Fail -> failStyle,
-      ActualMark -> actualMarkStyle,
-      FailAndActualMark -> failAndActualMarkStyle,
-      BoldText -> boldText
-    )
-  }
-}
-
 object ModuleExamGridSummaryAndKey {
 
   def summaryAndKey(
     sheet: Sheet,
-    cellStyleMap: Map[ModuleExamGridExportStyles.Style, CellStyle],
+    cellStyleMap: CellStyleMap,
     department: Department,
     academicYear: AcademicYear,
     module: Module,
@@ -248,7 +169,7 @@ object ModuleExamGridSummaryAndKey {
       val row = sheet.createRow(rowIndex)
       val keyCell = row.createCell(0)
       keyCell.setCellValue(key)
-      keyCell.setCellStyle(cellStyleMap(ModuleExamGridExportStyles.Header))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Header))
       val valueCell = row.createCell(1)
       valueCell.setCellValue(value)
       row
@@ -264,34 +185,42 @@ object ModuleExamGridSummaryAndKey {
       val row = sheet.createRow(5)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
-      keyCell.setCellStyle(cellStyleMap(ModuleExamGridExportStyles.Fail))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, unconfirmed = true))
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Failed module or component")
+      valueCell.setCellValue("\tUnconfirmed marks (subject to change)")
     }
     {
       val row = sheet.createRow(6)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
-      keyCell.setCellStyle(cellStyleMap(ModuleExamGridExportStyles.ActualMark))
+      keyCell.setCellStyle(cellStyleMap.getStyle(Fail))
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Agreed mark missing, using actual")
+      valueCell.setCellValue("Failed module or component")
     }
     {
       val row = sheet.createRow(7)
       val keyCell = row.createCell(0)
-      keyCell.setCellValue("[# (#)]")
+      keyCell.setCellValue("#")
+      keyCell.setCellStyle(cellStyleMap.getStyle(ActualMark))
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Resit mark (original mark)")
+      valueCell.setCellValue("Agreed mark missing, using actual")
     }
     {
       val row = sheet.createRow(8)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("[# (#)]")
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Resit grade (original grade)")
+      valueCell.setCellValue("Resit mark (original mark)")
     }
     {
       val row = sheet.createRow(9)
+      val keyCell = row.createCell(0)
+      keyCell.setCellValue("[# (#)]")
+      val valueCell = row.createCell(1)
+      valueCell.setCellValue("Resit grade (original grade)")
+    }
+    {
+      val row = sheet.createRow(10)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("X")
       val valueCell = row.createCell(1)

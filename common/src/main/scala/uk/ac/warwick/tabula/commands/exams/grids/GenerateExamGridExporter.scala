@@ -5,10 +5,11 @@ import java.awt.Color
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont}
+import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFFont, XSSFWorkbook}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles.{CellStyleMap, Style}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.StatusAdapter
 import uk.ac.warwick.tabula.exams.grids.columns._
@@ -51,7 +52,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
     val workbook = new SXSSFWorkbook(null, -1)
 
     // Styles
-    val cellStyleMap = getCellStyleMap(workbook)
+    val cellStyleMap = new CellStyleMap(workbook)
 
     val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
@@ -91,7 +92,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
         // Header row
         val headerCell = headerRow.createCell(currentColumnIndex)
         headerCell.setCellValue(leftColumn.title)
-        headerCell.setCellStyle(cellStyleMap(Header))
+        headerCell.setCellStyle(cellStyleMap.getStyle(Header))
         if (!leftColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
           // rowspan = 2
           mergedRegions += new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex)
@@ -148,7 +149,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
         // Year row
         val yearCell = yearRow.createCell(currentColumnIndex)
         yearCell.setCellValue(s"Year $year")
-        yearCell.setCellStyle(cellStyleMap(Header))
+        yearCell.setCellStyle(cellStyleMap.getStyle(Header))
 
         val startColumn = yearCell.getColumnIndex
         val endColumn = yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)
@@ -167,7 +168,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
               categoryCell.setCellValue(hasCategory.category)
               sheet.autoSizeColumn(currentColumnIndex)
               categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-              categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+              categoryCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
 
               // Guard against trying to create a merged region with only one cell in it
               val startColumn = categoryCell.getColumnIndex
@@ -186,9 +187,9 @@ object GenerateExamGridExporter extends TaskBenchmarking {
           headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 
           if (perYearColumn.boldTitle)
-            headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+            headerCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
           else
-            headerCell.setCellStyle(cellStyleMap(Rotated))
+            headerCell.setCellStyle(cellStyleMap.getStyle(Rotated))
 
           if (!perYearColumn.isInstanceOf[HasExamGridColumnCategory]) {
             // rowspan = 2
@@ -249,7 +250,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
             sheet.autoSizeColumn(currentColumnIndex)
 
             categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-            categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+            categoryCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
 
             // Guard against trying to create a merged region with only one cell in it
             val startColumn = categoryCell.getColumnIndex
@@ -264,9 +265,9 @@ object GenerateExamGridExporter extends TaskBenchmarking {
         headerCell.setCellValue(rightColumn.title)
 
         if (rightColumn.boldTitle)
-          headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+          headerCell.setCellStyle(cellStyleMap.getStyle(HeaderRotated))
         else
-          headerCell.setCellStyle(cellStyleMap(Rotated))
+          headerCell.setCellStyle(cellStyleMap.getStyle(Rotated))
 
         if (!rightColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
           // rowspan = 2
@@ -281,7 +282,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
         }
         // Entity rows
         entities.foreach(entity => {
-          if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
+          if (chosenYearColumnValues.get(rightColumn).exists(_.contains(entity))) {
             val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
             chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
             if (showComponentMarks) {
@@ -319,6 +320,8 @@ object ExamGridExportStyles {
 
   sealed trait Style
 
+  case object Base extends Style
+
   case object Header extends Style
 
   case object HeaderRotated extends Style
@@ -339,11 +342,16 @@ object ExamGridExportStyles {
 
   case object OvercatAndActualMark extends Style
 
+  case object UnconfirmedStyle extends Style
+
+  case object FailAndUnconfirmedStyle extends Style
+
+  case object OvercatAndUnconfirmedStyle extends Style
+
   case object BoldText extends Style
 
-
-  def getCellStyleMap(workbook: Workbook): Map[Style, CellStyle] = {
-    val headerStyle = {
+  class CellStyleMap(val workbook: Workbook) {
+    private val headerStyle = {
       val cs = workbook.createCellStyle()
       val boldFont = workbook.createFont()
       boldFont.setFontHeightInPoints(10)
@@ -353,7 +361,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val headerRotatedStyle = {
+    private val headerRotatedStyle = {
       val cs = workbook.createCellStyle()
       val boldFont = workbook.createFont()
       boldFont.setFontHeightInPoints(10)
@@ -364,14 +372,14 @@ object ExamGridExportStyles {
       cs
     }
 
-    val rotatedStyle = {
+    private val rotatedStyle = {
       val cs = workbook.createCellStyle()
       cs.setRotation(90)
       cs.setAlignment(HorizontalAlignment.CENTER)
       cs
     }
 
-    val failStyle = {
+    private val failStyle = {
       val cs = workbook.createCellStyle()
       val redFont = workbook.createFont().asInstanceOf[XSSFFont]
       redFont.setFontHeightInPoints(10)
@@ -381,7 +389,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val overcatStyle = {
+    private val overcatStyle = {
       val cs = workbook.createCellStyle()
       val greenFont = workbook.createFont().asInstanceOf[XSSFFont]
       greenFont.setFontHeightInPoints(10)
@@ -391,7 +399,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val overriddenStyle = {
+    private val overriddenStyle = {
       val cs = workbook.createCellStyle()
       val blueFont = workbook.createFont().asInstanceOf[XSSFFont]
       blueFont.setFontHeightInPoints(10)
@@ -400,7 +408,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val actualMarkStyle = {
+    private val actualMarkStyle = {
       val cs = workbook.createCellStyle()
       val blueFont = workbook.createFont().asInstanceOf[XSSFFont]
       blueFont.setFontHeightInPoints(10)
@@ -411,7 +419,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val failAndActualMarkStyle = {
+    private val failAndActualMarkStyle = {
       val cs = workbook.createCellStyle()
       val redFont = workbook.createFont().asInstanceOf[XSSFFont]
       redFont.setFontHeightInPoints(10)
@@ -422,7 +430,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val overcatAndActualMarkStyle = {
+    private val overcatAndActualMarkStyle = {
       val cs = workbook.createCellStyle()
       val greenFont = workbook.createFont().asInstanceOf[XSSFFont]
       greenFont.setFontHeightInPoints(10)
@@ -433,7 +441,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val boldText = {
+    private val boldText = {
       val cs = workbook.createCellStyle()
       val boldFont = workbook.createFont()
       boldFont.setFontHeightInPoints(10)
@@ -442,7 +450,7 @@ object ExamGridExportStyles {
       cs
     }
 
-    val wrappedText = {
+    private val wrappedText = {
       val cs = workbook.createCellStyle()
       val font = workbook.createFont().asInstanceOf[XSSFFont]
       font.setFontHeightInPoints(10)
@@ -453,8 +461,16 @@ object ExamGridExportStyles {
       cs
     }
 
+    private def unconfirmedStyle(base: CellStyle) = {
+      val cs = workbook.createCellStyle().asInstanceOf[XSSFCellStyle]
+      cs.cloneStyleFrom(base)
+      cs.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+      cs.setFillForegroundColor(new XSSFColor(new Color(252, 219, 205)))
+      cs
+    }
 
-    Map(
+    private val styles: Map[Style, CellStyle] = Map(
+      Base -> workbook.createCellStyle(),
       Header -> headerStyle,
       HeaderRotated -> headerRotatedStyle,
       Rotated -> rotatedStyle,
@@ -467,6 +483,17 @@ object ExamGridExportStyles {
       BoldText -> boldText,
       WrappedText -> wrappedText
     )
+
+    private val cache = mutable.Map[(Style, Boolean), CellStyle]()
+
+    def getStyle(style: Style, unconfirmed: Boolean = false): CellStyle = cache.get((style, unconfirmed)) match {
+      case Some(option) => option
+      case _ =>
+        val base = styles(style)
+        val result = if(unconfirmed) unconfirmedStyle(base) else base
+        cache.put((style, unconfirmed), result)
+        result
+    }
   }
 }
 
@@ -474,7 +501,7 @@ object ExamGridSummaryAndKey {
 
   def summaryAndKey(
     sheet: Sheet,
-    cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle],
+    cellStyleMap: CellStyleMap,
     department: Department,
     academicYear: AcademicYear,
     courses: Seq[Course],
@@ -488,7 +515,7 @@ object ExamGridSummaryAndKey {
       val row = sheet.createRow(rowIndex)
       val keyCell = row.createCell(0)
       keyCell.setCellValue(key)
-      keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Header))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Header))
       val valueCell = row.createCell(1)
       valueCell.setCellValue(value)
       row
@@ -524,52 +551,60 @@ object ExamGridSummaryAndKey {
       val row = sheet.createRow(9)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
-      keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, unconfirmed = true))
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Failed module or component")
+      valueCell.setCellValue("\tUnconfirmed marks (subject to change)")
     }
     {
       val row = sheet.createRow(10)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
-      keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Overcat))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Fail))
       val valueCell = row.createCell(1)
-      valueCell.setCellValue("Used in overcatting calculation")
+      valueCell.setCellValue("Failed module or component")
     }
     {
       val row = sheet.createRow(11)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
-      keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Overcat))
+      val valueCell = row.createCell(1)
+      valueCell.setCellValue("Used in overcatting calculation")
+    }
+    {
+      val row = sheet.createRow(12)
+      val keyCell = row.createCell(0)
+      keyCell.setCellValue("#")
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark))
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Agreed mark missing, using actual")
     }
     {
-      val row = sheet.createRow(12)
+      val row = sheet.createRow(13)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("[# (#)]")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Resit mark (original mark)")
     }
     {
-      val row = sheet.createRow(13)
+      val row = sheet.createRow(14)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("X")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Agreed mark and actual mark missing")
     }
     {
-      val row = sheet.createRow(14)
+      val row = sheet.createRow(15)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Blank indicates module not taken by student")
     }
     {
-      val row = sheet.createRow(15)
+      val row = sheet.createRow(16)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("AB")
-      keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.BoldText))
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.BoldText))
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Bold module name indicates a duplicate table entry")
     }

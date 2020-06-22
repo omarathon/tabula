@@ -1,6 +1,7 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
+<#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
   <h1>Record marks</h1>
@@ -44,96 +45,42 @@
 
                 <tr>
                   <td data-sortby="u${student.universityId}">
+                    <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].resitSequence" />
                     <@pl.profile_link member.universityId />
                     ${student.universityId}
-                    <#if !student.currentMember><span class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span></#if>
+                    <@components.componentMarkStudentStatus student />
                   </td>
                   <td>${member.firstName}</td>
                   <td>${member.lastName}</td>
                   <td data-sortby="${student.mark!-1}">
                     ${student.mark!'-'}
-                    <#if student.needsWritingToSits>
-                      <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
-                        <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
-                        <span class="sr-only">Waiting to be written to SITS</span>
-                      </span>
-                    <#elseif student.outOfSync>
-                      <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
-                        <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
-                        <span class="sr-only">Mark is out of sync with current mark in SITS</span>
-                      </span>
-                    <#elseif student.agreed>
-                      <span class="tabula-tooltip" data-title="Agreed mark published to student">
-                        <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
-                        <span class="sr-only">Agreed mark published to student</span>
-                      </span>
-                    </#if>
-
-                    <#if student.history?has_content>
-                      <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.universityId}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
-
-                      <@modal.modal id="mark-history-modal-${student.universityId}">
-                        <@modal.wrapper cssClass="modal-lg">
-                          <@modal.header>
-                            <h3 class="modal-title">Mark history for ${student.universityId}</h3>
-                          </@modal.header>
-                          <@modal.body>
-                            <table class="table table-condensed table-striped">
-                              <thead>
-                                <tr>
-                                  <th class="col-sm-3">Date</th>
-                                  <th class="col-sm-3">User</th>
-                                  <th class="col-sm-1">Mark</th>
-                                  <th class="col-sm-1">Grade</th>
-                                  <th class="col-sm-4">Comments</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <#list student.history as history>
-                                  <tr>
-                                    <td>
-                                      <@fmt.date date=history.updatedDate />
-                                    </td>
-                                    <td>${history.updatedBy.fullName!(history.updatedBy.userId)}</td>
-                                    <td>${history.mark!'-'}</td>
-                                    <td>${history.grade!'-'}</td>
-                                    <td>${history.comments!}</td>
-                                  </tr>
-                                </#list>
-                              </tbody>
-                            </table>
-                          </@modal.body>
-                          <@modal.footer>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </@modal.footer>
-                        </@modal.wrapper>
-                      </@modal.modal>
-                    </#if>
+                    <@components.componentMarkStatusIcon student />
+                    <@components.componentMarkHistory student assessmentComponent member />
                   </td>
                   <td data-sortby="g${student.grade!'-'}">
                     ${student.grade!'-'}
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].mark">
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].mark">
                       <div class="input-group">
-                        <@f.input path="students[${student.universityId}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].mark" cssClass="form-control mark-box" autocomplete="off" type="number" min="0" max="100" />
                         <div class="input-group-addon">%</div>
                       </div>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].grade">
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
-                        <@f.select path="students[${student.universityId}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
+                        <@f.select path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
-                        <@f.input path="students[${student.universityId}].grade" cssClass="form-control grade-box" />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control grade-box" />
                       </#if>
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
-                    <@bs3form.labelled_form_group path="students[${student.universityId}].comments">
-                      <@f.input path="students[${student.universityId}].comments" cssClass="form-control" />
+                    <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].comments">
+                      <@f.input path="students[${student.universityId}_${student.resitSequence!}].comments" cssClass="form-control" />
                     </@bs3form.labelled_form_group>
                   </td>
                 </tr>

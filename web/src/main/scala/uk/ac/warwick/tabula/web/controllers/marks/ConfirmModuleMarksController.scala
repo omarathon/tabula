@@ -50,8 +50,10 @@ class ConfirmModuleMarksController extends BaseModuleMarksController
 
   private val formView: String = "marks/admin/modules/confirm"
 
+  // We run validation when showing the form so we can avoid people clicking the button
   @RequestMapping(params = Array("!confirm"))
-  def preview(): String = formView
+  def preview(@Valid @ModelAttribute("command") cmd: CalculateModuleMarksCommand.Command, errors: Errors): String =
+    formView
 
   @RequestMapping(params = Array("confirm=true"))
   def save(

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, UpstreamRouteRuleServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -23,6 +24,8 @@ object StudentAssessmentCommand {
       with AutowiringNormalCATSLoadServiceComponent
       with AutowiringUpstreamRouteRuleServiceComponent
       with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringAssessmentComponentMarksServiceComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
@@ -43,6 +46,8 @@ object StudentAssessmentProfileCommand {
       with AutowiringCourseAndRouteServiceComponent
       with AutowiringNormalCATSLoadServiceComponent
       with AutowiringUpstreamRouteRuleServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringAssessmentComponentMarksServiceComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
       with StudentModuleRegistrationAndComponents
@@ -60,10 +65,11 @@ case class StudentMarksBreakdown(
 
 case class ModuleRegistrationAndComponents(
   moduleRegistration: ModuleRegistration,
-  components: Seq[Component]
+  markState: Option[MarkState],
+  components: Seq[Component],
 )
 
-case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGroupMember, weighting: Option[BigDecimal])
+case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGroupMember, weighting: Option[BigDecimal], markState: Option[MarkState])
 
 class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[StudentMarksBreakdown] with TaskBenchmarking {
@@ -129,7 +135,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
 }
 
 trait StudentModuleRegistrationAndComponents {
-  self: AssessmentMembershipServiceComponent =>
+  self: AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent =>
   def generateModuleRegistrationAndComponents(scyds: Seq[StudentCourseYearDetails]): Seq[ModuleRegistrationAndComponents] = {
     scyds.flatMap { scyd =>
       scyd.moduleRegistrations.map { mr =>
@@ -146,8 +152,14 @@ trait StudentModuleRegistrationAndComponents {
 
         ModuleRegistrationAndComponents(
           mr,
+          moduleRegistrationMarksService.getRecordedModuleRegistration(mr).flatMap(_.latestState),
           components.map { case (ug, uagm) =>
-            Component(ug, uagm, if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting)
+            Component(
+              ug,
+              uagm,
+              if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting,
+              assessmentComponentMarksService.getRecordedStudent(uagm).flatMap(_.latestState)
+            )
           }
         )
       }

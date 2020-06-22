@@ -56,7 +56,7 @@ object CalculateModuleMarksCommand {
 
     object MissingMarkAdjustment {
       val NoCalculationPossible: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.Pass), comments = Some("Missing mark adjustment - learning outcomes assessed, unable to calculate an overall module mark"))
-      val AllComponentsMissing: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.NoResult), comments = Some("Missing mark adjustment - learning outcomes not assessed"))
+      val AllComponentsMissing: Success = Success(None, Some(GradeBoundary.ForceMajeureMissingComponentGrade), Some(ModuleResult.Deferred), comments = Some("Missing mark adjustment - learning outcomes not assessed"))
 
       // Option 1) Use the remaining components to calculate a mark, with credit
       // Option 2) A force majeure pass, with credit
@@ -417,21 +417,9 @@ trait CalculateModuleMarksAlgorithm {
               // Each component must have a mark
               val componentsWithMissingMarks = componentsForCalculation.filter(_._2.mark.isEmpty).map(_._1).sortBy(_.sequence)
 
-              if (componentsWithMissingMarks.nonEmpty) ModuleMarkCalculation.Failure.MarksMissingFor(componentsWithMissingMarks.map(_.sequence))
-              else if (componentsForCalculation.size == 1) {
-                // If there's a single component and it's valid, just copy it over
-                val validGrades = validGradesForMark(componentsForCalculation.head._2.mark)
-
-                val gb: Option[GradeBoundary] = componentsForCalculation.head._2.grade match {
-                  case Some(existing) => validGrades.find(_.grade == existing)
-                  case _ => validGrades.find(_.isDefault)
-                }
-
-                gb match {
-                  case None => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, None)
-                  case Some(gradeBoundary) => ModuleMarkCalculation.Success(componentsForCalculation.head._2.mark, Some(gradeBoundary))
-                }
-              } else {
+              if (componentsWithMissingMarks.nonEmpty)
+                ModuleMarkCalculation.Failure.MarksMissingFor(componentsWithMissingMarks.map(_.sequence))
+              else {
                 val componentsWithMissingWeighting = components.filter(_._1.scaledWeighting.isEmpty).map(_._1).sortBy(_.sequence)
 
                 if (componentsWithMissingWeighting.nonEmpty) ModuleMarkCalculation.Failure.WeightingsMissingFor(componentsWithMissingWeighting.map(_.sequence))
@@ -459,7 +447,13 @@ trait CalculateModuleMarksAlgorithm {
                       val mark = s.mark.get
                       val weighting = ac.weightingFor(marksForWeighting).get
 
-                      mark * (weighting / totalWeighting)
+                      lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.resitExpected)
+
+                      val cappedMark = if(s.resitExpected && !s.furtherFirstSit) {
+                        markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
+                      } else mark
+
+                      cappedMark * (weighting / totalWeighting)
                     }.sum
                   }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
                   val validGrades = validGradesForMark(Some(calculatedMark))
@@ -523,6 +517,10 @@ trait CalculateModuleMarksValidation extends SelfValidating {
       }
 
       if (item.mark.hasText) {
+        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
+        }
+
         try {
           val asInt = item.mark.toInt
           if (asInt < 0 || asInt > 100) {

@@ -15,35 +15,40 @@ import scala.collection.immutable.ListMap
 object ListAssessmentComponentsCommand {
   case class StudentMarkRecord(
     universityId: String,
+    resitSequence: Option[String],
     position: Option[Int],
     currentMember: Boolean,
     resitExpected: Boolean,
+    furtherFirstSit: Boolean,
     mark: Option[Int],
     grade: Option[String],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
     markState: Option[MarkState],
     agreed: Boolean,
+    resitMark: Boolean, // the current mark is a resit mark (not the same as a resit being expected)
     history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
     upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   )
   object StudentMarkRecord {
-    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord =
+    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
+      val reassessment = member.isReassessment
+      val furtherFirstSit = reassessment && member.currentResitAttempt.exists(_ <= 1)
       StudentMarkRecord(
         universityId = member.universityId,
+        resitSequence = member.resitSequence,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
-        resitExpected = member.resitExpected.getOrElse(member.firstResitMark.nonEmpty || member.firstResitGrade.nonEmpty),
+        resitExpected = reassessment,
+        furtherFirstSit = furtherFirstSit,
         mark =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstAgreedMark)
-            .orElse(recordedStudent.flatMap(_.latestMark))
-            .orElse(member.firstDefinedMark),
+            .orElse(member.firstDefinedMark)
+            .orElse(recordedStudent.flatMap(_.latestMark)),
         grade =
           recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(member.firstAgreedGrade)
-            .orElse(recordedStudent.flatMap(_.latestGrade))
-            .orElse(member.firstDefinedGrade),
+            .orElse(member.firstDefinedGrade)
+            .orElse(recordedStudent.flatMap(_.latestGrade)),
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
@@ -51,18 +56,19 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
         markState = recordedStudent.flatMap(_.latestState),
-        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
-        agreed = recordedStudent.forall(!_.needsWritingToSits) && member.firstAgreedMark.nonEmpty,
+        agreed = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty),
+        resitMark = reassessment,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member
       )
+    }
   }
 
   def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
     val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
 
-    info.allMembers.sortBy(_.universityId).map { member =>
-      val recordedStudent = recordedStudents.find(_.universityId == member.universityId)
+    info.allMembers.sortBy { uagm => (uagm.universityId, uagm.resitSequence.getOrElse("000")) }.map { member =>
+      val recordedStudent = recordedStudents.find(_.matchesIdentity(member))
 
       StudentMarkRecord(info, member, recordedStudent)
     }
@@ -124,7 +130,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
 
   lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
     val assessmentComponents: Seq[AssessmentComponent] =
-      assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false)
+      assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false, inUseOnly = false)
         .filter { ac =>
           ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
           (canAdminDepartment || modulesWithPermission.contains(ac.module))

@@ -34,6 +34,8 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     this.sequence = uagm.upstreamAssessmentGroup.sequence
     this.academicYear = uagm.upstreamAssessmentGroup.academicYear
     this.universityId = uagm.universityId
+    this.assessmentType = uagm.assessmentType
+    this.resitSequence = uagm.resitSequence
   }
 
   // Properties for linking through to AssessmentComponent/UpstreamAssessmentGroup/UpstreamAssessmentGroupMember
@@ -58,6 +60,20 @@ class RecordedAssessmentComponentStudent extends GeneratedId
 
   @Column(name = "university_id", nullable = false)
   var universityId: String = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroupMemberAssessmentTypeUserType")
+  @Column(name = "assessment_type", nullable = false)
+  var assessmentType: UpstreamAssessmentGroupMemberAssessmentType = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  @Column(name = "resit_sequence")
+  var resitSequence: Option[String] = None
+
+  /**
+   * Doesn't check that this is for the same group, just that it's for the same person on the group
+   */
+  def matchesIdentity(uagm: UpstreamAssessmentGroupMember): Boolean =
+    universityId == uagm.universityId && assessmentType == uagm.assessmentType && resitSequence == uagm.resitSequence
 
   @OneToMany(mappedBy = "recordedAssessmentComponentStudent", cascade = Array(ALL), fetch = FetchType.LAZY)
   @OrderBy("updated_date DESC")
@@ -107,6 +123,8 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     "sequence" -> sequence,
     "academicYear" -> academicYear,
     "universityId" -> universityId,
+    "assessmentType" -> assessmentType,
+    "resitSequence" -> resitSequence,
     "marks" -> marks,
     "needsWritingToSits" -> needsWritingToSits,
     "lastWrittenToSits" -> lastWrittenToSits
@@ -154,12 +172,12 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
   )
 }
 
-sealed trait RecordedAssessmentComponentStudentMarkSource extends EnumEntry
+sealed abstract class RecordedAssessmentComponentStudentMarkSource(val description: String) extends EnumEntry
 object RecordedAssessmentComponentStudentMarkSource extends Enum[RecordedAssessmentComponentStudentMarkSource] {
-  case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource
-  case object Scaling extends RecordedAssessmentComponentStudentMarkSource
-  case object MissingMarkAdjustment extends RecordedAssessmentComponentStudentMarkSource
-  case object ModuleMarkConfirmation extends RecordedAssessmentComponentStudentMarkSource
+  case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource("Record component marks")
+  case object Scaling extends RecordedAssessmentComponentStudentMarkSource("Scaling")
+  case object MissingMarkAdjustment extends RecordedAssessmentComponentStudentMarkSource("Missing mark adjustment")
+  case object ModuleMarkConfirmation extends RecordedAssessmentComponentStudentMarkSource("Module mark confirmation")
 
   override def values: IndexedSeq[RecordedAssessmentComponentStudentMarkSource] = findValues
 }

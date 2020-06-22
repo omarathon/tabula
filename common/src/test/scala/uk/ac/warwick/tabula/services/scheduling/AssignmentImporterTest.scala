@@ -5,7 +5,7 @@ import org.junit.After
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterUtils}
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMemberAssessmentType, UpstreamAssessmentRegistration}
 import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService
 import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamProfile
 import uk.ac.warwick.tabula._
@@ -68,9 +68,9 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
     withFakeTime(dateTime(2012, 5)) {
       assignmentImporter.features.includeSMSForCurrentYear = true
       val yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
-      var members = ArrayBuffer[UpstreamModuleRegistration]()
+      var members = ArrayBuffer[UpstreamAssessmentRegistration]()
 
-      assignmentImporter.allMembers(yearsToImport) { mr =>
+      assignmentImporter.allMembers(UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment, yearsToImport) { mr =>
         members += mr
       }
 

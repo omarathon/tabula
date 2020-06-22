@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.exams.grids.columns
 
 import org.apache.commons.lang.StringEscapeUtils
 import org.apache.poi.common.usermodel.HyperlinkType
-import org.apache.poi.ss.usermodel.{Cell, CellStyle}
+import org.apache.poi.ss.usermodel.Cell
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles.CellStyleMap
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
@@ -38,15 +39,17 @@ sealed trait ExamGridColumnValue {
 
   override def toString: String = s"${getClass.getSimpleName}($getValueStringForRender)"
 
-  protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit
+  protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit
 
   val isActual: Boolean
 
   val isFail: Boolean = false
 
+  val isUnconfirmed: Boolean = false
+
   def toHTML: String
 
-  def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit
+  def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit
 
   def isEmpty: Boolean
 }
@@ -85,7 +88,7 @@ object ExamGridColumnGraduationBenchmarkDecimal {
 class ExamGridColumnGraduationBenchmarkDecimal(value: BigDecimal, override val isActual: Boolean = false, val url: String) extends ExamGridColumnValueDecimal(value, isActual) {
   override def toHTML: String = "<a href=\""+StringEscapeUtils.escapeHtml(url)+"\" target=\"_blank\">"+super.toHTML+"</a>"
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     super.populateCell(cell, cellStyleMap, commentHelper)
     val link = cell.getSheet.getWorkbook.getCreationHelper.createHyperlink(HyperlinkType.URL)
     link.setAddress(url)
@@ -94,30 +97,37 @@ class ExamGridColumnGraduationBenchmarkDecimal(value: BigDecimal, override val i
 }
 
 object ExamGridColumnValueDecimal {
-  def apply(value: BigDecimal, isActual: Boolean = false, isFail: Boolean = false) = new ExamGridColumnValueDecimal(value, isActual, isFail)
+  def apply(value: BigDecimal, isActual: Boolean = false, isFail: Boolean = false, isUnconfirmed: Boolean = false): ExamGridColumnValueDecimal =
+    new ExamGridColumnValueDecimal(value, isActual, isFail, isUnconfirmed)
 }
 
-class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = false, override val isFail: Boolean = false) extends ExamGridColumnValue {
+class ExamGridColumnValueDecimal(
+  value: BigDecimal,
+  val isActual: Boolean = false,
+  override val isFail: Boolean = false,
+  override val isUnconfirmed: Boolean = false
+) extends ExamGridColumnValue {
+
   protected final def getValueForRender: JBigDecimal = value.underlying.stripTrailingZeros()
 
   override protected final def getValueStringForRender: String = getValueForRender.toPlainString
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit =
     (isActual, isFail) match {
-      case (true, true) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.FailAndActualMark))
-      case (true, false) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
-      case (false, true) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
-      case (false, false) => // no specific style
+      case (true, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.FailAndActualMark, isUnconfirmed))
+      case (true, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark, isUnconfirmed))
+      case (false, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Fail, isUnconfirmed))
+      case (false, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, isUnconfirmed))
     }
-  }
 
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    s"""<span class="$actualClass $failedClass">$getValueStringForRender</span>"""
+    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    s"""<span class="$actualClass $failedClass $unconfirmedClass">$getValueStringForRender</span>"""
   }
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     cell.setCellValue(getValueForRender.doubleValue)
     applyCellStyle(cell, cellStyleMap)
   }
@@ -126,29 +136,36 @@ class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = fals
 }
 
 object ExamGridColumnValueString {
-  def apply(value: String, isActual: Boolean = false, isFail: Boolean = false) = new ExamGridColumnValueString(value, isActual, isFail)
+  def apply(value: String, isActual: Boolean = false, isFail: Boolean = false, isUnconfirmed: Boolean = false)
+    = new ExamGridColumnValueString(value, isActual, isFail, isUnconfirmed)
 }
 
-class ExamGridColumnValueString(value: String, val isActual: Boolean = false, override val isFail: Boolean = false) extends ExamGridColumnValue {
+class ExamGridColumnValueString(
+  value: String,
+  val isActual: Boolean = false,
+  override val isFail: Boolean = false,
+  override val isUnconfirmed: Boolean = false
+) extends ExamGridColumnValue {
+
   override protected final def getValueStringForRender: String = value
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
-
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit = {
     (isActual, isFail) match {
-      case (true, true) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.FailAndActualMark))
-      case (true, false) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
-      case (false, true) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
-      case (false, false) => cell.setCellStyle(cellStyleMap(ExamGridExportStyles.WrappedText))
+      case (true, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.FailAndActualMark, isUnconfirmed))
+      case (true, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark, isUnconfirmed))
+      case (false, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Fail, isUnconfirmed))
+      case (false, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.WrappedText, isUnconfirmed))
     }
   }
 
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    s"""<span class="$actualClass $failedClass">$value</span>"""
+    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    s"""<span class="$actualClass $failedClass $unconfirmedClass">$value</span>"""
   }
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     cell.setCellValue(value)
     applyCellStyle(cell, cellStyleMap)
   }
@@ -156,15 +173,18 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false, ov
   override def isEmpty: Boolean = !value.hasText
 }
 
-case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, message: String = "", failed: Boolean = false) extends ExamGridColumnValueString(value, actual, failed) {
+case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, message: String = "", failed: Boolean = false, unconfirmed: Boolean = false)
+  extends ExamGridColumnValueString(value, actual, failed, unconfirmed) {
+
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
+    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
     val (tooltipClass, tooltipMessage) = if (message.hasText) ("tabula-tooltip", s"""tabindex="0" data-title="$message" """) else ("", "")
-    s"""<span class="$actualClass $failedClass $tooltipClass" $tooltipMessage>$value</span>"""
+    s"""<span class="$actualClass $failedClass $unconfirmedClass $tooltipClass" $tooltipMessage>$value</span>"""
   }
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     super.populateCell(cell, cellStyleMap, commentHelper)
 
     if (message.hasText)
@@ -179,16 +199,16 @@ trait ExamGridColumnValueOvercat {
 
   override def toHTML: String = "<span class=\"exam-grid-overcat\">%s</span>".format(getValueStringForRender)
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit = {
     if (isActual) {
-      cell.setCellStyle(cellStyleMap(ExamGridExportStyles.OvercatAndActualMark))
+      cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.OvercatAndActualMark))
     } else {
-      cell.setCellStyle(cellStyleMap(ExamGridExportStyles.Overcat))
+      cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Overcat))
     }
   }
 }
 
-case class ExamGridColumnValueOvercatDecimal(value: BigDecimal, override val isActual: Boolean = false)
+case class ExamGridColumnValueOvercatDecimal(value: BigDecimal, override val isActual: Boolean = false, override val isUnconfirmed: Boolean = false)
   extends ExamGridColumnValueDecimal(value) with ExamGridColumnValueOvercat
 
 case class ExamGridColumnValueOvercatString(value: String, override val isActual: Boolean = false)
@@ -201,8 +221,8 @@ trait ExamGridColumnValueOverride {
 
   override def toHTML: String = "<span class=\"exam-grid-override\">%s</span>".format(getValueStringForRender)
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
-    cell.setCellStyle(cellStyleMap(ExamGridExportStyles.Overridden))
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit = {
+    cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Overridden))
   }
 }
 
@@ -220,11 +240,11 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
     else
       """<span class="exam-grid-actual-mark">X</span>"""
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
-    cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit = {
+    cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark))
   }
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     super.populateCell(cell, cellStyleMap, commentHelper)
 
     if (message.hasText)
@@ -239,5 +259,5 @@ case class ExamGridColumnValueStringWithHtml(value: String, html: String) extend
 case class ExamGridColumnValueStringHtmlOnly(value: String) extends ExamGridColumnValueString(value) {
   override def toHTML: String = super.toHTML
 
-  override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle], commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {}
+  override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {}
 }

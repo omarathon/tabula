@@ -5,9 +5,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 
@@ -18,6 +20,8 @@ object GenerateModuleExamGridCommand {
       with AutowiringStudentCourseYearDetailsDaoComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
+      with AutowiringModuleRegistrationMarksServiceComponent
+      with AutowiringAssessmentComponentMarksServiceComponent
       with ComposableCommand[ModuleExamGridResult]
       with GenerateModuleExamGridValidation
       with GenerateModuleExamGridPermissions
@@ -33,6 +37,7 @@ case class ModuleExamGridResult(
 
 case class ModuleGridDetailRecord(
   moduleRegistration: ModuleRegistration,
+  isUnconfirmed: Boolean,
   componentInfo: Map[String, AssessmentComponentInfo],
   name: String,
   universityId: String,
@@ -40,7 +45,7 @@ case class ModuleGridDetailRecord(
 )
 
 
-case class AssessmentComponentInfo(mark: Option[Int], grade: Option[String], isActualMark: Boolean, isActualGrade: Boolean, resitInfo: ResitComponentInfo)
+case class AssessmentComponentInfo(mark: Option[Int], grade: Option[String], isActualMark: Boolean, isActualGrade: Boolean, markState: Option[MarkState], resitInfo: ResitComponentInfo)
 
 case class ResitComponentInfo(resitMark: Option[Int], resitGrade: Option[String], isActualResitMark: Boolean, isActualResitGrade: Boolean)
 
@@ -49,7 +54,8 @@ case class AssessmentIdentity(code: String, name: String)
 class GenerateModuleExamGridCommandInternal(val department: Department, val academicYear: AcademicYear)
   extends CommandInternal[ModuleExamGridResult] with TaskBenchmarking {
 
-  self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent with AssessmentMembershipServiceComponent =>
+  self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent
+    with AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent =>
 
   override def applyInternal(): ModuleExamGridResult = {
     val isHistoricalGrid = academicYear != AcademicYear.now()
@@ -60,6 +66,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
         // multiple registrations here should only be the result of a course transfer - pick the highest spr
         .flatMap { case (_, registrations) => registrations.headOption }.toSeq
         .flatMap { mr =>
+          val isUnconfirmed = moduleRegistrationMarksService.getRecordedModuleRegistration(mr).flatMap(_.latestState).contains(UnconfirmedActual)
           val student: StudentMember = mr.studentCourseDetails.student
           val componentInfo: Seq[(AssessmentIdentity, AssessmentComponentInfo)] = mr.upstreamAssessmentGroupMembers.flatMap { uagm =>
             val code = s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}"
@@ -70,11 +77,12 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
                 grade = uagm.firstOriginalGrade,
                 isActualMark = uagm.agreedMark.isEmpty,
                 isActualGrade = uagm.agreedGrade.isEmpty,
+                markState = assessmentComponentMarksService.getRecordedStudent(uagm).flatMap(_.latestState),
                 resitInfo = ResitComponentInfo(
-                  resitMark = uagm.firstResitMark,
-                  resitGrade = uagm.firstResitGrade,
-                  isActualResitMark = uagm.resitAgreedMark.isEmpty,
-                  isActualResitGrade = uagm.resitAgreedGrade.isEmpty
+                  resitMark = uagm.firstDefinedMark.filter(_ => uagm.isReassessment),
+                  resitGrade = uagm.firstDefinedGrade.filter(_ => uagm.isReassessment),
+                  isActualResitMark = uagm.isReassessment && uagm.agreedMark.isEmpty,
+                  isActualResitGrade = uagm.isReassessment && uagm.agreedGrade.isEmpty
                 )
               )}
           }.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }
@@ -82,6 +90,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
           componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
             ModuleGridDetailRecord(
               moduleRegistration = mr,
+              isUnconfirmed = isUnconfirmed,
               componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
               name = s"${student.firstName} ${student.lastName}",
               universityId = student.universityId,

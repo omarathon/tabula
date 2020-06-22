@@ -211,10 +211,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
       val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
         .createAlias("upstreamAssessmentGroup", "uag")
         .add(is("uag.academicYear", academicYear))
-        .add(or(
-          or(isNotNull("resitActualMark"), isNotNull("resitActualGrade")),
-          or(isNotNull("resitAgreedMark"), isNotNull("resitAgreedGrade"))
-        ))
+        .add(is("assessmentType", UpstreamAssessmentGroupMemberAssessmentType.Reassessment))
         .add(eqProperty("uagm.universityId", "scd.student.universityId"))
       c.add(Subqueries.exists(resitQuery.setProjection(property("uagm.universityId"))))
     }
