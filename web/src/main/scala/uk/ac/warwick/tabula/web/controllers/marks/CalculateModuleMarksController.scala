@@ -165,8 +165,9 @@ class CalculateModuleMarksController extends BaseModuleMarksController
           // We know the .get is safe because it's validated
           val (studentModuleMarkRecord, componentMarks, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get
 
-          // Mark and grade and result haven't changed and no comment
+          // Mark and grade and result haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (
+            !studentModuleMarkRecord.outOfSync &&
             !student.comments.hasText &&
             ((!student.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(student.mark)) &&
             ((!student.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(student.grade)) &&
