@@ -97,8 +97,8 @@ class ExamGridColumnGraduationBenchmarkDecimal(value: BigDecimal, override val i
 }
 
 object ExamGridColumnValueDecimal {
-  def apply(value: BigDecimal, isActual: Boolean = false, isFail: Boolean = false, isUnconfirmed: Boolean = false)
-    = new ExamGridColumnValueDecimal(value, isActual, isFail, isUnconfirmed)
+  def apply(value: BigDecimal, isActual: Boolean = false, isFail: Boolean = false, isUnconfirmed: Boolean = false): ExamGridColumnValueDecimal =
+    new ExamGridColumnValueDecimal(value, isActual, isFail, isUnconfirmed)
 }
 
 class ExamGridColumnValueDecimal(
@@ -112,20 +112,19 @@ class ExamGridColumnValueDecimal(
 
   override protected final def getValueStringForRender: String = getValueForRender.toPlainString
 
-  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit = {
-
+  override protected def applyCellStyle(cell: Cell, cellStyleMap: CellStyleMap): Unit =
     (isActual, isFail) match {
       case (true, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.FailAndActualMark, isUnconfirmed))
       case (true, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark, isUnconfirmed))
       case (false, true) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Fail, isUnconfirmed))
       case (false, false) => cell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, isUnconfirmed))
     }
-  }
 
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    s"""<span class="$actualClass $failedClass">$getValueStringForRender</span>"""
+    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    s"""<span class="$actualClass $failedClass $unconfirmedClass">$getValueStringForRender</span>"""
   }
 
   override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
@@ -209,7 +208,7 @@ trait ExamGridColumnValueOvercat {
   }
 }
 
-case class ExamGridColumnValueOvercatDecimal(value: BigDecimal, override val isActual: Boolean = false)
+case class ExamGridColumnValueOvercatDecimal(value: BigDecimal, override val isActual: Boolean = false, override val isUnconfirmed: Boolean = false)
   extends ExamGridColumnValueDecimal(value) with ExamGridColumnValueOvercat
 
 case class ExamGridColumnValueOvercatString(value: String, override val isActual: Boolean = false)

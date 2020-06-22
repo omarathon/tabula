@@ -84,7 +84,7 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "studentId" -> student.universityId,
     "academicYear" -> student.academicYear.toString,
     "moduleCodeMatcher" -> student.moduleCode,
-    "resitSequenceMatcher" -> student.resitSequence,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
     "occurrences" -> Seq(student.occurrence).asJava,
     "sequences" -> Seq(student.sequence).asJava
   )
@@ -94,7 +94,7 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "studentId" -> student.universityId,
     "academicYear" -> student.academicYear.toString,
     "moduleCodeMatcher" -> student.moduleCode,
-    "resitSequenceMatcher" -> student.resitSequence,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
     "occurrences" -> Seq(student.occurrence).asJava,
     "sequences" -> Seq(student.sequence).asJava,
 
@@ -102,14 +102,6 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "now" -> DateTime.now.toDate,
     "actualMark" -> JInteger(student.latestMark),
     "actualGrade" -> student.latestGrade.orNull
-  )
-
-  def getResetModuleResultParams(process: String): JMap[String, Any] = JHashMap(
-    "studentId" -> student.universityId,
-    "academicYear" -> student.academicYear.toString,
-    "moduleCodeMatcher" -> student.moduleCode,
-    "occurrences" -> Seq(student.occurrence).asJava,
-    "process" -> process,
   )
 }
 
@@ -238,7 +230,8 @@ object ExportFeedbackToSitsService {
     and psl_code = 'Y'
     """
 
-  def whereClause = s"$rootWhereClause and mab_seq in (:sequences)" // mab_seq = sequence code determining an assessment component
+  // :resitSequenceMatcher = '%' is stupid but necessary as the number of bind params needs to match
+  def whereClause = s"$rootWhereClause and mab_seq in (:sequences) and '%' = :resitSequenceMatcher" // mab_seq = sequence code determining an assessment component
   def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences) and sra_rseq like :resitSequenceMatcher" // sra_seq = sequence code determining an assessment component
 
   final def CountMatchingBlankSasRecordsSql =
@@ -309,6 +302,7 @@ object ExportFeedbackToSitsService {
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("now", Types.DATE))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
@@ -333,6 +327,7 @@ object ExportFeedbackToSitsService {
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
   }

@@ -109,13 +109,13 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   override def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
-  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int]): Either[String, BigDecimal] = {
+  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int], gradeFn: ModuleRegistration => Option[String]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
       val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
       (mark, cats)
     }).filter { case (mark, cats) => mark != null & cats != null }
-    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(_.passFail).size) {
+    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade)).size) {
       Right(
         (nonNullReplacedMarksAndCats.map { case (mark, cats) => mark * cats }.sum / nonNullReplacedMarksAndCats.map { case (_, cats) => cats }.sum)
           .setScale(1, RoundingMode.HALF_UP)
@@ -127,15 +127,15 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
         else
           Left(s"The year mark cannot be calculated because there are no module marks")
       else
-        Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
+        Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && marksFn(mr).isEmpty && !gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade)).map(_.module.code.toUpperCase).mkString(", ")}")
     }
   }
 
   def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.firstDefinedMark }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty)(_.firstDefinedMark, _.firstDefinedGrade)
 
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.agreedMark }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty)(_.agreedMark, _.agreedGrade)
 
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
     // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
