@@ -5,7 +5,7 @@ import java.awt.Color
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFFont}
+import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFFont, XSSFWorkbook}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -282,7 +282,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
         }
         // Entity rows
         entities.foreach(entity => {
-          if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
+          if (chosenYearColumnValues.get(rightColumn).exists(_.contains(entity))) {
             val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
             chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap, commentHelper)
             if (showComponentMarks) {
@@ -462,9 +462,10 @@ object ExamGridExportStyles {
     }
 
     private def unconfirmedStyle(base: CellStyle) = {
-      val cs = workbook.createCellStyle()
+      val cs = workbook.createCellStyle().asInstanceOf[XSSFCellStyle]
       cs.cloneStyleFrom(base)
-      cs.setFillBackgroundColor(new XSSFColor(new Color(255, 170, 170)).getIndex)
+      cs.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+      cs.setFillForegroundColor(new XSSFColor(new Color(255, 170, 170)))
       cs
     }
 
@@ -550,12 +551,20 @@ object ExamGridSummaryAndKey {
       val row = sheet.createRow(9)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, unconfirmed = true))
+      val valueCell = row.createCell(1)
+      valueCell.setCellValue("\tUnconfirmed marks (subject to change)")
+    }
+    {
+      val row = sheet.createRow(10)
+      val keyCell = row.createCell(0)
+      keyCell.setCellValue("#")
       keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Fail))
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Failed module or component")
     }
     {
-      val row = sheet.createRow(10)
+      val row = sheet.createRow(11)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
       keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Overcat))
@@ -563,7 +572,7 @@ object ExamGridSummaryAndKey {
       valueCell.setCellValue("Used in overcatting calculation")
     }
     {
-      val row = sheet.createRow(11)
+      val row = sheet.createRow(12)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
       keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.ActualMark))
@@ -571,28 +580,28 @@ object ExamGridSummaryAndKey {
       valueCell.setCellValue("Agreed mark missing, using actual")
     }
     {
-      val row = sheet.createRow(12)
+      val row = sheet.createRow(13)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("[# (#)]")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Resit mark (original mark)")
     }
     {
-      val row = sheet.createRow(13)
+      val row = sheet.createRow(14)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("X")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Agreed mark and actual mark missing")
     }
     {
-      val row = sheet.createRow(14)
+      val row = sheet.createRow(15)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Blank indicates module not taken by student")
     }
     {
-      val row = sheet.createRow(15)
+      val row = sheet.createRow(16)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("AB")
       keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.BoldText))

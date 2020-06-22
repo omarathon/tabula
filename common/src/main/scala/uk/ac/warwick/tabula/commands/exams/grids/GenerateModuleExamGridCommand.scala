@@ -5,6 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -36,6 +37,7 @@ case class ModuleExamGridResult(
 
 case class ModuleGridDetailRecord(
   moduleRegistration: ModuleRegistration,
+  isUnconfirmed: Boolean,
   componentInfo: Map[String, AssessmentComponentInfo],
   name: String,
   universityId: String,
@@ -64,6 +66,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
         // multiple registrations here should only be the result of a course transfer - pick the highest spr
         .flatMap { case (_, registrations) => registrations.headOption }.toSeq
         .flatMap { mr =>
+          val isUnconfirmed = moduleRegistrationMarksService.getRecordedModuleRegistration(mr).flatMap(_.latestState).contains(UnconfirmedActual)
           val student: StudentMember = mr.studentCourseDetails.student
           val componentInfo: Seq[(AssessmentIdentity, AssessmentComponentInfo)] = mr.upstreamAssessmentGroupMembers.flatMap { uagm =>
             val code = s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}"
@@ -87,6 +90,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
           componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
             ModuleGridDetailRecord(
               moduleRegistration = mr,
+              isUnconfirmed = isUnconfirmed,
               componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
               name = s"${student.firstName} ${student.lastName}",
               universityId = student.universityId,

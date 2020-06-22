@@ -8,6 +8,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridExportStyles._
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ProgressionService
 
@@ -22,10 +23,10 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
     }
   }
 
-  private def getCellStyle(isActual: Boolean, styleMap: CellStyleMap, mark: BigDecimal, degreeType: DegreeType): Option[CellStyle] = {
+  private def getCellStyle(isActual: Boolean, styleMap: CellStyleMap, mark: BigDecimal, degreeType: DegreeType, isUnconfirmed: Boolean): Option[CellStyle] = {
     isActual match {
-      case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap.getStyle(FailAndActualMark)) else Option(styleMap.getStyle(ActualMark))
-      case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap.getStyle(Fail))
+      case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap.getStyle(FailAndActualMark, isUnconfirmed)) else Option(styleMap.getStyle(ActualMark, isUnconfirmed))
+      case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap.getStyle(Fail, isUnconfirmed))
       case _ => None
     }
   }
@@ -80,9 +81,9 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
       //detail rows
       entities.foreach { entity =>
         val (mark, markStyle) = if (entity.moduleRegistration.agreedMark.isDefined) {
-          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType))
+          (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
         } else if (entity.moduleRegistration.actualMark.isDefined) {
-          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType))
+          (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
         } else {
           ("X", None)
         }
@@ -108,16 +109,17 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         cSeqColumnIndex = 0
         aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
           cSeqColumnIndex = cSeqColumnIndex + 1
+          val isUnconfirmed = entity.componentInfo.get(aGroupAndSequenceAndOcc).flatMap(_.markState).contains(UnconfirmedActual)
           val (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitMark.isDefined) {
               if (cInfo.mark.isDefined) {
-                //will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
-                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                // will use resit style because of the limitation of multiple style application to single excel cell for SXSSFWorkbook
+                (s"[${cInfo.resitInfo.resitMark.get}(${cInfo.mark.get})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
               } else {
-                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+                (s"[${cInfo.resitInfo.resitMark.get}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
               }
             } else if (cInfo.mark.isDefined) {
-              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType))
+              (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
             } else {
               ("X", None)
             }
@@ -127,12 +129,12 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
           val (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
             case Some(cInfo) => if (cInfo.resitInfo.resitGrade.isDefined) {
               if (cInfo.grade.isDefined) {
-                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}(${cInfo.grade.get})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
               } else {
-                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark)) else None)
+                (s"[${cInfo.resitInfo.resitGrade.get}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
               }
             } else if (cInfo.grade.isDefined) {
-              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap.getStyle(ActualMark)) else None)
+              (cInfo.grade.get, if (cInfo.isActualGrade) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
             } else {
               ("X", None)
             }
@@ -183,12 +185,20 @@ object ModuleExamGridSummaryAndKey {
       val row = sheet.createRow(5)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
+      keyCell.setCellStyle(cellStyleMap.getStyle(ExamGridExportStyles.Base, unconfirmed = true))
+      val valueCell = row.createCell(1)
+      valueCell.setCellValue("\tUnconfirmed marks (subject to change)")
+    }
+    {
+      val row = sheet.createRow(6)
+      val keyCell = row.createCell(0)
+      keyCell.setCellValue("#")
       keyCell.setCellStyle(cellStyleMap.getStyle(Fail))
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Failed module or component")
     }
     {
-      val row = sheet.createRow(6)
+      val row = sheet.createRow(7)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("#")
       keyCell.setCellStyle(cellStyleMap.getStyle(ActualMark))
@@ -196,21 +206,21 @@ object ModuleExamGridSummaryAndKey {
       valueCell.setCellValue("Agreed mark missing, using actual")
     }
     {
-      val row = sheet.createRow(7)
+      val row = sheet.createRow(8)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("[# (#)]")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Resit mark (original mark)")
     }
     {
-      val row = sheet.createRow(8)
+      val row = sheet.createRow(9)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("[# (#)]")
       val valueCell = row.createCell(1)
       valueCell.setCellValue("Resit grade (original grade)")
     }
     {
-      val row = sheet.createRow(9)
+      val row = sheet.createRow(10)
       val keyCell = row.createCell(0)
       keyCell.setCellValue("X")
       val valueCell = row.createCell(1)

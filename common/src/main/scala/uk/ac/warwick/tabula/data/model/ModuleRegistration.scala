@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
-import org.hibernate.annotations.{BatchSize, Formula, Proxy, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
-import uk.ac.warwick.tabula.services.marks.AssessmentComponentMarksService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
@@ -137,18 +136,6 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var endDate: LocalDate = _
-
-//  @Formula("""(select m.mark_state from RecordedModuleMark m
-//              join RecordedModuleRegistration r on m.recorded_module_registration_id = r.id
-//              where
-//                r.sits_module_code = sitsModuleCode and
-//                r.academic_year = academicYear and
-//                r.occurrence = occurrence and
-//                r.spr_code = sprCode
-//              order by m.updated_date desc limit 1)""")
-//  @Type(`type` = "uk.ac.warwick.tabula.data.model.MarkStateUserType")
-//  private var _markState: MarkState = _
-//  def markState: Option[MarkState] = Option(_markState)
 
   def passedCats: Option[Boolean] = moduleResult match {
     case _: ModuleResult.Pass.type if hasAgreedMarkOrGrade => Some(true)
