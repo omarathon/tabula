@@ -465,7 +465,7 @@ object ExamGridExportStyles {
       val cs = workbook.createCellStyle().asInstanceOf[XSSFCellStyle]
       cs.cloneStyleFrom(base)
       cs.setFillPattern(FillPatternType.SOLID_FOREGROUND)
-      cs.setFillForegroundColor(new XSSFColor(new Color(255, 170, 170)))
+      cs.setFillForegroundColor(new XSSFColor(new Color(252, 219, 205)))
       cs
     }
 
