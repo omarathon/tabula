@@ -173,7 +173,7 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
     moduleRegistrations.foreach { mr =>
       student.mostSignificantCourse._moduleRegistrations.add(mr)
       mr.membershipService = assessmentMembershipService
-      assessmentMembershipService.getUpstreamAssessmentGroups(mr, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
+      assessmentMembershipService.getUpstreamAssessmentGroups(mr, allAssessmentGroups = true, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
     }
 
     // Year 1 year mark

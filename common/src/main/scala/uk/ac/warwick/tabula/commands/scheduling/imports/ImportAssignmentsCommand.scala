@@ -254,25 +254,25 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
           assessmentType -> doGroupMembersForAssessmentType(assessmentType)
         }.toMap
 
-      // We need to clear out groups we didn't see for each type; e.g. where a resit used to be against a sequence but not anymore
-      benchmark("Clearing out unseen groups per assessment type") {
-        UpstreamAssessmentGroupMemberAssessmentType.values.foreach { assessmentType =>
-          val seenIds = notEmptyGroupIdsByAssessmentType(assessmentType).map(_.id)
-
-          notEmptyGroupIdsByAssessmentType.view.filterKeys(_ != assessmentType)
-            .values.flatten
-            .filterNot(uag => seenIds.contains(uag.id))
-            .foreach { uag =>
-              transactional() {
-                assessmentMembershipService.replaceMembers(uag, Seq.empty, assessmentType)
-              }
-            }
-        }
-      }
-
-      val notEmptyGroupIds: Set[String] = notEmptyGroupIdsByAssessmentType.values.flatten.toSet.map((g: UpstreamAssessmentGroup) => g.id)
-
       if (importEverything) {
+        // We need to clear out groups we didn't see for each type; e.g. where a resit used to be against a sequence but not anymore
+        benchmark("Clearing out unseen groups per assessment type") {
+          UpstreamAssessmentGroupMemberAssessmentType.values.foreach { assessmentType =>
+            val seenIds = notEmptyGroupIdsByAssessmentType(assessmentType).map(_.id)
+
+            notEmptyGroupIdsByAssessmentType.view.filterKeys(_ != assessmentType)
+              .values.flatten
+              .filterNot(uag => seenIds.contains(uag.id))
+              .foreach { uag =>
+                transactional() {
+                  assessmentMembershipService.replaceMembers(uag, Seq.empty, assessmentType)
+                }
+              }
+          }
+        }
+
+        val notEmptyGroupIds: Set[String] = notEmptyGroupIdsByAssessmentType.values.flatten.toSet.map((g: UpstreamAssessmentGroup) => g.id)
+
         // empty unseen groups - this is done in transactional batches
 
         val groupsToEmpty = transactional(readOnly = true) {

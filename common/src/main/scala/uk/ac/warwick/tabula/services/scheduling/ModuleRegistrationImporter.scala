@@ -382,7 +382,15 @@ trait CopyModuleRegistrationProperties {
     val rowBean = PropertyAccessorFactory.forBeanPropertyAccess(modRegRow)
     val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
 
-    copyBasicProperties(properties, rowBean, moduleRegistrationBean)
+    copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
+    copyBigDecimal(moduleRegistrationBean, "cats", Some(modRegRow.cats)) |
+    copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+    copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
+    copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+    copyOptionProperty(moduleRegistrationBean, "actualGrade", modRegRow.actualGrade.maybeText) |
+    copyOptionProperty(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark) |
+    copyOptionProperty(moduleRegistrationBean, "agreedGrade", modRegRow.agreedGrade.maybeText) |
+    copyEndDate(moduleRegistrationBean, modRegRow.endWeek, moduleRegistration.academicYear)
   }
 
   private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
@@ -417,7 +425,7 @@ trait CopyModuleRegistrationProperties {
   }
 
   private val properties = Set(
-    "cats", "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
+    "assessmentGroup", "occurrence", "marksCode", "sitsModuleCode"
   )
 }
 

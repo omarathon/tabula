@@ -165,12 +165,13 @@ object Fixtures extends Mockito {
     a
   }
 
-  def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroup = {
+  def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String, sequence: String): UpstreamAssessmentGroup = {
     val group = new UpstreamAssessmentGroup
     group.academicYear = academicYear
     group.assessmentGroup = code
     group.moduleCode = module
     group.occurrence = occurrence
+    group.sequence = sequence
     group.members.addAll(Seq(
       new UpstreamAssessmentGroupMember(group, "0123456", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
       new UpstreamAssessmentGroupMember(group, "0123457", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
@@ -179,8 +180,8 @@ object Fixtures extends Mockito {
     group
   }
 
-  def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
-    val uag = assessmentGroup(academicYear, code, module, occurrence)
+  def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String, sequence: String): UpstreamAssessmentGroupInfo = {
+    val uag = assessmentGroup(academicYear, code, module, occurrence, sequence)
     val activeMembers = uag.members
     //add one PWD
     val uagm = new UpstreamAssessmentGroupMember(uag, "1000006", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
@@ -193,7 +194,8 @@ object Fixtures extends Mockito {
       academicYear = academicYear,
       code = assignment.assessmentGroup,
       module = assignment.moduleCode + "-30",
-      occurrence = "A"
+      occurrence = "A",
+      sequence = assignment.sequence
     )
     group.assessmentComponent = assignment
     group

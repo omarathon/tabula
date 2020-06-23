@@ -22,7 +22,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
       group.assessmentComponent = Fixtures.assessmentComponent(Fixtures.module("nl901"), 2)
       group.membershipService = smartMock[AssessmentMembershipService]
       group.membershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Some(
-        Fixtures.upstreamAssessmentGroupInfo(year, "A", "NL901-30", "B")
+        Fixtures.upstreamAssessmentGroupInfo(year, "A", "NL901-30", "B", "A01")
       )
       group
     })
