@@ -6,12 +6,13 @@ import org.hibernate.annotations.{Proxy, Type}
 import uk.ac.warwick.tabula.ToString
 
 object GradeBoundary {
-  def apply(marksCode: String, process: String, rank: Int, grade: String, minimumMark: Option[Int], maximumMark: Option[Int], signalStatus: String, result: Option[ModuleResult]): GradeBoundary = {
+  def apply(marksCode: String, process: String, attempt: Int, rank: Int, grade: String, minimumMark: Option[Int], maximumMark: Option[Int], signalStatus: String, result: Option[ModuleResult]): GradeBoundary = {
     require(minimumMark.nonEmpty == maximumMark.nonEmpty, "Either both minimum mark and maxmimum mark must be provided, or neither")
 
     val gb = new GradeBoundary
     gb.grade = grade
     gb.process = process
+    gb.attempt = attempt
     gb.rank = rank
     gb.marksCode = marksCode
     gb.minimumMark = minimumMark
@@ -52,6 +53,9 @@ class GradeBoundary extends GeneratedId with ToString {
   @NotNull
   var process: String = _ // SAS (first sit), RAS (resit), LAS (late), IAS (individual???), OTH (other). We only import SAS and RAS
 
+  @NotNull
+  var attempt: Int = _ // e.g. 1 for first attempt, 2 for second attempt, 3 for third attempt
+
   var rank: Int = _
 
   @NotNull
@@ -81,6 +85,7 @@ class GradeBoundary extends GeneratedId with ToString {
   override def toStringProps: Seq[(String, Any)] = Seq(
     "marksCode" -> marksCode,
     "process" -> process,
+    "attempt" -> attempt,
     "rank" -> rank,
     "grade" -> grade,
     "result" -> result,

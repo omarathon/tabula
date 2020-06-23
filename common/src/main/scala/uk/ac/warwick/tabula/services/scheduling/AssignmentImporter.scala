@@ -847,6 +847,7 @@ object AssignmentImporter {
     select
       mkc.mks_code as marks_code,
       mkc.mkc_proc as process,
+      mkc.mkc_attp as attempt,
       coalesce(mkc.mkc_rank, mkc.mkc_seq) as rank,
       mkc.mkc_grade as grade,
       mkc.mkc_minm as minimum_mark,
@@ -854,7 +855,16 @@ object AssignmentImporter {
       mkc.mkc_sigs as signal_status,
       mkc.mkc_rslt as result
     from $sitsSchema.cam_mkc mkc
-    where mkc_proc in ('SAS', 'RAS')
+    where mkc.mkc_proc in ('SAS', 'RAS') and
+      -- Avoid duplicates
+      mkc.mkc_seq = (
+          select min(mkc2.mkc_seq)
+          from $sitsSchema.cam_mkc mkc2
+          where mkc2.mks_code = mkc.mks_code and
+                mkc2.mkc_proc = mkc.mkc_proc and
+                mkc2.mkc_attp = mkc.mkc_attp and
+                mkc2.mkc_grade = mkc.mkc_grade
+      )
   """
 
   def GetAllVariableAssessmentWeightingRules: String =
@@ -1016,6 +1026,7 @@ object AssignmentImporter {
       GradeBoundary(
         rs.getString("marks_code"),
         rs.getString("process"),
+        rs.getInt("attempt"),
         rs.getInt("rank"),
         rs.getString("grade"),
         getNullableInt("minimum_mark"),

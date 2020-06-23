@@ -129,9 +129,9 @@ trait AssessmentMembershipDao {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary]
+  def getGradeBoundaries(marksCode: String, process: String, attempt: Int): Seq[GradeBoundary]
 
-  def getPassMark(marksCode: String, process: String): Option[Int]
+  def getPassMark(marksCode: String, process: String, attempt: Int): Option[Int]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
@@ -669,21 +669,22 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .setParameter("marksCode", marksCode)
       .run()
 
-  def getGradeBoundaries(marksCode: String, process: String): Seq[GradeBoundary] =
+  def getGradeBoundaries(marksCode: String, process: String, attempt: Int): Seq[GradeBoundary] =
     session.newCriteria[GradeBoundary]
       .add(is("marksCode", marksCode))
       .add(is("process", process))
+      .add(is("attempt", attempt))
       .seq
 
-  def getPassMark(marksCode: String, process: String): Option[Int] = {
+  def getPassMark(marksCode: String, process: String, attempt: Int): Option[Int] =
     session.newCriteria[GradeBoundary]
       .add(is("marksCode", marksCode))
       .add(is("process", process))
+      .add(is("attempt", attempt))
       .add(is("_result", ModuleResult.Pass))
       .add(is("signalStatus", "N"))
       .project[Option[Int]](Projections.min("minimumMark"))
       .uniqueResult.flatten
-  }
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
     val assignments = session.createSQLQuery(

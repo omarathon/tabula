@@ -45,7 +45,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
     val submitter: CurrentUser = currentUser
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
-    gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, null, 0, "A", Some(0), Some(100), "N", None)))
+    gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, null, 1, 0, "A", Some(0), Some(100), "N", None)))
   }
 
   @Test

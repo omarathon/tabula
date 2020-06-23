@@ -433,30 +433,30 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
   @Test def PassMark(): Unit = transactional { _ =>
     new Fixture {
       val gradeBoundaries = Seq(
-        GradeBoundary("WMR", "SAS", 1, "1", Some(70), Some(100), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", "SAS", 2, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", "SAS", 3, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", "SAS", 4, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", "SAS", 5, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", "SAS", 6, "CP", Some(0), Some(100), "S", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", "SAS", 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", "SAS", 20, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", "SAS", 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
+        GradeBoundary("WMR", "SAS", 1, 1, "1", Some(70), Some(100), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", "SAS", 1, 2, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", "SAS", 1, 3, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", "SAS", 1, 4, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", "SAS", 1, 5, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", "SAS", 1, 6, "CP", Some(0), Some(100), "S", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", "SAS", 1, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", "SAS", 1, 20, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", "SAS", 1, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
 
-        GradeBoundary("HRNZ", "SAS", 1, "P", None, None, "N", Some(ModuleResult.Pass)),
-        GradeBoundary("HRNZ", "SAS", 1, "F", None, None, "N", Some(ModuleResult.Fail)),
-        GradeBoundary("HRNZ", "SAS", 1, "S", Some(0), Some(100), "S", Some(ModuleResult.Pass)),
-        GradeBoundary("HRNZ", "SAS", 2, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("HRNZ", "SAS", 3, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("HRNZ", "SAS", 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
+        GradeBoundary("HRNZ", "SAS", 1, 1, "P", None, None, "N", Some(ModuleResult.Pass)),
+        GradeBoundary("HRNZ", "SAS", 1, 1, "F", None, None, "N", Some(ModuleResult.Fail)),
+        GradeBoundary("HRNZ", "SAS", 1, 1, "S", Some(0), Some(100), "S", Some(ModuleResult.Pass)),
+        GradeBoundary("HRNZ", "SAS", 1, 2, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("HRNZ", "SAS", 1, 3, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("HRNZ", "SAS", 1, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
       )
 
       gradeBoundaries.foreach(dao.save)
       session.flush()
 
-      dao.getPassMark("WMR", "SAS") should be (Some(40))
-      dao.getPassMark("HRNZ", "SAS") should be (None)
-      dao.getPassMark("NOBOUNDARIES", "SAS") should be (None)
+      dao.getPassMark("WMR", "SAS", 1) should be (Some(40))
+      dao.getPassMark("HRNZ", "SAS", 1) should be (None)
+      dao.getPassMark("NOBOUNDARIES", "SAS", 1) should be (None)
     }
   }
 }

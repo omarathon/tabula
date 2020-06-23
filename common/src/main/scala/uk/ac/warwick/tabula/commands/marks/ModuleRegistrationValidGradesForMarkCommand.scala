@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ModuleRegistrationValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleRegistration}
@@ -38,10 +39,10 @@ abstract class ModuleRegistrationValidGradesForMarkCommandInternal(val moduleReg
     val validGrades = mark.maybeText match {
       case Some(m) =>
         Try(m.toInt).toOption
-          .map(asInt => assessmentMembershipService.gradesForMark(moduleRegistration, Some(asInt), resit))
+          .map(asInt => assessmentMembershipService.gradesForMark(moduleRegistration, Some(asInt), Option(resitAttempt)))
           .getOrElse(Seq.empty)
 
-      case None => assessmentMembershipService.gradesForMark(moduleRegistration, None, resit)
+      case None => assessmentMembershipService.gradesForMark(moduleRegistration, None, Option(resitAttempt))
     }
 
     val default =
@@ -66,7 +67,7 @@ trait ModuleRegistrationValidGradesForMarkState {
 trait ModuleRegistrationValidGradesForMarkRequest {
   var mark: String = _
   var existing: String = _
-  var resit: Boolean = false
+  var resitAttempt: JInteger = _
 }
 
 trait ModuleRegistrationValidGradesForMarkValidation extends SelfValidating {
