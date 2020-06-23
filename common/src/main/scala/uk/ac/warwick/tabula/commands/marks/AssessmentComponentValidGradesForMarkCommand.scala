@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.AssessmentComponentValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary}
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
@@ -32,7 +31,7 @@ object AssessmentComponentValidGradesForMarkCommand {
 
 abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessmentComponent: AssessmentComponent)
   extends CommandInternal[Result]
-    with AssessmentComponentValidGradesForMarkState with Logging {
+    with AssessmentComponentValidGradesForMarkState {
   self: AssessmentComponentValidGradesForMarkRequest
     with AssessmentMembershipServiceComponent =>
 
@@ -45,8 +44,6 @@ abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessme
 
       case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, Option(resitAttempt))
     }
-
-    logger.info(s"mark=$mark validGrades=$validGrades")
 
     val default =
       if (existing.maybeText.nonEmpty && validGrades.exists(_.grade == existing)) {

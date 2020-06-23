@@ -23,23 +23,28 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val academicYear = AcademicYear.starting(2019)
     val occurrence = "A"
 
-    def markRecord(mark: Option[Int], grade: Option[String], resit: Boolean = false): StudentMarkRecord = StudentMarkRecord(
-      universityId = student.universityId,
-      resitSequence = None,
-      position = None,
-      currentMember = true,
-      resitExpected = resit,
-      furtherFirstSit = false,
-      mark = mark,
-      grade = grade,
-      needsWritingToSits = false,
-      outOfSync = false,
-      markState = Some(UnconfirmedActual),
-      agreed = false,
-      resitMark = false,
-      history = Seq.empty,
-      upstreamAssessmentGroupMember = null
-    )
+    def markRecord(mark: Option[Int], grade: Option[String], resit: Boolean = false): StudentMarkRecord = {
+      val uagm = new UpstreamAssessmentGroupMember
+      if (resit) uagm.currentResitAttempt = Some(1)
+
+      StudentMarkRecord(
+        universityId = student.universityId,
+        resitSequence = None,
+        position = None,
+        currentMember = true,
+        resitExpected = resit,
+        furtherFirstSit = false,
+        mark = mark,
+        grade = grade,
+        needsWritingToSits = false,
+        outOfSync = false,
+        markState = Some(UnconfirmedActual),
+        agreed = false,
+        resitMark = false,
+        history = Seq.empty,
+        upstreamAssessmentGroupMember = uagm
+      )
+    }
   }
 
   @Test def calculateNoComponents(): Unit = new Fixture {
