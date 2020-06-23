@@ -383,7 +383,7 @@ trait CopyModuleRegistrationProperties {
     val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
 
     copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
-    copyBigDecimal(moduleRegistrationBean, "cats", Some(modRegRow.cats)) |
+    copyBigDecimal(moduleRegistrationBean, "cats", Option(modRegRow.cats)) |
     copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
     copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
     copyOptionProperty(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
