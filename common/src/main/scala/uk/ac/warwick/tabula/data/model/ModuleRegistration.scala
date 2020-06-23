@@ -160,7 +160,9 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
 
     // Group by assessment component so we only get the latest by resit sequence
-    allMembers.groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
+    allMembers
+      .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
+      .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
       .values.map(_.sortBy(_.resitSequence).reverse.head)
       .toSeq
   }

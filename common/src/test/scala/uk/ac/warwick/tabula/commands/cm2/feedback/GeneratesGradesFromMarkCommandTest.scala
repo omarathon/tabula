@@ -23,8 +23,8 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
     assignment.assessmentGroups = JList(assessmentGroup)
     val upstreamAssessmentComponent: AssessmentComponent = Fixtures.assessmentComponent(module, 0)
     assessmentGroup.assessmentComponent = upstreamAssessmentComponent
-    val upstreamAssesmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
-    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2014), "A", module.code, null)
+    val upstreamAssesmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null, null)
+    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2014), "A", module.code, null, null)
     assessmentGroup.membershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
     upstreamAssesmentGroupInfo.upstreamAssessmentGroup.members.add(new UpstreamAssessmentGroupMember(upstreamAssesmentGroup, studentUser.getWarwickId, UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
     mockAssignmentMembershipService.determineMembershipUsersIncludingPWD(assignment) returns Seq(studentUser)

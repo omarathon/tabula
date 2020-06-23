@@ -24,7 +24,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
 
-    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, "A01")
+    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, "A", "A01")
     assessmentMembershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
 
     val upstream = new AssessmentComponent
