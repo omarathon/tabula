@@ -612,21 +612,32 @@ trait ClearRecordedModuleMarks {
     with ModuleRegistrationMarksServiceComponent
     with ModuleRegistrationServiceComponent =>
 
-  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): RecordedModuleRegistration = {
+  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): Option[RecordedModuleRegistration] = {
     // There might be multiple module registrations here, for different SPR codes. Just blat them all
     moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
       .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
-      .map { moduleRegistration =>
-        val recordedModuleRegistration: RecordedModuleRegistration =
-          moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
+      .filter { moduleRegistration =>
+        val existingRecordedModuleRegistration =
+          moduleRegistrationMarksService.getRecordedModuleRegistration(moduleRegistration)
 
+        moduleRegistration.firstDefinedMark.nonEmpty ||
+        moduleRegistration.firstDefinedGrade.nonEmpty ||
+        Option(moduleRegistration.moduleResult).nonEmpty ||
+        existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
+          recordedModuleRegistration.latestMark.nonEmpty ||
+          recordedModuleRegistration.latestGrade.nonEmpty ||
+          recordedModuleRegistration.latestResult.nonEmpty
+        }
+      }
+      .map(moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration)
+      .map { recordedModuleRegistration =>
         recordedModuleRegistration.addMark(
           uploader = currentUser.apparentUser,
           mark = None,
           grade = None,
           result = None,
           source = RecordedModuleMarkSource.ComponentMarkChange,
-          markState = MarkState.UnconfirmedActual,
+          markState = recordedModuleRegistration.latestState.getOrElse(MarkState.UnconfirmedActual),
           comments = "Module mark calculation reset by component mark change",
         )
 
@@ -635,8 +646,5 @@ trait ClearRecordedModuleMarks {
         recordedModuleRegistration
       }
       .headOption
-      // This is potentially frustrating, and might happen if the assignment importer and mod reg importer got out of sync
-      // but better to blow up than let marks get out of sync
-      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module registration for $recordedAssessmentComponentStudent"))
   }
 }
