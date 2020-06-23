@@ -120,9 +120,10 @@
 
 <#macro componentMarkHistory marks ac member>
   <#if marks.history?has_content>
-    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${marks.universityId}-${ac.sequence}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+    <#local modalId = "mark-history-modal-${marks.universityId}-${ac.moduleCode}-${ac.sequence}" />
+    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#${modalId}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
-    <@modal.modal id="mark-history-modal-${marks.universityId}-${ac.sequence}">
+    <@modal.modal id=modalId>
       <@modal.wrapper cssClass="modal-xl">
         <@modal.header>
           <h3 class="modal-title">Mark history for ${member.fullName}, ${marks.universityId}, ${ac.name}</h3>

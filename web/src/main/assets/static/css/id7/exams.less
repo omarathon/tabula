@@ -102,9 +102,11 @@ div.assessment_details {
 
   td.assessment_details_col2 {
     max-width: 250px;
-    word-wrap: break-word;
-    white-space: pre;
-    white-space: pre-wrap;
+    > div {
+      word-wrap: break-word;
+      white-space: pre;
+      white-space: pre-wrap;
+    }
   }
 
   td.assessment_details_col {

@@ -21,7 +21,9 @@ object StudentExamPapersCommand {
       with StudentExamPapersPermissions
       with StudentExamPapersCommandState
       with StudentModuleRegistrationAndComponents
-      with ReadOnly with Unaudited
+      with ReadOnly with Unaudited {
+      override val includeActualMarks: Boolean = false
+    }
 }
 
 
@@ -36,7 +38,7 @@ class StudentExamPapersCommandInternal(val studentMember: StudentMember, val aca
     generateModuleRegistrationAndComponents(studentCourseYearDetails).flatMap { moduleRegistrationAndComponents =>
       val examComponents = moduleRegistrationAndComponents.components.filter(c => c.upstreamGroup.assessmentComponent.examPaperCode.isDefined)
       if (examComponents.nonEmpty) {
-        Option(ModuleRegistrationAndComponents(moduleRegistrationAndComponents.moduleRegistration,  moduleRegistrationAndComponents.markState, examComponents))
+        Some(moduleRegistrationAndComponents.copy(components = examComponents))
       } else {
         None
       }

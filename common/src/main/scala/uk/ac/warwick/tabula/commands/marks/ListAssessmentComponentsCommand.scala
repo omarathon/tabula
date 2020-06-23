@@ -34,6 +34,8 @@ object ListAssessmentComponentsCommand {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
       val reassessment = member.isReassessment
       val furtherFirstSit = reassessment && member.currentResitAttempt.exists(_ <= 1)
+      val isAgreedSITS = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty)
+
       StudentMarkRecord(
         universityId = member.universityId,
         resitSequence = member.resitSequence,
@@ -41,14 +43,23 @@ object ListAssessmentComponentsCommand {
         currentMember = info.currentMembers.contains(member),
         resitExpected = reassessment,
         furtherFirstSit = furtherFirstSit,
-        mark =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(member.firstDefinedMark)
-            .orElse(recordedStudent.flatMap(_.latestMark)),
-        grade =
-          recordedStudent.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(member.firstDefinedGrade)
-            .orElse(recordedStudent.flatMap(_.latestGrade)),
+
+        // These are needlessly verbose but thought better to be explicit on the order
+        mark = recordedStudent match {
+          case Some(marks) if marks.needsWritingToSits => marks.latestMark
+          case _ if isAgreedSITS => member.agreedMark
+          case Some(marks) => marks.latestMark
+          case _ if member.firstDefinedMark.nonEmpty => member.firstDefinedMark
+          case _ => None
+        },
+        grade = recordedStudent match {
+          case Some(marks) if marks.needsWritingToSits => marks.latestGrade
+          case _ if isAgreedSITS => member.agreedGrade
+          case Some(marks) => marks.latestGrade
+          case _ if member.firstDefinedGrade.nonEmpty => member.firstDefinedGrade
+          case _ => None
+        },
+
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
@@ -56,7 +67,7 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
         markState = recordedStudent.flatMap(_.latestState),
-        agreed = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty),
+        agreed = isAgreedSITS,
         resitMark = reassessment,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member

@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.StudentAssessmentCommand.Command
+import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
+import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
@@ -31,6 +33,7 @@ object StudentAssessmentCommand {
       with StudentAssessmentCommandState
       with StudentModuleRegistrationAndComponents
       with ReadOnly with Unaudited {
+      override val includeActualMarks: Boolean = true
 
       override def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] =
         Some(mitCircsSubmissionService.submissionsWithOutcomes(studentCourseDetails.student))
@@ -51,7 +54,9 @@ object StudentAssessmentProfileCommand {
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
       with StudentModuleRegistrationAndComponents
-      with ReadOnly with Unaudited
+      with ReadOnly with Unaudited {
+      override val includeActualMarks: Boolean = false
+    }
 }
 
 case class StudentMarksBreakdown(
@@ -66,10 +71,17 @@ case class StudentMarksBreakdown(
 case class ModuleRegistrationAndComponents(
   moduleRegistration: ModuleRegistration,
   markState: Option[MarkState],
+  markRecord: StudentModuleMarkRecord,
   components: Seq[Component],
 )
 
-case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGroupMember, weighting: Option[BigDecimal], markState: Option[MarkState])
+case class Component(
+  upstreamGroup: UpstreamGroup,
+  member: UpstreamAssessmentGroupMember,
+  weighting: Option[BigDecimal],
+  markState: Option[MarkState],
+  markRecord: StudentMarkRecord,
+)
 
 class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[StudentMarksBreakdown] with TaskBenchmarking {
@@ -136,6 +148,13 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
 
 trait StudentModuleRegistrationAndComponents {
   self: AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent =>
+
+  /**
+   * Whether to consider actual marks, e.g. for calculating VAW weightings. This should be false when it will be displayed to students,
+   * as they will be able to infer component marks before they are agreed from the variable weightings.
+   */
+  def includeActualMarks: Boolean
+
   def generateModuleRegistrationAndComponents(scyds: Seq[StudentCourseYearDetails]): Seq[ModuleRegistrationAndComponents] = {
     scyds.flatMap { scyd =>
       scyd.moduleRegistrations.map { mr =>
@@ -145,20 +164,32 @@ trait StudentModuleRegistrationAndComponents {
             aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
           } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
 
-        // For VAW. Only considers agreed marks otherwise the student may be able to infer if they've got higher marks on one assessment than another
-        // based on the weighting
-        val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = false)
+        // For VAW
+        val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = includeActualMarks)
         val hasAnyMarks = marks.exists { case (_, _, mark) => mark.nonEmpty }
 
+        val recordedModuleRegistration: Option[RecordedModuleRegistration] = moduleRegistrationMarksService.getRecordedModuleRegistration(mr)
+
         ModuleRegistrationAndComponents(
-          mr,
-          moduleRegistrationMarksService.getRecordedModuleRegistration(mr).flatMap(_.latestState),
-          components.map { case (ug, uagm) =>
+          moduleRegistration = mr,
+          markState = recordedModuleRegistration.flatMap(_.latestState),
+          markRecord = StudentModuleMarkRecord(mr, recordedModuleRegistration),
+          components = components.map { case (ug, uagm) =>
+            val recordedAssessmentComponentStudent: Option[RecordedAssessmentComponentStudent] = assessmentComponentMarksService.getRecordedStudent(uagm)
+
             Component(
-              ug,
-              uagm,
-              if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting,
-              assessmentComponentMarksService.getRecordedStudent(uagm).flatMap(_.latestState)
+              upstreamGroup = ug,
+              member = uagm,
+              weighting = if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting,
+              markState = recordedAssessmentComponentStudent.flatMap(_.latestState),
+              markRecord = StudentMarkRecord(
+                UpstreamAssessmentGroupInfo(
+                  uagm.upstreamAssessmentGroup,
+                  Seq(uagm).filterNot(_ => scyd.studentCourseDetails.permanentlyWithdrawn)
+                ),
+                uagm,
+                recordedAssessmentComponentStudent
+              ),
             )
           }
         )
