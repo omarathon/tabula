@@ -144,17 +144,28 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
-      membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$sitsModuleCode-$occurrence") {
+      membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = false)
     }
 
-  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$assessmentGroup-$occurrence") {
-      membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
-    }.filter(_.universityId == studentCourseDetails.student.universityId)
+  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
+    val allMembers =
+      RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
+        membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
+      }.filter(_.universityId == studentCourseDetails.student.universityId)
 
+    // Filter down to just the latest resit sequence
+    // Find the assessment group to filter by (this is for students who take multiple reassessments)
+    val assessmentGroup =
+      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
 
-  def currentResitAttempt = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).sorted.lastOption
+    // Group by assessment component so we only get the latest by resit sequence
+    allMembers.groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
+      .values.map(_.sortBy(_.resitSequence).reverse.head)
+      .toSeq
+  }
+
+  def currentResitAttempt: Option[Int] = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).sorted.lastOption
 
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
     val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))

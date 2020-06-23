@@ -87,7 +87,7 @@ trait AssessmentMembershipService {
 
   def getUpstreamAssessmentGroupInfo(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -342,8 +342,8 @@ class AssessmentMembershipServiceImpl
     uagMap.map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }.toSeq ++ additional
   }
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
-    dao.getUpstreamAssessmentGroups(registration, eagerLoad)
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
+    dao.getUpstreamAssessmentGroups(registration, allAssessmentGroups, eagerLoad)
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     dao.getUpstreamAssessmentGroups(academicYears)

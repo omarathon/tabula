@@ -129,7 +129,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
     moduleRegistrations.foreach { mr =>
       scd._moduleRegistrations.add(mr)
       mr.membershipService = mockMembershipService
-      mockMembershipService.getUpstreamAssessmentGroups(mr, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
+      mockMembershipService.getUpstreamAssessmentGroups(mr, allAssessmentGroups = true, eagerLoad = true) returns { upstreamAssessmentGroups(mr.module.code) }
     }
   }
 

@@ -97,7 +97,7 @@ trait AssessmentMembershipDao {
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember]
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -526,13 +526,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
     val criteria =
       session.newCriteria[UpstreamAssessmentGroup]
         .add(is("academicYear", registration.academicYear))
         .add(is("moduleCode", registration.sitsModuleCode))
-        .add(is("assessmentGroup", registration.assessmentGroup))
         .add(is("occurrence", registration.occurrence))
+
+    if (!allAssessmentGroups) {
+      criteria.add(is("assessmentGroup", registration.assessmentGroup))
+    }
 
     if (eagerLoad) {
       criteria.setFetchMode("members", FetchMode.JOIN).distinct
