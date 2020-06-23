@@ -24,7 +24,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
 
-    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, "A01")
+    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, "A", "A01")
     assessmentMembershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
 
     val upstream = new AssessmentComponent
@@ -45,7 +45,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
     val submitter: CurrentUser = currentUser
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
-    gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, null, 0, "A", Some(0), Some(100), "N", None)))
+    gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, null, 1, 0, "A", Some(0), Some(100), "N", None)))
   }
 
   @Test

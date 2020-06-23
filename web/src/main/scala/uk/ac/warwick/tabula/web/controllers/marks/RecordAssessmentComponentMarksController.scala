@@ -166,7 +166,7 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
       val changes: Seq[(StudentMarkRecord, StudentMarksItem)] =
         cmd.students.asScala.values.toSeq.flatMap { student =>
           // We know the .get is safe because it's validated
-          val studentMarkRecord = studentMarkRecords.find(_.universityId == student.universityID).get
+          val studentMarkRecord = studentMarkRecords.find(smr => smr.universityId == student.universityID && smr.resitSequence.getOrElse("") == student.resitSequence).get
 
           // Mark and grade haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (

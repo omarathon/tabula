@@ -87,7 +87,7 @@ trait AssessmentMembershipService {
 
   def getUpstreamAssessmentGroupInfo(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -133,11 +133,11 @@ trait AssessmentMembershipService {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def gradesForMark(component: AssessmentComponent, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary]
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary]
 
-  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary]
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary]
 
-  def passMark(moduleRegistration: ModuleRegistration, isResit: Boolean): Option[Int]
+  def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int]
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
@@ -342,8 +342,8 @@ class AssessmentMembershipServiceImpl
     uagMap.map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }.toSeq ++ additional
   }
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
-    dao.getUpstreamAssessmentGroups(registration, eagerLoad)
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
+    dao.getUpstreamAssessmentGroups(registration, allAssessmentGroups, eagerLoad)
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     dao.getUpstreamAssessmentGroups(academicYears)
@@ -362,23 +362,23 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  private def gradesForMark(marksCode: String, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
-    dao.getGradeBoundaries(marksCode, if (isResit) "RAS" else "SAS")
+  private def gradesForMark(marksCode: String, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
+    dao.getGradeBoundaries(marksCode, if (resitAttempt.nonEmpty) "RAS" else "SAS", resitAttempt.getOrElse(1))
       .filter(_.isValidForMark(mark))
       .sorted
 
-  def gradesForMark(component: AssessmentComponent, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
     component.marksCode.maybeText.map { marksCode =>
-      gradesForMark(marksCode, mark, isResit)
+      gradesForMark(marksCode, mark, resitAttempt)
     }.getOrElse(Seq.empty)
 
-  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], isResit: Boolean): Seq[GradeBoundary] =
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
     moduleRegistration.marksCode.maybeText.map { marksCode =>
-      gradesForMark(marksCode, mark, isResit)
+      gradesForMark(marksCode, mark, resitAttempt)
     }.getOrElse(Seq.empty)
 
-  def passMark(moduleRegistration: ModuleRegistration, isResit: Boolean): Option[Int] =
-    dao.getPassMark(moduleRegistration.marksCode, if (isResit) "RAS" else "SAS")
+  def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int] =
+    dao.getPassMark(moduleRegistration.marksCode, if (resitAttempt.nonEmpty) "RAS" else "SAS", resitAttempt.getOrElse(1))
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 

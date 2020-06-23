@@ -16,7 +16,7 @@ object GraduationBenchmarkBreakdownCommand {
   type Result = Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]
   type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState
 
-  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
+  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new GraduationBenchmarkBreakdownCommandInternal(studentCourseDetails, academicYear)
       with ComposableCommand[Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]]
       with AutowiringAssessmentMembershipServiceComponent
@@ -31,7 +31,9 @@ object GraduationBenchmarkBreakdownCommand {
       with GraduationBenchmarkBreakdownCommandState
       with GraduationBenchmarkBreakdownCommandRequest
       with StudentModuleRegistrationAndComponents
-      with ReadOnly with Unaudited
+      with ReadOnly with Unaudited {
+      override val includeActualMarks: Boolean = true
+    }
 }
 
 case class UGGraduationBenchmarkBreakdown (
@@ -81,10 +83,10 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
 
       val weightedAssessmentMark = moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations)
 
-      val  percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
+      val percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
       val percentageOfAssessmentTakenDecimal =(percentageOfAssessmentTaken / 100)
 
-      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
+      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings, markForFinalYear = false)
         .map { _.map { case (year, weightedMark) =>
           val yearWeighting = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
           val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark

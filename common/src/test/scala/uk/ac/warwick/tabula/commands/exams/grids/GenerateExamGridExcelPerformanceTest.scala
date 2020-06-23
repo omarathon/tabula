@@ -106,7 +106,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
   def moduleRegistration(universityId: String, moduleCode: String, cats: BigDecimal): ModuleRegistration = {
     val reg = Fixtures.moduleRegistration(students(universityId).mostSignificantCourse, modules(moduleCode), cats.underlying(), academicYear)
     reg.membershipService = smartMock[AssessmentMembershipService]
-    reg.membershipService.getUpstreamAssessmentGroups(reg, eagerLoad = true) returns Nil // TODO component marks here
+    reg.membershipService.getUpstreamAssessmentGroups(reg, allAssessmentGroups = true, eagerLoad = true) returns Nil // TODO component marks here
     reg
   }
 

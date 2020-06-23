@@ -39,23 +39,31 @@ object MarksDepartmentHomeCommand {
     history: Seq[RecordedModuleMark] // Most recent first
   )
   object StudentModuleMarkRecord {
-    def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord =
+    def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord = {
+      val isAgreedSITS = recordedModuleRegistration.forall(!_.needsWritingToSits) && (moduleRegistration.agreedMark.nonEmpty || moduleRegistration.agreedGrade.nonEmpty)
+
       StudentModuleMarkRecord(
         sprCode = moduleRegistration.sprCode,
-        mark =
-          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestMark)
-            .orElse(moduleRegistration.agreedMark)
-            .orElse(recordedModuleRegistration.flatMap(_.latestMark))
-            .orElse(moduleRegistration.firstDefinedMark),
-        grade =
-          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestGrade)
-            .orElse(moduleRegistration.agreedGrade)
-            .orElse(recordedModuleRegistration.flatMap(_.latestGrade))
-            .orElse(moduleRegistration.firstDefinedGrade),
-        result =
-          recordedModuleRegistration.filter(_.needsWritingToSits).flatMap(_.latestResult)
-            .orElse(Option(moduleRegistration.moduleResult))
-            .orElse(recordedModuleRegistration.flatMap(_.latestResult)),
+
+        // These are needlessly verbose but thought better to be explicit on the order
+        mark = recordedModuleRegistration match {
+          case Some(marks) if marks.needsWritingToSits => marks.latestMark
+          case _ if isAgreedSITS => moduleRegistration.agreedMark
+          case Some(marks) => marks.latestMark
+          case _ => moduleRegistration.firstDefinedMark
+        },
+        grade = recordedModuleRegistration match {
+          case Some(marks) if marks.needsWritingToSits => marks.latestGrade
+          case _ if isAgreedSITS => moduleRegistration.agreedGrade
+          case Some(marks) => marks.latestGrade
+          case _ => moduleRegistration.firstDefinedGrade
+        },
+        result = recordedModuleRegistration match {
+          case Some(marks) if marks.needsWritingToSits => marks.latestResult
+          case _ if isAgreedSITS => Option(moduleRegistration.moduleResult)
+          case Some(marks) => marks.latestResult
+          case _ => Option(moduleRegistration.moduleResult)
+        },
         needsWritingToSits = recordedModuleRegistration.exists(_.needsWritingToSits),
         outOfSync = recordedModuleRegistration.exists(!_.needsWritingToSits) && (
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
@@ -63,10 +71,10 @@ object MarksDepartmentHomeCommand {
           recordedModuleRegistration.flatMap(_.latestResult).exists(r => moduleRegistration.moduleResult != r)
         ),
         markState = recordedModuleRegistration.flatMap(_.latestState),
-        // TODO - maybe consult markState for this but having a separate def that confirms that the mark is _really_ in SITS possibly makes more sense
-        agreed = recordedModuleRegistration.forall(!_.needsWritingToSits) && moduleRegistration.agreedMark.nonEmpty,
+        agreed = isAgreedSITS,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
       )
+    }
   }
 
   def studentModuleMarkRecords(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String, moduleRegistrations: Seq[ModuleRegistration], moduleRegistrationMarksService: ModuleRegistrationMarksService): Seq[StudentModuleMarkRecord] = {

@@ -231,7 +231,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
     scyd1.enrolledOrCompleted = true
     scyd1.studentCourseDetails.statusOnRoute = Fixtures.sitsStatus()
 
-    val uag = Fixtures.assessmentGroup(AcademicYear.now(), "", "", "A01")
+    val uag = Fixtures.assessmentGroup(AcademicYear.now(), "", "", "A", "A01")
     val uagm = new UpstreamAssessmentGroupMember(uag, "1000001", UpstreamAssessmentGroupMemberAssessmentType.Reassessment, Some("001"))
     uagm.actualMark = Some(41)
     uagm.actualGrade = Some("3")

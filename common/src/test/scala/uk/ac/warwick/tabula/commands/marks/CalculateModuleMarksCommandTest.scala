@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.marks
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.ModuleMarkCalculation
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, ModuleRegistration, ModuleResult}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
@@ -23,23 +23,28 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     val academicYear = AcademicYear.starting(2019)
     val occurrence = "A"
 
-    def markRecord(mark: Option[Int], grade: Option[String], resit: Boolean = false): StudentMarkRecord = StudentMarkRecord(
-      universityId = student.universityId,
-      resitSequence = None,
-      position = None,
-      currentMember = true,
-      resitExpected = resit,
-      furtherFirstSit = false,
-      mark = mark,
-      grade = grade,
-      needsWritingToSits = false,
-      outOfSync = false,
-      markState = Some(UnconfirmedActual),
-      agreed = false,
-      resitMark = false,
-      history = Seq.empty,
-      upstreamAssessmentGroupMember = null
-    )
+    def markRecord(mark: Option[Int], grade: Option[String], resit: Boolean = false): StudentMarkRecord = {
+      val uagm = new UpstreamAssessmentGroupMember
+      if (resit) uagm.currentResitAttempt = Some(1)
+
+      StudentMarkRecord(
+        universityId = student.universityId,
+        resitSequence = None,
+        position = None,
+        currentMember = true,
+        resitExpected = resit,
+        furtherFirstSit = false,
+        mark = mark,
+        grade = grade,
+        needsWritingToSits = false,
+        outOfSync = false,
+        markState = Some(UnconfirmedActual),
+        agreed = false,
+        resitMark = false,
+        history = Seq.empty,
+        upstreamAssessmentGroupMember = uagm
+      )
+    }
   }
 
   @Test def calculateNoComponents(): Unit = new Fixture {
@@ -59,19 +64,20 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
   private trait PassFailModuleFixture extends Fixture {
     val modReg = Fixtures.moduleRegistration(studentCourseDetails, module, JBigDecimal(Some(cats)), academicYear, occurrence, marksCode = "PF")
 
-    algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]], anyBoolean) answers { args: Array[AnyRef] =>
-      val resit = args(2).asInstanceOf[Boolean]
-      val process = if (resit) "RAS" else "SAS"
+    algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]], any[Option[Int]]) answers { args: Array[AnyRef] =>
+      val resitAttempt = args(2).asInstanceOf[Option[Int]]
+      val process = if (resitAttempt.nonEmpty) "RAS" else "SAS"
+      val attempt = resitAttempt.getOrElse(1)
 
       args(1).asInstanceOf[Option[Int]] match {
         case Some(_) => Seq.empty
         case _ => Seq(
-          GradeBoundary("PF", process, 1, "P", None, None, "S", Some(ModuleResult.Pass)),
-          GradeBoundary("PF", process, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
-          GradeBoundary("PF", process, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
-          GradeBoundary("PF", process, 4, "R", None, None, "S", Some(ModuleResult.Fail)),
-          GradeBoundary("PF", process, 5, GradeBoundary.MitigatingCircumstancesGrade, None, None, "S", Some(ModuleResult.Deferred)),
-          GradeBoundary("PF", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
+          GradeBoundary("PF", process, attempt, 1, "P", None, None, "S", Some(ModuleResult.Pass)),
+          GradeBoundary("PF", process, attempt, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
+          GradeBoundary("PF", process, attempt, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
+          GradeBoundary("PF", process, attempt, 4, "R", None, None, "S", Some(ModuleResult.Fail)),
+          GradeBoundary("PF", process, attempt, 5, GradeBoundary.MitigatingCircumstancesGrade, None, None, "S", Some(ModuleResult.Deferred)),
+          GradeBoundary("PF", process, attempt, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
         )
       }
     }
@@ -186,42 +192,44 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
   private trait UGModuleFixture extends Fixture {
     val modReg = Fixtures.moduleRegistration(studentCourseDetails, module, JBigDecimal(Some(cats)), academicYear, occurrence, marksCode = "WMR")
 
-    algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]], anyBoolean) answers { args: Array[AnyRef] =>
-      val resit = args(2).asInstanceOf[Boolean]
-      val process = if (resit) "RAS" else "SAS"
+    algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]], any[Option[Int]]) answers { args: Array[AnyRef] =>
+      val resitAttempt = args(2).asInstanceOf[Option[Int]]
+      val process = if (resitAttempt.nonEmpty) "RAS" else "SAS"
+      val attempt = resitAttempt.getOrElse(1)
 
       val gradeBoundaries = Seq(
-        GradeBoundary("WMR", process, 1, "1", Some(70), Some(100), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", process, 2, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", process, 3, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", process, 4, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
-        GradeBoundary("WMR", process, 5, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", process, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", process, 20, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-        GradeBoundary("WMR", process, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", Some(ModuleResult.Deferred)),
-        GradeBoundary("WMR", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
+        GradeBoundary("WMR", process, attempt, 1, "1", Some(70), Some(100), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", process, attempt, 2, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", process, attempt, 3, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", process, attempt, 4, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
+        GradeBoundary("WMR", process, attempt, 5, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", process, attempt, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", process, attempt, 20, "R", Some(0), Some(100), "S", Some(ModuleResult.Fail)),
+        GradeBoundary("WMR", process, attempt, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", Some(ModuleResult.Deferred)),
+        GradeBoundary("WMR", process, attempt, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
       )
 
       gradeBoundaries.filter(_.isValidForMark(args(1).asInstanceOf[Option[Int]]))
     }
 
-    algorithm.assessmentMembershipService.gradesForMark(any[AssessmentComponent], any[Option[Int]], anyBoolean) answers { args: Array[AnyRef] =>
+    algorithm.assessmentMembershipService.gradesForMark(any[AssessmentComponent], any[Option[Int]], any[Option[Int]]) answers { args: Array[AnyRef] =>
       args(0).asInstanceOf[AssessmentComponent].marksCode match {
         case "WAR" =>
-          val resit = args(2).asInstanceOf[Boolean]
-          val process = if (resit) "RAS" else "SAS"
+          val resitAttempt = args(2).asInstanceOf[Option[Int]]
+          val process = if (resitAttempt.nonEmpty) "RAS" else "SAS"
+          val attempt = resitAttempt.getOrElse(1)
 
           val gradeBoundaries = Seq(
-            GradeBoundary("WAR", process, 1, "1", Some(70), Some(100), "N", None),
-            GradeBoundary("WAR", process, 2, "21", Some(60), Some(69), "N", None),
-            GradeBoundary("WAR", process, 3, "22", Some(50), Some(59), "N", None),
-            GradeBoundary("WAR", process, 4, "3", Some(40), Some(49), "N", None),
-            GradeBoundary("WAR", process, 5, "F", Some(0), Some(39), "N", None),
-            GradeBoundary("WAR", process, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", None),
-            GradeBoundary("WAR", process, 20, "R", Some(0), Some(100), "S", None),
-            GradeBoundary("WAR", process, 30, "AB", Some(0), Some(100), "S", None), // Only a valid grade for components, not modules
-            GradeBoundary("WAR", process, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", None),
-            GradeBoundary("WAR", process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
+            GradeBoundary("WAR", process, attempt, 1, "1", Some(70), Some(100), "N", None),
+            GradeBoundary("WAR", process, attempt, 2, "21", Some(60), Some(69), "N", None),
+            GradeBoundary("WAR", process, attempt, 3, "22", Some(50), Some(59), "N", None),
+            GradeBoundary("WAR", process, attempt, 4, "3", Some(40), Some(49), "N", None),
+            GradeBoundary("WAR", process, attempt, 5, "F", Some(0), Some(39), "N", None),
+            GradeBoundary("WAR", process, attempt, 10, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", None),
+            GradeBoundary("WAR", process, attempt, 20, "R", Some(0), Some(100), "S", None),
+            GradeBoundary("WAR", process, attempt, 30, "AB", Some(0), Some(100), "S", None), // Only a valid grade for components, not modules
+            GradeBoundary("WAR", process, attempt, 50, GradeBoundary.MitigatingCircumstancesGrade, Some(0), Some(100), "S", None),
+            GradeBoundary("WAR", process, attempt, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None),
           )
 
           gradeBoundaries.filter(_.isValidForMark(args(1).asInstanceOf[Option[Int]]))
@@ -516,7 +524,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     ac2.membershipService = algorithm.assessmentMembershipService
     val smr2 = markRecord(Some(71), Some("1"), resit = true)
 
-    algorithm.assessmentMembershipService.passMark(any[ModuleRegistration], any[Boolean]) returns Some(40)
+    algorithm.assessmentMembershipService.passMark(any[ModuleRegistration], any[Option[Int]]) returns Some(40)
     algorithm.assessmentMembershipService.getVariableAssessmentWeightingRules("IN101-30", occurrence) returns Seq.empty
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 

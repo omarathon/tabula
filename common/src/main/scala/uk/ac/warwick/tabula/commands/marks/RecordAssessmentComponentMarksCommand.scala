@@ -266,7 +266,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
           } else if (doGradeValidation) {
-            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.exists(_.isReassessment))
+            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
             if (item.grade.hasText) {
               if (!validGrades.exists(_.grade == item.grade)) {
                 errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -285,7 +285,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
             errors.rejectValue("mark", "actualMark.format")
         }
       } else if (doGradeValidation&& item.grade.hasText) {
-        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.exists(_.isReassessment))
+        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
         if (!validGrades.exists(_.grade == item.grade)) {
           errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
         }

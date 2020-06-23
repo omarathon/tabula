@@ -137,7 +137,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     val feedback: Feedback = Fixtures.assignmentFeedback("1234")
     thisAssessment.feedbacks.add(feedback)
     val mockGradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
-    mockGradeGenerator.applyForMarks(Map("1234" -> 100)) returns Map("1234" -> Seq(GradeBoundary(null, "SAS", 1, "A", Some(0), Some(0), null, None)))
+    mockGradeGenerator.applyForMarks(Map("1234" -> 100)) returns Map("1234" -> Seq(GradeBoundary(null, "SAS", 1, 1, "A", Some(0), Some(0), null, None)))
     val validator = new BulkAdjustmentValidation with BulkAdjustmentCommandState {
       override def assignment: Assignment = thisAssessment
 

@@ -369,7 +369,7 @@ trait CalculateModuleMarksAlgorithm {
         } else {
           lazy val calculation = {
             def validGradesForMark(m: Option[Int]) =
-              assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.exists(_._2.resitExpected))
+              assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.map(_._2.upstreamAssessmentGroupMember.currentResitAttempt).maxOption.flatten)
 
             // Is this a pass/fail module?
             if (moduleRegistration.passFail) {
@@ -427,7 +427,7 @@ trait CalculateModuleMarksAlgorithm {
                   // If there are any indicator grades, just fail out unless all the grades are the same
                   def isIndicatorGrade(ac: AssessmentComponent, s: StudentMarkRecord): Boolean = {
                     s.grade.exists { g =>
-                      assessmentMembershipService.gradesForMark(ac, s.mark, s.resitExpected)
+                      assessmentMembershipService.gradesForMark(ac, s.mark, s.upstreamAssessmentGroupMember.currentResitAttempt)
                         .find(_.grade == g)
                         .exists(!_.isDefault)
                     }
@@ -447,7 +447,7 @@ trait CalculateModuleMarksAlgorithm {
                       val mark = s.mark.get
                       val weighting = ac.weightingFor(marksForWeighting).get
 
-                      lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.resitExpected)
+                      lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.upstreamAssessmentGroupMember.currentResitAttempt)
 
                       val cappedMark = if(s.resitExpected && !s.furtherFirstSit) {
                         markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
@@ -511,9 +511,9 @@ trait CalculateModuleMarksValidation extends SelfValidating {
         errors.reject("uniNumber.unacceptable", Array(sprCode), "")
       }
 
-      val isResitting = moduleRegistration.exists { modReg =>
+      val currentResitAttempt = moduleRegistration.flatMap { modReg =>
         val universityId = modReg.studentCourseDetails.student.universityId
-        componentMarks(universityId).exists(_._2.resitExpected)
+        componentMarks(universityId).map(_._2.upstreamAssessmentGroupMember.currentResitAttempt).maxOption.flatten
       }
 
       if (item.mark.hasText) {
@@ -526,7 +526,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
           if (asInt < 0 || asInt > 100) {
             errors.rejectValue("mark", "actualMark.range")
           } else if (doGradeValidation) {
-            val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, Some(asInt), isResitting)).getOrElse(Seq.empty)
+            val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, Some(asInt), currentResitAttempt)).getOrElse(Seq.empty)
             if (item.grade.hasText) {
               if (!validGrades.exists(_.grade == item.grade)) {
                 errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -561,7 +561,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
             errors.rejectValue("mark", "actualMark.format")
         }
       } else if (doGradeValidation && item.grade.hasText) {
-        val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, None, isResitting)).getOrElse(Seq.empty)
+        val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, None, currentResitAttempt)).getOrElse(Seq.empty)
         if (!validGrades.exists(_.grade == item.grade)) {
           errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
         } else {
@@ -612,21 +612,32 @@ trait ClearRecordedModuleMarks {
     with ModuleRegistrationMarksServiceComponent
     with ModuleRegistrationServiceComponent =>
 
-  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): RecordedModuleRegistration = {
+  def clearRecordedModuleMarksFor(recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): Option[RecordedModuleRegistration] = {
     // There might be multiple module registrations here, for different SPR codes. Just blat them all
     moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
       .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
-      .map { moduleRegistration =>
-        val recordedModuleRegistration: RecordedModuleRegistration =
-          moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
+      .filter { moduleRegistration =>
+        val existingRecordedModuleRegistration =
+          moduleRegistrationMarksService.getRecordedModuleRegistration(moduleRegistration)
 
+        moduleRegistration.firstDefinedMark.nonEmpty ||
+        moduleRegistration.firstDefinedGrade.nonEmpty ||
+        Option(moduleRegistration.moduleResult).nonEmpty ||
+        existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
+          recordedModuleRegistration.latestMark.nonEmpty ||
+          recordedModuleRegistration.latestGrade.nonEmpty ||
+          recordedModuleRegistration.latestResult.nonEmpty
+        }
+      }
+      .map(moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration)
+      .map { recordedModuleRegistration =>
         recordedModuleRegistration.addMark(
           uploader = currentUser.apparentUser,
           mark = None,
           grade = None,
           result = None,
           source = RecordedModuleMarkSource.ComponentMarkChange,
-          markState = MarkState.UnconfirmedActual,
+          markState = recordedModuleRegistration.latestState.getOrElse(MarkState.UnconfirmedActual),
           comments = "Module mark calculation reset by component mark change",
         )
 
@@ -635,8 +646,5 @@ trait ClearRecordedModuleMarks {
         recordedModuleRegistration
       }
       .headOption
-      // This is potentially frustrating, and might happen if the assignment importer and mod reg importer got out of sync
-      // but better to blow up than let marks get out of sync
-      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module registration for $recordedAssessmentComponentStudent"))
   }
 }
