@@ -71,7 +71,7 @@
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit=student.resitExpected />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=(student.upstreamAssessmentGroupMember.currentResitAttempt)! />
                         <@f.select path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
                       <#else>
                         <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control grade-box" />

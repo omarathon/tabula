@@ -488,14 +488,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     transactional() {
       val sitsBoundaries = assignmentImporter.getAllGradeBoundaries
 
-      val marksAndProcess = sitsBoundaries.map(gb => (gb.marksCode, gb.process)).distinct
+      val marksAndProcessAndAttempt = sitsBoundaries.map(gb => (gb.marksCode, gb.process, gb.attempt)).distinct
 
-      val fmBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
-        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process)) None
-        else Some(GradeBoundary(marksCode, process, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None)) // No suggested result for FM, all results are allowed
+      val fmBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process && gb.attempt == attempt)) None
+        else Some(GradeBoundary(marksCode, process, attempt, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None)) // No suggested result for FM, all results are allowed
       }
 
-      val wBoundary = marksAndProcess.flatMap { case (marksCode, process) =>
+      val wBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
         if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) {
           Seq.empty
         } else if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.isDefault)) {
@@ -506,11 +506,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
               .getOrElse(ProgressionService.DefaultPassMark)
 
           Seq(
-            GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, Some(passMark), Some(100), "S", Some(ModuleResult.Pass)),
-            GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, Some(0), Some(passMark - 1), "S", Some(ModuleResult.Fail))
+            GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, Some(passMark), Some(100), "S", Some(ModuleResult.Pass)),
+            GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, Some(0), Some(passMark - 1), "S", Some(ModuleResult.Fail))
           )
         } else {
-          Seq(GradeBoundary(marksCode, process, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)))
+          Seq(GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)))
         }
       }
 

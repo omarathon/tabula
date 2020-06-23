@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.AssessmentComponentValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
@@ -30,7 +32,7 @@ object AssessmentComponentValidGradesForMarkCommand {
 
 abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessmentComponent: AssessmentComponent)
   extends CommandInternal[Result]
-    with AssessmentComponentValidGradesForMarkState {
+    with AssessmentComponentValidGradesForMarkState with Logging {
   self: AssessmentComponentValidGradesForMarkRequest
     with AssessmentMembershipServiceComponent =>
 
@@ -38,11 +40,13 @@ abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessme
     val validGrades = mark.maybeText match {
       case Some(m) =>
         Try(m.toInt).toOption
-          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), resit))
+          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), Option(resitAttempt)))
           .getOrElse(Seq.empty)
 
-      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, resit)
+      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, Option(resitAttempt))
     }
+
+    logger.info(s"mark=$mark validGrades=$validGrades")
 
     val default =
       if (existing.maybeText.nonEmpty && validGrades.exists(_.grade == existing)) {
@@ -66,7 +70,7 @@ trait AssessmentComponentValidGradesForMarkState {
 trait AssessmentComponentValidGradesForMarkRequest {
   var mark: String = _
   var existing: String = _
-  var resit: Boolean = false
+  var resitAttempt: JInteger = _
 }
 
 trait AssessmentComponentValidGradesForMarkValidation extends SelfValidating {

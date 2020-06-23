@@ -69,11 +69,12 @@
   </#if>
 </#macro>
 
-<#macro moduleMarkHistory student member>
+<#macro moduleMarkHistory student moduleCode member>
   <#if student.history?has_content>
-    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#mark-history-modal-${student.sprCode?replace('/', '_')}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
+    <#local modalId = "mark-history-modal-${student.sprCode?replace('/', '_')}-${moduleCode}" />
+    <button type="button" class="btn btn-default btn-xs tabula-tooltip" data-title="View history" data-toggle="modal" data-target="#${modalId}"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
 
-    <@modal.modal id="mark-history-modal-${student.sprCode?replace('/', '_')}">
+    <@modal.modal id=modalId>
       <@modal.wrapper cssClass="modal-xl">
         <@modal.header>
           <h3 class="modal-title">Mark history for ${member.fullName}, ${student.sprCode}</h3>

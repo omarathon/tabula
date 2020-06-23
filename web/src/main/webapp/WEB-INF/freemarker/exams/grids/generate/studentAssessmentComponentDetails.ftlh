@@ -226,7 +226,7 @@
             <#else>
               <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>
             </#if>
-            <@marks_components.moduleMarkHistory info.markRecord member />
+            <@marks_components.moduleMarkHistory info.markRecord mr.sitsModuleCode member />
           </td>
           <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
             <#if mr.agreedGrade??>

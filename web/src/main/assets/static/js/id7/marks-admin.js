@@ -25,7 +25,7 @@ $(() => {
 
         const data = {
           mark: $markInput.val(),
-          resit: $input.data('resit') || false,
+          resitAttempt: $input.data('resit-attempt') || undefined,
         };
 
         if ($select.is(':visible')) {
