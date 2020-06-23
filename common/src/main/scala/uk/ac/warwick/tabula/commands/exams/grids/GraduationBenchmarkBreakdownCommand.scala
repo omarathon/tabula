@@ -16,7 +16,7 @@ object GraduationBenchmarkBreakdownCommand {
   type Result = Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]
   type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState
 
-  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
+  def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new GraduationBenchmarkBreakdownCommandInternal(studentCourseDetails, academicYear)
       with ComposableCommand[Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]]
       with AutowiringAssessmentMembershipServiceComponent
@@ -31,7 +31,9 @@ object GraduationBenchmarkBreakdownCommand {
       with GraduationBenchmarkBreakdownCommandState
       with GraduationBenchmarkBreakdownCommandRequest
       with StudentModuleRegistrationAndComponents
-      with ReadOnly with Unaudited
+      with ReadOnly with Unaudited {
+      override val includeActualMarks: Boolean = true
+    }
 }
 
 case class UGGraduationBenchmarkBreakdown (
