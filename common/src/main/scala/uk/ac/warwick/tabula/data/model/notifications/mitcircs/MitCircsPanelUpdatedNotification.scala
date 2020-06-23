@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 object MitCircsPanelUpdatedNotification {
-  val templateLocation: String = "/WEB-INF/freemarker/emails/mit_circs_panel_updated.ftlh"
+  val templateLocation: String = "/WEB-INF/freemarker/emails/mit_circs_panel_updated.ftl"
 }
 
 @Entity
