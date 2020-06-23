@@ -51,7 +51,7 @@ object FinalYearGrade {
   def toBigDecimal(d: Double): BigDecimal = BigDecimal(d).setScale(1, RoundingMode.HALF_UP)
 
   object Undergraduate {
-    val all = Seq(
+    val all: Seq[FinalYearGrade] = Seq(
       First, FirstBorderline, UpperSecond, UpperSecondBorderline, LowerSecond, LowerSecondBorderline,
       Third, ThirdBorderline, Pass, PassBorderline, Fail
     )
@@ -81,7 +81,7 @@ object FinalYearGrade {
   }
 
   object Postgraduate {
-    val all = Seq(HighDistinction, Distinction, Merit, Pass, Fail)
+    val all: Seq[FinalYearGrade] = Seq(HighDistinction, Distinction, Merit, Pass, Fail)
 
     case object HighDistinction extends FinalYearGrade("High Distinction", min = 80, max = 200)
 
@@ -145,7 +145,7 @@ object ProgressionService {
 trait ProgressionService {
   def getYearMark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
-  def marksPerYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, Map[Int, BigDecimal]]
+  def marksPerYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting], markForFinalYear: Boolean): Either[String, Map[Int, BigDecimal]]
 
   def graduationBenchmark(studentCourseYearDetails: Option[StudentCourseYearDetails], yearOfStudy: Int, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal]
 
@@ -200,11 +200,12 @@ abstract class AbstractProgressionService extends ProgressionService {
     routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]],
     calculateYearMarks: Boolean,
     groupByLevel: Boolean,
-    weightings: Seq[CourseYearWeighting]
+    weightings: Seq[CourseYearWeighting],
+    markForFinalYear: Boolean,
   ): Either[String, Map[Int, BigDecimal]] = {
     val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
     lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
-    getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear = true)
+    getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear)
   }
 
   def graduationBenchmark(studentCourseYearDetails: Option[StudentCourseYearDetails], yearOfStudy: Int, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {

@@ -83,10 +83,10 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
 
       val weightedAssessmentMark = moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations)
 
-      val  percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
+      val percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
       val percentageOfAssessmentTakenDecimal =(percentageOfAssessmentTaken / 100)
 
-      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
+      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings, markForFinalYear = false)
         .map { _.map { case (year, weightedMark) =>
           val yearWeighting = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
           val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark
