@@ -1,14 +1,16 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedAssessmentComponentStudentsToSitsCommand._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedAssessmentComponentStudentsToSitsCommand._
+import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
-import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportFeedbackToSitsServiceComponent, ExportFeedbackToSitsServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
 
@@ -19,7 +21,7 @@ object ExportRecordedAssessmentComponentStudentsToSitsCommand {
   def apply(): Command =
     new ExportRecordedAssessmentComponentStudentsToSitsCommandInternal()
       with ComposableCommand[Result]
-      with ExportFeedbackToSitsCommandPermissions
+      with ExportRecordedAssessmentComponentStudentsToSitsPermissions
       with ExportRecordedAssessmentComponentStudentsToSitsDescription
       with AutowiringExportFeedbackToSitsServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
@@ -98,6 +100,12 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
         }
       }
     }
+  }
+}
+
+trait ExportRecordedAssessmentComponentStudentsToSitsPermissions extends RequiresPermissionsChecking {
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Marks.UploadToSits)
   }
 }
 

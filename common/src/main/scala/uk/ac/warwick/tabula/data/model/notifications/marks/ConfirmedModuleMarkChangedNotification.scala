@@ -26,17 +26,17 @@ class ConfirmModuleMarkChangedNotification
   @transient var profileService: ProfileService = Wire[ProfileService]
   @transient var topLevelUrl: String = Wire.property("${toplevel.url}")
   @transient lazy val department: Department = target.entity
-  @transient lazy val recordedModuleRegistartions = entities
+  @transient lazy val recordedModuleRegistrations = entities
 
-  override def onPreSave(isNew: Boolean) {
+  override def onPreSave(isNew: Boolean): Unit = {
     priority = NotificationPriority.Info
   }
 
   def verb = "modified"
 
-  def academicYear = recordedModuleRegistartions.head.academicYear
+  def academicYear = recordedModuleRegistrations.head.academicYear
 
-  def module = recordedModuleRegistartions.head.sitsModuleCode
+  def module = recordedModuleRegistrations.head.sitsModuleCode
 
   def studentList: Seq[StudentCourseYearDetails] = entities.flatMap { rmr =>
     profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).filter(_.mostSignificant).flatMap(_.freshStudentCourseYearDetailsForYear(academicYear))

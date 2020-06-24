@@ -27,6 +27,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
       def session: Session = mockSession
 
       override def assignmentImporter: AssignmentImporter = importer
+      override def yearsToImport: Seq[AcademicYear] = Seq(AcademicYear(2013))
     }
     command.assessmentMembershipService = membershipService
     command.moduleAndDepartmentService = moduleService
