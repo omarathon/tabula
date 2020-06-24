@@ -685,7 +685,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("process", process))
       .add(is("attempt", attempt))
       .add(is("_result", ModuleResult.Pass))
-      .add(is("signalStatus", "N"))
+      .add(in("signalStatus", "N", "Q"))
       .project[Option[Int]](Projections.min("minimumMark"))
       .uniqueResult.flatten
 
