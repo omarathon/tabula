@@ -214,6 +214,8 @@ trait MyCommandBinding extends BindListener {
 }
 ```
 
+Because the BindListener trait is mixed in directly to the command to provide the `onBind` definition, only one bind listener can be registered per command.
+
 Validating data
 ---------------
 
