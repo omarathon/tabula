@@ -10,10 +10,11 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkState.{ConfirmedActual, UnconfirmedActual}
 import uk.ac.warwick.tabula.data.model.RecordedAssessmentComponentStudentMarkSource.ModuleMarkConfirmation
 import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource.MarkConfirmation
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.marks.ConfirmModuleMarkChangedNotification
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.jdk.CollectionConverters._
@@ -41,6 +42,8 @@ object ConfirmModuleMarksCommand {
       with AutowiringModuleRegistrationMarksServiceComponent
       with ComposableCommand[Result] // late-init due to ModuleOccurrenceUpdateMarksPermissions being called from permissions
       with ModuleOccurrenceDescription
+      with AutowiringProfileServiceComponent
+      with ConfirmModuleMarkChangedCommandNotification
 }
 
 
@@ -66,7 +69,7 @@ class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: 
         mark = module.mark,
         grade = module.grade,
         result = module.result,
-        source =  MarkConfirmation,
+        source = MarkConfirmation,
         comments = comments.asScala(recordedModuleRegistration.sprCode),
         markState = ConfirmedActual
       )
@@ -80,7 +83,7 @@ class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: 
           mark = component.mark,
           grade = component.grade,
           comments = component.history.headOption.map(_.comments).orNull, // leave component comments as-is
-          source =   ModuleMarkConfirmation,
+          source = ModuleMarkConfirmation,
           markState = ConfirmedActual
         )
 
@@ -109,18 +112,16 @@ trait ConfirmModuleMarksValidation extends SelfValidating {
     }
 
     if (studentsWithMissingModuleGrade.nonEmpty)
-      errors.reject( "moduleMarks.confirm.missingGrade", Array(studentsWithMissingModuleGrade.map(_._1.sprCode).mkString(", ")), "")
+      errors.reject("moduleMarks.confirm.missingGrade", Array(studentsWithMissingModuleGrade.map(_._1.sprCode).mkString(", ")), "")
 
     if (studentsWithMissingComponentGrades.nonEmpty)
-      errors.reject( "moduleMarks.confirm.missingComponentGrade", Array(studentsWithMissingComponentGrades.map(_._1.sprCode).mkString(", ")), "")
+      errors.reject("moduleMarks.confirm.missingComponentGrade", Array(studentsWithMissingComponentGrades.map(_._1.sprCode).mkString(", ")), "")
   }
 }
 
-trait ConfirmModuleMarksState extends ModuleOccurrenceState {
+trait ConfirmModuleMarksState extends ModuleOccurrenceState with ClearRecordedModuleMarksState {
 
   self: ModuleOccurrenceLoadModuleRegistrations =>
-
-  def currentUser: CurrentUser
 
   lazy val studentModuleRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleMarkRecords.map { student =>
     moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
@@ -143,4 +144,34 @@ trait ConfirmModuleMarksRequest {
     studentModuleRecords.map(_._1).find(_.sprCode == sprCode).flatMap(_.history.headOption).map(_.comments).orNull
   }.asJava
 
+}
+
+
+case class RecordedModuleRegistrationInfo(recordedModuleRegistration: RecordedModuleRegistration, member: StudentMember)
+
+trait ConfirmModuleMarkChangedCommandNotification extends Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
+
+  self: ClearRecordedModuleMarksState with ProfileServiceComponent =>
+
+  //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
+  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =  {
+    val student = profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).head.student
+    val module = rmr.moduleRegistration.map(_.module).get
+    rmr.moduleRegistration
+      .map(_.studentCourseDetails)
+      .flatMap(_.course.department)
+      .flatMap(_.subDepartmentsContaining(student).lastOption) // Get the sub-department containing the student, if applicable
+      .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
+  }
+
+  override def emit(result: Seq[RecordedModuleRegistration]) = {
+
+    val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.filter(rmr => rmr.marks.tail.exists(m => m.markState == ConfirmedActual)).map { rmr =>
+      rmr ->  notificationDepartment(rmr)
+    }
+    recordedModuleRegs.filter(_._2.nonEmpty).groupBy(_._2.get).map { case (d, rmrWithDeptList) =>
+      Notification.init(new ConfirmModuleMarkChangedNotification, currentUser.apparentUser, rmrWithDeptList.map(_._1), d)
+    }.toSeq
+
+  }
 }

@@ -5,8 +5,10 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
@@ -24,7 +26,12 @@ import scala.jdk.CollectionConverters._
 @Access(AccessType.FIELD)
 class RecordedModuleRegistration extends GeneratedId
   with HibernateVersioned
+  with ToEntityReference
   with ToString with Serializable {
+
+  @transient var profileService: ProfileService = Wire.auto[ProfileService]
+
+  override type Entity = RecordedModuleRegistration
 
   def this(mr: ModuleRegistration) {
     this()

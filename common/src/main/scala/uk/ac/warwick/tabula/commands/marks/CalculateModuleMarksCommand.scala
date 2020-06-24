@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -151,11 +151,13 @@ object CalculateModuleMarksCommand {
       with CalculateModuleMarksSpreadsheetBindListener
       with CalculateModuleMarksPopulateOnForm
       with CalculateModuleMarksAlgorithm
+      with AutowiringProfileServiceComponent
+      with ConfirmModuleMarkChangedCommandNotification
 }
 
-abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, currentUser: CurrentUser)
+abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with ModuleOccurrenceState {
+    with ModuleOccurrenceState with ClearRecordedModuleMarksState {
   self: CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
