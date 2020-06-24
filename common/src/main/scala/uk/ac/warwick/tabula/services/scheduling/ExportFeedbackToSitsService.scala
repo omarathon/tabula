@@ -27,9 +27,7 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 }
 
 trait ExportFeedbackToSitsService {
-  def countMatchingSitsRecords(feedback: Feedback): Int
   def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int
-  def exportToSits(feedback: Feedback): Int
   def exportToSits(student: RecordedAssessmentComponentStudent): Int
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow]
 }
@@ -52,28 +50,6 @@ class FeedbackParameterGetter(feedback: Feedback) {
       // by student, module code and year
       "occurrences" -> possibleOccurrenceSequencePairs.map(_._1).asJava,
       "sequences" -> possibleOccurrenceSequencePairs.map(_._2).asJava
-    ))
-  }
-
-  def getUpdateParams(mark: Int, grade: String): Option[JMap[String, Any]] = possibleOccurrenceSequencePairs match {
-    case pairs if pairs.isEmpty => None
-    case _ => Option(JHashMap(
-      // for the where clause
-      "studentId" -> feedback.studentIdentifier,
-      "academicYear" -> feedback.academicYear.toString,
-      "moduleCodeMatcher" -> (feedback.module.code.toUpperCase + "%"),
-      "resitSequenceMatcher" -> "%", // We don't hold this for Feedback
-      "now" -> DateTime.now.toDate,
-
-      // in theory we should look for a record with occurrence and sequence from the same pair,
-      // but in practice there won't be any ambiguity since the record is already determined
-      // by student, module code and year
-      "occurrences" -> possibleOccurrenceSequencePairs.map(_._1).asJava,
-      "sequences" -> possibleOccurrenceSequencePairs.map(_._2).asJava,
-
-      // data to insert
-      "actualMark" -> mark,
-      "actualGrade" -> grade
     ))
   }
 }
@@ -145,43 +121,12 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     countInternal(student, countQuery)
   }
 
-  def countMatchingSitsRecords(feedback: Feedback): Int = feedback match {
-    case f: Feedback if f.assignment.resitAssessment => countMatchingSraRecords(feedback: Feedback)
-    case _ => countMatchingSasRecords(feedback: Feedback)
-  }
-
   override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = student.assessmentType match {
     case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
       countMatchingSasRecords(student)
 
     case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
       countMatchingSraRecords(student)
-  }
-
-  def exportToSits(feedback: Feedback): Int = {
-    val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
-    val (updateQuery, tableName) = feedback match {
-      case f: Feedback if f.assignment.resitAssessment => (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
-      case _ => (new ExportFeedbackToSitsQuery(sitsDataSource), "CAM_SAS")
-    }
-
-    val grade = feedback.latestGrade
-    val mark = feedback.latestMark
-    val numRowsChanged = {
-      if (grade.isDefined && mark.isDefined) {
-        parameterGetter.getUpdateParams(mark.get, grade.get) match {
-          case Some(params) =>
-            updateQuery.updateByNamedParam(params)
-          case None =>
-            logger.warn(s"Cannot upload feedback ${feedback.id} for SITS $tableName as no assessment groups found")
-            0
-        }
-      } else {
-        logger.warn(f"Not updating SITS $tableName for feedback ${feedback.id} - no latest mark or grade found")
-        0 // issue a warning when the FeedbackForSits record is created, not here
-      }
-    }
-    numRowsChanged
   }
 
   override def exportToSits(student: RecordedAssessmentComponentStudent): Int = {
@@ -197,8 +142,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
   }
 
-  def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
-
+  override def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
     val (matchQuery, tableName) = feedback match {
       case f: Feedback if f.assignment.resitAssessment => (new SRAPartialMatchQuery(sitsDataSource), "CAM_SRA")
       case _ => (new SASPartialMatchQuery(sitsDataSource), "CAM_SAS")
@@ -207,7 +151,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
     parameterGetter.getQueryParams match {
       case Some(params) =>
-        matchQuery.executeByNamedParam(params.asScala.view.filterKeys(_ != "now").toMap.asJava).asScala.toSeq
+        matchQuery.executeByNamedParam(params).asScala.toSeq
       case None =>
         logger.warn(s"Cannot get partial matching $tableName records for feedback ${feedback.id} as no assessment groups found")
         Nil
@@ -368,9 +312,7 @@ class ExportFeedbackToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
-  def countMatchingSitsRecords(feedback: Feedback) = 0
-  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = 0
-  def exportToSits(feedback: Feedback) = 0
-  def exportToSits(student: RecordedAssessmentComponentStudent): Int = 0
-  def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
+  override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = 0
+  override def exportToSits(student: RecordedAssessmentComponentStudent): Int = 0
+  override def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
 }

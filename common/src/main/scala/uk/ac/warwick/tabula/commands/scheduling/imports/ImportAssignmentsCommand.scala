@@ -251,7 +251,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       val notEmptyGroupIdsByAssessmentType: Map[UpstreamAssessmentGroupMemberAssessmentType, Set[UpstreamAssessmentGroup]] =
         UpstreamAssessmentGroupMemberAssessmentType.values.map { assessmentType =>
-          assessmentType -> doGroupMembersForAssessmentType(assessmentType)
+          assessmentType -> doGroupMembersForAssessmentType(assessmentType).filter(uag => yearsToImport.contains(uag.academicYear))
         }.toMap
 
       if (importEverything) {

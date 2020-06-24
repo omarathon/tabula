@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand.StudentMarksItem
 import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
@@ -166,7 +166,12 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
       val changes: Seq[(StudentMarkRecord, StudentMarksItem)] =
         cmd.students.asScala.values.toSeq.flatMap { student =>
           // We know the .get is safe because it's validated
-          val studentMarkRecord = studentMarkRecords.find(smr => smr.universityId == student.universityID && smr.resitSequence.getOrElse("") == student.resitSequence).get
+          val studentMarkRecord = studentMarkRecords.find { m =>
+            m.universityId == student.universityID && (
+              (student.resitSequence.maybeText.isEmpty && m.upstreamAssessmentGroupMember.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+              (m.upstreamAssessmentGroupMember.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(student.resitSequence))
+            )
+          }.get
 
           // Mark and grade haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (

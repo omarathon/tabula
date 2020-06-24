@@ -76,7 +76,7 @@ class GradeBoundary extends GeneratedId with ToString {
   def result: Option[ModuleResult] = Option(_result)
   def result_=(r: Option[ModuleResult]): Unit = _result = r.orNull
 
-  def isDefault: Boolean = signalStatus == "N"
+  def isDefault: Boolean = signalStatus == "N" || signalStatus == "Q"
 
   def isValidForMark(mark: Option[Int]): Boolean =
     (minimumMark.isEmpty && maximumMark.isEmpty) ||

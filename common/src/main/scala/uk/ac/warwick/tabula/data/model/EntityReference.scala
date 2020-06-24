@@ -50,6 +50,7 @@ class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
       new MetaValue(targetEntity = classOf[MitigatingCircumstancesSubmission], value = "MitigatingCircumstancesSubmission"),
       new MetaValue(targetEntity = classOf[MitigatingCircumstancesMessage], value = "MitigatingCircumstancesMessage"),
       new MetaValue(targetEntity = classOf[MitigatingCircumstancesPanel], value = "MitigatingCircumstancesPanel"),
+      new MetaValue(targetEntity = classOf[RecordedModuleRegistration], value = "RecordedModuleRegistration"),
     )
   )
   @JoinColumn(name = "entity_id")
