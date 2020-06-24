@@ -76,7 +76,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
   var rawWeighting: JInteger = _
 
   private def scaleWeighting(raw: Int, total: Int): BigDecimal =
-    if (total == 100) BigDecimal(raw)
+    if (raw == 0 || total == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
+    else if (total == 100) BigDecimal(raw)
     else {
       val bd = BigDecimal(raw * 100) / BigDecimal(total)
       bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
