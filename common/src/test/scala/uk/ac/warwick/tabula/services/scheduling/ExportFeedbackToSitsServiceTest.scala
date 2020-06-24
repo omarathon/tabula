@@ -30,10 +30,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
     val feedback: Feedback = Fixtures.assignmentFeedback("1000006")
     feedback.assignment = assignment
 
-    val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
-
     val paramGetter = new FeedbackParameterGetter(feedback)
-
   }
 
   @Test
@@ -55,18 +52,4 @@ class ExportFeedbackToSitsServiceTest extends TestBase with Mockito {
       inspectMe.isEmpty should be(true)
     }
   }
-
-  @Test
-  def updateParams(): Unit = withUser("1000006", "cusdx") {
-    new Environment {
-
-      val inspectMe: JMap[String, Any] = paramGetter.getUpdateParams(73, "A").get
-      inspectMe.get("studentId") should be("1000006")
-      inspectMe.get("academicYear") should be(year.toString)
-      inspectMe.get("moduleCodeMatcher") should be("NL901%")
-      inspectMe.get("actualMark", 73)
-      inspectMe.get("actualGrade", "A")
-    }
-  }
-
 }

@@ -1,40 +1,53 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
-import org.hibernate.annotations.{Proxy, Type}
+import enumeratum.{Enum, EnumEntry}
 import org.joda.time.DateTime
-import uk.ac.warwick.userlookup.User
 
-@Entity
-@Proxy
-class FeedbackForSits extends GeneratedId {
+/**
+ * As of TAB-8520 this is no longer an entity in its own right, but instead is a thin wrapper on
+ * RecordedAssessmentComponentStudent
+ */
+case class FeedbackForSits(
+  feedback: Feedback,
+  status: FeedbackForSitsStatus,
+  dateOfUpload: Option[DateTime],
+  actualMarkLastUploaded: Option[Int],
+  actualGradeLastUploaded: Option[String],
+)
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "feedback_id")
-  var feedback: Feedback = _
+object FeedbackForSits {
+  def apply(feedback: Feedback, recordedAssessmentComponentStudent: RecordedAssessmentComponentStudent): FeedbackForSits =
+    FeedbackForSits(
+      feedback = feedback,
+      status =
+        if (recordedAssessmentComponentStudent.needsWritingToSits) FeedbackForSitsStatus.UploadNotAttempted
+        else FeedbackForSitsStatus.Successful,
+      dateOfUpload = recordedAssessmentComponentStudent.lastWrittenToSits,
+      actualMarkLastUploaded = recordedAssessmentComponentStudent.latestMark,
+      actualGradeLastUploaded = recordedAssessmentComponentStudent.latestGrade,
+    )
 
-  @Column(name = "status")
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.FeedbackForSitsStatusUserType")
-  var status: FeedbackForSitsStatus = _
+  def apply(feedback: Feedback, recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent]): FeedbackForSits =
+    FeedbackForSits(
+      feedback = feedback,
+      status =
+        if (recordedAssessmentComponentStudents.exists(_.needsWritingToSits)) FeedbackForSitsStatus.UploadNotAttempted
+        else FeedbackForSitsStatus.Successful,
+      dateOfUpload = recordedAssessmentComponentStudents.map(_.lastWrittenToSits).max,
+      actualMarkLastUploaded = recordedAssessmentComponentStudents.maxBy(_.lastWrittenToSits).latestMark,
+      actualGradeLastUploaded = recordedAssessmentComponentStudents.maxBy(_.lastWrittenToSits).latestGrade,
+    )
+}
 
-  var dateOfUpload: DateTime = _
-  var actualMarkLastUploaded: Integer = _
-  var actualGradeLastUploaded: String = _
-  var firstCreatedOn: DateTime = _
-  var lastInitialisedOn: DateTime = _
+sealed abstract class FeedbackForSitsStatus(val code: String, val description: String) extends EnumEntry {
+  override val entryName: String = code
+  override def toString: String = description
+}
 
-  // 'initialiser' is the identify of whoever last queued this feedback for upload - same as the creator unless for
-  // some reason the feedback is republished (and that functionality is being removed soon, so in future having an
-  // initialiser who is not the creator might only be possible as a result of a db hack)
-  @Column(nullable = false)
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  final var initialiser: User = null
+object FeedbackForSitsStatus extends Enum[FeedbackForSitsStatus] {
+  case object UploadNotAttempted extends FeedbackForSitsStatus("uploadNotAttempted", "Queued for SITS upload")
+  case object Failed extends FeedbackForSitsStatus("failed", "SITS upload failed")
+  case object Successful extends FeedbackForSitsStatus("successful", "Uploaded to SITS")
 
-  def init(feedback: Feedback, initialiser: User): Unit = {
-    this.feedback = feedback
-    this.initialiser = initialiser
-    this.lastInitialisedOn = DateTime.now()
-    this.status = FeedbackForSitsStatus.UploadNotAttempted
-  }
-
+  override def values: IndexedSeq[FeedbackForSitsStatus] = findValues
 }
