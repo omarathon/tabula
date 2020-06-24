@@ -6,6 +6,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.apache.poi.xssf.usermodel.XSSFComment
+import org.hibernate.validator.constraints.Length
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -122,6 +123,7 @@ object CalculateModuleMarksCommand {
 
     var sprCode: SprCode = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
+    @Length(max = 2)
     var grade: String = _
     var result: String = _
     var comments: String = _

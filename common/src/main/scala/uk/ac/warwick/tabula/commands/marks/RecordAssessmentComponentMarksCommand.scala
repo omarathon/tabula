@@ -5,6 +5,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.apache.poi.xssf.usermodel.XSSFComment
+import org.hibernate.validator.constraints.Length
 import org.springframework.validation.{BindingResult, Errors}
 import org.xml.sax.InputSource
 import uk.ac.warwick.tabula.CurrentUser
@@ -37,6 +38,7 @@ object RecordAssessmentComponentMarksCommand {
     var universityID: UniversityID = _
     var resitSequence: String = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
+    @Length(max = 2)
     var grade: String = _
     var comments: String = _
   }
