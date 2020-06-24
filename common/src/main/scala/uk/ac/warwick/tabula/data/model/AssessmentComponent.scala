@@ -141,8 +141,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
       // - The same number of Variable Assessment Weighting Rules as there are components
       // - No extra unexpected marks have been passed
       // - Marks (or a record with no mark) for every assessment sequence
-      require(componentsForType.size == rulesForType.size, s"There are ${componentsForType.size} assessment components for $assessmentType but ${rulesForType.size} VAW rules")
-      require(componentsForType.size == marksForType.size, s"There are ${componentsForType.size} assessment components for $assessmentType but ${marksForType.size} marks passed")
+      require(componentsForType.size == rulesForType.size, s"${toString()}: There are ${componentsForType.size} assessment components for $assessmentType (${componentsForType.keys.mkString(",")}) but ${rulesForType.size} VAW rules")
+      require(componentsForType.size == marksForType.size, s"${toString()}: There are ${componentsForType.size} assessment components for $assessmentType (${componentsForType.keys.mkString(",")}) but ${marksForType.size} marks passed (${marksForType.map(_._1).mkString(",")})")
 
       val missingMarkSequences = componentsForType.keys.filterNot(sequence => marksForType.exists { case (s, _) => s == sequence })
       require(missingMarkSequences.isEmpty, s"No mark was provided for assessment sequence(s) ${missingMarkSequences.mkString(", ")}")
