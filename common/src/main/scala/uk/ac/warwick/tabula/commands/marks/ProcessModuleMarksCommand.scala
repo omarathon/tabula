@@ -47,7 +47,7 @@ object ProcessModuleMarksCommand {
       with AutowiringTransactionalComponent
       with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to ModuleOccurrenceLoadModuleRegistrations being called from permissions
-      with ModuleOccurrenceDescription
+      with RecordedModuleRegistrationsDescription
       with ModuleOccurrenceValidGradesBindListener
       with ProcessModuleMarksBindListener
       with ProcessModuleMarksPopulateOnForm
@@ -62,7 +62,7 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
   self: ProcessModuleMarksRequest
     with ModuleOccurrenceLoadModuleRegistrations
     with TransactionalComponent
-    with ModuleOccurrenceDescription
+    with RecordedModuleRegistrationsDescription
     with ModuleRegistrationMarksServiceComponent
     with AssessmentComponentMarksServiceComponent =>
 

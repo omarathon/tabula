@@ -142,6 +142,9 @@
                     Process module marks
                   </li>
                 </#if>
+                <li>
+                  <a href="<@routes.marks.module_marks_resits item.moduleCode academicYear item.occurrence />" >Generate resits</a>
+                </li>
               </@dropdown_menu>
             </div>
           </div>

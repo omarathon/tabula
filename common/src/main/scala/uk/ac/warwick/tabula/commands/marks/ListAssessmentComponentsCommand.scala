@@ -19,7 +19,7 @@ object ListAssessmentComponentsCommand {
     position: Option[Int],
     currentMember: Boolean,
     resitExpected: Boolean,
-    furtherFirstSit: Boolean,
+    currentResitAttempt: Option[Int],
     mark: Option[Int],
     grade: Option[String],
     needsWritingToSits: Boolean,
@@ -29,11 +29,12 @@ object ListAssessmentComponentsCommand {
     resitMark: Boolean, // the current mark is a resit mark (not the same as a resit being expected)
     history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
     upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
-  )
+  ) {
+    val furtherFirstSit: Boolean = resitExpected && currentResitAttempt.exists(_ <= 1)
+  }
   object StudentMarkRecord {
     def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
       val reassessment = member.isReassessment
-      val furtherFirstSit = reassessment && member.currentResitAttempt.exists(_ <= 1)
       val isAgreedSITS = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty)
 
       StudentMarkRecord(
@@ -42,8 +43,7 @@ object ListAssessmentComponentsCommand {
         position = member.position,
         currentMember = info.currentMembers.contains(member),
         resitExpected = reassessment,
-        furtherFirstSit = furtherFirstSit,
-
+        currentResitAttempt = member.currentResitAttempt,
         // These are needlessly verbose but thought better to be explicit on the order
         mark = recordedStudent match {
           case Some(marks) if marks.needsWritingToSits => marks.latestMark
@@ -59,7 +59,6 @@ object ListAssessmentComponentsCommand {
           case _ if member.firstDefinedGrade.nonEmpty => member.firstDefinedGrade
           case _ => None
         },
-
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (

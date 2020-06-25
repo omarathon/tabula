@@ -33,3 +33,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro module_generateGrades sitsModuleCode academicYear occurrence sprCode><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/generate-grades?sprCode=${sprCode?url}" /></#macro>
 <#macro module_marks_confirm sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/confirm" /></#macro>
 <#macro module_marks_process sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/process" /></#macro>
+<#macro module_marks_resits sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/resits" /></#macro>

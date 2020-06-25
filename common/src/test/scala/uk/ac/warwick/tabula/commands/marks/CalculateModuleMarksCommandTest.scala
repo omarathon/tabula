@@ -33,7 +33,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
         position = None,
         currentMember = true,
         resitExpected = resit,
-        furtherFirstSit = false,
+        currentResitAttempt = if(resit) Some(2) else None,
         mark = mark,
         grade = grade,
         needsWritingToSits = false,

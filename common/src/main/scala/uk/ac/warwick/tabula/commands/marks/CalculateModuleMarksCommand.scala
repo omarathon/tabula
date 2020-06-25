@@ -160,7 +160,7 @@ object CalculateModuleMarksCommand {
       with AutowiringTransactionalComponent
       with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
-      with ModuleOccurrenceDescription
+      with RecordedModuleRegistrationsDescription
       with ModuleOccurrenceValidGradesBindListener
       with CalculateModuleMarksSpreadsheetBindListener
       with CompositeCalculateModuleMarksBindListener
@@ -178,7 +178,7 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
     with ModuleRegistrationMarksServiceComponent
     with TransactionalComponent
     with ProfileServiceComponent
-    with ModuleOccurrenceDescription =>
+    with RecordedModuleRegistrationsDescription =>
 
   override val mandatoryEventName: String = "CalculateModuleMarks"
 

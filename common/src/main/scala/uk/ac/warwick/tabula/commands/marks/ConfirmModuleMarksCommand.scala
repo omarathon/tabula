@@ -52,7 +52,7 @@ object ConfirmModuleMarksCommand {
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with ComposableCommand[Result] // late-init due to ModuleOccurrenceUpdateMarksPermissions being called from permissions
-      with ModuleOccurrenceDescription
+      with RecordedModuleRegistrationsDescription
       with AutowiringProfileServiceComponent
       with ConfirmModuleMarkChangedCommandNotification
 }
@@ -63,7 +63,7 @@ abstract class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val
     with ModuleOccurrenceLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
     with AssessmentComponentMarksServiceComponent
-    with ModuleOccurrenceDescription =>
+    with RecordedModuleRegistrationsDescription =>
 
   override val mandatoryEventName: String = "ConfirmModuleMarks"
 

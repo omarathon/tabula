@@ -20,6 +20,10 @@ object TabulaAssessmentSubtype extends Enum[TabulaAssessmentSubtype] {
 sealed abstract class AssessmentType(val astCode: String, val name: String, val subtype: TabulaAssessmentSubtype) extends EnumEntry with Convertible[String] {
   val code:String = subtype.code
   override val value: String = astCode
+
+  // old school getters so spring form options tags work
+  def getAstCode: String = astCode
+  def getName: String = name
 }
 
 sealed abstract class AssignmentType(astCode: String, name: String) extends AssessmentType(astCode, name, TabulaAssessmentSubtype.Assignment)

@@ -38,8 +38,11 @@ trait ModuleOccurrenceLoadModuleRegistrations {
         ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 
-  lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
+  lazy val upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] =
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
+
+  lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
+    upstreamAssessmentGroupInfos
       .filter { info =>
         info.upstreamAssessmentGroup.occurrence == occurrence &&
         info.allMembers.nonEmpty
@@ -231,7 +234,7 @@ trait ModuleOccurrenceValidation {
   }
 }
 
-trait ModuleOccurrenceDescription extends Describable[Seq[RecordedModuleRegistration]] {
+trait ModuleOccurrenceDescription[A] extends Describable[A] {
   self: ModuleOccurrenceState =>
 
   def mandatoryEventName: String
@@ -245,6 +248,10 @@ trait ModuleOccurrenceDescription extends Describable[Seq[RecordedModuleRegistra
         "academicYear" -> academicYear.toString,
         "occurrence" -> occurrence,
       )
+}
+
+trait RecordedModuleRegistrationsDescription extends ModuleOccurrenceDescription[Seq[RecordedModuleRegistration]] {
+  self: ModuleOccurrenceState =>
 
   override def describeResult(d: Description, result: Seq[RecordedModuleRegistration]): Unit =
     d.properties(
