@@ -47,21 +47,29 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
         val mitCircsCodesString = entity.mitigatingCircumstances.map(s => {
           val header = s"MIT-${s.key} Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})\n"
-          val global = globalRecommendations(s).mkStringOrEmpty("", "\n", "\n")
-          val affected = affectedAssessmentsByRecommendation(s).mkStringOrEmpty("", "\n", "\n")
-          val acute = modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")\n")
           val comments = Option(s.boardRecommendationComments).toSeq.mkStringOrEmpty("", "\n", "\n")
-          header ++ global ++ affected ++ acute ++ comments
+          if (s.outcomeGrading.entryName != "Rejected") {
+            val global = globalRecommendations(s).mkStringOrEmpty("", "\n", "\n")
+            val affected = affectedAssessmentsByRecommendation(s).mkStringOrEmpty("", "\n", "\n")
+            val acute = modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")\n")
+
+            header ++ global ++ affected ++ acute ++ comments
+          } else {
+            header ++ comments
+          }
         }).mkString("\n")
 
         val mitCircsHtml = entity.mitigatingCircumstances.map(s => s"""<dl class="dl-horizontal">
           <dt>MIT-${s.key}<dt><dd>Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})<dd>
-          <dt>Recommendation</dt>
+          ${if(s.outcomeGrading.entryName != "Rejected") {
+          s"""<dt>Recommendation</dt>
             ${globalRecommendations(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${affectedAssessmentsByRecommendation(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"<dd>${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")</dd>")}
+            """}}
           ${Option(s.boardRecommendationComments).map(comments => s"<dt>Comments</dt><dd>$comments</dd>").getOrElse("")}
-        </dl>""").mkString
+        }
+          </dl>""").mkString
 
         val notes = if (state.department.rootDepartment.code == "es") {
           entity.validYears.headOption
