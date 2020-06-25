@@ -31,7 +31,7 @@ class JobServiceTest extends TestBase with Mockito {
     jobDao.getById(null) returns Some(inst)
     verify(jobDao, times(1)).saveJob(inst)
 
-    jobDao.findOutstandingInstances(10) returns Seq(inst)
+    jobDao.findOutstandingInstances(service.RunBatchSize) returns Seq(inst)
 
     service.run()(new EarlyRequestInfoImpl)
     jobDao.listRunningJobs returns Seq(inst)
@@ -61,7 +61,7 @@ class JobServiceTest extends TestBase with Mockito {
     val inst = service.add(Some(currentUser), TestingJob("job"))
     verify(jobDao, times(1)).saveJob(inst)
 
-    jobDao.findOutstandingInstances(10) returns Seq(inst)
+    jobDao.findOutstandingInstances(service.RunBatchSize) returns Seq(inst)
 
     service.kill(inst)
 
@@ -74,7 +74,7 @@ class JobServiceTest extends TestBase with Mockito {
     inst.updatedDate should not be null
   }
 
-  @Test def keep10JobsRunning() = withUser("cuscav") {
+  @Test def keep25JobsRunning() = withUser("cuscav") {
     val job = new TestingJob
     job.jobService = service
     service.jobDao = jobDao
@@ -92,7 +92,7 @@ class JobServiceTest extends TestBase with Mockito {
     runningJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
 
     jobDao.listRunningJobs returns Nil
-    jobDao.findOutstandingInstances(10) returns runningJobInstances
+    jobDao.findOutstandingInstances(service.RunBatchSize) returns runningJobInstances
 
     service.run()(new EarlyRequestInfoImpl)
 
@@ -109,12 +109,12 @@ class JobServiceTest extends TestBase with Mockito {
     outstandingJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
 
     jobDao.listRunningJobs returns runningJobInstances
-    jobDao.findOutstandingInstances(5) returns outstandingJobInstances
+    jobDao.findOutstandingInstances(service.RunBatchSize - 5) returns outstandingJobInstances
 
     service.run()(new EarlyRequestInfoImpl)
 
-    verify(jobDao, times(1)).findOutstandingInstances(10) // Looks for 10 the first time
-    verify(jobDao, times(1)).findOutstandingInstances(5) // Looks for 5 the second time (10 less 5 running)
+    verify(jobDao, times(1)).findOutstandingInstances(service.RunBatchSize) // Looks for 25 the first time
+    verify(jobDao, times(1)).findOutstandingInstances(service.RunBatchSize - 5) // Looks for 20 the second time (25 less 5 running)
     outstandingJobInstances.foreach(job => job.started should be (true))
 
   }
@@ -132,7 +132,7 @@ class JobServiceTest extends TestBase with Mockito {
     runningJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
 
     jobDao.listRunningJobs returns Nil
-    jobDao.findOutstandingInstances(10) returns runningJobInstances
+    jobDao.findOutstandingInstances(service.RunBatchSize) returns runningJobInstances
 
     service.run()(new EarlyRequestInfoImpl)
 
@@ -145,12 +145,12 @@ class JobServiceTest extends TestBase with Mockito {
     outstandingJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
 
     jobDao.listRunningJobs returns runningJobInstances
-    jobDao.findOutstandingInstances(9) returns outstandingJobInstances
+    jobDao.findOutstandingInstances(service.RunBatchSize - 1) returns outstandingJobInstances
 
     service.run()(new EarlyRequestInfoImpl)
 
-    verify(jobDao, times(1)).findOutstandingInstances(10) // Looks for 10 the first time
-    verify(jobDao, times(1)).findOutstandingInstances(9) // Looks for 9 the second time (10 less 1 running)
+    verify(jobDao, times(1)).findOutstandingInstances(service.RunBatchSize) // Looks for 25 the first time
+    verify(jobDao, times(1)).findOutstandingInstances(service.RunBatchSize - 1) // Looks for 24 the second time (25 less 1 running)
     outstandingJobInstances.foreach(job => job.started should be (false)) // Identical job should not be started
 
   }
