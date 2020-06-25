@@ -14,6 +14,16 @@
 
   <p><a href="<@routes.marks.adminhome module.adminDepartment academicYear />">Back to module marks</a></p>
 <#else>
+  
+  <#if notificationDepartments?has_content>
+    <div class="alert alert-info">
+        <#list notificationDepartments?keys as dept>
+          <#assign stuIds = mapGet(notificationDepartments, dept) />
+          <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/>  <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
+        </#list>
+    </div>
+  </#if>
+
   <p>The following marks, grades and results will be changed:</p>
 
   <div class="fix-area">
