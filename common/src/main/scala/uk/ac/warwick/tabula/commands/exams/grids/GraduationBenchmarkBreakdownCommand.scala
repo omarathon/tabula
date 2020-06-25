@@ -84,14 +84,16 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
       val weightedAssessmentMark = moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations)
 
       val percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
-      val percentageOfAssessmentTakenDecimal =(percentageOfAssessmentTaken / 100)
+      val percentageOfAssessmentTakenDecimal = percentageOfAssessmentTaken / 100
 
-      val yearMarks = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings, markForFinalYear = false)
+      def weighting(year: Int): BigDecimal = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
+
+      val yearMarksAndWeightings = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings, markForFinalYear = false)
         .map { _.map { case (year, weightedMark) =>
-          val yearWeighting = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
           val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark
-          year -> (mark, yearWeighting)
-        }}
+          year -> (mark, weighting(year))
+        } + (yearOfStudy -> (weightedAssessmentMark, weighting(yearOfStudy)))
+      }
 
       val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
 
@@ -101,9 +103,9 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
         totalCats = studentCourseYearDetails.totalCats,
         percentageOfAssessmentTaken,
         percentageOfAssessmentTakenDecimal,
-        marksAndWeightingsPerYear = yearMarks.toOption.getOrElse(Map()),
+        marksAndWeightingsPerYear = yearMarksAndWeightings.toOption.getOrElse(Map()),
         graduationBenchmark = benchmark.toOption,
-        benchmarkErrors = yearMarks.swap.toSeq ++ benchmark.swap.toSeq
+        benchmarkErrors = yearMarksAndWeightings.swap.toSeq ++ benchmark.swap.toSeq
       ))
     } else {
       val minCatsToConsider = progressionService.numberCatsToConsiderPG(studentCourseYearDetails)
