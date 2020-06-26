@@ -20,9 +20,9 @@ import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Transactiona
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.marks.{ModuleRegistrationValidGradesForMarkRequest, ValidGradesForMark}
-import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksService, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -201,12 +201,16 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
         val recordedModuleRegistration: RecordedModuleRegistration =
           moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
 
+        val source =
+          if (doesntMatchCalculation(item)) RecordedModuleMarkSource.RecordModuleMarks
+          else RecordedModuleMarkSource.ComponentMarkCalculation
+
         recordedModuleRegistration.addMark(
           uploader = currentUser.apparentUser,
           mark = item.mark.maybeText.map(_.toInt),
           grade = item.grade.maybeText,
           result = item.result.maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
-          source = RecordedModuleMarkSource.ComponentMarkCalculation,
+          source = source,
           markState = recordedModuleRegistration.latestState.getOrElse(UnconfirmedActual),
           comments = item.comments,
         )
@@ -252,6 +256,20 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
       (student, cm, mr, calculation)
     }
   }
+
+  def doesntMatchCalculation(item: StudentModuleMarksItem): Boolean =
+    studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).exists { case (currentModuleMarkRecord, _, _, calculation) =>
+      def matchesCalculation(calculation: ModuleMarkCalculation.Success): Boolean =
+        item.mark.maybeText.exists(m => m != calculation.mark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
+        item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
+        item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
+
+      calculation match {
+        case c: ModuleMarkCalculation.Success => matchesCalculation(c)
+        case m: ModuleMarkCalculation.Multiple => m.suggestions.map(_.calculation).collect { case c: ModuleMarkCalculation.Success => c }.exists(matchesCalculation)
+        case _ => false // If the calculation was a failure, allow it through
+      }
+    }
 }
 
 trait CalculateModuleMarksRequest {
@@ -391,26 +409,47 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
     with AssessmentComponentMarksServiceComponent =>
 
   override def populate(): Unit = {
-    studentModuleMarkRecordsAndCalculations.foreach { case (student, _, mr, calculation) =>
+    studentModuleMarkRecordsAndCalculations.foreach { case (student, components, mr, calculation) =>
       val s = new StudentModuleMarksItem(student.sprCode)
-      student.mark.foreach(m => s.mark = m.toString)
-      student.grade.foreach(s.grade = _)
-      student.result.foreach(r => s.result = r.dbValue)
 
-      // If we can make a calculation we always use it, but make it clear that we have done
+      def populateMarksItem(mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: Option[String] = None): Unit = {
+        mark.foreach(m => s.mark = m.toString)
+        grade.foreach(s.grade = _)
+
+        mark.foreach { m =>
+          val request = new ValidGradesRequest()
+          request.mark = m.toString
+          request.existing = grade.orNull
+          request.resitAttempt = JInteger(mr.flatMap(_.currentResitAttempt))
+          s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
+        }
+
+        result.foreach(r => s.result = r.dbValue)
+        comments.foreach(s.comments = _)
+      }
+
+      populateMarksItem(student.mark, student.grade, student.result)
+
+      // We use the calculation _unless_:
+      // - We had a RecordModuleMarks before the last ComponentMarkCalculation; or
+      // - The most recent ComponentMarkCalculation had comments and there haven't been any component mark changes since
+      lazy val shouldUseCalculation: Boolean = {
+        lazy val mostRecentChange =
+          student.history
+            .find(m => m.source == RecordedModuleMarkSource.ComponentMarkCalculation || m.source == RecordedModuleMarkSource.RecordModuleMarks)
+
+        if (student.mark.isEmpty && student.grade.isEmpty && student.result.isEmpty) true
+        else if (mostRecentChange.isEmpty) true
+        else if (mostRecentChange.exists(_.source == RecordedModuleMarkSource.RecordModuleMarks)) true
+        else {
+          val componentMarkRecords = components.map(_._2._1)
+          componentMarkRecords.forall(_.history.find(_.source != RecordedAssessmentComponentStudentMarkSource.ModuleMarkConfirmation).forall(_.updatedDate.isBefore(mostRecentChange.get.updatedDate)))
+        }
+      }
+
       calculation match {
-        case ModuleMarkCalculation.Success(mark, grade, result, comments) =>
-          mark.foreach(m => {
-            s.mark = m.toString
-            val request = new ValidGradesRequest()
-            request.mark = s.mark
-            request.existing = s.grade
-            request.resitAttempt = JInteger(Some(mr.get.currentResitAttempt.getOrElse(0)))
-            s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
-          })
-          grade.foreach(s.grade = _)
-          result.foreach(r => s.result = r.dbValue)
-          comments.foreach(s.comments = _)
+        case ModuleMarkCalculation.Success(mark, grade, result, comments) if shouldUseCalculation =>
+          populateMarksItem(mark, grade, result, comments)
 
         case _ => // Do nothing
       }
@@ -614,7 +653,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
                   if (!item.result.hasText) {
                     item.result = gb.result.map(_.dbValue).orNull
                   } else if (gb.result.exists(_.dbValue != item.result)) {
-                    errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.dbValue), "")
+                    errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
                   }
                 }
               }
@@ -626,7 +665,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
                 if (!item.result.hasText) {
                   item.result = gb.result.map(_.dbValue).orNull
                 } else if (gb.result.exists(_.dbValue != item.result)) {
-                  errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.dbValue), "")
+                  errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
                 }
               }
             }
@@ -648,29 +687,17 @@ trait CalculateModuleMarksValidation extends SelfValidating {
             if (!item.result.hasText) {
               item.result = gb.result.map(_.dbValue).orNull
             } else if (gb.result.exists(_.dbValue != item.result)) {
-              errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.dbValue), "")
+              errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
             }
           }
         }
       }
 
+
       // TAB-8428 if the mark, grade or result differ from the current mark, grade or result AND they differ from the calculated
       // mark, grade and result, comment becomes mandatory
-      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, _, _, calculation) =>
-        def matchesCalculation(calculation: ModuleMarkCalculation.Success): Boolean =
-          item.mark.maybeText.exists(m => m != calculation.mark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
-            item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
-            item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
-
-        lazy val doesntMatchCalculation = calculation match {
-          case c: ModuleMarkCalculation.Success => matchesCalculation(c)
-          case m: ModuleMarkCalculation.Multiple => m.suggestions.map(_.calculation).collect { case c: ModuleMarkCalculation.Success => c }.exists(matchesCalculation)
-          case _ => false // If the calculation was a failure, allow it through
-        }
-
-        if (!item.comments.hasText && doesntMatchCalculation) {
-          errors.rejectValue("comments", "moduleMarkCalculation.mismatch.noComment")
-        }
+      if (!item.comments.hasText && doesntMatchCalculation(item)) {
+        errors.rejectValue("comments", "moduleMarkCalculation.mismatch.noComment")
       }
 
       errors.popNestedPath()
@@ -680,6 +707,26 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
 trait ClearRecordedModuleMarksState {
   def currentUser: CurrentUser
+}
+
+object ClearRecordedModuleMarks {
+  def shouldClear(moduleRegistration: ModuleRegistration)(moduleRegistrationMarksService: ModuleRegistrationMarksService): Option[StudentModuleMarkRecord] = {
+    val existingRecordedModuleRegistration =
+      moduleRegistrationMarksService.getRecordedModuleRegistration(moduleRegistration)
+
+    val isNonEmpty =
+      moduleRegistration.firstDefinedMark.nonEmpty ||
+      moduleRegistration.firstDefinedGrade.nonEmpty ||
+      Option(moduleRegistration.moduleResult).nonEmpty ||
+      existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
+        recordedModuleRegistration.latestMark.nonEmpty ||
+        recordedModuleRegistration.latestGrade.nonEmpty ||
+        recordedModuleRegistration.latestResult.nonEmpty
+      }
+
+    if (isNonEmpty) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration))
+    else None
+  }
 }
 
 /**
@@ -695,19 +742,7 @@ trait ClearRecordedModuleMarks {
     // There might be multiple module registrations here, for different SPR codes. Just blat them all
     moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
       .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
-      .filter { moduleRegistration =>
-        val existingRecordedModuleRegistration =
-          moduleRegistrationMarksService.getRecordedModuleRegistration(moduleRegistration)
-
-        moduleRegistration.firstDefinedMark.nonEmpty ||
-          moduleRegistration.firstDefinedGrade.nonEmpty ||
-          Option(moduleRegistration.moduleResult).nonEmpty ||
-          existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
-            recordedModuleRegistration.latestMark.nonEmpty ||
-              recordedModuleRegistration.latestGrade.nonEmpty ||
-              recordedModuleRegistration.latestResult.nonEmpty
-          }
-      }
+      .filter(ClearRecordedModuleMarks.shouldClear(_)(moduleRegistrationMarksService).nonEmpty)
       .map(moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration)
       .map { recordedModuleRegistration =>
         recordedModuleRegistration.addMark(

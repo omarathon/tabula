@@ -166,3 +166,27 @@
     </@modal.modal>
   </#if>
 </#macro>
+
+<#macro preview_clear_warning student>
+  <#if ((willClearModuleMarksForUniversityId[student.universityId])!{})?has_content>
+    <#local moduleMarkRecord = willClearModuleMarksForUniversityId[student.universityId] />
+
+    <#local tooltip>
+      The current module mark record will be cleared.
+      <#if moduleMarkRecord.mark?has_content>
+        Mark: ${moduleMarkRecord.mark!'-'}
+      </#if>
+      <#if moduleMarkRecord.grade?has_content>
+        Grade: ${moduleMarkRecord.grade!'-'}
+      </#if>
+      <#if moduleMarkRecord.result?has_content>
+        Result: ${(moduleMarkRecord.result.description)!'-'}
+      </#if>
+    </#local>
+
+    <span class="tabula-tooltip text-danger" data-title="${tooltip}">
+      <i class="fa-fw fas fa-exclamation-triangle" aria-hidden="true"></i>
+      <span class="sr-only">${tooltip}</span>
+    </span>
+  </#if>
+</#macro>
