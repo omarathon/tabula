@@ -420,11 +420,11 @@ object CM2WorkflowStages {
         val actualFeedback = coursework.enhancedFeedback.map(_.feedback).get
 
         Option(feedbackForSits.dateOfUpload).nonEmpty &&
-          feedbackForSits.status != FeedbackForSitsStatus.UploadNotAttempted &&
-          (
-            Option(feedbackForSits.actualMarkLastUploaded).getOrElse(0) != actualFeedback.latestMark.getOrElse(0) ||
-              Option(feedbackForSits.actualGradeLastUploaded).getOrElse("") != actualFeedback.latestGrade.getOrElse("")
-            )
+        feedbackForSits.status != FeedbackForSitsStatus.UploadNotAttempted &&
+        (
+          feedbackForSits.actualMarkLastUploaded != actualFeedback.latestMark ||
+          feedbackForSits.actualGradeLastUploaded != actualFeedback.latestGrade
+        )
       }
 
       lazy val isManuallyAdded: Boolean =
