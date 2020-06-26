@@ -248,7 +248,7 @@ abstract class AbstractProgressionService extends ProgressionService {
   }
 
   private def calculateBenchmark(entityPerYear: Map[Int, ExamGridEntityYear], marksPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting]): BigDecimal = {
-    val finalYear :: otherYears = entityPerYear.keys.toSeq.reverse
+    val finalYear :: otherYears = entityPerYear.keys.toSeq.sorted.reverse
     val previousYearWeightedMarks = otherYears.map(year =>
       marksPerYear(year) * yearWeightings(year).weighting
     ).sum
