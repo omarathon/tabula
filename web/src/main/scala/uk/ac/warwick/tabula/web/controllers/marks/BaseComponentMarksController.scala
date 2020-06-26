@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.web.controllers.marks
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.commands.{MemberOrUser, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.ModuleExamGridColumn
+import uk.ac.warwick.tabula.exams.grids.columns.modules.ModuleExamGridColumn.SITSIndicator
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.User
@@ -35,5 +37,11 @@ abstract class BaseComponentMarksController extends BaseController
       members.view.mapValues(MemberOrUser(_)).toMap
     }
   }
+
+  @ModelAttribute("sitsIndicatorLookup")
+  def sitsIndicatorLookup: Map[String, SITSIndicator] =
+    ModuleExamGridColumn.SITSIndicators
+      .map(i => i.grade -> i)
+      .toMap
 
 }

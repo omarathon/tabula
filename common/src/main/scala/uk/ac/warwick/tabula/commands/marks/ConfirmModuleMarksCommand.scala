@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.commands.marks
 
+import enumeratum.{Enum, EnumEntry}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand.{Comment, Result, SprCode}
+import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand.{Result, SprCode}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.Transactions._
@@ -15,12 +16,23 @@ import uk.ac.warwick.tabula.data.model.notifications.marks.ConfirmModuleMarkChan
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.jdk.CollectionConverters._
 
-object ConfirmModuleMarksCommand {
+sealed abstract class ConfirmModuleMarksAction(val label: String, val markState: MarkState, val comment: Option[String]) extends EnumEntry
+object ConfirmModuleMarksAction extends Enum[ConfirmModuleMarksAction] {
+  case object Confirm extends ConfirmModuleMarksAction("Confirmed", ConfirmedActual, None)
+  case object AcademicIntegrity extends ConfirmModuleMarksAction("Unconfirmed (Ongoing academic conduct investigation)", UnconfirmedActual, Some("Unconfirmed due to ongoing academic conduct investigation"))
+  case object Extension extends ConfirmModuleMarksAction("Unconfirmed (Deadline extended beyond BoE meeting)", UnconfirmedActual, Some("Unconfirmed due to deadline after the Board of Examiners meeting"))
+  case object InternalStudent extends ConfirmModuleMarksAction("Unconfirmed (Student internal to department)", UnconfirmedActual, Some("Unconfirmed, student is internal to department"))
 
+  override def values: IndexedSeq[ConfirmModuleMarksAction] = findValues
+}
+class ConfirmModuleMarksActionConverter extends EnumTwoWayConverter(ConfirmModuleMarksAction)
+
+object ConfirmModuleMarksCommand {
   type Result = Seq[RecordedModuleRegistration]
   type Command = Appliable[Result]
     with ConfirmModuleMarksState
@@ -28,7 +40,6 @@ object ConfirmModuleMarksCommand {
     with ModuleOccurrenceLoadModuleRegistrations
     with SelfValidating
   type SprCode = String
-  type Comment = String
 
   def apply(sitsModuleCode: String, module: Module, academicYear: AcademicYear, occurrence: String, currentUser: CurrentUser) =
     new ConfirmModuleMarksCommandInternal(sitsModuleCode, module, academicYear, occurrence, currentUser)
@@ -46,23 +57,24 @@ object ConfirmModuleMarksCommand {
       with ConfirmModuleMarkChangedCommandNotification
 }
 
-
-class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
+abstract class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
   extends CommandInternal[Result] with ConfirmModuleMarksState with ConfirmModuleMarksValidation {
+  self: ConfirmModuleMarksRequest
+    with ModuleOccurrenceLoadModuleRegistrations
+    with ModuleRegistrationMarksServiceComponent
+    with AssessmentComponentMarksServiceComponent
+    with ModuleOccurrenceDescription =>
 
-  self: ConfirmModuleMarksRequest with ModuleOccurrenceLoadModuleRegistrations with ModuleRegistrationMarksServiceComponent
-    with AssessmentComponentMarksServiceComponent =>
-
-  val mandatoryEventName: String = "ConfirmModuleMarks"
+  override val mandatoryEventName: String = "ConfirmModuleMarks"
 
   def applyInternal(): Result = transactional() {
-
     studentsToConfirm.map { case (module, components) =>
-
       require(module.markState.forall(_ == UnconfirmedActual))
 
       val moduleRegistration = moduleRegistrations.find(_.sprCode == module.sprCode).get
       val recordedModuleRegistration = moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration(moduleRegistration)
+
+      val action = actions.asScala(recordedModuleRegistration.sprCode)
 
       recordedModuleRegistration.addMark(
         uploader = currentUser.apparentUser,
@@ -70,8 +82,8 @@ class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: 
         grade = module.grade,
         result = module.result,
         source = MarkConfirmation,
-        comments = comments.asScala(recordedModuleRegistration.sprCode),
-        markState = ConfirmedActual
+        comments = action.comment.orNull,
+        markState = action.markState
       )
 
       // change the state of all components that are Unconfirmed actual (or that have no state)
@@ -84,7 +96,7 @@ class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val module: 
           grade = component.grade,
           comments = component.history.headOption.map(_.comments).orNull, // leave component comments as-is
           source = ModuleMarkConfirmation,
-          markState = ConfirmedActual
+          markState = action.markState
         )
 
         assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
@@ -100,27 +112,24 @@ trait ConfirmModuleMarksValidation extends SelfValidating {
   self: ConfirmModuleMarksState with ConfirmModuleMarksRequest =>
 
   def validate(errors: Errors): Unit = {
+    actions.asScala.foreach { case (sprCode, action) =>
+      if (action == null) {
+        errors.rejectValue(s"actions[$sprCode]", "moduleMarks.confirm.noAction")
+      } else if (action == ConfirmModuleMarksAction.Confirm) {
+        val hasMissingModuleGrade = studentsWithMissingModuleGrade.exists(_._1.sprCode == sprCode)
+        val hasMissingComponentGrade = studentsWithMissingComponentGrades.exists(_._1.sprCode == sprCode)
 
-    // TODO - is validation on grades even needed :superthinking:
-    // cannot confirm module marks if any components or modules are missing a grade (marks may be missing but indicator grades should always be present)
-    lazy val studentsWithMissingModuleGrade: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
-      case (module, _) => module.grade.isEmpty
+        if (hasMissingModuleGrade) {
+          errors.rejectValue(s"actions[$sprCode]", "moduleMarks.confirm.missingGrade", Array(sprCode), "")
+        } else if (hasMissingComponentGrade) {
+          errors.rejectValue(s"actions[$sprCode]", "moduleMarks.confirm.missingComponentGrade", Array(sprCode), "")
+        }
+      }
     }
-
-    lazy val studentsWithMissingComponentGrades: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
-      case (_, components) => components.values.exists(_.grade.isEmpty)
-    }
-
-    if (studentsWithMissingModuleGrade.nonEmpty)
-      errors.reject("moduleMarks.confirm.missingGrade", Array(studentsWithMissingModuleGrade.map(_._1.sprCode).mkString(", ")), "")
-
-    if (studentsWithMissingComponentGrades.nonEmpty)
-      errors.reject("moduleMarks.confirm.missingComponentGrade", Array(studentsWithMissingComponentGrades.map(_._1.sprCode).mkString(", ")), "")
   }
 }
 
 trait ConfirmModuleMarksState extends ModuleOccurrenceState with ClearRecordedModuleMarksState {
-
   self: ModuleOccurrenceLoadModuleRegistrations =>
 
   lazy val studentModuleRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleMarkRecords.map { student =>
@@ -130,22 +139,32 @@ trait ConfirmModuleMarksState extends ModuleOccurrenceState with ClearRecordedMo
   }
 
   lazy val studentsToConfirm: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter { case (module, _) =>
-    module.markState.forall(_ == UnconfirmedActual)
+    module.markState.forall(_ == UnconfirmedActual) || module.agreed
   }
 
   lazy val alreadyConfirmed: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.diff(studentsToConfirm)
-    .filter { case (module, _) => module.markState.isDefined && module.markState.contains(ConfirmedActual) }
+    .filter { case (module, _) => module.markState.contains(ConfirmedActual) }
+
+  lazy val studentsWithMissingModuleGrade: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
+    case (module, _) => module.grade.isEmpty
+  }
+
+  lazy val studentsWithMissingComponentGrades: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
+    case (_, components) => components.values.exists(_.grade.isEmpty)
+  }
 }
 
 trait ConfirmModuleMarksRequest {
   self: ConfirmModuleMarksState =>
 
-  var comments: JMap[SprCode, Comment] = LazyMaps.create { sprCode: SprCode =>
-    studentModuleRecords.map(_._1).find(_.sprCode == sprCode).flatMap(_.history.headOption).map(_.comments).orNull
+  var actions: JMap[SprCode, ConfirmModuleMarksAction] = LazyMaps.create { sprCode: SprCode =>
+    val hasMissingModuleGrade = studentsWithMissingModuleGrade.exists(_._1.sprCode == sprCode)
+    val hasMissingComponentGrade = studentsWithMissingComponentGrades.exists(_._1.sprCode == sprCode)
+
+    if (hasMissingModuleGrade || hasMissingComponentGrade) null: ConfirmModuleMarksAction
+    else ConfirmModuleMarksAction.Confirm
   }.asJava
-
 }
-
 
 case class RecordedModuleRegistrationInfo(recordedModuleRegistration: RecordedModuleRegistration, member: StudentMember)
 
@@ -164,14 +183,13 @@ trait ConfirmModuleMarkChangedCommandNotification extends Notifies[Seq[RecordedM
       .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
   }
 
-  override def emit(result: Seq[RecordedModuleRegistration]) = {
-
+  override def emit(result: Seq[RecordedModuleRegistration]): Seq[ConfirmModuleMarkChangedNotification] = {
     val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.filter(rmr => rmr.marks.tail.exists(m => m.markState == ConfirmedActual)).map { rmr =>
       rmr ->  notificationDepartment(rmr)
     }
+
     recordedModuleRegs.filter(_._2.nonEmpty).groupBy(_._2.get).map { case (d, rmrWithDeptList) =>
       Notification.init(new ConfirmModuleMarkChangedNotification, currentUser.apparentUser, rmrWithDeptList.map(_._1), d)
     }.toSeq
-
   }
 }

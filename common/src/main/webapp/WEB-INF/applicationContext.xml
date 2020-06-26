@@ -219,6 +219,7 @@
     <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaErrorCodeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.FiniteDurationConverter" />
     <bean class="uk.ac.warwick.tabula.data.convert.BigDecimalConverter"/>
+    <bean class="uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksActionConverter" />
   </util:list>
 
   <bean id="typeConverter"
