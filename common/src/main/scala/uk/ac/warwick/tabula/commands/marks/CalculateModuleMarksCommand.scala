@@ -159,11 +159,12 @@ object CalculateModuleMarksCommand {
 
 abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with ModuleOccurrenceState with ClearRecordedModuleMarksState {
+    with ModuleOccurrenceState with ClearRecordedModuleMarksState with RecordedModuleRegistrationNotifcationDepartment {
   self: CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
-    with TransactionalComponent =>
+    with TransactionalComponent
+    with ProfileServiceComponent =>
 
   val mandatoryEventName: String = "CalculateModuleMarks"
 

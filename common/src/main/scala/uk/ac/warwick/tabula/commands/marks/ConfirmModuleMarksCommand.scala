@@ -146,32 +146,39 @@ trait ConfirmModuleMarksRequest {
 
 }
 
+trait RecordedModuleRegistrationNotifcationDepartment {
+  self: ProfileServiceComponent =>
 
-case class RecordedModuleRegistrationInfo(recordedModuleRegistration: RecordedModuleRegistration, member: StudentMember)
+  //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
+  private def department(rmr: RecordedModuleRegistration): Option[Department] = {
+      val student = profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).head.student
+      val module = rmr.moduleRegistration.map(_.module).get
+      rmr.moduleRegistration
+        .map(_.studentCourseDetails)
+        .flatMap(_.course.department)
+        .flatMap(_.subDepartmentsContaining(student).lastOption) // Get the sub-department containing the student, if applicable
+        .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
 
-trait ConfirmModuleMarkChangedCommandNotification extends Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
+  }
+
+  def notificationDepartment(stuRecord: StudentModuleMarkRecord): Option[Department] =  {
+    val marksHistory = stuRecord.history
+    if (!marksHistory.isEmpty && marksHistory.exists(m => m.markState == ConfirmedActual)) department(marksHistory.head.recordedModuleRegistration) else None
+  }
+
+  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =   if (rmr.marks.tail.exists(m => m.markState == ConfirmedActual)) department(rmr) else None
+}
+
+trait ConfirmModuleMarkChangedCommandNotification extends RecordedModuleRegistrationNotifcationDepartment with Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
 
   self: ClearRecordedModuleMarksState with ProfileServiceComponent =>
 
-  //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
-  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =  {
-    val student = profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).head.student
-    val module = rmr.moduleRegistration.map(_.module).get
-    rmr.moduleRegistration
-      .map(_.studentCourseDetails)
-      .flatMap(_.course.department)
-      .flatMap(_.subDepartmentsContaining(student).lastOption) // Get the sub-department containing the student, if applicable
-      .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
-  }
-
   override def emit(result: Seq[RecordedModuleRegistration]) = {
-
-    val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.filter(rmr => rmr.marks.tail.exists(m => m.markState == ConfirmedActual)).map { rmr =>
+    val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.map { rmr =>
       rmr ->  notificationDepartment(rmr)
     }
     recordedModuleRegs.filter(_._2.nonEmpty).groupBy(_._2.get).map { case (d, rmrWithDeptList) =>
       Notification.init(new ConfirmModuleMarkChangedNotification, currentUser.apparentUser, rmrWithDeptList.map(_._1), d)
     }.toSeq
-
   }
 }
