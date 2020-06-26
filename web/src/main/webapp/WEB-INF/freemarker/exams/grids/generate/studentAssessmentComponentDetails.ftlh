@@ -180,6 +180,17 @@
                           (${component.member.firstOriginalMark})
                         </#if>
                           </#compress></span>
+                    <#elseif (component.member.firstDefinedGrade!"") == 'FM'>
+                      <#assign class><#compress>
+                        <#if !component.member.isAgreedMark()>exam-grid-actual-mark </#if>
+                        <#if component.member.reassessment>exam-grid-resit </#if>
+                      </#compress></#assign>
+                      <span class="${class}"><#compress>
+                        -
+                        <#if component.member.reassessment && component.member.firstOriginalMark??>
+                          (${component.member.firstOriginalMark})
+                        </#if>
+                          </#compress></span>
                     <#else>
                       <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Assessment component">X</span>
                     </#if>
@@ -222,6 +233,12 @@
                 <span class="exam-grid-fail">${mr.actualMark}</span>
               <#else>
                 <span class="exam-grid-actual-mark">${mr.actualMark}</span>
+              </#if>
+            <#elseif ((mr.agreedGrade)!((mr.actualGrade)!'FM')) == 'FM'>
+              <#if mr.agreedGrade??>
+                -
+              <#else>
+                <span class="exam-grid-actual-mark">-</span>
               </#if>
             <#else>
               <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>

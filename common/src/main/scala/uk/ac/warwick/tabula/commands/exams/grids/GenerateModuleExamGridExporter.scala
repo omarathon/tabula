@@ -80,10 +80,14 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
       //detail rows
       entities.foreach { entity =>
-        val (mark, markStyle) = if (entity.moduleRegistration.agreedMark.isDefined) {
+        val (mark, markStyle) = if (entity.moduleRegistration.passFail) {
+          ("", None)
+        } else if (entity.moduleRegistration.agreedMark.isDefined) {
           (entity.moduleRegistration.agreedMark.get.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
         } else if (entity.moduleRegistration.actualMark.isDefined) {
           (entity.moduleRegistration.actualMark.get.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark.get, entity.moduleRegistration.module.degreeType, entity.isUnconfirmed))
+        } else if (entity.moduleRegistration.agreedGrade.orElse(entity.moduleRegistration.actualGrade).contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+          ("-", Option(cellStyleMap.getStyle(ActualMark)).filter(_ => entity.moduleRegistration.agreedGrade.isEmpty))
         } else {
           ("X", None)
         }
@@ -120,6 +124,8 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
               }
             } else if (cInfo.mark.isDefined) {
               (cInfo.mark.get.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark.map(BigDecimal(_)).orNull, mr.module.degreeType, isUnconfirmed))
+            } else if (cInfo.resitInfo.resitGrade.orElse(cInfo.grade).contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+              ("-", if ((cInfo.resitInfo.resitGrade.nonEmpty && cInfo.resitInfo.isActualResitGrade) || (cInfo.resitInfo.resitGrade.isEmpty && cInfo.grade.nonEmpty && cInfo.isActualGrade)) Option(cellStyleMap.getStyle(ActualMark, isUnconfirmed)) else None)
             } else {
               ("X", None)
             }
