@@ -7,26 +7,36 @@ import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.{ModuleMarkCalculation, StudentModuleMarksItem}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleResult}
+import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, RecordedModuleRegistrationNotifcationDepartment}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module, ModuleResult}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, SprCode}
 
 import scala.jdk.CollectionConverters._
+
+trait StudentModuleMarkRecordNotificationDepartment extends RecordedModuleRegistrationNotifcationDepartment
+  with AutowiringProfileServiceComponent {
+  def departmentalStudents(studentMarks: Seq[StudentModuleMarkRecord]):Map[Department, Seq[String]] = {
+    studentMarks.filter(_.history.size > 0)
+      .map { mark => (mark,notificationDepartment(mark)) }
+      .filter(_._2.nonEmpty)
+      .groupBy(_._2.get)
+      .map { case (d, rmrWithDeptList) => d -> rmrWithDeptList.map(data => SprCode.getUniversityId(data._1.sprCode)) }
+  }
+}
 
 @Controller
 @RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/marks"))
 class CalculateModuleMarksController extends BaseModuleMarksController
-  with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent with StudentModuleMarkRecordNotificationDepartment {
 
   @ModelAttribute("command")
   def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): CalculateModuleMarksCommand.Command =
@@ -176,6 +186,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
         }
 
       model.addAttribute("changes", changes)
+      model.addAttribute("notificationDepartments", departmentalStudents(changes.map(_._1)))
       model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence)}/skip-import"))
 
       "marks/admin/modules/calculate_preview"

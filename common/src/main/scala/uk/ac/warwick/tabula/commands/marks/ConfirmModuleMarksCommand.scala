@@ -26,7 +26,7 @@ object ConfirmModuleMarksAction extends Enum[ConfirmModuleMarksAction] {
   case object Confirm extends ConfirmModuleMarksAction("Confirmed", ConfirmedActual, None)
   case object AcademicIntegrity extends ConfirmModuleMarksAction("Unconfirmed (Ongoing academic conduct investigation)", UnconfirmedActual, Some("Unconfirmed due to ongoing academic conduct investigation"))
   case object Extension extends ConfirmModuleMarksAction("Unconfirmed (Deadline extended beyond BoE meeting)", UnconfirmedActual, Some("Unconfirmed due to deadline after the Board of Examiners meeting"))
-  case object InternalStudent extends ConfirmModuleMarksAction("Unconfirmed (Student internal to department)", UnconfirmedActual, Some("Unconfirmed, student is internal to department"))
+  case object InternalStudentWBS extends ConfirmModuleMarksAction("Unconfirmed (Student internal to WBS)", UnconfirmedActual, Some("Unconfirmed, student is internal to WBS"))
 
   override def values: IndexedSeq[ConfirmModuleMarksAction] = findValues
 }
@@ -68,7 +68,7 @@ abstract class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val
   override val mandatoryEventName: String = "ConfirmModuleMarks"
 
   def applyInternal(): Result = transactional() {
-    studentsToConfirm.map { case (module, components) =>
+    studentsToConfirm.filterNot { case (module, _) => actions.asScala(module.sprCode) == ConfirmModuleMarksAction.InternalStudentWBS }.map { case (module, components) =>
       require(module.markState.forall(_ == UnconfirmedActual))
 
       val moduleRegistration = moduleRegistrations.find(_.sprCode == module.sprCode).get
@@ -161,30 +161,41 @@ trait ConfirmModuleMarksRequest {
     val hasMissingModuleGrade = studentsWithMissingModuleGrade.exists(_._1.sprCode == sprCode)
     val hasMissingComponentGrade = studentsWithMissingComponentGrades.exists(_._1.sprCode == sprCode)
 
-    if (hasMissingModuleGrade || hasMissingComponentGrade) null: ConfirmModuleMarksAction
+    if (hasMissingModuleGrade && module.adminDepartment.rootDepartment.code == "ib") ConfirmModuleMarksAction.InternalStudentWBS
+    else if (hasMissingModuleGrade || hasMissingComponentGrade) null: ConfirmModuleMarksAction
     else ConfirmModuleMarksAction.Confirm
   }.asJava
 }
 
-case class RecordedModuleRegistrationInfo(recordedModuleRegistration: RecordedModuleRegistration, member: StudentMember)
+trait RecordedModuleRegistrationNotifcationDepartment {
+  self: ProfileServiceComponent =>
 
-trait ConfirmModuleMarkChangedCommandNotification extends Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
+  //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
+  private def department(rmr: RecordedModuleRegistration): Option[Department] = {
+      val student = profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).head.student
+      val module = rmr.moduleRegistration.map(_.module).get
+      rmr.moduleRegistration
+        .map(_.studentCourseDetails)
+        .flatMap(_.course.department)
+        .flatMap(_.subDepartmentsContaining(student).lastOption) // Get the sub-department containing the student, if applicable
+        .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
+
+  }
+
+  def notificationDepartment(stuRecord: StudentModuleMarkRecord): Option[Department] =  {
+    val marksHistory = stuRecord.history
+    if (marksHistory.exists(m => m.markState == ConfirmedActual)) department(marksHistory.head.recordedModuleRegistration) else None
+  }
+
+  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =   if (rmr.marks.tail.exists(m => m.markState == ConfirmedActual)) department(rmr) else None
+}
+
+trait ConfirmModuleMarkChangedCommandNotification extends RecordedModuleRegistrationNotifcationDepartment with Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
 
   self: ClearRecordedModuleMarksState with ProfileServiceComponent =>
 
-  //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
-  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =  {
-    val student = profileService.getStudentCourseDetailsBySprCode(rmr.sprCode).head.student
-    val module = rmr.moduleRegistration.map(_.module).get
-    rmr.moduleRegistration
-      .map(_.studentCourseDetails)
-      .flatMap(_.course.department)
-      .flatMap(_.subDepartmentsContaining(student).lastOption) // Get the sub-department containing the student, if applicable
-      .filterNot(_.rootDepartment == module.adminDepartment.rootDepartment) // Make sure it isn't the same department as the one recording the module marks
-  }
-
   override def emit(result: Seq[RecordedModuleRegistration]): Seq[ConfirmModuleMarkChangedNotification] = {
-    val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.filter(rmr => rmr.marks.tail.exists(m => m.markState == ConfirmedActual)).map { rmr =>
+    val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.map { rmr =>
       rmr ->  notificationDepartment(rmr)
     }
 

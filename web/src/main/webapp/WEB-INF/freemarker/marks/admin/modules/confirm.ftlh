@@ -33,6 +33,14 @@
   </div>
 </#if>
 <#if studentsToConfirm?has_content>
+  <#if notificationDepartments?has_content>
+    <div class="alert alert-info">
+        <#list notificationDepartments?keys as dept>
+            <#assign stuIds = mapGet(notificationDepartments, dept) />
+          <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/>  <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
+        </#list>
+    </div>
+  </#if>
   <p>
     The following module results and all component results will be confirmed as actual marks.
     Other departments will be made aware that these marks have been approved by a Pre-examination Module Board.
@@ -81,7 +89,7 @@
             </td>
             <td>
               <@bs3form.labelled_form_group path="actions[${student.sprCode}]">
-                <@f.select path="actions[${student.sprCode}]" cssClass="form-control">
+                <@f.select path="actions[${student.sprCode}]" cssClass="form-control" required=true>
                   <@f.option value="" />
                   <#list mapGet(validActions, student.sprCode) as action>
                     <@f.option value=action.entryName label=action.label />

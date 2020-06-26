@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.marks.{ConfirmModuleMarksAction, ConfirmModuleMarksCommand, ListAssessmentComponentsCommand, MarksDepartmentHomeCommand}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
@@ -16,7 +16,8 @@ import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 @RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/confirm"))
 class ConfirmModuleMarksController extends BaseModuleMarksController
   with AutowiringProfileServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent
+  with StudentModuleMarkRecordNotificationDepartment {
 
   @ModelAttribute("command")
   def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): ConfirmModuleMarksCommand.Command =
@@ -54,11 +55,16 @@ class ConfirmModuleMarksController extends BaseModuleMarksController
       val hasMissingModuleGrade = command.studentsWithMissingModuleGrade.exists(_._1.sprCode == sprCode)
       val hasMissingComponentGrade = command.studentsWithMissingComponentGrades.exists(_._1.sprCode == sprCode)
 
-      sprCode -> {
+      val allOptions =
         if (hasMissingModuleGrade || hasMissingComponentGrade) ConfirmModuleMarksAction.values.filterNot(_ == ConfirmModuleMarksAction.Confirm)
         else ConfirmModuleMarksAction.values
-      }
+
+      sprCode -> allOptions.filter(o => o != ConfirmModuleMarksAction.InternalStudentWBS || command.module.adminDepartment.rootDepartment.code == "ib")
     }.toMap
+
+  @ModelAttribute("notificationDepartments")
+  def notificationDepartments(@Valid @ModelAttribute("command") command: ConfirmModuleMarksCommand.Command, errors: Errors): Map[Department, Seq[String]] =
+    departmentalStudents(command.studentsToConfirm.sortBy(_._1.sprCode).map(_._1))
 
   private val formView: String = "marks/admin/modules/confirm"
 
