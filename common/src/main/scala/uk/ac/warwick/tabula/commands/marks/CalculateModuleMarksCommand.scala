@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.marks.{ModuleRegistrationValidGradesForMarkRequest, ValidGradesForMark}
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services._
@@ -30,20 +31,27 @@ import scala.util.Using
 import scala.xml.InputSource
 
 object CalculateModuleMarksCommand {
+
   sealed trait ModuleMarkCalculation {
     def isSuccessful: Boolean
+
     def isMultiple: Boolean
   }
+
   object ModuleMarkCalculation {
+
     case class Success(mark: Option[Int], grade: Option[String], result: Option[ModuleResult], comments: Option[String] = None) extends ModuleMarkCalculation {
       override val isSuccessful: Boolean = true
       override val isMultiple: Boolean = false
     }
+
     case class SuggestedModuleMarkCalculation(title: String, description: TemplateHTMLOutputModel, calculation: ModuleMarkCalculation)
+
     case class Multiple(reason: TemplateHTMLOutputModel, suggestions: Seq[SuggestedModuleMarkCalculation]) extends ModuleMarkCalculation {
       override val isSuccessful: Boolean = true
       override val isMultiple: Boolean = true
     }
+
     case class Failure(message: String) extends ModuleMarkCalculation {
       override val isSuccessful: Boolean = false
       override val isMultiple: Boolean = false
@@ -52,6 +60,7 @@ object CalculateModuleMarksCommand {
     // Some reusable results (just trying to keep these together)
     object Success {
       def apply(mark: Option[Int], gradeBoundary: Option[GradeBoundary]): Success = Success(mark, gradeBoundary.map(_.grade), gradeBoundary.flatMap(_.result))
+
       def PassFail(gradeBoundary: GradeBoundary): Success = Success(None, Some(gradeBoundary.grade), gradeBoundary.result)
     }
 
@@ -97,24 +106,34 @@ object CalculateModuleMarksCommand {
       val NoModuleRegistration: Failure = Failure("No module registration found")
       val NoComponentMarks: Failure = Failure("There were no component marks")
       val NoMarkScheme: Failure = Failure("There is no mark scheme associated with the module registration")
+
       def MarksAndGradesMissingFor(sequences: Seq[String]): Failure = Failure(s"Marks and grades are missing for ${sequences.mkString(", ")}")
 
       object PassFail {
         val MismatchedMarkScheme: Failure = Failure("Not all components are pass/fail but module is")
+
         def GradesMissingFor(sequences: Seq[String]): Failure = Failure(s"Grades are missing for ${sequences.mkString(", ")}")
+
         val NoDefaultGrade: Failure = Failure("Unable to select a valid grade")
+
         def MismatchedGrades(grades: Seq[String]): Failure = Failure(s"Couldn't automatically select a result from component grades ${grades.mkString(", ")}")
       }
 
       def MarksMissingFor(sequences: Seq[String]): Failure = Failure(s"Marks are missing for ${sequences.mkString(", ")}")
+
       def WeightingsMissingFor(sequences: Seq[String]): Failure = Failure(s"Weightings are missing for ${sequences.mkString(", ")}")
+
       def NoGradeBoundary(grade: String): Failure = Failure(s"Unable to find grade boundary for $grade grade")
+
       def MismatchedIndicatorGrades(grades: Seq[String], sequences: Seq[String]): Failure = Failure(s"Mis-matched indicator grades ${grades.mkString(", ")} for ${sequences.mkString(", ")}")
+
       val General: Failure = Failure("Couldn't automatically calculate a module result")
     }
+
   }
 
   type SprCode = String
+
   class StudentModuleMarksItem {
     def this(sprCode: SprCode) {
       this()
@@ -123,6 +142,8 @@ object CalculateModuleMarksCommand {
 
     var sprCode: SprCode = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
+    var validGrades: (Seq[GradeBoundary], Option[GradeBoundary]) = _
+
     @Length(max = 2)
     var grade: String = _
     var result: String = _
@@ -150,7 +171,9 @@ object CalculateModuleMarksCommand {
       with AutowiringTransactionalComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
       with ModuleOccurrenceDescription
+      with CalculateValidGradesBindListener
       with CalculateModuleMarksSpreadsheetBindListener
+      with CompositeCalculateModuleMarksBindListener
       with CalculateModuleMarksPopulateOnForm
       with CalculateModuleMarksAlgorithm
       with AutowiringProfileServiceComponent
@@ -203,13 +226,14 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
     with ModuleRegistrationServiceComponent
     with ModuleRegistrationMarksServiceComponent =>
 
-  lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)] =
+  lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)] = {
+    val noReg: Option[ModuleRegistration] = None
     studentModuleMarkRecords.map { student =>
-      val (cm, calculation) =
+      val (cm, mr, calculation) =
         moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
           val universityId = moduleRegistration.studentCourseDetails.student.universityId
           val components: Seq[(AssessmentComponent, StudentMarkRecord)] = componentMarks(universityId).toSeq
-
+          val mr: Option[ModuleRegistration] = Some(moduleRegistration)
           // Also get the weighting by passing all marks in
           val marksForWeighting: Seq[(AssessmentType, String, Option[Int])] =
             components.map { case (ac, s) =>
@@ -222,12 +246,12 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
               ac -> (s, weighting)
             }.toMap
 
-          (weightedComponents, calculate(moduleRegistration, components))
-        }.getOrElse((Map.empty[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation.Failure.NoModuleRegistration))
+          (weightedComponents, mr, calculate(moduleRegistration, components))
+        }.getOrElse((Map.empty[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], noReg, ModuleMarkCalculation.Failure.NoModuleRegistration))
 
-      (student, cm, calculation)
+      (student, cm, mr, calculation)
     }
-
+  }
 }
 
 trait CalculateModuleMarksRequest {
@@ -239,14 +263,39 @@ trait CalculateModuleMarksRequest {
   var file: UploadedFile = new UploadedFile
 }
 
-trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
+trait CalculateValidGradesBindListener {
+  self: CalculateModuleMarksRequest
+    with CalculateModuleMarksLoadModuleRegistrations
+    with AssessmentMembershipServiceComponent =>
+
+  def onBindValidGrades(result: BindingResult): Unit = {
+    students.asScala.foreach { case (sprCode, item) =>
+      val moduleRegistration =
+        moduleRegistrations.find(_.sprCode == item.sprCode)
+
+      if (moduleRegistration.isDefined) {
+        val request = new ValidGradesRequest()
+        request.mark = item.mark
+        request.existing = item.grade
+        request.resitAttempt = JInteger(Some(moduleRegistration.get.currentResitAttempt.getOrElse(0)))
+        item.validGrades = ValidGradesForMark.getTuple(
+          request,
+          moduleRegistration.get
+        )(assessmentMembershipService = assessmentMembershipService)
+      }
+      // we don't care if it's not a valid module reg, it'll be caught in the validation step after the bind listeners have run
+    }
+  }
+}
+
+trait CalculateModuleMarksSpreadsheetBindListener {
   self: CalculateModuleMarksRequest
     with TransactionalComponent =>
 
   final val MAX_MARKS_ROWS: Int = 5000
   final val VALID_FILE_TYPES: Seq[String] = Seq(".xlsx")
 
-  override def onBind(result: BindingResult): Unit = {
+  def onBindSpreadsheet(result: BindingResult): Unit = {
     val fileNames = file.fileNames.map(_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !VALID_FILE_TYPES.exists(s.endsWith))
 
@@ -272,6 +321,7 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
               val items: JList[StudentModuleMarksItem] = JArrayList()
               val sheetHandler = new AbstractXslxSheetHandler(styles, sst, items) {
                 override def newCurrentItem: StudentModuleMarksItem = new StudentModuleMarksItem()
+
                 override def cell(cellReference: String, formattedValue: String, comment: XSSFComment): Unit = {
                   val col = new CellReference(cellReference).getCol
                   if (isFirstRow) {
@@ -318,6 +368,18 @@ trait CalculateModuleMarksSpreadsheetBindListener extends BindListener {
   }
 }
 
+trait CompositeCalculateModuleMarksBindListener extends BindListener {
+  self: CalculateModuleMarksRequest
+    with CalculateValidGradesBindListener
+    with CalculateModuleMarksSpreadsheetBindListener
+    with TransactionalComponent =>
+
+  override def onBind(result: BindingResult): Unit = {
+    onBindSpreadsheet(result)
+    onBindValidGrades(result)
+  }
+}
+
 trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
   self: ModuleOccurrenceState
     with CalculateModuleMarksRequest
@@ -329,7 +391,7 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
     with AssessmentComponentMarksServiceComponent =>
 
   override def populate(): Unit = {
-    studentModuleMarkRecordsAndCalculations.foreach { case (student, _, calculation) =>
+    studentModuleMarkRecordsAndCalculations.foreach { case (student, _, mr, calculation) =>
       val s = new StudentModuleMarksItem(student.sprCode)
       student.mark.foreach(m => s.mark = m.toString)
       student.grade.foreach(s.grade = _)
@@ -338,7 +400,14 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
       // If we can make a calculation we always use it, but make it clear that we have done
       calculation match {
         case ModuleMarkCalculation.Success(mark, grade, result, comments) =>
-          mark.foreach(m => s.mark = m.toString)
+          mark.foreach(m => {
+            s.mark = m.toString
+            val request = new ValidGradesRequest()
+            request.mark = s.mark
+            request.existing = s.grade
+            request.resitAttempt = JInteger(Some(mr.get.currentResitAttempt.getOrElse(0)))
+            s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
+          })
           grade.foreach(s.grade = _)
           result.foreach(r => s.result = r.dbValue)
           comments.foreach(s.comments = _)
@@ -351,13 +420,17 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
   }
 }
 
+class ValidGradesRequest extends ModuleRegistrationValidGradesForMarkRequest {
+
+}
+
 trait CalculateModuleMarksAlgorithm {
   self: AssessmentMembershipServiceComponent =>
 
   def calculate(moduleRegistration: ModuleRegistration, components: Seq[(AssessmentComponent, StudentMarkRecord)]): ModuleMarkCalculation = {
     require(components.isEmpty || components.forall { case (ac, s) =>
       ac.moduleCode == components.head._1.moduleCode &&
-      s.universityId == components.head._2.universityId
+        s.universityId == components.head._2.universityId
     })
 
     if (components.isEmpty) ModuleMarkCalculation.Failure.NoComponentMarks
@@ -383,6 +456,7 @@ trait CalculateModuleMarksAlgorithm {
                 ModuleMarkCalculation.Failure.PassFail.MismatchedMarkScheme
               } else {
                 val validGrades = validGradesForMark(None)
+
                 def passFailResult(grade: String): ModuleMarkCalculation =
                   validGrades.find(_.grade == grade) match {
                     case None => ModuleMarkCalculation.Failure.NoGradeBoundary(grade)
@@ -454,7 +528,7 @@ trait CalculateModuleMarksAlgorithm {
 
                       lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.upstreamAssessmentGroupMember.currentResitAttempt)
 
-                      val cappedMark = if(s.resitExpected && !s.furtherFirstSit) {
+                      val cappedMark = if (s.resitExpected && !s.furtherFirstSit) {
                         markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
                       } else mark
 
@@ -562,7 +636,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
             }
           }
         } catch {
-          case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+          case _@(_: NumberFormatException | _: IllegalArgumentException) =>
             errors.rejectValue("mark", "actualMark.format")
         }
       } else if (doGradeValidation && item.grade.hasText) {
@@ -582,11 +656,11 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
       // TAB-8428 if the mark, grade or result differ from the current mark, grade or result AND they differ from the calculated
       // mark, grade and result, comment becomes mandatory
-      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, _, calculation) =>
+      studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).foreach { case (currentModuleMarkRecord, _, _, calculation) =>
         def matchesCalculation(calculation: ModuleMarkCalculation.Success): Boolean =
           item.mark.maybeText.exists(m => m != calculation.mark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
-          item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
-          item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
+            item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
+            item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
 
         lazy val doesntMatchCalculation = calculation match {
           case c: ModuleMarkCalculation.Success => matchesCalculation(c)
@@ -626,13 +700,13 @@ trait ClearRecordedModuleMarks {
           moduleRegistrationMarksService.getRecordedModuleRegistration(moduleRegistration)
 
         moduleRegistration.firstDefinedMark.nonEmpty ||
-        moduleRegistration.firstDefinedGrade.nonEmpty ||
-        Option(moduleRegistration.moduleResult).nonEmpty ||
-        existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
-          recordedModuleRegistration.latestMark.nonEmpty ||
-          recordedModuleRegistration.latestGrade.nonEmpty ||
-          recordedModuleRegistration.latestResult.nonEmpty
-        }
+          moduleRegistration.firstDefinedGrade.nonEmpty ||
+          Option(moduleRegistration.moduleResult).nonEmpty ||
+          existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
+            recordedModuleRegistration.latestMark.nonEmpty ||
+              recordedModuleRegistration.latestGrade.nonEmpty ||
+              recordedModuleRegistration.latestResult.nonEmpty
+          }
       }
       .map(moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration)
       .map { recordedModuleRegistration =>
