@@ -15,6 +15,16 @@ $(() => {
     const $markInput = $input.closest('form').find(`[name="${$input.data('mark')}"]`);
     const $select = $input.next('select');
 
+    function initialiseSelect() {
+      if ($select.find('option').length > 1) {
+        $input.hide().prop('disabled', true);
+        $select.prop('disabled', false).show();
+      } else {
+        $input.show().prop('disabled', false);
+        $select.prop('disabled', true).hide();
+      }
+    }
+
     if ($input.length && $markInput.length && $select.length) {
       let currentRequest;
 
@@ -39,13 +49,7 @@ $(() => {
           data,
           success: (html) => {
             $select.html(html);
-            if ($select.find('option').length > 1) {
-              $input.hide().prop('disabled', true);
-              $select.prop('disabled', false).show();
-            } else {
-              $input.show().prop('disabled', false);
-              $select.prop('disabled', true).hide();
-            }
+            initialiseSelect();
           },
           error: (xhr, errorText) => {
             if (errorText !== 'abort') {
@@ -56,7 +60,11 @@ $(() => {
       };
 
       $markInput.on('change input', doRequest);
-      doRequest();
+      if (!$input.hasClass('grades-already-available')) {
+        doRequest();
+      } else {
+        initialiseSelect();
+      }
     }
   });
 

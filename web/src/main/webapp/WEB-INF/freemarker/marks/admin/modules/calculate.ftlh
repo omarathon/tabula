@@ -1,7 +1,11 @@
 <#-- @ftlvariable name="from_origin" type="java.lang.String" -->
+<#-- @ftlvariable name="calculation" type="uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.StudentModuleMarksItem" -->
+<#-- @ftlvariable name="assessmentComponents" type="java.util.List<uk.ac.warwick.tabula.data.model.AssessmentComponent>" -->
+
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
 <#import "*/marks_components.ftlh" as components />
+<#import "/WEB-INF/freemarker/generated_grades_macros.ftlh" as gg />
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
@@ -134,7 +138,7 @@
 <#macro studentMarkRecordRow studentMarkRecord>
   <#local student = studentMarkRecord._1() />
   <#local componentMarks = studentMarkRecord._2() />
-  <#local calculation = studentMarkRecord._3() />
+  <#local calculation = studentMarkRecord._4() />
   <#local member = membersBySprCode[student.sprCode] />
 
   <tr>
@@ -179,12 +183,18 @@
       </@bs3form.labelled_form_group>
     </td>
     <td>
+      <@spring.bind path="students[${student.sprCode}]">
+        <#local studentModuleMarkItem = status.actualValue />
+      </@spring.bind>
       <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
         <#if isGradeValidation>
           <#local generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#local>
-
-          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=max_resit_attempt(componentMarks)! />
-          <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control ${studentModuleMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=max_resit_attempt(componentMarks)! />
+          <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true>
+              <#if studentModuleMarkItem.validGrades?has_content>
+                  <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() />
+              </#if>
+          </@f.select>
         <#else>
           <@f.input id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control grade-box" />
         </#if>
@@ -210,7 +220,7 @@
 
 <#function has_mma_calculation studentModuleMarkRecords>
   <#list studentModuleMarkRecords as studentMarkRecord>
-    <#local calculation = studentMarkRecord._3() />
+    <#local calculation = studentMarkRecord._4() />
     <#if calculation.successful && calculation.multiple>
       <#return true />
     </#if>
@@ -221,7 +231,7 @@
 <#function get_mma_records studentModuleMarkRecords>
   <#local result = [] />
   <#list studentModuleMarkRecords as studentMarkRecord>
-    <#local calculation = studentMarkRecord._3() />
+    <#local calculation = studentMarkRecord._4() />
     <#if calculation.successful && calculation.multiple>
       <#local result = result + [studentMarkRecord] />
     </#if>
@@ -232,7 +242,7 @@
 <#function get_base_mma_calculation studentModuleMarkRecords>
   <#local baseCalculation = {} />
   <#list studentModuleMarkRecords as studentMarkRecord>
-    <#local calculation = studentMarkRecord._3() />
+    <#local calculation = studentMarkRecord._4() />
     <#if calculation.successful && calculation.multiple>
       <#if !baseCalculation?has_content>
         <#local baseCalculation = calculation />
@@ -330,7 +340,7 @@
                                 <div class="panel-footer clearfix" id="mma-modal-all-suggestion-${suggestion_index}">
                                   <#list mmaModuleMarkRecords as studentMarkRecord>
                                     <#assign student = studentMarkRecord._1() />
-                                    <#assign calculation = studentMarkRecord._3().suggestions[suggestion_index].calculation />
+                                    <#assign calculation = studentMarkRecord._4().suggestions[suggestion_index].calculation />
 
                                     <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${calculation.mark!}" />
                                     <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${calculation.grade!}" />
