@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.exams.grids.columns.administration
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.helpers.SeqUtils._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -73,12 +73,12 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
         val mitCircsHtml = entity.mitigatingCircumstances.map(s => s"""<dl class="dl-horizontal">
           <dt>MIT-${s.key}<dt><dd>Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})<dd>
-          ${if(s.outcomeGrading.entryName != "Rejected") {
+          ${if(s.outcomeGrading != MitigatingCircumstancesGrading.Rejected) {
           s"""<dt>Recommendation</dt>
             ${globalRecommendations(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${affectedAssessmentsByRecommendation(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"<dd>${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")</dd>")}
-            """}}
+            """} else ""}
           ${Option(s.boardRecommendationComments).map(comments => s"<dt>Comments</dt><dd>$comments</dd>").getOrElse("")}
           </dl>""").mkString
 
