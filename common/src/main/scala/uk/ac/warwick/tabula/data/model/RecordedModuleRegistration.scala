@@ -65,7 +65,7 @@ class RecordedModuleRegistration extends GeneratedId
   @Column(nullable = false)
   var occurrence: String = _
 
-  @OneToMany(mappedBy = "recordedModuleRegistration", cascade = Array(ALL), fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "recordedModuleRegistration", cascade = Array(ALL), fetch = FetchType.EAGER)
   @OrderBy("updated_date DESC")
   @BatchSize(size = 200)
   private val _marks: JList[RecordedModuleMark] = JArrayList()
@@ -172,6 +172,7 @@ class RecordedModuleMark extends GeneratedId
 sealed abstract class RecordedModuleMarkSource(val description: String) extends EnumEntry
 object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
   case object ComponentMarkCalculation extends RecordedModuleMarkSource("Calculate module marks")
+  case object RecordModuleMarks extends RecordedModuleMarkSource("Record module marks") // Used when the calculation is ignored
   case object MarkConfirmation extends RecordedModuleMarkSource("Confirm module marks")
   case object ComponentMarkChange extends RecordedModuleMarkSource("Component mark changed")
 

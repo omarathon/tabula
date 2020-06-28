@@ -44,6 +44,7 @@
                 <@pl.profile_link member.universityId />
                 ${student.universityId}
                 <@components.componentMarkStudentStatus student />
+                <@components.preview_clear_warning student />
               </td>
               <td>${member.firstName}</td>
               <td>${member.lastName}</td>
