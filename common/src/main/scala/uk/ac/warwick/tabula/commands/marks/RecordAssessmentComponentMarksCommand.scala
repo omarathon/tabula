@@ -175,7 +175,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                       case "University ID" | "ID" =>
                         currentItem.universityID = formattedValue
                       case "Resit sequence" =>
-                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%02d".format(_)).getOrElse(v)).getOrElse("")
+                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%03d".format(_)).getOrElse(v)).getOrElse("")
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
