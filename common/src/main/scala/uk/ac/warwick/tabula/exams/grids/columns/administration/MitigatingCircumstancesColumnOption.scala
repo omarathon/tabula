@@ -80,7 +80,6 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
             ${modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"<dd>${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")</dd>")}
             """}}
           ${Option(s.boardRecommendationComments).map(comments => s"<dt>Comments</dt><dd>$comments</dd>").getOrElse("")}
-        }
           </dl>""").mkString
 
         val notes = if (state.department.rootDepartment.code == "es") {
