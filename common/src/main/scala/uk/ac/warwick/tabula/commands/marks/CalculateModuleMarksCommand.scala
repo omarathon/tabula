@@ -6,7 +6,6 @@ import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.apache.poi.xssf.usermodel.XSSFComment
-import org.hibernate.validator.constraints.Length
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -22,7 +21,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.marks.{ModuleRegistrationValidGradesForMarkRequest, ValidGradesForMark}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksService, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -144,7 +143,6 @@ object CalculateModuleMarksCommand {
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var validGrades: (Seq[GradeBoundary], Option[GradeBoundary]) = _
 
-    @Length(max = 2)
     var grade: String = _
     var result: String = _
     var comments: String = _
@@ -699,6 +697,10 @@ trait CalculateModuleMarksValidation extends SelfValidating {
       // mark, grade and result, comment becomes mandatory
       if (!item.comments.hasText && doesntMatchCalculation(item)) {
         errors.rejectValue("comments", "moduleMarkCalculation.mismatch.noComment")
+      }
+
+      if (item.grade.safeLength > 2) {
+        errors.rejectValue("grade", "actualGrade.tooLong")
       }
 
       errors.popNestedPath()
