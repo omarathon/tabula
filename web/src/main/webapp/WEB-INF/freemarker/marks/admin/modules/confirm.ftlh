@@ -119,7 +119,7 @@
             <td data-sortby="${(student.result.dbValue)!}">
               ${(student.result.description)!'-'}
             </td>
-            <td>&nbsp;</td>
+            <td>Confirmed</td>
           </tr>
         </#list>
         </tbody>
