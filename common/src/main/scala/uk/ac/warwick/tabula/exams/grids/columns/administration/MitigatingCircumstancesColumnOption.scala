@@ -3,11 +3,14 @@ package uk.ac.warwick.tabula.exams.grids.columns.administration
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.helpers.SeqUtils._
+import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
+import uk.ac.warwick.util.core
 
+import scala.Option
 import scala.jdk.CollectionConverters._
 
 @Component
@@ -37,7 +40,21 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
         def globalRecommendations(s: MitigatingCircumstancesSubmission): Seq[String] = s.globalRecommendations
           .map{ r => r -> s.affectedAssessments.asScala.toSeq }
-          .map{ case (r, a) => s"${r.description} (all assessments - ${affectedAssessmentsModuleCodes(a).mkString(", ")})"}
+          .map{ case (r, a) =>
+            "%s (all assessments - %s)%s".format(
+              r.description,
+              affectedAssessmentsModuleCodes(a).mkString(", "),
+              r match {
+                case MitCircsExamBoardRecommendation.Other =>
+                  if (Option(s.boardRecommendationOther).exists(core.StringUtils.hasText)) {
+                    "<br /><span class=\"very-subtle\">%s</span>".format(s.boardRecommendationOther)
+                  } else {
+                    ""
+                  }
+                case _ => ""
+              }
+            )
+          }
 
         def affectedAssessmentsByRecommendation(s: MitigatingCircumstancesSubmission): Seq[String] = s.affectedAssessmentsByRecommendation.toSeq
           .map{case (r, a) => s"${r.description} ${affectedAssessmentsModuleCodes(a).mkStringOrEmpty("(", ", ", ")")}"}
