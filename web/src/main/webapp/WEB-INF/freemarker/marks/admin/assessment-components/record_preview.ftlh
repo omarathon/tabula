@@ -58,10 +58,10 @@
               </td>
               <td data-sortby="g${c.grade!}">
                 <@f.hidden path="students[${student.universityId}_${student.resitSequence!}].grade" />
-                ${student.grade!'-'}
+                <@components.format_grade student.grade!'-' />
                 <#if student.grade! != c.grade!>
                   <i class="fal fa-arrow-right"></i>
-                  ${c.grade!}
+                  <@components.format_grade c.grade! />
                 </#if>
               </td>
               <td><@f.input path="students[${student.universityId}_${student.resitSequence!}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>

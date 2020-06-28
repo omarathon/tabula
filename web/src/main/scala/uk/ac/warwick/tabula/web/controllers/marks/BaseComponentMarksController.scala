@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.commands.marks.ClearRecordedModuleMarks
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.commands.{MemberOrUser, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, ModuleRegistration, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.ModuleExamGridColumn
+import uk.ac.warwick.tabula.exams.grids.columns.modules.ModuleExamGridColumn.SITSIndicator
 import uk.ac.warwick.tabula.services.marks.AutowiringModuleRegistrationMarksServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -54,5 +56,11 @@ abstract class BaseComponentMarksController extends BaseController
         }
     }.toMap
   }
+
+  @ModelAttribute("sitsIndicatorLookup")
+  def sitsIndicatorLookup: Map[String, SITSIndicator] =
+    ModuleExamGridColumn.SITSIndicators
+      .map(i => i.grade -> i)
+      .toMap
 
 }

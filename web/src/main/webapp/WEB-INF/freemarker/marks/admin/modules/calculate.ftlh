@@ -89,10 +89,10 @@
       </td>
       <td data-sortby="g${calculation.grade!}">
         <#if student.grade! != calculation.grade!>
-          ${student.grade!'-'}
+          <@components.format_grade student.grade!'-' />
           <i class="fal fa-arrow-right"></i>
         </#if>
-        ${calculation.grade!'-'}
+        <@components.format_grade calculation.grade!'-' />
       </td>
       <td data-sortby="${(calculation.result.dbValue)!}">
         <#if (student.result.description)! != (calculation.result.description)!>
@@ -108,7 +108,7 @@
         <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
         ${calculation.message}
       <#else>
-        <span class="tabula-tooltip" data-title="${calculation.message}">
+        <span tabindex="0" class="tabula-tooltip" data-title="${calculation.message}">
           <i class="fa-fw fad fa-exclamation-triangle" aria-hidden="true"></i>
           <span class="sr-only">${calculation.message}</span>
         </span>
@@ -160,13 +160,13 @@
           ${marks.mark!'-'}
 
           <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
-            <span class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
+            <span tabindex="0" class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
           </#if>
 
           <@components.componentMarkStatusIcon marks />
           <@components.componentMarkHistory marks ac member />
         </td>
-        <td data-sortby="g${marks.grade!'-'}">${marks.grade!'-'}</td>
+        <td data-sortby="g${marks.grade!'-'}"><@components.format_grade marks.grade!'-' /></td>
       <#else>
         <td colspan="2"><span class="very-subtle">N/A</span></td>
       </#if>

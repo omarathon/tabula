@@ -187,9 +187,10 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
     with CalculateModuleMarksLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
     with TransactionalComponent
-    with ProfileServiceComponent =>
+    with ProfileServiceComponent
+    with ModuleOccurrenceDescription =>
 
-  val mandatoryEventName: String = "CalculateModuleMarks"
+  override val mandatoryEventName: String = "CalculateModuleMarks"
 
   override def applyInternal(): Result = transactional() {
     students.asScala.values.toSeq

@@ -58,7 +58,7 @@
                     <@components.componentMarkHistory student assessmentComponent member />
                   </td>
                   <td data-sortby="g${student.grade!'-'}">
-                    ${student.grade!'-'}
+                    <@components.format_grade student.grade!'-' />
                   </td>
                   <td>
                     <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].mark">
