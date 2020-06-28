@@ -3,14 +3,12 @@ package uk.ac.warwick.tabula.exams.grids.columns.administration
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.helpers.SeqUtils._
-import uk.ac.warwick.tabula.helpers.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
-import uk.ac.warwick.util.core
 
-import scala.Option
 import scala.jdk.CollectionConverters._
 
 @Component
@@ -45,12 +43,9 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
               r.description,
               affectedAssessmentsModuleCodes(a).mkString(", "),
               r match {
-                case MitCircsExamBoardRecommendation.Other =>
-                  if (Option(s.boardRecommendationOther).exists(core.StringUtils.hasText)) {
-                    "<br /><span class=\"very-subtle\">%s</span>".format(s.boardRecommendationOther)
-                  } else {
-                    ""
-                  }
+                case MitCircsExamBoardRecommendation.Other if s.boardRecommendationOther.maybeText.nonEmpty =>
+                  "<br /><span class=\"very-subtle\">%s</span>".format(s.boardRecommendationOther)
+
                 case _ => ""
               }
             )
