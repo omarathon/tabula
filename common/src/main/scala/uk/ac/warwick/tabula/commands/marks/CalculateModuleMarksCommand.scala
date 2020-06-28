@@ -441,7 +441,7 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
 
         if (student.mark.isEmpty && student.grade.isEmpty && student.result.isEmpty) true
         else if (mostRecentChange.isEmpty) true
-        else if (mostRecentChange.exists(_.source == RecordedModuleMarkSource.RecordModuleMarks)) true
+        else if (mostRecentChange.exists(_.source == RecordedModuleMarkSource.RecordModuleMarks)) false
         else {
           val componentMarkRecords = components.map(_._2._1)
           componentMarkRecords.forall(_.history.find(_.source != RecordedAssessmentComponentStudentMarkSource.ModuleMarkConfirmation).forall(_.updatedDate.isBefore(mostRecentChange.get.updatedDate)))
