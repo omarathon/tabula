@@ -253,7 +253,8 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
             .toMap
 
         // Eagerly load the students and relationships for use later
-        sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
+        if (studentsMap.isEmpty) Seq.empty
+        else sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
           .add(safeIn("universityId", studentsMap.keys.toSeq))
           .setFetchMode("studentCourseDetails", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)

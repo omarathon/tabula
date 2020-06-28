@@ -63,7 +63,7 @@ abstract class ModuleMarksTemplateCommandInternal(val sitsModuleCode: String, va
     header.createCell(4).setCellValue("Comments")
 
     // populate the mark sheet with ids and existing data
-    studentModuleMarkRecordsAndCalculations.zipWithIndex.foreach { case ((student, _, _), i) =>
+    studentModuleMarkRecordsAndCalculations.zipWithIndex.foreach { case ((student, _, _, _), i) =>
       val row = sheet.createRow(i + 1)
       row.createCell(0).setCellValue(student.sprCode)
 

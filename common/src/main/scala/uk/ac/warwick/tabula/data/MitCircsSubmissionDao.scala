@@ -66,8 +66,9 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       .addOrder(Order.desc("_lastModified"))
       .seq
 
-  override def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission] = {
-    session.newCriteria[MitigatingCircumstancesSubmission]
+  override def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission] =
+    if (students.isEmpty) Seq.empty
+    else session.newCriteria[MitigatingCircumstancesSubmission]
       .add(safeIn("student", students))
       .add(or(
         is("_state", ApprovedByChair),
@@ -75,7 +76,6 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       ))
       .add(isNotNull("outcomeGrading"))
       .seq
-  }
 
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =

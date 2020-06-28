@@ -1,5 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
+<#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
   <h1>Calculate module marks</h1>
@@ -14,6 +15,16 @@
 
   <p><a href="<@routes.marks.adminhome module.adminDepartment academicYear />">Back to module marks</a></p>
 <#else>
+  
+  <#if notificationDepartments?has_content>
+    <div class="alert alert-info">
+        <#list notificationDepartments?keys as dept>
+          <#assign stuIds = mapGet(notificationDepartments, dept) />
+          <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/>  <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
+        </#list>
+    </div>
+  </#if>
+
   <p>The following marks, grades and results will be changed:</p>
 
   <div class="fix-area">
@@ -55,18 +66,20 @@
               </td>
               <td data-sortby="g${c.grade!}">
                 <@f.hidden path="students[${student.sprCode}].grade" />
-                ${student.grade!'-'}
+                <@components.format_grade student.grade!'-' />
                 <#if student.grade! != c.grade!>
                   <i class="fal fa-arrow-right"></i>
-                  ${c.grade!}
+                  <@components.format_grade c.grade! />
                 </#if>
               </td>
               <td data-sortby="${c.result!}">
                 <@f.hidden path="students[${student.sprCode}].result" />
-                ${(student.result.dbValue)!'-'}
+                ${(student.result.description)!'-'}
                 <#if (student.result.dbValue)! != c.result!>
                   <i class="fal fa-arrow-right"></i>
-                  ${c.result!}
+                  <#if c.result?has_content>
+                    ${moduleResultsLookup[c.result].description}
+                  </#if>
                 </#if>
               </td>
               <td><@f.input path="students[${student.sprCode}].comments" cssClass="form-control" readonly=true tabindex="-1" /></td>

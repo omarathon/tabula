@@ -123,7 +123,7 @@ class ExamGridColumnValueDecimal(
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    val unconfirmedClass = if (isActual && isUnconfirmed) "exam-grid-unconfirmed" else ""
     s"""<span class="$actualClass $failedClass $unconfirmedClass">$getValueStringForRender</span>"""
   }
 
@@ -161,7 +161,7 @@ class ExamGridColumnValueString(
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    val unconfirmedClass = if (isActual && isUnconfirmed) "exam-grid-unconfirmed" else ""
     s"""<span class="$actualClass $failedClass $unconfirmedClass">$value</span>"""
   }
 
@@ -179,7 +179,7 @@ case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, messag
   override def toHTML: String = {
     val actualClass = if (isActual) "exam-grid-actual-mark" else ""
     val failedClass = if (isFail) "exam-grid-fail" else ""
-    val unconfirmedClass = if (isUnconfirmed) "exam-grid-unconfirmed" else ""
+    val unconfirmedClass = if (isActual && isUnconfirmed) "exam-grid-unconfirmed" else ""
     val (tooltipClass, tooltipMessage) = if (message.hasText) ("tabula-tooltip", s"""tabindex="0" data-title="$message" """) else ("", "")
     s"""<span class="$actualClass $failedClass $unconfirmedClass $tooltipClass" $tooltipMessage>$value</span>"""
   }

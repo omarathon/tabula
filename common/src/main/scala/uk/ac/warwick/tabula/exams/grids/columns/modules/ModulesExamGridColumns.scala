@@ -117,7 +117,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
             def markAsString: String = {
               val raw = mark.orElse(grade).get.toString
-              val checkResit = if (member.isReassessment) s"[$raw ${member.firstOriginalMark.orElse(member.firstOriginalGrade).map(s => s"($s)").getOrElse("")}]" else raw
+              val checkResit = if (member.isReassessment) s"[$raw${member.firstOriginalMark.orElse(member.firstOriginalGrade).map(s => s" ($s)").getOrElse("")}]" else raw
               val checkShowSequence = if (state.showComponentSequence) s"$checkResit (${member.upstreamAssessmentGroup.sequence})" else checkResit
               checkShowSequence
             }

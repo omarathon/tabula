@@ -43,17 +43,17 @@
         <td data-sortby="${result.studentsWithMarks?size}">
           ${result.studentsWithMarks?size}
           <#if result.needsWritingToSits>
-            <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
+            <span tabindex="0" class="tabula-tooltip" data-title="Waiting to be written to SITS">
               <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
               <span class="sr-only">Waiting to be written to SITS</span>
             </span>
           <#elseif result.outOfSync>
-            <span class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
+            <span tabindex="0" class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
               <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
               <span class="sr-only">Mark is out of sync with current mark in SITS</span>
             </span>
           <#elseif result.allAgreed>
-            <span class="tabula-tooltip" data-title="Agreed marks published to students">
+            <span tabindex="0" class="tabula-tooltip" data-title="Agreed marks published to students">
               <i class="fa-fw fad fa-check-circle" aria-hidden="true"></i>
               <span class="sr-only">Agreed marks published to students</span>
             </span>

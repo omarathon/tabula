@@ -183,6 +183,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     val validRecords = moduleRegistrations
       .filterNot(_.deleted)
       .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0)// 0 CAT modules don't count towards the overall mark so ignore them
+      .filterNot(mr => mr.firstDefinedGrade.contains(GradeBoundary.WithdrawnGrade)) // Remove withdrawn modules
     if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
         Seq((null, validRecords))
     } else {

@@ -7,26 +7,37 @@ import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.{ModuleMarkCalculation, StudentModuleMarksItem}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleResult}
+import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, RecordedModuleRegistrationNotifcationDepartment}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module, ModuleResult}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleRegistration, ModuleResult}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, SprCode}
 
 import scala.jdk.CollectionConverters._
+
+trait StudentModuleMarkRecordNotificationDepartment extends RecordedModuleRegistrationNotifcationDepartment
+  with AutowiringProfileServiceComponent {
+  def departmentalStudents(studentMarks: Seq[StudentModuleMarkRecord]):Map[Department, Seq[String]] = {
+    studentMarks.filter(_.history.size > 0)
+      .map { mark => (mark,notificationDepartment(mark)) }
+      .filter(_._2.nonEmpty)
+      .groupBy(_._2.get)
+      .map { case (d, rmrWithDeptList) => d -> rmrWithDeptList.map(data => SprCode.getUniversityId(data._1.sprCode)) }
+  }
+}
 
 @Controller
 @RequestMapping(Array("/marks/admin/module/{sitsModuleCode}/{academicYear}/{occurrence}/marks"))
 class CalculateModuleMarksController extends BaseModuleMarksController
-  with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent with StudentModuleMarkRecordNotificationDepartment {
 
   @ModelAttribute("command")
   def command(@PathVariable sitsModuleCode: String, @ModelAttribute("module") module: Module, @PathVariable academicYear: AcademicYear, @PathVariable occurrence: String): CalculateModuleMarksCommand.Command =
@@ -43,11 +54,11 @@ class CalculateModuleMarksController extends BaseModuleMarksController
   }
 
   @ModelAttribute("studentModuleMarkRecords")
-  def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)] =
+  def studentModuleMarkRecords(@ModelAttribute("command") command: CalculateModuleMarksCommand.Command): Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)] =
     command.studentModuleMarkRecordsAndCalculations
 
   @ModelAttribute("assessmentComponents")
-  def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)]): Seq[AssessmentComponent] =
+  def assessmentComponents(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)]): Seq[AssessmentComponent] =
     studentModuleMarkRecords.flatMap(_._2.keySet).distinct.sortBy(_.sequence)
 
   @ModelAttribute("isGradeValidation")
@@ -67,7 +78,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
    */
   @RequestMapping
   def triggerImportIfNecessary(
-    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)],
+    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)],
     @PathVariable academicYear: AcademicYear,
     model: ModelMap,
     @ModelAttribute("command") command: CalculateModuleMarksCommand.Command,
@@ -145,7 +156,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
     @Valid @ModelAttribute("command") cmd: CalculateModuleMarksCommand.Command,
     errors: Errors,
     model: ModelMap,
-    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation)],
+    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)],
     @PathVariable sitsModuleCode: String,
     @PathVariable academicYear: AcademicYear,
     @PathVariable occurrence: String
@@ -163,7 +174,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
       val changes: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation, StudentModuleMarksItem)] =
         cmd.students.asScala.values.toSeq.flatMap { student =>
           // We know the .get is safe because it's validated
-          val (studentModuleMarkRecord, componentMarks, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get
+          val (studentModuleMarkRecord, componentMarks, mr, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get
 
           // Mark and grade and result haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (
@@ -176,6 +187,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
         }
 
       model.addAttribute("changes", changes)
+      model.addAttribute("notificationDepartments", departmentalStudents(changes.map(_._1)))
       model.addAttribute("returnTo", getReturnTo(s"${Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence)}/skip-import"))
 
       "marks/admin/modules/calculate_preview"

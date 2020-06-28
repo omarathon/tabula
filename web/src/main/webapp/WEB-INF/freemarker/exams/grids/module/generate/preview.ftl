@@ -184,6 +184,13 @@
                               </#compress>
                             </#assign>
                             <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
+                          <#elseif ((componentResitDetails.resitGrade)!((componentDetails.grade)!'')) == 'FM'>
+                            <#assign componentmark_class>
+                              <#compress>
+                                <#if componentDetails.actualMark>exam-grid-actual-mark</#if>
+                              </#compress>
+                            </#assign>
+                            <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>-</span>
                           <#else>
                             <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
                           </#if>
@@ -214,7 +221,11 @@
                         <span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
                       <#elseif mr.actualMark??>
                         <span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
-                      <#else>
+                      <#elseif (mr.agreedGrade!'') == 'FM'>
+                        <span>-</span>
+                      <#elseif (mr.actualGrade!'') == 'FM'>
+                        <span class="exam-grid-actual-mark">-</span>
+                      <#elseif !mr.passFail>
                         <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
                       </#if>
                     </td>

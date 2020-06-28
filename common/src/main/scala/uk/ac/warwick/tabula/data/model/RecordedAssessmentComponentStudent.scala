@@ -75,7 +75,7 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   def matchesIdentity(uagm: UpstreamAssessmentGroupMember): Boolean =
     universityId == uagm.universityId && assessmentType == uagm.assessmentType && resitSequence == uagm.resitSequence
 
-  @OneToMany(mappedBy = "recordedAssessmentComponentStudent", cascade = Array(ALL), fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "recordedAssessmentComponentStudent", cascade = Array(ALL), fetch = FetchType.EAGER)
   @OrderBy("updated_date DESC")
   @BatchSize(size = 200)
   private val _marks: JList[RecordedAssessmentComponentStudentMark] = JArrayList()

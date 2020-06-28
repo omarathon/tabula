@@ -173,7 +173,7 @@ trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener
                       case "University ID" | "ID" =>
                         currentItem.universityID = formattedValue
                       case "Resit sequence" =>
-                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%s%02d".format(_)).getOrElse(v)).getOrElse("")
+                        currentItem.resitSequence = formattedValue.maybeText.map(v => Try(v.toInt).toOption.map("%03d".format(_)).getOrElse(v)).getOrElse("")
                       case "Mark" =>
                         currentItem.mark = formattedValue
                       case "Grade" =>
@@ -289,6 +289,10 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
         if (!validGrades.exists(_.grade == item.grade)) {
           errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
         }
+      }
+
+      if (item.grade.safeLength > 2) {
+        errors.rejectValue("grade", "actualGrade.tooLong")
       }
 
       errors.popNestedPath()

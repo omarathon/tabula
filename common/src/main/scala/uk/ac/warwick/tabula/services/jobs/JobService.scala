@@ -30,7 +30,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
   import uk.ac.warwick.tabula.data.Transactions._
 
   // How many jobs to load and run each time
-  val RunBatchSize = 10
+  val RunBatchSize = 25
 
   var stopping = false
 

@@ -1,5 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
+<#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
   <h1>Missing marks adjustment</h1>
@@ -42,6 +43,8 @@
               <td data-sortby="u${student.universityId}">
                 <@pl.profile_link member.universityId />
                 ${student.universityId}
+                <@components.componentMarkStudentStatus student />
+                <@components.preview_clear_warning student />
               </td>
               <td>${member.firstName}</td>
               <td>${member.lastName}</td>
