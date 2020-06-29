@@ -43,7 +43,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
   def viewBenchmarkDetails(
     @PathVariable studentCourseDetails: StudentCourseDetails,
     @PathVariable academicYear: AcademicYear,
-    @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command with GraduationBenchmarkBreakdownCommandRequest
+    @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command
   ): Mav = {
     if(!features.graduationBenchmark) throw new ItemNotFoundException() // 404 if the feature is off
 
