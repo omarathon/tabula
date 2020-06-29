@@ -152,7 +152,9 @@ case class ExamGridColumnState (
   calculateYearMarks: Boolean,
   isLevelGrid: Boolean,
   applyBenchmark: Boolean,
-)
+) {
+  override lazy val hashCode: Int = super.hashCode()
+}
 
 case object EmptyExamGridColumnState {
   def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks = false, isLevelGrid = false, applyBenchmark = false)
