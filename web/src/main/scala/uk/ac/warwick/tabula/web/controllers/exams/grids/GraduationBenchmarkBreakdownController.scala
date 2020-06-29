@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.exams.grids
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.exams.grids.GraduationBenchmarkBreakdownCommand
+import uk.ac.warwick.tabula.commands.exams.grids.{GraduationBenchmarkBreakdownCommand, GraduationBenchmarkBreakdownCommandRequest}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
@@ -43,7 +43,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
   def viewBenchmarkDetails(
     @PathVariable studentCourseDetails: StudentCourseDetails,
     @PathVariable academicYear: AcademicYear,
-    @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command
+    @ModelAttribute("command") cmd: GraduationBenchmarkBreakdownCommand.Command with GraduationBenchmarkBreakdownCommandRequest
   ): Mav = {
     if(!features.graduationBenchmark) throw new ItemNotFoundException() // 404 if the feature is off
 
@@ -61,7 +61,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
     }
 
     mav.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
-      .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
+      .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.benchmarkdetails(scyd, cmd.calculateYearMarks, cmd.groupByLevel)): _*)
   }
 
 }
