@@ -117,24 +117,6 @@
   </#if>
 </#macro>
 
-<#function max_resit_attempt componentMarks>
-  <#local max = 0 />
-  <#list assessmentComponents as ac>
-    <#local marksAndWeighting = (mapGet(componentMarks, ac))! />
-    <#if marksAndWeighting?has_content>
-      <#local marks = marksAndWeighting._1() />
-
-      <#if marks.upstreamAssessmentGroupMember.currentResitAttempt?? && marks.upstreamAssessmentGroupMember.currentResitAttempt gt max>
-        <#local max = marks.upstreamAssessmentGroupMember.currentResitAttempt />
-      </#if>
-    </#if>
-  </#list>
-
-  <#if max gt 0>
-    <#return max />
-  </#if>
-</#function>
-
 <#macro studentMarkRecordRow studentMarkRecord>
   <#local student = studentMarkRecord._1() />
   <#local componentMarks = studentMarkRecord._2() />
@@ -189,7 +171,7 @@
       <@bs3form.labelled_form_group path="students[${student.sprCode}].grade">
         <#if isGradeValidation>
           <#local generateUrl><@routes.marks.module_generateGrades sitsModuleCode academicYear occurrence student.sprCode /></#local>
-          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control ${studentModuleMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=max_resit_attempt(componentMarks)! />
+          <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control ${studentModuleMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string />
           <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true>
               <#if studentModuleMarkItem.validGrades?has_content>
                   <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() />

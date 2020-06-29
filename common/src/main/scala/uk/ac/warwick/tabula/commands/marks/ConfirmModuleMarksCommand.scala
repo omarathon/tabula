@@ -4,11 +4,11 @@ import enumeratum.{Enum, EnumEntry}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand.{Result, SprCode}
+import uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksCommand._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.MarkState.{ConfirmedActual, UnconfirmedActual}
+import uk.ac.warwick.tabula.data.model.MarkState._
 import uk.ac.warwick.tabula.data.model.RecordedAssessmentComponentStudentMarkSource.ModuleMarkConfirmation
 import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource.MarkConfirmation
 import uk.ac.warwick.tabula.data.model._
@@ -87,14 +87,13 @@ abstract class ConfirmModuleMarksCommandInternal(val sitsModuleCode: String, val
       )
 
       // change the state of all components that are Unconfirmed actual (or that have no state)
-      components.values.filter(c => c.markState.forall(_ == UnconfirmedActual)).map { component =>
-
+      components.values.filter(c => c.markState.forall(_ == UnconfirmedActual) && !c.agreed).foreach { component =>
         val recordedAssessmentComponentStudent = assessmentComponentMarksService.getOrCreateRecordedStudent(component.upstreamAssessmentGroupMember)
         recordedAssessmentComponentStudent.addMark(
           uploader = currentUser.apparentUser,
           mark = component.mark,
           grade = component.grade,
-          comments = component.history.headOption.map(_.comments).orNull, // leave component comments as-is
+          comments = null,
           source = ModuleMarkConfirmation,
           markState = action.markState
         )
@@ -139,11 +138,11 @@ trait ConfirmModuleMarksState extends ModuleOccurrenceState with ClearRecordedMo
   }
 
   lazy val studentsToConfirm: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter { case (module, _) =>
-    module.markState.forall(_ == UnconfirmedActual) || module.agreed
+    module.markState.forall(_ == UnconfirmedActual) && !module.agreed
   }
 
   lazy val alreadyConfirmed: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.diff(studentsToConfirm)
-    .filter { case (module, _) => module.markState.contains(ConfirmedActual) }
+    .filter { case (module, _) => module.markState.contains(ConfirmedActual) || module.markState.contains(Agreed) || module.agreed }
 
   lazy val studentsWithMissingModuleGrade: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleRecords.filter {
     case (module, _) => module.grade.isEmpty
@@ -167,7 +166,7 @@ trait ConfirmModuleMarksRequest {
   }.asJava
 }
 
-trait RecordedModuleRegistrationNotifcationDepartment {
+trait RecordedModuleRegistrationNotificationDepartment {
   self: ProfileServiceComponent =>
 
   //Pick up sub department of the department that owns the course linked to the StudentCourseDetails from the ModuleRegistration
@@ -184,13 +183,18 @@ trait RecordedModuleRegistrationNotifcationDepartment {
 
   def notificationDepartment(stuRecord: StudentModuleMarkRecord): Option[Department] =  {
     val marksHistory = stuRecord.history
-    if (marksHistory.exists(m => m.markState == ConfirmedActual)) department(marksHistory.head.recordedModuleRegistration) else None
+    if (marksHistory.exists(_.markState == ConfirmedActual)) department(marksHistory.head.recordedModuleRegistration) else None
   }
 
-  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] =   if (rmr.marks.tail.exists(m => m.markState == ConfirmedActual)) department(rmr) else None
+  def notificationDepartment(rmr: RecordedModuleRegistration): Option[Department] = {
+    val previousConfirmation = rmr.marks.tail.find(_.markState == ConfirmedActual)
+    val currentMarks = rmr.marks.head
+
+    if (previousConfirmation.exists(m => currentMarks.mark != m.mark || currentMarks.grade != m.grade || currentMarks.result != m.result)) department(rmr) else None
+  }
 }
 
-trait ConfirmModuleMarkChangedCommandNotification extends RecordedModuleRegistrationNotifcationDepartment with Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
+trait ConfirmModuleMarkChangedCommandNotification extends RecordedModuleRegistrationNotificationDepartment with Notifies[Seq[RecordedModuleRegistration], Seq[RecordedModuleRegistration]] {
 
   self: ClearRecordedModuleMarksState with ProfileServiceComponent =>
 

@@ -171,59 +171,154 @@ object SandboxData {
     ), 5600001, 5600030),
   )
 
-  final val GradeBoundaries = Seq(
-    GradeBoundary("TABULA-UG", "SAS", 1, 1, "1", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 2, "1", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 3, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 4, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 5, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 6, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-UG", "SAS", 1, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 1, "1", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 2, "1", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 3, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 4, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 5, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 6, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-UG", "RAS", 1, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 1, "1", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 2, "1", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 3, "21", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 4, "22", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 5, "3", Some(40), Some(49), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 6, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-UG", "RAS", 2, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 1, "A+", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 2, "A", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 3, "B", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 4, "C", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 5, "D", Some(40), Some(49), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 6, "E", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "SAS", 1, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 1, "A+", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 2, "A", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 3, "B", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 4, "C", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 5, "D", Some(40), Some(49), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 6, "E", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 1, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 1, "A+", Some(80), Some(100), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 2, "A", Some(70), Some(79), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 3, "B", Some(60), Some(69), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 4, "C", Some(50), Some(59), "N", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 5, "D", Some(40), Some(49), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 6, "E", Some(0), Some(39), "N", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PG", "RAS", 2, 7, GradeBoundary.WithdrawnGrade, Some(0), Some(100), "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "SAS", 1, 1, "P", None, None, "S", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PF", "SAS", 1, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "SAS", 1, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "RAS", 1, 1, "P", None, None, "S", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PF", "RAS", 1, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "RAS", 1, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "RAS", 2, 1, "P", None, None, "S", Some(ModuleResult.Pass)),
-    GradeBoundary("TABULA-PF", "RAS", 2, 2, "F", None, None, "S", Some(ModuleResult.Fail)),
-    GradeBoundary("TABULA-PF", "RAS", 2, 3, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)),
+  // We only need to worry about the default grades as the importer will inject FM and W
+  private val gradeThresholds = Seq(
+    "TABULA-UG" -> Seq(
+      (70, 100) -> ("1", ModuleResult.Pass),
+      (60, 69) -> ("21", ModuleResult.Pass),
+      (50, 59) -> ("22", ModuleResult.Pass),
+      (40, 49) -> ("3", ModuleResult.Pass),
+      (0, 39) -> ("F", ModuleResult.Fail),
+    ),
+
+    "TABULA-PG" -> Seq(
+      (80, 100) -> ("A+", ModuleResult.Pass),
+      (70, 79) -> ("A", ModuleResult.Pass),
+      (60, 69) -> ("B", ModuleResult.Pass),
+      (50, 59) -> ("C", ModuleResult.Pass),
+      (40, 49) -> ("D", ModuleResult.Fail),
+      (0, 39) -> ("E", ModuleResult.Fail),
+    )
   )
+
+  private def gradeBoundaries(process: GradeBoundaryProcess, attempt: Int): Seq[GradeBoundary] = {
+    val boundariesWithMarks = for {
+      (marksCode, thresholds) <- gradeThresholds
+      (((minimumMark, maximumMark), (grade, result)), rank) <- thresholds.zipWithIndex
+    } yield GradeBoundary(
+      marksCode = marksCode,
+      process = process,
+      attempt = attempt,
+      rank = rank,
+      grade = grade,
+      minimumMark = Some(minimumMark),
+      maximumMark = Some(maximumMark),
+      signalStatus = GradeBoundarySignalStatus.NoSignal,
+      result = Some(result),
+      agreedStatus = result match {
+        case ModuleResult.Pass => GradeBoundaryAgreedStatus.Agreed
+        case ModuleResult.Fail => GradeBoundaryAgreedStatus.Reassessment
+        case ModuleResult.Deferred => GradeBoundaryAgreedStatus.Held
+      },
+      incrementsAttempt = result == ModuleResult.Fail
+    )
+
+    val indicatorGrades = gradeThresholds.map(_._1).flatMap { marksCode =>
+      Seq(
+        GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 100,
+          grade = "R",
+          minimumMark = Some(0),
+          maximumMark = Some(100),
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = Some(ModuleResult.Deferred),
+          agreedStatus = GradeBoundaryAgreedStatus.Reassessment,
+          incrementsAttempt = false,
+        ),
+        GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 110,
+          grade = "S",
+          minimumMark = Some(0),
+          maximumMark = Some(100),
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = Some(ModuleResult.Deferred),
+          agreedStatus = GradeBoundaryAgreedStatus.Reassessment,
+          incrementsAttempt = true,
+        ),
+        GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 120,
+          grade = "AB",
+          minimumMark = Some(0),
+          maximumMark = Some(100),
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = Some(ModuleResult.Deferred),
+          agreedStatus = GradeBoundaryAgreedStatus.Held,
+          incrementsAttempt = false,
+        ),
+        GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 130,
+          grade = "PL",
+          minimumMark = Some(0),
+          maximumMark = Some(100),
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = Some(ModuleResult.Deferred),
+          agreedStatus = GradeBoundaryAgreedStatus.Held,
+          incrementsAttempt = false,
+        ),
+        GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 140,
+          grade = GradeBoundary.MitigatingCircumstancesGrade,
+          minimumMark = Some(0),
+          maximumMark = Some(100),
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = Some(ModuleResult.Deferred),
+          agreedStatus = GradeBoundaryAgreedStatus.Held,
+          incrementsAttempt = false,
+        ),
+      )
+    }
+
+    val passFail = Seq(
+      GradeBoundary(
+        marksCode = "TABULA-PF",
+        process = process,
+        attempt = attempt,
+        rank = 1,
+        grade = "P",
+        minimumMark = None,
+        maximumMark = None,
+        signalStatus = GradeBoundarySignalStatus.NoSignal,
+        result = Some(ModuleResult.Pass),
+        agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+        incrementsAttempt = false
+      ),
+      GradeBoundary(
+        marksCode = "TABULA-PF",
+        process = process,
+        attempt = attempt,
+        rank = 2,
+        grade = "F",
+        minimumMark = None,
+        maximumMark = None,
+        signalStatus = GradeBoundarySignalStatus.NoSignal,
+        result = Some(ModuleResult.Fail),
+        agreedStatus = GradeBoundaryAgreedStatus.Reassessment,
+        incrementsAttempt = true
+      )
+    )
+
+    boundariesWithMarks ++ indicatorGrades ++ passFail
+  }
+
+  final val GradeBoundaries =
+    gradeBoundaries(GradeBoundaryProcess.StudentAssessment, 1) ++
+    gradeBoundaries(GradeBoundaryProcess.Reassessment, 1) ++
+    gradeBoundaries(GradeBoundaryProcess.Reassessment, 2)
 
   def randomName(id: Long, gender: Gender): Name = {
     val nameGender = gender match {

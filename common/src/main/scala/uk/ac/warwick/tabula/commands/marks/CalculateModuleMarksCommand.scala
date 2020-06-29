@@ -131,21 +131,12 @@ object CalculateModuleMarksCommand {
 
   }
 
-  type SprCode = String
-
-  class StudentModuleMarksItem {
+  type SprCode = ModuleOccurrenceCommands.SprCode
+  class StudentModuleMarksItem extends ModuleOccurrenceCommands.StudentModuleMarksItem {
     def this(sprCode: SprCode) {
       this()
       this.sprCode = sprCode
     }
-
-    var sprCode: SprCode = _
-    var mark: String = _ // Easier as a String to treat empty strings correctly
-    var validGrades: (Seq[GradeBoundary], Option[GradeBoundary]) = _
-
-    var grade: String = _
-    var result: String = _
-    var comments: String = _
   }
 
   type Result = Seq[RecordedModuleRegistration]
@@ -169,7 +160,7 @@ object CalculateModuleMarksCommand {
       with AutowiringTransactionalComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
       with ModuleOccurrenceDescription
-      with CalculateValidGradesBindListener
+      with ModuleOccurrenceValidGradesBindListener
       with CalculateModuleMarksSpreadsheetBindListener
       with CompositeCalculateModuleMarksBindListener
       with CalculateModuleMarksPopulateOnForm
@@ -180,7 +171,7 @@ object CalculateModuleMarksCommand {
 
 abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, val module: Module, val academicYear: AcademicYear, val occurrence: String, val currentUser: CurrentUser)
   extends CommandInternal[Result]
-    with ModuleOccurrenceState with ClearRecordedModuleMarksState with RecordedModuleRegistrationNotifcationDepartment {
+    with ModuleOccurrenceState with ClearRecordedModuleMarksState with RecordedModuleRegistrationNotificationDepartment {
   self: CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
     with ModuleRegistrationMarksServiceComponent
@@ -258,51 +249,29 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
 
   def doesntMatchCalculation(item: StudentModuleMarksItem): Boolean =
     studentModuleMarkRecordsAndCalculations.find(_._1.sprCode == item.sprCode).exists { case (currentModuleMarkRecord, _, _, calculation) =>
-      def matchesCalculation(calculation: ModuleMarkCalculation.Success): Boolean =
-        item.mark.maybeText.exists(m => m != calculation.mark.map(_.toString).getOrElse("") && m != currentModuleMarkRecord.mark.map(_.toString).getOrElse("")) ||
-        item.grade.maybeText.exists(g => g != calculation.grade.getOrElse("") && g != currentModuleMarkRecord.grade.getOrElse("")) ||
-        item.result.maybeText.exists(r => r != calculation.result.map(_.dbValue).getOrElse("") && r != currentModuleMarkRecord.result.map(_.dbValue).getOrElse(""))
+      def differsFrom(mark: Option[Int], grade: Option[String], result: Option[ModuleResult]): Boolean =
+        item.mark.maybeText.exists(m => m != mark.map(_.toString).getOrElse("")) ||
+        item.grade.maybeText.exists(g => g != grade.getOrElse("")) ||
+        item.result.maybeText.exists(r => r != result.map(_.dbValue).getOrElse(""))
 
-      calculation match {
-        case c: ModuleMarkCalculation.Success => matchesCalculation(c)
-        case m: ModuleMarkCalculation.Multiple => m.suggestions.map(_.calculation).collect { case c: ModuleMarkCalculation.Success => c }.exists(matchesCalculation)
+      differsFrom(currentModuleMarkRecord.mark, currentModuleMarkRecord.grade, currentModuleMarkRecord.result) && (calculation match {
+        case ModuleMarkCalculation.Success(mark, grade, result, _) => differsFrom(mark, grade, result)
+        case ModuleMarkCalculation.Multiple(_, suggestions) => suggestions.map(_.calculation).exists {
+          case ModuleMarkCalculation.Success(mark, grade, result, _) => differsFrom(mark, grade, result)
+          case _ => false
+        }
         case _ => false // If the calculation was a failure, allow it through
-      }
+      })
     }
 }
 
-trait CalculateModuleMarksRequest {
-  var students: JMap[SprCode, StudentModuleMarksItem] =
+trait CalculateModuleMarksRequest extends ModuleOccurrenceMarksRequest[StudentModuleMarksItem] {
+  override var students: JMap[SprCode, StudentModuleMarksItem] =
     LazyMaps.create { sprCode: SprCode => new StudentModuleMarksItem(sprCode) }
       .asJava
 
   // For uploading a spreadsheet
   var file: UploadedFile = new UploadedFile
-}
-
-trait CalculateValidGradesBindListener {
-  self: CalculateModuleMarksRequest
-    with CalculateModuleMarksLoadModuleRegistrations
-    with AssessmentMembershipServiceComponent =>
-
-  def onBindValidGrades(result: BindingResult): Unit = {
-    students.asScala.foreach { case (sprCode, item) =>
-      val moduleRegistration =
-        moduleRegistrations.find(_.sprCode == item.sprCode)
-
-      if (moduleRegistration.isDefined) {
-        val request = new ValidGradesRequest()
-        request.mark = item.mark
-        request.existing = item.grade
-        request.resitAttempt = JInteger(Some(moduleRegistration.get.currentResitAttempt.getOrElse(0)))
-        item.validGrades = ValidGradesForMark.getTuple(
-          request,
-          moduleRegistration.get
-        )(assessmentMembershipService = assessmentMembershipService)
-      }
-      // we don't care if it's not a valid module reg, it'll be caught in the validation step after the bind listeners have run
-    }
-  }
 }
 
 trait CalculateModuleMarksSpreadsheetBindListener {
@@ -387,7 +356,7 @@ trait CalculateModuleMarksSpreadsheetBindListener {
 
 trait CompositeCalculateModuleMarksBindListener extends BindListener {
   self: CalculateModuleMarksRequest
-    with CalculateValidGradesBindListener
+    with ModuleOccurrenceValidGradesBindListener
     with CalculateModuleMarksSpreadsheetBindListener
     with TransactionalComponent =>
 
@@ -419,7 +388,6 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
           val request = new ValidGradesRequest()
           request.mark = m.toString
           request.existing = grade.orNull
-          request.resitAttempt = JInteger(mr.flatMap(_.currentResitAttempt))
           s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
         }
 
@@ -485,7 +453,7 @@ trait CalculateModuleMarksAlgorithm {
         } else {
           lazy val calculation = {
             def validGradesForMark(m: Option[Int]) =
-              assessmentMembershipService.gradesForMark(moduleRegistration, m, componentsForCalculation.map(_._2.upstreamAssessmentGroupMember.currentResitAttempt).maxOption.flatten)
+              assessmentMembershipService.gradesForMark(moduleRegistration, m)
 
             // Is this a pass/fail module?
             if (moduleRegistration.passFail) {
@@ -609,7 +577,7 @@ trait CalculateModuleMarksAlgorithm {
   }
 }
 
-trait CalculateModuleMarksValidation extends SelfValidating {
+trait CalculateModuleMarksValidation extends ModuleOccurrenceValidation with SelfValidating {
   self: ModuleOccurrenceState
     with CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
@@ -620,87 +588,12 @@ trait CalculateModuleMarksValidation extends SelfValidating {
     students.asScala.foreach { case (sprCode, item) =>
       errors.pushNestedPath(s"students[$sprCode]")
 
-      // Check that there's a module registration for the student
-      val moduleRegistration = moduleRegistrations.find(_.sprCode == sprCode)
-
-      // We allow returning marks for PWD students so we don't need to filter by "current" members here
-      if (moduleRegistration.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(sprCode), "")
-      }
-
-      val currentResitAttempt = moduleRegistration.flatMap { modReg =>
-        val universityId = modReg.studentCourseDetails.student.universityId
-        componentMarks(universityId).map(_._2.upstreamAssessmentGroupMember.currentResitAttempt).maxOption.flatten
-      }
-
-      if (item.mark.hasText) {
-        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
-          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
-        }
-
-        try {
-          val asInt = item.mark.toInt
-          if (asInt < 0 || asInt > 100) {
-            errors.rejectValue("mark", "actualMark.range")
-          } else if (doGradeValidation) {
-            val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, Some(asInt), currentResitAttempt)).getOrElse(Seq.empty)
-            if (item.grade.hasText) {
-              if (!validGrades.exists(_.grade == item.grade)) {
-                errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-              } else {
-                validGrades.find(_.grade == item.grade).foreach { gb =>
-                  if (!item.result.hasText) {
-                    item.result = gb.result.map(_.dbValue).orNull
-                  } else if (gb.result.exists(_.dbValue != item.result)) {
-                    errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
-                  }
-                }
-              }
-            } else if (asInt != 0 || module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
-              // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
-              validGrades.find(_.isDefault).foreach { gb =>
-                item.grade = gb.grade
-
-                if (!item.result.hasText) {
-                  item.result = gb.result.map(_.dbValue).orNull
-                } else if (gb.result.exists(_.dbValue != item.result)) {
-                  errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
-                }
-              }
-            }
-
-            if (!item.grade.hasText) {
-              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-            }
-          }
-        } catch {
-          case _@(_: NumberFormatException | _: IllegalArgumentException) =>
-            errors.rejectValue("mark", "actualMark.format")
-        }
-      } else if (doGradeValidation && item.grade.hasText) {
-        val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, None, currentResitAttempt)).getOrElse(Seq.empty)
-        if (!validGrades.exists(_.grade == item.grade)) {
-          errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-        } else {
-          validGrades.find(_.grade == item.grade).foreach { gb =>
-            if (!item.result.hasText) {
-              item.result = gb.result.map(_.dbValue).orNull
-            } else if (gb.result.exists(_.dbValue != item.result)) {
-              errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
-            }
-          }
-        }
-      }
-
+      validateMarkEntry(errors)(item, doGradeValidation)
 
       // TAB-8428 if the mark, grade or result differ from the current mark, grade or result AND they differ from the calculated
       // mark, grade and result, comment becomes mandatory
       if (!item.comments.hasText && doesntMatchCalculation(item)) {
         errors.rejectValue("comments", "moduleMarkCalculation.mismatch.noComment")
-      }
-
-      if (item.grade.safeLength > 2) {
-        errors.rejectValue("grade", "actualGrade.tooLong")
       }
 
       errors.popNestedPath()

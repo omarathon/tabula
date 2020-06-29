@@ -133,8 +133,8 @@
                   <a href="<@routes.marks.module_marks_confirm item.moduleCode academicYear item.occurrence />" >Confirm module marks</a>
                 </li>
 
-                <li class="disabled">
-                  <a>Process module marks</a>
+                <li>
+                  <a href="<@routes.marks.module_marks_process item.moduleCode academicYear item.occurrence />" >Process module marks</a>
                 </li>
               </@dropdown_menu>
             </div>

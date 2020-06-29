@@ -46,11 +46,11 @@ class MarkerBulkModerationCommandTest extends TestBase with Mockito {
       val marks = arg.asInstanceOf[Map[String, Int]]
       marks.map { case (id, mark) => (id, mark) match {
         case (i, _) if id == "3" => i -> Seq() // Mocks that ID 3 isn't linked to an assessment component in SITS with a mark scheme
-        case (_, m) if m < 40 => id -> Seq(GradeBoundary(null, "SAS", 1, 10, "F", Some(0), Some(39), "N", Some(ModuleResult.Fail)))
-        case (_, m) if m >= 40 && mark < 50 => id -> Seq(GradeBoundary(null, "SAS", 1, 4, "3", Some(40), Some(50), "N", Some(ModuleResult.Pass)))
-        case (_, m) if m >= 50 && mark < 60 => id -> Seq(GradeBoundary(null, "SAS", 1, 3, "22", Some(50), Some(60), "N", Some(ModuleResult.Pass)))
-        case (_, m) if m >= 60 && mark < 70 => id -> Seq(GradeBoundary(null, "SAS", 1, 2, "21", Some(60), Some(70), "N", Some(ModuleResult.Pass)))
-        case (_, m) if m >= 70 => id -> Seq(GradeBoundary(null, "SAS", 1, 1, "1", Some(70), Some(100), "N", Some(ModuleResult.Pass)))
+        case (_, m) if m < 40 => id -> Seq(Fixtures.gradeBoundary(null, grade = "F", minimumMark = Some(0), maximumMark = Some(39), result = Some(ModuleResult.Fail), agreedStatus = GradeBoundaryAgreedStatus.Reassessment, incrementsAttempt = true))
+        case (_, m) if m >= 40 && mark < 50 => id -> Seq(Fixtures.gradeBoundary(null, grade = "3", minimumMark = Some(40), maximumMark = Some(49), result = Some(ModuleResult.Pass)))
+        case (_, m) if m >= 50 && mark < 60 => id -> Seq(Fixtures.gradeBoundary(null, grade = "22", minimumMark = Some(50), maximumMark = Some(59), result = Some(ModuleResult.Pass)))
+        case (_, m) if m >= 60 && mark < 70 => id -> Seq(Fixtures.gradeBoundary(null, grade = "21", minimumMark = Some(60), maximumMark = Some(69), result = Some(ModuleResult.Pass)))
+        case (_, m) if m >= 70 => id -> Seq(Fixtures.gradeBoundary(null, grade = "1", minimumMark = Some(70), maximumMark = Some(100), result = Some(ModuleResult.Pass)))
       }}
     }
 
