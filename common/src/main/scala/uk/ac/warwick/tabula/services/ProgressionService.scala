@@ -172,7 +172,9 @@ abstract class AbstractProgressionService extends ProgressionService {
       * Will need same checking at other places too. Currently, for those  courses  year weightings are set as non zero for one of them (2nd or 3rd year) by modern language making it unable to calculate final year overall marks
       * even though they are abroad. A further validation  will be required to ensure weighted %age is 100 when we calculate final overall marks.
       */
-    val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear))
+    val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear)
+
+    val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = allowEmpty)
       .left.map(msg => s"$msg for year ${entityYear.yearOfStudy}")
 
     val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear.moduleRegistrations, Map(), normalLoad, routeRules)
@@ -189,6 +191,14 @@ abstract class AbstractProgressionService extends ProgressionService {
             case Left(message) => Left(message)
           }
         }.getOrElse(Left("Could not find valid module registration subset matching chosen subset"))
+    } else if (allowEmpty) {
+      // Just pick the highest subset, it's zero-weighted anyway
+      val overcatMark = overcatSubsets.map(_._1).max
+
+      possibleWeightedMeanMark match {
+        case Right(mark) => Right(Seq(mark, overcatMark).max)
+        case Left(message) => Left(message)
+      }
     } else {
       Left("The overcat adjusted mark subset has not been chosen")
     }
