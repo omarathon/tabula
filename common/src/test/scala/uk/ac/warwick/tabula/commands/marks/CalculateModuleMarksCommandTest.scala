@@ -63,6 +63,10 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
   private trait PassFailModuleFixture extends Fixture {
     val modReg = Fixtures.moduleRegistration(studentCourseDetails, module, JBigDecimal(Some(cats)), academicYear, occurrence, marksCode = "PF")
+    modReg.membershipService = algorithm.assessmentMembershipService
+
+    // This is just for getting currentResitAttempt so it's fine to just return empty
+    modReg.membershipService.getUpstreamAssessmentGroups(modReg, allAssessmentGroups = true, eagerLoad = true) returns Seq.empty
 
     algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]]) answers { args: Array[AnyRef] =>
       val process = if (modReg.currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
@@ -190,6 +194,10 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
 
   private trait UGModuleFixture extends Fixture {
     val modReg = Fixtures.moduleRegistration(studentCourseDetails, module, JBigDecimal(Some(cats)), academicYear, occurrence, marksCode = "WMR")
+    modReg.membershipService = algorithm.assessmentMembershipService
+
+    // This is just for getting currentResitAttempt so it's fine to just return empty
+    modReg.membershipService.getUpstreamAssessmentGroups(modReg, allAssessmentGroups = true, eagerLoad = true) returns Seq.empty
 
     algorithm.assessmentMembershipService.gradesForMark(isEq(modReg), any[Option[Int]]) answers { args: Array[AnyRef] =>
       val process = if (modReg.currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment

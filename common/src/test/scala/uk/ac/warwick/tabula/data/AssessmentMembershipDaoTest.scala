@@ -441,14 +441,14 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         Fixtures.gradeBoundary("WMR", grade = "CP", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Pass), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
         Fixtures.gradeBoundary("WMR", grade = GradeBoundary.WithdrawnGrade, minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
         Fixtures.gradeBoundary("WMR", grade = "R", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Deferred), signalStatus = GradeBoundarySignalStatus.SpecificOutcome, agreedStatus = GradeBoundaryAgreedStatus.Reassessment, incrementsAttempt = true),
-        Fixtures.gradeBoundary("WMR", grade = GradeBoundary.ForceMajeureMissingComponentGrade),
+        Fixtures.gradeBoundary("WMR", grade = GradeBoundary.ForceMajeureMissingComponentGrade, signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
 
         Fixtures.gradeBoundary("HRNZ", grade = "P", result = Some(ModuleResult.Pass)),
         Fixtures.gradeBoundary("HRNZ", grade = "F", result = Some(ModuleResult.Fail)),
-        Fixtures.gradeBoundary("HRNZ", grade = "S", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Pass)),
-        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.WithdrawnGrade, minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail)),
-        Fixtures.gradeBoundary("HRNZ", grade = "R", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail)),
-        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.ForceMajeureMissingComponentGrade),
+        Fixtures.gradeBoundary("HRNZ", grade = "S", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Pass), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.WithdrawnGrade, minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = "R", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.ForceMajeureMissingComponentGrade, signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
       )
 
       gradeBoundaries.foreach(dao.save)
