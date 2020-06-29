@@ -253,7 +253,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (upstreamAssessmentGroupMember.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(item.universityID), "")
+        errors.reject("uniNumber.notOnAssessment", Array(item.universityID), "")
       }
 
       if (item.mark.hasText) {

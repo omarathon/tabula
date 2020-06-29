@@ -625,7 +625,7 @@ trait CalculateModuleMarksValidation extends SelfValidating {
 
       // We allow returning marks for PWD students so we don't need to filter by "current" members here
       if (moduleRegistration.isEmpty) {
-        errors.reject("uniNumber.unacceptable", Array(sprCode), "")
+        errors.reject("uniNumber.notOnModule", Array(sprCode), "")
       }
 
       val currentResitAttempt = moduleRegistration.flatMap { modReg =>
