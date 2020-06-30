@@ -33,6 +33,7 @@ object Routes {
       def apply(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"$context/admin/module/${encoded(sitsModuleCode)}/${encoded(academicYear.startYear.toString)}/${encoded(occurrence)}"
       def recordMarks(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"${apply(sitsModuleCode, academicYear, occurrence)}/marks"
       def confirmMarks(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"${apply(sitsModuleCode, academicYear, occurrence)}/confirm"
+      def processMarks(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): String = s"${apply(sitsModuleCode, academicYear, occurrence)}/process"
     }
   }
 }

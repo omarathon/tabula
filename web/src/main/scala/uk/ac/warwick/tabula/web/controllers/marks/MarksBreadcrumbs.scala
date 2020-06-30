@@ -45,13 +45,18 @@ object MarksBreadcrumbs {
 
     case class ModuleOccurrenceRecordMarks(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
       extends ModuleOccurrenceBookmark(sitsModuleCode, module, academicYear, occurrence, active) {
-        val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence))
-      }
+      val url = Some(Routes.marks.Admin.ModuleOccurrences.recordMarks(sitsModuleCode, academicYear, occurrence))
+    }
 
     case class ModuleOccurrenceConfirmMarks(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
       extends ModuleOccurrenceBookmark(sitsModuleCode, module, academicYear, occurrence, active) {
-        val url = Some(Routes.marks.Admin.ModuleOccurrences.confirmMarks(sitsModuleCode, academicYear, occurrence))
-      }
+      val url = Some(Routes.marks.Admin.ModuleOccurrences.confirmMarks(sitsModuleCode, academicYear, occurrence))
+    }
+
+    case class ModuleOccurrenceProcessMarks(sitsModuleCode: String, module: model.Module, academicYear: AcademicYear, occurrence: String, override val active: Boolean = false)
+      extends ModuleOccurrenceBookmark(sitsModuleCode, module, academicYear, occurrence, active) {
+      val url = Some(Routes.marks.Admin.ModuleOccurrences.processMarks(sitsModuleCode, academicYear, occurrence))
+    }
   }
 
 }

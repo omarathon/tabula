@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, RecordedAssessmentComponentStudent, UpstreamAssessmentGroupMemberAssessmentType}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService._
 
@@ -77,7 +77,9 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     // data to insert
     "now" -> DateTime.now.toDate,
     "actualMark" -> JInteger(student.latestMark),
-    "actualGrade" -> student.latestGrade.orNull
+    "actualGrade" -> student.latestGrade.orNull,
+    "agreedMark" -> JInteger(student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))),
+    "agreedGrade" -> student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed)).orNull
   )
 }
 
@@ -213,8 +215,8 @@ object ExportFeedbackToSitsService {
     update $sitsSchema.cam_sas
     set sas_actm = :actualMark,
       sas_actg = :actualGrade,
-      sas_agrm = null,
-      sas_agrg = null,
+      sas_agrm = :agreedMark,
+      sas_agrg = :agreedGrade,
       sas_prcs = 'I',
       sas_proc = 'SAS',
       sas_udf1 = '$tabulaIdentifier',
@@ -231,8 +233,8 @@ object ExportFeedbackToSitsService {
     update $sitsSchema.cam_sra
     set sra_actm = :actualMark,
       sra_actg = :actualGrade,
-      sra_agrm = null,
-      sra_agrg = null,
+      sra_agrm = :agreedMark,
+      sra_agrg = :agreedGrade,
       sra_prcs = 'I',
       sra_proc = 'RAS',
       sra_udf2 = '$tabulaIdentifier',
@@ -243,6 +245,8 @@ object ExportFeedbackToSitsService {
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
     declareParameter(new SqlParameter("actualMark", Types.INTEGER))
     declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
+    declareParameter(new SqlParameter("agreedMark", Types.INTEGER))
+    declareParameter(new SqlParameter("agreedGrade", Types.VARCHAR))
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
@@ -281,6 +285,8 @@ object ExportFeedbackToSitsService {
       SITSMarkRow(
         ImportMemberHelpers.getInteger(rs, "sas_actm"),
         rs.getString("sas_actg"),
+        ImportMemberHelpers.getInteger(rs, "sas_agrm"),
+        rs.getString("sas_agrg"),
         rs.getString("sas_udf1")
       )
     }
@@ -291,6 +297,8 @@ object ExportFeedbackToSitsService {
       SITSMarkRow(
         ImportMemberHelpers.getInteger(rs, "sra_actm"),
         rs.getString("sra_actg"),
+        ImportMemberHelpers.getInteger(rs, "sra_agrm"),
+        rs.getString("sra_agrg"),
         rs.getString("sra_udf2")
       )
     }
@@ -299,6 +307,8 @@ object ExportFeedbackToSitsService {
   case class SITSMarkRow(
     actualMark: Option[Int],
     actualGrade: String,
+    agreedMark: Option[Int],
+    agreedGrade: String,
     uploader: String
   )
 

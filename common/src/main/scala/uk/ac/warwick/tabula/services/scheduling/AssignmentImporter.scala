@@ -853,7 +853,9 @@ object AssignmentImporter {
       mkc.mkc_minm as minimum_mark,
       mkc.mkc_maxm as maximum_mark,
       mkc.mkc_sigs as signal_status,
-      mkc.mkc_rslt as result
+      mkc.mkc_rslt as result,
+      mkc.mkc_sasf as agreed_status,
+      mkc.mkc_ainc as increments_attempt
     from $sitsSchema.cam_mkc mkc
     where mkc.mkc_proc in ('SAS', 'RAS') and
       -- Avoid duplicates
@@ -1024,15 +1026,17 @@ object AssignmentImporter {
       }
 
       GradeBoundary(
-        rs.getString("marks_code"),
-        rs.getString("process"),
-        rs.getInt("attempt"),
-        rs.getInt("rank"),
-        rs.getString("grade"),
-        getNullableInt("minimum_mark"),
-        getNullableInt("maximum_mark"),
-        rs.getString("signal_status"),
-        rs.getString("result").maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
+        marksCode = rs.getString("marks_code"),
+        process = GradeBoundaryProcess.withName(rs.getString("process")),
+        attempt = rs.getInt("attempt"),
+        rank = rs.getInt("rank"),
+        grade = rs.getString("grade"),
+        minimumMark = getNullableInt("minimum_mark"),
+        maximumMark = getNullableInt("maximum_mark"),
+        signalStatus = GradeBoundarySignalStatus.withName(rs.getString("signal_status")),
+        result = rs.getString("result").maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
+        agreedStatus = GradeBoundaryAgreedStatus.withName(rs.getString("agreed_status")),
+        incrementsAttempt = rs.getString("increments_attempt").maybeText.contains("Y"),
       )
     }
   }

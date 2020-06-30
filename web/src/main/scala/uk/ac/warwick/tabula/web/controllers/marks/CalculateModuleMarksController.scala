@@ -10,7 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.{ModuleMarkCalculation, StudentModuleMarksItem}
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
-import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, RecordedModuleRegistrationNotifcationDepartment}
+import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, RecordedModuleRegistrationNotificationDepartment}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module, ModuleResult}
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleRegistration, ModuleResult}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
@@ -22,11 +22,11 @@ import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, SprCode}
 
 import scala.jdk.CollectionConverters._
 
-trait StudentModuleMarkRecordNotificationDepartment extends RecordedModuleRegistrationNotifcationDepartment
+trait StudentModuleMarkRecordNotificationDepartment extends RecordedModuleRegistrationNotificationDepartment
   with AutowiringProfileServiceComponent {
-  def departmentalStudents(studentMarks: Seq[StudentModuleMarkRecord]):Map[Department, Seq[String]] = {
-    studentMarks.filter(_.history.size > 0)
-      .map { mark => (mark,notificationDepartment(mark)) }
+  def departmentalStudents(studentMarks: Seq[StudentModuleMarkRecord]): Map[Department, Seq[String]] = {
+    studentMarks.filter(_.history.nonEmpty)
+      .map { mark => (mark, notificationDepartment(mark)) }
       .filter(_._2.nonEmpty)
       .groupBy(_._2.get)
       .map { case (d, rmrWithDeptList) => d -> rmrWithDeptList.map(data => SprCode.getUniversityId(data._1.sprCode)) }

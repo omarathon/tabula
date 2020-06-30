@@ -3,11 +3,11 @@
 <#import "*/marks_components.ftlh" as components />
 
 <div class="deptheader">
-  <h1>Calculate module marks</h1>
+  <h1>Process module marks</h1>
   <h4 class="with-related">for ${sitsModuleCode} ${module.name} (${academicYear.toString}, ${occurrence})</h4>
 </div>
 
-<#assign submitUrl><@routes.marks.module_marks sitsModuleCode academicYear occurrence /></#assign>
+<#assign submitUrl><@routes.marks.module_marks_process sitsModuleCode academicYear occurrence /></#assign>
 
 <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 <#if changes?size == 0>
@@ -15,13 +15,12 @@
 
   <p><a href="<@routes.marks.adminhome module.adminDepartment academicYear />">Back to module marks</a></p>
 <#else>
-
   <#if notificationDepartments?has_content>
     <div class="alert alert-info">
-        <#list notificationDepartments?keys as dept>
-          <#assign stuIds = mapGet(notificationDepartments, dept) />
-          <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/>  <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
-        </#list>
+      <#list notificationDepartments?keys as dept>
+        <#assign stuIds = mapGet(notificationDepartments, dept) />
+        <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/> <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
+      </#list>
     </div>
   </#if>
 
@@ -34,28 +33,45 @@
       <table class="table table-striped table-sortable">
         <thead>
           <tr>
-            <th class="col-sm-1 sortable">SPR Code</th>
-            <th class="col-sm-1 sortable">First name</th>
-            <th class="col-sm-1 sortable">Last name</th>
-            <th class="col-sm-1 sortable">Mark</th>
-            <th class="col-sm-1 sortable">Grade</th>
-            <th class="col-sm-1 sortable">Result</th>
-            <th class="col-sm-4">Comment</th>
+            <th class="col-sm-1 sortable" data-sortInitialOrder="asc" data-sorter="text">SPR Code</th>
+            <th class="col-sm-1 sortable" data-sorter="text">First name</th>
+            <th class="col-sm-1 sortable" data-sorter="text">Last name</th>
+            <th class="col-sm-2" data-sorter="false">State</th>
+            <th class="col-sm-1 sortable" data-sorter="text">Mark</th>
+            <th class="col-sm-1 sortable" data-sorter="text">Grade</th>
+            <th class="col-sm-1 sortable" data-sorter="text">Result</th>
+            <th class="col-sm-4" data-sorter="false">Comment</th>
           </tr>
         </thead>
         <tbody>
-          <#list changes as change>
-            <#assign student = change._1() />
-            <#assign c = change._4() />
+          <#list changes as student>
             <#assign member = membersBySprCode[student.sprCode] />
+            <@spring.bind path="students[${student.sprCode}]">
+              <#assign c = status.actualValue />
+            </@spring.bind>
 
             <tr>
               <td data-sortby="${student.sprCode}">
+                <@f.hidden path="students[${student.sprCode}].process" />
                 <@pl.profile_link member.universityId />
                 ${student.sprCode}
+                <@components.moduleMarkStatusIcon student />
+                <@components.moduleMarkHistory student sitsModuleCode member />
               </td>
               <td>${member.firstName}</td>
               <td>${member.lastName}</td>
+              <td>
+                <#if student.markState?has_content>
+                  <span class="label label-${student.markState.cssClass}">${student.markState.description}</span>
+                <#else>
+                  -
+                </#if>
+
+                <#if (student.markState.entryName)! != 'Agreed'>
+                  <i class="fal fa-arrow-right"></i>
+                  <span class="label label-success">Agreed</span>
+                </#if>
+              </td>
               <td data-sortby="${c.mark!-1}">
                 <@f.hidden path="students[${student.sprCode}].mark" />
                 ${student.mark!'-'}
@@ -89,7 +105,7 @@
       </table>
 
       <div class="submit-buttons fix-footer">
-        <input type="submit" class="btn btn-primary" value="Save" />
+        <input type="submit" class="btn btn-primary" value="Process" />
         <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
       </div>
     </@f.form>

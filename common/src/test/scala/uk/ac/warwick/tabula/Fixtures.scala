@@ -561,5 +561,30 @@ object Fixtures extends Mockito {
     q
   }
 
+  def gradeBoundary(
+    marksCode: String,
+    process: GradeBoundaryProcess = GradeBoundaryProcess.StudentAssessment,
+    attempt: Int = 1,
+    rank: Int = 1,
+    grade: String,
+    minimumMark: Option[Int] = None,
+    maximumMark: Option[Int] = None,
+    signalStatus: GradeBoundarySignalStatus = GradeBoundarySignalStatus.NoSignal,
+    result: Option[ModuleResult] = None,
+    agreedStatus: GradeBoundaryAgreedStatus = GradeBoundaryAgreedStatus.Agreed,
+    incrementsAttempt: Boolean = false,
+  ): GradeBoundary = GradeBoundary(
+    marksCode = marksCode,
+    process = process,
+    attempt = attempt,
+    rank = rank,
+    grade = grade,
+    minimumMark = minimumMark,
+    maximumMark = maximumMark,
+    signalStatus = signalStatus,
+    result = result,
+    agreedStatus = agreedStatus,
+    incrementsAttempt = incrementsAttempt,
+  )
 
 }
