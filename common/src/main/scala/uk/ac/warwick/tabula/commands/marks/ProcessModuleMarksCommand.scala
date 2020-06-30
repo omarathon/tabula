@@ -92,7 +92,8 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
         )
 
         // change the state of all components that are Unconfirmed actual (or that have no state)
-        components.values.filterNot(c => c.markState.contains(MarkState.Agreed) || c.agreed).filterNot(c => c.mark.isEmpty && c.grade.isEmpty).foreach { component =>
+        // this includes writing an empty agreed mark/grade if necessary - it stops it being modified later
+        components.values.filterNot(c => c.markState.contains(MarkState.Agreed) || c.agreed).foreach { component =>
           val recordedAssessmentComponentStudent = assessmentComponentMarksService.getOrCreateRecordedStudent(component.upstreamAssessmentGroupMember)
           recordedAssessmentComponentStudent.addMark(
             uploader = currentUser.apparentUser,
