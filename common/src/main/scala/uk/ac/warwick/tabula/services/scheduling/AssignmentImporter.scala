@@ -345,6 +345,22 @@ class SandboxAssignmentImporter extends AssignmentImporter
             assessmentComponentMarksService.saveOrUpdate(s)
           }
 
+          val actualMark =
+            recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark)
+
+          val actualGrade =
+            recordedStudent.flatMap(_.latestGrade).getOrElse(grade)
+
+          val isAgreedRecordedMarks = recordedStudent.flatMap(_.latestState).contains(MarkState.Agreed)
+
+          val agreedMark =
+            recordedStudent.flatMap(_.latestMark).map(_.toString).filter(_ => isAgreedRecordedMarks)
+              .getOrElse(if (generateMarks) mark else null)
+
+          val agreedGrade =
+            recordedStudent.flatMap(_.latestGrade).filter(_ => isAgreedRecordedMarks)
+              .getOrElse(if (generateMarks) grade else null)
+
           Some(UpstreamAssessmentRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
@@ -356,10 +372,10 @@ class SandboxAssignmentImporter extends AssignmentImporter
             sequence = sequence,
             moduleCode = moduleCodeFull,
             assessmentGroup = assessmentGroup,
-            actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
-            actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
-            agreedMark = if (generateMarks) mark else null,
-            agreedGrade = if (generateMarks) grade else null,
+            actualMark = actualMark,
+            actualGrade = actualGrade,
+            agreedMark = agreedMark,
+            agreedGrade = agreedGrade,
             currentResitAttempt = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else if (SandboxData.randomMarkSeed(universityId, moduleCode) % 13 < 5) "1" else "2",
             resitSequence = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else "001",
           ))

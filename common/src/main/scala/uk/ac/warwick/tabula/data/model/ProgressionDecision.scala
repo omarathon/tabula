@@ -3,12 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import enumeratum.{Enum, EnumEntry}
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
-import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.jdk.CollectionConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * A progression decision for a student (linked by SPR code).
@@ -61,26 +60,7 @@ class ProgressionDecision extends GeneratedId with ToString {
   @Column(name = "resit_period", nullable = false)
   var resitPeriod: Boolean = _
 
-  def isVisibleToStudent: Boolean =
-    if (academicYear < AcademicYear.now()) {
-      // The past is the past
-      true
-    } else if (studentCourseDetails.exists(scd => scd.course.code.startsWith("D") && scd.latestStudentCourseYearDetails.yearOfStudy == 1)) {
-      // First year degree apprenticeship
-      !new LocalDate(2020, DateTimeConstants.JULY, 29).isAfter(LocalDate.now())
-    } else if (studentCourseDetails.exists(scd => scd.courseType.contains(CourseType.UG) && scd.latestStudentCourseYearDetails.yearOfStudy == 1)) {
-      // First year UG
-      !new LocalDate(2020, DateTimeConstants.JULY, 9).isAfter(LocalDate.now())
-    } else if (studentCourseDetails.exists(scd => scd.courseType.contains(CourseType.UG) && scd.latestStudentCourseYearDetails.isFinalYear)) {
-      // Finalist UG
-      !new LocalDate(2020, DateTimeConstants.JULY, 22).isAfter(LocalDate.now())
-    } else if (studentCourseDetails.exists(scd => scd.courseType.contains(CourseType.UG))) {
-      // Intermediate UG
-      !new LocalDate(2020, DateTimeConstants.JULY, 30).isAfter(LocalDate.now())
-    } else {
-      // who dis
-      false
-    }
+  def isVisibleToStudent: Boolean = MarkState.resultsReleasedToStudents(academicYear, studentCourseDetails)
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,
