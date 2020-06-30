@@ -133,9 +133,15 @@
                   <a href="<@routes.marks.module_marks_confirm item.moduleCode academicYear item.occurrence />" >Confirm module marks</a>
                 </li>
 
-                <li>
-                  <a href="<@routes.marks.module_marks_process item.moduleCode academicYear item.occurrence />" >Process module marks</a>
-                </li>
+                <#if features.processAgreedMarks>
+                  <li>
+                    <a href="<@routes.marks.module_marks_process item.moduleCode academicYear item.occurrence />" >Process module marks</a>
+                  </li>
+                <#else>
+                  <li class="disabled">
+                    Process module marks
+                  </li>
+                </#if>
               </@dropdown_menu>
             </div>
           </div>
