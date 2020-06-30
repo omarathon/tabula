@@ -52,7 +52,7 @@ object StudentCourseYearDetails {
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
         level = scyds.head.level,
-        yearOfStudy
+        yearOfStudy = yearOfStudy,
       )
     }
 
@@ -218,7 +218,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
         markOverrides = None,
         studentCourseYearDetails = Some(this),
         level = level,
-        yearOfStudy = this.yearOfStudy
+        yearOfStudy = this.yearOfStudy,
       )
     }
 

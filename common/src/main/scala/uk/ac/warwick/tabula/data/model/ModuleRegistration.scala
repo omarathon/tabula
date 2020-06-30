@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.services.marks.AssessmentComponentMarksService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
@@ -46,6 +47,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   }
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  @transient var assessmentComponentMarksService: AssessmentComponentMarksService = Wire[AssessmentComponentMarksService]
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "moduleCode", referencedColumnName = "code")
@@ -82,6 +84,17 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
     _allStudentCourseDetails.asScala.find(_.mostSignificant)
       .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
       .orNull
+
+  // Lookup by notional key - sprcode, sitsmodulecode, academicyear, occurrence
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumns(value = Array(
+    new JoinColumn(name = "sprCode", referencedColumnName = "spr_code", insertable = false, updatable = false),
+    new JoinColumn(name = "sitsModuleCode", referencedColumnName = "sits_module_code", insertable = false, updatable = false),
+    new JoinColumn(name = "academicYear", referencedColumnName = "academic_year", insertable = false, updatable = false),
+    new JoinColumn(name = "occurrence", referencedColumnName = "occurrence", insertable = false, updatable = false)
+  ))
+  private val _recordedModuleRegistration: RecordedModuleRegistration = null
+  def recordedModuleRegistration: Option[RecordedModuleRegistration] = Option(_recordedModuleRegistration)
 
   var sprCode: String = _
 
@@ -165,6 +178,14 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
       .values.map(_.sortBy(_.resitSequence).reverse.head)
       .toSeq
+  }
+
+  def recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent] = {
+    val uagms = upstreamAssessmentGroupMembers
+
+    RequestLevelCache.cachedBy("ModuleRegistration.recordedAssessmentComponentStudents", s"$academicYear-$sitsModuleCode-$occurrence") {
+      upstreamAssessmentGroups.flatMap(assessmentComponentMarksService.getAllRecordedStudents)
+    }.filter(r => uagms.exists(r.matchesIdentity))
   }
 
   def currentResitAttempt: Option[Int] = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).sorted.lastOption
