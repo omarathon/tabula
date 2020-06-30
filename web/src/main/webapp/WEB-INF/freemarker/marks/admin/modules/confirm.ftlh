@@ -42,9 +42,8 @@
     </div>
   </#if>
   <p>
-    The following module results and all component results will be confirmed as actual marks.
-    Other departments will be made aware that these marks have been approved by a Pre-examination Module Board.
-    Any subsequent changes to confirmed actual marks <strong>must</strong> be communicated to any other departments with students taking this module.
+    The following module results and all component results will be confirmed as actual marks approved by a Pre-examination Module Board.
+    Other departments with students taking this module will not be notified of this, but will be notified of any subsequent changes to these marks.
   </p>
 <#else>
   <div class="alert alert-info">There are no students with unconfirmed actual marks for this module.</div>
