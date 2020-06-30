@@ -15,7 +15,7 @@
 
   <p><a href="<@routes.marks.adminhome module.adminDepartment academicYear />">Back to module marks</a></p>
 <#else>
-  
+
   <#if notificationDepartments?has_content>
     <div class="alert alert-info">
         <#list notificationDepartments?keys as dept>
@@ -89,7 +89,7 @@
       </table>
 
       <div class="submit-buttons fix-footer">
-        <input type="submit" class="btn btn-primary" value="Confirm" />
+        <input type="submit" class="btn btn-primary" value="Save" />
         <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
       </div>
     </@f.form>

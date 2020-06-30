@@ -105,7 +105,7 @@
       </table>
 
       <div class="submit-buttons fix-footer">
-        <input type="submit" class="btn btn-primary" value="Confirm" />
+        <input type="submit" class="btn btn-primary" value="Process" />
         <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
       </div>
     </@f.form>
