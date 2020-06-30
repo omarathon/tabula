@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, MarkState, ModuleRegistration, UpstreamAssessmentGroup}
 
 @Service
 class MarksWorkflowProgressService {
@@ -21,10 +21,11 @@ class MarksWorkflowProgressService {
   def componentProgress(
     assessmentComponent: AssessmentComponent,
     upstreamAssessmentGroup: UpstreamAssessmentGroup,
-    students: Seq[StudentMarkRecord]
+    students: Seq[StudentMarkRecord],
+    moduleRegistrations: Seq[ModuleRegistration]
   ): WorkflowProgress = {
     val allStages = componentStages(assessmentComponent, upstreamAssessmentGroup)
-    val progresses = allStages.map(_.progress(assessmentComponent, upstreamAssessmentGroup, students))
+    val progresses = allStages.map(_.progress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations))
 
     WorkflowProgress(progresses, allStages)
   }
@@ -178,7 +179,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
         s.markState.contains(Agreed) || s.agreed
 
       // For needsWritingToSits and outOfSync we only check this state, not the SITS state as that doesn't make sense
-      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits)) {
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && MarkState.resultsReleasedToStudents(s.moduleRegistration))) {
         // Needs writing to SITS
         StageProgress(
           stage = ProcessModuleMarks,
@@ -223,7 +224,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
 sealed abstract class ComponentMarkWorkflowStage extends WorkflowStage with EnumEntry {
   def applies(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): Boolean = true
-  def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress
+  def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress
   override val actionCode: String = s"workflow.marks.component.$entryName.action"
 }
 
@@ -235,7 +236,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
       Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate)
     }
 
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress =
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress =
       if (upstreamAssessmentGroup.deadline.isEmpty) {
         StageProgress(
           stage = SetDeadline,
@@ -254,7 +255,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
   }
 
   case object RecordMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress = {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress = {
       lazy val neededForGraduateBenchmark =
         upstreamAssessmentGroup.academicYear == AcademicYear.starting(2019) &&
         Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate) &&
@@ -317,7 +318,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
   }
 
   case object ConfirmMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): StageProgress = {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): StageProgress = {
       def isConfirmed(s: StudentMarkRecord): Boolean =
         s.markState.contains(ConfirmedActual) || s.markState.contains(Agreed) || s.agreed
 
@@ -363,12 +364,12 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
   }
 
   case object ProcessMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): StageProgress = {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): StageProgress = {
       def isAgreed(s: StudentMarkRecord): Boolean =
         s.markState.contains(Agreed) || s.agreed
 
       // For needsWritingToSits and outOfSync we only check the state, not the SITS flag
-      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits)) {
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && moduleRegistrations.filter(_.studentCourseDetails.student.universityId == s.universityId).exists(MarkState.resultsReleasedToStudents))) {
         // Needs writing to SITS
         StageProgress(
           stage = ProcessMarks,

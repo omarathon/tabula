@@ -22,6 +22,9 @@ object MarkState extends Enum[MarkState] {
   val UndergraduateIntermediateReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 30)
   val PostgraduateTaughtReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 8)
 
+  def resultsReleasedToStudents(moduleRegistration: ModuleRegistration): Boolean =
+    resultsReleasedToStudents(moduleRegistration.academicYear, Option(moduleRegistration.studentCourseDetails))
+
   def resultsReleasedToStudents(academicYear: AcademicYear, studentCourseDetails: Option[StudentCourseDetails]): Boolean = {
     // Include previous years as well for (e.g.) resits, that'll work for 19/20 at least.
     if (academicYear <= AcademicYear.starting(2019)) {
