@@ -286,7 +286,19 @@
       <#if info.submission??>
         <#local submission = info.submission />
         <#local submissionStatus>
-          <strong>Submitted:</strong> <@fmt.date date=submission.submittedDate showLocal=true />
+          <strong>
+              <#if !show_submission_progress>
+                  <#if submission.late>
+                    Submitted Late:
+                  <#elseif submission.authorisedLate>
+                    Submitted within extension:
+                  <#else>
+                    Submitted:
+                  </#if>
+              <#else>
+                  Submitted:
+              </#if>
+          </strong> <@fmt.date date=submission.submittedDate showLocal=true />
         </#local>
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>

@@ -14,7 +14,7 @@ import scala.math.BigDecimal.RoundingMode
 object GraduationBenchmarkBreakdownCommand {
 
   type Result = Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]
-  type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState
+  type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState with GraduationBenchmarkBreakdownCommandRequest
 
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new GraduationBenchmarkBreakdownCommandInternal(studentCourseDetails, academicYear)
