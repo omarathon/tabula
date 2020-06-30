@@ -17,9 +17,9 @@ import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Transactiona
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -49,6 +49,7 @@ object RecordAssessmentComponentMarksCommand {
     with PopulateOnForm
 
   val AdminPermission: Permission = Permissions.Feedback.Publish
+  val OverwriteAgreedMarksPermission: Permission = Permissions.Marks.OverwriteAgreedMarks
 
   def apply(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, currentUser: CurrentUser): Command =
     new RecordAssessmentComponentMarksCommandInternal(assessmentComponent, upstreamAssessmentGroup, currentUser)
@@ -65,6 +66,7 @@ object RecordAssessmentComponentMarksCommand {
       with AutowiringTransactionalComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringModuleRegistrationServiceComponent
+      with AutowiringSecurityServiceComponent
 }
 
 abstract class RecordAssessmentComponentMarksCommandInternal(val assessmentComponent: AssessmentComponent, val upstreamAssessmentGroup: UpstreamAssessmentGroup, val currentUser: CurrentUser)
@@ -236,10 +238,23 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
 
 trait RecordAssessmentComponentMarksValidation extends SelfValidating {
   self: RecordAssessmentComponentMarksState
+    with ClearRecordedModuleMarksState
     with RecordAssessmentComponentMarksRequest
-    with AssessmentMembershipServiceComponent =>
+    with AssessmentMembershipServiceComponent
+    with AssessmentComponentMarksServiceComponent
+    with SecurityServiceComponent =>
+
+  lazy val canEditAgreedMarks: Boolean =
+    securityService.can(currentUser, OverwriteAgreedMarksPermission, assessmentComponent.module)
 
   override def validate(errors: Errors): Unit = {
+    val info = UpstreamAssessmentGroupInfo(
+      upstreamAssessmentGroup,
+      assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
+    )
+
+    val studentMarkRecords = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+
     val doGradeValidation = assessmentComponent.module.adminDepartment.assignmentGradeValidation
     students.asScala.foreach { case (id, item) =>
       errors.pushNestedPath(s"students[$id]")
@@ -293,6 +308,22 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       if (item.grade.safeLength > 2) {
         errors.rejectValue("grade", "actualGrade.tooLong")
+      }
+
+      upstreamAssessmentGroupMember.foreach { uagm =>
+        val studentMarkRecord = studentMarkRecords.find(_.upstreamAssessmentGroupMember == uagm).get
+
+        val isUnchanged =
+          !studentMarkRecord.outOfSync &&
+          !item.comments.hasText &&
+          ((!item.mark.hasText && studentMarkRecord.mark.isEmpty) || studentMarkRecord.mark.map(_.toString).contains(item.mark)) &&
+          ((!item.grade.hasText && studentMarkRecord.grade.isEmpty) || studentMarkRecord.grade.contains(item.grade))
+
+        val isAgreed = studentMarkRecord.agreed || studentMarkRecord.markState.contains(MarkState.Agreed)
+
+        if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
+          errors.rejectValue("mark", "actualMark.agreed")
+        }
       }
 
       errors.popNestedPath()

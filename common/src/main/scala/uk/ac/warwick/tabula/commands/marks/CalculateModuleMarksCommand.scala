@@ -158,6 +158,7 @@ object CalculateModuleMarksCommand {
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringTransactionalComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
       with ModuleOccurrenceDescription
       with ModuleOccurrenceValidGradesBindListener
@@ -426,9 +427,8 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
   }
 }
 
-class ValidGradesRequest extends ModuleRegistrationValidGradesForMarkRequest {
-
-}
+class ValidGradesRequest
+  extends ModuleRegistrationValidGradesForMarkRequest
 
 trait CalculateModuleMarksAlgorithm {
   self: AssessmentMembershipServiceComponent =>
@@ -579,9 +579,11 @@ trait CalculateModuleMarksAlgorithm {
 
 trait CalculateModuleMarksValidation extends ModuleOccurrenceValidation with SelfValidating {
   self: ModuleOccurrenceState
+    with ClearRecordedModuleMarksState
     with CalculateModuleMarksRequest
     with CalculateModuleMarksLoadModuleRegistrations
-    with AssessmentMembershipServiceComponent =>
+    with AssessmentMembershipServiceComponent
+    with SecurityServiceComponent =>
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = module.adminDepartment.assignmentGradeValidation
@@ -647,7 +649,10 @@ trait ClearRecordedModuleMarks {
           grade = None,
           result = None,
           source = RecordedModuleMarkSource.ComponentMarkChange,
-          markState = recordedModuleRegistration.latestState.getOrElse(MarkState.UnconfirmedActual),
+
+          // This intentionally copies the state from the component mark, as it allows a resit mark
+          // being recorded to reset an agreed module mark to be not-agreed.
+          markState = recordedAssessmentComponentStudent.latestState.getOrElse(MarkState.UnconfirmedActual),
           comments = "Module mark calculation reset by component mark change",
         )
 

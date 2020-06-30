@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -45,6 +45,7 @@ object ProcessModuleMarksCommand {
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringTransactionalComponent
+      with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to ModuleOccurrenceLoadModuleRegistrations being called from permissions
       with ModuleOccurrenceDescription
       with ModuleOccurrenceValidGradesBindListener
@@ -150,9 +151,11 @@ trait ProcessModuleMarksBindListener extends BindListener {
 
 trait ProcessModuleMarksValidation extends ModuleOccurrenceValidation with SelfValidating {
   self: ModuleOccurrenceState
+    with ClearRecordedModuleMarksState
     with ProcessModuleMarksRequest
     with ModuleOccurrenceLoadModuleRegistrations
-    with AssessmentMembershipServiceComponent =>
+    with AssessmentMembershipServiceComponent
+    with SecurityServiceComponent =>
 
   override def validate(errors: Errors): Unit = {
     students.asScala.foreach { case (sprCode, item) =>

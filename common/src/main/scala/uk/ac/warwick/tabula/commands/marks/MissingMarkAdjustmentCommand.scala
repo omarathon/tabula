@@ -66,8 +66,8 @@ trait MissingMarkAdjustmentStudentsToSet {
   self: RecordAssessmentComponentMarksState
     with AssessmentComponentMarksServiceComponent =>
 
-  // All students in this existing group and their latest mark and grade
-  lazy val allStudents: Seq[(UpstreamAssessmentGroupMember, Option[Int], Option[String])] = {
+  // All students in this existing group and their latest mark and grade and whether they're agreed
+  lazy val allStudents: Seq[(UpstreamAssessmentGroupMember, Option[Int], Option[String], Boolean)] = {
     val allRecordedStudents = assessmentComponentMarksService.getAllRecordedStudents(upstreamAssessmentGroup)
 
     upstreamAssessmentGroup.members.asScala.map { upstreamAssessmentGroupMember =>
@@ -81,16 +81,22 @@ trait MissingMarkAdjustmentStudentsToSet {
           .flatMap(_.latestGrade)
           .orElse(upstreamAssessmentGroupMember.firstDefinedGrade)
 
-      (upstreamAssessmentGroupMember, latestMark, latestGrade)
+      val isAgreed =
+        upstreamAssessmentGroupMember.isAgreedMark ||
+        upstreamAssessmentGroupMember.isAgreedGrade ||
+        allRecordedStudents.find(_.matchesIdentity(upstreamAssessmentGroupMember)).flatMap(_.latestState).contains(MarkState.Agreed)
+
+      (upstreamAssessmentGroupMember, latestMark, latestGrade, isAgreed)
     }.toSeq.sortBy(_._1.universityId)
   }
 
   // We don't let this happen if there are any existing student marks other 0/W or if it's a no-op
   lazy val studentsToSet: Seq[(UpstreamAssessmentGroupMember, Option[Int], Option[String])] =
-    allStudents.filterNot { case (_, latestMark, latestGrade) =>
+    allStudents.filterNot { case (_, latestMark, latestGrade, isAgreed) =>
+      isAgreed ||
       (latestMark.contains(0) && latestGrade.contains(GradeBoundary.WithdrawnGrade)) ||
       (latestMark.isEmpty && latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
-    }
+    }.map { case (uagm, latestMark, latestGrade, _) => (uagm, latestMark, latestGrade) }
 
 }
 
@@ -98,8 +104,8 @@ trait MissingMarkAdjustmentValidation extends SelfValidating {
   self: MissingMarkAdjustmentStudentsToSet =>
 
   override def validate(errors: Errors): Unit = {
-    val studentsWithExistingMarks = allStudents.filter { case (_, latestMark, latestGrade) =>
-      latestMark.exists(_ > 0) || latestGrade.exists(g => g != GradeBoundary.WithdrawnGrade && g != GradeBoundary.ForceMajeureMissingComponentGrade)
+    val studentsWithExistingMarks = allStudents.filter { case (_, latestMark, latestGrade, isAgreed) =>
+      !isAgreed && (latestMark.exists(_ > 0) || latestGrade.exists(g => g != GradeBoundary.WithdrawnGrade && g != GradeBoundary.ForceMajeureMissingComponentGrade))
     }
 
     val hasChanges = studentsToSet.nonEmpty
