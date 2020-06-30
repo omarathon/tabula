@@ -392,8 +392,13 @@
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button>
               </li>
               <li>
-                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells
-                </button>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoCellComments}">Excel grid without cell comments</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCellsNoCellComments}">Excel grid without merged cells, without cell comments</button>
               </li>
               <li>
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button>

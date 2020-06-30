@@ -39,6 +39,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
     showComponentMarks: Boolean,
     yearOrder: Ordering[Int] = Ordering.Int,
     mergedCells: Boolean = true,
+    cellComments: Boolean = true,
     status: StatusAdapter
   ): Workbook = {
     // Allow randomly accessing rows at any point during generation, don't flush
@@ -50,7 +51,9 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
     val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
 
-    val commentHelper = new SpreadsheetHelpers.CommentHelper(sheet)
+    val commentHelper =
+      if (cellComments) new SpreadsheetHelpers.CommentHelper(sheet)
+      else null
 
     ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
 

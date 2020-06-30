@@ -22,7 +22,10 @@ import scala.jdk.CollectionConverters._
 object ExcelGridDocument extends ExamGridDocumentPrototype {
   override val identifier: String = "ExcelGrid"
 
-  def options(mergedCells: Boolean): Map[String, Any] = Map("mergedCells" -> mergedCells)
+  def options(mergedCells: Boolean, cellComments: Boolean): Map[String, Any] = Map(
+    "mergedCells" -> mergedCells,
+    "cellComments" -> cellComments,
+  )
 }
 
 @Component
@@ -64,6 +67,7 @@ class ExcelGridDocument extends ExamGridDocument
     status: StatusAdapter
   ): FileAttachment = {
     val mergedCells: Boolean = options.get("mergedCells").fold(false)(_.asInstanceOf[Boolean])
+    val cellComments: Boolean = options.get("cellComments").fold(true)(_.asInstanceOf[Boolean])
 
     val coreRequiredModuleLookup = benchmark("Build core-required module lookup") {
       buildCoreRequiredModuleLookup(academicYear, selectCourseCommand.yearOfStudy, selectCourseCommand.levelCode)
@@ -124,6 +128,7 @@ class ExcelGridDocument extends ExamGridDocument
           perYearColumnValues = perYearColumnValues,
           showComponentMarks = gridOptionsCommand.showComponentMarks,
           mergedCells = mergedCells,
+          cellComments = cellComments,
           status = status
         )
       } else {
@@ -172,6 +177,7 @@ class ExcelGridDocument extends ExamGridDocument
             maxYearColumnSize,
             showComponentMarks = gridOptionsCommand.showComponentMarks,
             mergedCells = mergedCells,
+            cellComments = cellComments,
             status = status
           )
         }

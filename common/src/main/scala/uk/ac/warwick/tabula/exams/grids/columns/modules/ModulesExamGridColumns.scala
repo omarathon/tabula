@@ -6,8 +6,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
-import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringProgressionServiceComponent}
 
 import scala.collection.mutable
@@ -38,7 +37,7 @@ object ModuleExamGridColumn {
 
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, val moduleList: Option[UpstreamModuleList], isDuplicate: Boolean, cats: JBigDecimal)
   extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with AutowiringAssessmentMembershipServiceComponent
-    with AutowiringAssessmentComponentMarksServiceComponent with AutowiringModuleRegistrationMarksServiceComponent with AutowiringProgressionServiceComponent {
+    with AutowiringProgressionServiceComponent {
 
   def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
@@ -70,7 +69,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
           if (entity.markOverrides.exists(_.contains(module))) {
             ExamGridColumnValueOverrideDecimal(entity.markOverrides.get(module))
           } else {
-            lazy val isUnconfirmed: Boolean = moduleRegistrationMarksService.getRecordedModuleRegistration(mr).flatMap(_.latestState).contains(UnconfirmedActual)
+            lazy val isUnconfirmed: Boolean =
+              mr.recordedModuleRegistration.flatMap(_.latestState).contains(UnconfirmedActual)
 
             if (mr.passFail) {
               val (grade, isActual) = mr.agreedGrade match {
@@ -139,7 +139,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
             val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.firstDefinedMark.isDefined || m.firstDefinedGrade.nonEmpty).sortBy(_.upstreamAssessmentGroup.sequence)
 
             val isUnconfirmed = allComponents.map(uagm =>
-              uagm -> assessmentComponentMarksService.getRecordedStudent(uagm).flatMap(_.latestState).contains(UnconfirmedActual)
+              uagm -> mr.recordedAssessmentComponentStudents.find(_.matchesIdentity(uagm)).flatMap(_.latestState).contains(UnconfirmedActual)
             ).toMap
 
             val componentsAndWeights = allComponents.map { uagm => uagm ->
@@ -180,13 +180,12 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
   protected def scaled(bg: JBigDecimal): JBigDecimal =
     JBigDecimal(Option(bg).map(_.setScale(1, RoundingMode.HALF_UP)))
 
-  private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] = {
+  private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] =
     entity.moduleRegistrations.find(mr =>
       mr.module == module &&
       scaled(mr.cats) == scaled(cats) &&
       (moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
     )
-  }
 
   override val secondaryValue: String = scaled(cats).toPlainString
 

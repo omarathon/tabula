@@ -259,6 +259,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
           .setFetchMode("studentCourseDetails", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails._moduleRegistrations._recordedModuleRegistration", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)
