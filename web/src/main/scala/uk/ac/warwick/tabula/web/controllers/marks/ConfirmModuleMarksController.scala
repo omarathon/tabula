@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.marks.{ConfirmModuleMarksAction, ConfirmModuleMarksCommand, ListAssessmentComponentsCommand, MarksDepartmentHomeCommand}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
@@ -61,10 +61,6 @@ class ConfirmModuleMarksController extends BaseModuleMarksController
 
       sprCode -> allOptions.filter(o => o != ConfirmModuleMarksAction.InternalStudentWBS || command.module.adminDepartment.rootDepartment.code == "ib")
     }.toMap
-
-  @ModelAttribute("notificationDepartments")
-  def notificationDepartments(@Valid @ModelAttribute("command") command: ConfirmModuleMarksCommand.Command, errors: Errors): Map[Department, Seq[String]] =
-    departmentalStudents(command.studentsToConfirm.sortBy(_._1.sprCode).map(_._1))
 
   private val formView: String = "marks/admin/modules/confirm"
 
