@@ -68,24 +68,27 @@ class ProcessModuleMarksController extends BaseModuleMarksController
       formView
     } else {
       // Filter down to just changes
-      val changes: Seq[StudentModuleMarkRecord] =
+      val changes: Seq[(StudentModuleMarkRecord, Boolean)] =
         cmd.students.asScala.values.toSeq.filter(_.process).flatMap { student =>
           // We know the .get is safe because it's validated
           val studentModuleMarkRecord = studentModuleMarkRecords.find(_.sprCode == student.sprCode).get
+
+          val isNotNotifiableChange =
+            !student.comments.hasText &&
+            ((!student.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(student.mark)) &&
+            ((!student.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(student.grade)) &&
+            ((!student.result.hasText && studentModuleMarkRecord.result.isEmpty) || studentModuleMarkRecord.result.map(_.dbValue).contains(student.result))
 
           // Mark and grade and result haven't changed and no comment and not out of sync (we always re-push out of sync records)
           if (
             !studentModuleMarkRecord.outOfSync &&
             (studentModuleMarkRecord.markState.contains(MarkState.Agreed) || studentModuleMarkRecord.agreed) &&
-            !student.comments.hasText &&
-            ((!student.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(student.mark)) &&
-            ((!student.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(student.grade)) &&
-            ((!student.result.hasText && studentModuleMarkRecord.result.isEmpty) || studentModuleMarkRecord.result.map(_.dbValue).contains(student.result))
-          ) None else Some(studentModuleMarkRecord)
+            isNotNotifiableChange
+          ) None else Some(studentModuleMarkRecord -> !isNotNotifiableChange)
         }
 
-      model.addAttribute("changes", changes)
-      model.addAttribute("notificationDepartments", departmentalStudents(changes))
+      model.addAttribute("changes", changes.map(_._1))
+      model.addAttribute("notificationDepartments", departmentalStudents(changes.filter(_._2).map(_._1)))
       model.addAttribute("returnTo", getReturnTo(Routes.marks.Admin.ModuleOccurrences.processMarks(sitsModuleCode, academicYear, occurrence)))
 
       "marks/admin/modules/process_preview"
