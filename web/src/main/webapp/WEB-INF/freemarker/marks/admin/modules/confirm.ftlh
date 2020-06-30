@@ -33,14 +33,6 @@
   </div>
 </#if>
 <#if studentsToConfirm?has_content>
-  <#if notificationDepartments?has_content>
-    <div class="alert alert-info">
-        <#list notificationDepartments?keys as dept>
-            <#assign stuIds = mapGet(notificationDepartments, dept) />
-          <p>Departmental administrators in <strong>${dept.name}</strong> will receive a notification that the mark has changed for <@fmt.p number=stuIds?size singular="student" shownumber=false/>  <#list stuIds as stuId>${stuId}<#if stuId_has_next>, </#if></#list> when you click confirm.</p>
-        </#list>
-    </div>
-  </#if>
   <p>
     The following module results and all component results will be confirmed as actual marks approved by a Pre-examination Module Board.
     Other departments with students taking this module will not be notified of this, but will be notified of any subsequent changes to these marks.
