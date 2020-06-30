@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.commands.scheduling
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedAssessmentComponentStudentsToSitsCommand._
-import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportFeedbackToSitsServiceComponent, ExportFeedbackToSitsServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
@@ -27,6 +27,7 @@ object ExportRecordedAssessmentComponentStudentsToSitsCommand {
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
       with AutowiringTransactionalComponent
 }
 
@@ -37,10 +38,15 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
     with AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with ModuleAndDepartmentServiceComponent
+    with ModuleRegistrationServiceComponent
     with TransactionalComponent =>
 
   override def applyInternal(): Result = transactional() {
-    val marksToUpload = assessmentComponentMarksService.allNeedingWritingToSits
+    val marksToUpload =
+      assessmentComponentMarksService.allNeedingWritingToSits
+        .filter(_.marks.nonEmpty) // Should never happen anyway
+        .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
+        .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
 
     marksToUpload.flatMap { student =>
       val canUploadMarksToSitsForYear =
@@ -48,7 +54,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
           module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
         }
 
-      val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
+      lazy val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
         assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
           this.academicYear = student.academicYear
           this.occurrence = student.occurrence
@@ -57,8 +63,25 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
           this.assessmentGroup = student.assessmentGroup
         }).flatMap(_.members.asScala.find(uagm => uagm.universityId == student.universityId && uagm.assessmentType == student.assessmentType))
 
+      // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
+      lazy val moduleRegistrations: Seq[ModuleRegistration] =
+        moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
+          .filter(_.studentCourseDetails.student.universityId == student.universityId)
+
+      lazy val canUploadMarksToSits: Boolean = {
+        // true if latestState is empty (which should never be the case anyway)
+        student.latestState.forall { markState =>
+          markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
+            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+          }
+        }
+      }
+
       if (!canUploadMarksToSitsForYear) {
         logger.warn(s"Not uploading assessment component mark $student as department for ${student.moduleCode} is closed for ${student.academicYear}")
+        None
+      } else if (!canUploadMarksToSits) {
+        logger.warn(s"Not uploading assessment component mark $student as agreed marks are not currently allowed to be uploaded")
         None
       } else {
         // first check to see if there is one and only one matching row
@@ -89,8 +112,8 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
                 upstreamAssessmentGroupMember.foreach { uagm =>
                   uagm.actualMark = student.latestMark
                   uagm.actualGrade = student.latestGrade
-                  uagm.agreedMark = None
-                  uagm.agreedGrade = None
+                  uagm.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
+                  uagm.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
 
                   assessmentMembershipService.save(uagm)
                 }

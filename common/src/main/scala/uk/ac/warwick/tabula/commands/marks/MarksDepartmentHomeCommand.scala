@@ -36,7 +36,8 @@ object MarksDepartmentHomeCommand {
     outOfSync: Boolean,
     markState: Option[MarkState],
     agreed: Boolean,
-    history: Seq[RecordedModuleMark] // Most recent first
+    history: Seq[RecordedModuleMark], // Most recent first
+    moduleRegistration: ModuleRegistration
   )
   object StudentModuleMarkRecord {
     def apply(moduleRegistration: ModuleRegistration, recordedModuleRegistration: Option[RecordedModuleRegistration]): StudentModuleMarkRecord = {
@@ -73,6 +74,7 @@ object MarksDepartmentHomeCommand {
         markState = recordedModuleRegistration.flatMap(_.latestState),
         agreed = isAgreedSITS,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
+        moduleRegistration = moduleRegistration,
       )
     }
   }

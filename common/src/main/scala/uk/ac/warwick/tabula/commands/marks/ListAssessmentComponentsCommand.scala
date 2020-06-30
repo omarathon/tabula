@@ -113,6 +113,7 @@ object ListAssessmentComponentsCommand {
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringMarksWorkflowProgressServiceComponent
+      with AutowiringModuleRegistrationServiceComponent
       with ComposableCommand[Result]
       with ListAssessmentComponentsModulesWithPermission
       with ListAssessmentComponentsPermissions
@@ -126,6 +127,7 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
   self: AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with MarksWorkflowProgressServiceComponent
+    with ModuleRegistrationServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
   override def applyInternal(): Result = assessmentComponentInfos
@@ -137,6 +139,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
     with MarksWorkflowProgressServiceComponent
+    with ModuleRegistrationServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
   lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
@@ -152,6 +155,10 @@ trait ListAssessmentComponentsForModulesWithPermission {
         AssessmentComponentKey(ac) -> ac
       }.toMap
 
+    val allModuleRegistrations =
+      moduleRegistrationService.getByDepartmentAndYear(department, academicYear)
+        .groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
       .filter(_.allMembers.nonEmpty)
       .map { upstreamAssessmentGroupInfo =>
@@ -159,7 +166,8 @@ trait ListAssessmentComponentsForModulesWithPermission {
         val upstreamAssessmentGroup = upstreamAssessmentGroupInfo.upstreamAssessmentGroup
         val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
 
-        val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students)
+        val moduleRegistrations = allModuleRegistrations.getOrElse((assessmentComponent.moduleCode, academicYear, upstreamAssessmentGroup.occurrence), Seq.empty).sortBy(_.sprCode)
+        val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations)
 
         AssessmentComponentInfo(
           assessmentComponent,
