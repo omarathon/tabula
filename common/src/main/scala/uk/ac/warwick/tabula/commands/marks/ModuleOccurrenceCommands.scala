@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.commands.{Describable, Description, SelfValidating}
@@ -9,10 +10,10 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.marks.ValidGradesForMark
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, ModuleRegistrationServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import uk.ac.warwick.tabula.JavaImports._
+
 import scala.jdk.CollectionConverters._
 
 // Traits for commands that act on a specific run of a module - extend as required
@@ -129,8 +130,13 @@ object ModuleOccurrenceCommands {
 trait ModuleOccurrenceValidation {
   self: SelfValidating
     with ModuleOccurrenceState
+    with ClearRecordedModuleMarksState
     with ModuleOccurrenceLoadModuleRegistrations
-    with AssessmentMembershipServiceComponent =>
+    with AssessmentMembershipServiceComponent
+    with SecurityServiceComponent =>
+
+  lazy val canEditAgreedMarks: Boolean =
+    securityService.can(currentUser, Permissions.Marks.OverwriteAgreedMarks, module)
 
   def validateMarkEntry(errors: Errors)(item: ModuleOccurrenceCommands.StudentModuleMarksItem, doGradeValidation: Boolean): Unit = {
     val sprCode = item.sprCode
@@ -204,6 +210,23 @@ trait ModuleOccurrenceValidation {
 
     if (item.grade.safeLength > 2) {
       errors.rejectValue("grade", "actualGrade.tooLong")
+    }
+
+    moduleRegistration.foreach { modReg =>
+      val studentModuleMarkRecord = studentModuleMarkRecords.find(_.sprCode == modReg.sprCode).get
+
+      val isUnchanged =
+        !studentModuleMarkRecord.outOfSync &&
+        !item.comments.hasText &&
+        ((!item.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(item.mark)) &&
+        ((!item.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(item.grade)) &&
+        ((!item.result.hasText && studentModuleMarkRecord.result.isEmpty) || studentModuleMarkRecord.result.map(_.dbValue).contains(item.result))
+
+      val isAgreed = studentModuleMarkRecord.agreed || studentModuleMarkRecord.markState.contains(MarkState.Agreed)
+
+      if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
+        errors.rejectValue("mark", "actualMark.agreed")
+      }
     }
   }
 }
