@@ -441,14 +441,17 @@ abstract class AbstractProgressionService extends ProgressionService {
             getYearMark(entityYear, normalLoad, routeRulesPerYear.getOrElse(year, Seq()), yearWeightings)
 
           yearMarksToUseForPreviousYearMarks match {
+            case _ if year == finalYearOfStudy =>
+              calculatedYearMark
+
+            case ExamGridYearMarksToUse.CalculateYearMarks =>
+              calculatedYearMark
+
             case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
               uploadedYearMark.toRight(s"Could not find agreed mark for year $year")
 
             case ExamGridYearMarksToUse.UploadedYearMarksIfAvailable =>
               uploadedYearMark.fold(calculatedYearMark)(Right.apply)
-
-            case ExamGridYearMarksToUse.CalculateYearMarks =>
-              calculatedYearMark
           }
         }.getOrElse(Left(s"Could not find course details for year $year"))
       }

@@ -91,7 +91,10 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
             progressionService.getYearMark(year, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level), entity.yearWeightings).toOption
 
           yearMarksToUse match {
-            case ExamGridYearMarksToUse.CalculateYearMarks | _ if entity.years.keys.last == yearOfStudy =>
+            case _ if entity.years.keys.last == yearOfStudy =>
+              calculatedYearMark
+
+            case ExamGridYearMarksToUse.CalculateYearMarks =>
               calculatedYearMark
 
             case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
