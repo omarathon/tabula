@@ -42,7 +42,7 @@ class JobStatusHealthcheck
       ServiceHealthcheck.Status.Okay
 
     val message =
-      oldestPendingJob.map { job => s"Oldest job created ${naturalTime(job.createdDate.toDate)}" }.getOrElse("There are no pending jobs that  haven't started yet.")
+      oldestPendingJob.map { job => s"Oldest job created ${naturalTime(job.createdDate.toDate)}" }.getOrElse("There are no pending jobs that needs starting.")
 
 
     update(new ServiceHealthcheck(
