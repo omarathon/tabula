@@ -173,7 +173,7 @@ class ExamGridColumnValueString(
   override def isEmpty: Boolean = !value.hasText
 }
 
-case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, message: String = "", failed: Boolean = false, unconfirmed: Boolean = false)
+case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean = false, message: String = "", failed: Boolean = false, unconfirmed: Boolean = false)
   extends ExamGridColumnValueString(value, actual, failed, unconfirmed) {
 
   override def toHTML: String = {

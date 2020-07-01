@@ -35,7 +35,8 @@ class SuggestedFinalYearGradeColumnOption extends ChosenYearExamGridColumnOption
             state.applyBenchmark,
             entity.yearWeightings
           ) match {
-            case unknown: FinalYearGrade.Unknown => ExamGridColumnValueMissing(unknown.details)
+            case unknown: FinalYearGrade.Unknown => ExamGridColumnValueMissing(unknown.reason)
+            case result if result.details.nonEmpty => ExamGridColumnValueWithTooltip(result.description, message = result.details.get)
             case result => ExamGridColumnValueString(result.description)
           }
         ).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
