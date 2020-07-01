@@ -9,9 +9,10 @@
 </div>
 
 <p>
-  Use this form to process and finalise module marks as <strong>agreed</strong> marks. Agreed marks (but not comments)
-  will be visible to students on their Tabula profile once they have been ratified by the Senate Sub-Group (SSG), on the
-  previously agreed release day for results.
+  Use this form to process and finalise module marks as <strong>agreed</strong> marks, for ratification by the Senate Sub-Group (SSG).
+  Students can see their agreed mark, grade and result (but not comments) in their Tabula profile on the release day for their year and level of study.
+  The agreed marks are also uploaded to SITS on the <a href="https://warwick.ac.uk/coronavirus/intranet/continuity/teaching/marksandexamboards/guidance/results/#coordinatedrelease" target="_blank">release day</a>,
+  showing in Tabula as waiting to be written to SITS until then.
 </p>
 
 <p>
