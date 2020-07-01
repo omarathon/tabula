@@ -255,14 +255,19 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
         item.grade.maybeText.exists(g => g != grade.getOrElse("")) ||
         item.result.maybeText.exists(r => r != result.map(_.dbValue).getOrElse(""))
 
-      differsFrom(currentModuleMarkRecord.mark, currentModuleMarkRecord.grade, currentModuleMarkRecord.result) && (calculation match {
+      def differsFromCalculation(calculation: ModuleMarkCalculation): Boolean = calculation match {
+        // Allow an FM grade if there's any calculated FM grade, regardless of result or mark
+        case ModuleMarkCalculation.Success(_, Some(GradeBoundary.ForceMajeureMissingComponentGrade), _, _) if item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => false
         case ModuleMarkCalculation.Success(mark, grade, result, _) => differsFrom(mark, grade, result)
-        case ModuleMarkCalculation.Multiple(_, suggestions) => suggestions.map(_.calculation).exists {
-          case ModuleMarkCalculation.Success(mark, grade, result, _) => differsFrom(mark, grade, result)
-          case _ => false
-        }
+        case ModuleMarkCalculation.Multiple(_, suggestions) => suggestions.map(_.calculation).forall(differsFromCalculation)
         case _ => false // If the calculation was a failure, allow it through
-      })
+      }
+
+      if (differsFromCalculation(calculation)) {
+        println(calculation)
+      }
+
+      differsFrom(currentModuleMarkRecord.mark, currentModuleMarkRecord.grade, currentModuleMarkRecord.result) && differsFromCalculation(calculation)
     }
 }
 
