@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
 import com.google.common.annotations.VisibleForTesting
+import enumeratum.{Enum, EnumEntry}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -9,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
-import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.system.{EnumTwoWayConverter, TwoWayConverter}
 
 object ExamGridColumnOption {
   type Identifier = String
@@ -149,7 +150,7 @@ case class ExamGridColumnState (
   showZeroWeightedComponents: Boolean,
   showComponentSequence: Boolean,
   showModuleNames: ExamGridDisplayModuleNameColumnValue,
-  calculateYearMarks: Boolean,
+  yearMarksToUse: ExamGridYearMarksToUse,
   isLevelGrid: Boolean,
   applyBenchmark: Boolean,
 ) {
@@ -157,7 +158,7 @@ case class ExamGridColumnState (
 }
 
 case object EmptyExamGridColumnState {
-  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks = false, isLevelGrid = false, applyBenchmark = false)
+  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, isLevelGrid = false, applyBenchmark = false)
 }
 
 @Component
@@ -232,3 +233,13 @@ trait HasExamGridColumnSecondaryValue {
   val secondaryValue: String
 
 }
+
+sealed abstract class ExamGridYearMarksToUse(override val entryName: String) extends EnumEntry
+object ExamGridYearMarksToUse extends Enum[ExamGridYearMarksToUse] {
+  case object UploadedYearMarksOnly extends ExamGridYearMarksToUse("sits")
+  case object UploadedYearMarksIfAvailable extends ExamGridYearMarksToUse("sitsIfAvailable")
+  case object CalculateYearMarks extends ExamGridYearMarksToUse("calculated")
+
+  override def values: IndexedSeq[ExamGridYearMarksToUse] = findValues
+}
+class ExamGridYearMarksToUseConverter extends EnumTwoWayConverter(ExamGridYearMarksToUse)

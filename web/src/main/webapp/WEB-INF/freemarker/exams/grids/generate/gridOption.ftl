@@ -396,12 +396,24 @@
         academic years are not available in SITS.</p>
     </#assign>
 
+    <#assign uploadedYearMarksIfAvailablePopoverContent>
+      <p>If you have <a target="_blank" href="<@routes.exams.uploadYearMarks department academicYear />">uploaded year marks</a> via Tabula, you can use these
+        in your grid. If an uploaded year mark isn't available, the calculated year mark will be used based on component and module marks.</p>
+    </#assign>
+
     <div class="row">
       <div class="col-md-3">
         <div class="radio">
           <label><input type="radio" name="yearMarksToUse" value="sits"
                         <#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
-            /> Uploaded year marks <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
+            /> Uploaded year marks only <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="radio">
+          <label><input type="radio" name="yearMarksToUse" value="sitsIfAvailable"
+                        <#if gridOptionsCommand.yearMarksToUse == 'sitsIfAvailable'>checked</#if>
+            /> Uploaded year marks if available <@fmt.help_popover id="sitsIfAvailable" content=uploadedYearMarksIfAvailablePopoverContent html=true /></label>
         </div>
       </div>
       <div class="col-md-3">

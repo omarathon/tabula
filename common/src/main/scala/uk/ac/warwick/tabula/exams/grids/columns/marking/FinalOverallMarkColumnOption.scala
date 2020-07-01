@@ -30,7 +30,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
             entityYear,
             state.normalLoadLookup(entityYear.route),
             entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
-            state.calculateYearMarks,
+            state.yearMarksToUse,
             state.isLevelGrid,
             state.applyBenchmark,
             entity.yearWeightings

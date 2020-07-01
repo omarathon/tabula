@@ -4,8 +4,8 @@ import org.mockito.ArgumentMatchers
 import org.scalatest.Assertions
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
-import uk.ac.warwick.tabula.data.model.CourseType.{PGT, UG}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 import scala.util.Random
@@ -50,7 +50,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         academicYear,
         agreedMark = None
       ))
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
       result.asInstanceOf[ProgressionResult.Unknown].details should include(module1.code.toUpperCase)
     }
@@ -59,7 +59,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
   @Test
   def suggestedResultNoModuleRegistrations(): Unit = {
     new Fixture {
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
       result.asInstanceOf[ProgressionResult.Unknown].details should include("No module registrations found")
     }
@@ -85,7 +85,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(100)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -107,7 +107,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(30)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -129,7 +129,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(90)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.PossiblyProceed.description)
     }
 
@@ -158,7 +158,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(40)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Proceed.description)
     }
   }
@@ -183,7 +183,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(100)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -205,7 +205,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(90)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -234,7 +234,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         agreedMark = Some(40)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Proceed.description)
     }
   }
@@ -243,7 +243,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
   def suggestedFinalYearGradeNotFinalYear(): Unit = {
     new Fixture {
       scyd3.yearOfStudy = 2
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Ignore.description)
     }
   }
@@ -273,7 +273,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns None
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Left("No mark for you")
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 1, year 2, year 3")
     }
@@ -286,7 +286,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90.0), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 2")
     }
@@ -298,7 +298,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
       student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 3")
     }
@@ -339,7 +339,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2))
       )
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
@@ -350,7 +350,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq(mr1, mr2))
       ) // One subset
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       // Should re-use the initally calculated mark as only 1 subset
       verify(service.moduleRegistrationService, times(1)).weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean])
       result.description should be(FinalYearGrade.Unknown("").description)
@@ -372,7 +372,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq(mr1, mr3))
       ) // Two subsets
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 3")
     }
@@ -393,7 +393,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       ) // Two subsets
       scyd3.overcattingModules = Seq(module1, module2) // Subset chosen
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
@@ -413,7 +413,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns None
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
@@ -433,7 +433,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Some(year1Weighting)
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns Some(year3Weighting)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year3Weighting))
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year3Weighting))
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should include(s"Could not find year weightings for: ${course.code.toUpperCase} ${student.mostSignificantCourse.sprStartAcademicYear.toString} Year 2")
     }
@@ -472,7 +472,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       )
       student.mostSignificantCourse._moduleRegistrations.add(mr1)
       student.mostSignificantCourse._moduleRegistrations.add(mr2)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
       result.asInstanceOf[FinalYearGrade.Unknown].reason should include(module1.code.toUpperCase)
     }
@@ -511,7 +511,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       student.mostSignificantCourse._moduleRegistrations.add(mr2)
       student.mostSignificantCourse._moduleRegistrations.add(mr3)
       student.mostSignificantCourse._moduleRegistrations.add(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
         case _ => Assertions.fail("Incorrect type returned")
@@ -553,7 +553,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       student.mostSignificantCourse._moduleRegistrations.add(mr2)
       student.mostSignificantCourse._moduleRegistrations.add(mr3)
       student.mostSignificantCourse._moduleRegistrations.add(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
         case _ => Assertions.fail("Incorrect type returned")
@@ -595,7 +595,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       student.mostSignificantCourse._moduleRegistrations.add(mr2)
       student.mostSignificantCourse._moduleRegistrations.add(mr3)
       student.mostSignificantCourse._moduleRegistrations.add(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       // 1st year: 65 @ 20%, 2nd year: 60 @ 40%, 3rd year 80 @ 40%
       // Final grade 69 = 2.1, but on the grade boundary so borderline
       result match {
@@ -642,7 +642,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     ))
     service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(70.0))
     service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Option(yearWeighting)
-    val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear, 70, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, weightings = Seq(yearWeighting))
+    val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear, 70, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, weightings = Seq(yearWeighting))
     result match {
       case withMark: FinalYearMark => withMark.mark should be(BigDecimal(70))
       case _ => Assertions.fail("Incorrect type returned")
@@ -690,7 +690,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       student.mostSignificantCourse._moduleRegistrations.add(mr2)
       student.mostSignificantCourse._moduleRegistrations.add(mr3)
       student.mostSignificantCourse._moduleRegistrations.add(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year2Weighting, year3Weighting))
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year2Weighting, year3Weighting))
       // 1st year: 65 @ 70%, 2nd year: 60 @ 0%, 3rd year 80 @ 30%
       // Final grade 69.5 = 2.1, but on the grade boundary so borderline
       result match {
@@ -941,7 +941,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(50))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(65))
 
-      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(60.3))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(60.3))
     }
 
     new FixtureWithYearsAndMarks(
@@ -950,7 +950,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     ) {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(76))
-      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(70))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(70))
     }
 
     new FixtureWithYearsAndMarks(
@@ -960,7 +960,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(72))
 
-      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), calculateYearMarks = false, groupByLevel = false, weightings) should be(Right(71.5))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(71.5))
     }
   }
 

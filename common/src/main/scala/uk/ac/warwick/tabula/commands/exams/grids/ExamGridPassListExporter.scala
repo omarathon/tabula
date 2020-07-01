@@ -6,6 +6,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{ProgressionResult, ProgressionService}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
@@ -24,7 +25,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
     normalLoadLookup: NormalLoadLookup,
     routeRulesLookup: UpstreamRouteRuleLookup,
     isConfidential: Boolean,
-    calculateYearMarks: Boolean,
+    yearMarksToUse: ExamGridYearMarksToUse,
     isLevelGrid: Boolean,
     applyBenchmark: Boolean,
   ): XWPFDocument = {
@@ -60,7 +61,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
             year,
             normalLoadLookup(year.route),
             routeRules,
-            calculateYearMarks,
+            yearMarksToUse,
             isLevelGrid,
             applyBenchmark,
             entity.yearWeightings

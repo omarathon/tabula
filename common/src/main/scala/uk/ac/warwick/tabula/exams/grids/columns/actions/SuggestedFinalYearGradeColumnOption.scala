@@ -30,7 +30,7 @@ class SuggestedFinalYearGradeColumnOption extends ChosenYearExamGridColumnOption
             entityYear.get,
             state.normalLoadLookup(entityYear.get.route),
             entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
-            state.calculateYearMarks,
+            state.yearMarksToUse,
             state.isLevelGrid,
             state.applyBenchmark,
             entity.yearWeightings

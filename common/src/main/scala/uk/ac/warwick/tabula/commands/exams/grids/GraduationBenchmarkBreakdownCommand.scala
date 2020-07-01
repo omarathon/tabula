@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, NormalLoadLookup, UpstreamRouteRuleServiceComponent}
@@ -88,14 +89,14 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
 
       def weighting(year: Int): BigDecimal = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
 
-      val yearMarksAndWeightings = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings, markForFinalYear = false)
+      val yearMarksAndWeightings = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, weightings, markForFinalYear = false)
         .map { _.map { case (year, weightedMark) =>
           val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark
           year -> (mark, weighting(year))
         } + (yearOfStudy -> (weightedAssessmentMark, weighting(yearOfStudy)))
       }
 
-      val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, groupByLevel, weightings)
+      val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, weightings)
 
       Left(UGGraduationBenchmarkBreakdown(
         modules = modules.filter{ case (_, components) => components.nonEmpty },
@@ -169,5 +170,5 @@ trait GraduationBenchmarkBreakdownCommandState {
 
 trait GraduationBenchmarkBreakdownCommandRequest {
   var groupByLevel: Boolean = false
-  var calculateYearMarks: Boolean = false
+  var yearMarksToUse: ExamGridYearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly
 }
