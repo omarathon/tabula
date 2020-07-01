@@ -1,6 +1,11 @@
 <div class="exam-grid-preview">
   <div class="deptheader">
-    <h1>PG Graduation Benchmark Breakdown</h1>
+    <h1>Graduation benchmark breakdown</h1>
+    <#if department.examGridOptions.nameToShow.toString != 'none'>
+      <h4 class="with-related">for ${member.fullName!}, ${member.universityId}</h4>
+    <#else>
+      <h4 class="with-related">for ${member.universityId}</h4>
+    </#if>
   </div>
 
   <section>
@@ -37,7 +42,7 @@
       <#list breakdown.modules as moduleReg>
        <tr>
         <td class="assessment_details_col assessment_details_col2">
-          <div>${(moduleReg.module.code)!""?upper_case}</div>
+          <div>${((moduleReg.module.code)!"")?upper_case}</div>
           <div>${moduleReg.module.name}</div>
         </td>
          <td class="assessment_details_col assessment_details_col2">
@@ -69,18 +74,30 @@
 
           <tr>
             <td class="assessment_details_col assessment_details_col2">
-              <div>${(cumulative.moduleRegistration.module.code)!""?upper_case}</div>
+              <div>${((cumulative.moduleRegistration.module.code)!"")?upper_case}</div>
               <div>${cumulative.moduleRegistration.module.name}</div>
             </td>
             <td class="assessment_details_col assessment_details_col2">${cumulative.moduleRegistration.cats}</td>
             <td class="assessment_details_col assessment_details_col2">${(cumulative.moduleRegistration.firstDefinedMark)!"X"}</td>
-            <td>${cumulative.cats}</td>
+            <td>
+              <div class="benchmark-breakdown-calculation">
+                <div>
+                  <#if cumulative_index gt 0>
+                    ${breakdown.usedModulesWithCumulativeSums[cumulative_index - 1].cats}
+                    +
+                    ${(cumulative.moduleRegistration.cats)}
+                    =
+                  </#if>
+                  ${cumulative.cats}
+                </div>
+              </div>
+            </td>
           </tr>
         </#list>
         <#list breakdown.unusedModules as modulereg>
           <tr>
             <td class="assessment_details_col assessment_details_col2">
-              <div>${(modulereg.module.code)!""?upper_case}</div>
+              <div>${((modulereg.module.code)!"")?upper_case}</div>
               <div>${modulereg.module.name}</div>
             </td>
             <td class="assessment_details_col assessment_details_col2">${modulereg.cats}</td>
@@ -99,8 +116,8 @@
         <th>Module</th>
         <th>Module Credit</th>
         <th>Module Mark</th>
-        <th>Credits*Mark</th>
-        <th>Cumulative sum of Credits*Mark</th>
+        <th>Credits × Mark</th>
+        <th>Cumulative sum of Credits × Mark</th>
         <th>Cumulative sum of credits</th>
         <th>Weighted Average</th>
       </tr>
@@ -109,21 +126,70 @@
       <#list breakdown.usedModulesWithCumulativeSums as cumulative>
         <tr>
           <td class="assessment_details_col assessment_details_col2">
-            <div>${(cumulative.moduleRegistration.module.code)!""?upper_case}</div>
+            <div>${((cumulative.moduleRegistration.module.code)!"")?upper_case}</div>
             <div>${cumulative.moduleRegistration.module.name}</div>
           </td>
           <td class="assessment_details_col assessment_details_col2">${cumulative.moduleRegistration.cats}</td>
           <td class="assessment_details_col assessment_details_col2">${(cumulative.moduleRegistration.firstDefinedMark)!"X"}</td>
-          <td class="assessment_details_col assessment_details_col2">${(cumulative.moduleRegistration.firstDefinedMark*cumulative.moduleRegistration.cats)}</td>
-          <td class="assessment_details_col assessment_details_col2">${cumulative.marks}</td>
-          <td>${cumulative.cats}</td>
-          <td><#if cumulative?is_last>${breakdown.graduationBenchmark}*</#if></td>
+          <td class="assessment_details_col assessment_details_col2">
+            <div class="benchmark-breakdown-calculation">
+              <div>
+                ${cumulative.moduleRegistration.firstDefinedMark}
+                ×
+                ${cumulative.moduleRegistration.cats}
+                =
+                ${(cumulative.moduleRegistration.firstDefinedMark*cumulative.moduleRegistration.cats)}
+              </div>
+            </div>
+          </td>
+          <td class="assessment_details_col assessment_details_col2">
+            <div class="benchmark-breakdown-calculation">
+              <div>
+                <#if cumulative_index gt 0>
+                  ${breakdown.usedModulesWithCumulativeSums[cumulative_index - 1].marks}
+                  +
+                  ${(cumulative.moduleRegistration.firstDefinedMark*cumulative.moduleRegistration.cats)}
+                  =
+                </#if>
+                ${cumulative.marks}
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="benchmark-breakdown-calculation">
+              <div>
+                <#if cumulative_index gt 0>
+                  ${breakdown.usedModulesWithCumulativeSums[cumulative_index - 1].cats}
+                  +
+                  ${(cumulative.moduleRegistration.cats)}
+                  =
+                </#if>
+                ${cumulative.cats}
+              </div>
+            </div>
+          </td>
+          <td>
+            <#if cumulative?is_last>
+              <div class="benchmark-breakdown-calculation">
+                <#if breakdown.usedModulesWithCumulativeSums?has_content>
+                  <div class="formula">
+                    <div class="numerator">${breakdown.usedModulesWithCumulativeSums?last.marks}</div>
+                    <div class="denominator">${breakdown.catsConsidered}</div>
+                  </div>
+                  <div>=</div>
+                </#if>
+                <div class="result">
+                  ${breakdown.graduationBenchmark}%
+                </div>
+              </div>
+            </#if>
+          </td>
         </tr>
       </#list>
       <#list breakdown.unusedModules as moduleReg>
         <tr>
           <td class="assessment_details_col assessment_details_col2">
-            <div>${(moduleReg.module.code)!""?upper_case}</div>
+            <div>${((moduleReg.module.code)!"")?upper_case}</div>
             <div>${moduleReg.module.name}</div>
           </td>
           <td class="assessment_details_col assessment_details_col2">${moduleReg.cats}</td>
@@ -136,8 +202,4 @@
       </#list>
     </table>
   </section>
-  <#if breakdown.usedModulesWithCumulativeSums?has_content>
-    <h2>*Weighted average</h2>
-    ${breakdown.usedModulesWithCumulativeSums?last.marks}/${breakdown.catsConsidered}=${breakdown.usedModulesWithCumulativeSums?last.marks / breakdown.catsConsidered}
-  </#if>
 </div>
