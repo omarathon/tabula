@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
-import uk.ac.warwick.tabula.data.model.MarkState.ConfirmedActual
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model.MarkState._
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, MarkState, ModuleRegistration, UpstreamAssessmentGroup}
 
 @Service
 class MarksWorkflowProgressService {
@@ -21,10 +21,11 @@ class MarksWorkflowProgressService {
   def componentProgress(
     assessmentComponent: AssessmentComponent,
     upstreamAssessmentGroup: UpstreamAssessmentGroup,
-    students: Seq[StudentMarkRecord]
+    students: Seq[StudentMarkRecord],
+    moduleRegistrations: Seq[ModuleRegistration]
   ): WorkflowProgress = {
     val allStages = componentStages(assessmentComponent, upstreamAssessmentGroup)
-    val progresses = allStages.map(_.progress(assessmentComponent, upstreamAssessmentGroup, students))
+    val progresses = allStages.map(_.progress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations))
 
     WorkflowProgress(progresses, allStages)
   }
@@ -82,14 +83,14 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.notStarted",
           health = WorkflowStageHealth.Warning,
         )
-      } else if (students.exists(_.needsWritingToSits)) {
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.needsWritingToSits)) {
         // Needs writing to SITS
         StageProgress(
           stage = CalculateModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.needsWritingToSits",
         )
-      } else if (students.exists(_.outOfSync)) {
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
           stage = CalculateModuleMarks,
@@ -127,15 +128,34 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
   }
 
   case object ConfirmModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
-      if (students.nonEmpty && students.forall(s => s.agreed || s.markState.contains(ConfirmedActual))) {
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
+      def isConfirmed(s: StudentModuleMarkRecord): Boolean =
+        s.markState.contains(ConfirmedActual) || s.markState.contains(Agreed) || s.agreed
+
+      // For needsWritingToSits and outOfSync we only check this state - if it were agreed it'd be caught by the next state
+      if (students.exists(s => s.markState.contains(ConfirmedActual) && s.needsWritingToSits)) {
+        // Needs writing to SITS
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.outOfSync)) {
+        // Out of sync with SITS
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.outOfSync",
+          health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.nonEmpty && students.forall(isConfirmed)) {
         StageProgress(
           stage = ConfirmModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.markState.contains(ConfirmedActual))) {
+      } else if (students.exists(isConfirmed)) {
         StageProgress(
           stage = ConfirmModuleMarks,
           started = true,
@@ -148,20 +168,40 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.notStarted",
         )
       }
+    }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(CalculateModuleMarks))
   }
 
   case object ProcessModuleMarks extends ModuleOccurrenceMarkWorkflowStage {
-    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress =
-      if (students.nonEmpty && students.forall(_.agreed)) {
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
+      def isAgreed(s: StudentModuleMarkRecord): Boolean =
+        s.markState.contains(Agreed) || s.agreed
+
+      // For needsWritingToSits and outOfSync we only check this state, not the SITS state as that doesn't make sense
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && MarkState.resultsReleasedToStudents(s.moduleRegistration))) {
+        // Needs writing to SITS
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(Agreed) && s.outOfSync)) {
+        // Out of sync with SITS
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.outOfSync",
+          health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.nonEmpty && students.forall(isAgreed)) {
         StageProgress(
           stage = ProcessModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.agreed)) {
+      } else if (students.exists(isAgreed)) {
         StageProgress(
           stage = ProcessModuleMarks,
           started = true,
@@ -174,6 +214,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.notStarted",
         )
       }
+    }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(CalculateModuleMarks), Seq(ConfirmModuleMarks))
   }
@@ -183,7 +224,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
 sealed abstract class ComponentMarkWorkflowStage extends WorkflowStage with EnumEntry {
   def applies(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup): Boolean = true
-  def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress
+  def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress
   override val actionCode: String = s"workflow.marks.component.$entryName.action"
 }
 
@@ -195,7 +236,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
       Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate)
     }
 
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress =
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress =
       if (upstreamAssessmentGroup.deadline.isEmpty) {
         StageProgress(
           stage = SetDeadline,
@@ -214,7 +255,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
   }
 
   case object RecordMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): WorkflowStages.StageProgress = {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): WorkflowStages.StageProgress = {
       lazy val neededForGraduateBenchmark =
         upstreamAssessmentGroup.academicYear == AcademicYear.starting(2019) &&
         Option(assessmentComponent.module.degreeType).forall(_ == DegreeType.Undergraduate) &&
@@ -233,14 +274,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
             else if (isInPast) WorkflowStageHealth.Warning
             else WorkflowStageHealth.Good,
         )
-      } else if (students.exists(_.needsWritingToSits)) {
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.needsWritingToSits)) {
         // Needs writing to SITS
         StageProgress(
           stage = RecordMarks,
           started = true,
           messageCode = "workflow.marks.component.RecordMarks.needsWritingToSits",
         )
-      } else if (students.exists(_.outOfSync)) {
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
           stage = RecordMarks,
@@ -277,15 +318,34 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
   }
 
   case object ConfirmMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): StageProgress =
-      if (students.nonEmpty && students.forall(s => s.agreed || s.markState.contains(ConfirmedActual))) {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): StageProgress = {
+      def isConfirmed(s: StudentMarkRecord): Boolean =
+        s.markState.contains(ConfirmedActual) || s.markState.contains(Agreed) || s.agreed
+
+      // For needsWritingToSits and outOfSync we only check this state - if it were agreed it'd be caught by the next state
+      if (students.exists(s => s.markState.contains(ConfirmedActual) && s.needsWritingToSits)) {
+        // Needs writing to SITS
+        StageProgress(
+          stage = ConfirmMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ConfirmMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.outOfSync)) {
+        // Out of sync with SITS
+        StageProgress(
+          stage = ConfirmMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ConfirmMarks.outOfSync",
+          health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.nonEmpty && students.forall(isConfirmed)) {
         StageProgress(
           stage = ConfirmMarks,
           started = true,
           messageCode = "workflow.marks.component.ConfirmMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.markState.contains(ConfirmedActual))) {
+      } else if (students.exists(isConfirmed)) {
         StageProgress(
           stage = ConfirmMarks,
           started = true,
@@ -298,20 +358,40 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           messageCode = "workflow.marks.component.ConfirmMarks.notStarted",
         )
       }
+    }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(RecordMarks))
   }
 
   case object ProcessMarks extends ComponentMarkWorkflowStage {
-    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord]): StageProgress =
-      if (students.nonEmpty && students.forall(_.agreed)) {
+    override def progress(assessmentComponent: AssessmentComponent, upstreamAssessmentGroup: UpstreamAssessmentGroup, students: Seq[StudentMarkRecord], moduleRegistrations: Seq[ModuleRegistration]): StageProgress = {
+      def isAgreed(s: StudentMarkRecord): Boolean =
+        s.markState.contains(Agreed) || s.agreed
+
+      // For needsWritingToSits and outOfSync we only check the state, not the SITS flag
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && moduleRegistrations.filter(_.studentCourseDetails.student.universityId == s.universityId).exists(MarkState.resultsReleasedToStudents))) {
+        // Needs writing to SITS
+        StageProgress(
+          stage = ProcessMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ProcessMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(Agreed) && s.outOfSync)) {
+        // Out of sync with SITS
+        StageProgress(
+          stage = ProcessMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ProcessMarks.outOfSync",
+          health = WorkflowStageHealth.Danger,
+        )
+      } else if (students.nonEmpty && students.forall(isAgreed)) {
         StageProgress(
           stage = ProcessMarks,
           started = true,
           messageCode = "workflow.marks.component.ProcessMarks.completed",
           completed = true,
         )
-      } else if (students.exists(_.agreed)) {
+      } else if (students.exists(isAgreed)) {
         StageProgress(
           stage = ProcessMarks,
           started = true,
@@ -324,6 +404,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           messageCode = "workflow.marks.component.ProcessMarks.notStarted",
         )
       }
+    }
 
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(ConfirmMarks))
   }

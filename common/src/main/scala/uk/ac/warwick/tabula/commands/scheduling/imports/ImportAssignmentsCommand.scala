@@ -492,7 +492,19 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       val fmBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
         if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process && gb.attempt == attempt)) None
-        else Some(GradeBoundary(marksCode, process, attempt, 1000, GradeBoundary.ForceMajeureMissingComponentGrade, None, None, "S", None)) // No suggested result for FM, all results are allowed
+        else Some(GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 1000,
+          grade = GradeBoundary.ForceMajeureMissingComponentGrade,
+          minimumMark = None,
+          maximumMark = None,
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = None, // No suggested result for FM, all results are allowed
+          agreedStatus = GradeBoundaryAgreedStatus.Agreed, // This outcome doesn't change
+          incrementsAttempt = false,
+        ))
       }
 
       val wBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
@@ -506,11 +518,47 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
               .getOrElse(ProgressionService.DefaultPassMark)
 
           Seq(
-            GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, Some(passMark), Some(100), "S", Some(ModuleResult.Pass)),
-            GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, Some(0), Some(passMark - 1), "S", Some(ModuleResult.Fail))
+            GradeBoundary(
+              marksCode = marksCode,
+              process = process,
+              attempt = attempt,
+              rank = 999,
+              grade = GradeBoundary.WithdrawnGrade,
+              minimumMark = Some(passMark),
+              maximumMark = Some(100),
+              signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+              result = Some(ModuleResult.Pass),
+              agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+              incrementsAttempt = false,
+            ),
+            GradeBoundary(
+              marksCode = marksCode,
+              process = process,
+              attempt = attempt,
+              rank = 999,
+              grade = GradeBoundary.WithdrawnGrade,
+              minimumMark = Some(0),
+              maximumMark = Some(passMark - 1),
+              signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+              result = Some(ModuleResult.Fail),
+              agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+              incrementsAttempt = false,
+            )
           )
         } else {
-          Seq(GradeBoundary(marksCode, process, attempt, 999, GradeBoundary.WithdrawnGrade, None, None, "S", Some(ModuleResult.Fail)))
+          Seq(GradeBoundary(
+            marksCode = marksCode,
+            process = process,
+            attempt = attempt,
+            rank = 999,
+            grade = GradeBoundary.WithdrawnGrade,
+            minimumMark = None,
+            maximumMark = None,
+            signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+            result = Some(ModuleResult.Fail),
+            agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+            incrementsAttempt = false,
+          ))
         }
       }
 

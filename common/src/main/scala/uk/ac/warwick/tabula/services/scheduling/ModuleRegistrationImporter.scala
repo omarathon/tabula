@@ -135,6 +135,22 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter
         moduleRegistrationMarksService.saveOrUpdate(r)
       }
 
+      val actualMark: Option[Int] =
+        recordedModuleRegistration.flatMap(_.latestMark).orElse(mark)
+
+      val actualGrade: String =
+        recordedModuleRegistration.flatMap(_.latestGrade).getOrElse(grade)
+
+      val isAgreedRecordedMarks = recordedModuleRegistration.flatMap(_.latestState).contains(MarkState.Agreed)
+
+      val agreedMark: Option[Int] =
+        recordedModuleRegistration.flatMap(_.latestMark).filter(_ => isAgreedRecordedMarks)
+          .orElse(mark.filter(_ => academicYear <= AcademicYear.now()))
+
+      val agreedGrade: String =
+        recordedModuleRegistration.flatMap(_.latestGrade).filter(_ => isAgreedRecordedMarks)
+          .getOrElse(if (academicYear < AcademicYear.now()) grade else null)
+
       new ModuleRegistrationRow(
         sprCode = "%s/1".format(universityId),
         sitsModuleCode = module.fullModuleCode,
@@ -143,10 +159,10 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter
         selectionStatusCode = if (route.coreModules.contains(moduleCode)) "C" else "O",
         occurrence = "A",
         academicYear = academicYear.toString,
-        actualMark = recordedModuleRegistration.flatMap(_.latestMark).orElse(mark),
-        actualGrade = recordedModuleRegistration.flatMap(_.latestGrade).getOrElse(grade),
-        agreedMark = if (academicYear < AcademicYear.now()) mark else None,
-        agreedGrade = if (academicYear < AcademicYear.now()) grade else null,
+        actualMark = actualMark,
+        actualGrade = actualGrade,
+        agreedMark = agreedMark,
+        agreedGrade = agreedGrade,
         marksCode = marksCode,
         moduleResult = recordedModuleRegistration.flatMap(_.latestResult).map(_.dbValue).getOrElse(result),
         endWeek = None

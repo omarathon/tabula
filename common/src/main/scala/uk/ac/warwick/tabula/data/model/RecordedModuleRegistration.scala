@@ -174,6 +174,7 @@ object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
   case object ComponentMarkCalculation extends RecordedModuleMarkSource("Calculate module marks")
   case object RecordModuleMarks extends RecordedModuleMarkSource("Record module marks") // Used when the calculation is ignored
   case object MarkConfirmation extends RecordedModuleMarkSource("Confirm module marks")
+  case object ProcessModuleMarks extends RecordedModuleMarkSource("Process module marks")
   case object ComponentMarkChange extends RecordedModuleMarkSource("Component mark changed")
 
   override def values: IndexedSeq[RecordedModuleMarkSource] = findValues

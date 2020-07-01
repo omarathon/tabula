@@ -37,7 +37,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
   @Test
   def valid(): Unit = new Fixture {
     command.studentMarks = JHashMap(studentUser.getWarwickId -> "100")
-    val gb = GradeBoundary(null, null, 1, 0, "A", Some(0), Some(100), null, None)
+    val gb = Fixtures.gradeBoundary(null, grade = "A", minimumMark = Some(0), maximumMark = Some(100))
     mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, Some(100), resitAttempt = None) returns Seq(gb)
     val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
     result should be(Map(studentUser.getWarwickId -> Seq(gb)))

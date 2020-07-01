@@ -204,6 +204,12 @@ abstract class AbstractProgressionService extends ProgressionService {
     }
   }
 
+  private def finalYearOfStudy(scyd: StudentCourseYearDetails, groupByLevel: Boolean): Int = if (groupByLevel && scyd.isFinalYear) {
+    scyd.level.map(_.toYearOfStudy).getOrElse(scyd.studentCourseDetails.courseYearLength)
+  } else {
+    scyd.studentCourseDetails.courseYearLength
+  }
+
   def marksPerYear(
     scyd: StudentCourseYearDetails,
     normalLoad: BigDecimal,
@@ -213,17 +219,17 @@ abstract class AbstractProgressionService extends ProgressionService {
     weightings: Seq[CourseYearWeighting],
     markForFinalYear: Boolean,
   ): Either[String, Map[Int, BigDecimal]] = {
-    val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
-    lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
-    getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear)
+    val finalYear = finalYearOfStudy(scyd, groupByLevel)
+    lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+    getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear)
   }
 
   def graduationBenchmark(studentCourseYearDetails: Option[StudentCourseYearDetails], yearOfStudy: Int, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {
     studentCourseYearDetails.map(scyd => {
-      val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
-      if (yearOfStudy >= finalYearOfStudy) {
-        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
-        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear = false)
+      val finalYear = finalYearOfStudy(scyd, groupByLevel)
+      if (yearOfStudy >= finalYear) {
+        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear = false)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
         for (mpy <- markPerYear; yw <- yearWeightings) yield {
           calculateBenchmark(entityPerYear, mpy, yw)
@@ -376,10 +382,10 @@ abstract class AbstractProgressionService extends ProgressionService {
     weightings: Seq[CourseYearWeighting]
   ): FinalYearGrade = {
     entityYear.studentCourseYearDetails.map { scyd =>
-      val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
-      if (entityYear.yearOfStudy >= finalYearOfStudy) {
-        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYearOfStudy)
-        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear = true)
+      val finalYear = finalYearOfStudy(scyd, groupByLevel)
+      if (entityYear.yearOfStudy >= finalYear) {
+        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+        lazy val markPerYear = getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, calculateYearMarks, weightings, markForFinalYear = true)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
 
         (for(mpy <- markPerYear; yw <- yearWeightings) yield {

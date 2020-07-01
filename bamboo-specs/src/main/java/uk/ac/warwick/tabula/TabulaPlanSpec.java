@@ -13,6 +13,8 @@ import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.api.builders.trigger.Trigger;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
+import com.atlassian.bamboo.specs.builders.notification.DeploymentFinishedNotification;
+import com.atlassian.bamboo.specs.builders.notification.DeploymentStartedAndFinishedNotification;
 import com.atlassian.bamboo.specs.builders.task.*;
 import com.atlassian.bamboo.specs.builders.trigger.AfterSuccessfulBuildPlanTrigger;
 import com.atlassian.bamboo.specs.builders.trigger.ScheduledTrigger;
@@ -209,7 +211,19 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
               .recipients(slackRecipient(SLACK_CHANNEL))
           )
         )
-        .productionTomcatEnvironment("Production", "tabula.warwick.ac.uk", "tabula", SLACK_CHANNEL)
+        .tomcatEnvironment("Production", "tabula.warwick.ac.uk", "tabula", "prod", env -> env
+          .notifications(
+            new Notification()
+              .type(new DeploymentStartedAndFinishedNotification())
+              .recipients(slackRecipient(SLACK_CHANNEL)),
+            new Notification()
+              .type(new DeploymentFinishedNotification())
+              .recipients(slackRecipient("#support-summary")),
+            new Notification()
+              .type(new DeploymentFinishedNotification())
+              .recipients(slackRecipient("#support-tabula"))
+          )
+        )
         .build()
     );
   }

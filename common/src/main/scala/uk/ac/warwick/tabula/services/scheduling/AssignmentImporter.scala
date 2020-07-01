@@ -345,6 +345,22 @@ class SandboxAssignmentImporter extends AssignmentImporter
             assessmentComponentMarksService.saveOrUpdate(s)
           }
 
+          val actualMark =
+            recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark)
+
+          val actualGrade =
+            recordedStudent.flatMap(_.latestGrade).getOrElse(grade)
+
+          val isAgreedRecordedMarks = recordedStudent.flatMap(_.latestState).contains(MarkState.Agreed)
+
+          val agreedMark =
+            recordedStudent.flatMap(_.latestMark).map(_.toString).filter(_ => isAgreedRecordedMarks)
+              .getOrElse(if (generateMarks) mark else null)
+
+          val agreedGrade =
+            recordedStudent.flatMap(_.latestGrade).filter(_ => isAgreedRecordedMarks)
+              .getOrElse(if (generateMarks) grade else null)
+
           Some(UpstreamAssessmentRegistration(
             year = academicYear.toString,
             sprCode = "%d/1".format(uniId),
@@ -356,10 +372,10 @@ class SandboxAssignmentImporter extends AssignmentImporter
             sequence = sequence,
             moduleCode = moduleCodeFull,
             assessmentGroup = assessmentGroup,
-            actualMark = recordedStudent.flatMap(_.latestMark).map(_.toString).getOrElse(mark),
-            actualGrade = recordedStudent.flatMap(_.latestGrade).getOrElse(grade),
-            agreedMark = if (generateMarks) mark else null,
-            agreedGrade = if (generateMarks) grade else null,
+            actualMark = actualMark,
+            actualGrade = actualGrade,
+            agreedMark = agreedMark,
+            agreedGrade = agreedGrade,
             currentResitAttempt = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else if (SandboxData.randomMarkSeed(universityId, moduleCode) % 13 < 5) "1" else "2",
             resitSequence = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else "001",
           ))
@@ -853,7 +869,9 @@ object AssignmentImporter {
       mkc.mkc_minm as minimum_mark,
       mkc.mkc_maxm as maximum_mark,
       mkc.mkc_sigs as signal_status,
-      mkc.mkc_rslt as result
+      mkc.mkc_rslt as result,
+      mkc.mkc_sasf as agreed_status,
+      mkc.mkc_ainc as increments_attempt
     from $sitsSchema.cam_mkc mkc
     where mkc.mkc_proc in ('SAS', 'RAS') and
       -- Avoid duplicates
@@ -1024,15 +1042,17 @@ object AssignmentImporter {
       }
 
       GradeBoundary(
-        rs.getString("marks_code"),
-        rs.getString("process"),
-        rs.getInt("attempt"),
-        rs.getInt("rank"),
-        rs.getString("grade"),
-        getNullableInt("minimum_mark"),
-        getNullableInt("maximum_mark"),
-        rs.getString("signal_status"),
-        rs.getString("result").maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
+        marksCode = rs.getString("marks_code"),
+        process = GradeBoundaryProcess.withName(rs.getString("process")),
+        attempt = rs.getInt("attempt"),
+        rank = rs.getInt("rank"),
+        grade = rs.getString("grade"),
+        minimumMark = getNullableInt("minimum_mark"),
+        maximumMark = getNullableInt("maximum_mark"),
+        signalStatus = GradeBoundarySignalStatus.withName(rs.getString("signal_status")),
+        result = rs.getString("result").maybeText.flatMap(c => Option(ModuleResult.fromCode(c))),
+        agreedStatus = GradeBoundaryAgreedStatus.withName(rs.getString("agreed_status")),
+        incrementsAttempt = rs.getString("increments_attempt").maybeText.contains("Y"),
       )
     }
   }
