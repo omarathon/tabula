@@ -4,6 +4,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.UpstreamRouteRuleLookup
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
 
@@ -17,7 +18,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
     normalLoadLookup: NormalLoadLookup,
     routeRulesLookup: UpstreamRouteRuleLookup,
     isConfidential: Boolean,
-    calculateYearMarks: Boolean,
+    yearMarksToUse: ExamGridYearMarksToUse,
     isLevelGrid: Boolean,
     applyBenchmark: Boolean,
   ): XWPFDocument = {
@@ -82,19 +83,31 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 
         doc.createParagraph()
 
-        val yearMark = {
-          if (calculateYearMarks || entity.years.keys.last == yearOfStudy) {
-            progressionService.getYearMark(year, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level), entity.yearWeightings).right.toOption
-          } else if (Option(year.studentCourseYearDetails.get.agreedMark).isDefined) {
+        val yearMark: Option[BigDecimal] = {
+          lazy val uploadedYearMark: Option[BigDecimal] =
             Option(BigDecimal(year.studentCourseYearDetails.get.agreedMark))
-          } else {
-            None
+
+          lazy val calculatedYearMark: Option[BigDecimal] =
+            progressionService.getYearMark(year, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level), entity.yearWeightings).toOption
+
+          yearMarksToUse match {
+            case _ if entity.years.keys.last == yearOfStudy =>
+              calculatedYearMark
+
+            case ExamGridYearMarksToUse.CalculateYearMarks =>
+              calculatedYearMark
+
+            case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
+              uploadedYearMark
+
+            case ExamGridYearMarksToUse.UploadedYearMarksIfAvailable =>
+              uploadedYearMark.orElse(calculatedYearMark)
           }
         }
         doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
         val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey.route, ey.level)).toMap
-        progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year.route), routeRules, calculateYearMarks, isLevelGrid, applyBenchmark, entity.yearWeightings) match {
+        progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year.route), routeRules, yearMarksToUse, isLevelGrid, applyBenchmark, entity.yearWeightings) match {
           case FinalYearGrade.Ignore =>
           case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")
         }

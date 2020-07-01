@@ -191,7 +191,7 @@ class OvercattingOptionsView(
     showZeroWeightedComponents = false,
     showComponentSequence = false,
     showModuleNames = department.moduleNameToShow,
-    calculateYearMarks = false,
+    yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly,
     isLevelGrid = basedOnLevel,
     applyBenchmark = false
   )
@@ -207,7 +207,7 @@ class OvercattingOptionsView(
     new UniversityIDColumnOption().getColumns(overcattedEntitiesState),
     new ChooseOvercatColumnOption().getColumns(overcattedEntitiesState, Option(overcatChoice)),
     new OvercattedYearMarkColumnOption().getColumns(overcattedEntitiesState),
-    new FixedValueColumnOption().getColumns(overcattedEntitiesState, currentYearMark.right.toOption)
+    new FixedValueColumnOption().getColumns(overcattedEntitiesState, currentYearMark.toOption)
   ).flatten
 
   lazy val optionsColumnCategories: Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]] =

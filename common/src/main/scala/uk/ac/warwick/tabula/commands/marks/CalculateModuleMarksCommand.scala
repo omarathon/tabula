@@ -124,7 +124,8 @@ object CalculateModuleMarksCommand {
 
       def NoGradeBoundary(grade: String): Failure = Failure(s"Unable to find grade boundary for $grade grade")
 
-      def MismatchedIndicatorGrades(grades: Seq[String], sequences: Seq[String]): Failure = Failure(s"Mis-matched indicator grades ${grades.mkString(", ")} for ${sequences.mkString(", ")}")
+      def MismatchedIndicatorGrades(grades: Seq[String], sequences: Seq[String]): Failure =
+        Failure(s"For a mark to be calculated when an indicator grade has been used for a component, this same grade (${grades.mkString(", ")}) must be used for all components (${sequences.mkString(", ")}, excluding any with a grade of ${GradeBoundary.ForceMajeureMissingComponentGrade})")
 
       val General: Failure = Failure("Couldn't automatically calculate a module result")
     }
