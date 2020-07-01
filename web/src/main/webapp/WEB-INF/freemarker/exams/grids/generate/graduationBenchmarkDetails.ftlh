@@ -38,11 +38,11 @@
 
 <div class="exam-grid-preview">
   <div class="deptheader">
+    <h1>Graduation benchmark breakdown</h1>
     <#if department.examGridOptions.nameToShow.toString != 'none'>
-      <h1>${member.fullName!}</h1>
-      <h4 class="with-related">${member.universityId}</h4>
+      <h4 class="with-related">for ${member.fullName!}, ${member.universityId}</h4>
     <#else>
-      <h1>${member.universityId}</h1>
+      <h4 class="with-related">for ${member.universityId}</h4>
     </#if>
   </div>
 
@@ -125,7 +125,7 @@
             </div>
             <div>=</div>
             <div class="result">
-                ${breakdown.graduationBenchmark}%
+              ${breakdown.graduationBenchmark}%
             </div>
           </div>
         </#if>
