@@ -42,7 +42,7 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 
           state.yearMarksToUse match {
             case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
-              uploadedYearMark.toRight(s"No year mark for Year $year")
+              uploadedYearMark.toRight(s"No year mark for Year ${year.yearOfStudy}")
 
             case ExamGridYearMarksToUse.UploadedYearMarksIfAvailable =>
               uploadedYearMark.fold(calculatedYearMark)(Right.apply)

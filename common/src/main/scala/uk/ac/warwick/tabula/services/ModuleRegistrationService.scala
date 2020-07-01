@@ -115,8 +115,8 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
       val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
       (mark, cats)
-    }).filter { case (mark, cats) => mark != null & cats != null }
-    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade)).size) {
+    }).filter { case (mark, cats) => mark != null && cats != null && cats > 0 }
+    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade) || BigDecimal(mr.cats) == 0).size) {
       Right(
         (nonNullReplacedMarksAndCats.map { case (mark, cats) => mark * cats }.sum / nonNullReplacedMarksAndCats.map { case (_, cats) => cats }.sum)
           .setScale(1, RoundingMode.HALF_UP)
