@@ -325,7 +325,7 @@ class Department extends GeneratedId
     settings += (Settings.ExamGridOptions.EntitiesPerPage -> options.entitiesPerPage.getOrElse(0))
   }
 
-  def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = false)
+  def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = true)
 
   def enableLevelGrids_=(enabled: Boolean): Unit = {
     settings += (Settings.EnableLevelGrids -> enabled)
