@@ -46,7 +46,7 @@ class MarksRecordDocument extends ExamGridDocument
       NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
       UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
       isConfidential = isConfidential,
-      calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+      yearMarksToUse = gridOptionsCommand.yearMarksSetting,
       selectCourseCommand.isLevelGrid,
       gridOptionsCommand.applyBenchmark
     )

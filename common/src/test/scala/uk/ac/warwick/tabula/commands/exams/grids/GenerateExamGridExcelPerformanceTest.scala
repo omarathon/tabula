@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.cats._
-import uk.ac.warwick.tabula.exams.grids.columns.marking.{CurrentYearMarkColumnOption, BenchmarkWeightedAssessmentMarkColumnOption, OvercattedYearMarkColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.marking.{BenchmarkWeightedAssessmentMarkColumnOption, CurrentYearMarkColumnOption, OvercattedYearMarkColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, OptionalModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.studentidentification.{NameColumnOption, RouteColumnOption, UniversityIDColumnOption}
 import uk.ac.warwick.tabula.exams.grids.{NullStatusAdapter, StatusAdapter}
@@ -222,7 +222,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
     showZeroWeightedComponents = false,
     showComponentSequence = false,
     showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames,
-    calculateYearMarks = false,
+    yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly,
     isLevelGrid = false,
     applyBenchmark = false
   )

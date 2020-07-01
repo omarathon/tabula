@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
 import uk.ac.warwick.tabula.exams.grids.columns.marking.CurrentYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreModulesColumnOption
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue, ExamGridYearMarksToUse}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -183,7 +183,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 
   def showZeroWeightedComponents: Boolean = componentsToShow == "all"
 
-  def calculateYearMarks: Boolean = yearMarksToUse != "sits"
+  def yearMarksSetting: ExamGridYearMarksToUse = ExamGridYearMarksToUse.withName(yearMarksToUse)
 
   private def isModulesOrYearMarkColumn(identifier: ExamGridColumnOption.Identifier): Boolean =
     identifier == new CoreModulesColumnOption().identifier ||

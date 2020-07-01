@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreRequiredModulesColum
 import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
 import uk.ac.warwick.tabula.services._
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
+import scala.jdk.CollectionConverters._
 
 trait GeneratesExamGridData extends CourseAndRouteServiceComponent with MaintenanceModeServiceComponent with ModuleRegistrationServiceComponent {
   protected def checkAndApplyOvercatAndGetGridData(
@@ -66,7 +66,7 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
       showComponentSequence = gridOptionsCommand.showComponentSequence,
       showModuleNames = gridOptionsCommand.moduleNameToShow,
-      calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+      yearMarksToUse = gridOptionsCommand.yearMarksSetting,
       isLevelGrid = selectCourseCommand.isLevelGrid,
       applyBenchmark = gridOptionsCommand.applyBenchmark
     )
