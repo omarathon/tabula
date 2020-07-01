@@ -225,7 +225,7 @@ trait ModuleOccurrenceValidation {
       val isAgreed = studentModuleMarkRecord.agreed || studentModuleMarkRecord.markState.contains(MarkState.Agreed)
 
       if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
-        errors.rejectValue("mark", "actualMark.agreed")
+        errors.rejectValue("mark", "actualMark.module.agreed")
       }
     }
   }
