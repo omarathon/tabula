@@ -73,6 +73,8 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
     textField("title").value = "Created meeting"
 
+    // FIXME this will fail on the first of the month because the datepicker will have the current month,
+    // not the month we want
     val datetime = DateTime.now.minusDays(1).withHourOfDay(11)
 
     eventually {
