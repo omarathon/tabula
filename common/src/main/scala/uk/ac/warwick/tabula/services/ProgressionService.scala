@@ -467,7 +467,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     if(yearsWithoutWeightings.nonEmpty) {
       val missingYearsString = yearsWithoutWeightings.map(y =>
         s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.studentCourseDetails.sprStartAcademicYear.toString} Year $y"
-      )
+      ).mkString(", ")
       Left(s"Could not find year weightings for: $missingYearsString")
     } else {
       Right(yearWeightings.toMap)
