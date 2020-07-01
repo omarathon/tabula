@@ -36,13 +36,26 @@ abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessme
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) = {
+    //noinspection IfElseToOption
+    /*
+     * Don't replace this with Option(resitAttempt)
+     *
+     * @ val jint: java.lang.Integer = null
+     * jint: Integer = null
+     * @ Option(jint)
+     * res1: Option[Integer] = None
+     * @ val sint: Option[Int] = Option(jint)
+     * sint: Option[Int] = Some(0)
+     */
+    val resitAttemptInt: Option[Int] = if (resitAttempt == null) None else Some(resitAttempt)
+
     val validGrades = mark.maybeText match {
       case Some(m) =>
         Try(m.toInt).toOption
-          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), Option(resitAttempt)))
+          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), resitAttemptInt))
           .getOrElse(Seq.empty)
 
-      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, Option(resitAttempt))
+      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, resitAttemptInt)
     }
 
     val default =
