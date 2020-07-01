@@ -263,10 +263,6 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
         case _ => false // If the calculation was a failure, allow it through
       }
 
-      if (differsFromCalculation(calculation)) {
-        println(calculation)
-      }
-
       differsFrom(currentModuleMarkRecord.mark, currentModuleMarkRecord.grade, currentModuleMarkRecord.result) && differsFromCalculation(calculation)
     }
 }
