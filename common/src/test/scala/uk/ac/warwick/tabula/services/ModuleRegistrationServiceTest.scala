@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.services
 
+import org.springframework.transaction.annotation.Propagation
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.TabulaAssessmentSubtype.Exam
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
+import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
@@ -14,8 +15,10 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   val mockModuleRegistrationDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
 
   trait Fixture {
-    val service: AbstractModuleRegistrationService with ModuleRegistrationDaoComponent = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent {
+    val service: AbstractModuleRegistrationService with ModuleRegistrationDaoComponent = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent with TransactionalComponent {
       val moduleRegistrationDao: ModuleRegistrationDao = mockModuleRegistrationDao
+
+      override def transactional[A](readOnly: Boolean, propagation: Propagation)(f: => A): A = f
     }
   }
 
