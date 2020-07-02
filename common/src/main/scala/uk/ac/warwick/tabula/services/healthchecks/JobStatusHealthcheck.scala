@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 object JobStatusHealthcheck {
-  val Name = "pending-jobs"
+  val Name = "unfinished-jobs"
   val InitialState = new ServiceHealthcheck(Name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
 
   val WarningThreshold: Duration = 30.minutes
@@ -32,17 +32,17 @@ class JobStatusHealthcheck
   override def run(): Unit = {
 
     val service = Wire[JobService]
-    val pendingJobs = service.unfinishedInstances.filter(_.started == false).sortBy(_.createdDate)
-    val oldestPendingJob = pendingJobs.headOption
-    val status = if (oldestPendingJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.ErrorThreshold.toMillis.toInt).isBeforeNow))
+    val unfinishedJobs = service.unfinishedInstances.sortBy(_.createdDate)
+    val oldestUnfinishedJob = unfinishedJobs.headOption
+    val status = if (oldestUnfinishedJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.ErrorThreshold.toMillis.toInt).isBeforeNow))
       ServiceHealthcheck.Status.Error
-    else if (oldestPendingJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.WarningThreshold.toMillis.toInt).isBeforeNow))
+    else if (oldestUnfinishedJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.WarningThreshold.toMillis.toInt).isBeforeNow))
       ServiceHealthcheck.Status.Warning
     else
       ServiceHealthcheck.Status.Okay
 
     val message =
-      oldestPendingJob.map { job => s"Oldest job created ${naturalTime(job.createdDate.toDate)}" }.getOrElse("There are no pending jobs that needs starting.")
+      oldestUnfinishedJob.map { job => s"Oldest job created ${naturalTime(job.createdDate.toDate)}" }.getOrElse("There are no unfinished jobs.")
 
 
     update(new ServiceHealthcheck(
@@ -51,7 +51,7 @@ class JobStatusHealthcheck
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
       message,
       Seq[ServiceHealthcheck.PerformanceData[_]](
-        new ServiceHealthcheck.PerformanceData("pending_jobs_total", pendingJobs.size, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours)
+        new ServiceHealthcheck.PerformanceData("unfinished_jobs_total", unfinishedJobs.size, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours)
       ).asJava
     ))
 
