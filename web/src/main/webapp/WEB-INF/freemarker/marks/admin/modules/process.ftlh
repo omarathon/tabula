@@ -78,7 +78,7 @@
                 <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control ${studentModuleMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string />
                 <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true>
                   <#if studentModuleMarkItem.validGrades?has_content>
-                    <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() />
+                    <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() studentModuleMarkItem.grade!'' />
                   </#if>
                 </@f.select>
               </@bs3form.labelled_form_group>
