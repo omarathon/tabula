@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.marks.{AssessmentComponentValidGradesForMarkRequest, ValidGradesForMark}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
@@ -38,6 +39,7 @@ object RecordAssessmentComponentMarksCommand {
     var resitSequence: String = _
     var mark: String = _ // Easier as a String to treat empty strings correctly
     var grade: String = _
+    var validGrades: (Seq[GradeBoundary], Option[GradeBoundary]) = _
     var comments: String = _
   }
 
@@ -58,6 +60,8 @@ object RecordAssessmentComponentMarksCommand {
       with RecordAssessmentComponentMarksValidation
       with RecordAssessmentComponentMarksPermissions
       with RecordAssessmentComponentMarksDescription
+      with RecordAssessmentComponentMarksBindListener
+      with RecordAssessmentComponentMarksValidGradesBindListener
       with RecordAssessmentComponentMarksSpreadsheetBindListener
       with RecordAssessmentComponentMarksPopulateOnForm
       with ClearRecordedModuleMarks
@@ -133,14 +137,58 @@ trait RecordAssessmentComponentMarksRequest {
   var file: UploadedFile = new UploadedFile
 }
 
-trait RecordAssessmentComponentMarksSpreadsheetBindListener extends BindListener {
+trait RecordAssessmentComponentMarksBindListener extends BindListener {
+  self: RecordAssessmentComponentMarksValidGradesBindListener
+    with RecordAssessmentComponentMarksSpreadsheetBindListener
+    with RecordAssessmentComponentMarksRequest
+    with TransactionalComponent =>
+
+  override def onBind(result: BindingResult): Unit = {
+    onBindSpreadsheet(result)
+    onBindValidGrades(result)
+  }
+}
+
+trait RecordAssessmentComponentMarksValidGradesBindListener {
+  self: RecordAssessmentComponentMarksRequest
+    with RecordAssessmentComponentMarksState
+    with AssessmentMembershipServiceComponent =>
+
+  def onBindValidGrades(result: BindingResult): Unit = {
+    students.asScala.foreach { case (_, item) =>
+      upstreamAssessmentGroup.members.asScala
+        .find { m =>
+          m.universityId == item.universityID && (
+            (item.resitSequence.maybeText.isEmpty && m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) ||
+              (m.assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && m.resitSequence.contains(item.resitSequence))
+            )
+        }
+        .foreach { upstreamAssessmentGroupMember =>
+          val request = new ValidAssessmentComponentGradesRequest
+          request.mark = item.mark
+          request.existing = item.grade
+          request.resitAttempt = JInteger(upstreamAssessmentGroupMember.currentResitAttempt)
+          item.validGrades = ValidGradesForMark.getTuple(
+            request,
+            assessmentComponent
+          )(assessmentMembershipService = assessmentMembershipService)
+        }
+        // we don't care if it's not a valid upstream group member, it'll be caught in the validation step after the bind listeners have run
+    }
+  }
+}
+
+class ValidAssessmentComponentGradesRequest
+  extends AssessmentComponentValidGradesForMarkRequest
+
+trait RecordAssessmentComponentMarksSpreadsheetBindListener {
   self: RecordAssessmentComponentMarksRequest
     with TransactionalComponent =>
 
   final val MAX_MARKS_ROWS: Int = 5000
   final val VALID_FILE_TYPES: Seq[String] = Seq(".xlsx")
 
-  override def onBind(result: BindingResult): Unit = {
+  def onBindSpreadsheet(result: BindingResult): Unit = {
     val fileNames = file.fileNames map (_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !VALID_FILE_TYPES.exists(s.endsWith))
 
@@ -230,6 +278,14 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
         student.mark.foreach(m => s.mark = m.toString)
         student.grade.foreach(s.grade = _)
 
+        student.mark.foreach { mark =>
+          val request = new ValidAssessmentComponentGradesRequest
+          request.mark = mark.toString
+          request.existing = student.grade.orNull
+          request.resitAttempt = JInteger(student.upstreamAssessmentGroupMember.currentResitAttempt)
+          s.validGrades = ValidGradesForMark.getTuple(request, assessmentComponent)(assessmentMembershipService = assessmentMembershipService)
+        }
+
         students.put(s"${student.universityId}_${student.resitSequence.getOrElse("")}", s)
       }
     }
@@ -271,43 +327,55 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
         errors.reject("uniNumber.notOnAssessment", Array(item.universityID), "")
       }
 
-      if (item.mark.hasText) {
-        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
-          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
-        }
+      // Don't worry about validating marks/grades if there's been no change
+      val isUnchanged = upstreamAssessmentGroupMember.exists { uagm =>
+        val studentMarkRecord = studentMarkRecords.find(_.upstreamAssessmentGroupMember == uagm).get
 
-        try {
-          val asInt = item.mark.toInt
-          if (asInt < 0 || asInt > 100) {
-            errors.rejectValue("mark", "actualMark.range")
-          } else if (doGradeValidation) {
-            val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
-            if (item.grade.hasText) {
-              if (!validGrades.exists(_.grade == item.grade)) {
-                errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-              }
-            } else if (asInt != 0 || assessmentComponent.module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
-              // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
-              validGrades.find(_.isDefault).foreach(gb => item.grade = gb.grade)
-            }
-
-            if (!item.grade.hasText) {
-              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-            }
-          }
-        } catch {
-          case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
-            errors.rejectValue("mark", "actualMark.format")
-        }
-      } else if (doGradeValidation&& item.grade.hasText) {
-        val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
-        if (!validGrades.exists(_.grade == item.grade)) {
-          errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-        }
+        !studentMarkRecord.outOfSync &&
+        !item.comments.hasText &&
+        ((!item.mark.hasText && studentMarkRecord.mark.isEmpty) || studentMarkRecord.mark.map(_.toString).contains(item.mark)) &&
+        ((!item.grade.hasText && studentMarkRecord.grade.isEmpty) || studentMarkRecord.grade.contains(item.grade))
       }
 
-      if (item.grade.safeLength > 2) {
-        errors.rejectValue("grade", "actualGrade.tooLong")
+      if (!isUnchanged) {
+        if (item.mark.hasText) {
+          if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+            errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
+          }
+
+          try {
+            val asInt = item.mark.toInt
+            if (asInt < 0 || asInt > 100) {
+              errors.rejectValue("mark", "actualMark.range")
+            } else if (doGradeValidation) {
+              val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
+              if (item.grade.hasText) {
+                if (!validGrades.exists(_.grade == item.grade)) {
+                  errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+                }
+              } else if (asInt != 0 || assessmentComponent.module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
+                // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
+                validGrades.find(_.isDefault).foreach(gb => item.grade = gb.grade)
+              }
+
+              if (!item.grade.hasText) {
+                errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+              }
+            }
+          } catch {
+            case _@(_: NumberFormatException | _: IllegalArgumentException) =>
+              errors.rejectValue("mark", "actualMark.format")
+          }
+        } else if (doGradeValidation && item.grade.hasText) {
+          val validGrades = assessmentMembershipService.gradesForMark(assessmentComponent, None, upstreamAssessmentGroupMember.flatMap(_.currentResitAttempt))
+          if (!validGrades.exists(_.grade == item.grade)) {
+            errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+          }
+        }
+
+        if (item.grade.safeLength > 2) {
+          errors.rejectValue("grade", "actualGrade.tooLong")
+        }
       }
 
       upstreamAssessmentGroupMember.foreach { uagm =>

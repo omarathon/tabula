@@ -82,7 +82,7 @@ trait ModuleOccurrenceValidGradesBindListener {
   def onBindValidGrades(result: BindingResult): Unit = {
     students.asScala.foreach { case (_, item) =>
       moduleRegistrations.find(_.sprCode == item.sprCode).foreach { moduleRegistration =>
-        val request = new ValidGradesRequest()
+        val request = new ValidModuleRegistrationGradesRequest
         request.mark = item.mark
         request.existing = item.grade
         item.validGrades = ValidGradesForMark.getTuple(
