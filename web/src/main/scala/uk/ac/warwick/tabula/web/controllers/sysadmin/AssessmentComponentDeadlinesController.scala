@@ -234,11 +234,11 @@ object AssessmentComponentDeadlinesController {
         result.rejectValue("file", "NotEmpty")
       } else {
         val fileNames = file.fileNames.map(_.toLowerCase)
-        val invalidFiles = fileNames.filter(!_.endsWith(".xlsm"))
+        val invalidFiles = fileNames.filterNot(f => f.endsWith(".xlsm") || f.endsWith(".xlsx"))
 
         if (invalidFiles.nonEmpty) {
-          if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), ".xlsm"), "")
-          else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), ".xlsm"), "")
+          if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), ".xlsm, .xlsx"), "")
+          else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), ".xlsm, .xlsx"), "")
         }
       }
 
@@ -262,7 +262,7 @@ object AssessmentComponentDeadlinesController {
                   columnMap(col) = formattedValue
                 } else if (columnMap.asJava.containsKey(col) && formattedValue.hasText) {
                   columnMap(col).toLowerCase match {
-                    case "modulecode" | "module code" =>
+                    case "modulecode" | "module code" | "module_code" =>
                       currentItem.moduleCode = formattedValue
                     case "sequence" =>
                       currentItem.sequence = formattedValue

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.marks.ValidGradesForMark
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -124,7 +125,8 @@ trait ProcessModuleMarksRequest extends ModuleOccurrenceMarksRequest[StudentModu
 trait ProcessModuleMarksPopulateOnForm extends PopulateOnForm {
   self: ModuleOccurrenceState
     with ProcessModuleMarksRequest
-    with ModuleOccurrenceLoadModuleRegistrations =>
+    with ModuleOccurrenceLoadModuleRegistrations
+    with AssessmentMembershipServiceComponent =>
 
   override def populate(): Unit =
     studentModuleMarkRecords.foreach { student =>
@@ -132,6 +134,13 @@ trait ProcessModuleMarksPopulateOnForm extends PopulateOnForm {
       student.mark.foreach(m => s.mark = m.toString)
       student.grade.foreach(s.grade = _)
       student.result.foreach(r => s.result = r.dbValue)
+
+      student.mark.foreach { m =>
+        val request = new ValidModuleRegistrationGradesRequest
+        request.mark = m.toString
+        request.existing = student.grade.orNull
+        s.validGrades = ValidGradesForMark.getTuple(request, student.moduleRegistration)(assessmentMembershipService = assessmentMembershipService)
+      }
 
       if (student.grade.isEmpty || student.result.isEmpty || student.agreed || student.markState.contains(MarkState.Agreed)) {
         s.process = false

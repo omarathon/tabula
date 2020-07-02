@@ -35,13 +35,12 @@ abstract class ModuleRegistrationValidGradesForMarkCommandInternal(val moduleReg
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) =
-  ValidGradesForMark.getTuple(this, moduleRegistration)(assessmentMembershipService = assessmentMembershipService)
+    ValidGradesForMark.getTuple(this, moduleRegistration)(assessmentMembershipService = assessmentMembershipService)
 }
 
 trait ModuleRegistrationValidGradesForMarkState {
   def moduleRegistration: ModuleRegistration
 }
-
 
 trait ModuleRegistrationValidGradesForMarkValidation extends SelfValidating {
   self: ModuleRegistrationValidGradesForMarkRequest =>

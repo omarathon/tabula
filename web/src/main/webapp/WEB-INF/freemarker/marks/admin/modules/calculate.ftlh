@@ -19,6 +19,19 @@
   </#if>
 </p>
 
+<#if oldestImport??>
+  <p>
+    Marks are shown using the data available in SITS at <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+    If data changes in SITS after this time, you'll need to refresh the SITS data to see the most recent information.
+  </p>
+
+  <p>
+    <a href="<@routes.marks.module_marks_forceImport sitsModuleCode academicYear occurrence />" class="btn btn-default">
+      Refresh SITS data
+    </a>
+  </p>
+</#if>
+
 <#macro calculationCells calculation student member expand_failure_message=false>
   <#if calculation.successful>
     <#if calculation.multiple>
@@ -174,7 +187,7 @@
           <@f.input id="students${student.sprCode?replace('/', '_')}.grade-txt" path="students[${student.sprCode}].grade" cssClass="form-control ${studentModuleMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.sprCode}].mark" data\-generate\-url=generateUrl?markup_string />
           <@f.select id="students${student.sprCode?replace('/', '_')}.grade" path="students[${student.sprCode}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true>
               <#if studentModuleMarkItem.validGrades?has_content>
-                  <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() />
+                  <@gg.gradeOptions studentModuleMarkItem.validGrades._1() studentModuleMarkItem.validGrades._2() studentModuleMarkItem.grade!'' />
               </#if>
           </@f.select>
         <#else>

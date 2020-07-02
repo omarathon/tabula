@@ -407,7 +407,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 
   private def getEntityPerYear(scyd: StudentCourseYearDetails, groupByLevel: Boolean, finalYearOfStudy: Int): Map[Int, ExamGridEntityYear] = {
     val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
-    val allScyds = scds.flatMap(_.freshStudentCourseYearDetails).filter(_.studentCourseDetails.courseType == scyd.studentCourseDetails.courseType)
+    val allScyds = scds.flatMap(_.freshStudentCourseYearDetails).filter(d => d.studentCourseDetails.courseType == scyd.studentCourseDetails.courseType && d.academicYear <= scyd.academicYear)
 
     if (groupByLevel) {
       allScyds.groupBy(_.level.orNull)

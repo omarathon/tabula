@@ -2,6 +2,7 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "*/_profile_link.ftl" as pl />
 <#import "*/marks_components.ftlh" as components />
+<#import "/WEB-INF/freemarker/generated_grades_macros.ftlh" as gg />
 
 <div class="deptheader">
   <h1>Record marks</h1>
@@ -9,6 +10,19 @@
 </div>
 
 <p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank and apply a <a href="<@routes.marks.assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup />">missing marks adjustment</a>.</p>
+
+<#if oldestImport??>
+  <p>
+    Marks are shown using the data available in SITS at <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+    If data changes in SITS after this time, you'll need to refresh the SITS data to see the most recent information.
+  </p>
+
+  <p>
+    <a href="<@routes.marks.assessmentcomponent_marks_forceImport assessmentComponent upstreamAssessmentGroup />" class="btn btn-default">
+      Refresh SITS data
+    </a>
+  </p>
+</#if>
 
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>
@@ -69,10 +83,17 @@
                     </@bs3form.labelled_form_group>
                   </td>
                   <td>
+                    <@spring.bind path="students[${student.universityId}_${student.resitSequence!}]">
+                      <#assign studentMarkItem = status.actualValue />
+                    </@spring.bind>
                     <@bs3form.labelled_form_group path="students[${student.universityId}_${student.resitSequence!}].grade">
                       <#if isGradeValidation>
-                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control auto-grade grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=(student.upstreamAssessmentGroupMember.currentResitAttempt)! />
-                        <@f.select path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true />
+                        <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control ${studentMarkItem.validGrades?has_content?string('auto-grade grades-already-available', 'auto-grade')} grade-box" data\-mark="students[${student.universityId}_${student.resitSequence!}].mark" data\-generate\-url=generateUrl?markup_string data\-resit\-attempt=(student.upstreamAssessmentGroupMember.currentResitAttempt)! />
+                        <@f.select path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control" cssStyle="display: none;" disabled=true>
+                          <#if studentMarkItem.validGrades?has_content>
+                            <@gg.gradeOptions studentMarkItem.validGrades._1() studentMarkItem.validGrades._2() studentMarkItem.grade!'' />
+                          </#if>
+                        </@f.select>
                       <#else>
                         <@f.input path="students[${student.universityId}_${student.resitSequence!}].grade" cssClass="form-control grade-box" />
                       </#if>
