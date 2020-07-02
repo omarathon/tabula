@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.commands.marks
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.AssessmentComponentValidGradesForMarkCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, GradeBoundary}
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.marks.{AssessmentComponentValidGradesForMarkRequest, ValidGradesForMark}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-
-import scala.util.Try
 
 object AssessmentComponentValidGradesForMarkCommand {
   // Tuple of all valid grades and the default
@@ -35,52 +32,12 @@ abstract class AssessmentComponentValidGradesForMarkCommandInternal(val assessme
   self: AssessmentComponentValidGradesForMarkRequest
     with AssessmentMembershipServiceComponent =>
 
-  override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) = {
-    //noinspection IfElseToOption
-    /*
-     * Don't replace this with Option(resitAttempt)
-     *
-     * @ val jint: java.lang.Integer = null
-     * jint: Integer = null
-     * @ Option(jint)
-     * res1: Option[Integer] = None
-     * @ val sint: Option[Int] = Option(jint)
-     * sint: Option[Int] = Some(0)
-     */
-    val resitAttemptInt: Option[Int] = if (resitAttempt == null) None else Some(resitAttempt)
-
-    val validGrades = mark.maybeText match {
-      case Some(m) =>
-        Try(m.toInt).toOption
-          .map(asInt => assessmentMembershipService.gradesForMark(assessmentComponent, Some(asInt), resitAttemptInt))
-          .getOrElse(Seq.empty)
-
-      case None => assessmentMembershipService.gradesForMark(assessmentComponent, None, resitAttemptInt)
-    }
-
-    val default =
-      if (existing.maybeText.nonEmpty && validGrades.exists(_.grade == existing)) {
-        validGrades.find(_.grade == existing)
-      } else {
-        if (!assessmentComponent.module.adminDepartment.assignmentGradeValidationUseDefaultForZero && mark == "0") {
-          None // TAB-3499
-        } else {
-          validGrades.find(_.isDefault)
-        }
-      }
-
-    (validGrades, default)
-  }
+  override def applyInternal(): (Seq[GradeBoundary], Option[GradeBoundary]) =
+    ValidGradesForMark.getTuple(this, assessmentComponent)(assessmentMembershipService = assessmentMembershipService)
 }
 
 trait AssessmentComponentValidGradesForMarkState {
   def assessmentComponent: AssessmentComponent
-}
-
-trait AssessmentComponentValidGradesForMarkRequest {
-  var mark: String = _
-  var existing: String = _
-  var resitAttempt: JInteger = _
 }
 
 trait AssessmentComponentValidGradesForMarkValidation extends SelfValidating {
