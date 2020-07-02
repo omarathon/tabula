@@ -58,7 +58,7 @@ class JobStatusHealthcheck
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
       message,
       Seq[ServiceHealthcheck.PerformanceData[_]](
-        new ServiceHealthcheck.PerformanceData("oldest_unfinished_jobs_created", oldestUnfinishedJobDuration.toMinutes, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours)
+        new ServiceHealthcheck.PerformanceData("oldest_unfinished_job_created", oldestUnfinishedJobDuration.toMinutes, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours)
       ).asJava
     ))
 
