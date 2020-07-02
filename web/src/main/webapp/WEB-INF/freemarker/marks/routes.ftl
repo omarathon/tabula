@@ -18,6 +18,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assessmentcomponents department academicYear><@_u page="/admin/${department.code}/${academicYear.startYear?c}/assessment-components" /></#macro>
 <#macro assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks" /></#macro>
 <#macro assessmentcomponent_marks_skipImport assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/skip-import" /></#macro>
+<#macro assessmentcomponent_marks_forceImport assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/import" /></#macro>
 <#macro assessmentcomponent_marks_progress assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/progress" /></#macro>
 <#macro assessmentcomponent_marks_importComplete assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/import-complete" /></#macro>
 <#macro assessmentcomponent_marks_template assessmentComponent upstreamAssessmentGroup><@_u page="/admin/assessment-component/${assessmentComponent.id}/${upstreamAssessmentGroup.id}/marks/template.xlsx" /></#macro>
@@ -27,6 +28,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro module_marks sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks" /></#macro>
 <#macro module_marks_skipImport sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/skip-import" /></#macro>
+<#macro module_marks_forceImport sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/import" /></#macro>
 <#macro module_marks_progress sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/progress" /></#macro>
 <#macro module_marks_importComplete sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/import-complete" /></#macro>
 <#macro module_marks_template sitsModuleCode academicYear occurrence><@_u page="/admin/module/${sitsModuleCode}/${academicYear.startYear?c}/${occurrence?url}/marks/template.xlsx" /></#macro>
