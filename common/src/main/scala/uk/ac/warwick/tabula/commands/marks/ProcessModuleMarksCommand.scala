@@ -133,7 +133,7 @@ trait ProcessModuleMarksPopulateOnForm extends PopulateOnForm {
       student.grade.foreach(s.grade = _)
       student.result.foreach(r => s.result = r.dbValue)
 
-      if (student.grade.isEmpty || student.result.isEmpty) {
+      if (student.grade.isEmpty || student.result.isEmpty || student.agreed || student.markState.contains(MarkState.Agreed)) {
         s.process = false
       }
 

@@ -61,7 +61,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
     }
 
     mav.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
-      .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.benchmarkdetails(scyd, cmd.calculateYearMarks, cmd.groupByLevel)): _*)
+      .secondCrumbs(scydBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.benchmarkdetails(scyd, cmd.yearMarksToUse, cmd.groupByLevel)): _*)
   }
 
 }

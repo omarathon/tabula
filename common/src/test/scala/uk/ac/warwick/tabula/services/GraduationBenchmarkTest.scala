@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent, TransactionalComponent}
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 import scala.collection.immutable.SortedMap
@@ -185,7 +186,7 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
     // Year 2 year mark
     scyd2.agreedMark = BigDecimal(45.0).underlying
 
-    progressionService.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, normalLoad, routeRules, calculateYearMarks = false, groupByLevel = false, yearWeightings) should be(
+    progressionService.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, normalLoad, routeRules, yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, yearWeightings) should be(
       Right(49.0)
     )
   }

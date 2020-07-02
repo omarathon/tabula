@@ -203,7 +203,7 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
       "marks/admin/assessment-components/record_preview"
     }
 
-  @PostMapping(params = Array("confirm=true", "action=Confirm"))
+  @PostMapping(params = Array("confirm=true", "action=Save"))
   def save(
     @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
     errors: Errors,
@@ -221,7 +221,7 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
       RedirectFlashing(Routes.marks.Admin.home(assessmentComponent.module.adminDepartment, upstreamAssessmentGroup.academicYear), "flash__success" -> "flash.assessmentComponent.marksRecorded")
     }
 
-  @PostMapping(params = Array("confirm=true", "action!=Confirm"))
+  @PostMapping(params = Array("confirm=true", "action!=Save"))
   def cancelPreview(
     @Valid @ModelAttribute("command") cmd: RecordAssessmentComponentMarksCommand.Command,
     errors: Errors,

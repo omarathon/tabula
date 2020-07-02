@@ -280,7 +280,9 @@
             <li>Short grid</li>
           </#if>
           <#if gridOptionsCommand.yearMarksToUse == 'sits'>
-            <li>Uploaded year marks</li>
+            <li>Uploaded year marks only</li>
+          <#elseif gridOptionsCommand.yearMarksToUse == 'sitsIfAvailable'>
+            <li>Uploaded year marks if available</li>
           <#else>
             <li>Calculate year marks</li>
           </#if>

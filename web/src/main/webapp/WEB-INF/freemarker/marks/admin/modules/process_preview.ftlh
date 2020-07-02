@@ -24,7 +24,7 @@
     </div>
   </#if>
 
-  <p>The following marks, grades and results will be changed:</p>
+  <p>The following marks will become agreed, which you will not be able to change without the involvement of the Exams Office:</p>
 
   <div class="fix-area">
     <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">

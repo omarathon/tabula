@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.exams.web
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 
 /**
@@ -89,8 +90,8 @@ object Routes {
     def uploadYearMarks(department: Department, academicYear: AcademicYear): String =
       s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/upload"
 
-    def benchmarkdetails(scyd: StudentCourseYearDetails, calculateYearMarks: Boolean, groupByLevel: Boolean): String =
-      s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/benchmarkdetails?calculateYearMarks=${calculateYearMarks}&groupByLevel=${groupByLevel}"
+    def benchmarkdetails(scyd: StudentCourseYearDetails, yearMarksToUse: ExamGridYearMarksToUse, groupByLevel: Boolean): String =
+      s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/benchmarkdetails?yearMarksToUse=${yearMarksToUse.entryName}&groupByLevel=$groupByLevel"
 
     def assessmentdetails(scyd: StudentCourseYearDetails): String =
       s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"
