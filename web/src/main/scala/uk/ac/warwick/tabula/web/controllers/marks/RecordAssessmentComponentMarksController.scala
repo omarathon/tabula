@@ -5,10 +5,9 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.RecordAssessmentComponentMarksCommand.StudentMarksItem
 import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, RecordAssessmentComponentMarksCommand}
@@ -17,7 +16,6 @@ import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
@@ -73,35 +71,53 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
   @RequestMapping
   def triggerImportIfNecessary(
     @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @ModelAttribute("oldestImport") oldestImport: Option[DateTime],
     @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
     model: ModelMap,
     @ModelAttribute("command") command: RecordAssessmentComponentMarksCommand.Command,
   ): String = {
-    val universityIds = studentMarkRecords.map(_.universityId)
-    lazy val members = profileService.getAllMembersWithUniversityIds(universityIds)
-
-    if (!maintenanceModeService.enabled && (studentMarkRecords.exists(_.outOfSync) || members.flatMap(m => Option(m.lastImportDate)).exists(_.isBefore(DateTime.now.minusMinutes(5))))) {
-      stopOngoingImportForStudents(universityIds)
-
-      val studentLastImportDates =
-        members.map(m =>
-          (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
-        ).sortBy(_._2)
-
-      val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(upstreamAssessmentGroup.academicYear)))
-
-      model.addAttribute("jobId", jobInstance.id)
-      model.addAttribute("jobProgress", jobInstance.progress)
-      model.addAttribute("jobStatus", jobInstance.status)
-      model.addAttribute("oldestImport", studentLastImportDates.headOption.map { case (_, datetime) => datetime })
-      model.addAttribute("studentLastImportDates", studentLastImportDates)
-
-      "marks/admin/assessment-components/job-progress"
+    if (!maintenanceModeService.enabled && (studentMarkRecords.exists(_.outOfSync) || oldestImport.exists(_.isBefore(DateTime.now.minusHours(3))))) {
+      forceImport(studentMarkRecords, upstreamAssessmentGroup, model)
     } else {
       command.populate()
       formView
     }
   }
+
+  @RequestMapping(Array("/import"))
+  def forceImport(
+    @ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord],
+    @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup,
+    model: ModelMap,
+  ): String = {
+    val universityIds = studentMarkRecords.map(_.universityId)
+    stopOngoingImportForStudents(universityIds)
+
+    val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(upstreamAssessmentGroup.academicYear)))
+
+    model.addAttribute("jobId", jobInstance.id)
+    model.addAttribute("jobProgress", jobInstance.progress)
+    model.addAttribute("jobStatus", jobInstance.status)
+
+    "marks/admin/assessment-components/job-progress"
+  }
+
+  @ModelAttribute("studentLastImportDates")
+  def studentLastImportDates(@ModelAttribute("studentMarkRecords") studentMarkRecords: Seq[StudentMarkRecord]): Seq[(String, DateTime)] = {
+    val universityIds = studentMarkRecords.map(_.universityId)
+    val members = profileService.getAllMembersWithUniversityIds(universityIds)
+
+    val studentLastImportDates =
+      members.map(m =>
+        (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
+      ).sortBy(_._2)
+
+    studentLastImportDates
+  }
+
+  @ModelAttribute("oldestImport")
+  def oldestImport(@ModelAttribute("studentLastImportDates") studentLastImportDates: Seq[(String, DateTime)]): Option[DateTime] =
+    studentLastImportDates.headOption.map { case (_, datetime) => datetime }
 
   private def stopOngoingImportForStudents(universityIds: Seq[String]): Unit =
     jobService.jobDao.listRunningJobs

@@ -19,6 +19,19 @@
   </#if>
 </p>
 
+<#if oldestImport??>
+  <p>
+    Marks are shown using the data available in SITS at <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+    If data changes in SITS after this time, you'll need to refresh the SITS data to see the most recent information.
+  </p>
+
+  <p>
+    <a href="<@routes.marks.module_marks_forceImport sitsModuleCode academicYear occurrence />" class="btn btn-default">
+      Refresh SITS data
+    </a>
+  </p>
+</#if>
+
 <#macro calculationCells calculation student member expand_failure_message=false>
   <#if calculation.successful>
     <#if calculation.multiple>

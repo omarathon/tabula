@@ -11,6 +11,19 @@
 
 <p>Use this form to record <strong>unconfirmed actual</strong> component marks for students. If the assessment didn't take place, leave all marks and grades blank and apply a <a href="<@routes.marks.assessmentcomponent_missingMarks assessmentComponent upstreamAssessmentGroup />">missing marks adjustment</a>.</p>
 
+<#if oldestImport??>
+  <p>
+    Marks are shown using the data available in SITS at <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+    If data changes in SITS after this time, you'll need to refresh the SITS data to see the most recent information.
+  </p>
+
+  <p>
+    <a href="<@routes.marks.assessmentcomponent_marks_forceImport assessmentComponent upstreamAssessmentGroup />" class="btn btn-default">
+      Refresh SITS data
+    </a>
+  </p>
+</#if>
+
 <#assign submitUrl><@routes.marks.assessmentcomponent_marks assessmentComponent upstreamAssessmentGroup /></#assign>
 <#assign generateUrl><@routes.marks.assessmentcomponent_generateGrades assessmentComponent /></#assign>
 

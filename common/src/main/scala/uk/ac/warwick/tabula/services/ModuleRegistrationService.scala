@@ -6,7 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.ModuleResult.Pass
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, AutowiringTransactionalComponent, ModuleRegistrationDaoComponent, TransactionalComponent}
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -75,8 +75,8 @@ trait ModuleRegistrationService {
 }
 
 abstract class AbstractModuleRegistrationService extends ModuleRegistrationService {
-
-  self: ModuleRegistrationDaoComponent =>
+  self: ModuleRegistrationDaoComponent
+    with TransactionalComponent =>
 
   def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 
@@ -98,8 +98,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   override def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-  override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] =
+  override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] = transactional(readOnly = true) {
     moduleRegistrationDao.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
+  }
 
   override def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByDepartmentAndYear(department, academicYear)
@@ -236,6 +237,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 class ModuleRegistrationServiceImpl
   extends AbstractModuleRegistrationService
     with AutowiringModuleRegistrationDaoComponent
+    with AutowiringTransactionalComponent
 
 trait ModuleRegistrationServiceComponent {
   def moduleRegistrationService: ModuleRegistrationService

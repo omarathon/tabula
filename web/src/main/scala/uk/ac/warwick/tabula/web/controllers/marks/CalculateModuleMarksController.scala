@@ -11,8 +11,7 @@ import uk.ac.warwick.tabula.commands.marks.CalculateModuleMarksCommand.{ModuleMa
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.StudentMarkRecord
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.commands.marks.{CalculateModuleMarksCommand, RecordedModuleRegistrationNotificationDepartment}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Department, Module, ModuleResult}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, ModuleRegistration, ModuleResult}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
@@ -79,36 +78,55 @@ class CalculateModuleMarksController extends BaseModuleMarksController
   @RequestMapping
   def triggerImportIfNecessary(
     @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)],
+    @ModelAttribute("oldestImport") oldestImport: Option[DateTime],
     @PathVariable academicYear: AcademicYear,
     model: ModelMap,
     @ModelAttribute("command") command: CalculateModuleMarksCommand.Command,
-  ): String = {
-    val sprCodes = studentModuleMarkRecords.map(_._1.sprCode)
-    lazy val members = sprCodes.flatMap(profileService.getStudentCourseDetailsBySprCode).map(_.student)
-    lazy val universityIds = members.map(_.universityId).distinct
-
-    if (!maintenanceModeService.enabled && (studentModuleMarkRecords.exists(_._1.outOfSync) || members.flatMap(m => Option(m.lastImportDate)).exists(_.isBefore(DateTime.now.minusMinutes(5))))) {
-      stopOngoingImportForStudents(universityIds)
-
-      val studentLastImportDates =
-        members.map(m =>
-          (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
-        ).sortBy(_._2)
-
-      val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(academicYear)))
-
-      model.addAttribute("jobId", jobInstance.id)
-      model.addAttribute("jobProgress", jobInstance.progress)
-      model.addAttribute("jobStatus", jobInstance.status)
-      model.addAttribute("oldestImport", studentLastImportDates.headOption.map { case (_, datetime) => datetime })
-      model.addAttribute("studentLastImportDates", studentLastImportDates)
-
-      "marks/admin/modules/job-progress"
+  ): String =
+    if (!maintenanceModeService.enabled && (studentModuleMarkRecords.exists(_._1.outOfSync) || oldestImport.exists(_.isBefore(DateTime.now.minusHours(3))))) {
+      forceImport(studentModuleMarkRecords, academicYear, model)
     } else {
       command.populate()
       formView
     }
+
+  @RequestMapping(Array("/import"))
+  def forceImport(
+    @ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)],
+    @PathVariable academicYear: AcademicYear,
+    model: ModelMap,
+  ): String = {
+    val sprCodes = studentModuleMarkRecords.map(_._1.sprCode)
+    val members = sprCodes.flatMap(profileService.getStudentCourseDetailsBySprCode).map(_.student)
+    val universityIds = members.map(_.universityId).distinct
+
+    stopOngoingImportForStudents(universityIds)
+
+    val jobInstance = jobService.add(Some(user), ImportMembersJob(universityIds, Seq(academicYear)))
+
+    model.addAttribute("jobId", jobInstance.id)
+    model.addAttribute("jobProgress", jobInstance.progress)
+    model.addAttribute("jobStatus", jobInstance.status)
+
+    "marks/admin/modules/job-progress"
   }
+
+  @ModelAttribute("studentLastImportDates")
+  def studentLastImportDates(@ModelAttribute("studentModuleMarkRecords") studentModuleMarkRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)]): Seq[(String, DateTime)] = {
+    val sprCodes = studentModuleMarkRecords.map(_._1.sprCode)
+    val members = sprCodes.flatMap(profileService.getStudentCourseDetailsBySprCode).map(_.student)
+
+    val studentLastImportDates =
+      members.map(m =>
+        (m.fullName.getOrElse(m.universityId), Option(m.lastImportDate).getOrElse(new DateTime(0)))
+      ).sortBy(_._2)
+
+    studentLastImportDates
+  }
+
+  @ModelAttribute("oldestImport")
+  def oldestImport(@ModelAttribute("studentLastImportDates") studentLastImportDates: Seq[(String, DateTime)]): Option[DateTime] =
+    studentLastImportDates.headOption.map { case (_, datetime) => datetime }
 
   private def stopOngoingImportForStudents(universityIds: Seq[String]): Unit =
     jobService.jobDao.listRunningJobs

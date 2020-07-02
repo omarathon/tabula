@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.services
 
 import org.joda.time.LocalDate
+import org.springframework.transaction.annotation.Propagation
 import uk.ac.warwick.tabula.Fixtures.assessmentGroup
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
+import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
@@ -19,8 +20,10 @@ import scala.jdk.CollectionConverters._
 class GraduationBenchmarkTest extends TestBase with Mockito {
 
   private trait Fixture {
-    val moduleRegistrationService: AbstractModuleRegistrationService with ModuleRegistrationDaoComponent = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent {
+    val moduleRegistrationService: AbstractModuleRegistrationService with ModuleRegistrationDaoComponent = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent with TransactionalComponent {
       val moduleRegistrationDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
+
+      override def transactional[A](readOnly: Boolean, propagation: Propagation)(f: => A): A = f
     }
 
     val progressionService: AbstractProgressionService with CourseAndRouteServiceComponent = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
