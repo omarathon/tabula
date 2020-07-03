@@ -466,12 +466,7 @@ class StudentMember extends Member with StudentProperties {
           } else {
             Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(yr, groupedByLevelMap.values.flatten.toSeq: _*)) // for non UG level there is just one entry - M1 or M2 or F so extract all values
           }
-          yr -> examGridEntity.map { examGridEntity =>
-            val applicableModuleRegistrationRecords = examGridEntity.moduleRegistrations.filterNot { mr =>
-              mr.agreedGrade.orElse(mr.actualGrade).contains(GradeBoundary.WithdrawnGrade)
-            }
-            examGridEntity.copy(applicableModuleRegistrationRecords)
-          }
+          yr -> examGridEntity
         }.toMap
       } else {
         (1 to baseSCYD.yearOfStudy).map(year =>
