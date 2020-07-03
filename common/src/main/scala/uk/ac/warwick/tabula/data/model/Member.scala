@@ -434,10 +434,20 @@ class StudentMember extends Member with StudentProperties {
 
   def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false, mitCircs: Seq[MitigatingCircumstancesSubmission] = Nil): ExamGridEntity =
     RequestLevelCache.cachedBy("StudentMember.toExamGridEntity", s"$universityId-${baseSCYD.id}-$basedOnLevel") {
-      val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
+      val allSCYDsUnfiltered: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
         .flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
         .takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 
+      // Where there are multiple SYCDs with the same SPR code and academic year, only retain the last one.
+      var seen: mutable.Set[(String, AcademicYear)] = mutable.Set()
+      val allSCYDs: Seq[StudentCourseYearDetails] =
+        allSCYDsUnfiltered.reverse.filter { scyd =>
+          if (seen.contains((scyd.studentCourseDetails.sprCode, scyd.academicYear))) false
+          else {
+            seen += scyd.studentCourseDetails.sprCode -> scyd.academicYear
+            true
+          }
+        }.reverse
 
       /** Level grids can be used for UG or non UG ( PG/F etc). If someone is on a UG course there is a possibility some scyd entry will be missing sometimes at the SITS end. We need to ensure that level entry is still there in the map otherwise
         * it will blow up further. Example - level grid 3 for UG but missing level 2 scyd. Map needs constructing with all three level entries. For PG level grids, there is always just one level that grid generates so you have one entry in the map.
