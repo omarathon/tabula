@@ -161,11 +161,6 @@ trait StudentModuleRegistrationAndComponents {
 
     val studentsResits: Seq[RecordedResit] = resitService.findResits(scyds.map(_.studentCourseDetails.sprCode))
 
-
-
-    scyds.flatMap(_.moduleRegistrations).map(_.marksCode)
-    scyds.flatMap(_.moduleRegistrations).flatMap(_.upstreamAssessmentGroups).flatMap(_.assessmentComponent).map(_.marksCode)
-
     lazy val gradeBoundaries: Seq[GradeBoundary] = {
       val mr = scyds.flatMap(_.moduleRegistrations)
       val ac = mr.flatMap(_.upstreamAssessmentGroups).flatMap(_.assessmentComponent)

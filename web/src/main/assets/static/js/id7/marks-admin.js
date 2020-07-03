@@ -114,7 +114,7 @@ $(() => {
   // bulk change resit assessment types by component
   $('select.update-assessment-type[data-sequence]').on('change', (e) => {
     const $dropdown = $(e.target);
-    const $targets = $(`select.assessment-type[data-sequence=${$dropdown.data('sequence')}]`);
+    const $targets = $(`select.assessment-type[data-sequence="${$dropdown.data('sequence')}"]`);
     $targets.val($dropdown.val());
   });
 });
