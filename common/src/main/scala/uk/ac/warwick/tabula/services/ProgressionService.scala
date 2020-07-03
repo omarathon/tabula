@@ -487,9 +487,13 @@ abstract class AbstractProgressionService extends ProgressionService {
   }
 
   private def invalidTotalYearWeightings(markPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting]): Boolean = {
-    // you can set up 0/50/50/50 initially. One of those could be abroad(2nd or 3rd year year). Excluding any abroad year we still should have total as 100
-    //0 marks  generated for the year  are valid allowed marks with 0 weightings based on year abroad. Check the remaining ones total are  still 100%
-    markPerYear.filter(_._2 > 0).map { case (year, _) => yearWeightings(year).weighting }.toSeq.sum != 1
+    val baseTotalWeighting = markPerYear.map { case (year, _) => yearWeightings(year).weighting }.sum
+
+    if (baseTotalWeighting > 1) {
+      // you can set up 0/50/50/50 initially. One of those could be abroad(2nd or 3rd year year). Excluding any abroad year we still should have total as 100
+      //0 marks  generated for the year  are valid allowed marks with 0 weightings based on year abroad. Check the remaining ones total are  still 100%
+      markPerYear.filter(_._2 > 0).map { case (year, _) => yearWeightings(year).weighting }.toSeq.sum != 1
+    } else baseTotalWeighting != 1
   }
 
   private def weightedFinalYearGrade(
