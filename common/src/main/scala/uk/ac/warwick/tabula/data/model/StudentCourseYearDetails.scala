@@ -35,8 +35,6 @@ object StudentCourseYearDetails {
       mr.agreedGrade.orElse(mr.actualGrade).contains(GradeBoundary.WithdrawnGrade) //TAB-8575
     }.toSeq
 
-
-
   // makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
   def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails*): ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYearGrouped", s"$yearOfStudy-${scyds.map(_.id).sorted.mkString("-")}") {
