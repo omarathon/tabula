@@ -18,22 +18,29 @@ object ListAssessmentComponentsCommand {
     resitSequence: Option[String],
     position: Option[Int],
     currentMember: Boolean,
-    resitExpected: Boolean,
+    isReassessment: Boolean,
     currentResitAttempt: Option[Int],
     mark: Option[Int],
     grade: Option[String],
+    requiresResit: Boolean, // the grade assigned indicates that further assessment is required
+    existingResit: Option[RecordedResit], // a new reassessment record for the next exam period
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
     markState: Option[MarkState],
     agreed: Boolean,
-    resitMark: Boolean, // the current mark is a resit mark (not the same as a resit being expected)
     history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
     upstreamAssessmentGroupMember: UpstreamAssessmentGroupMember
   ) {
-    val furtherFirstSit: Boolean = resitExpected && currentResitAttempt.exists(_ <= 1)
+    val furtherFirstSit: Boolean = isReassessment && currentResitAttempt.exists(_ <= 1)
   }
   object StudentMarkRecord {
-    def apply(info: UpstreamAssessmentGroupInfo, member: UpstreamAssessmentGroupMember, recordedStudent: Option[RecordedAssessmentComponentStudent]): StudentMarkRecord = {
+    def apply(
+      info: UpstreamAssessmentGroupInfo,
+      member: UpstreamAssessmentGroupMember,
+      recordedStudent: Option[RecordedAssessmentComponentStudent],
+      existingResit: Option[RecordedResit],
+      requiresResit: Boolean
+    ): StudentMarkRecord = {
       val reassessment = member.isReassessment
       val isAgreedSITS = recordedStudent.forall(!_.needsWritingToSits) && (member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty)
 
@@ -42,7 +49,7 @@ object ListAssessmentComponentsCommand {
         resitSequence = member.resitSequence,
         position = member.position,
         currentMember = info.currentMembers.contains(member),
-        resitExpected = reassessment,
+        isReassessment = reassessment,
         currentResitAttempt = member.currentResitAttempt,
         // These are needlessly verbose but thought better to be explicit on the order
         mark = recordedStudent match {
@@ -59,6 +66,8 @@ object ListAssessmentComponentsCommand {
           case _ if member.firstDefinedGrade.nonEmpty => member.firstDefinedGrade
           case _ => None
         },
+        requiresResit,
+        existingResit,
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
@@ -67,20 +76,32 @@ object ListAssessmentComponentsCommand {
           ),
         markState = recordedStudent.flatMap(_.latestState),
         agreed = isAgreedSITS,
-        resitMark = reassessment,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
         member
       )
     }
   }
 
-  def studentMarkRecords(info: UpstreamAssessmentGroupInfo, assessmentComponentMarksService: AssessmentComponentMarksService): Seq[StudentMarkRecord] = {
+  def studentMarkRecords(
+    info: UpstreamAssessmentGroupInfo,
+    assessmentComponentMarksService: AssessmentComponentMarksService,
+    resitService: ResitService,
+    assessmentMembershipService: AssessmentMembershipService
+  ): Seq[StudentMarkRecord] = {
     val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
-
+    val resits = resitService.getAllResits(info.upstreamAssessmentGroup)
+    val gradeBoundaries = info.upstreamAssessmentGroup.assessmentComponent.map(_.marksCode).map(assessmentMembershipService.markScheme).getOrElse(Nil)
     info.allMembers.sortBy { uagm => (uagm.universityId, uagm.resitSequence.getOrElse("000")) }.map { member =>
       val recordedStudent = recordedStudents.find(_.matchesIdentity(member))
-
-      StudentMarkRecord(info, member, recordedStudent)
+      val existingResit = resits.filter(r => r.universityId.contains(member.universityId) && r.sequence == info.upstreamAssessmentGroup.sequence)
+        .sortBy(_.resitSequence)
+        .headOption
+      val gradeBoundary = {
+        val process = if (member.isReassessment) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+        val grade = recordedStudent.flatMap(_.latestGrade)
+        grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process))
+      }
+      StudentMarkRecord(info, member, recordedStudent, existingResit, gradeBoundary.exists(_.generatesResit))
     }
   }
 
@@ -109,6 +130,7 @@ object ListAssessmentComponentsCommand {
     new ListAssessmentComponentsCommandInternal(department, academicYear, currentUser)
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringSecurityServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringMarksWorkflowProgressServiceComponent
@@ -124,6 +146,7 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
     with ListAssessmentComponentsState
     with ListAssessmentComponentsForModulesWithPermission {
   self: AssessmentComponentMarksServiceComponent
+    with ResitServiceComponent
     with AssessmentMembershipServiceComponent
     with MarksWorkflowProgressServiceComponent
     with ModuleRegistrationServiceComponent
@@ -137,6 +160,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
   self: ListAssessmentComponentsState
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
+    with ResitServiceComponent
     with MarksWorkflowProgressServiceComponent
     with ModuleRegistrationServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
@@ -163,7 +187,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
       .map { upstreamAssessmentGroupInfo =>
         val assessmentComponent = assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup))
         val upstreamAssessmentGroup = upstreamAssessmentGroupInfo.upstreamAssessmentGroup
-        val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService)
+        val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService, resitService, assessmentMembershipService)
 
         val moduleRegistrations = allModuleRegistrations.getOrElse((assessmentComponent.moduleCode, academicYear, upstreamAssessmentGroup.occurrence), Seq.empty).sortBy(_.sprCode)
         val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations)

@@ -45,9 +45,9 @@
     </span>
   </#if>
 
-  <#if marks.resitMark && marks.furtherFirstSit>
+  <#if marks.isReassessment && marks.furtherFirstSit>
     <span class="label label-info">Further first sit</span>
-  <#elseif marks.resitMark>
+  <#elseif marks.isReassessment>
     <span tabindex="0" class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">
       <span class="label label-warning">Resit</span>
       <span class="sr-only">Resit mark will be capped at the pass mark when calculating the module mark</span>
@@ -59,9 +59,9 @@
   <#if !marks.currentMember>
     <span tabindex="0" class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span>
   </#if>
-  <#if marks.resitMark && marks.furtherFirstSit>
+  <#if marks.isReassessment && marks.furtherFirstSit>
     <span class="label label-info">Further first sit</span>
-  <#elseif marks.resitMark>
+  <#elseif marks.isReassessment>
     <span tabindex="0" class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">
       <span class="label label-warning">Resit</span>
       <span class="sr-only">Resit mark will be capped at the pass mark when calculating the module mark</span>

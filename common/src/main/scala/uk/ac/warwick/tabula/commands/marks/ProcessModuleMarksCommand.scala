@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Transactiona
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -41,6 +41,7 @@ object ProcessModuleMarksCommand {
       with ProcessModuleMarksValidation
       with ModuleOccurrenceUpdateMarksPermissions
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent

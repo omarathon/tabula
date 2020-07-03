@@ -43,9 +43,40 @@
 
     <#if requiresResits?has_content>
         <p>
-          <@fmt.p number=requiresResits?size singular="student" plural="students" /> have recieved a grade which indicates they need to resit one or more
-          components of ${sitsModuleCode}.
+          <@fmt.p number=requiresResits?size singular="student" plural="students" /> have received a grade which indicates that they have further assessment requirements.
+          Please indicate for each whether this is an "Examination" (i.e. an online test to be administered via the Alternative Exams Portal (AEP)) or
+          a written "Assignment", by selecting the appropriate type from the drop-down.
         </p>
+
+        <p>
+          You can choose the assessment type to use for each assessment component below. You can also specify this for each student.
+        </p>
+
+        <table class="table table-sortable">
+          <thead>
+          <tr>
+            <th class="col-sm-2 sortable">Name</th>
+            <th class="col-sm-1 sortable">Sequence</th>
+            <th class="col-sm-2 sortable">Assessment Type</th>
+            <th class="col-sm-2 sortable">Weighting</th>
+          </tr>
+          </thead>
+          <tbody>
+            <#list assessmentComponents as assessmentComponent>
+              <tr>
+                <td>${assessmentComponent.name}</td>
+                <td>${assessmentComponent.sequence}</td>
+                <td>
+                  <select class="form-control update-assessment-type" data-sequence="${assessmentComponent.sequence}">
+                    <#list assessmentTypes as at><option value="${at.astCode}">${at.name}</option></#list>
+                  </select>
+                </td>
+                <td>${assessmentComponent.scaledWeighting}</td>
+              </tr>
+            </#list>
+          </tbody>
+        </table>
+
         <#list requiresResits as record>
           <#assign member = membersBySprCode[record.module.sprCode] />
           <#assign sprCode = record.module.sprCode />
@@ -90,27 +121,27 @@
                                   <span class="sr-only">Waiting to be written to SITS</span>
                                 </span>
                               </#if>
-                            <#elseif componentRecord.requiresResit>
+                            <#elseif record.requiresResit>
                               <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" checked="checked" />
                             </#if>
                           </td>
                           <td>${assessmentComponent.name}</td>
                           <td>${assessmentComponent.sequence}</td>
-                          <td>${componentRecord.component.mark!'-'}</td>
-                          <td>${componentRecord.component.grade!'-'}</td>
+                          <td>${componentRecord.mark!'-'}</td>
+                          <td>${componentRecord.grade!'-'}</td>
                           <td>
                             <#if componentRecord.existingResit?has_content>
                               ${componentRecord.existingResit.assessmentType.name}
-                            <#elseif componentRecord.requiresResit>
-                              <@f.select path="resits[${sprCode}][${assessmentComponent.sequence}].assessmentType" cssClass="form-control">
-                                <@f.options items=assessmentTypes itemValue="astCode" itemLabel="name" />
-                              </@f.select>
+                            <#elseif record.requiresResit>
+                              <select name="resits[${sprCode}][${assessmentComponent.sequence}].assessmentType" class="form-control assessment-type" data-sequence="${assessmentComponent.sequence}">
+                                <#list assessmentTypes as at><option value="${at.astCode}" >${at.name}</option></#list>
+                              </select>
                              <#else>
                                 ${assessmentComponent.assessmentType.name}
                              </#if>
                           </td>
                           <td>${assessmentComponent.scaledWeighting}</td>
-                          <td><#if componentRecord.incrementsAttempt>${componentRecord.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if></td>
+                          <td><#if record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if></td>
                         </tr>
                       </#list>
                     </tbody>

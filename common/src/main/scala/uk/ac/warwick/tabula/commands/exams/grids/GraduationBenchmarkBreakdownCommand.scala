@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, NormalLoadLookup, UpstreamRouteRuleServiceComponent}
-import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
@@ -27,6 +27,7 @@ object GraduationBenchmarkBreakdownCommand {
       with AutowiringNormalCATSLoadServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with GraduationBenchmarkBreakdownPermissions
       with GraduationBenchmarkBreakdownCommandState
       with GraduationBenchmarkBreakdownCommandRequest

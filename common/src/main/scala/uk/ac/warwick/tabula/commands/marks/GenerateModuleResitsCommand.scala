@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.Stude
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.commands.marks.GenerateModuleResitsCommand.{ResitItem, Result, Sequence, SprCode}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, Module, RecordedResit}
+import uk.ac.warwick.tabula.data.model.MarkState.Agreed
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, GradeBoundaryProcess, Module, RecordedResit}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
@@ -17,16 +18,11 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
-case class ComponentMarks (
-  component: StudentMarkRecord,
-  existingResit: Option[RecordedResit],
-  requiresResit: Boolean,
-  incrementsAttempt: Boolean
-)
-
 case class StudentMarks (
   module: StudentModuleMarkRecord,
-  components: Map[AssessmentComponent, ComponentMarks],
+  requiresResit: Boolean,
+  incrementsAttempt: Boolean,
+  components: Map[AssessmentComponent, StudentMarkRecord],
 )
 
 object GenerateModuleResitsCommand {
@@ -81,23 +77,25 @@ class GenerateModuleResitsCommandInternal(val sitsModuleCode: String, val module
   def applyInternal(): Result = transactional() {
     resitsToCreate.flatMap { case (sprCode, resits) =>
 
-      val studentMarkRecords: Iterable[(AssessmentComponent, ComponentMarks)] = requiresResits.find(_.module.sprCode == sprCode).map(_.components).getOrElse(Map())
+      val studentMarks: Option[StudentMarks] = requiresResits.find(_.module.sprCode == sprCode)
 
-      val highestResitSequence: Int = studentMarkRecords.flatMap(_._2.component.resitSequence)
+      val components: Iterable[(AssessmentComponent, StudentMarkRecord)] = studentMarks.map(_.components).getOrElse(Nil)
+
+      val highestResitSequence: Int = components.flatMap(_._2.resitSequence)
         .map(_.replaceAll("[^0-9]", "")) // strip out any characters
         .flatMap(s => Try(s.toInt).toOption)
         .maxByOption(identity)
         .getOrElse(0)
 
       resits.zipWithIndex.flatMap { case ((sequence, resitItem), index) =>
-        val componentMarks = studentMarkRecords.find(_._1.sequence == sequence).map(_._2)
+        val componentMarks = components.find(_._1.sequence == sequence).map(_._2)
         componentMarks.map { cm =>
-          val recordedResit = new RecordedResit(cm.component, sprCode)
+          val recordedResit = new RecordedResit(cm, sprCode)
           recordedResit.assessmentType = resitItem.assessmentType
           recordedResit.resitSequence = f"${highestResitSequence + index + 1}%03d" // 3 chars padded with leading zeros
           recordedResit.currentResitAttempt = {
-            val currentAttempt = cm.component.currentResitAttempt.getOrElse(1)
-            if(cm.incrementsAttempt) currentAttempt + 1 else currentAttempt
+            val currentAttempt = cm.currentResitAttempt.getOrElse(1)
+            if(studentMarks.exists(_.incrementsAttempt)) currentAttempt + 1 else currentAttempt
           }
           recordedResit.needsWritingToSits = true
           recordedResit.updatedBy = currentUser.apparentUser
@@ -126,29 +124,25 @@ trait GenerateModuleResitsState extends ModuleOccurrenceState {
   private lazy val gradeBoundaries: Seq[GradeBoundary] = (moduleRegistrations.map(_.marksCode) ++ studentComponentMarkRecords.map(_._1.marksCode))
     .distinct.flatMap(assessmentMembershipService.markScheme)
 
-  def getGradeBoundary(marksCode: String, process: String, grade: Option[String]): Option[GradeBoundary] =
+  def getGradeBoundary(marksCode: String, process: GradeBoundaryProcess, grade: Option[String]): Option[GradeBoundary] =
     gradeBoundaries.find { gb => gb.marksCode == marksCode && gb.process == process && grade.contains(gb.grade) }
 
-  lazy val existingResits: Seq[RecordedResit] = upstreamAssessmentGroupInfos.flatMap { info =>resitService.getAllResits(info.upstreamAssessmentGroup) }
+  lazy val existingResits: Seq[RecordedResit] = upstreamAssessmentGroupInfos.flatMap { info => resitService.getAllResits(info.upstreamAssessmentGroup) }
 
-  lazy val requiresResits: Seq[StudentMarks] = studentModuleMarkRecords.flatMap { student =>
+  lazy val requiresResits: Seq[StudentMarks] = studentModuleMarkRecords.filter(_.markState.contains(Agreed)).flatMap { student =>
     val moduleRegistration = moduleRegistrations.find(_.sprCode == student.sprCode)
     val components = moduleRegistration.map(mr => componentMarks(mr.studentCourseDetails.student.universityId))
       .getOrElse(Map.empty[AssessmentComponent, StudentMarkRecord])
-    val process = if (components.exists(_._2.resitExpected)) "RAS" else "SAS"
+
+    val process = if (moduleRegistration.exists(_.currentResitAttempt.nonEmpty)) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
     val gradeBoundary = moduleRegistrations.find(_.sprCode == student.sprCode).flatMap { mr => getGradeBoundary(mr.marksCode, process, student.grade) }
 
-    val componentsWithResitInfo = components.map { case (ac, marks) =>
-      val process = if (marks.resitExpected) "RAS" else "SAS"
-      val gradeBoundary = getGradeBoundary(ac.marksCode, process, marks.grade)
-      val existingResit = existingResits.filter(r => r.sprCode == student.sprCode && r.sequence == ac.sequence).sortBy(_.resitSequence).headOption
-      ac -> ComponentMarks(marks, existingResit, gradeBoundary.exists(_.generatesResit), gradeBoundary.exists(_.incrementsAttempt))
+    if (gradeBoundary.exists(_.generatesResit)) {
+      Some(StudentMarks(student, gradeBoundary.exists(_.generatesResit), gradeBoundary.exists(_.incrementsAttempt), components))
+    } else {
+      None
     }
-
-    if (gradeBoundary.exists(_.generatesResit)) Some(StudentMarks(student, componentsWithResitInfo))
-    else None
   }
-
 
 }
 

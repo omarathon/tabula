@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, UpstreamRouteRuleServiceComponent}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent, ResitServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -28,6 +28,7 @@ object StudentAssessmentCommand {
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
@@ -51,6 +52,7 @@ object StudentAssessmentProfileCommand {
       with AutowiringUpstreamRouteRuleServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
       with StudentModuleRegistrationAndComponents
@@ -147,7 +149,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
 }
 
 trait StudentModuleRegistrationAndComponents {
-  self: AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent =>
+  self: AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent with ResitServiceComponent =>
 
   /**
    * Whether to consider actual marks, e.g. for calculating VAW weightings. This should be false when it will be displayed to students,
@@ -156,6 +158,21 @@ trait StudentModuleRegistrationAndComponents {
   def includeActualMarks: Boolean
 
   def generateModuleRegistrationAndComponents(scyds: Seq[StudentCourseYearDetails]): Seq[ModuleRegistrationAndComponents] = {
+
+    val studentsResits: Seq[RecordedResit] = resitService.findResits(scyds.map(_.studentCourseDetails.sprCode))
+
+
+
+    scyds.flatMap(_.moduleRegistrations).map(_.marksCode)
+    scyds.flatMap(_.moduleRegistrations).flatMap(_.upstreamAssessmentGroups).flatMap(_.assessmentComponent).map(_.marksCode)
+
+    lazy val gradeBoundaries: Seq[GradeBoundary] = {
+      val mr = scyds.flatMap(_.moduleRegistrations)
+      val ac = mr.flatMap(_.upstreamAssessmentGroups).flatMap(_.assessmentComponent)
+      val marksCodes = (mr.map(_.marksCode) ++ ac.map(_.marksCode)).distinct
+      marksCodes.flatMap(assessmentMembershipService.markScheme)
+    }
+
     scyds.flatMap { scyd =>
       scyd.moduleRegistrations.map { mr =>
         val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember)] =
@@ -169,13 +186,24 @@ trait StudentModuleRegistrationAndComponents {
         val hasAnyMarks = marks.exists { case (_, _, mark) => mark.nonEmpty }
 
         val recordedModuleRegistration: Option[RecordedModuleRegistration] = moduleRegistrationMarksService.getRecordedModuleRegistration(mr)
+        val process = if (mr.currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+        val grade = recordedModuleRegistration.flatMap(_.latestGrade)
+        val gradeBoundary = grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process && mr.marksCode == gb.marksCode))
 
         ModuleRegistrationAndComponents(
           moduleRegistration = mr,
           markState = recordedModuleRegistration.flatMap(_.latestState),
-          markRecord = StudentModuleMarkRecord(mr, recordedModuleRegistration),
+          markRecord = StudentModuleMarkRecord(mr, recordedModuleRegistration, gradeBoundary.exists(_.generatesResit)),
           components = components.map { case (ug, uagm) =>
             val recordedAssessmentComponentStudent: Option[RecordedAssessmentComponentStudent] = assessmentComponentMarksService.getRecordedStudent(uagm)
+            val resit: Option[RecordedResit] = studentsResits.filter(r => r.sprCode == mr.sprCode && r.sequence == ug.sequence)
+              .sortBy(_.resitSequence)
+              .headOption
+            val gradeBoundary = {
+              val process = if (uagm.isReassessment) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+              val grade = recordedAssessmentComponentStudent.flatMap(_.latestGrade)
+              grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process))
+            }
 
             Component(
               upstreamGroup = ug,
@@ -188,7 +216,9 @@ trait StudentModuleRegistrationAndComponents {
                   Seq(uagm).filterNot(_ => scyd.studentCourseDetails.permanentlyWithdrawn)
                 ),
                 uagm,
-                recordedAssessmentComponentStudent
+                recordedAssessmentComponentStudent,
+                resit,
+                gradeBoundary.exists(_.generatesResit)
               ),
             )
           }

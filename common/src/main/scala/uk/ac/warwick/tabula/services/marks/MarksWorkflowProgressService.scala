@@ -219,6 +219,58 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
     override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(CalculateModuleMarks), Seq(ConfirmModuleMarks))
   }
 
+  case object CreateResits extends ModuleOccurrenceMarkWorkflowStage {
+
+    override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
+
+      val componentRecords = components.flatMap(_.students)
+
+      val agreedStudents = students.filter(_.markState.contains(Agreed))
+
+      val studentsRequiringResits = agreedStudents.filter(s => s.requiresResit)
+
+      val studentsWithOutstandingResits = studentsRequiringResits.filter { record =>
+        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(_.existingResit.isEmpty)
+      }
+
+      if (componentRecords.exists(_.existingResit.exists(_.needsWritingToSits))) {
+        StageProgress(
+          stage = CreateResits,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CreateResits.needsWritingToSits",
+        )
+      } else if (agreedStudents.nonEmpty && studentsRequiringResits.isEmpty) {
+        StageProgress(
+          stage = CreateResits,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CreateResits.skipped",
+          skipped = true
+        )
+      } else if (agreedStudents.nonEmpty && studentsWithOutstandingResits.isEmpty) {
+        StageProgress(
+          stage = CreateResits,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CreateResits.completed",
+          completed = true
+        )
+      }  else if (agreedStudents.nonEmpty && studentsRequiringResits.size != studentsWithOutstandingResits.size) {
+        StageProgress(
+          stage = CreateResits,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CreateResits.inProgress",
+        )
+      } else {
+        StageProgress(
+          stage = CreateResits,
+          started = false,
+          messageCode = "workflow.marks.moduleOccurrence.CreateResits.notStarted",
+        )
+      }
+    }
+
+    override def preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(ProcessModuleMarks))
+  }
+
   override val values: IndexedSeq[ModuleOccurrenceMarkWorkflowStage] = findValues
 }
 

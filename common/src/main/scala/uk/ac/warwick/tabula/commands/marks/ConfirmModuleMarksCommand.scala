@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource.MarkConfirmation
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.marks.ConfirmModuleMarkChangedNotification
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -48,6 +48,7 @@ object ConfirmModuleMarksCommand {
       with ModuleOccurrenceUpdateMarksPermissions
       with ModuleOccurrenceLoadModuleRegistrations
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent

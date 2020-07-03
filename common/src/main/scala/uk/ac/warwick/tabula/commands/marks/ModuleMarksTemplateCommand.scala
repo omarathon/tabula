@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.ModuleMarksTemplateCommand._
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
@@ -23,6 +23,7 @@ object ModuleMarksTemplateCommand {
       with ModuleOccurrenceUpdateMarksPermissions
       with CalculateModuleMarksAlgorithm
       with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent

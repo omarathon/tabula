@@ -35,6 +35,8 @@ class RecordedResit extends GeneratedId
   @Column(name = "spr_code", nullable = false)
   var sprCode: String = _
 
+  def universityId: Option[String] = Option(sprCode).flatMap(_.split("/").headOption)
+
   // Long-form module code with hyphen and CATS value
   @Column(name = "module_code", nullable = false)
   var moduleCode: String = _

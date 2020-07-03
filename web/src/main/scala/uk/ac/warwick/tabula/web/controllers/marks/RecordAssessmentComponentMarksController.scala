@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, Rec
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -30,7 +30,8 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
   with AutowiringAssessmentMembershipServiceComponent
   with AutowiringProfileServiceComponent
   with AutowiringJobServiceComponent
-  with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringMaintenanceModeServiceComponent
+  with AutowiringResitServiceComponent {
 
   @ModelAttribute("command")
   def command(@PathVariable assessmentComponent: AssessmentComponent, @PathVariable upstreamAssessmentGroup: UpstreamAssessmentGroup): RecordAssessmentComponentMarksCommand.Command =
@@ -55,7 +56,7 @@ class RecordAssessmentComponentMarksController extends BaseComponentMarksControl
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
   }
 
   @ModelAttribute("isGradeValidation")

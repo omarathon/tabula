@@ -32,17 +32,18 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
         resitSequence = None,
         position = None,
         currentMember = true,
-        resitExpected = resit,
+        isReassessment = resit,
         currentResitAttempt = if(resit) Some(2) else None,
+        requiresResit = false,
+        existingResit = None,
         mark = mark,
         grade = grade,
         needsWritingToSits = false,
         outOfSync = false,
         markState = Some(UnconfirmedActual),
         agreed = false,
-        resitMark = false,
         history = Seq.empty,
-        upstreamAssessmentGroupMember = uagm
+        upstreamAssessmentGroupMember = uagm,
       )
     }
   }

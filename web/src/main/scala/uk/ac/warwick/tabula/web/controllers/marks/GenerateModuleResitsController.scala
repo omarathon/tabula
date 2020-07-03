@@ -6,9 +6,10 @@ import org.springframework.ui.ModelMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.marks.{GenerateModuleResitsCommand, StudentMarks}
-import uk.ac.warwick.tabula.data.model.{AssessmentType, Module}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, Module}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
@@ -36,8 +37,17 @@ class GenerateModuleResitsController extends BaseModuleMarksController
   def requiresResits(@ModelAttribute("command") command: GenerateModuleResitsCommand.Command, errors: Errors): Seq[StudentMarks] =
     command.requiresResits.sortBy(_.module.sprCode)
 
+  @ModelAttribute("assessmentComponents")
+  def assessmentComponents(@ModelAttribute("command") command: GenerateModuleResitsCommand.Command, errors: Errors): Seq[AssessmentComponent] =
+    command.requiresResits.flatMap(_.components.keys).distinct.sortBy(_.sequence)
+
   @ModelAttribute("assessmentTypes")
-  def assessmentTypes: Seq[AssessmentType] = AssessmentType.values
+  def assessmentTypes: Seq[AssessmentType] = {
+    Wire.property("${resit.assessmentTypes}")
+      .split(',').toSeq
+      .filter(_.hasText)
+      .map(astCode => AssessmentType.factory(astCode.trim()))
+  }
 
   private val formView: String = "marks/admin/modules/resits"
 
