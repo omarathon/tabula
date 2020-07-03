@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, NormalLoadLookup, UpstreamRouteRuleServiceComponent}
-import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.exams.grids._
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
@@ -28,6 +28,7 @@ object GraduationBenchmarkBreakdownCommand {
       with AutowiringNormalCATSLoadServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with GraduationBenchmarkBreakdownPermissions
       with GraduationBenchmarkBreakdownCommandState
       with GraduationBenchmarkBreakdownCommandRequest
@@ -87,16 +88,16 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
       val percentageOfAssessmentTaken = moduleRegistrationService.percentageOfAssessmentTaken(studentCourseYearDetails.moduleRegistrations).setScale(1, RoundingMode.HALF_UP)
       val percentageOfAssessmentTakenDecimal = percentageOfAssessmentTaken / 100
 
-      def weighting(year: Int): BigDecimal = weightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
+      def weighting(year: Int): BigDecimal = abroadYearWeightings.find(_.yearOfStudy == year).map(w => BigDecimal(w.weightingAsPercentage)).getOrElse(BigDecimal(0))
 
-      val yearMarksAndWeightings = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, weightings, markForFinalYear = false)
+      val yearMarksAndWeightings = progressionService.marksPerYear(studentCourseYearDetails, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, abroadYearWeightings, markForFinalYear = false)
         .map { _.map { case (year, weightedMark) =>
           val mark = if (year == yearOfStudy) weightedAssessmentMark else weightedMark
           year -> (mark, weighting(year))
         } + (yearOfStudy -> (weightedAssessmentMark, weighting(yearOfStudy)))
       }
 
-      val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, weightings)
+      val benchmark = progressionService.graduationBenchmark(Option(studentCourseYearDetails), yearOfStudy, normalLoad, routeRulesPerYear, yearMarksToUse, groupByLevel, abroadYearWeightings)
 
       Left(UGGraduationBenchmarkBreakdown(
         modules = modules.filter{ case (_, components) => components.nonEmpty },
@@ -160,8 +161,10 @@ trait GraduationBenchmarkBreakdownCommandState {
 
   lazy val normalLoad: BigDecimal = NormalLoadLookup(academicYear, yearOfStudy, normalCATSLoadService).apply(studentCourseYearDetails.route)
 
-  lazy val weightings: Seq[CourseYearWeighting] = courseAndRouteService
-    .findAllCourseYearWeightings(Seq(studentCourseDetails.course), studentCourseDetails.sprStartAcademicYear)
+  lazy val rawWeightings: Seq[CourseYearWeighting] =
+    courseAndRouteService.findAllCourseYearWeightings(Seq(studentCourseDetails.course), studentCourseDetails.sprStartAcademicYear)
+
+  lazy val abroadYearWeightings: Seq[CourseYearWeighting] = ProgressionService.abroadYearWeightings(rawWeightings, studentCourseYearDetails)
 
   lazy val routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]] = studentCourseDetails.freshOrStaleStudentCourseYearDetails.flatMap(_.level)
     .map(level => level.toYearOfStudy -> UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService).apply(studentCourseYearDetails.route, Option(level)))

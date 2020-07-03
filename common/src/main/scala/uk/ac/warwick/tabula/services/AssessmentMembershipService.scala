@@ -139,6 +139,8 @@ trait AssessmentMembershipService {
 
   def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int]
 
+  def markScheme(marksCode: String): Seq[GradeBoundary]
+
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
@@ -376,6 +378,8 @@ class AssessmentMembershipServiceImpl
     moduleRegistration.marksCode.maybeText.map { marksCode =>
       gradesForMark(marksCode, mark, moduleRegistration.currentResitAttempt)
     }.getOrElse(Seq.empty)
+
+  def markScheme(marksCode: String): Seq[GradeBoundary] = dao.getGradeBoundaries(marksCode)
 
   def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int] =
     dao.getPassMark(moduleRegistration.marksCode, if (resitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment, resitAttempt.getOrElse(1))

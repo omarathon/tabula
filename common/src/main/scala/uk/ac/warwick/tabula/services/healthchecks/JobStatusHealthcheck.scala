@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.healthchecks
 import java.time.LocalDateTime
 
 import humanize.Humanize._
+import org.joda.time.{DateTime, Minutes}
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -12,6 +13,7 @@ import uk.ac.warwick.util.core.DateTimeUtils
 import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 import scala.concurrent.duration._
+import scala.concurrent.duration.Duration.Zero
 import scala.jdk.CollectionConverters._
 
 object JobStatusHealthcheck {
@@ -34,6 +36,11 @@ class JobStatusHealthcheck
     val service = Wire[JobService]
     val unfinishedJobs = service.unfinishedInstances.sortBy(_.createdDate)
     val oldestUnfinishedJob = unfinishedJobs.headOption
+    val oldestUnfinishedJobDuration: Duration =
+      oldestUnfinishedJob
+        .map { job =>  Minutes.minutesBetween(job.createdDate, DateTime.now).getMinutes.minutes.toCoarsest
+        }.getOrElse(Zero)
+
     val status = if (oldestUnfinishedJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.ErrorThreshold.toMillis.toInt).isBeforeNow))
       ServiceHealthcheck.Status.Error
     else if (oldestUnfinishedJob.exists(_.createdDate.plusMillis(JobStatusHealthcheck.WarningThreshold.toMillis.toInt).isBeforeNow))
@@ -51,10 +58,10 @@ class JobStatusHealthcheck
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
       message,
       Seq[ServiceHealthcheck.PerformanceData[_]](
-        new ServiceHealthcheck.PerformanceData("unfinished_jobs_total", unfinishedJobs.size, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours)
+        new ServiceHealthcheck.PerformanceData("oldest_unfinished_job_created", oldestUnfinishedJobDuration.toMinutes, JobStatusHealthcheck.WarningThreshold.toHours, JobStatusHealthcheck.ErrorThreshold.toHours),
+        new ServiceHealthcheck.PerformanceData("unfinished_jobs_total", unfinishedJobs.size)
       ).asJava
     ))
 
   }
 }
-

@@ -6,8 +6,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.marks.AssessmentComponentMarksTemplateCommand._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringResitServiceComponent, ResitServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.web.views.ExcelView
 
@@ -23,6 +22,7 @@ object AssessmentComponentMarksTemplateCommand {
       with RecordAssessmentComponentMarksPermissions
       with Unaudited with ReadOnly
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
 }
 
@@ -30,6 +30,7 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
   extends CommandInternal[Result]
     with RecordAssessmentComponentMarksState {
   self: AssessmentComponentMarksServiceComponent
+    with ResitServiceComponent
     with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): Result = {
@@ -38,7 +39,7 @@ abstract class AssessmentComponentMarksTemplateCommandInternal(val assessmentCom
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    val students = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+    val students = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
 
     val workbook = new SXSSFWorkbook
     val fullSheetName = s"Marks for ${assessmentComponent.name} (${assessmentComponent.moduleCode}, ${assessmentComponent.sequence}, ${upstreamAssessmentGroup.occurrence}, ${upstreamAssessmentGroup.academicYear.toString})"

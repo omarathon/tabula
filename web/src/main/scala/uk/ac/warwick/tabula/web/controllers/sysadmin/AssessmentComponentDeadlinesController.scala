@@ -272,7 +272,7 @@ object AssessmentComponentDeadlinesController {
                       currentItem.academicYear = AcademicYear.starting(formattedValue.toInt)
                     case "academicyear" | "academic year" =>
                       currentItem.academicYear = AcademicYear.parse(formattedValue)
-                    case "deadline" =>
+                    case "deadline" | "confirmed deadline" =>
                       currentItem.deadline = parseDeadlineDate(formattedValue)
                     case _ => // ignore anything else
                   }

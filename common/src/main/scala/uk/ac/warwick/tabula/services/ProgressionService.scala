@@ -131,6 +131,18 @@ object ProgressionService {
     yearWeightings.exists(w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0) || yearAbroad
   }
 
+  def abroadYearWeightings(yearWeightings: Seq[CourseYearWeighting], studentCourseYearDetails: StudentCourseYearDetails): Seq[CourseYearWeighting] = {
+    val allYearStudentCourseDetails = studentCourseYearDetails.studentCourseDetails.student.toExamGridEntity(studentCourseYearDetails).years
+    yearWeightings.map { yearWeighting =>
+      // if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
+      val abroad = allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).exists {
+        case Some(ey) => allowEmptyYearMarks(yearWeightings, ey)
+        case _ => false
+      }
+      if (abroad) yearWeighting.copyZeroWeighted else yearWeighting
+    }
+  }
+
   final val DefaultPassMark = 40
   final val UndergradPassMark = 40
   final val PostgraduatePassMark = 50
@@ -470,7 +482,9 @@ abstract class AbstractProgressionService extends ProgressionService {
     }
   }
 
-  private def getWeightingsPerYear(scyd: StudentCourseYearDetails, weightings: Seq[CourseYearWeighting], years: Seq[Int]): Either[String, Map[Int, CourseYearWeighting]] = {
+  private def getWeightingsPerYear(scyd: StudentCourseYearDetails, rawWeightings: Seq[CourseYearWeighting], years: Seq[Int]): Either[String, Map[Int, CourseYearWeighting]] = {
+    val weightings = ProgressionService.abroadYearWeightings(rawWeightings, scyd)
+
     val (yearsWithoutWeightings, yearWeightings) = years.map { year =>
       val yearWeighting = weightings.filter(_.yearOfStudy == year)
       yearWeighting.headOption.map(w => Right(year -> w)).getOrElse(Left(year))
@@ -507,10 +521,10 @@ abstract class AbstractProgressionService extends ProgressionService {
     // This only considers years where the weighting counts  when they are not not abroad - so for a course with an
     // intercalated year weighted 0,50,0,50, this would consider years 2 and 4. For weightings set like 0/50/50/50 (2nd or 3rd year abroad for same course), it will consider last 2 years non- abroad ones
     val finalTwoYearsModuleRegistrations =
-    entityPerYear.toSeq.reverse
-      .filter { case (_, gridEntityYear) => gridEntityYear != null && !ProgressionService.allowEmptyYearMarks(yearWeightings.values.toSeq, gridEntityYear) }
-      .take(2)
-      .flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
+      entityPerYear.toSeq.reverse
+        .filter { case (_, gridEntityYear) => gridEntityYear != null && !ProgressionService.allowEmptyYearMarks(yearWeightings.values.toSeq, gridEntityYear) }
+        .take(2)
+        .flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
     // Don't take into account the FM grade here - it's not valid for the final two years, only for first years
     if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(_.firstDefinedMark.isEmpty)) {

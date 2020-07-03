@@ -19,7 +19,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
 import scala.jdk.CollectionConverters._
-import scala.collection.mutable.ArrayBuffer
 import scala.math.BigDecimal.RoundingMode
 
 object UploadYearMarksCommand {
@@ -176,12 +175,18 @@ trait UploadYearMarksCommandBindListener extends BindListener {
   }
 
   private def validateStudent(studentId: String, maybeScyd: Option[StudentCourseYearDetails], isSCJCode: Boolean): Seq[String] = {
-    def departmentAndParents(department: Department): LazyList[Department] = department #:: (if (!department.isImportDepartment) departmentAndParents(department.parent) else LazyList.empty)
+    def departmentAndParents(department: Department): LazyList[Department] =
+      department #:: (if (!department.isImportDepartment) departmentAndParents(department.parent) else LazyList.empty)
+
+    def allDepartments(scyd: StudentCourseYearDetails): LazyList[Department] = {
+      val enrolmentRootDepartment = scyd.enrolmentDepartment.rootDepartment
+      enrolmentRootDepartment.subDepartmentsContaining(scyd.studentCourseDetails.student) #::: departmentAndParents(scyd.enrolmentDepartment)
+    }
 
     maybeScyd match {
       case None =>
         Seq(s"Could not find a student with ${if (isSCJCode) "SCJ code" else "University ID"} $studentId for academic year ${academicYear.toString}")
-      case Some(scyd) if !departmentAndParents(scyd.enrolmentDepartment).contains(department) =>
+      case Some(scyd) if !allDepartments(scyd).contains(department) =>
         val enrolmentRootDepartment = scyd.enrolmentDepartment.rootDepartment
 
         val userAccessManagers = permissionsService.getAllGrantedRolesFor(enrolmentRootDepartment).filter(_.builtInRoleDefinition == UserAccessMgrRoleDefinition).flatMap(_.users.users).map(u => s"${u.getFullName} (${u.getEmail})")

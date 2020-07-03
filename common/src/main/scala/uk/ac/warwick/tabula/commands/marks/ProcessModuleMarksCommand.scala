@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.marks.ValidGradesForMark
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -42,13 +42,14 @@ object ProcessModuleMarksCommand {
       with ProcessModuleMarksValidation
       with ModuleOccurrenceUpdateMarksPermissions
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringTransactionalComponent
       with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to ModuleOccurrenceLoadModuleRegistrations being called from permissions
-      with ModuleOccurrenceDescription
+      with RecordedModuleRegistrationsDescription
       with ModuleOccurrenceValidGradesBindListener
       with ProcessModuleMarksBindListener
       with ProcessModuleMarksPopulateOnForm
@@ -63,7 +64,7 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
   self: ProcessModuleMarksRequest
     with ModuleOccurrenceLoadModuleRegistrations
     with TransactionalComponent
-    with ModuleOccurrenceDescription
+    with RecordedModuleRegistrationsDescription
     with ModuleRegistrationMarksServiceComponent
     with AssessmentComponentMarksServiceComponent =>
 

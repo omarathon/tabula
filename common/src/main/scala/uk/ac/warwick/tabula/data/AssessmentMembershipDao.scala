@@ -129,6 +129,8 @@ trait AssessmentMembershipDao {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
+  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
+
   def getGradeBoundaries(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Seq[GradeBoundary]
 
   def getPassMark(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Option[Int]
@@ -671,6 +673,11 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     session.newUpdateQuery("delete GradeBoundary gb where gb.marksCode = :marksCode")
       .setParameter("marksCode", marksCode)
       .run()
+
+  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] =
+    session.newCriteria[GradeBoundary]
+      .add(is("marksCode", marksCode))
+      .seq
 
   def getGradeBoundaries(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Seq[GradeBoundary] =
     session.newCriteria[GradeBoundary]

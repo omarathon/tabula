@@ -155,13 +155,14 @@ object CalculateModuleMarksCommand {
       with CalculateModuleMarksValidation
       with ModuleOccurrenceUpdateMarksPermissions
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringTransactionalComponent
       with AutowiringSecurityServiceComponent
       with ComposableCommand[Result] // late-init due to CalculateModuleMarksLoadModuleRegistrations being called from permissions
-      with ModuleOccurrenceDescription
+      with RecordedModuleRegistrationsDescription
       with ModuleOccurrenceValidGradesBindListener
       with CalculateModuleMarksSpreadsheetBindListener
       with CompositeCalculateModuleMarksBindListener
@@ -179,7 +180,7 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
     with ModuleRegistrationMarksServiceComponent
     with TransactionalComponent
     with ProfileServiceComponent
-    with ModuleOccurrenceDescription =>
+    with RecordedModuleRegistrationsDescription =>
 
   override val mandatoryEventName: String = "CalculateModuleMarks"
 
@@ -220,7 +221,8 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
     with ModuleRegistrationServiceComponent
-    with ModuleRegistrationMarksServiceComponent =>
+    with ModuleRegistrationMarksServiceComponent
+    with ResitServiceComponent =>
 
   lazy val studentModuleMarkRecordsAndCalculations: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], Option[ModuleRegistration], ModuleMarkCalculation)] = {
     val noReg: Option[ModuleRegistration] = None
@@ -536,7 +538,7 @@ trait CalculateModuleMarksAlgorithm {
 
                       lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.upstreamAssessmentGroupMember.currentResitAttempt)
 
-                      val cappedMark = if (s.resitExpected && !s.furtherFirstSit) {
+                      val cappedMark = if (s.isReassessment && !s.furtherFirstSit) {
                         markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
                       } else mark
 
@@ -624,7 +626,7 @@ object ClearRecordedModuleMarks {
         recordedModuleRegistration.latestResult.nonEmpty
       }
 
-    if (isNonEmpty) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration))
+    if (isNonEmpty) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration, requiresResit = false))
     else None
   }
 }

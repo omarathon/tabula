@@ -29,6 +29,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
       override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
     }
+    student.courseAndRouteService = service.courseAndRouteService
 
     def entityYear3: ExamGridEntityYear = scyd3.toExamGridEntityYear
 
@@ -620,6 +621,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
       override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
     }
+    student.courseAndRouteService = service.courseAndRouteService
 
     def entityYear: ExamGridEntityYear = scyd.toExamGridEntityYear
 
@@ -901,6 +903,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
       override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
     }
+    student.courseAndRouteService = service.courseAndRouteService
 
     def entityYear: ExamGridEntityYear = currentScyd.toExamGridEntityYear
     var weightings: Seq[CourseYearWeighting] = Seq()

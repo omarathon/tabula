@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.exams.grids
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.{GraduationBenchmarkBreakdownCommand, GraduationBenchmarkBreakdownCommandRequest}
 import uk.ac.warwick.tabula.data.model._
@@ -13,7 +13,8 @@ import uk.ac.warwick.tabula.web.controllers.exams.{ExamsController, StudentCours
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/{studentCourseDetails}/benchmarkdetails"))
@@ -35,8 +36,14 @@ class GraduationBenchmarkBreakdownController extends ExamsController
 
 
   @ModelAttribute("command")
-  def command(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): GraduationBenchmarkBreakdownCommand.Command = {
-    GraduationBenchmarkBreakdownCommand(mandatory(studentCourseDetails), mandatory(academicYear))
+  def command(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear, @RequestParam(required = false) calculateYearMarks: JBoolean): GraduationBenchmarkBreakdownCommand.Command = {
+    val command = GraduationBenchmarkBreakdownCommand(mandatory(studentCourseDetails), mandatory(academicYear))
+    calculateYearMarks match {
+      case null => // Do nothing, use the default
+      case java.lang.Boolean.TRUE => command.yearMarksToUse = ExamGridYearMarksToUse.CalculateYearMarks
+      case java.lang.Boolean.FALSE => command.yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly
+    }
+    command
   }
 
   @RequestMapping()
