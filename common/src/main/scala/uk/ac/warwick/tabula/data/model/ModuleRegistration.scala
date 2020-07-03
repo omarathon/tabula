@@ -140,6 +140,8 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var marksCode: String = _
 
+  def process: GradeBoundaryProcess = if(currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   def passFail: Boolean = marksCode.maybeText.exists(ModuleRegistration.PassFailMarkSchemeCodes.contains)
 

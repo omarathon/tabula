@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.{ModuleRegistrationAndComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object StudentExamPapersCommand {
@@ -15,6 +15,7 @@ object StudentExamPapersCommand {
     new StudentExamPapersCommandInternal(studentMember, academicYear)
       with ComposableCommand[Seq[ModuleRegistrationAndComponents]]
       with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
