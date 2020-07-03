@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.marks.{ListAssessmentComponentsCommand, Rec
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Module, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.marks.AutowiringAssessmentComponentMarksServiceComponent
+import uk.ac.warwick.tabula.services.marks.{AutowiringAssessmentComponentMarksServiceComponent, AutowiringResitServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
@@ -24,7 +24,8 @@ import scala.jdk.CollectionConverters._
 @RequestMapping(value = Array("/v1/marks/module/{module}-{cats}/{academicYear}/{occurrence}/component/{assessmentGroup}/{sequence}"), produces = Array("application/json"))
 class ComponentMarksController extends ApiController
   with AutowiringAssessmentMembershipServiceComponent
-  with AutowiringAssessmentComponentMarksServiceComponent {
+  with AutowiringAssessmentComponentMarksServiceComponent
+  with AutowiringResitServiceComponent {
 
   @ModelAttribute("assessmentComponent")
   def assessmentComponent(
@@ -74,7 +75,7 @@ class ComponentMarksController extends ApiController
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    val studentMarkRecords = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+    val studentMarkRecords = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
 
     Mav(new JSONView(Map(
       "success" -> true,
@@ -86,7 +87,7 @@ class ComponentMarksController extends ApiController
   def jsonStudentMarkRecord(student: StudentMarkRecord): Map[String, Any] = Map(
     "universityId" -> student.universityId,
     "currentMember" -> student.currentMember,
-    "resitStudent" -> student.resitExpected,
+    "resitStudent" -> student.isReassessment,
     "mark" -> student.mark,
     "grade" -> student.grade,
     "needsWritingToSits" -> student.needsWritingToSits,

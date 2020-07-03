@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.commands.sysadmin.ComponentMarkUploadProgressCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentComponentKey, Department}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringResitServiceComponent, ResitServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.immutable.ListMap
@@ -37,13 +37,14 @@ object ComponentMarkUploadProgressCommand {
     with ComponentMarkUploadProgressPermissions
     with AutowiringAssessmentMembershipServiceComponent
     with AutowiringAssessmentComponentMarksServiceComponent
+    with AutowiringResitServiceComponent
     with AutowiringModuleAndDepartmentServiceComponent
     with Unaudited with ReadOnly
 }
 
 class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Result] {
 
-  self: AutowiringAssessmentMembershipServiceComponent with AssessmentComponentMarksServiceComponent with ModuleAndDepartmentServiceComponent =>
+  self: AssessmentMembershipServiceComponent with AssessmentComponentMarksServiceComponent with ResitServiceComponent with ModuleAndDepartmentServiceComponent =>
 
   def applyInternal(): Result = transactional() {
 
@@ -65,7 +66,7 @@ class ComponentMarkUploadProgressCommandInternal() extends CommandInternal[Resul
             AssessmentComponentInfo(
               assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup)),
               upstreamAssessmentGroupInfo.upstreamAssessmentGroup,
-              studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService),
+              studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService, resitService, assessmentMembershipService),
 
               // Not used
               progress = MarksWorkflowProgress(0, null, null),

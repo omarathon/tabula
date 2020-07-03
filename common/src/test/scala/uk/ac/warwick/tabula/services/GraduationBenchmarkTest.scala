@@ -43,6 +43,7 @@ class GraduationBenchmarkTest extends TestBase with Mockito {
 
     // Student 2 off WBS/Phil Young's spreadsheet
     val student: StudentMember = Fixtures.student("2")
+    student.courseAndRouteService = progressionService.courseAndRouteService
     student.mostSignificantCourse.course = course
 
     // Student is finalist on a 3 year course

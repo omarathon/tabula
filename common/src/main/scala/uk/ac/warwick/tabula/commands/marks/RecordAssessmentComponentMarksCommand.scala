@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.marks.{AssessmentComponentValidGradesForMark
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ResitServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -66,6 +66,7 @@ object RecordAssessmentComponentMarksCommand {
       with RecordAssessmentComponentMarksPopulateOnForm
       with ClearRecordedModuleMarks
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringResitServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringTransactionalComponent
       with AutowiringModuleRegistrationMarksServiceComponent
@@ -263,6 +264,7 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
   self: RecordAssessmentComponentMarksState
     with RecordAssessmentComponentMarksRequest
     with AssessmentComponentMarksServiceComponent
+    with ResitServiceComponent
     with AssessmentMembershipServiceComponent =>
 
   override def populate(): Unit = {
@@ -271,7 +273,7 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService).foreach { student =>
+    ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService).foreach { student =>
       if ((student.mark.nonEmpty || student.grade.nonEmpty) && !students.asScala.keysIterator.contains(student.universityId)) {
         val s = new StudentMarksItem(student.universityId)
         s.resitSequence = student.resitSequence.getOrElse("")
@@ -298,6 +300,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
     with RecordAssessmentComponentMarksRequest
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
+    with ResitServiceComponent
     with SecurityServiceComponent =>
 
   lazy val canEditAgreedMarks: Boolean =
@@ -309,7 +312,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
       assessmentMembershipService.getCurrentUpstreamAssessmentGroupMembers(upstreamAssessmentGroup.id)
     )
 
-    val studentMarkRecords = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+    val studentMarkRecords = ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
 
     val doGradeValidation = assessmentComponent.module.adminDepartment.assignmentGradeValidation
     students.asScala.foreach { case (id, item) =>

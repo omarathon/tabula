@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.marks.ValidGradesForMark
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
+import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, ModuleRegistrationMarksServiceComponent, ResitServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, ModuleRegistrationServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -30,7 +30,8 @@ trait ModuleOccurrenceLoadModuleRegistrations {
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
     with ModuleRegistrationServiceComponent
-    with ModuleRegistrationMarksServiceComponent =>
+    with ModuleRegistrationMarksServiceComponent
+    with ResitServiceComponent =>
 
   lazy val assessmentComponents: Seq[AssessmentComponent] =
     assessmentMembershipService.getAssessmentComponents(sitsModuleCode, inUseOnly = false)
@@ -38,14 +39,18 @@ trait ModuleOccurrenceLoadModuleRegistrations {
         ac.sequence != AssessmentComponent.NoneAssessmentGroup
       }
 
-  lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
+  lazy val upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] =
     assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
+
+  lazy val studentComponentMarkRecords: Seq[(AssessmentComponent, Seq[StudentMarkRecord])] =
+    upstreamAssessmentGroupInfos
       .filter { info =>
         info.upstreamAssessmentGroup.occurrence == occurrence &&
         info.allMembers.nonEmpty
       }
       .map { info =>
-        info.upstreamAssessmentGroup.assessmentComponent.get -> ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService)
+        info.upstreamAssessmentGroup.assessmentComponent.get ->
+          ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
       }
 
   def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] = {
@@ -67,7 +72,7 @@ trait ModuleOccurrenceLoadModuleRegistrations {
   lazy val moduleRegistrations: Seq[ModuleRegistration] = moduleRegistrationService.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
 
   lazy val studentModuleMarkRecords: Seq[StudentModuleMarkRecord] =
-    MarksDepartmentHomeCommand.studentModuleMarkRecords(sitsModuleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService)
+    MarksDepartmentHomeCommand.studentModuleMarkRecords(sitsModuleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService, assessmentMembershipService)
 }
 
 trait ModuleOccurrenceMarksRequest[A <: ModuleOccurrenceCommands.StudentModuleMarksItem] {
@@ -231,7 +236,7 @@ trait ModuleOccurrenceValidation {
   }
 }
 
-trait ModuleOccurrenceDescription extends Describable[Seq[RecordedModuleRegistration]] {
+trait ModuleOccurrenceDescription[A] extends Describable[A] {
   self: ModuleOccurrenceState =>
 
   def mandatoryEventName: String
@@ -245,6 +250,10 @@ trait ModuleOccurrenceDescription extends Describable[Seq[RecordedModuleRegistra
         "academicYear" -> academicYear.toString,
         "occurrence" -> occurrence,
       )
+}
+
+trait RecordedModuleRegistrationsDescription extends ModuleOccurrenceDescription[Seq[RecordedModuleRegistration]] {
+  self: ModuleOccurrenceState =>
 
   override def describeResult(d: Description, result: Seq[RecordedModuleRegistration]): Unit =
     d.properties(
