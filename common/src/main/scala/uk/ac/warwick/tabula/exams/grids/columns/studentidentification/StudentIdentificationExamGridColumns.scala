@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.web.Routes
-import uk.ac.warwick.tabula.services.ProgressionService._
-import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent, ProgressionService}
 
 @Component
 class NameColumnOption extends StudentExamGridColumnOption {
@@ -276,15 +275,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
   private def abroadYearWeightings(studentCourseYearDetails: Option[StudentCourseYearDetails]): Seq[CourseYearWeighting] = {
     studentCourseYearDetails.map { scyd =>
       val weightings = courseAndRouteService.findAllCourseYearWeightings(Seq(scyd.studentCourseDetails.course), scyd.studentCourseDetails.sprStartAcademicYear)
-      val allYearStudentCourseDetails = scyd.studentCourseDetails.student.toExamGridEntity(scyd).years
-      weightings.map { yearWeighting =>
-        // if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
-        val abroad = allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).exists {
-          case Some(ey) => allowEmptyYearMarks(weightings, ey)
-          case _ => false
-        }
-        if (abroad) yearWeighting.copyZeroWeighted else yearWeighting
-      }
+      ProgressionService.abroadYearWeightings(weightings, scyd)
     }.getOrElse(Seq())
   }
 }

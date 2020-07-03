@@ -222,8 +222,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
       )
     }
 
-  //Logic picked up from cognos -TAB-6397
-  def yearAbroad: Boolean = modeOfAttendance != null && modeOfAttendance.yearAbroad && (blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
+  // Logic picked up from cognos - TAB-6397
+  // Don't worry about block occurrence if the MoA ends with "E" for "Erasmus"
+  def yearAbroad: Boolean = modeOfAttendance != null && modeOfAttendance.yearAbroad && (modeOfAttendance.code.endsWith("E") || blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
 
   override def postLoad(): Unit = {
     ensureOvercatting()
