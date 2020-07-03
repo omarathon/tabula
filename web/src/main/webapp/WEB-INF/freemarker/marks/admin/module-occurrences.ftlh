@@ -142,10 +142,10 @@
                   </li>
                 <#else>
                   <li class="disabled">
-                    Process module marks
+                    <a>Process module marks</a>
                   </li>
                   <li class="disabled">
-                    Generate resits
+                    <a>Generate resits</a>
                   </li>
                 </#if>
               </@dropdown_menu>
