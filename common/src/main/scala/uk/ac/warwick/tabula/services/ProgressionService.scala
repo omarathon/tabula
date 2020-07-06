@@ -423,12 +423,18 @@ abstract class AbstractProgressionService extends ProgressionService {
 
     if (groupByLevel) {
       allScyds.groupBy(_.level.orNull)
-        .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _ *) }
+        .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*) }
     } else {
-      (1 to finalYearOfStudy).map(block => {
-        val latestSCYDForThisYear = allScyds.filter(_.yearOfStudy.toInt == block).lastOption
-        block -> latestSCYDForThisYear.map(_.toExamGridEntityYear).orNull
-      }).toMap
+      (1 to finalYearOfStudy).map { block =>
+        val allScydsForYear = allScyds.filter(_.yearOfStudy.toInt == block)
+
+        // For block grids, only merge where it's the same SCJ
+        block -> (allScydsForYear.filter(scyd => allScydsForYear.lastOption.map(_.studentCourseDetails.scjCode).contains(scyd.studentCourseDetails.scjCode)).toList match {
+          case Nil => null
+          case single :: Nil => single.toExamGridEntityYear
+          case multiple => StudentCourseYearDetails.toExamGridEntityYearGrouped(block, multiple: _*)
+        })
+      }.toMap
     }
   }
 
@@ -446,8 +452,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       .filter { case (year, entityYear) => entityYear != null && (markForFinalYear || year < finalYearOfStudy)}
       .map { case (year, entityYear) =>
         year -> entityYear.studentCourseYearDetails.map { thisScyd =>
-          lazy val uploadedYearMark: Option[BigDecimal] =
-            Option(thisScyd.agreedMark).map(BigDecimal(_))
+          lazy val uploadedYearMark: Option[BigDecimal] = entityYear.agreedMark
 
           lazy val calculatedYearMark: Either[String, BigDecimal] =
             getYearMark(entityYear, normalLoad, routeRulesPerYear.getOrElse(year, Seq()), yearWeightings)
