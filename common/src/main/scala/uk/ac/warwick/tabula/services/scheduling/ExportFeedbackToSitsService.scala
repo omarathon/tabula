@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, UpstreamAssessmentGroupMemberAssessmentType}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, RecordedAssessmentComponentStudentMark, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService._
 
@@ -65,6 +65,17 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
     "sequences" -> Seq(student.sequence).asJava
   )
 
+  // If we've got an agreed mark/grade, store the last recorded mark/grade before it was agreed as the actual mark/grade
+  lazy val latestRecordedActualMark: Option[RecordedAssessmentComponentStudentMark] = student.marks.find(_.markState != MarkState.Agreed)
+  lazy val actualMark: JInteger = JInteger(latestRecordedActualMark match {
+    case Some(m) => m.mark
+    case _ => student.latestMark
+  })
+  lazy val actualGrade: String = (latestRecordedActualMark match {
+    case Some(m) => m.grade
+    case _ => student.latestGrade
+  }).orNull
+
   def getUpdateParams: JMap[String, Any] = JHashMap(
     // for the where clause
     "studentId" -> student.universityId,
@@ -76,8 +87,8 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
 
     // data to insert
     "now" -> DateTime.now.toDate,
-    "actualMark" -> JInteger(student.latestMark),
-    "actualGrade" -> student.latestGrade.orNull,
+    "actualMark" -> actualMark,
+    "actualGrade" -> actualGrade,
     "agreedMark" -> JInteger(student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))),
     "agreedGrade" -> student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed)).orNull
   )
