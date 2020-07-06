@@ -532,18 +532,23 @@ trait CalculateModuleMarksAlgorithm {
 
                     val totalWeighting: BigDecimal = componentsForCalculation.map(_._1.weightingFor(marksForWeighting).get).sum
 
-                    componentsForCalculation.map { case (ac, s) =>
+                    lazy val markCap: Option[Int] = {
+                      val maxAttempt = componentsForCalculation.map { _._2.upstreamAssessmentGroupMember.currentResitAttempt.getOrElse(1) }.maxOption
+                      assessmentMembershipService.passMark(moduleRegistration, maxAttempt)
+                    }
+
+                    val uncappedMark = componentsForCalculation.map { case (ac, s) =>
                       val mark = s.mark.get
                       val weighting = ac.weightingFor(marksForWeighting).get
-
-                      lazy val markCap = assessmentMembershipService.passMark(moduleRegistration, s.upstreamAssessmentGroupMember.currentResitAttempt)
-
-                      val cappedMark = if (s.isReassessment && !s.furtherFirstSit) {
-                        markCap.map(cap => if (mark > cap) cap else mark).getOrElse(mark)
-                      } else mark
-
-                      cappedMark * (weighting / totalWeighting)
+                      mark * (weighting / totalWeighting)
                     }.sum
+
+                    // if any of the components being considered are a resit then cap the module mark
+                    if (componentsForCalculation.exists { case (_, s) => s.isReassessment && !s.furtherFirstSit }) {
+                      markCap.map(cap => if (uncappedMark > cap) BigDecimal(cap) else uncappedMark).getOrElse(uncappedMark)
+                    } else {
+                      uncappedMark
+                    }
                   }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
                   val validGrades = validGradesForMark(Some(calculatedMark))
 
