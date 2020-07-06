@@ -38,20 +38,22 @@ class ExportRecordedModuleRegistrationsToSitsHealthcheck extends ServiceHealthch
     val service = Wire[ModuleRegistrationMarksService]
 
     // Don't consider any that aren't allowed
-    val queue = service.allNeedingWritingToSits
-      .filterNot { student =>
-        lazy val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
-        lazy val canUploadMarksToSits: Boolean = {
-          // true if latestState is empty (which should never be the case anyway)
-          student.latestState.forall { markState =>
-            markState != MarkState.Agreed || student.moduleRegistration.exists { moduleRegistration =>
-              MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+    val queue =
+      service.allNeedingWritingToSits
+        .filterNot(_.marks.isEmpty) // Should never happen anyway
+        .filterNot { student =>
+          lazy val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
+          lazy val canUploadMarksToSits: Boolean = {
+            // true if latestState is empty (which should never be the case anyway)
+            student.latestState.forall { markState =>
+              markState != MarkState.Agreed || student.moduleRegistration.exists { moduleRegistration =>
+                MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+              }
             }
           }
-        }
 
-        !canUploadMarksToSitsForYear || !canUploadMarksToSits
-      }
+          !canUploadMarksToSitsForYear || !canUploadMarksToSits
+        }
 
     val queueSize = queue.size
 

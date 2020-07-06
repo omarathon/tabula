@@ -42,8 +42,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
   override def applyInternal(): Result = transactional() {
     val moduleMarksToUpload =
       moduleRegistrationMarksService.allNeedingWritingToSits
-        .filter(_.marks.nonEmpty) // Should never happen anyway
-        .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
+        .filterNot(_.marks.isEmpty) // Should never happen anyway
         .filterNot { student =>
           lazy val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
           lazy val canUploadMarksToSits: Boolean = {
@@ -57,6 +56,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
 
           !canUploadMarksToSitsForYear || !canUploadMarksToSits
         }
+        .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
         .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
 
     moduleMarksToUpload.flatMap { student =>

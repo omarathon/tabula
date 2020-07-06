@@ -41,28 +41,31 @@ class ExportRecordedAssessmentComponentStudentsToSitsHealthcheck extends Service
     lazy val moduleRegistrationService = Wire[ModuleRegistrationService]
 
     // Don't consider any that aren't allowed
-    val queue = service.allNeedingWritingToSits.filterNot { student =>
-      lazy val canUploadMarksToSitsForYear =
-        moduleAndDepartmentService.getModuleBySitsCode(student.moduleCode).forall { module =>
-          module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
-        }
+    val queue =
+      service.allNeedingWritingToSits
+        .filterNot(_.marks.isEmpty) // Should never happen anyway
+        .filterNot { student =>
+          lazy val canUploadMarksToSitsForYear =
+            moduleAndDepartmentService.getModuleBySitsCode(student.moduleCode).forall { module =>
+              module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
+            }
 
-      // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
-      lazy val moduleRegistrations: Seq[ModuleRegistration] =
-        moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
-          .filter(_.studentCourseDetails.student.universityId == student.universityId)
+          // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
+          lazy val moduleRegistrations: Seq[ModuleRegistration] =
+            moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
+              .filter(_.studentCourseDetails.student.universityId == student.universityId)
 
-      lazy val canUploadMarksToSits: Boolean = {
-        // true if latestState is empty (which should never be the case anyway)
-        student.latestState.forall { markState =>
-          markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
-            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+          lazy val canUploadMarksToSits: Boolean = {
+            // true if latestState is empty (which should never be the case anyway)
+            student.latestState.forall { markState =>
+              markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
+                MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+              }
+            }
           }
-        }
-      }
 
-      !canUploadMarksToSitsForYear || !canUploadMarksToSits
-    }
+          !canUploadMarksToSitsForYear || !canUploadMarksToSits
+        }
 
     val queueSize = queue.size
 
