@@ -130,7 +130,7 @@ abstract class Features {
   @Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes: Boolean = defaults.schedulingAttendanceUpdateSchemes
   @Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals: Boolean = defaults.schedulingAttendanceUpdateTotals
   @Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits: Boolean = defaults.schedulingExportFeedbackToSits
-  @Value("${features.scheduling.exportResitsToSits:false}") var schedulingExportResitsToSits: Boolean = defaults.schedulingExportResitsToSits
+  @Value("${features.scheduling.exportResitsToSits:true}") var schedulingExportResitsToSits: Boolean = defaults.schedulingExportResitsToSits
   @Value("${features.scheduling.exportRecordedModuleMarksToSits:true}") var schedulingExportRecordedModuleMarksToSits: Boolean = defaults.schedulingExportRecordedModuleMarksToSits
   @Value("${features.scheduling.triggers:true}") var schedulingTriggers: Boolean = defaults.schedulingTriggers
   @Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration: Boolean = defaults.schedulingObjectStorageMigration
@@ -161,7 +161,7 @@ abstract class Features {
   @Value("${features.marksManagement:true}") var marksManagement: Boolean = defaults.marksManagement
   @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
   @Value("${features.progressionDecisionsInStudentProfile:false}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
-  @Value("${features.processAgreedMarks:false}") var processAgreedMarks: Boolean = defaults.processAgreedMarks
+  @Value("${features.processAgreedMarks:true}") var processAgreedMarks: Boolean = defaults.processAgreedMarks
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -284,7 +284,7 @@ class FeaturesMessage {
   @BeanProperty var schedulingExportAttendanceToSits = true
   @BeanProperty var schedulingSynchroniseAttendanceToSits = true
   @BeanProperty var schedulingExportFeedbackToSits = true
-  @BeanProperty var schedulingExportResitsToSits = false
+  @BeanProperty var schedulingExportResitsToSits = true
   @BeanProperty var schedulingExportRecordedModuleMarksToSits = true
   @BeanProperty var schedulingAttendanceUpdateSchemes = true
   @BeanProperty var schedulingAttendanceUpdateTotals = true
@@ -320,7 +320,7 @@ class FeaturesMessage {
   @BeanProperty var marksManagement = true
   @BeanProperty var includeSMSForCurrentYear = false
   @BeanProperty var progressionDecisionsInStudentProfile = false
-  @BeanProperty var processAgreedMarks = false
+  @BeanProperty var processAgreedMarks = true
 
 }
 
