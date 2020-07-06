@@ -532,7 +532,7 @@ abstract class AbstractProgressionService extends ProgressionService {
         .flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
     // Don't take into account the FM grade here - it's not valid for the final two years, only for first years
-    if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(_.firstDefinedMark.isEmpty)) {
+    if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(mr => mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
       FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${
         finalTwoYearsModuleRegistrations.filter(_.firstDefinedMark.isEmpty).map(mr => "%s %s".format(mr.module.code.toUpperCase, mr.academicYear.toString)).mkString(", ")
       }")

@@ -39,6 +39,7 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
         val overcatSubsets = state.overcatSubsets(entity).flatMap {
           case (nullableMark, sets) => Option(nullableMark).map(_ -> sets)
         }
+
         if (overcatSubsets.size == 1) {
           // If the student only has one valid subset, just show the mark for that subset
           Right(overcatSubsets.head._1)
@@ -46,7 +47,7 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
           // If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
           // find the subset that matches those modules, and show that mark if found
           overcatSubsets.find { case (_, subset) => subset.size == entity.overcattingModules.get.size && subset.map(_.module).forall(entity.overcattingModules.get.contains) } match {
-            case Some((mark, subset)) => Right(mark)
+            case Some((mark, _)) => Right(mark)
             case _ => Left("Could not find valid module registration subset matching chosen subset")
           }
         } else {
