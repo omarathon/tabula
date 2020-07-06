@@ -96,7 +96,7 @@
                     <thead>
                       <tr>
                         <th class="col-sm-1"></th>
-                        <th class="col-sm-2 sortable">Name</th>
+                        <th class="col-sm-2 sortable">Original assessment</th>
                         <th class="col-sm-1 sortable">Sequence</th>
                         <th class="col-sm-1 sortable">Mark</th>
                         <th class="col-sm-1 sortable">Grade</th>
@@ -122,7 +122,7 @@
                                 </span>
                               </#if>
                             <#elseif record.requiresResit>
-                              <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" checked="checked" />
+                              <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" />
                             </#if>
                           </td>
                           <td>${assessmentComponent.name}</td>
@@ -140,7 +140,16 @@
                                 ${assessmentComponent.assessmentType.name}
                              </#if>
                           </td>
-                          <td>${assessmentComponent.scaledWeighting}</td>
+                          <td>
+                            <#if componentRecord.existingResit?has_content>
+                              ${componentRecord.existingResit.weighting}
+                            <#else>
+                              <@bs3form.form_group path="resits[${sprCode}][${assessmentComponent.sequence}].weighting">
+                                <@f.input type="number" path="resits[${sprCode}][${assessmentComponent.sequence}].weighting" class="form-control"/>
+                                <@bs3form.errors path="resits[${sprCode}][${assessmentComponent.sequence}].weighting" />
+                              </@bs3form.form_group>
+                            </#if>
+                          </td>
                           <td><#if record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if></td>
                         </tr>
                       </#list>
