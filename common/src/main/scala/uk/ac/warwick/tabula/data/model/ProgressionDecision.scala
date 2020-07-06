@@ -82,11 +82,13 @@ object ProgressionDecisionOutcome extends Enum[ProgressionDecisionOutcome] {
   case object Held extends ProgressionDecisionOutcome(Set("H"), "Held")
   case object UndergraduateAwardHonours extends ProgressionDecisionOutcome(Set("UA1", "UA1-D"), "Award honours degree")
   case object UndergraduateAwardPass extends ProgressionDecisionOutcome(Set("UA2", "UA2-D"), "Award pass degree")
-  case object UndergraduateAwardDiploma extends ProgressionDecisionOutcome(Set("UA3"), "Award diploma")
+  case object UndergraduateAwardDiploma extends ProgressionDecisionOutcome(Set("UA3", "UA3-D"), "Award diploma")
   case object UndergraduateAwardCertificate extends ProgressionDecisionOutcome(Set("UA4", "UA4-D"), "Award certificate")
   case object UndergraduateProceedHonours extends ProgressionDecisionOutcome(Set("UP1", "UP1-S"), "Proceed")
   case object UndergraduateProceedPass extends ProgressionDecisionOutcome(Set("UP2", "UP2-S"), "Proceed to pass degree")
   case object UndergraduateProceedLevel1 extends ProgressionDecisionOutcome(Set("UP3"), "Proceed to foundation degree")
+  case object UndergraduateProceedOptionalResit extends ProgressionDecisionOutcome(Set("UPH1"), "Proceed - resit optional")
+  case object UndergraduateProceedOptionalFurtherFirstSit extends ProgressionDecisionOutcome(Set("UPK1"), "Proceed - further first sit optional")
   case object UndergraduateFinalistAcademicFail extends ProgressionDecisionOutcome(Set("UF1", "UF1-D"), "Academic fail")
   case object UndergraduateNonFinalistWithdraw extends ProgressionDecisionOutcome(Set("UF2", "UF2-S"), "Withdraw")
   case object UndergraduateResitInSeptember extends ProgressionDecisionOutcome(Set("UR1"), "Resit required")
@@ -96,6 +98,7 @@ object ProgressionDecisionOutcome extends Enum[ProgressionDecisionOutcome] {
   case object UndergraduateFirstSitInSeptember extends ProgressionDecisionOutcome(Set("US1"), "Further first sit required")
   case object UndergraduateFirstSitWithoutResidence extends ProgressionDecisionOutcome(Set("US2", "US2-S"), "Further first sit without residence")
   case object UndergraduateFirstSitWithResidence extends ProgressionDecisionOutcome(Set("US3", "US3-S"), "Further first sit with residence")
+  case object UndergraduateDeferToSeptember extends ProgressionDecisionOutcome(Set("UD1"), "Defer to September")
 
   def forPitCode(pitCode: String): ProgressionDecisionOutcome =
     values.find(_.pitCodes.contains(pitCode)).getOrElse(throw new NoSuchElementException)
