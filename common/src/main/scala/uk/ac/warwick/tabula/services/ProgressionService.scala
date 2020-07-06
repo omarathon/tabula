@@ -426,7 +426,10 @@ abstract class AbstractProgressionService extends ProgressionService {
         .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*) }
     } else {
       (1 to finalYearOfStudy).map { block =>
-        block -> (allScyds.filter(_.yearOfStudy.toInt == block).toList match {
+        val allScydsForYear = allScyds.filter(_.yearOfStudy.toInt == block)
+
+        // For block grids, only merge where it's the same SCJ
+        block -> (allScydsForYear.filter(scyd => allScydsForYear.lastOption.map(_.studentCourseDetails.scjCode).contains(scyd.studentCourseDetails.scjCode)).toList match {
           case Nil => null
           case single :: Nil => single.toExamGridEntityYear
           case multiple => StudentCourseYearDetails.toExamGridEntityYearGrouped(block, multiple: _*)
