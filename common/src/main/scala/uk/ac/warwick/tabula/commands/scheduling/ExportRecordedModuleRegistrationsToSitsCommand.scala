@@ -42,65 +42,60 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
   override def applyInternal(): Result = transactional() {
     val moduleMarksToUpload =
       moduleRegistrationMarksService.allNeedingWritingToSits
-        .filter(_.marks.nonEmpty) // Should never happen anyway
+        .filterNot(_.marks.isEmpty) // Should never happen anyway
+        .filterNot { student =>
+          lazy val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
+          lazy val canUploadMarksToSits: Boolean = {
+            // true if latestState is empty (which should never be the case anyway)
+            student.latestState.forall { markState =>
+              markState != MarkState.Agreed || student.moduleRegistration.exists { moduleRegistration =>
+                MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+              }
+            }
+          }
+
+          !canUploadMarksToSitsForYear || !canUploadMarksToSits
+        }
         .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
         .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
 
     moduleMarksToUpload.flatMap { student =>
-      val canUploadMarksToSitsForYear = student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
-      lazy val canUploadMarksToSits: Boolean = {
-        // true if latestState is empty (which should never be the case anyway)
-        student.latestState.forall { markState =>
-          markState != MarkState.Agreed || student.moduleRegistration.exists { moduleRegistration =>
-            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
-          }
-        }
-      }
+      // TAB-8438 we set that the student has attended the final assessment for a module if they have a non-0 component mark
+      // TODO How do we handle where there's no component mark? (Currently will be false)
+      // TODO What should we do if the final assessment was cancelled (i.e. has a grade of FM) or where the student has mitigation (grade M)? (Currently will be false)
 
-      if (!canUploadMarksToSitsForYear) {
-        logger.warn(s"Not uploading module mark $student as department for ${student.sitsModuleCode} is closed for ${student.academicYear}")
-        None
-      } else if (!canUploadMarksToSits) {
-        logger.warn(s"Not uploading module mark $student as agreed marks are not currently allowed to be uploaded")
-        None
-      } else {
-        // TAB-8438 we set that the student has attended the final assessment for a module if they have a non-0 component mark
-        // TODO How do we handle where there's no component mark? (Currently will be false)
-        // TODO What should we do if the final assessment was cancelled (i.e. has a grade of FM) or where the student has mitigation (grade M)? (Currently will be false)
-
-        // Find the final assessment component for a module
-        val finalAssessmentAttended =
-          student.moduleRegistration.exists { moduleRegistration =>
-            moduleRegistration.upstreamAssessmentGroupMembers
-              .find(_.upstreamAssessmentGroup.assessmentComponent.exists(_.finalChronologicalAssessment))
-              .exists { uagm =>
-                if (moduleRegistration.passFail) uagm.firstDefinedGrade.contains("P")
-                else uagm.firstDefinedMark.exists(_ > 0)
-              }
-          }
-
-        exportStudentModuleResultToSitsService.exportModuleMarksToSits(student, finalAssessmentAttended) match {
-          case r if r > 1 =>
-            throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
-          case 1 =>
-            student.needsWritingToSits = false
-            student.lastWrittenToSits = Some(DateTime.now)
-
-            // Update the ModuleRegistration so it doesn't show as out of sync
-            student.moduleRegistration.foreach { moduleRegistration =>
-              moduleRegistration.actualMark = student.latestMark
-              moduleRegistration.actualGrade = student.latestGrade
-              moduleRegistration.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
-              moduleRegistration.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
-              moduleRegistration.moduleResult = student.latestResult.orNull
-
-              moduleRegistrationService.saveOrUpdate(moduleRegistration)
+      // Find the final assessment component for a module
+      val finalAssessmentAttended =
+        student.moduleRegistration.exists { moduleRegistration =>
+          moduleRegistration.upstreamAssessmentGroupMembers
+            .find(_.upstreamAssessmentGroup.assessmentComponent.exists(_.finalChronologicalAssessment))
+            .exists { uagm =>
+              if (moduleRegistration.passFail) uagm.firstDefinedGrade.contains("P")
+              else uagm.firstDefinedMark.exists(_ > 0)
             }
-
-            Some(moduleRegistrationMarksService.saveOrUpdate(student))
-          case _ =>
-            None
         }
+
+      exportStudentModuleResultToSitsService.exportModuleMarksToSits(student, finalAssessmentAttended) match {
+        case r if r > 1 =>
+          throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
+        case 1 =>
+          student.needsWritingToSits = false
+          student.lastWrittenToSits = Some(DateTime.now)
+
+          // Update the ModuleRegistration so it doesn't show as out of sync
+          student.moduleRegistration.foreach { moduleRegistration =>
+            moduleRegistration.actualMark = student.latestMark
+            moduleRegistration.actualGrade = student.latestGrade
+            moduleRegistration.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
+            moduleRegistration.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
+            moduleRegistration.moduleResult = student.latestResult.orNull
+
+            moduleRegistrationService.saveOrUpdate(moduleRegistration)
+          }
+
+          Some(moduleRegistrationMarksService.saveOrUpdate(student))
+        case _ =>
+          None
       }
     }
   }
