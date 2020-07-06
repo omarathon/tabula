@@ -53,6 +53,7 @@ object StudentCourseYearDetails {
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
+        agreedMark = scyds.toSeq.flatMap(scyd => Option(scyd.agreedMark)).lastOption.map(BigDecimal(_)),
         level = scyds.head.level,
         yearOfStudy = yearOfStudy,
       )
@@ -219,6 +220,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = Some(this),
+        agreedMark = Option(agreedMark).map(BigDecimal(_)),
         level = level,
         yearOfStudy = this.yearOfStudy,
       )

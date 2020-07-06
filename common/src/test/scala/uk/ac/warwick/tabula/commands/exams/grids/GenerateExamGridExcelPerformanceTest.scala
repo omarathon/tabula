@@ -118,6 +118,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       overcattingModules = None,
       markOverrides = None,
       studentCourseYearDetails = students.get(universityId).map(_.mostSignificantCourse.latestStudentCourseYearDetails),
+      agreedMark = students.get(universityId).map(_.mostSignificantCourse.latestStudentCourseYearDetails).flatMap(scyd => Option(scyd.agreedMark)).map(BigDecimal(_)),
       level = Some(level),
       yearOfStudy = 1
     )

@@ -536,7 +536,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
     algorithm.assessmentMembershipService.getAssessmentComponents("IN101-30", inUseOnly = false) returns Seq(ac1, ac2)
 
     // (64 * (30/100)) + (40 * (70/100)) = 47.2
-    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(47), Some("3"), Some(ModuleResult.Pass)))
+    algorithm.calculate(modReg, Seq(ac1 -> smr1, ac2 -> smr2)) should be (ModuleMarkCalculation.Success(Some(40), Some("3"), Some(ModuleResult.Pass)))
   }
 
 }
