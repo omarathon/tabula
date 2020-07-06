@@ -46,7 +46,7 @@ class ExportRecordedResitsToSitsHealthcheck extends ServiceHealthcheckProvider(I
       else ServiceHealthcheck.Status.Okay
 
     val countMessage =
-      s"$queueSize mark${if (queueSize == 1) "" else "s"} in queue" +
+      s"$queueSize resit${if (queueSize == 1) "" else "s"} in queue" +
       (if (countStatus == ServiceHealthcheck.Status.Error) " (!!)" else if (countStatus == ServiceHealthcheck.Status.Warning) " (!)" else "") +
       s" (warning: $QueueSizeWarningThreshold, critical: $QueueSizeErrorThreshold)"
 

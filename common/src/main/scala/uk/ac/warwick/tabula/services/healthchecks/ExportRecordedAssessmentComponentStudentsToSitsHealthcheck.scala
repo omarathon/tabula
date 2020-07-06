@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleAndDepartmentService, ModuleRegistrationService}
 import uk.ac.warwick.tabula.services.healthchecks.ExportRecordedAssessmentComponentStudentsToSitsHealthcheck._
 import uk.ac.warwick.tabula.services.marks.AssessmentComponentMarksService
 import uk.ac.warwick.util.core.DateTimeUtils
@@ -35,7 +37,32 @@ class ExportRecordedAssessmentComponentStudentsToSitsHealthcheck extends Service
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   def run(): Unit = transactional(readOnly = true) {
     val service = Wire[AssessmentComponentMarksService]
-    val queue = service.allNeedingWritingToSits
+    lazy val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+    lazy val moduleRegistrationService = Wire[ModuleRegistrationService]
+
+    // Don't consider any that aren't allowed
+    val queue = service.allNeedingWritingToSits.filterNot { student =>
+      lazy val canUploadMarksToSitsForYear =
+        moduleAndDepartmentService.getModuleBySitsCode(student.moduleCode).forall { module =>
+          module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
+        }
+
+      // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
+      lazy val moduleRegistrations: Seq[ModuleRegistration] =
+        moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
+          .filter(_.studentCourseDetails.student.universityId == student.universityId)
+
+      lazy val canUploadMarksToSits: Boolean = {
+        // true if latestState is empty (which should never be the case anyway)
+        student.latestState.forall { markState =>
+          markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
+            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+          }
+        }
+      }
+
+      !canUploadMarksToSitsForYear || !canUploadMarksToSits
+    }
 
     val queueSize = queue.size
 
