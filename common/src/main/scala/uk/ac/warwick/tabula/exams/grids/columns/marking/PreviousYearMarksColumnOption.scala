@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringProgressionServiceComponent}
 
@@ -32,45 +32,24 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
     }
 
     private def markOrError(entity: ExamGridEntity): Either[String, BigDecimal] = {
-      relevantEntityYear(entity) match {
-        case Some(year) =>
-          lazy val uploadedYearMark: Option[BigDecimal] =
-            Option(year.studentCourseYearDetails.get.agreedMark).map(BigDecimal(_))
+      entity.years.filter { case (_, entityYear) => entityYear.nonEmpty }.get(state.yearOfStudy).flatten match {
+        case Some(year) if year.studentCourseYearDetails.nonEmpty =>
+          val marksPerYear =
+            progressionService.marksPerYear(
+              year.studentCourseYearDetails.get,
+              state.normalLoadLookup(year.route),
+              Map(thisYearOfStudy -> state.routeRulesLookup(year.route, year.level)),
+              state.yearMarksToUse,
+              state.isLevelGrid,
+              entity.yearWeightings,
+              markForFinalYear = false
+            )
 
-          lazy val calculatedYearMark: Either[String, BigDecimal] =
-            progressionService.getYearMark(year, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level), entity.yearWeightings)
-
-          state.yearMarksToUse match {
-            case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
-              uploadedYearMark.toRight(s"No year mark for Year ${year.yearOfStudy}")
-
-            case ExamGridYearMarksToUse.UploadedYearMarksIfAvailable =>
-              uploadedYearMark.fold(calculatedYearMark)(Right.apply)
-
-            case ExamGridYearMarksToUse.CalculateYearMarks =>
-              calculatedYearMark
-          }
+          marksPerYear.flatMap(_.get(thisYearOfStudy).toRight(s"No year mark for Year ${year.yearOfStudy}"))
 
         case _ => Left(s"No course detail found for ${entity.universityId} for Year $thisYearOfStudy")
       }
     }
-
-    /**
-      * Gets the ExamGridEntityYear for this previous year of study.
-      * This may have already been calculated if we're showing previous year registrations.
-      * If not we need to re-fetch it.
-      */
-    private def relevantEntityYear(entity: ExamGridEntity): Option[ExamGridEntityYear] = {
-      entity.validYears.get(thisYearOfStudy).orElse(
-        entity.validYears.values.lastOption.flatMap(entityYear =>
-          // For the last year go back up to the student and re-fetch the ExamGridEntity
-          entityYear.studentCourseYearDetails.get.studentCourseDetails.student.toExamGridEntity(entityYear.studentCourseYearDetails.get)
-            // Then see if a matching ExamGrdEntityYear exists
-            .validYears.get(thisYearOfStudy)
-        )
-      )
-    }
-
   }
 
   override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = {
