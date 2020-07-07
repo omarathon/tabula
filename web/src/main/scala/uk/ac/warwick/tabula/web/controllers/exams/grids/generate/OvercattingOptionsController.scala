@@ -172,7 +172,8 @@ class OvercattingOptionsView(
       overcattingModules = Some(overcattedModules.map(_.module)),
       markOverrides = Some(overwrittenMarks),
       studentCourseYearDetails = None,
-      agreedMark = None,
+      agreedMark = Option(scyd.agreedMark).map(BigDecimal(_)),
+      yearAbroad = scyd.yearAbroad,
       level = scyd.level,
       yearOfStudy = studyYearByLevelOrBlock
     ))))

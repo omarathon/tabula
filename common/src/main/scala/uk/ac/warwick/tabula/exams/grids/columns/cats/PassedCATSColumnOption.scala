@@ -25,12 +25,11 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption with Autowir
 
     override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-    override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
+    override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] =
       state.entities.map(entity =>
         entity -> relevantEntityYear(entity).map(entityYear => result(entityYear))
           .getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for year $thisYearOfStudy"))
       ).toMap
-    }
 
     private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
       val emptyExpectingMarks = entity.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
