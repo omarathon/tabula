@@ -43,9 +43,9 @@
 
     <#if requiresResits?has_content>
         <p>
-          <@fmt.p number=requiresResits?size singular="student" plural="students" /> have received a grade which indicates that they have further assessment requirements.
-          Please indicate for each whether this is an "Examination" (i.e. an online test to be administered via the Alternative Exams Portal (AEP)) or
-          a written "Assignment", by selecting the appropriate type from the drop-down.
+          <@fmt.p number=requiresResits?size singular="student" plural="students" /> have received a grade which indicates that they have further assessment
+          requirements.  Please check the box next to each component that will be re-assessed and indicate for each whether this is an "Examination" (i.e. an
+          online test to be administered via the Alternative Exams Portal (AEP)) or a written "Assignment", by selecting the appropriate type from the drop-down.
         </p>
 
         <p>
