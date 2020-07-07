@@ -39,7 +39,7 @@ object StudentCourseYearDetails {
   // makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
   def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails*): ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYearGrouped", s"$yearOfStudy-${scyds.map(_.id).sorted.mkString("-")}") {
-      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
+      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException(s"Cannot group StudentCourseYearDetails from different levels ${scyds.map(_.studyLevel).distinct.mkString(", ")}")
       val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
       val route = {
         val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
