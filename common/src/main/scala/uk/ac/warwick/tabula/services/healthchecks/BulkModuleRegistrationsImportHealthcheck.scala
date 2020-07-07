@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.healthchecks
 import java.time.LocalDateTime
 
 import humanize.Humanize._
+import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -15,25 +16,15 @@ import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvide
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
+abstract class AbstractImportModuleRegistraionStatusHealthcheck(name: String)
+  extends ServiceHealthcheckProvider(new ServiceHealthcheck(name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
 
-object BulkModuleRegistraionsImportHealthcheck {
-  val Name = "import-bulk-moduleregistrations"
-  val InitialState = new ServiceHealthcheck(Name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
-
-}
-
-
-@Component
-@Profile(Array("scheduling"))
-class ImportModuleRegistraionStatusHealthcheck
-  extends ServiceHealthcheckProvider(BulkModuleRegistraionsImportHealthcheck.InitialState) {
-
-
-  def auditEvents: Seq[AuditEvent] = {
-    val queryService = Wire[AuditEventQueryService]
-    Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForAcademicYear", 0, 50), 1.minute)
-  }
+  /**
+   * Fetch a list of audit events, most recent first, relating to this import
+   */
+  protected def auditEvents: Seq[AuditEvent]
 
   protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
     //find the last successful import
@@ -62,21 +53,49 @@ class ImportModuleRegistraionStatusHealthcheck
       failedMessage
     ).flatten.mkString(", ")
 
+    val lastSuccessfulHoursAgo: Double =
+      lastSuccessful.map { event =>
+        val d = new org.joda.time.Duration(event.eventDate, DateTime.now)
+        d.toStandardSeconds.getSeconds / 3600.0
+      }.getOrElse(0)
+
     new ServiceHealthcheck(
-      BulkModuleRegistraionsImportHealthcheck.Name,
+      name,
       status,
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
-      message
+      message,
+      Seq[ServiceHealthcheck.PerformanceData[_]](
+        new ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo)
+      ).asJava
     )
   }
+
 
   @Scheduled(fixedRate = 60 * 1000) // 1 minute
   def run(): Unit = transactional(readOnly = true) {
     val imports = auditEvents
+
     update(getServiceHealthCheck(imports))
   }
 
 }
 
+@Component
+@Profile(Array("scheduling"))
+class ImportModuleRegistraionsForAcademicYearStatusHealthcheck extends AbstractImportModuleRegistraionStatusHealthcheck("import-bulk-academicyear-moduleregistrations") {
+  def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForAcademicYear", 0, 50), 1.minute)
+  }
+}
+
+@Component
+@Profile(Array("scheduling"))
+class ImportModuleRegistraionsForUniversityIdsStatusHealthcheck extends AbstractImportModuleRegistraionStatusHealthcheck("import-bulk-universityids-moduleregistrations") {
+  def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForUniversityIds", 0, 50), 1.minute)
+  }
+}
 
 
