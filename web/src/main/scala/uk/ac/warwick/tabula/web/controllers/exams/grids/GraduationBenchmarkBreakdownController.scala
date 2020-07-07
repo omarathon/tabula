@@ -59,6 +59,7 @@ class GraduationBenchmarkBreakdownController extends ExamsController
         Mav("exams/grids/generate/graduationBenchmarkDetails",
           "breakdown" -> ugBreakdown,
           "member" -> studentCourseDetails.student,
+          "benchmarkCutoffDate" -> ModuleRegistration.GraduationBenchmarkCutoff
         )
       case Right(pgBreakdown) =>
         Mav("exams/grids/generate/pgGraduationBenchmarkDetails",
