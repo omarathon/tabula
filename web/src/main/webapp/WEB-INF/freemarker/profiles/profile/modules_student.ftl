@@ -53,11 +53,7 @@
             </h3>
           </div>
           <div class="panel-body">
-            <h4>Board decision: ${progressionDecision.outcome.description}</h4>
-
-            <#if progressionDecision.minutes?has_content>
-              <p>${progressionDecision.minutes}</p>
-            </#if>
+            <div class="lead">${progressionDecision.outcome.message}</div>
           </div>
         </div>
       </#list>
