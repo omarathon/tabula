@@ -730,14 +730,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
   def allowEmptyYearMarks(): Unit = {
     // full time student with no year abroad
     new ThreeYearStudentFixture {
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
       allowEmpty should be(false)
     }
 
     // An year abroad - 2nd year  with null block occurrence
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("SWE", "SANDWICH (E)", "Sandwich (thick) Erasmus Scheme")
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(true)
     }
 
@@ -745,7 +745,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YO", "OPTIONAL YR", "Optional year out (study related)")
       scyd2.blockOccurrence = "FW" //  SITS block occurrence
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(true)
     }
 
@@ -753,7 +753,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YM", "COMP YR", "Compulsory year out (study related)")
       scyd2.blockOccurrence = "I"
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(false)
     }
 
@@ -761,7 +761,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YX", "EXCH YR", "Exchange year out (study related)")
       scyd2.blockOccurrence = "I"
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(false)
     }
 

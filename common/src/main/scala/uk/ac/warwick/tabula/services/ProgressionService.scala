@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.CourseType.{PGT, UG}
 import uk.ac.warwick.tabula.data.model.DegreeType.{Postgraduate, Undergraduate}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 
+import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
 
 sealed abstract class ProgressionResult(val description: String)
@@ -124,10 +126,7 @@ object ProgressionService {
   }
 
   def allowEmptyYearMarks(yearWeightings: Seq[CourseYearWeighting], entityYear: ExamGridEntityYear): Boolean = {
-    lazy val yearAbroad = entityYear.studentCourseYearDetails match {
-      case Some(scyd) => scyd.yearAbroad
-      case _ => false
-    }
+    lazy val yearAbroad = entityYear.yearAbroad
     yearWeightings.exists(w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0) || yearAbroad
   }
 
@@ -140,6 +139,37 @@ object ProgressionService {
         case _ => false
       }
       if (abroad) yearWeighting.copyZeroWeighted else yearWeighting
+    }
+  }
+
+  def getEntityPerYear(scyd: StudentCourseYearDetails, groupByLevel: Boolean, finalYearOfStudy: Int): Map[Int, ExamGridEntityYear] = {
+    val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
+    val allScydsUnfiltered = scds.flatMap(_.freshStudentCourseYearDetails).filter(d => d.studentCourseDetails.courseType == scyd.studentCourseDetails.courseType && d.academicYear <= scyd.academicYear)
+
+    // Where there are multiple SYCDs with the same SPR code and academic year, only retain the last one.
+    var seen: mutable.Set[(String, AcademicYear)] = mutable.Set()
+    val allScyds: Seq[StudentCourseYearDetails] =
+      allScydsUnfiltered.reverse.filter { scyd =>
+        if (seen.contains((scyd.studentCourseDetails.sprCode, scyd.academicYear))) false
+        else {
+          seen += scyd.studentCourseDetails.sprCode -> scyd.academicYear
+          true
+        }
+      }.reverse
+
+    if (groupByLevel) {
+      allScyds.groupBy(_.level.orNull)
+        .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*) }
+    } else {
+      (1 to finalYearOfStudy).map { block =>
+        val allScydsForYear = allScyds.filter(_.yearOfStudy.toInt == block)
+
+        block -> (allScydsForYear.toList match {
+          case Nil => null
+          case single :: Nil => single.toExamGridEntityYear
+          case multiple => StudentCourseYearDetails.toExamGridEntityYearGrouped(block, multiple: _*)
+        })
+      }.toMap
     }
   }
 
@@ -233,7 +263,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     markForFinalYear: Boolean,
   ): Either[String, Map[Int, BigDecimal]] = {
     val finalYear = finalYearOfStudy(scyd, groupByLevel)
-    lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+    lazy val entityPerYear = ProgressionService.getEntityPerYear(scyd, groupByLevel, finalYear)
     getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, yearMarksToUse, weightings, markForFinalYear)
   }
 
@@ -241,7 +271,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     studentCourseYearDetails.map(scyd => {
       val finalYear = finalYearOfStudy(scyd, groupByLevel)
       if (yearOfStudy >= finalYear) {
-        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+        lazy val entityPerYear = ProgressionService.getEntityPerYear(scyd, groupByLevel, finalYear)
         lazy val markPerYear = getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, yearMarksToUse, weightings, markForFinalYear = false)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
         for (mpy <- markPerYear; yw <- yearWeightings) yield {
@@ -397,7 +427,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     entityYear.studentCourseYearDetails.map { scyd =>
       val finalYear = finalYearOfStudy(scyd, groupByLevel)
       if (entityYear.yearOfStudy >= finalYear) {
-        lazy val entityPerYear = getEntityPerYear(scyd, groupByLevel, finalYear)
+        lazy val entityPerYear = ProgressionService.getEntityPerYear(scyd, groupByLevel, finalYear)
         lazy val markPerYear = getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, yearMarksToUse, weightings, markForFinalYear = true)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
 
@@ -415,27 +445,6 @@ abstract class AbstractProgressionService extends ProgressionService {
         FinalYearGrade.Ignore
       }
     }.getOrElse(FinalYearGrade.Ignore)
-  }
-
-  private def getEntityPerYear(scyd: StudentCourseYearDetails, groupByLevel: Boolean, finalYearOfStudy: Int): Map[Int, ExamGridEntityYear] = {
-    val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
-    val allScyds = scds.flatMap(_.freshStudentCourseYearDetails).filter(d => d.studentCourseDetails.courseType == scyd.studentCourseDetails.courseType && d.academicYear <= scyd.academicYear)
-
-    if (groupByLevel) {
-      allScyds.groupBy(_.level.orNull)
-        .map { case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*) }
-    } else {
-      (1 to finalYearOfStudy).map { block =>
-        val allScydsForYear = allScyds.filter(_.yearOfStudy.toInt == block)
-
-        // For block grids, only merge where it's the same SCJ
-        block -> (allScydsForYear.filter(scyd => allScydsForYear.lastOption.map(_.studentCourseDetails.scjCode).contains(scyd.studentCourseDetails.scjCode)).toList match {
-          case Nil => null
-          case single :: Nil => single.toExamGridEntityYear
-          case multiple => StudentCourseYearDetails.toExamGridEntityYearGrouped(block, multiple: _*)
-        })
-      }.toMap
-    }
   }
 
   private def getMarkPerYear(
