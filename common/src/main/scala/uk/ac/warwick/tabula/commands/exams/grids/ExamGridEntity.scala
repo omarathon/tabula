@@ -25,6 +25,7 @@ case class ExamGridEntityYear(
   markOverrides: Option[Map[Module, BigDecimal]],
   studentCourseYearDetails: Option[StudentCourseYearDetails],
   agreedMark: Option[BigDecimal],
+  yearAbroad: Boolean,
   level: Option[Level],
   yearOfStudy: YearOfStudy, // a pointer back to this ExamGridEntityYears key in the parent ExamGridEntity.years map
 )
