@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportFeedbackToSitsServiceComponent, ExportFeedbackToSitsServiceComponent}
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 import scala.jdk.CollectionConverters._
@@ -26,8 +26,6 @@ object ExportRecordedAssessmentComponentStudentsToSitsCommand {
       with AutowiringExportFeedbackToSitsServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringAssessmentMembershipServiceComponent
-      with AutowiringModuleAndDepartmentServiceComponent
-      with AutowiringModuleRegistrationServiceComponent
       with AutowiringTransactionalComponent
 }
 
@@ -37,36 +35,11 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
   self: ExportFeedbackToSitsServiceComponent
     with AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
-    with ModuleAndDepartmentServiceComponent
-    with ModuleRegistrationServiceComponent
     with TransactionalComponent =>
 
   override def applyInternal(): Result = transactional() {
     val marksToUpload =
-      assessmentComponentMarksService.allNeedingWritingToSits
-        .filterNot(_.marks.isEmpty) // Should never happen anyway
-        .filterNot { student =>
-          lazy val canUploadMarksToSitsForYear =
-            moduleAndDepartmentService.getModuleBySitsCode(student.moduleCode).forall { module =>
-              module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
-            }
-
-          // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
-          lazy val moduleRegistrations: Seq[ModuleRegistration] =
-            moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
-              .filter(_.studentCourseDetails.student.universityId == student.universityId)
-
-          lazy val canUploadMarksToSits: Boolean = {
-            // true if latestState is empty (which should never be the case anyway)
-            student.latestState.forall { markState =>
-              markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
-                MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
-              }
-            }
-          }
-
-          !canUploadMarksToSitsForYear || !canUploadMarksToSits
-        }
+      assessmentComponentMarksService.allNeedingWritingToSits(filtered = true)
         .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
         .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
 

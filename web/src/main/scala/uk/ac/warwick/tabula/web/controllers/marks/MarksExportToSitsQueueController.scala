@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.marks
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{MarkState, ModuleRegistration, RecordedAssessmentComponentStudent, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, ModuleRegistrationMarksServiceComponent}
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.controllers.marks.MarksExportToSitsQueueCommand.Result
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 @Controller
 @RequestMapping(Array("/marks/sits-queue"))
@@ -49,7 +50,7 @@ object MarksExportToSitsQueueCommand {
       with Unaudited with ReadOnly
 }
 
-abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Result] {
+abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Result] with TaskBenchmarking {
   self: AssessmentComponentMarksServiceComponent
     with ModuleAndDepartmentServiceComponent
     with ModuleRegistrationServiceComponent
@@ -57,22 +58,45 @@ abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Res
     with TransactionalComponent =>
 
   override def applyInternal(): Result = transactional(readOnly = true) {
-    val allComponentMarksNeedsWritingToSits = assessmentComponentMarksService.allNeedingWritingToSits.filterNot(_.marks.isEmpty)
+    val allComponentMarksNeedsWritingToSits = benchmarkTask("Load the component mark queue") {
+      assessmentComponentMarksService.allNeedingWritingToSits(filtered = false).filterNot(_.marks.isEmpty)
+    }
 
-    val (componentMarksCanUploadToSitsForYear, componentMarksCannotUploadToSitsForYear) =
+    type UniversityId = String
+    type TabulaModuleCode = String
+    type SitsModuleCode = String
+    type Occurrence = String
+
+    val allModules: Map[TabulaModuleCode, Module] = benchmarkTask("Load all modules for component marks") {
+      moduleAndDepartmentService.getModulesByCodes(
+        allComponentMarksNeedsWritingToSits.map(_.moduleCode).distinct.flatMap(Module.stripCats).map(_.toLowerCase)
+      ).map(module => module.code -> module).toMap
+    }
+
+    val (componentMarksCanUploadToSitsForYear, componentMarksCannotUploadToSitsForYear) = benchmarkTask("Filter component marks with upload disabled") {
       allComponentMarksNeedsWritingToSits.partition { student =>
-        moduleAndDepartmentService.getModuleBySitsCode(student.moduleCode).forall { module =>
+        Module.stripCats(student.moduleCode).map(_.toLowerCase).flatMap(allModules.get).forall { module =>
           module.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, module)
         }
       }
+    }
 
-    val (componentMarksCanUploadAgreedMarksToSits, componentMarksCannotUploadAgreedMarksToSits) =
+    val allModuleRegistrations: Map[UniversityId, Map[(SitsModuleCode, AcademicYear, Occurrence), Seq[ModuleRegistration]]] = benchmarkTask("Load all module registrations for component marks") {
+      moduleRegistrationService.getByUniversityIds(componentMarksCanUploadToSitsForYear.map(_.universityId).distinct, includeDeleted = false)
+        .groupBy(mr => SprCode.getUniversityId(mr.sprCode))
+        .map { case (sprCode, registrations) =>
+          sprCode -> registrations.groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+        }
+    }
+
+    val (componentMarksCanUploadAgreedMarksToSits, componentMarksCannotUploadAgreedMarksToSits) = benchmarkTask("Filter component marks not allowing agreed mark processing") {
       componentMarksCanUploadToSitsForYear
         .map { student =>
           // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
           lazy val moduleRegistrations: Seq[ModuleRegistration] =
-            moduleRegistrationService.getByModuleOccurrence(student.moduleCode, student.academicYear, student.occurrence)
-              .filter(_.studentCourseDetails.student.universityId == student.universityId)
+            allModuleRegistrations
+              .getOrElse(student.universityId, Map.empty)
+              .getOrElse((student.moduleCode, student.academicYear, student.occurrence), Seq.empty)
 
           student -> moduleRegistrations
         }
@@ -84,15 +108,19 @@ abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Res
             }
           }
         }
+    }
 
-    val allModuleMarksNeedsWritingToSits = moduleRegistrationMarksService.allNeedingWritingToSits.filterNot(_.marks.isEmpty)
+    val allModuleMarksNeedsWritingToSits = benchmarkTask("Load the module mark queue") {
+      moduleRegistrationMarksService.allNeedingWritingToSits(filtered = false).filterNot(_.marks.isEmpty)
+    }
 
-    val (moduleMarksCanUploadToSitsForYear, moduleMarksCannotUploadToSitsForYear) =
+    val (moduleMarksCanUploadToSitsForYear, moduleMarksCannotUploadToSitsForYear) = benchmarkTask("Filter module marks with upload disabled") {
       allModuleMarksNeedsWritingToSits.partition { student =>
         student.moduleRegistration.map(_.module).exists(m => m.adminDepartment.canUploadMarksToSitsForYear(student.academicYear, m))
       }
+    }
 
-    val (moduleMarksCanUploadAgreedMarksToSits, moduleMarksCannotUploadAgreedMarksToSits) =
+    val (moduleMarksCanUploadAgreedMarksToSits, moduleMarksCannotUploadAgreedMarksToSits) = benchmarkTask("Filter module marks not allowing agreed mark processing") {
       moduleMarksCanUploadToSitsForYear.partition { student =>
         // true if latestState is empty (which should never be the case anyway)
         student.latestState.forall { markState =>
@@ -101,27 +129,30 @@ abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Res
           }
         }
       }
+    }
 
-    Result(
-      componentMarksNotEnabledForYear = componentMarksCannotUploadToSitsForYear.size,
-      componentMarksAgreedNotAllowed = componentMarksCannotUploadAgreedMarksToSits.size,
-      componentMarksQueue =
-        componentMarksCanUploadAgreedMarksToSits
-          .map { case (student, moduleRegistrations) =>
-            moduleRegistrations.headOption.map(_.sprCode).getOrElse(s"${student.universityId}/???") -> student
-          }
-          .sortBy { case (sprCode, student) =>
-            (sprCode, student.moduleCode, student.academicYear, student.occurrence, student.sequence, student.resitSequence)
-          },
+    benchmarkTask("Build result") {
+      Result(
+        componentMarksNotEnabledForYear = componentMarksCannotUploadToSitsForYear.size,
+        componentMarksAgreedNotAllowed = componentMarksCannotUploadAgreedMarksToSits.size,
+        componentMarksQueue =
+          componentMarksCanUploadAgreedMarksToSits
+            .map { case (student, moduleRegistrations) =>
+              moduleRegistrations.headOption.map(_.sprCode).getOrElse(s"${student.universityId}/???") -> student
+            }
+            .sortBy { case (sprCode, student) =>
+              (sprCode, student.moduleCode, student.academicYear, student.occurrence, student.sequence, student.resitSequence)
+            },
 
-      moduleMarksNotEnabledForYear = moduleMarksCannotUploadToSitsForYear.size,
-      moduleMarksAgreedNotAllowed = moduleMarksCannotUploadAgreedMarksToSits.size,
-      moduleMarksQueue =
-        moduleMarksCanUploadAgreedMarksToSits
-          .sortBy { student =>
-            (student.sprCode, student.sitsModuleCode, student.academicYear, student.occurrence)
-          },
-    )
+        moduleMarksNotEnabledForYear = moduleMarksCannotUploadToSitsForYear.size,
+        moduleMarksAgreedNotAllowed = moduleMarksCannotUploadAgreedMarksToSits.size,
+        moduleMarksQueue =
+          moduleMarksCanUploadAgreedMarksToSits
+            .sortBy { student =>
+              (student.sprCode, student.sitsModuleCode, student.academicYear, student.occurrence)
+            },
+      )
+    }
   }
 }
 
