@@ -383,13 +383,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       upstreamAssessmentGroupMember.foreach { uagm =>
         val studentMarkRecord = studentMarkRecords.find(_.upstreamAssessmentGroupMember == uagm).get
-
-        val isUnchanged =
-          !studentMarkRecord.outOfSync &&
-          !item.comments.hasText &&
-          ((!item.mark.hasText && studentMarkRecord.mark.isEmpty) || studentMarkRecord.mark.map(_.toString).contains(item.mark)) &&
-          ((!item.grade.hasText && studentMarkRecord.grade.isEmpty) || studentMarkRecord.grade.contains(item.grade))
-
+        
         val isAgreed = studentMarkRecord.agreed || studentMarkRecord.markState.contains(MarkState.Agreed)
 
         if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
