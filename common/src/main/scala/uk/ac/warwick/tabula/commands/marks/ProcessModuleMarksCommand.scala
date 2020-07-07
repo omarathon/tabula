@@ -136,12 +136,10 @@ trait ProcessModuleMarksPopulateOnForm extends PopulateOnForm {
       student.grade.foreach(s.grade = _)
       student.result.foreach(r => s.result = r.dbValue)
 
-      student.mark.foreach { m =>
-        val request = new ValidModuleRegistrationGradesRequest
-        request.mark = m.toString
-        request.existing = student.grade.orNull
-        s.validGrades = ValidGradesForMark.getTuple(request, student.moduleRegistration)(assessmentMembershipService = assessmentMembershipService)
-      }
+      val request = new ValidModuleRegistrationGradesRequest
+      request.mark = student.mark.map(_.toString).getOrElse("")
+      request.existing = student.grade.orNull
+      s.validGrades = ValidGradesForMark.getTuple(request, student.moduleRegistration)(assessmentMembershipService = assessmentMembershipService)
 
       if (student.grade.isEmpty || student.result.isEmpty || student.agreed || student.markState.contains(MarkState.Agreed)) {
         s.process = false

@@ -389,12 +389,10 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
         mark.foreach(m => s.mark = m.toString)
         grade.foreach(s.grade = _)
 
-        mark.foreach { m =>
-          val request = new ValidModuleRegistrationGradesRequest
-          request.mark = m.toString
-          request.existing = grade.orNull
-          s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
-        }
+        val request = new ValidModuleRegistrationGradesRequest
+        request.mark = mark.map(_.toString).getOrElse("")
+        request.existing = grade.orNull
+        s.validGrades = ValidGradesForMark.getTuple(request, mr.get)(assessmentMembershipService = assessmentMembershipService)
 
         result.foreach(r => s.result = r.dbValue)
         comments.foreach(s.comments = _)

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.helpers.marks.{AssessmentComponentValidGradesForMark
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ResitServiceComponent}
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -280,13 +280,11 @@ trait RecordAssessmentComponentMarksPopulateOnForm extends PopulateOnForm {
         student.mark.foreach(m => s.mark = m.toString)
         student.grade.foreach(s.grade = _)
 
-        student.mark.foreach { mark =>
-          val request = new ValidAssessmentComponentGradesRequest
-          request.mark = mark.toString
-          request.existing = student.grade.orNull
-          request.resitAttempt = JInteger(student.upstreamAssessmentGroupMember.currentResitAttempt)
-          s.validGrades = ValidGradesForMark.getTuple(request, assessmentComponent)(assessmentMembershipService = assessmentMembershipService)
-        }
+        val request = new ValidAssessmentComponentGradesRequest
+        request.mark = student.mark.map(_.toString).getOrElse("")
+        request.existing = student.grade.orNull
+        request.resitAttempt = JInteger(student.upstreamAssessmentGroupMember.currentResitAttempt)
+        s.validGrades = ValidGradesForMark.getTuple(request, assessmentComponent)(assessmentMembershipService = assessmentMembershipService)
 
         students.put(s"${student.universityId}_${student.resitSequence.getOrElse("")}", s)
       }
@@ -383,7 +381,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
       upstreamAssessmentGroupMember.foreach { uagm =>
         val studentMarkRecord = studentMarkRecords.find(_.upstreamAssessmentGroupMember == uagm).get
-        
+
         val isAgreed = studentMarkRecord.agreed || studentMarkRecord.markState.contains(MarkState.Agreed)
 
         if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
