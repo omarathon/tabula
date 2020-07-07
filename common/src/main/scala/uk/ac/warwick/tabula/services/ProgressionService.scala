@@ -160,7 +160,7 @@ object ProgressionService {
     if (groupByLevel) {
       allScyds.groupBy(_.level.orNull)
         .map { case (level, scyds) =>
-          if (level == null) throw new RuntimeException(s"Invalid SITS data. SITS Student course level not set ${scyds.head.studentCourseDetails.scjCode}")
+          if (level == null) throw new RuntimeException(s"Invalid SITS data. SITS Student course level not set ${scyds.map(_.studentCourseDetails.scjCode).distinct.mkString(", ")}")
           level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*)
         }
     } else {
