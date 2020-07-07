@@ -46,7 +46,7 @@ abstract class AbstractModuleRegistrationMarksService extends ModuleRegistration
         // true if latestState is empty (which should never be the case anyway)
         student.latestState.forall { markState =>
           markState != MarkState.Agreed || student.moduleRegistration.exists { moduleRegistration =>
-            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+            MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails), MarkState.MarkUploadTime)
           }
         }
       }
