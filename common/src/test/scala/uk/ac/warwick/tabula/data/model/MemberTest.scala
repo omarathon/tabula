@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
@@ -240,18 +242,29 @@ class MemberTest extends TestBase with Mockito {
     val scyd2012 = scd1.latestStudentCourseYearDetails
     scyd2012.academicYear = AcademicYear(2012)
     scyd2012.yearOfStudy = 1
+    scyd2012.studyLevel = "1"
     val scyd2013 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2013), yearOfStudy = 1, studentCourseDetails = scd1)
+    scyd2013.studyLevel = "1"
     scd1.addStudentCourseYearDetails(scyd2013)
     val scyd2014 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2014), yearOfStudy = 2, studentCourseDetails = scd1)
+    scyd2014.studyLevel = "2"
     scd1.addStudentCourseYearDetails(scyd2014)
     val scyd2015 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2015), yearOfStudy = 3, studentCourseDetails = scd1)
+    scyd2015.studyLevel = "3"
     scd1.addStudentCourseYearDetails(scyd2015)
     val scd2 = Fixtures.studentCourseDetails(student, null, null)
     scd2.scjCode = s"${student.universityId}/2"
     val scyd2016 = scd2.latestStudentCourseYearDetails
     scyd2016.academicYear = AcademicYear(2016)
     scyd2016.yearOfStudy = 1
+    scyd2016.studyLevel = "1"
     student.courseAndRouteService = courseAndRouteService
+
+    scyd2012.id = UUID.randomUUID.toString
+    scyd2013.id = UUID.randomUUID.toString
+    scyd2014.id = UUID.randomUUID.toString
+    scyd2015.id = UUID.randomUUID.toString
+    scyd2016.id = UUID.randomUUID.toString
 
     val entity = student.toExamGridEntity(scyd2015)
     entity.validYears(1).studentCourseYearDetails.get should be(scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)
