@@ -247,7 +247,7 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
   override def populateCell(cell: Cell, cellStyleMap: CellStyleMap, commentHelper: SpreadsheetHelpers.CommentHelper): Unit = {
     super.populateCell(cell, cellStyleMap, commentHelper)
 
-    if (message.hasText)
+    if (message.hasText && commentHelper != null)
       cell.setCellComment(commentHelper.createComment(cell, message))
   }
 }

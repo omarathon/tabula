@@ -28,8 +28,6 @@ class RecordedResit extends GeneratedId
     this.academicYear = uag.academicYear
     this.occurrence = uag.occurrence
     this.marksCode = ac.map(_.marksCode).orNull
-    // use raw so that the reassessment is weighted correctly against other assessments in the group
-    this.weighting = ac.map(_.rawWeighting).orNull
   }
 
   @Column(name = "spr_code", nullable = false)
