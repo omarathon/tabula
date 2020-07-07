@@ -76,7 +76,7 @@ object MarksDepartmentHomeCommand {
         agreed = isAgreedSITS,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),
         moduleRegistration = moduleRegistration,
-        requiresResit
+        requiresResit = requiresResit
       )
     }
   }

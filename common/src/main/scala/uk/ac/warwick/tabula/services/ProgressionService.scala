@@ -164,7 +164,13 @@ object ProgressionService {
       (1 to finalYearOfStudy).map { block =>
         val allScydsForYear = allScyds.filter(_.yearOfStudy.toInt == block)
 
-        block -> (allScydsForYear.toList match {
+        // Only where the SPR code and SCJ code matches the last one - don't undo this or it will merge over course transfers
+        val allScydsForYearForSameCourse = allScydsForYear.filter { scd =>
+          scd.studentCourseDetails.sprCode == allScydsForYear.last.studentCourseDetails.sprCode &&
+          scd.studentCourseDetails.scjCode == allScydsForYear.last.studentCourseDetails.scjCode
+        }
+
+        block -> (allScydsForYearForSameCourse.toList match {
           case Nil => null
           case single :: Nil => single.toExamGridEntityYear
           case multiple => StudentCourseYearDetails.toExamGridEntityYearGrouped(block, multiple: _*)
