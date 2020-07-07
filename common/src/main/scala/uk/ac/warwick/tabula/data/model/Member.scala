@@ -445,11 +445,11 @@ class StudentMember extends Member with StudentProperties {
         val relevantYears = if (ugLevel) baseSCYD.studyLevel.toInt else 1
 
         (1 to relevantYears).map { yr =>
-          yr -> entitiesPerYear.get(yr)
+          yr -> entitiesPerYear.get(yr).filter(_ != null)
         }.toMap
       } else {
         (1 to baseSCYD.yearOfStudy).map(year =>
-          year -> entitiesPerYear.get(year)
+          year -> entitiesPerYear.get(year).filter(_ != null)
         ).toMap
       }
 
