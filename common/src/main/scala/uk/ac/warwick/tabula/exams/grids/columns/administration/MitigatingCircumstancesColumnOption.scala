@@ -36,7 +36,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
           assessment.module.map(_.code.toUpperCase).getOrElse(assessment.moduleCode)
         }.distinct
 
-        def globalRecommendations(s: MitigatingCircumstancesSubmission): Seq[String] = s.globalRecommendations
+        def globalRecommendations(s: MitigatingCircumstancesSubmission, html: Boolean): Seq[String] = s.globalRecommendations
           .map{ r => r -> s.affectedAssessments.asScala.toSeq }
           .map{ case (r, a) =>
             "%s (all assessments - %s)%s".format(
@@ -44,7 +44,8 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
               affectedAssessmentsModuleCodes(a).mkString(", "),
               r match {
                 case MitCircsExamBoardRecommendation.Other if s.boardRecommendationOther.maybeText.nonEmpty =>
-                  "<br /><span class=\"very-subtle\">%s</span>".format(s.boardRecommendationOther)
+                  if (html) "<br /><span class=\"very-subtle\">%s</span>".format(s.boardRecommendationOther)
+                  else "\n(%s)".format(s.boardRecommendationOther)
 
                 case _ => ""
               }
@@ -61,7 +62,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
           val header = s"MIT-${s.key} Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})\n"
           val comments = Option(s.boardRecommendationComments).toSeq.mkStringOrEmpty("", "\n", "\n")
           if (s.outcomeGrading.entryName != "Rejected") {
-            val global = globalRecommendations(s).mkStringOrEmpty("", "\n", "\n")
+            val global = globalRecommendations(s, html = false).mkStringOrEmpty("", "\n", "\n")
             val affected = affectedAssessmentsByRecommendation(s).mkStringOrEmpty("", "\n", "\n")
             val acute = modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")\n")
 
@@ -75,7 +76,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
           <dt>MIT-${s.key}<dt><dd>Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})<dd>
           ${if(s.outcomeGrading != MitigatingCircumstancesGrading.Rejected) {
           s"""<dt>Recommendation</dt>
-            ${globalRecommendations(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
+            ${globalRecommendations(s, html = true).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${affectedAssessmentsByRecommendation(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"<dd>${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")</dd>")}
             """} else ""}
