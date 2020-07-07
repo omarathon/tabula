@@ -41,7 +41,7 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       .flatMap(entity => {
         entity.validYears.get(selectCourseCommand.studyYearByLevelOrBlock).map((entity, _))
       })
-      .map { case (entity, entityYear) =>
+      .map { case (_, entityYear) =>
         entityYear -> moduleRegistrationService.overcattedModuleSubsets(
           entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),

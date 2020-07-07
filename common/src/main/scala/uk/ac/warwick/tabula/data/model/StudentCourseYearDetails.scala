@@ -31,14 +31,15 @@ object StudentCourseYearDetails {
 
   //ensure we have  a single module code from module registration records. Some students have same module codes for different years but the latest year is the valid one with board marks
   def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] =
-    mrRecords.groupBy(_.module.code).values.map(_.maxBy(_.academicYear.startYear)).filterNot { mr =>
-      mr.agreedGrade.orElse(mr.actualGrade).contains(GradeBoundary.WithdrawnGrade) //TAB-8575
+    mrRecords.groupBy(_.module.code).values.flatMap { modRegs =>
+      modRegs.filterNot(mr => mr.agreedGrade.orElse(mr.actualGrade).contains(GradeBoundary.WithdrawnGrade))
+        .maxByOption(_.academicYear.startYear)
     }.toSeq
 
   // makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
   def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails*): ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYearGrouped", s"$yearOfStudy-${scyds.map(_.id).sorted.mkString("-")}") {
-      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
+      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException(s"Cannot group StudentCourseYearDetails from different levels ${scyds.map(_.studyLevel).distinct.mkString(", ")}")
       val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
       val route = {
         val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
@@ -54,6 +55,7 @@ object StudentCourseYearDetails {
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
         agreedMark = scyds.toSeq.flatMap(scyd => Option(scyd.agreedMark)).lastOption.map(BigDecimal(_)),
+        yearAbroad = scyds.exists(_.yearAbroad),
         level = scyds.head.level,
         yearOfStudy = yearOfStudy,
       )
@@ -221,6 +223,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
         markOverrides = None,
         studentCourseYearDetails = Some(this),
         agreedMark = Option(agreedMark).map(BigDecimal(_)),
+        yearAbroad = yearAbroad,
         level = level,
         yearOfStudy = this.yearOfStudy,
       )
