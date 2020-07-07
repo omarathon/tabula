@@ -62,7 +62,7 @@ class ProgressionDecision extends GeneratedId with ToString {
   @Column(name = "resit_period", nullable = false)
   var resitPeriod: Boolean = _
 
-  def isVisibleToStudent: Boolean = MarkState.resultsReleasedToStudents(academicYear, studentCourseDetails)
+  def isVisibleToStudent: Boolean = MarkState.resultsReleasedToStudents(academicYear, studentCourseDetails, MarkState.DecisionReleaseTime)
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,

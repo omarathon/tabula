@@ -13,7 +13,8 @@ object MarkState extends Enum[MarkState] {
   case object ConfirmedActual extends MarkState("Confirmed actual", "info") // could be named Actual but being explicit also helps with Actual/Agreed confusion
   case object Agreed extends MarkState("Agreed", "success")
 
-  val ReleaseTime = new LocalTime(10, 0)
+  val DecisionReleaseTime = new LocalTime(10, 0)
+  val MarkUploadTime = new LocalTime(9, 40) // Give us 20 minutes to upload agreed marks before release
 
   // https://warwick.ac.uk/coronavirus/intranet/continuity/teaching/marksandexamboards/guidance/results/#coordinatedrelease
   val DegreeApprenticeshipFirstYearReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 29)
@@ -22,10 +23,10 @@ object MarkState extends Enum[MarkState] {
   val UndergraduateIntermediateReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 30)
   val PostgraduateTaughtReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 8)
 
-  def resultsReleasedToStudents(moduleRegistration: ModuleRegistration): Boolean =
-    resultsReleasedToStudents(moduleRegistration.academicYear, Option(moduleRegistration.studentCourseDetails))
+  def resultsReleasedToStudents(moduleRegistration: ModuleRegistration, releaseTime: LocalTime): Boolean =
+    resultsReleasedToStudents(moduleRegistration.academicYear, Option(moduleRegistration.studentCourseDetails), releaseTime)
 
-  def resultsReleasedToStudents(academicYear: AcademicYear, studentCourseDetails: Option[StudentCourseDetails]): Boolean = {
+  def resultsReleasedToStudents(academicYear: AcademicYear, studentCourseDetails: Option[StudentCourseDetails], releaseTime: LocalTime): Boolean = {
     // Include previous years as well for (e.g.) resits, that'll work for 19/20 at least.
     if (academicYear <= AcademicYear.starting(2019)) {
       val releaseDate: Option[LocalDate] = studentCourseDetails.collect {
@@ -46,7 +47,7 @@ object MarkState extends Enum[MarkState] {
       }
 
       // Fail open, if the student doesn't match any rules, allow pushing
-      releaseDate.forall(_.toDateTime(ReleaseTime).isBefore(DateTime.now()))
+      releaseDate.forall(_.toDateTime(releaseTime).isBefore(DateTime.now()))
     } else true
   }
 }

@@ -78,7 +78,7 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
           // true if latestState is empty (which should never be the case anyway)
           student.latestState.forall { markState =>
             markState != MarkState.Agreed || moduleRegistrations.exists { moduleRegistration =>
-              MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails))
+              MarkState.resultsReleasedToStudents(student.academicYear, Option(moduleRegistration.studentCourseDetails), MarkState.MarkUploadTime)
             }
           }
         }

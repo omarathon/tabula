@@ -179,7 +179,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
         s.markState.contains(Agreed) || s.agreed
 
       // For needsWritingToSits and outOfSync we only check this state, not the SITS state as that doesn't make sense
-      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && MarkState.resultsReleasedToStudents(s.moduleRegistration))) {
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && MarkState.resultsReleasedToStudents(s.moduleRegistration, MarkState.DecisionReleaseTime))) {
         // Needs writing to SITS
         StageProgress(
           stage = ProcessModuleMarks,
@@ -421,7 +421,7 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
         s.markState.contains(Agreed) || s.agreed
 
       // For needsWritingToSits and outOfSync we only check the state, not the SITS flag
-      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && moduleRegistrations.filter(_.studentCourseDetails.student.universityId == s.universityId).exists(MarkState.resultsReleasedToStudents))) {
+      if (students.exists(s => s.markState.contains(Agreed) && s.needsWritingToSits && moduleRegistrations.filter(_.studentCourseDetails.student.universityId == s.universityId).exists(MarkState.resultsReleasedToStudents(_, MarkState.DecisionReleaseTime)))) {
         // Needs writing to SITS
         StageProgress(
           stage = ProcessMarks,
