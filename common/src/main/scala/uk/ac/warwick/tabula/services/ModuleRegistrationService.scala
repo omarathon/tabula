@@ -183,10 +183,11 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
     val validRecords = moduleRegistrations
       .filterNot(_.deleted)
-      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0)// 0 CAT modules don't count towards the overall mark so ignore them
+      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0) // 0 CAT modules don't count towards the overall mark so ignore them
       .filterNot(mr => mr.firstDefinedGrade.contains(GradeBoundary.WithdrawnGrade)) // Remove withdrawn modules
-    if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
-        Seq((null, validRecords))
+
+    if (validRecords.exists(mr => mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
+      Seq((null, validRecords))
     } else {
       // TAB-6331 - Overcat subsets don't _have_ to contain all optional core modules. If a minimum number of optional core modules must be passed that should
       // be handled by pathway rules instead (which means as far as grids are concerned there is no difference between Optional and OptionalCore modules)
@@ -194,14 +195,17 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
         mr.selectionStatus == ModuleSelectionStatus.Core
       )
       val subsets = validRecords.toSet.subsets.toSeq
-      val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
-        // CATS total of at least the normal load
-        modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
-          // Contains all the core modules
-          coreModules.forall(modRegs.contains) &&
-          // All the registrations have agreed or actual marks
-          modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.contains(mr.module) && markOverrides(mr.module) != null)
-      )
+      val validSubsets = subsets.filter(_.nonEmpty).filter { modRegs =>
+        val (forceMajeureModRegs, modRegsWithoutForceMajeure) = modRegs.partition(_.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
+        val forceMajeureCats = forceMajeureModRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum
+
+        // CATS total of at least the normal load, less any FM module weightings
+        modRegsWithoutForceMajeure.toSeq.map(mr => BigDecimal(mr.cats)).sum >= (normalLoad - forceMajeureCats) &&
+        // Contains all the core modules (including if FM)
+        coreModules.forall(modRegs.contains) &&
+        // All the registrations have agreed or actual marks
+        modRegsWithoutForceMajeure.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.contains(mr.module) && markOverrides(mr.module) != null)
+      }
       val ruleFilteredSubsets = validSubsets.filter(modRegs => rules.forall(_.passes(modRegs.toSeq)))
       val subsetsToReturn = {
         if (ruleFilteredSubsets.isEmpty) {

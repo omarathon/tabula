@@ -154,22 +154,46 @@ trait ModuleOccurrenceValidation {
       errors.reject("uniNumber.notOnModule", Array(sprCode), "")
     }
 
-    if (item.mark.hasText) {
-      if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
-        errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
-      }
+    // Don't worry about validating marks/grades if there's been no change
+    val isUnchanged = moduleRegistration.exists { modReg =>
+      val studentModuleMarkRecord = studentModuleMarkRecords.find(_.sprCode == modReg.sprCode).get
 
-      try {
-        val asInt = item.mark.toInt
-        if (asInt < 0 || asInt > 100) {
-          errors.rejectValue("mark", "actualMark.range")
-        } else if (doGradeValidation) {
-          val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, Some(asInt))).getOrElse(Seq.empty)
-          if (item.grade.hasText) {
-            if (!validGrades.exists(_.grade == item.grade)) {
-              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-            } else {
-              validGrades.find(_.grade == item.grade).foreach { gb =>
+      !studentModuleMarkRecord.outOfSync &&
+      !item.comments.hasText &&
+      ((!item.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(item.mark)) &&
+      ((!item.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(item.grade)) &&
+      ((!item.result.hasText && studentModuleMarkRecord.result.isEmpty) || studentModuleMarkRecord.result.map(_.dbValue).contains(item.result))
+    }
+
+    if (!isUnchanged) {
+      if (item.mark.hasText) {
+        if (item.grade.maybeText.contains(GradeBoundary.ForceMajeureMissingComponentGrade)) {
+          errors.rejectValue("mark", "actualMark.notEmpty.forceMajeure")
+        }
+
+        try {
+          val asInt = item.mark.toInt
+          if (asInt < 0 || asInt > 100) {
+            errors.rejectValue("mark", "actualMark.range")
+          } else if (doGradeValidation) {
+            val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, Some(asInt))).getOrElse(Seq.empty)
+            if (item.grade.hasText) {
+              if (!validGrades.exists(_.grade == item.grade)) {
+                errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+              } else {
+                validGrades.find(_.grade == item.grade).foreach { gb =>
+                  if (!item.result.hasText) {
+                    item.result = gb.result.map(_.dbValue).orNull
+                  } else if (gb.result.exists(_.dbValue != item.result)) {
+                    errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
+                  }
+                }
+              }
+            } else if (asInt != 0 || module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
+              // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
+              validGrades.find(_.isDefault).foreach { gb =>
+                item.grade = gb.grade
+
                 if (!item.result.hasText) {
                   item.result = gb.result.map(_.dbValue).orNull
                 } else if (gb.result.exists(_.dbValue != item.result)) {
@@ -177,55 +201,37 @@ trait ModuleOccurrenceValidation {
                 }
               }
             }
-          } else if (asInt != 0 || module.adminDepartment.assignmentGradeValidationUseDefaultForZero) {
-            // This is a bit naughty, validation shouldn't modify state, but it's clearer in the preview if we show what the grade will be
-            validGrades.find(_.isDefault).foreach { gb =>
-              item.grade = gb.grade
 
-              if (!item.result.hasText) {
-                item.result = gb.result.map(_.dbValue).orNull
-              } else if (gb.result.exists(_.dbValue != item.result)) {
-                errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
-              }
+            if (!item.grade.hasText) {
+              errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
             }
           }
-
-          if (!item.grade.hasText) {
-            errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-          }
+        } catch {
+          case _@(_: NumberFormatException | _: IllegalArgumentException) =>
+            errors.rejectValue("mark", "actualMark.format")
         }
-      } catch {
-        case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
-          errors.rejectValue("mark", "actualMark.format")
-      }
-    } else if (doGradeValidation && item.grade.hasText) {
-      val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, None)).getOrElse(Seq.empty)
-      if (!validGrades.exists(_.grade == item.grade)) {
-        errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
-      } else {
-        validGrades.find(_.grade == item.grade).foreach { gb =>
-          if (!item.result.hasText) {
-            item.result = gb.result.map(_.dbValue).orNull
-          } else if (gb.result.exists(_.dbValue != item.result)) {
-            errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
+      } else if (doGradeValidation && item.grade.hasText) {
+        val validGrades = moduleRegistration.map(modReg => assessmentMembershipService.gradesForMark(modReg, None)).getOrElse(Seq.empty)
+        if (!validGrades.exists(_.grade == item.grade)) {
+          errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+        } else {
+          validGrades.find(_.grade == item.grade).foreach { gb =>
+            if (!item.result.hasText) {
+              item.result = gb.result.map(_.dbValue).orNull
+            } else if (gb.result.exists(_.dbValue != item.result)) {
+              errors.rejectValue("result", "result.invalidSITS", Array(gb.result.get.description), "")
+            }
           }
         }
       }
-    }
 
-    if (item.grade.safeLength > 2) {
-      errors.rejectValue("grade", "actualGrade.tooLong")
+      if (item.grade.safeLength > 2) {
+        errors.rejectValue("grade", "actualGrade.tooLong")
+      }
     }
 
     moduleRegistration.foreach { modReg =>
       val studentModuleMarkRecord = studentModuleMarkRecords.find(_.sprCode == modReg.sprCode).get
-
-      val isUnchanged =
-        !studentModuleMarkRecord.outOfSync &&
-        !item.comments.hasText &&
-        ((!item.mark.hasText && studentModuleMarkRecord.mark.isEmpty) || studentModuleMarkRecord.mark.map(_.toString).contains(item.mark)) &&
-        ((!item.grade.hasText && studentModuleMarkRecord.grade.isEmpty) || studentModuleMarkRecord.grade.contains(item.grade)) &&
-        ((!item.result.hasText && studentModuleMarkRecord.result.isEmpty) || studentModuleMarkRecord.result.map(_.dbValue).contains(item.result))
 
       val isAgreed = studentModuleMarkRecord.agreed || studentModuleMarkRecord.markState.contains(MarkState.Agreed)
 

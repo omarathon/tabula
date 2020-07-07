@@ -207,6 +207,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
     "yearMarksToUse" -> yearMarksToUse,
     "mandatoryModulesAndYearMarkColumns" -> mandatoryModulesAndYearMarkColumns,
     "customColumnTitles" -> customColumnTitles,
-    "entitiesPerPage" -> entitiesPerPage
+    "entitiesPerPage" -> entitiesPerPage,
+    "applyBenchmark" -> applyBenchmark,
   )
 }

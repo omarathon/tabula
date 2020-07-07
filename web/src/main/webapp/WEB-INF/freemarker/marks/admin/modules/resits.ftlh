@@ -43,9 +43,9 @@
 
     <#if requiresResits?has_content>
         <p>
-          <@fmt.p number=requiresResits?size singular="student" plural="students" /> have received a grade which indicates that they have further assessment requirements.
-          Please indicate for each whether this is an "Examination" (i.e. an online test to be administered via the Alternative Exams Portal (AEP)) or
-          a written "Assignment", by selecting the appropriate type from the drop-down.
+          <@fmt.p number=requiresResits?size singular="student has" plural="students have" /> received a grade which indicates that they have further assessment
+          requirements.  Please check the box next to each component that will be re-assessed and indicate for each whether this is an "Examination" (i.e. an
+          online test to be administered via the Alternative Exams Portal (AEP)) or a written "Assignment", by selecting the appropriate type from the drop-down.
         </p>
 
         <p>
@@ -96,7 +96,7 @@
                     <thead>
                       <tr>
                         <th class="col-sm-1"></th>
-                        <th class="col-sm-2 sortable">Name</th>
+                        <th class="col-sm-2 sortable">Original assessment</th>
                         <th class="col-sm-1 sortable">Sequence</th>
                         <th class="col-sm-1 sortable">Mark</th>
                         <th class="col-sm-1 sortable">Grade</th>
@@ -122,7 +122,7 @@
                                 </span>
                               </#if>
                             <#elseif record.requiresResit>
-                              <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" checked="checked" />
+                              <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" />
                             </#if>
                           </td>
                           <td>${assessmentComponent.name}</td>
@@ -140,7 +140,16 @@
                                 ${assessmentComponent.assessmentType.name}
                              </#if>
                           </td>
-                          <td>${assessmentComponent.scaledWeighting}</td>
+                          <td>
+                            <#if componentRecord.existingResit?has_content>
+                              ${componentRecord.existingResit.weighting}
+                            <#else>
+                              <@bs3form.form_group path="resits[${sprCode}][${assessmentComponent.sequence}].weighting">
+                                <@f.input type="number" path="resits[${sprCode}][${assessmentComponent.sequence}].weighting" class="form-control"/>
+                                <@bs3form.errors path="resits[${sprCode}][${assessmentComponent.sequence}].weighting" />
+                              </@bs3form.form_group>
+                            </#if>
+                          </td>
                           <td><#if record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if></td>
                         </tr>
                       </#list>
