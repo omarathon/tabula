@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
@@ -252,6 +254,12 @@ class MemberTest extends TestBase with Mockito {
     scyd2016.academicYear = AcademicYear(2016)
     scyd2016.yearOfStudy = 1
     student.courseAndRouteService = courseAndRouteService
+
+    scyd2012.id = UUID.randomUUID.toString
+    scyd2013.id = UUID.randomUUID.toString
+    scyd2014.id = UUID.randomUUID.toString
+    scyd2015.id = UUID.randomUUID.toString
+    scyd2016.id = UUID.randomUUID.toString
 
     val entity = student.toExamGridEntity(scyd2015)
     entity.validYears(1).studentCourseYearDetails.get should be(scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)

@@ -55,6 +55,7 @@ object StudentCourseYearDetails {
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
         agreedMark = scyds.toSeq.flatMap(scyd => Option(scyd.agreedMark)).lastOption.map(BigDecimal(_)),
+        yearAbroad = scyds.exists(_.yearAbroad),
         level = scyds.head.level,
         yearOfStudy = yearOfStudy,
       )
@@ -222,6 +223,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
         markOverrides = None,
         studentCourseYearDetails = Some(this),
         agreedMark = Option(agreedMark).map(BigDecimal(_)),
+        yearAbroad = yearAbroad,
         level = level,
         yearOfStudy = this.yearOfStudy,
       )
