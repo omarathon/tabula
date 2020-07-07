@@ -18,7 +18,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
-abstract class AbstractImportModuleRegistraionStatusHealthcheck(name: String)
+abstract class AbstractImportBulkModuleRegistrationStatusHealthcheck(name: String)
   extends ServiceHealthcheckProvider(new ServiceHealthcheck(name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
 
   /**
@@ -82,7 +82,7 @@ abstract class AbstractImportModuleRegistraionStatusHealthcheck(name: String)
 
 @Component
 @Profile(Array("scheduling"))
-class ImportModuleRegistraionsForAcademicYearStatusHealthcheck extends AbstractImportModuleRegistraionStatusHealthcheck("import-bulk-academicyear-moduleregistrations") {
+class ImportBulkModuleRegistrationsForAcademicYearStatusHealthcheck extends AbstractImportBulkModuleRegistrationStatusHealthcheck("import-bulk-academicyear-moduleregistrations") {
   def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]
     Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForAcademicYear", 0, 50), 1.minute)
@@ -91,7 +91,7 @@ class ImportModuleRegistraionsForAcademicYearStatusHealthcheck extends AbstractI
 
 @Component
 @Profile(Array("scheduling"))
-class ImportModuleRegistraionsForUniversityIdsStatusHealthcheck extends AbstractImportModuleRegistraionStatusHealthcheck("import-bulk-universityids-moduleregistrations") {
+class ImportBulkModuleRegistrationsForUniversityIdsStatusHealthcheck extends AbstractImportBulkModuleRegistrationStatusHealthcheck("import-bulk-universityids-moduleregistrations") {
   def auditEvents: Seq[AuditEvent] = {
     val queryService = Wire[AuditEventQueryService]
     Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForUniversityIds", 0, 50), 1.minute)
