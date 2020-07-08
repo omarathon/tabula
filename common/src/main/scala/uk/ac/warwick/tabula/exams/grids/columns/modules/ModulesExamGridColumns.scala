@@ -92,7 +92,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
                 val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
                 if (indicator.grade == GradeBoundary.ForceMajeureMissingComponentGrade) {
                   // This is the only grade where the module result can vary so we need to include that too
-                  ExamGridColumnValueWithTooltip(s"${indicator.grade} (${mr.moduleResult.description})", isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), unconfirmed = isUnconfirmed)
+                  ExamGridColumnValueWithTooltip(s"${indicator.grade}${Option(mr.moduleResult).map(r => s" (${r.description})").getOrElse("")}", isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), unconfirmed = isUnconfirmed)
                 } else {
                   ExamGridColumnValueWithTooltip(indicator.grade, isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), unconfirmed = isUnconfirmed)
                 }
