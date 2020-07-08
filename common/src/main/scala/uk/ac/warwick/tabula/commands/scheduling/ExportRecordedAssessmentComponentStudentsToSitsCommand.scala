@@ -43,7 +43,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
     val marksToUpload = benchmarkTask("Get next batch of component marks to upload") {
       assessmentComponentMarksService.allNeedingWritingToSits(filtered = true)
         .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
-        .take(200) // Don't try and upload more than 200 at a time or we end up with too big a transaction
+        .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
     }
 
     // Commonly this will include lots of duplicate UpstreamAssessmentGroups, so just fetch them once
