@@ -58,7 +58,7 @@ class ComponentMarksController extends ApiController
     template.sequence = assessmentComponent.sequence
     template.assessmentGroup = assessmentComponent.assessmentGroup
 
-    assessmentMembershipService.getUpstreamAssessmentGroup(template)
+    assessmentMembershipService.getUpstreamAssessmentGroup(template, eagerLoad = true)
   }
 
   @ModelAttribute("command")

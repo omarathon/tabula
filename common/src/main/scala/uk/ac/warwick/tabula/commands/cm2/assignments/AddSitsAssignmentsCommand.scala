@@ -176,7 +176,7 @@ trait AddSitsAssignmentsCommandOnBind extends BindListener {
         this.moduleCode = item.assessmentComponent.moduleCode
         this.sequence = item.assessmentComponent.sequence
         this.assessmentGroup = item.assessmentComponent.assessmentGroup
-      })
+      }, eagerLoad = false)
     }
   }
 }

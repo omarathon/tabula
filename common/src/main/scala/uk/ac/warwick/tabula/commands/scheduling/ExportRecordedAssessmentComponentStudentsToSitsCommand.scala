@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedAssessmentComponentStudentsToSitsCommand._
 import uk.ac.warwick.tabula.data.model._
@@ -45,15 +46,31 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
         .take(200) // Don't try and upload more than 200 at a time or we end up with too big a transaction
     }
 
+    // Commonly this will include lots of duplicate UpstreamAssessmentGroups, so just fetch them once
+    type SitsModuleCode = String
+    type Occurrence = String
+    type AssessmentSequence = String
+    type AssessmentGroupCode = String
+    val upstreamAssessmentGroups: Map[(SitsModuleCode, AcademicYear, Occurrence, AssessmentSequence, AssessmentGroupCode), UpstreamAssessmentGroup] = benchmarkTask("Get all UAGs") {
+      marksToUpload.map(student => (student.moduleCode, student.academicYear, student.occurrence, student.sequence, student.assessmentGroup))
+        .distinct
+        .flatMap { case (studentSitsModuleCode, studentAcademicYear, studentOccurrence, studentAssessmentSequence, studentAssessmentGroupCode) =>
+          assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
+            this.academicYear = studentAcademicYear
+            this.occurrence = studentOccurrence
+            this.moduleCode = studentSitsModuleCode
+            this.sequence = studentAssessmentSequence
+            this.assessmentGroup = studentAssessmentGroupCode
+          }, eagerLoad = true).map { uag =>
+            (studentSitsModuleCode, studentAcademicYear, studentOccurrence, studentAssessmentSequence, studentAssessmentGroupCode) -> uag
+          }
+        }.toMap
+    }
+
     marksToUpload.flatMap { student =>
       lazy val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] = benchmarkTask(s"Get matching UAGM - $student") {
-        assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
-          this.academicYear = student.academicYear
-          this.occurrence = student.occurrence
-          this.moduleCode = student.moduleCode
-          this.sequence = student.sequence
-          this.assessmentGroup = student.assessmentGroup
-        }).flatMap(_.members.asScala.find(student.matchesIdentity))
+        upstreamAssessmentGroups.get((student.moduleCode, student.academicYear, student.occurrence, student.sequence, student.assessmentGroup))
+          .flatMap(_.members.asScala.find(student.matchesIdentity))
       }
 
       // first check to see if there is one and only one matching row

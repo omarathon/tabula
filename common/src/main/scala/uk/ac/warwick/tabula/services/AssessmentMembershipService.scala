@@ -18,7 +18,7 @@ trait AssessmentMembershipService {
 
   def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def find(group: AssessmentGroup): Option[AssessmentGroup]
 
@@ -34,7 +34,7 @@ trait AssessmentMembershipService {
 
   def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 
-  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo]
 
@@ -210,7 +210,7 @@ class AssessmentMembershipServiceImpl
   def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): UpstreamAssessmentGroup = {
     if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 
-    getUpstreamAssessmentGroup(template).map { group =>
+    getUpstreamAssessmentGroup(template, eagerLoad = true).map { group =>
       group.replaceMembers(registrations.map(r => (r.universityId, r.resitSequence.maybeText)), assessmentType)
       group
     } getOrElse {
@@ -229,7 +229,7 @@ class AssessmentMembershipServiceImpl
     */
   def find(assignment: AssessmentComponent): Option[AssessmentComponent] = dao.find(assignment)
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = dao.find(group)
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = dao.find(group, eagerLoad)
 
   def find(group: AssessmentGroup): Option[AssessmentGroup] = dao.find(group)
 
@@ -249,10 +249,10 @@ class AssessmentMembershipServiceImpl
 
   def getUpstreamAssessmentGroups(student: StudentMember, academicYear: AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroups(student, academicYear, resitOnly)
 
-  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = find(template, eagerLoad)
 
   def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo] = {
-    find(template).map(grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
+    find(template, eagerLoad = false).map(grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
   }
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
