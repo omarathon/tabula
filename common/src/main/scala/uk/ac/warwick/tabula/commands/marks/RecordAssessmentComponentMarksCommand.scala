@@ -298,6 +298,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
     with RecordAssessmentComponentMarksRequest
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
+    with ModuleRegistrationServiceComponent
     with ResitServiceComponent
     with SecurityServiceComponent =>
 
@@ -384,7 +385,12 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
         val isAgreed = studentMarkRecord.agreed || studentMarkRecord.markState.contains(MarkState.Agreed)
 
-        if (isAgreed && !isUnchanged && !canEditAgreedMarks) {
+        val resultsReleasedToStudents =
+          moduleRegistrationService.getByModuleOccurrence(upstreamAssessmentGroup.moduleCode, upstreamAssessmentGroup.academicYear, upstreamAssessmentGroup.occurrence)
+            .filter(_.studentCourseDetails.student.universityId == uagm.universityId)
+            .exists(MarkState.resultsReleasedToStudents(_, MarkState.MarkUploadTime))
+
+        if (isAgreed && !isUnchanged && resultsReleasedToStudents && !canEditAgreedMarks) {
           errors.rejectValue("mark", "actualMark.agreed")
         }
       }
