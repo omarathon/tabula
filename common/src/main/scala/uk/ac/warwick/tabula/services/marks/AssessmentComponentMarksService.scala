@@ -6,7 +6,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AssessmentComponentMarksDaoComponent, AutowiringAssessmentComponentMarksDaoComponent, AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 trait AssessmentComponentMarksService {
   def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
@@ -40,11 +39,7 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
     if (filtered) {
       val allComponentMarksNeedsWritingToSits = assessmentComponentMarksDao.allNeedingWritingToSits.filterNot(_.marks.isEmpty)
 
-      type UniversityId = String
       type TabulaModuleCode = String
-      type SitsModuleCode = String
-      type Occurrence = String
-
       val allModules: Map[TabulaModuleCode, Module] =
         moduleAndDepartmentService.getModulesByCodes(
           allComponentMarksNeedsWritingToSits.map(_.moduleCode).distinct.flatMap(Module.stripCats).map(_.toLowerCase)
@@ -57,22 +52,12 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
           }
         }
 
-      val allModuleRegistrations: Map[UniversityId, Map[(SitsModuleCode, AcademicYear, Occurrence), Seq[ModuleRegistration]]] =
-        moduleRegistrationService.getByUniversityIds(componentMarksCanUploadToSitsForYear.map(_.universityId).distinct, includeDeleted = false)
-          .groupBy(mr => SprCode.getUniversityId(mr.sprCode))
-          .map { case (sprCode, registrations) =>
-            sprCode -> registrations.groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
-          }
+      val allModuleRegistrations: Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]] =
+        moduleRegistrationService.getByRecordedAssessmentComponentStudentsNeedsWritingToSits(componentMarksCanUploadToSitsForYear)
 
       componentMarksCanUploadToSitsForYear
         .map { student =>
-          // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
-          lazy val moduleRegistrations: Seq[ModuleRegistration] =
-            allModuleRegistrations
-              .getOrElse(student.universityId, Map.empty)
-              .getOrElse((student.moduleCode, student.academicYear, student.occurrence), Seq.empty)
-
-          student -> moduleRegistrations
+          student -> allModuleRegistrations.getOrElse(student, Seq.empty)
         }
         .filter { case (student, moduleRegistrations) =>
           // true if latestState is empty (which should never be the case anyway)
