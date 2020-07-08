@@ -44,6 +44,8 @@ trait ModuleRegistrationDao {
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
   def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String]
+
+  def getByRecordedAssessmentComponentStudentsNeedsWritingToSits: Seq[ModuleRegistration]
 }
 
 @Repository
@@ -171,4 +173,17 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
     query.seq
   }
+
+  override def getByRecordedAssessmentComponentStudentsNeedsWritingToSits: Seq[ModuleRegistration] =
+    session.newQuery[ModuleRegistration](
+      """select distinct mr
+        |from ModuleRegistration mr
+        |join fetch mr._allStudentCourseDetails studentCourseDetails
+        |join RecordedAssessmentComponentStudent racs
+        |  on racs.moduleCode = mr.sitsModuleCode and
+        |     racs.occurrence = mr.occurrence and
+        |     racs.academicYear = mr.academicYear and
+        |     racs.universityId = studentCourseDetails.student.universityId
+        |where mr.deleted is false and racs.needsWritingToSits is true""".stripMargin
+    ).seq
 }
