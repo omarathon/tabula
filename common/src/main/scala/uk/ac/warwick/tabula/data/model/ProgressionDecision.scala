@@ -82,8 +82,8 @@ object ProgressionDecisionOutcome extends Enum[ProgressionDecisionOutcome] {
   // We don't care about the distinction in Tabula
 
   case object Held extends ProgressionDecisionOutcome(Set("H"), "Held", message = FormattedHtml("Your progression decision is not yet available"))
-  case object UndergraduateAwardHonours extends ProgressionDecisionOutcome(Set("UA1", "UA1-D"), "Award honours degree", message = FormattedHtml("Congratulations, you've passed!"))
-  case object UndergraduateAwardPass extends ProgressionDecisionOutcome(Set("UA2", "UA2-D"), "Award pass degree", message = FormattedHtml("Congratulations, you've passed!"))
+  case object UndergraduateAwardHonours extends ProgressionDecisionOutcome(Set("UA1", "UA1-D"), "Award honours degree", message = FormattedHtml("You've passed."))
+  case object UndergraduateAwardPass extends ProgressionDecisionOutcome(Set("UA2", "UA2-D"), "Award pass degree", message = FormattedHtml("You've passed."))
   case object UndergraduateAwardDiploma extends ProgressionDecisionOutcome(Set("UA3", "UA3-D"), "Award diploma", message = FormattedHtml("Your results indicate that you have been awarded a Diploma of Higher Education. You will receive an email containing further details."))
   case object UndergraduateAwardCertificate extends ProgressionDecisionOutcome(Set("UA4", "UA4-D"), "Award certificate", message = FormattedHtml("Your results indicate that you have been awarded a Certificate of Higher Education. You will receive an email containing further details."))
   case object UndergraduateProceedHonours extends ProgressionDecisionOutcome(Set("UP1", "UP1-S"), "Proceed", message = FormattedHtml("Congratulations, you've passed!"))
