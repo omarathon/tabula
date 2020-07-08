@@ -411,7 +411,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     session.clear()
 
-    val foundGroup = assignmentMembershipService.find(group)
+    val foundGroup = assignmentMembershipService.find(group, eagerLoad = false)
     foundGroup should be(Symbol("defined"))
     foundGroup.eq(Some(group)) should be(false)
 
@@ -421,8 +421,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    assignmentMembershipService.find(group) should be(Symbol("empty"))
-    assignmentMembershipService.find(foundGroup.get) should be(Symbol("defined"))
+    assignmentMembershipService.find(group, eagerLoad = false) should be(Symbol("empty"))
+    assignmentMembershipService.find(foundGroup.get, eagerLoad = true) should be(Symbol("defined"))
   }
 
   @Test def assessmentComponents(): Unit = transactional { tx =>

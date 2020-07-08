@@ -32,7 +32,7 @@ trait AutowiringAssessmentMembershipDaoComponent extends AssessmentMembershipDao
 trait AssessmentMembershipDao {
   def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def find(group: AssessmentGroup): Option[AssessmentGroup]
 
@@ -221,14 +221,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("sequence", assignment.sequence))
       .uniqueResult
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] =
-    session.newCriteria[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = {
+    val criteria = session.newCriteria[UpstreamAssessmentGroup]
       .add(is("assessmentGroup", group.assessmentGroup))
       .add(is("academicYear", group.academicYear))
       .add(is("moduleCode", group.moduleCode))
       .add(is("occurrence", group.occurrence))
       .add(is("sequence", group.sequence))
-      .uniqueResult
+
+    if (eagerLoad) {
+      criteria.setFetchMode("members", FetchMode.JOIN).distinct
+    }
+
+    criteria.uniqueResult
+  }
 
   def find(group: AssessmentGroup): Option[AssessmentGroup] = {
     if (group.assignment == null && group.smallGroupSet == null && group.exam == null) None
@@ -264,7 +270,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       }
 
   def save(group: UpstreamAssessmentGroup): Unit =
-    find(group) match {
+    find(group, eagerLoad = false) match {
       case Some(existing) if existing.deadline == group.deadline => // Do nothing
       case Some(outdated) =>
         outdated.deadline = group.deadline

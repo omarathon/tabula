@@ -124,7 +124,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
       mc -> components.map { ac =>
         val deadline =
           if(ac.assessmentType.subtype == Exam) AcademicYear(2019).termOrVacation(PeriodType.summerTerm).firstDay
-          else AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+          else AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay.minusDays(5)
         Fixtures.assessmentGroupAndMember(ac, componentMarks(i), academicYear, deadline)
       }
     }.toMap

@@ -36,6 +36,47 @@
     </#list>
 </#assign>
 
+<#macro list_component component module included><#compress>
+          <tr>
+            <td class="assessment_details_col assessment_details_col2">
+              <div>${((component.assessmentComponent.moduleCode!"")?upper_case)}</div>
+              <div>${component.assessmentComponent.module.name}</div>
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+                ${component.assessmentComponent.sequence}
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+                ${component.assessmentComponent.name}
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+                ${component.assessmentComponent.assessmentType.name}
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+                ${(module.cats!'-')}
+            </td>
+            <td class="assessment_details_col assessment_details_col2 <#if !component.member.deadline?has_content || component.member.deadline.isAfter(benchmarkCutoffDate)>alert alert-info</#if>">
+                <#if component.member.deadline??>
+                    <@fmt.date date=component.member.deadline includeTime=false relative=false shortMonth=true excludeCurrentYear=false />
+                <#else>
+                  <span class="very-subtle">Unknown</span>
+                </#if>
+            </td>
+            <td class="assessment_details_col assessment_details_col2 <#if !component.member.firstDefinedMark?has_content>alert alert-info</#if>">
+                ${component.member.firstDefinedMark!"X"}
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+                ${component.member.firstDefinedGrade!}
+            </td>
+            <td class="assessment_details_col assessment_details_col2">
+              <#if included>
+                <i class="fa fa-check" title="Included"></i>
+              <#else>
+                <i class="fa fa-times" title="Excluded"></i>
+              </#if>
+            </td>
+          </tr>
+</#compress></#macro>
+
 <div class="exam-grid-preview">
   <div class="deptheader">
     <h1>Graduation benchmark breakdown</h1>
@@ -132,4 +173,41 @@
       </div>
     </div>
   </section>
+
+  <#if !breakdown.benchmarkErrors?has_content>
+    <section>
+      <h4>Final year components</h4>
+      <p>Components will only be included in the benchmark if there is a deadline of no later than
+          <@fmt.date date=benchmarkCutoffDate includeTime=false relative=false shortMonth=true excludeCurrentYear=false />
+        and a mark for this student.
+      </p>
+      <table class="table table-condensed grid">
+        <thead>
+        <tr class="assessment_componentdetails_header">
+          <th>Module</th>
+          <th>Sequence</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>CATS</th>
+          <th>Deadline</th>
+          <th>Mark</th>
+          <th>Grade</th>
+          <th>Included in benchmark</th>
+        </tr>
+        </thead>
+        <tbody>
+        <#list breakdown.modules?keys as module>
+            <#list mapGet(breakdown.modules, module) as component>
+                <@list_component component, module, true/>
+            </#list>
+        </#list>
+        <#list breakdown.excludedModules?keys as module>
+            <#list mapGet(breakdown.excludedModules, module) as component>
+                <@list_component component, module, false/>
+            </#list>
+        </#list>
+        </tbody>
+      </table>
+    </section>
+  </#if>
 </div>

@@ -283,7 +283,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
           template.assessmentGroup = assessmentGroup
 
           val upstreamAssessmentGroup: Option[UpstreamAssessmentGroup] =
-            assessmentMembershipService.getUpstreamAssessmentGroup(template)
+            assessmentMembershipService.getUpstreamAssessmentGroup(template, eagerLoad = true)
 
           val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
             upstreamAssessmentGroup.flatMap(_.members.asScala.find(m => m.universityId == universityId && m.assessmentType == assessmentType))

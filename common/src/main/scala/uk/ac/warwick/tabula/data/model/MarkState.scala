@@ -14,7 +14,7 @@ object MarkState extends Enum[MarkState] {
   case object Agreed extends MarkState("Agreed", "success")
 
   val DecisionReleaseTime = new LocalTime(10, 0)
-  val MarkUploadTime = new LocalTime(9, 40) // Give us 20 minutes to upload agreed marks before release
+  val MarkUploadTime = new LocalTime(0, 0) // Give us 10 hours to upload agreed marks before release
 
   // https://warwick.ac.uk/coronavirus/intranet/continuity/teaching/marksandexamboards/guidance/results/#coordinatedrelease
   val DegreeApprenticeshipFirstYearReleaseDate2020 = new LocalDate(2020, DateTimeConstants.JULY, 29)

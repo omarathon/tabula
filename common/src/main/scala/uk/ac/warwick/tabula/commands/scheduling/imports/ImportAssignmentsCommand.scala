@@ -371,7 +371,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
         .map { assessmentGroup =>
-          assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup)
+          assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup, eagerLoad = true)
             .map { group =>
               if (importEverything) {
                 val existingUniversityIdAndResitSequences: Set[(String, Option[String])] = group.members.asScala.map(m => (m.universityId, m.resitSequence)).toSet

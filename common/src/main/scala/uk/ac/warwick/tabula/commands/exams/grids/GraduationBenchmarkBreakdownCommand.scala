@@ -40,6 +40,7 @@ object GraduationBenchmarkBreakdownCommand {
 
 case class UGGraduationBenchmarkBreakdown (
   modules: Map[ModuleRegistration, Seq[ComponentAndMarks]],
+  excludedModules: Map[ModuleRegistration, Seq[ComponentAndMarks]],
   weightedAssessmentMark: BigDecimal,
   totalCats: BigDecimal,
   percentageOfAssessmentTaken: BigDecimal,
@@ -81,6 +82,7 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
   override def applyInternal(): Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown] = {
     val moduleRegistrations = studentCourseYearDetails.moduleRegistrations
     val modules = moduleRegistrations.map { mr => mr -> moduleRegistrationService.benchmarkComponentsAndMarks(mr) }.toMap
+    val excludedModules = moduleRegistrations.map { mr => mr -> moduleRegistrationService.componentsAndMarksExcludedFromBenchmark(mr)}.toMap
     if (studentCourseDetails.student.isUG) {
 
       val weightedAssessmentMark = moduleRegistrationService.benchmarkWeightedAssessmentMark(studentCourseYearDetails.moduleRegistrations)
@@ -101,6 +103,7 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
 
       Left(UGGraduationBenchmarkBreakdown(
         modules = modules.filter{ case (_, components) => components.nonEmpty },
+        excludedModules = excludedModules.filter{ case (_, components) => components.nonEmpty },
         weightedAssessmentMark,
         totalCats = studentCourseYearDetails.totalCats,
         percentageOfAssessmentTaken,
