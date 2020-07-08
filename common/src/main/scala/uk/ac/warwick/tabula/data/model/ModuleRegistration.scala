@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
@@ -13,13 +13,12 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.marks.AssessmentComponentMarksService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
-import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object ModuleRegistration {
-  final val GraduationBenchmarkCutoff: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+  final val GraduationBenchmarkCutoff: LocalDate = new LocalDate(2020, DateTimeConstants.MARCH, 13)
 
   // a list of all the markscheme codes that we consider to be pass/fail modules
   final val PassFailMarkSchemeCodes = Seq("PF")
