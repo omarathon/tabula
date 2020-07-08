@@ -31,30 +31,33 @@ object ExportRecordedAssessmentComponentStudentsToSitsCommand {
 
 abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
   extends CommandInternal[Result]
-    with Logging {
+    with Logging
+    with TaskBenchmarking {
   self: ExportFeedbackToSitsServiceComponent
     with AssessmentComponentMarksServiceComponent
     with AssessmentMembershipServiceComponent
     with TransactionalComponent =>
 
   override def applyInternal(): Result = transactional() {
-    val marksToUpload =
+    val marksToUpload = benchmarkTask("Get next batch of component marks to upload") {
       assessmentComponentMarksService.allNeedingWritingToSits(filtered = true)
         .sortBy(_.marks.head.updatedDate).reverse // Upload most recently updated first (so a stuck queue doesn't prevent upload)
-        .take(1000) // Don't try and upload more than 1000 at a time or we end up with too big a transaction
+        .take(200) // Don't try and upload more than 200 at a time or we end up with too big a transaction
+    }
 
     marksToUpload.flatMap { student =>
-      lazy val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] =
+      lazy val upstreamAssessmentGroupMember: Option[UpstreamAssessmentGroupMember] = benchmarkTask(s"Get matching UAGM - $student") {
         assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
           this.academicYear = student.academicYear
           this.occurrence = student.occurrence
           this.moduleCode = student.moduleCode
           this.sequence = student.sequence
           this.assessmentGroup = student.assessmentGroup
-        }).flatMap(_.members.asScala.find(uagm => uagm.universityId == student.universityId && uagm.assessmentType == student.assessmentType))
+        }).flatMap(_.members.asScala.find(student.matchesIdentity))
+      }
 
       // first check to see if there is one and only one matching row
-      exportFeedbackToSitsService.countMatchingSitsRecords(student) match {
+      benchmarkTask(s"Count matching SITS rows - $student") { exportFeedbackToSitsService.countMatchingSitsRecords(student) } match {
         case 0 =>
           logger.warn(s"Not updating SITS for assessment component mark $student - found zero rows")
           None
@@ -65,7 +68,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
 
         case _ =>
           // update - expecting to update one row
-          exportFeedbackToSitsService.exportToSits(student) match {
+          benchmarkTask(s"Export row to SITS - $student") { exportFeedbackToSitsService.exportToSits(student) } match {
             case 0 =>
               logger.warn(s"Upload to SITS for assessment component mark $student failed - found zero rows")
               None
@@ -78,13 +81,15 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
               student.lastWrittenToSits = Some(DateTime.now)
 
               // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync
-              upstreamAssessmentGroupMember.foreach { uagm =>
-                uagm.actualMark = student.latestMark
-                uagm.actualGrade = student.latestGrade
-                uagm.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
-                uagm.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
+              benchmarkTask(s"Update UAGM - $student") {
+                upstreamAssessmentGroupMember.foreach { uagm =>
+                  uagm.actualMark = student.latestMark
+                  uagm.actualGrade = student.latestGrade
+                  uagm.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
+                  uagm.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
 
-                assessmentMembershipService.save(uagm)
+                  assessmentMembershipService.save(uagm)
+                }
               }
 
               Some(assessmentComponentMarksService.saveOrUpdate(student))
