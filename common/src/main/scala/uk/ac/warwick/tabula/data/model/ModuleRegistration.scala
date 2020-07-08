@@ -166,7 +166,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
     val allMembers =
       RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
         membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
-      }.filter(_.universityId == studentCourseDetails.student.universityId)
+      }.filter(member => studentCourseDetails !=null && member.universityId == studentCourseDetails.student.universityId)
 
     // Filter down to just the latest resit sequence
     // Find the assessment group to filter by (this is for students who take multiple reassessments)
