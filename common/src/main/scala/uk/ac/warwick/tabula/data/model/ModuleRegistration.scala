@@ -203,6 +203,10 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       .filter(_.firstDefinedMark.isDefined)
   }
 
+  def componentsIgnoredForBenchmark: Seq[UpstreamAssessmentGroupMember] = {
+    upstreamAssessmentGroupMembers.diff(componentsForBenchmark)
+  }
+
   def componentMarks(includeActualMarks: Boolean): Seq[(AssessmentType, String, Option[Int])] =
     upstreamAssessmentGroupMembers.flatMap { uagm =>
       uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>

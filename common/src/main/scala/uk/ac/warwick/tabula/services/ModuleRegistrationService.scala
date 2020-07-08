@@ -52,6 +52,8 @@ trait ModuleRegistrationService {
 
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
 
+  def componentsAndMarksExcludedFromBenchmark(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
+
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
   def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
@@ -140,10 +142,18 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty)(_.agreedMark, _.agreedGrade)
 
   def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    getComponentsAndMarks(moduleRegistration.componentsForBenchmark, moduleRegistration)
+  }
+
+  def componentsAndMarksExcludedFromBenchmark(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    getComponentsAndMarks(moduleRegistration.componentsIgnoredForBenchmark, moduleRegistration)
+  }
+
+  private def getComponentsAndMarks(components: Seq[UpstreamAssessmentGroupMember], moduleRegistration: ModuleRegistration) = {
     // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
     lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
 
-    moduleRegistration.componentsForBenchmark.map { uagm =>
+    components.map { uagm =>
       val weighting: BigDecimal =
         uagm.upstreamAssessmentGroup.assessmentComponent
           .flatMap(_.weightingFor(marks))
