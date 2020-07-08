@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.controllers.marks.MarksExportToSitsQueueCommand.Result
-import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 @Controller
 @RequestMapping(Array("/marks/sits-queue"))
@@ -62,11 +61,7 @@ abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Res
       assessmentComponentMarksService.allNeedingWritingToSits(filtered = false).filterNot(_.marks.isEmpty)
     }
 
-    type UniversityId = String
     type TabulaModuleCode = String
-    type SitsModuleCode = String
-    type Occurrence = String
-
     val allModules: Map[TabulaModuleCode, Module] = benchmarkTask("Load all modules for component marks") {
       moduleAndDepartmentService.getModulesByCodes(
         allComponentMarksNeedsWritingToSits.map(_.moduleCode).distinct.flatMap(Module.stripCats).map(_.toLowerCase)
@@ -81,24 +76,14 @@ abstract class MarksExportToSitsQueueCommandInternal extends CommandInternal[Res
       }
     }
 
-    val allModuleRegistrations: Map[UniversityId, Map[(SitsModuleCode, AcademicYear, Occurrence), Seq[ModuleRegistration]]] = benchmarkTask("Load all module registrations for component marks") {
-      moduleRegistrationService.getByUniversityIds(componentMarksCanUploadToSitsForYear.map(_.universityId).distinct, includeDeleted = false)
-        .groupBy(mr => SprCode.getUniversityId(mr.sprCode))
-        .map { case (sprCode, registrations) =>
-          sprCode -> registrations.groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
-        }
+    val allModuleRegistrations: Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]] = benchmarkTask("Load all module registrations for component marks") {
+      moduleRegistrationService.getByRecordedAssessmentComponentStudentsNeedsWritingToSits(componentMarksCanUploadToSitsForYear)
     }
 
     val (componentMarksCanUploadAgreedMarksToSits, componentMarksCannotUploadAgreedMarksToSits) = benchmarkTask("Filter component marks not allowing agreed mark processing") {
       componentMarksCanUploadToSitsForYear
         .map { student =>
-          // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
-          lazy val moduleRegistrations: Seq[ModuleRegistration] =
-            allModuleRegistrations
-              .getOrElse(student.universityId, Map.empty)
-              .getOrElse((student.moduleCode, student.academicYear, student.occurrence), Seq.empty)
-
-          student -> moduleRegistrations
+          student -> allModuleRegistrations.getOrElse(student, Seq.empty)
         }
         .partition { case (student, moduleRegistrations) =>
           // true if latestState is empty (which should never be the case anyway)

@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.ModuleResult.Pass
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, AutowiringTransactionalComponent, ModuleRegistrationDaoComponent, TransactionalComponent}
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -38,6 +38,8 @@ trait ModuleRegistrationService {
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
+
+  def getByRecordedAssessmentComponentStudentsNeedsWritingToSits(students: Seq[RecordedAssessmentComponentStudent]): Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]]
 
   /**
     * Gets the weighted mean mark for the given module registrations.
@@ -112,6 +114,16 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
   override def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
+
+  override def getByRecordedAssessmentComponentStudentsNeedsWritingToSits(students: Seq[RecordedAssessmentComponentStudent]): Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]] = transactional(readOnly = true) {
+    val allModuleRegistrations =
+      moduleRegistrationDao.getByRecordedAssessmentComponentStudentsNeedsWritingToSits
+        .groupBy(mr => (SprCode.getUniversityId(mr.sprCode), mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+
+    students.map { student =>
+      student -> allModuleRegistrations.getOrElse((student.universityId, student.moduleCode, student.academicYear, student.occurrence), Seq.empty)
+    }.toMap
+  }
 
   private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int], gradeFn: ModuleRegistration => Option[String]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
