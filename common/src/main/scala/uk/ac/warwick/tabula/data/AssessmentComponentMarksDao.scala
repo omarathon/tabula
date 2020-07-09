@@ -47,7 +47,7 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
   override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] =
     session.newCriteria[RecordedAssessmentComponentStudent]
       .add(is("needsWritingToSits", true))
-      // TODO order by most recent mark updatedDate asc
+      .distinct
       .seq
 
   override def mostRecentlyWrittenStudentDate: Option[DateTime] =
