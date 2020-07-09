@@ -43,7 +43,7 @@ abstract class AbstractModuleRegistrationMarksDao extends ModuleRegistrationMark
   override def allNeedingWritingToSits: Seq[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]
       .add(is("needsWritingToSits", true))
-      // TODO order by most recent mark updatedDate asc
+      .distinct
       .seq
 
   override def mostRecentlyWrittenToSitsDate: Option[DateTime] =
