@@ -8,6 +8,8 @@ $(() => {
     textAttribute: 'data-sortby',
   });
 
+  $('.process-module-marks').find('.table-checkable').bigList({});
+
   // Auto grade generator
   $('.auto-grade[data-mark][data-generate-url]').each((i, el) => {
     const $input = $(el);
