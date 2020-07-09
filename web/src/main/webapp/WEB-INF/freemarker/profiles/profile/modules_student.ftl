@@ -31,12 +31,14 @@
         </#list>
         <strong>Total CATS:</strong> ${totalCats}
       </#if>
-      <strong>Year mark:</strong> ${yearMark!"-"}
-      <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
-        (weighted mean: ${weightedMeanYearMark!"-"})
-      </#if>
-      <strong>Year Weighting:</strong>
-      <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
+     <#if !yearWeightingsInFlux || (user.staff && !isSelf)>
+        <strong>Year mark:</strong> ${yearMark!"-"}
+        <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
+          (weighted mean: ${weightedMeanYearMark!"-"})
+        </#if>
+        <strong>Year Weighting:</strong>
+        <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
+     </#if>
     </h3>
 
     <#if progressionDecisions?has_content>

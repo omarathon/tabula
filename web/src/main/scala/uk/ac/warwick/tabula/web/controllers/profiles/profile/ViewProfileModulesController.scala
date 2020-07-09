@@ -54,7 +54,8 @@ class ViewProfileModulesController extends AbstractViewProfileController {
       "moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq.empty),
       "progressionDecisions" -> studentBreakdown.map(_.progressionDecisions.reverse).getOrElse(Seq.empty), // Most recent first
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
-      "member" -> studentCourseDetails.student
+      "member" -> studentCourseDetails.student,
+      "yearWeightingsInFlux" -> (thisAcademicYear.startYear == 2019),
     ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.ModulesIdentifier): _*)
       .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.modules(scyd)): _*)
   }
