@@ -18,13 +18,18 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
-abstract class AbstractImportBulkModuleRegistrationStatusHealthcheck(name: String)
-  extends ServiceHealthcheckProvider(new ServiceHealthcheck(name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
+@Component
+@Profile(Array("scheduling"))
+class ImportProgressionDecisionsStatusHealthcheck
+  extends ServiceHealthcheckProvider(new ServiceHealthcheck("import-progression-decisions", ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
 
   /**
    * Fetch a list of audit events, most recent first, relating to this import
    */
-  protected def auditEvents: Seq[AuditEvent]
+  private def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:BulkImportProgressionDecisionsForAcademicYear", 0, 50), 1.minute)
+  }
 
   protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
     //find the last successful import
@@ -60,7 +65,7 @@ abstract class AbstractImportBulkModuleRegistrationStatusHealthcheck(name: Strin
       }.getOrElse(0)
 
     new ServiceHealthcheck(
-      name,
+      "import-progression-decisions",
       status,
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
       message,
@@ -79,14 +84,3 @@ abstract class AbstractImportBulkModuleRegistrationStatusHealthcheck(name: Strin
   }
 
 }
-
-@Component
-@Profile(Array("scheduling"))
-class ImportBulkModuleRegistrationsForAcademicYearStatusHealthcheck extends AbstractImportBulkModuleRegistrationStatusHealthcheck("import-bulk-academicyear-moduleregistrations") {
-  def auditEvents: Seq[AuditEvent] = {
-    val queryService = Wire[AuditEventQueryService]
-    Await.result(queryService.query("eventType:BulkImportModuleRegistrationsForAcademicYear", 0, 50), 1.minute)
-  }
-}
-
-
