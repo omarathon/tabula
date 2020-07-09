@@ -239,7 +239,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.CreateResits.needsWritingToSits",
         )
-      } else if (agreedStudents.nonEmpty && studentsRequiringResits.isEmpty) {
+      } else if ((agreedStudents.nonEmpty && studentsRequiringResits.isEmpty) || componentRecords.forall(!_.requiresResit)) {
         StageProgress(
           stage = CreateResits,
           started = true,
