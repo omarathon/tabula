@@ -30,13 +30,13 @@ object MarkState extends Enum[MarkState] {
     // Include previous years as well for (e.g.) resits, that'll work for 19/20 at least.
     if (academicYear <= AcademicYear.starting(2019)) {
       val releaseDate: Option[LocalDate] = studentCourseDetails.collect {
-        case scd if scd.course.code.startsWith("D") && scd.latestStudentCourseYearDetails.yearOfStudy == 1 =>
+        case scd if scd.course.code.startsWith("D") && scd.freshStudentCourseYearDetailsForYear(academicYear).exists(_.yearOfStudy == 1) =>
           DegreeApprenticeshipFirstYearReleaseDate2020
 
-        case scd if scd.courseType.contains(CourseType.UG) && scd.latestStudentCourseYearDetails.yearOfStudy == 1 =>
+        case scd if scd.courseType.contains(CourseType.UG) && scd.freshStudentCourseYearDetailsForYear(academicYear).exists(_.yearOfStudy == 1) =>
           UndergraduateFirstYearReleaseDate2020
 
-        case scd if scd.courseType.contains(CourseType.UG) && scd.latestStudentCourseYearDetails.isFinalYear =>
+        case scd if scd.courseType.contains(CourseType.UG) && scd.freshStudentCourseYearDetailsForYear(academicYear).exists(_.isFinalYear) =>
           UndergraduateFinalistReleaseDate2020
 
         case scd if scd.courseType.contains(CourseType.UG) =>
