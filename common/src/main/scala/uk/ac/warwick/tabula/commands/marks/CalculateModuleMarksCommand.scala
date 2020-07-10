@@ -550,7 +550,9 @@ trait CalculateModuleMarksAlgorithm {
                   }.setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt
                   val validGrades = validGradesForMark(Some(calculatedMark))
 
-                  val componentsWithIndicatorGrades = componentsForCalculation.filter { case (ac, s) => isIndicatorGrade(ac, s) }.sortBy(_._1.sequence)
+                  val componentsWithIndicatorGrades = componentsForCalculation
+                    .filter { case (ac, s) => isIndicatorGrade(ac, s) && ac.scaledWeighting.exists(_ > 0) }
+                    .sortBy(_._1.sequence)
 
                   if (componentsWithIndicatorGrades.size == componentsForCalculation.size && componentsForCalculation.nonEmpty && componentsForCalculation.forall(_._2.grade == componentsForCalculation.head._2.grade)) {
                     val grade = componentsForCalculation.head._2.grade.get

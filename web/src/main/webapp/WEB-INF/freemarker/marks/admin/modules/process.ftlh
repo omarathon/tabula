@@ -24,13 +24,13 @@
 
 <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
-<div class="fix-area">
+<div class="fix-area process-module-marks">
   <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
     <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
-    <table class="table table-striped table-sortable">
+    <table class="table table-striped table-sortable table-checkable">
       <thead>
         <tr>
-          <th data-sorter="false"></th>
+          <th class="for-check-all" data-sorter="false"><input type="checkbox" class="collection-check-all" title="Select all/none" /></th>
           <th class="col-sm-1 sortable" data-sortInitialOrder="asc" data-sorter="text">SPR Code</th>
           <th class="col-sm-1 sortable" data-sorter="text">First name</th>
           <th class="col-sm-1 sortable" data-sorter="text">Last name</th>
@@ -46,7 +46,7 @@
           <#assign member = membersBySprCode[student.sprCode] />
           <tr>
             <td>
-              <@f.checkbox path="students[${student.sprCode}].process" />
+              <@f.checkbox cssClass="collection-checkbox" path="students[${student.sprCode}].process" />
             </td>
             <td data-sortby="${student.sprCode}">
               <@pl.profile_link member.universityId />
