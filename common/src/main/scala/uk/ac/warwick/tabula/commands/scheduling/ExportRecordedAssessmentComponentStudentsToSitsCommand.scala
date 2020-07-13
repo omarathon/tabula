@@ -85,7 +85,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
 
         case _ =>
           // update - expecting to update one row
-          benchmarkTask(s"Export row to SITS - $student") { exportFeedbackToSitsService.exportToSits(student) } match {
+          benchmarkTask(s"Export row to SITS - $student") { exportFeedbackToSitsService.exportToSits(student, upstreamAssessmentGroupMember) } match {
             case 0 =>
               logger.warn(s"Upload to SITS for assessment component mark $student failed - found zero rows")
               None

@@ -161,7 +161,15 @@ object ProgressionService {
       allScyds.groupBy(_.level.orNull)
         .map { case (level, scyds) =>
           if (level == null) throw new RuntimeException(s"Invalid SITS data. SITS Student course level not set ${scyds.map(_.studentCourseDetails.scjCode).distinct.mkString(", ")}")
-          level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds: _*)
+
+          // Only where the SPR code and SCJ code matches the last one - don't undo this or it will merge over course transfers
+          // also needs to be for the same level, we don't allow grouping of more than one level, just use the last
+          val allScydsForSameCourse = scyds.filter { scyd =>
+            scyd.studentCourseDetails.sprCode == scyds.last.studentCourseDetails.sprCode &&
+            scyd.studentCourseDetails.scjCode == scyds.last.studentCourseDetails.scjCode
+          }
+
+          level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, allScydsForSameCourse: _*)
         }
     } else {
       (1 to finalYearOfStudy).map { block =>

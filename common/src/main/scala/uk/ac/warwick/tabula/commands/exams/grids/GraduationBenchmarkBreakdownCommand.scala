@@ -142,7 +142,7 @@ trait GraduationBenchmarkBreakdownPermissions extends RequiresPermissionsCheckin
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
-        CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.studentCourseDetails.currentRoute))
+        CheckablePermission(Permissions.Department.ExamGrids, Option(studentCourseYearDetails.route).getOrElse(studentCourseYearDetails.studentCourseDetails.currentRoute)))
     )
   }
 
@@ -162,7 +162,7 @@ trait GraduationBenchmarkBreakdownCommandState {
 
   lazy val yearOfStudy: Int = if(groupByLevel) studentCourseYearDetails.level.map(_.toYearOfStudy).getOrElse(1) else studentCourseYearDetails.yearOfStudy
 
-  lazy val normalLoad: BigDecimal = NormalLoadLookup(academicYear, yearOfStudy, normalCATSLoadService).apply(studentCourseYearDetails.route)
+  lazy val normalLoad: BigDecimal = NormalLoadLookup(yearOfStudy, normalCATSLoadService).apply(studentCourseYearDetails.route, studentCourseYearDetails.academicYear)
 
   lazy val rawWeightings: Seq[CourseYearWeighting] =
     courseAndRouteService.findAllCourseYearWeightings(Seq(studentCourseDetails.course), studentCourseDetails.sprStartAcademicYear)
@@ -170,7 +170,7 @@ trait GraduationBenchmarkBreakdownCommandState {
   lazy val abroadYearWeightings: Seq[CourseYearWeighting] = ProgressionService.abroadYearWeightings(rawWeightings, studentCourseYearDetails)
 
   lazy val routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]] = studentCourseDetails.freshOrStaleStudentCourseYearDetails.flatMap(_.level)
-    .map(level => level.toYearOfStudy -> UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService).apply(studentCourseYearDetails.route, Option(level)))
+    .map(level => level.toYearOfStudy -> UpstreamRouteRuleLookup(upstreamRouteRuleService).apply(studentCourseYearDetails.route, studentCourseYearDetails.academicYear, Option(level)))
     .toMap
 }
 

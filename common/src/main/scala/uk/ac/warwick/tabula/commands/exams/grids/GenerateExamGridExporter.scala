@@ -541,7 +541,7 @@ object ExamGridSummaryAndKey {
       case n => keyValueCells("Routes:", s"$n routes", 4)
     }
     keyValueCells("Year of study:", yearOfStudy.toString, 5)
-    val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
+    val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r, academicYear).underlying.toString}").mkString("\n"), 6)
     normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
     if (isStudentCount) {
       keyValueCells("Student Count:", count.toString, 7)

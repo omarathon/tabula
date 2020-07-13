@@ -54,10 +54,10 @@
       <tr>
         <th>Normal CAT load:</th>
         <td>
-          <#if normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)?has_content>
-            ${normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)}
+          <#if normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)?has_content>
+            ${normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)}
           <#else>
-            <#assign defaultNormalLoad>${normalLoadLookup.apply(studentCourseDetails.currentRoute)}</#assign>
+            <#assign defaultNormalLoad>${normalLoadLookup.apply(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)}</#assign>
             ${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
           </#if>
         </td>

@@ -60,7 +60,7 @@ class StudentAssessmentBreakdownController extends ExamsController
       val module = ac.moduleRegistration.module
       module -> ProgressionService.modulePassMark(module.degreeType)
     }).toMap
-    val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, cmd.studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
+    val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(cmd.studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
 
     Mav("exams/grids/generate/studentAssessmentComponentDetails",
       "passMarkMap" -> passMarkMap,

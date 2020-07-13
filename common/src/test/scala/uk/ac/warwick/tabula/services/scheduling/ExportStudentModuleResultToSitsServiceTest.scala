@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.GradeBoundarySignalStatus.NoSignal
 import uk.ac.warwick.tabula.data.model.MarkState._
 import uk.ac.warwick.tabula.data.model.ModuleResult._
 import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource._
@@ -14,6 +15,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
 
   val smrExporter = new ExportStudentModuleResultToSitsServiceImpl
   smrExporter.sitsDataSource = sits
+  smrExporter.assessmentMembershipService =  smartMock[AssessmentMembershipService]
   ExportStudentModuleResultToSitsService.sitsSchema = "public"
 
   val thisDepartment: Department = Fixtures.department("ch")
@@ -88,6 +90,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
       markState = UnconfirmedActual,
       comments = "Module mark entry" )
     session.saveOrUpdate(rMark1)
+    smrExporter.assessmentMembershipService.gradesForMark(mr1, Some(40)) returns Nil
 
     val dbRmr2: RecordedModuleRegistration = session.get(classOf[RecordedModuleRegistration].getName, rmr2.id).asInstanceOf[RecordedModuleRegistration]
     val rMark2: RecordedModuleMark = dbRmr2.addMark( uploader = currentUser.apparentUser,
@@ -98,6 +101,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
       markState = UnconfirmedActual,
       comments = "Module mark reset" )
     session.saveOrUpdate(rMark2)
+    smrExporter.assessmentMembershipService.gradesForMark(mr2, None) returns Nil
 
     val dbRmr3: RecordedModuleRegistration = session.get(classOf[RecordedModuleRegistration].getName, rmr3.id).asInstanceOf[RecordedModuleRegistration]
 
@@ -109,6 +113,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
       markState = ConfirmedActual,
       comments = "Actual marks")
     session.saveOrUpdate(rMark3Actual)
+    smrExporter.assessmentMembershipService.gradesForMark(mr3, Some(61)) returns Nil
 
     val rMark3: RecordedModuleMark = dbRmr3.addMark(uploader = currentUser.apparentUser,
       mark = Some(62),
@@ -147,6 +152,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
     }
   }
 
+
   @Transactional
   @Test def smrExportWithBlankRecordedMark(): Unit = {
     //if we move back from agreed mark to start actual this should clear both agreed/actual marks and leave other fields as expected
@@ -184,6 +190,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         val m1: ModuleRegistration = dbRmr3.moduleRegistration.get
         m1.membershipService = smartMock[AssessmentMembershipService]
         m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+        smrExporter.assessmentMembershipService.gradesForMark(m1, Some(62)) returns Nil
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr3, finalAssessmentAttended = false)
         session.flush()
         session.clear()
@@ -204,6 +211,53 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
 
   }
 
+  @Transactional
+  @Test def smrExportWithAgreedFailedRecordedMark(): Unit = {
+    withUser("cusxxx") {
+      new ExportSMREnvironment {
+        val dbRmr4: RecordedModuleRegistration = session.get(classOf[RecordedModuleRegistration].getName, rmr4.id).asInstanceOf[RecordedModuleRegistration]
+        val rMark4: RecordedModuleMark = dbRmr4.addMark(uploader = currentUser.apparentUser,
+          mark = Some(20),
+          grade = Some("R"),
+          result = Some(Fail),
+          source = ComponentMarkCalculation,
+          markState = Agreed,
+          comments = "Agreed fail")
+        smrExporter.assessmentMembershipService.gradesForMark(mr4, Some(20)) returns Seq(GradeBoundary (
+          marksCode = "WAR",
+          process = GradeBoundaryProcess.Reassessment,
+          attempt = 1,
+          rank = 1,
+          grade = "R",
+          Some(0),
+          Some(100),
+          signalStatus = NoSignal,
+          result = Some(Fail),
+          agreedStatus = GradeBoundaryAgreedStatus.Reassessment,
+          incrementsAttempt = true
+        ))
+
+        val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
+        m1.membershipService = smartMock[AssessmentMembershipService]
+        m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+        val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr4, finalAssessmentAttended = false)
+        session.flush()
+        session.clear()
+        cnt should be(1)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr4)
+        existingSmr.size should be(1)
+        existingSmr.get.actualMark should be(Some(20))
+        existingSmr.get.actualGrade should be(Some("R"))
+        existingSmr.get.agreedMark should be(Some(20))
+        existingSmr.get.agreedGrade should be(Some("R"))
+        existingSmr.get.currentAttempt should be(Some(2))
+        existingSmr.get.completedAttempt should be(Some(1))
+        existingSmr.get.sasStatus should be(Some("R"))
+        existingSmr.get.processStatus should be(None)
+        existingSmr.get.process should be(Some("RAS"))
+      }
+    }
+  }
 
 
   @Transactional
@@ -218,6 +272,7 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
           source = ComponentMarkCalculation,
           markState = UnconfirmedActual,
           comments = "Actual marks")
+        smrExporter.assessmentMembershipService.gradesForMark(mr4, Some(20)) returns Nil
 
         val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
         m1.membershipService = smartMock[AssessmentMembershipService]

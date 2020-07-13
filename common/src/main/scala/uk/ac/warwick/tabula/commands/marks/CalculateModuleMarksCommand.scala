@@ -240,7 +240,7 @@ trait CalculateModuleMarksLoadModuleRegistrations extends ModuleOccurrenceLoadMo
 
           val weightedComponents =
             components.map { case (ac, s) =>
-              val weighting = ac.weightingFor(marksForWeighting)
+              val weighting = ac.weightingFor(marksForWeighting).get // .get as we want it to fail out if we don't meet VAW requirements
               ac -> (s, weighting)
             }.toMap
 
@@ -528,7 +528,7 @@ trait CalculateModuleMarksAlgorithm {
                         (ac.assessmentType, ac.sequence, s.mark)
                       }
 
-                    val totalWeighting: BigDecimal = componentsForCalculation.map(_._1.weightingFor(marksForWeighting).get).sum
+                    val totalWeighting: BigDecimal = componentsForCalculation.map(_._1.weightingFor(marksForWeighting).get.get).sum
 
                     lazy val markCap: Option[Int] = {
                       val maxAttempt = componentsForCalculation.map { _._2.upstreamAssessmentGroupMember.currentResitAttempt.getOrElse(1) }.maxOption
@@ -537,7 +537,7 @@ trait CalculateModuleMarksAlgorithm {
 
                     val uncappedMark = componentsForCalculation.map { case (ac, s) =>
                       val mark = s.mark.get
-                      val weighting = ac.weightingFor(marksForWeighting).get
+                      val weighting = ac.weightingFor(marksForWeighting).get.get
                       mark * (weighting / totalWeighting)
                     }.sum
 
