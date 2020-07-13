@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceCompo
 
 import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
+import scala.util.{Failure, Success}
 
 object ModuleExamGridColumn {
 
@@ -147,7 +148,12 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
                 component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
                 component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
                 component.sequence == uagm.upstreamAssessmentGroup.sequence
-              }.flatMap(ac => ac.weightingFor(marks))
+              }.flatMap(ac => ac.weightingFor(marks) match {
+                case Success(w) => w
+                case Failure(t) =>
+                  logger.error(s"Couldn't calculate variable weighting for $ac, using scaled weighting", t)
+                  ac.scaledWeighting
+              })
             }.toMap.collect { case (key, Some(value)) => (key, value, isUnconfirmed(key)) }
 
             if (state.showZeroWeightedComponents)

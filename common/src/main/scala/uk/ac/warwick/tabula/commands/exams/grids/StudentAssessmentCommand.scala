@@ -6,14 +6,17 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.Stude
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, UpstreamRouteRuleServiceComponent}
-import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent, ResitServiceComponent}
+import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+
+import scala.util.{Failure, Success}
 
 object StudentAssessmentCommand {
   type Command = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState with PermissionsChecking
@@ -148,7 +151,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
   }
 }
 
-trait StudentModuleRegistrationAndComponents {
+trait StudentModuleRegistrationAndComponents extends Logging {
   self: AssessmentMembershipServiceComponent with ModuleRegistrationMarksServiceComponent with AssessmentComponentMarksServiceComponent with ResitServiceComponent =>
 
   /**
@@ -203,7 +206,15 @@ trait StudentModuleRegistrationAndComponents {
             Component(
               upstreamGroup = ug,
               member = uagm,
-              weighting = if (hasAnyMarks) ug.assessmentComponent.weightingFor(marks) else ug.assessmentComponent.scaledWeighting,
+              weighting =
+                if (hasAnyMarks)
+                  ug.assessmentComponent.weightingFor(marks)  match {
+                    case Success(w) => w
+                    case Failure(t) =>
+                      logger.error(s"Couldn't calculate variable weighting for ${ug.assessmentComponent}, using scaled weighting", t)
+                      ug.assessmentComponent.scaledWeighting
+                  }
+                else ug.assessmentComponent.scaledWeighting,
               markState = recordedAssessmentComponentStudent.flatMap(_.latestState),
               markRecord = StudentMarkRecord(
                 UpstreamAssessmentGroupInfo(
