@@ -246,10 +246,11 @@ object ExportFeedbackToSitsService {
       sas_agrg = :agreedGrade,
       sas_prcs = '$processStatus',
       sas_proc = '$currentProcess',
+      ${if (agreed) "sas_coma = sas_cura," }
       sas_udf1 = '$tabulaIdentifier',
       sas_udf2 = :now
     $whereClause
-  """
+    """
   }
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
@@ -270,12 +271,13 @@ object ExportFeedbackToSitsService {
       sra_actg = :actualGrade,
       sra_agrm = :agreedMark,
       sra_agrg = :agreedGrade,
-      sas_prcs = '$processStatus',
-      sas_proc = '$currentProcess',
+      sra_prcs = '$processStatus',
+      sra_proc = '$currentProcess',
+      ${if (agreed) "sra_coma = sra_cura," }
       sra_udf2 = '$tabulaIdentifier',
       sra_udf3 = :now
     $resitWhereClause
-  """
+    """
   }
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
