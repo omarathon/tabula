@@ -88,7 +88,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
             Option(BigDecimal(year.studentCourseYearDetails.get.agreedMark))
 
           lazy val calculatedYearMark: Option[BigDecimal] =
-            progressionService.getYearMark(year, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level), entity.yearWeightings).toOption
+            progressionService.getYearMark(year, normalLoadLookup(year), routeRulesLookup(year), entity.yearWeightings).toOption
 
           yearMarksToUse match {
             case _ if entity.years.keys.last == yearOfStudy =>
@@ -106,8 +106,8 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
         }
         doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
-        val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey.route, ey.level)).toMap
-        progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year.route), routeRules, yearMarksToUse, isLevelGrid, applyBenchmark, entity.yearWeightings) match {
+        val routeRules = entity.validYears.view.mapValues(ey => routeRulesLookup(ey)).toMap
+        progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year), routeRules, yearMarksToUse, isLevelGrid, applyBenchmark, entity.yearWeightings) match {
           case FinalYearGrade.Ignore =>
           case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")
         }

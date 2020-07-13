@@ -29,8 +29,8 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
         entity -> entity.years.filter { case (_, entityYear) => entityYear.nonEmpty }.get(state.yearOfStudy).map(entityYear =>
           progressionService.suggestedResult(
             entityYear.get,
-            state.normalLoadLookup(entityYear.get.route),
-            entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
+            state.normalLoadLookup(entityYear.get),
+            entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey)).toMap,
             state.yearMarksToUse,
             state.isLevelGrid,
             state.applyBenchmark,
