@@ -168,7 +168,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     components.map { uagm =>
       val weighting: BigDecimal =
         uagm.upstreamAssessmentGroup.assessmentComponent
-          .flatMap(_.weightingFor(marks))
+          .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
           .getOrElse(BigDecimal(0))
 
       val cats = (weighting / 100) * moduleRegistration.cats

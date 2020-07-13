@@ -6,10 +6,12 @@ import org.joda.time.Duration
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.jdk.CollectionConverters._
+import scala.util.{Success, Try}
 
 /**
   * Represents an upstream assessment component as found in the central
@@ -19,7 +21,7 @@ import scala.jdk.CollectionConverters._
   */
 @Entity
 @Proxy
-class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString {
+class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString with Logging {
 
   @transient var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
@@ -115,9 +117,9 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
    * @return the scaled (out of 100%) weighting of this assessment component, using variable assessment weightings if available
    *         or falling back to [[scaledWeighting]]
    */
-  def weightingFor(marks: Seq[(AssessmentType, String, Option[Int])]): Option[BigDecimal] =
-    if (variableAssessmentWeightingRules.isEmpty) scaledWeighting
-    else {
+  def weightingFor(marks: Seq[(AssessmentType, String, Option[Int])]): Try[Option[BigDecimal]] =
+    if (variableAssessmentWeightingRules.isEmpty) Success(scaledWeighting)
+    else Try {
       // Get matching assessment components for this assessment _type_
       val componentsForType: Map[String, AssessmentComponent] =
         allComponentsForAssessmentGroup.filter(_.assessmentType == assessmentType)
