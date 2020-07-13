@@ -42,7 +42,7 @@ object StudentCourseYearDetails {
       if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException(s"Cannot group StudentCourseYearDetails from different levels ${scyds.map(_.studyLevel).distinct.mkString(", ")}")
       val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
       val route = {
-        val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
+        val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)) // ignore any nulls
         allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
       }
       val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
@@ -51,6 +51,7 @@ object StudentCourseYearDetails {
         moduleRegistrations = moduleRegistrations,
         cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
         route = route,
+        baseAcademicYear = scyds.min.academicYear,
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
@@ -219,6 +220,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
           case _: Route => route
           case _ => studentCourseDetails.currentRoute
         },
+        baseAcademicYear = academicYear,
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = Some(this),

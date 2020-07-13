@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
@@ -21,6 +22,7 @@ case class ExamGridEntityYear(
   moduleRegistrations: Seq[ModuleRegistration],
   cats: BigDecimal,
   route: Route,
+  baseAcademicYear: AcademicYear, // This is used to look for UpstreamRouteRules so is tied to the route used
   overcattingModules: Option[Seq[Module]],
   markOverrides: Option[Map[Module, BigDecimal]],
   studentCourseYearDetails: Option[StudentCourseYearDetails],

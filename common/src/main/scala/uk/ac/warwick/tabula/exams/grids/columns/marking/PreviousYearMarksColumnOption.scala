@@ -38,7 +38,7 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
             Option(year.studentCourseYearDetails.get.agreedMark).map(BigDecimal(_))
 
           lazy val calculatedYearMark: Either[String, BigDecimal] =
-            progressionService.getYearMark(year, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level), entity.yearWeightings)
+            progressionService.getYearMark(year, state.normalLoadLookup(year), state.routeRulesLookup(year), entity.yearWeightings)
 
           state.yearMarksToUse match {
             case ExamGridYearMarksToUse.UploadedYearMarksOnly =>
