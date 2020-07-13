@@ -246,7 +246,7 @@ object ExportFeedbackToSitsService {
       sas_agrg = :agreedGrade,
       sas_prcs = '$processStatus',
       sas_proc = '$currentProcess',
-      ${if (agreed) "sas_coma = sas_cura," }
+      ${if (agreed) "sas_coma = sas_cura," else ""}
       sas_udf1 = '$tabulaIdentifier',
       sas_udf2 = :now
     $whereClause
@@ -273,7 +273,7 @@ object ExportFeedbackToSitsService {
       sra_agrg = :agreedGrade,
       sra_prcs = '$processStatus',
       sra_proc = '$currentProcess',
-      ${if (agreed) "sra_coma = sra_cura," }
+      ${if (agreed) "sra_coma = sra_cura," else ""}
       sra_udf2 = '$tabulaIdentifier',
       sra_udf3 = :now
     $resitWhereClause
