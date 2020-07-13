@@ -230,7 +230,7 @@ trait StudentAssessmentPermissions extends RequiresPermissionsChecking with Perm
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheckAny(
       Seq(CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
-        CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.studentCourseDetails.currentRoute))
+        CheckablePermission(Permissions.Department.ExamGrids, Option(studentCourseYearDetails.route).getOrElse(studentCourseYearDetails.studentCourseDetails.currentRoute)))
     )
   }
 

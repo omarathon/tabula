@@ -39,8 +39,8 @@ class GraduationBenchmarkColumnOption extends ChosenYearExamGridColumnOption wit
             case Some(UG) => progressionService.graduationBenchmark(
               entityYear.studentCourseYearDetails,
               entityYear.yearOfStudy,
-              state.normalLoadLookup(entityYear.route),
-              entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)).toMap,
+              state.normalLoadLookup(entityYear),
+              entity.validYears.view.mapValues(ey => state.routeRulesLookup(ey)).toMap,
               state.yearMarksToUse,
               state.isLevelGrid,
               entity.yearWeightings

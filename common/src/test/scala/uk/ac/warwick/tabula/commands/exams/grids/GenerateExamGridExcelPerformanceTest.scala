@@ -52,8 +52,8 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
 
   val yearOfStudy: Int = 1
 
-  val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, yearOfStudy, smartMock[NormalCATSLoadService])
-  val upstreamRouteRuleLookup: UpstreamRouteRuleLookup = UpstreamRouteRuleLookup(academicYear, smartMock[UpstreamRouteRuleService])
+  val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(yearOfStudy, smartMock[NormalCATSLoadService])
+  val upstreamRouteRuleLookup: UpstreamRouteRuleLookup = UpstreamRouteRuleLookup(smartMock[UpstreamRouteRuleService])
 
   val yearWeightings: Seq[CourseYearWeighting] =
     Seq(
@@ -115,6 +115,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       moduleRegistrations = moduleRegistrations,
       cats = cats,
       route = route,
+      baseAcademicYear = academicYear,
       overcattingModules = None,
       markOverrides = None,
       studentCourseYearDetails = students.get(universityId).map(_.mostSignificantCourse.latestStudentCourseYearDetails),

@@ -5,11 +5,12 @@ import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.services.LevelService
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 /**
   * Tabula store for a Pathway Module Rule (CAM_PMR) from SITS.
@@ -61,15 +62,16 @@ class UpstreamRouteRule extends GeneratedId {
 
 }
 
-case class UpstreamRouteRuleLookup(academicYear: AcademicYear, upstreamRouteRuleService: UpstreamRouteRuleService) {
-  private val cache = mutable.Map[(Route, Level), Seq[UpstreamRouteRule]]()
+case class UpstreamRouteRuleLookup(upstreamRouteRuleService: UpstreamRouteRuleService) {
+  private val cache = mutable.Map[(Route, Level, AcademicYear), Seq[UpstreamRouteRule]]()
 
-  def apply(route: Route, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
-    cache.get((route, l)) match {
+  def apply(route: Route, academicYear: AcademicYear, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
+    cache.get((route, l, academicYear)) match {
       case Some(rules) => rules
       case _ =>
-        cache.put((route, l), upstreamRouteRuleService.list(route, academicYear, l))
-        cache((route, l))
+        cache.put((route, l, academicYear), upstreamRouteRuleService.list(route, academicYear, l))
+        cache((route, l, academicYear))
     }).getOrElse(Seq())
 
+  def apply(year: ExamGridEntityYear): Seq[UpstreamRouteRule] = apply(year.route, year.baseAcademicYear, year.level)
 }
