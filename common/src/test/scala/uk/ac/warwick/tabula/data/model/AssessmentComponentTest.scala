@@ -49,7 +49,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
     components.map(_.scaledWeighting) should be (Seq(Some(BigDecimal(12.5)), Some(BigDecimal(12.5)), Some(BigDecimal(75))))
 
     // Also check variableWeighting while we're here, as that shouldn't be affected when there's no rules but should still scale
-    components.map(_.weightingFor(Seq.empty)) should be (Seq(Some(BigDecimal(12.5)), Some(BigDecimal(12.5)), Some(BigDecimal(75))))
+    components.map(_.weightingFor(Seq.empty).get) should be (Seq(Some(BigDecimal(12.5)), Some(BigDecimal(12.5)), Some(BigDecimal(75))))
   }
 
   @Test def variableWeighting(): Unit = {
@@ -77,7 +77,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
       (AssessmentType.Essay, "A02", Some(60)),
       (AssessmentType.SummerExam, "E01", None), // It doesn't matter that the exam hasn't happened yet
     )
-    components.map(_.weightingFor(marks)) should be (Seq(Some(BigDecimal(30)), Some(BigDecimal(0)), Some(BigDecimal(70))))
+    components.map(_.weightingFor(marks).get) should be (Seq(Some(BigDecimal(30)), Some(BigDecimal(0)), Some(BigDecimal(70))))
 
     // If the marks are equal, the first by sequence takes precedence
     val marks2 = Seq(
@@ -85,7 +85,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
       (AssessmentType.Essay, "A02", Some(60)),
       (AssessmentType.SummerExam, "E01", None),
     )
-    components.map(_.weightingFor(marks2)) should be (Seq(Some(BigDecimal(30)), Some(BigDecimal(0)), Some(BigDecimal(70))))
+    components.map(_.weightingFor(marks2).get) should be (Seq(Some(BigDecimal(30)), Some(BigDecimal(0)), Some(BigDecimal(70))))
 
     // Check that it works if A02 has a higher mark
     val marks3 = Seq(
@@ -93,7 +93,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
       (AssessmentType.Essay, "A02", Some(75)),
       (AssessmentType.SummerExam, "E01", None),
     )
-    components.map(_.weightingFor(marks3)) should be (Seq(Some(BigDecimal(0)), Some(BigDecimal(30)), Some(BigDecimal(70))))
+    components.map(_.weightingFor(marks3).get) should be (Seq(Some(BigDecimal(0)), Some(BigDecimal(30)), Some(BigDecimal(70))))
 
     // Check that a missing mark is treated correctly
     val marks4 = Seq(
@@ -101,7 +101,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
       (AssessmentType.Essay, "A02", Some(75)),
       (AssessmentType.SummerExam, "E01", None),
     )
-    components.map(_.weightingFor(marks4)) should be (Seq(Some(BigDecimal(0)), Some(BigDecimal(30)), Some(BigDecimal(70))))
+    components.map(_.weightingFor(marks4).get) should be (Seq(Some(BigDecimal(0)), Some(BigDecimal(30)), Some(BigDecimal(70))))
   }
 
   @Test def scaledVariableWeighting(): Unit = {
@@ -133,7 +133,7 @@ class AssessmentComponentTest extends TestBase with Mockito {
       (AssessmentType.Essay, "A03", Some(19)),
       (AssessmentType.Essay, "A04", Some(53)),
     )
-    components.map(_.weightingFor(marks)) should be (Seq(Some(BigDecimal(12.5)), Some(BigDecimal(75)), Some(BigDecimal(0)), Some(BigDecimal(12.5))))
+    components.map(_.weightingFor(marks).get) should be (Seq(Some(BigDecimal(12.5)), Some(BigDecimal(75)), Some(BigDecimal(0)), Some(BigDecimal(12.5))))
   }
 
 }
