@@ -256,7 +256,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
     override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
       state.entities.map { entity =>
         val studentCourseYearDetails = entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails)
-        val weightings = abroadYearWeightings(studentCourseYearDetails)
+        val weightings = abroadYearWeightings(studentCourseYearDetails).sorted
         val yearWeightingsAsString = for {
           weighting <- weightings
         } yield s"${weighting.weightingAsPercentage.toPlainString}"
