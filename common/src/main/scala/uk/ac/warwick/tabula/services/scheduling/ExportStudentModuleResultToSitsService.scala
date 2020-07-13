@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.ModuleResult._
-import uk.ac.warwick.tabula.data.model.{GradeBoundary, MarkState, ModuleRegistration, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, GradeBoundaryProcess, MarkState, ModuleRegistration, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.CountQuery
 import uk.ac.warwick.tabula.services.scheduling.ExportStudentModuleResultToSitsService.{ExportStudentModuleResultToSitsUpdateQuery, SmoCountQuery, SmrQuery, SmrSubset}
 
@@ -33,7 +34,7 @@ trait ExportStudentModuleResultToSitsService {
 }
 
 class AbstractExportStudentModuleResultToSitsService extends ExportStudentModuleResultToSitsService with Logging {
-  self: SitsDataSourceComponent =>
+  self: SitsDataSourceComponent with AssessmentMembershipServiceComponent =>
 
   private def extractSmrSubsetData(recordedModuleRegistration: RecordedModuleRegistration): SmrSubset = {
     val latestResult = recordedModuleRegistration.latestResult
@@ -42,9 +43,9 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
 
     val mr: ModuleRegistration = recordedModuleRegistration.moduleRegistration.getOrElse(throw new IllegalStateException(s"Expected ModuleRegistration record but 0 found for module mark $recordedModuleRegistration"))
 
-    // if there is any resit row
-    val currentResitAttempt = mr.currentResitAttempt
-    val isResitting = currentResitAttempt.nonEmpty
+    lazy val gradeBoundary = assessmentMembershipService.gradesForMark(mr, recordedModuleRegistration.latestMark).find(gb => latestGrade.contains(gb.grade))
+    val requiresResit = gradeBoundary.exists(_.generatesResit)
+    val incrementAttempt = gradeBoundary.exists(_.incrementsAttempt)
 
     val smrCredits: Option[JBigDecimal] = latestResult match {
       case Some(Pass) => Some(mr.cats)
@@ -57,23 +58,27 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         latestResult match {
           case Some(Pass) => Some("COM")
           case Some(Deferred) if latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => Some("COM")
-          case Some(Fail) => Some("RAS")
-          case Some(Deferred) => if (latestGrade.contains("S")) Some("RAS") else Some("SAS") // S is further first sit
+          case Some(Fail) | Some(Deferred) => Some("RAS") // Process is RAS even for first sits
           case _ => Some("SAS")
         }
       } else {
-        if (isResitting) Some("RAS") else Some("SAS")
+        if (mr.currentResitAttempt.nonEmpty) Some("RAS") else Some("SAS")
       }
     }
 
-    val smrCurrentAttempt: Option[Int] = if (isResitting) mr.currentResitAttempt else Some(1)
+    val currentAttempt: Int = mr.currentResitAttempt.getOrElse(1)
 
-    val smrCompletedAttempt: Option[Int] =
-      if (isAgreedMark) smrCurrentAttempt
-      else smrCurrentAttempt.map(_ - 1)
+    val smrCurrentAttempt: Int = {
+      if (isAgreedMark && incrementAttempt) currentAttempt + 1
+      else currentAttempt
+    }
+
+    val smrCompletedAttempt: Int =
+      if (isAgreedMark) currentAttempt
+      else currentAttempt - 1
 
     val smrSasStatus: Option[String] =
-      if (isResitting) Some("R")
+      if (mr.currentResitAttempt.nonEmpty || (isAgreedMark && requiresResit)) Some("R")
       else if (isAgreedMark) Some("A")
       else None
 
@@ -108,8 +113,8 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       processStatus = smrProcStatus,
       process = smrProcess,
       credits = smrCredits,
-      currentAttempt = smrCurrentAttempt,
-      completedAttempt = smrCompletedAttempt,
+      currentAttempt = Option(smrCurrentAttempt),
+      completedAttempt = Option(smrCompletedAttempt),
       actualMark = smrActualMark,
       actualGrade = smrActualGrade,
       agreedMark = smrAgreedMark,
@@ -316,7 +321,7 @@ object ExportStudentModuleResultToSitsService {
 @Profile(Array("dev", "test", "production"))
 @Service
 class ExportStudentModuleResultToSitsServiceImpl
-  extends AbstractExportStudentModuleResultToSitsService with AutowiringSitsDataSourceComponent
+  extends AbstractExportStudentModuleResultToSitsService with AutowiringSitsDataSourceComponent with AutowiringAssessmentMembershipServiceComponent
 
 @Profile(Array("sandbox"))
 @Service
