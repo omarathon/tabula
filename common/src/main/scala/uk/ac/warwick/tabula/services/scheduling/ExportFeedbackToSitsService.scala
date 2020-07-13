@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, RecordedAssessmentComponentStudentMark, UpstreamAssessmentGroupMemberAssessmentType}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, RecordedAssessmentComponentStudentMark, UpstreamAssessmentGroupMember, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService._
 
 import scala.jdk.CollectionConverters._
@@ -28,7 +29,7 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 
 trait ExportFeedbackToSitsService {
   def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int
-  def exportToSits(student: RecordedAssessmentComponentStudent): Int
+  def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow]
 }
 
@@ -96,7 +97,7 @@ class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessm
 
 
 class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService with Logging {
-  self: SitsDataSourceComponent =>
+  self: SitsDataSourceComponent with AssessmentMembershipServiceComponent =>
 
   private def countInternal(feedback: Feedback, tableName: String, query: CountQuery): Int = {
     val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
@@ -142,14 +143,22 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
       countMatchingSraRecords(student)
   }
 
-  override def exportToSits(student: RecordedAssessmentComponentStudent): Int = {
+  override def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int = {
     val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
+    val agreed = student.latestState.contains(MarkState.Agreed)
+    val reassessmentExpected = agreed && {
+      val assessmentComponent = member.flatMap(_.upstreamAssessmentGroup.assessmentComponent)
+      val currentResitAttempt = member.flatMap(_.currentResitAttempt)
+      val gradeBoundaries = assessmentComponent.map(ac => assessmentMembershipService.gradesForMark(ac, student.latestMark, currentResitAttempt)).getOrElse(Nil)
+      gradeBoundaries.find(gb => student.latestGrade.contains(gb.grade)).exists(_.generatesResit)
+    }
+
     val updateQuery = student.assessmentType match {
       case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
-        new ExportFeedbackToSitsQuery(sitsDataSource)
+        new ExportFeedbackToSitsQuery(sitsDataSource, agreed, reassessmentExpected)
 
       case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
-        new ExportResitFeedbackToSitsQuery(sitsDataSource)
+        new ExportResitFeedbackToSitsQuery(sitsDataSource, agreed, reassessmentExpected)
     }
 
     updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
@@ -221,37 +230,53 @@ object ExportFeedbackToSitsService {
   // SAS_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
   // SAS_PROC = Current Process - Value of SAS enabled overall marks to be calculated in SITS
   // SAS_UDF1, SAS_UDF2 - user defined fields used for audit
-  final def UpdateSITSFeedbackSql =
+  final def UpdateSITSFeedbackSql(agreed: Boolean, reassessment: Boolean): String = {
+
+    val (processStatus, currentProcess) = if (agreed) {
+      if(reassessment) ("R", "RAS") else ("A", "COM")
+    } else {
+      ("I", "SAS")
+    }
+
     f"""
     update $sitsSchema.cam_sas
     set sas_actm = :actualMark,
       sas_actg = :actualGrade,
       sas_agrm = :agreedMark,
       sas_agrg = :agreedGrade,
-      sas_prcs = 'I',
-      sas_proc = 'SAS',
+      sas_prcs = '$processStatus',
+      sas_proc = '$currentProcess',
       sas_udf1 = '$tabulaIdentifier',
       sas_udf2 = :now
     $whereClause
   """
+  }
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
   // SRA_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
   // SRA_PROC = Current Process - Value of RAS enabled overall marks to be calculated in SITS
   // SRA_UDF2, SRA_UDF3 - user defined fields used for audit
-  final def UpdateSITSResitFeedbackSql =
+  final def UpdateSITSResitFeedbackSql(agreed: Boolean, reassessment: Boolean): String = {
+
+    val (processStatus, currentProcess) = if (agreed) {
+      if(reassessment) ("R", "RAS") else ("A", "COM")
+    } else {
+      ("I", "RAS")
+    }
+
     f"""
     update $sitsSchema.cam_sra
     set sra_actm = :actualMark,
       sra_actg = :actualGrade,
       sra_agrm = :agreedMark,
       sra_agrg = :agreedGrade,
-      sra_prcs = 'I',
-      sra_proc = 'RAS',
+      sas_prcs = '$processStatus',
+      sas_proc = '$currentProcess',
       sra_udf2 = '$tabulaIdentifier',
       sra_udf3 = :now
     $resitWhereClause
   """
+  }
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
     declareParameter(new SqlParameter("actualMark", Types.INTEGER))
@@ -269,8 +294,8 @@ object ExportFeedbackToSitsService {
     compile()
   }
 
-  class ExportFeedbackToSitsQuery(ds: DataSource) extends ExportQuery(ds, UpdateSITSFeedbackSql)
-  class ExportResitFeedbackToSitsQuery(ds: DataSource) extends ExportQuery(ds, UpdateSITSResitFeedbackSql)
+  class ExportFeedbackToSitsQuery(ds: DataSource, agreed: Boolean, reassessment: Boolean) extends ExportQuery(ds, UpdateSITSFeedbackSql(agreed, reassessment))
+  class ExportResitFeedbackToSitsQuery(ds: DataSource, agreed: Boolean, reassessment: Boolean) extends ExportQuery(ds, UpdateSITSResitFeedbackSql(agreed, reassessment))
 
   final def PartialMatchingSasRecordsSql =
     f"""
@@ -328,12 +353,12 @@ object ExportFeedbackToSitsService {
 @Profile(Array("dev", "test", "production"))
 @Service
 class ExportFeedbackToSitsServiceImpl
-  extends AbstractExportFeedbackToSitsService with AutowiringSitsDataSourceComponent
+  extends AbstractExportFeedbackToSitsService with AutowiringSitsDataSourceComponent with AutowiringAssessmentMembershipServiceComponent
 
 @Profile(Array("sandbox"))
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
   override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = 0
-  override def exportToSits(student: RecordedAssessmentComponentStudent): Int = 0
+  override def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int = 0
   override def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
 }
