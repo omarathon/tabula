@@ -589,7 +589,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       val sumFinalTwoYearsPassedCredits = passedModuleRegistrationsInFinalTwoYears.map(mr => BigDecimal(mr.cats)).sum
       val passedCreditsInFinalTwoYears = sumFinalTwoYearsPassedCredits >= ProgressionService.FinalTwoYearsRequiredCredits
 
-      val passedModuleRegistrationsFinalYear: Seq[ModuleRegistration] = entityPerYear.toSeq.reverse.head._2.moduleRegistrations.filter(isPassed)
+      val passedModuleRegistrationsFinalYear: Seq[ModuleRegistration] = entityPerYear.toSeq.last._2.moduleRegistrations.filter(isPassed)
       val sumFinalYearPassedCredits = passedModuleRegistrationsFinalYear.map(mr => BigDecimal(mr.cats)).sum
       val passedCreditsFinalYear = sumFinalYearPassedCredits >= ProgressionService.FinalYearRequiredCredits
 
