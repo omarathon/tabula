@@ -225,7 +225,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
       val componentRecords = components.flatMap(_.students)
 
-      val agreedStudents = students.filter(_.markState.contains(Agreed))
+      val agreedStudents = students.filter(s => s.markState.contains(Agreed) || s.agreed)
 
       val studentsRequiringResits = agreedStudents.filter(s => s.requiresResit)
 
@@ -239,7 +239,7 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.CreateResits.needsWritingToSits",
         )
-      } else if ((agreedStudents.nonEmpty && studentsRequiringResits.isEmpty) || componentRecords.forall(!_.requiresResit)) {
+      } else if (agreedStudents.nonEmpty && studentsRequiringResits.isEmpty) {
         StageProgress(
           stage = CreateResits,
           started = true,
