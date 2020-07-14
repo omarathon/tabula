@@ -84,16 +84,16 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
       .orNull
 
-  // Lookup by notional key - sprcode, sitsmodulecode, academicyear, occurrence
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumns(value = Array(
-    new JoinColumn(name = "sprCode", referencedColumnName = "spr_code", insertable = false, updatable = false),
-    new JoinColumn(name = "sitsModuleCode", referencedColumnName = "sits_module_code", insertable = false, updatable = false),
-    new JoinColumn(name = "academicYear", referencedColumnName = "academic_year", insertable = false, updatable = false),
-    new JoinColumn(name = "occurrence", referencedColumnName = "occurrence", insertable = false, updatable = false)
-  ))
-  private val _recordedModuleRegistration: RecordedModuleRegistration = null
-  def recordedModuleRegistration: Option[RecordedModuleRegistration] = Option(_recordedModuleRegistration)
+  // This isn't really a ManyToMany but we don't have bytecode instrumentation so this allows us to make it lazy at both ends
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "ModuleRegistration_RecordedModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "recorded_module_registration_id", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "id", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  private val _recordedModuleRegistration: JSet[RecordedModuleRegistration] = JHashSet()
+  def recordedModuleRegistration: Option[RecordedModuleRegistration] = _recordedModuleRegistration.asScala.headOption
 
   var sprCode: String = _
 

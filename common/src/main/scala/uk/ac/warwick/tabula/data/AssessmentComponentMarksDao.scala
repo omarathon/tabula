@@ -1,17 +1,19 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.FetchMode
+import org.hibernate.{FetchMode, Session}
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.Daoisms._
 import uk.ac.warwick.tabula.data.model.{RecordedAssessmentComponentStudent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember}
 
 trait AssessmentComponentMarksDao {
   def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
+  def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedAssessmentComponentStudent]
   def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent]
   def mostRecentlyWrittenStudentDate: Option[DateTime]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
@@ -43,6 +45,16 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
       .add(is("academicYear", uag.academicYear))
       .distinct
       .seq
+
+  override def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedAssessmentComponentStudent] =
+    safeInSeq(
+      () =>
+        session.newCriteria[RecordedAssessmentComponentStudent]
+          .setFetchMode("_marks", FetchMode.JOIN)
+          .add(is("academicYear", academicYear)),
+      "moduleCode",
+      moduleCodes
+    )
 
   override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] =
     session.newCriteria[RecordedAssessmentComponentStudent]

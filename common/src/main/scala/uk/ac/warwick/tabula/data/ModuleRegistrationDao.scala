@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
@@ -97,6 +98,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
   override def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration] =
     session.newCriteria[ModuleRegistration]
       .createAlias("module", "module")
+      .setFetchMode("module", FetchMode.JOIN)
       .add(is("module.adminDepartment", department))
       .add(is("academicYear", academicYear))
       .add(is("deleted", false))

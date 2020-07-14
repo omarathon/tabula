@@ -44,16 +44,16 @@ class RecordedModuleRegistration extends GeneratedId
   @Column(name = "spr_code", nullable = false)
   var sprCode: String = _
 
-  // Lookup by notional key - sprcode, sitsmodulecode, academicyear, occurrence
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumns(value = Array(
-    new JoinColumn(name = "spr_code", referencedColumnName = "sprCode", insertable = false, updatable = false),
-    new JoinColumn(name = "sits_module_code", referencedColumnName = "sitsModuleCode", insertable = false, updatable = false),
-    new JoinColumn(name = "academic_year", referencedColumnName = "academicYear", insertable = false, updatable = false),
-    new JoinColumn(name = "occurrence", referencedColumnName = "occurrence", insertable = false, updatable = false)
-  ))
-  private val _moduleRegistration: ModuleRegistration = null
-  def moduleRegistration: Option[ModuleRegistration] = Option(_moduleRegistration)
+  // This isn't really a ManyToMany but we don't have bytecode instrumentation so this allows us to make it lazy at both ends
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "ModuleRegistration_RecordedModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "recorded_module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "id", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  private val _moduleRegistration: JSet[ModuleRegistration] = JHashSet()
+  def moduleRegistration: Option[ModuleRegistration] = _moduleRegistration.asScala.headOption
 
   @Column(name = "sits_module_code", nullable = false)
   var sitsModuleCode: String = _

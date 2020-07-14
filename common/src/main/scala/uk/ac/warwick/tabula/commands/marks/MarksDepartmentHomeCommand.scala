@@ -89,18 +89,29 @@ object MarksDepartmentHomeCommand {
     moduleRegistrationMarksService: ModuleRegistrationMarksService,
     assessmentMembershipService: AssessmentMembershipService
   ): Seq[StudentModuleMarkRecord] = {
-    val recordedModuleRegistrations = moduleRegistrationMarksService.getAllRecordedModuleRegistrations(sitsModuleCode, academicYear, occurrence)
+    val recordedModuleRegistrations =
+      moduleRegistrationMarksService.getAllRecordedModuleRegistrations(sitsModuleCode, academicYear, occurrence)
+        .map(student => student.sprCode -> student)
+        .toMap
 
-    lazy val gradeBoundaries: Seq[GradeBoundary] = moduleRegistrations.map(_.marksCode).distinct.flatMap(assessmentMembershipService.markScheme)
+    val gradeBoundaries: Map[String, Seq[GradeBoundary]] =
+      moduleRegistrations.map(_.marksCode).distinct.map(gb => gb -> assessmentMembershipService.markScheme(gb)).toMap
 
+    studentModuleMarkRecords(moduleRegistrations, recordedModuleRegistrations, gradeBoundaries)
+  }
+
+  def studentModuleMarkRecords(
+    moduleRegistrations: Seq[ModuleRegistration],
+    recordedModuleRegistrations: Map[String, RecordedModuleRegistration],
+    gradeBoundaries: Map[String, Seq[GradeBoundary]]
+  ): Seq[StudentModuleMarkRecord] =
     moduleRegistrations.sortBy(_.sprCode).map { moduleRegistration =>
-      val recordedModuleRegistration = recordedModuleRegistrations.find(_.sprCode == moduleRegistration.sprCode)
+      val recordedModuleRegistration = recordedModuleRegistrations.get(moduleRegistration.sprCode)
       val process = if (moduleRegistration.currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
       val grade = recordedModuleRegistration.flatMap(_.latestGrade)
-      val gradeBoundary = grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process))
+      val gradeBoundary = grade.flatMap(g => gradeBoundaries.getOrElse(moduleRegistration.marksCode, Seq.empty).find(gb => gb.grade == g && gb.process == process))
       StudentModuleMarkRecord(moduleRegistration, recordedModuleRegistration, gradeBoundary.exists(_.generatesResit))
     }
-  }
 
   type Result = Seq[ModuleOccurrence]
   type Command = Appliable[Result]
@@ -140,9 +151,20 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
         .groupBy { info => (info.assessmentComponent.moduleCode, info.upstreamAssessmentGroup.occurrence) }
     }
 
-    val allModuleRegistrations = benchmarkTask("Get module registrations for department grouped by SITS module code, academicYear and occurrence") {
-      moduleRegistrationService.getByDepartmentAndYear(department, academicYear)
-        .groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+    val recordedModuleRegistrationsByModuleOccurrence: Map[(String, String), Map[String, RecordedModuleRegistration]] = benchmarkTask("Get all recorded module registrations") {
+      moduleRegistrationMarksService.getAllRecordedModuleRegistrationsByModuleOccurrencesInYear(groupedInfo.keys.toSeq, academicYear)
+        .view
+        .mapValues { students =>
+          students.map { student =>
+            student.sprCode -> student
+          }.toMap
+        }.toMap
+    }
+
+    val gradeBoundariesByMarksCode: Map[String, Seq[GradeBoundary]] = benchmarkTask("Get all grade boundaries") {
+      allModuleRegistrations.values.flatten.toSeq.map(_.marksCode).distinct.map { marksCode =>
+        marksCode -> assessmentMembershipService.markScheme(marksCode)
+      }.toMap
     }
 
     benchmarkTask("Calculate progress for module") {
@@ -151,7 +173,9 @@ abstract class MarksDepartmentHomeCommandInternal(val department: Department, va
 
         val moduleRegistrations = benchmarkTask("Get module registrations") { allModuleRegistrations.getOrElse((moduleCode, academicYear, occurrence), Seq.empty).sortBy(_.sprCode) }
         val students = benchmarkTask("Get student module mark records") {
-          studentModuleMarkRecords(moduleCode, academicYear, occurrence, moduleRegistrations, moduleRegistrationMarksService, assessmentMembershipService)
+          val recordedModuleRegistrations = recordedModuleRegistrationsByModuleOccurrence.getOrElse((moduleCode, occurrence), Map.empty)
+
+          studentModuleMarkRecords(moduleRegistrations, recordedModuleRegistrations, gradeBoundariesByMarksCode)
         }
 
         val progress = benchmarkTask("Progress") { workflowProgressService.moduleOccurrenceProgress(students, infos) }
