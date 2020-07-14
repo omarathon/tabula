@@ -22,6 +22,20 @@ object ModuleRegistration {
 
   // a list of all the markscheme codes that we consider to be pass/fail modules
   final val PassFailMarkSchemeCodes = Seq("PF")
+
+  def filterToLatestAttempt(allMembers: Seq[UpstreamAssessmentGroupMember]): Seq[UpstreamAssessmentGroupMember] = {
+    // Filter down to just the latest resit sequence
+    // Find the assessment group to filter by (this is for students who take multiple reassessments)
+    val assessmentGroup =
+      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
+
+    // Group by assessment component so we only get the latest by resit sequence
+    allMembers
+      .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
+      .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
+      .values.map(_.maxBy(_.resitSequence))
+      .toSeq
+  }
 }
 
 /*
@@ -162,24 +176,16 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = false)
     }
 
-  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
-    val allMembers =
-      RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
-        membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
-      }.filter(member => studentCourseDetails !=null && member.universityId == studentCourseDetails.student.universityId)
+  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+    if (studentCourseDetails == null) Seq.empty
+    else {
+      val allMembers =
+        RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
+          membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
+        }.filter(member => member.universityId == studentCourseDetails.student.universityId)
 
-    // Filter down to just the latest resit sequence
-    // Find the assessment group to filter by (this is for students who take multiple reassessments)
-    val assessmentGroup =
-      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
-
-    // Group by assessment component so we only get the latest by resit sequence
-    allMembers
-      .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
-      .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
-      .values.map(_.sortBy(_.resitSequence).reverse.head)
-      .toSeq
-  }
+      ModuleRegistration.filterToLatestAttempt(allMembers)
+    }
 
   def recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent] = {
     val uagms = upstreamAssessmentGroupMembers
@@ -189,7 +195,7 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
     }.filter(r => uagms.exists(r.matchesIdentity))
   }
 
-  def currentResitAttempt: Option[Int] = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).sorted.lastOption
+  def currentResitAttempt: Option[Int] = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).maxOption
 
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
     val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))
