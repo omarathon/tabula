@@ -27,7 +27,7 @@ object ModuleRegistration {
     // Filter down to just the latest resit sequence
     // Find the assessment group to filter by (this is for students who take multiple reassessments)
     val assessmentGroup =
-    allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
+      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
 
     // Group by assessment component so we only get the latest by resit sequence
     allMembers
