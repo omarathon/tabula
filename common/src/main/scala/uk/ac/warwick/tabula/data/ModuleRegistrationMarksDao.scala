@@ -7,13 +7,13 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms._
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, RecordedModuleRegistration}
 
 trait ModuleRegistrationMarksDao {
   def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration]
   def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
+  def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedModuleRegistration]
   def allNeedingWritingToSits: Seq[RecordedModuleRegistration]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
   def saveOrUpdate(reg: RecordedModuleRegistration): RecordedModuleRegistration
@@ -39,6 +39,16 @@ abstract class AbstractModuleRegistrationMarksDao extends ModuleRegistrationMark
       .add(is("occurrence", occurrence))
       .distinct
       .seq
+
+  override def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedModuleRegistration] =
+    safeInSeq(
+      () =>
+        session.newCriteria[RecordedModuleRegistration]
+          .setFetchMode("_marks", FetchMode.JOIN)
+          .add(is("academicYear", academicYear)),
+      "sitsModuleCode",
+      moduleCodes
+    )
 
   override def allNeedingWritingToSits: Seq[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]

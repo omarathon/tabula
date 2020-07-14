@@ -88,14 +88,32 @@ object ListAssessmentComponentsCommand {
     resitService: ResitService,
     assessmentMembershipService: AssessmentMembershipService
   ): Seq[StudentMarkRecord] = {
-    val recordedStudents = assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
-    val resits = resitService.getAllResits(info.upstreamAssessmentGroup)
+    val recordedStudents =
+      assessmentComponentMarksService.getAllRecordedStudents(info.upstreamAssessmentGroup)
+        .map { student =>
+          (student.universityId, student.assessmentType, student.resitSequence) -> student
+        }.toMap
+
+    val resits =
+      resitService.getAllResits(info.upstreamAssessmentGroup)
+        .filter(_.universityId.nonEmpty)
+        .map { resit =>
+          (resit.universityId.get, resit.sequence) -> resit
+        }.toMap
+
     val gradeBoundaries = info.upstreamAssessmentGroup.assessmentComponent.map(_.marksCode).map(assessmentMembershipService.markScheme).getOrElse(Nil)
+    studentMarkRecords(info, recordedStudents, resits, gradeBoundaries)
+  }
+
+  def studentMarkRecords(
+    info: UpstreamAssessmentGroupInfo,
+    recordedStudents: Map[(String, UpstreamAssessmentGroupMemberAssessmentType, Option[String]), RecordedAssessmentComponentStudent],
+    resits: Map[(String, String), RecordedResit],
+    gradeBoundaries: Seq[GradeBoundary]
+  ): Seq[StudentMarkRecord] =
     info.allMembers.sortBy { uagm => (uagm.universityId, uagm.resitSequence.getOrElse("000")) }.map { member =>
-      val recordedStudent = recordedStudents.find(_.matchesIdentity(member))
-      val existingResit = resits.filter(r => r.universityId.contains(member.universityId) && r.sequence == info.upstreamAssessmentGroup.sequence)
-        .sortBy(_.resitSequence)
-        .headOption
+      val recordedStudent = recordedStudents.get((member.universityId, member.assessmentType, member.resitSequence))
+      val existingResit = resits.get((member.universityId, member.upstreamAssessmentGroup.sequence))
       val gradeBoundary = {
         val process = if (member.isReassessment) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
         val grade = recordedStudent.flatMap(_.latestGrade)
@@ -103,7 +121,6 @@ object ListAssessmentComponentsCommand {
       }
       StudentMarkRecord(info, member, recordedStudent, existingResit, gradeBoundary.exists(_.generatesResit))
     }
-  }
 
   case class AssessmentComponentInfo(
     assessmentComponent: AssessmentComponent,
@@ -156,7 +173,7 @@ abstract class ListAssessmentComponentsCommandInternal(val department: Departmen
 
 }
 
-trait ListAssessmentComponentsForModulesWithPermission {
+trait ListAssessmentComponentsForModulesWithPermission extends TaskBenchmarking {
   self: ListAssessmentComponentsState
     with AssessmentMembershipServiceComponent
     with AssessmentComponentMarksServiceComponent
@@ -165,32 +182,71 @@ trait ListAssessmentComponentsForModulesWithPermission {
     with ModuleRegistrationServiceComponent
     with ListAssessmentComponentsModulesWithPermission =>
 
+  lazy val allModuleRegistrations: Map[(String, AcademicYear, String), Seq[ModuleRegistration]] = benchmarkTask("Load all module registrations for department") {
+    moduleRegistrationService.getByDepartmentAndYear(department, academicYear)
+      .groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+  }
+
   lazy val assessmentComponentInfos: Seq[AssessmentComponentInfo] = {
-    val assessmentComponents: Seq[AssessmentComponent] =
+    val assessmentComponents: Seq[AssessmentComponent] = benchmarkTask("Get assessment components") {
       assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments = false, inUseOnly = false)
         .filter { ac =>
           ac.sequence != AssessmentComponent.NoneAssessmentGroup &&
           (canAdminDepartment || modulesWithPermission.contains(ac.module))
         }
+    }
 
-    val assessmentComponentsByKey: Map[AssessmentComponentKey, AssessmentComponent] =
+    val assessmentComponentsByKey: Map[AssessmentComponentKey, AssessmentComponent] = benchmarkTask("Group assessment components") {
       assessmentComponents.map { ac =>
         AssessmentComponentKey(ac) -> ac
       }.toMap
+    }
 
-    val allModuleRegistrations =
-      moduleRegistrationService.getByDepartmentAndYear(department, academicYear)
-        .groupBy(mr => (mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+    val upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = benchmarkTask("Get UAG infos for components") {
+      assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
+        .filter(_.allMembers.nonEmpty)
+    }
+    val recordedStudentsByGroup: Map[UpstreamAssessmentGroup, Map[(String, UpstreamAssessmentGroupMemberAssessmentType, Option[String]), RecordedAssessmentComponentStudent]] = benchmarkTask("Get all recorded students") {
+      assessmentComponentMarksService.getAllRecordedStudentsByGroup(upstreamAssessmentGroupInfos.map(_.upstreamAssessmentGroup).distinct)
+        .view
+        .mapValues { students =>
+          students.map { student =>
+            (student.universityId, student.assessmentType, student.resitSequence) -> student
+          }.toMap
+        }.toMap
+    }
 
-    assessmentMembershipService.getUpstreamAssessmentGroupInfoForComponents(assessmentComponents, academicYear)
-      .filter(_.allMembers.nonEmpty)
-      .map { upstreamAssessmentGroupInfo =>
+    val resitsByGroup: Map[UpstreamAssessmentGroup, Map[(String, String), RecordedResit]] = benchmarkTask("Get all recorded resits") {
+      resitService.getAllResitsByGroup(upstreamAssessmentGroupInfos.map(_.upstreamAssessmentGroup).distinct)
+        .view
+        .mapValues { resits =>
+          resits.filter(_.universityId.nonEmpty).groupBy(r => (r.universityId.get, r.sequence))
+            .view
+            .mapValues(_.maxBy(_.resitSequence))
+            .toMap
+        }.toMap
+    }
+
+    val gradeBoundariesByMarksCode: Map[String, Seq[GradeBoundary]] = benchmarkTask("Get all grade boundaries") {
+      upstreamAssessmentGroupInfos.flatMap(_.upstreamAssessmentGroup.assessmentComponent.map(_.marksCode)).distinct.map { marksCode =>
+        marksCode -> assessmentMembershipService.markScheme(marksCode)
+      }.toMap
+    }
+
+    upstreamAssessmentGroupInfos
+      .map { upstreamAssessmentGroupInfo => benchmarkTask(s"Process ${upstreamAssessmentGroupInfo.upstreamAssessmentGroup}") {
         val assessmentComponent = assessmentComponentsByKey(AssessmentComponentKey(upstreamAssessmentGroupInfo.upstreamAssessmentGroup))
         val upstreamAssessmentGroup = upstreamAssessmentGroupInfo.upstreamAssessmentGroup
-        val students = studentMarkRecords(upstreamAssessmentGroupInfo, assessmentComponentMarksService, resitService, assessmentMembershipService)
+        val students: Seq[StudentMarkRecord] = benchmarkTask("Get student mark records") {
+          val recordedStudents = recordedStudentsByGroup.getOrElse(upstreamAssessmentGroup, Map.empty)
+          val resits = resitsByGroup.getOrElse(upstreamAssessmentGroup, Map.empty)
+          val gradeBoundaries = upstreamAssessmentGroup.assessmentComponent.map(_.marksCode).flatMap(gradeBoundariesByMarksCode.get).getOrElse(Seq.empty)
+
+          studentMarkRecords(upstreamAssessmentGroupInfo, recordedStudents, resits, gradeBoundaries)
+        }
 
         val moduleRegistrations = allModuleRegistrations.getOrElse((assessmentComponent.moduleCode, academicYear, upstreamAssessmentGroup.occurrence), Seq.empty).sortBy(_.sprCode)
-        val progress = workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations)
+        val progress = benchmarkTask("Progress") { workflowProgressService.componentProgress(assessmentComponent, upstreamAssessmentGroup, students, moduleRegistrations) }
 
         AssessmentComponentInfo(
           assessmentComponent,
@@ -200,7 +256,7 @@ trait ListAssessmentComponentsForModulesWithPermission {
           nextStage = progress.nextStage,
           stages = progress.stages,
         )
-      }
+      }}
       .sortBy { info =>
         // module_code, assessment_group, sequence, mav_occurrence
         (info.assessmentComponent.moduleCode, info.assessmentComponent.assessmentGroup, info.assessmentComponent.sequence, info.upstreamAssessmentGroup.occurrence)

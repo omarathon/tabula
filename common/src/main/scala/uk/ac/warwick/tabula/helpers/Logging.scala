@@ -55,7 +55,7 @@ trait Logging {
     stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
     logger: Logger = this.logger
   )(fn: => A): A =
-    timed(description, level, minMillis, stopWatch, logger) { timer =>
+    timed(description, level, minMillis, stopWatch, logger) { _ =>
       fn
     }
 
@@ -68,7 +68,7 @@ trait Logging {
     minMillis: Int = 0,
     stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
     logger: Logger = this.logger
-  )(fn: => (uk.ac.warwick.util.core.StopWatch => A)): A = {
+  )(fn: => uk.ac.warwick.util.core.StopWatch => A): A = {
     if (Logging.benchmarking) {
       try stopWatch.record(description) {
         fn(stopWatch)
