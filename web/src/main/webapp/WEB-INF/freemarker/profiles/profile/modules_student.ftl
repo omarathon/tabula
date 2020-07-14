@@ -31,7 +31,7 @@
         </#list>
         <strong>Total CATS:</strong> ${totalCats}
       </#if>
-     <#if !yearWeightingsInFlux || (user.staff && !isSelf)>
+     <#if !hideYearWeightings || (user.staff && !isSelf)>
         <strong>Year mark:</strong> ${yearMark!"-"}
         <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
           (weighted mean: ${weightedMeanYearMark!"-"})
