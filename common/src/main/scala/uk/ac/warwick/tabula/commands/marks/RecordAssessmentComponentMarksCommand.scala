@@ -315,7 +315,8 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
     val doGradeValidation = assessmentComponent.module.adminDepartment.assignmentGradeValidation
 
-    val modRegs = moduleRegistrationService.getByModuleOccurrence(upstreamAssessmentGroup.moduleCode, upstreamAssessmentGroup.academicYear, upstreamAssessmentGroup.occurrence)
+    val modRegsMap = moduleRegistrationService.getByModuleOccurrence(upstreamAssessmentGroup.moduleCode, upstreamAssessmentGroup.academicYear, upstreamAssessmentGroup.occurrence)
+      .map(modReg => modReg.studentCourseDetails.student.universityId -> modReg).toMap
 
     students.asScala.foreach { case (id, item) =>
       errors.pushNestedPath(s"students[$id]")
@@ -388,9 +389,7 @@ trait RecordAssessmentComponentMarksValidation extends SelfValidating {
 
         val isAgreed = studentMarkRecord.agreed || studentMarkRecord.markState.contains(MarkState.Agreed)
 
-        val resultsReleasedToStudents =
-          modRegs.filter(_.studentCourseDetails.student.universityId == uagm.universityId)
-            .exists(MarkState.resultsReleasedToStudents(_, MarkState.MarkUploadTime))
+        val resultsReleasedToStudents = modRegsMap.get(uagm.universityId).exists(MarkState.resultsReleasedToStudents(_, MarkState.MarkUploadTime))
 
         if (isAgreed && !isUnchanged && resultsReleasedToStudents && !canEditAgreedMarks) {
           errors.rejectValue("mark", "actualMark.agreed")
