@@ -12,6 +12,7 @@ buildscript {
   dependencies {
     classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.8"
     classpath "com.bmuschko:gradle-cargo-plugin:2.6.1"
+    classpath "org.hibernate:hibernate-gradle-plugin:5.4.18.Final"
   }
 }
 
