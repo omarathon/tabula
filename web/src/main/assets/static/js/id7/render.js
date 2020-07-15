@@ -86,3 +86,4 @@ require('../jquery.form');
 require('./jquery-tableform');
 require('../select-deselect-checkboxes');
 require('./local-times');
+require('./tablesorter-formfield');
