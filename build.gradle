@@ -24,7 +24,7 @@ ext {
   scalaVersion = "2.13.1"
   scalaMajorVersion = "2.13"
   springVersion = "5.2.4.RELEASE"
-  hibernateVersion = "5.4.17.Final"
+  hibernateVersion = "5.4.18.Final"
   jacksonVersion = "2.9.10"
   jacksonDatabindVersion = "2.9.10.1"
   jacksonScalaModuleVersion = "2.9.10"
