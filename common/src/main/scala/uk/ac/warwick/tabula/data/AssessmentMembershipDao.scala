@@ -635,12 +635,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       if (components.isEmpty) Nil
       else session.newQuery[UpstreamAssessmentGroup](
         """
-        select uag
+        select distinct uag
         from UpstreamAssessmentGroup uag
-          join AssessmentComponent ac
+          join fetch AssessmentComponent ac
             on ac.assessmentGroup = uag.assessmentGroup and
                ac.moduleCode = uag.moduleCode and
                ac.sequence = uag.sequence
+          join fetch uag.members
         where
           uag.academicYear = :academicYear and
           ac in (:components)""")

@@ -11,6 +11,7 @@ trait ModuleRegistrationMarksService {
   def getOrCreateRecordedModuleRegistration(reg: ModuleRegistration): RecordedModuleRegistration
   def getRecordedModuleRegistration(reg: ModuleRegistration): Option[RecordedModuleRegistration]
   def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration]
+  def getAllRecordedModuleRegistrationsByModuleOccurrencesInYear(moduleOccurrences: Seq[(String, String)], academicYear: AcademicYear): Map[(String, String), Seq[RecordedModuleRegistration]]
   def allNeedingWritingToSits(filtered: Boolean): Seq[RecordedModuleRegistration]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
   def saveOrUpdate(reg: RecordedModuleRegistration): RecordedModuleRegistration
@@ -31,6 +32,21 @@ abstract class AbstractModuleRegistrationMarksService extends ModuleRegistration
 
   override def getAllRecordedModuleRegistrations(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[RecordedModuleRegistration] = transactional(readOnly = true) {
     moduleRegistrationMarksDao.getAllRecordedModuleRegistrations(sitsModuleCode, academicYear, occurrence)
+  }
+
+  override def getAllRecordedModuleRegistrationsByModuleOccurrencesInYear(moduleOccurrences: Seq[(String, String)], academicYear: AcademicYear): Map[(String, String), Seq[RecordedModuleRegistration]] = transactional(readOnly = true) {
+    if (moduleOccurrences.isEmpty) Map.empty
+    else {
+      val moduleCodes = moduleOccurrences.map(_._1).distinct
+
+      val allStudents: Map[(String, String), Seq[RecordedModuleRegistration]] =
+        moduleRegistrationMarksDao.getAllForModulesInYear(moduleCodes, academicYear)
+          .groupBy(rmr => (rmr.sitsModuleCode, rmr.occurrence))
+
+      moduleOccurrences.map { case (sitsModuleCode, occurrence) =>
+        (sitsModuleCode, occurrence) -> allStudents.getOrElse((sitsModuleCode, occurrence), Seq.empty)
+      }.toMap
+    }
   }
 
   override def allNeedingWritingToSits(filtered: Boolean): Seq[RecordedModuleRegistration] = transactional(readOnly = true) {

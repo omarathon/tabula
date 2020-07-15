@@ -7,12 +7,14 @@ import org.hibernate.criterion.Restrictions.isNotNull
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{RecordedModuleRegistration, RecordedResit, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.Daoisms._
+import uk.ac.warwick.tabula.data.model.{RecordedResit, UpstreamAssessmentGroup}
 
 trait ResitDao {
   def saveOrUpdate(resit: RecordedResit): RecordedResit
   def getAllResits(uag: UpstreamAssessmentGroup): Seq[RecordedResit]
+  def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedResit]
   def findResits(sprCodes: Seq[String]): Seq[RecordedResit]
   def allNeedingWritingToSits: Seq[RecordedResit]
   def mostRecentlyWrittenToSitsDate: Option[DateTime]
@@ -36,6 +38,13 @@ abstract class AbstractResitDao extends ResitDao {
       .add(is("academicYear", uag.academicYear))
       .distinct
       .seq
+
+  override def getAllForModulesInYear(moduleCodes: Seq[String], academicYear: AcademicYear): Seq[RecordedResit] =
+    safeInSeq(
+      () => session.newCriteria[RecordedResit].add(is("academicYear", academicYear)),
+      "moduleCode",
+      moduleCodes
+    )
 
   override def findResits(sprCodes: Seq[String]): Seq[RecordedResit] =
     session.newCriteria[RecordedResit]

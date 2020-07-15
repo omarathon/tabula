@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.marks
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AssessmentComponentMarksDaoComponent, AutowiringAssessmentComponentMarksDaoComponent, AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleAndDepartmentServiceComponent, ModuleRegistrationServiceComponent}
@@ -11,6 +12,7 @@ trait AssessmentComponentMarksService {
   def getRecordedStudent(uagm: UpstreamAssessmentGroupMember): Option[RecordedAssessmentComponentStudent]
   def getOrCreateRecordedStudent(uagm: UpstreamAssessmentGroupMember): RecordedAssessmentComponentStudent
   def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent]
+  def getAllRecordedStudentsByGroup(groups: Seq[UpstreamAssessmentGroup]): Map[UpstreamAssessmentGroup, Seq[RecordedAssessmentComponentStudent]]
   def allNeedingWritingToSits(filtered: Boolean): Seq[RecordedAssessmentComponentStudent]
   def mostRecentlyWrittenStudentDate: Option[DateTime]
   def saveOrUpdate(student: RecordedAssessmentComponentStudent): RecordedAssessmentComponentStudent
@@ -33,6 +35,24 @@ abstract class AbstractAssessmentComponentMarksService extends AssessmentCompone
 
   override def getAllRecordedStudents(uag: UpstreamAssessmentGroup): Seq[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {
     assessmentComponentMarksDao.getAllRecordedStudents(uag)
+  }
+
+  override def getAllRecordedStudentsByGroup(groups: Seq[UpstreamAssessmentGroup]): Map[UpstreamAssessmentGroup, Seq[RecordedAssessmentComponentStudent]] = transactional(readOnly = true) {
+    if (groups.isEmpty) Map.empty
+    else {
+      require(groups.forall(_.academicYear == groups.head.academicYear), "UpstreamAssessmentGroups must all be for the same academic year")
+
+      val academicYear = groups.head.academicYear
+      val moduleCodes = groups.map(_.moduleCode).distinct
+
+      val allStudents: Map[(String, AcademicYear, String, String, String), Seq[RecordedAssessmentComponentStudent]] =
+        assessmentComponentMarksDao.getAllForModulesInYear(moduleCodes, academicYear)
+          .groupBy(racs => (racs.moduleCode, racs.academicYear, racs.occurrence, racs.assessmentGroup, racs.sequence))
+
+      groups.map { uag =>
+        uag -> allStudents.getOrElse((uag.moduleCode, uag.academicYear, uag.occurrence, uag.assessmentGroup, uag.sequence), Seq.empty)
+      }.toMap
+    }
   }
 
   override def allNeedingWritingToSits(filtered: Boolean): Seq[RecordedAssessmentComponentStudent] = transactional(readOnly = true) {

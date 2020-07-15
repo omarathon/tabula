@@ -48,7 +48,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
         if (feedback.assignment.resitAssessment) {
           info.allMembers.filter { uagm =>
             feedback.universityId.contains(uagm.universityId) && uagm.isReassessment
-          }.sortBy(_.resitSequence).reverse.headOption
+          }.maxByOption(_.resitSequence)
         } else {
           info.allMembers.find { uagm =>
             feedback.universityId.contains(uagm.universityId) && !uagm.isReassessment

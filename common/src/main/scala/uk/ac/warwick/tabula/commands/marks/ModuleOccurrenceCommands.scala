@@ -64,7 +64,7 @@ trait ModuleOccurrenceLoadModuleRegistrations {
     studentComponentMarkRecords
       .filter { case (ac, allStudents) => assessmentGroup.contains(ac.assessmentGroup) && allStudents.exists(_.universityId == universityId) }
       .map { case (ac, allStudents) =>
-        ac -> allStudents.filter(_.universityId == universityId).sortBy(_.resitSequence).reverse.head // Resits first, then latest by resit sequence
+        ac -> allStudents.filter(_.universityId == universityId).maxBy(_.resitSequence) // Resits first, then latest by resit sequence
       }
       .toMap
   }
