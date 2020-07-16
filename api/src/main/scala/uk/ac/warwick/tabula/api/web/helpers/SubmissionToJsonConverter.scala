@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 import scala.util.Try
 
 trait SubmissionToJsonConverter {
-  self: TopLevelUrlComponent =>
+  self: TopLevelUrlComponent with ExtensionToJsonConvertor =>
 
   def jsonSubmissionObject(submission: Submission): Map[String, Any] = {
     Map(
@@ -43,7 +43,7 @@ trait SubmissionToJsonConverter {
     student.coursework.enhancedSubmission.map { enhancedSubmission =>
       jsonSubmissionObject(enhancedSubmission.submission) ++ Map(
         "downloaded" -> enhancedSubmission.downloaded
-      )
+      ) ++ jsonExtension(student)
     }.orNull
   }
 }

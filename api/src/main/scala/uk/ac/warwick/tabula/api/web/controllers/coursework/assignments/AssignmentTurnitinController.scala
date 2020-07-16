@@ -32,6 +32,7 @@ class AssignmentTurnitinController extends AssignmentController
   with AssignmentToJsonConverter
   with AssessmentMembershipInfoToJsonConverter
   with AssignmentStudentToJsonConverter
+  with ExtensionToJsonConvertor
   with ReplacingAssignmentStudentMessageResolver
   with JobInstanceToJsonConverter {
   validatesSelf[SelfValidating]
