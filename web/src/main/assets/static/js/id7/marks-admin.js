@@ -4,8 +4,6 @@ import $ from 'jquery';
 $(() => {
   $('.fix-area').fixHeaderFooter();
 
-  $('.process-module-marks').find('.table-checkable').bigList({});
-
   // Auto grade generator
   $('.auto-grade[data-mark][data-generate-url]').each((i, el) => {
     const $input = $(el);
@@ -122,6 +120,10 @@ $(() => {
     textAttribute: 'data-sortby',
   }).on('tablesorter-ready', (e) => {
     const $table = $(e.target);
+
+    if ($table.hasClass('table-checkable')) {
+      $table.bigList({});
+    }
 
     /*
      * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
