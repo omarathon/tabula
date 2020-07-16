@@ -538,7 +538,8 @@ trait CalculateModuleMarksAlgorithm {
                     val uncappedMark = componentsForCalculation.map { case (ac, s) =>
                       val mark = s.mark.get
                       val weighting = ac.weightingFor(marksForWeighting).get.get
-                      mark * (weighting / totalWeighting)
+                      if (totalWeighting == 0) BigDecimal(0)
+                      else mark * (weighting / totalWeighting)
                     }.sum
 
                     // if any of the components being considered are a resit then cap the module mark
