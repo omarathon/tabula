@@ -12,6 +12,7 @@ trait StudentAwardDao {
   def delete(sa: StudentAward): Unit
   def getByAcademicYears(academicYears: Seq[AcademicYear]): Seq[StudentAward]
   def getByUniversityIds(universityIds: Seq[String]): Seq[StudentAward]
+  def getBySprCodeAndAcademicYear(sprCode: String, academicYear: AcademicYear): Seq[StudentAward]
 }
 
 abstract class HibernateStudentAwardDao extends StudentAwardDao with HelperRestrictions {
@@ -39,6 +40,20 @@ abstract class HibernateStudentAwardDao extends StudentAwardDao with HelperRestr
           and studentCourseDetails.student.universityId in :universityIds
       """)
       .setParameterList("universityIds", universityIds)
+      .seq
+  }
+
+  def getBySprCodeAndAcademicYear(sprCode: String, academicYear:AcademicYear): Seq[StudentAward] = {
+    session.newQuery[StudentAward](
+      """
+        select distinct sa
+        from StudentAward sa
+        join StudentCourseDetails studentCourseDetails
+          on studentCourseDetails.sprCode = sa.sprCode
+        where studentCourseDetails.sprCode = :sprCode and sa.academicYear = :academicYear
+      """)
+      .setParameter("sprCode", sprCode)
+      .setParameter("academicYear", academicYear)
       .seq
   }
 }

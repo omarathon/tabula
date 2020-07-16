@@ -61,7 +61,27 @@
       </#list>
     </#if>
 
-    <#if moduleRegistrationsAndComponents?has_content>
+    <#if studentAwards?has_content>
+        <#list studentAwards as studentAward>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">
+                Student Award <span class="label label-info">${studentAward.award.name}</span>
+              </h3>
+            </div>
+            <div class="panel-body">
+                <#if studentAward.classification?has_content>
+                  <div>
+                    <span class="lead">${studentAward.classification.name}</span>
+                  </div>
+                </#if>
+
+            </div>
+          </div>
+        </#list>
+    </#if>
+
+      <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
       <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
