@@ -222,7 +222,7 @@ trait ListAssessmentComponentsForModulesWithPermission extends TaskBenchmarking 
         .mapValues { resits =>
           resits.filter(_.universityId.nonEmpty).groupBy(r => (r.universityId.get, r.sequence))
             .view
-            .mapValues(_.maxBy(_.resitSequence))
+            .mapValues(_.maxBy(_.currentResitAttempt))
             .toMap
         }.toMap
     }
