@@ -306,7 +306,6 @@ class ImportStudentAwardsController extends BaseSysadminController
     ))
 }
 
-
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles/{universityId}"))
 class ImportSingleProfileController extends BaseSysadminController {
