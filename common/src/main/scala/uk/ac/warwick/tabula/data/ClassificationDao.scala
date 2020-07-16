@@ -5,11 +5,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Classification
 
 trait ClassificationDaoComponent {
-  val ClassificationDao: ClassificationDao
+  val classificationDao: ClassificationDao
 }
 
 trait AutowiringClassificationDaoComponent extends ClassificationDaoComponent {
-  val ClassificationDao: ClassificationDao = Wire[ClassificationDao]
+  val classificationDao: ClassificationDao = Wire[ClassificationDao]
 }
 
 trait ClassificationDao {

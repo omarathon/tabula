@@ -4,7 +4,7 @@ import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
-import uk.ac.warwick.tabula.data.model.{Award, Course, Department, Route, SitsStatus}
+import uk.ac.warwick.tabula.data.model.{Award, Classification, Course, Department, Route, SitsStatus}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
@@ -65,6 +65,7 @@ trait PropertyCopying extends Logging {
             case dept: Department => dept.code
             case sitsStatus: SitsStatus => sitsStatus.code
             case award: Award => award.code
+            case classification: Classification => classification.code
             case _ =>
               logger.warn(s"Couldn't find a code for ${oldValue.getClass.getSimpleName}, this will always be seen as changed!")
               null

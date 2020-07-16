@@ -151,6 +151,19 @@
     </p>
 
     <p>
+        <@f.form method="post" action="${url('/sysadmin/import-student-awards')}" modelAttribute="blankForm">
+    <div class="input-group">
+      <select name="academicYear" class="form-control">
+          <#list academicYears as ay>
+            <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+          </#list>
+      </select>
+      <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Student Awards" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
+    </div>
+      </@f.form>
+    </p>
+
+    <p>
       <@f.form method="post" action="${url('/sysadmin/import-locations')}" modelAttribute="blankForm">
       Check for missing event locations
     <div class="input-group">

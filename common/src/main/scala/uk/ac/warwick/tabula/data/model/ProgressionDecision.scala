@@ -35,12 +35,6 @@ class ProgressionDecision extends GeneratedId with ToString {
     _allStudentCourseDetails.asScala.find(_.mostSignificant)
       .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
 
-  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "_allProgressionDecision")
-  @BatchSize(size = 100)
-  val _studentAwards: JSet[StudentAward] = JHashSet()
-
-  def studentAwards: Seq[StudentAward] = _studentAwards.asScala.toSeq.sortBy {_.award.code }
-
   @Column(nullable = false)
   var sequence: String = _
 
