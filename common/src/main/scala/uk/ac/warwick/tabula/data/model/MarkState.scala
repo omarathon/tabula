@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import enumeratum.{Enum, EnumEntry}
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 sealed abstract class MarkState(val description: String, val cssClass: String) extends EnumEntry

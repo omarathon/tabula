@@ -4,10 +4,11 @@ import enumeratum.{Enum, EnumEntry}
 import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.tabula.{AcademicYear, Features, ToString}
 
 import scala.jdk.CollectionConverters._
 
@@ -62,7 +63,8 @@ class ProgressionDecision extends GeneratedId with ToString {
   @Column(name = "resit_period", nullable = false)
   var resitPeriod: Boolean = _
 
-  def isVisibleToStudent: Boolean = MarkState.resultsReleasedToStudents(academicYear, studentCourseDetails, MarkState.DecisionReleaseTime)
+  @transient var features: Features = Wire[Features]
+  def isVisibleToStudent: Boolean = features.ignoreResultRelease || MarkState.resultsReleasedToStudents(academicYear, studentCourseDetails, MarkState.DecisionReleaseTime)
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,
@@ -74,7 +76,15 @@ class ProgressionDecision extends GeneratedId with ToString {
   )
 }
 
-sealed abstract class ProgressionDecisionOutcome(val pitCodes: Set[String], val description: String, val message: TemplateHTMLOutputModel) extends EnumEntry
+sealed abstract class ProgressionDecisionOutcome(val pitCodes: Set[String], val description: String, val message: TemplateHTMLOutputModel) extends EnumEntry {
+  def hasAward: Boolean = false // can't work with types easily in freemarker so implement this crufty def instead
+}
+
+sealed abstract class ProgressionDecisionWithAward(pitCodes: Set[String], description: String, message: TemplateHTMLOutputModel)
+  extends ProgressionDecisionOutcome(pitCodes, description, message) {
+    override def hasAward: Boolean = true
+  }
+
 object ProgressionDecisionOutcome extends Enum[ProgressionDecisionOutcome] {
   // Common suffixes:
   // -S decision in September
@@ -82,10 +92,10 @@ object ProgressionDecisionOutcome extends Enum[ProgressionDecisionOutcome] {
   // We don't care about the distinction in Tabula
 
   case object Held extends ProgressionDecisionOutcome(Set("H"), "Held", message = FormattedHtml("Your progression decision is not yet available"))
-  case object UndergraduateAwardHonours extends ProgressionDecisionOutcome(Set("UA1", "UA1-D"), "Award honours degree", message = FormattedHtml("You've passed."))
-  case object UndergraduateAwardPass extends ProgressionDecisionOutcome(Set("UA2", "UA2-D"), "Award pass degree", message = FormattedHtml("You've passed."))
-  case object UndergraduateAwardDiploma extends ProgressionDecisionOutcome(Set("UA3", "UA3-D"), "Award diploma", message = FormattedHtml("Your results indicate that you have been awarded a Diploma of Higher Education. You will receive an email containing further details."))
-  case object UndergraduateAwardCertificate extends ProgressionDecisionOutcome(Set("UA4", "UA4-D"), "Award certificate", message = FormattedHtml("Your results indicate that you have been awarded a Certificate of Higher Education. You will receive an email containing further details."))
+  case object UndergraduateAwardHonours extends ProgressionDecisionWithAward(Set("UA1", "UA1-D"), "Award honours degree", message = FormattedHtml("You've passed."))
+  case object UndergraduateAwardPass extends ProgressionDecisionWithAward(Set("UA2", "UA2-D"), "Award pass degree", message = FormattedHtml("You've passed."))
+  case object UndergraduateAwardDiploma extends ProgressionDecisionWithAward(Set("UA3", "UA3-D"), "Award diploma", message = FormattedHtml("Your results indicate that you have been awarded a Diploma of Higher Education. You will receive an email containing further details."))
+  case object UndergraduateAwardCertificate extends ProgressionDecisionWithAward(Set("UA4", "UA4-D"), "Award certificate", message = FormattedHtml("Your results indicate that you have been awarded a Certificate of Higher Education. You will receive an email containing further details."))
   case object UndergraduateProceedHonours extends ProgressionDecisionOutcome(Set("UP1", "UP1-S"), "Proceed", message = FormattedHtml("Congratulations, you've passed!"))
   case object UndergraduateProceedPass extends ProgressionDecisionOutcome(Set("UP2", "UP2-S"), "Proceed to pass degree", message = FormattedHtml("Congratulations, you've passed!"))
   case object UndergraduateProceedLevel1 extends ProgressionDecisionOutcome(Set("UP3"), "Proceed to foundation degree", message = FormattedHtml("Congratulations, you've passed!"))

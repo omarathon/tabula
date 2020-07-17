@@ -163,6 +163,7 @@ abstract class Features {
   @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
   @Value("${features.progressionDecisionsInStudentProfile:true}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
   @Value("${features.processAgreedMarks:true}") var processAgreedMarks: Boolean = defaults.processAgreedMarks
+  @Value("${features.ignoreResultRelease:false}") var ignoreResultRelease: Boolean = defaults.processAgreedMarks
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -323,6 +324,7 @@ class FeaturesMessage {
   @BeanProperty var includeSMSForCurrentYear = false
   @BeanProperty var progressionDecisionsInStudentProfile = true
   @BeanProperty var processAgreedMarks = true
+  @BeanProperty var ignoreResultRelease = false
 
 }
 
