@@ -56,6 +56,7 @@
           </div>
           <div class="panel-body">
             <div class="lead">${progressionDecision.outcome.message}</div>
+            <#if progressionDecision.minutes??><p>${progressionDecision.minutes}</p></#if>
           </div>
         </div>
       </#list>
