@@ -78,7 +78,7 @@ class SandboxStudentAwardImporter extends StudentAwardImporter {
           StudentAwardRow(
             sprCode = "%s/1".format(universityId),
             academicYear = academicYear,
-            awardCode = "BA", //Setting BA for now but we can use some random algothrim to use some few awards
+            awardCode = route.awardCode,
             awardDate = None,
             classificationCode = None
           )
