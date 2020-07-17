@@ -20,6 +20,7 @@ trait AutowiringAwardServiceComponent extends AwardServiceComponent {
 
 trait AwardService {
   def awardFromCode(code: String): Option[Award]
+  def allAwards: Seq[Award]
 }
 
 abstract class AbstractAwardService extends AwardService {
@@ -28,6 +29,9 @@ abstract class AbstractAwardService extends AwardService {
   def awardFromCode(code: String): Option[Award] = code.maybeText.flatMap {
     someCode => awardDao.getByCode(someCode.toLowerCase)
   }
+
+  def allAwards: Seq[Award] = awardDao.getAll
+
 }
 
 @Service("awardService")
