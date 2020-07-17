@@ -86,6 +86,7 @@ object ExportResitsToSitsService {
       and mod_code like :moduleCode
       and ayr_code = :academicYear
       order by sra_rseq desc
+      fetch first 1 row only
     """
 
   class CurrentSraSequenceQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
