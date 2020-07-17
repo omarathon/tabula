@@ -3,12 +3,6 @@ import $ from 'jquery';
 
 $(() => {
   $('.fix-area').fixHeaderFooter();
-  $('.table-sortable').sortableTable({
-    sortLocaleCompare: true,
-    textAttribute: 'data-sortby',
-  });
-
-  $('.process-module-marks').find('.table-checkable').bigList({});
 
   // Auto grade generator
   $('.auto-grade[data-mark][data-generate-url]').each((i, el) => {
@@ -118,5 +112,28 @@ $(() => {
     const $dropdown = $(e.target);
     const $targets = $(`select.assessment-type[data-sequence="${$dropdown.data('sequence')}"]`);
     $targets.val($dropdown.val());
+  });
+
+  // This is intentionally at the end, after we've messed around with things
+  $('.table-sortable').sortableTable({
+    sortLocaleCompare: true,
+    textAttribute: 'data-sortby',
+  }).on('tablesorter-ready', (e) => {
+    const $table = $(e.target);
+
+    if ($table.hasClass('table-checkable')) {
+      $table.bigList({});
+    }
+
+    /*
+     * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
+     * the whole thing every time there's a change. Probably don't use it until we've found some
+     * way to optimise the amount of time it takes tablesorter to init.
+     */
+    if ($table.data('dynamic-sort') && !$table.data('dynamic-sort-initialised')) {
+      $table.data('dynamic-sort-initialised', true);
+
+      $table.on('change', () => $table.trigger('update'));
+    }
   });
 });

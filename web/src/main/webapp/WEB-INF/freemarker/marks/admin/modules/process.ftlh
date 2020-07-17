@@ -35,10 +35,10 @@
           <th class="col-sm-1 sortable" data-sorter="text">First name</th>
           <th class="col-sm-1 sortable" data-sorter="text">Last name</th>
           <th class="col-sm-1 sortable" data-sorter="text">State</th>
-          <th class="col-sm-2" data-sorter="false">Mark</th>
-          <th class="col-sm-1" data-sorter="false">Grade</th>
-          <th class="col-sm-1" data-sorter="false">Result</th>
-          <th class="col-sm-4" data-sorter="false">Comments</th>
+          <th class="col-sm-2 sortable" data-sorter="formfield">Mark</th>
+          <th class="col-sm-1 sortable" data-sorter="formfield">Grade</th>
+          <th class="col-sm-1 sortable" data-sorter="formfield">Result</th>
+          <th class="col-sm-4 sortable" data-sorter="formfield">Comments</th>
         </tr>
       </thead>
       <tbody>

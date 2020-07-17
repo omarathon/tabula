@@ -72,13 +72,13 @@ class SandboxStudentAwardImporter extends StudentAwardImporter {
   def studentStudentAwardRows(universityId: String): Seq[StudentAwardRow] = {
     SandboxData.Departments.flatMap(_._2.routes.values)
       .find(route => route.degreeType == DegreeType.Undergraduate && (route.studentsStartId to route.studentsEndId).contains(universityId.toInt))
-      .map { _ =>
+      .map { route =>
         val yearOfStudy = ((universityId.toLong % 3) + 1).toInt
         (1 until yearOfStudy).reverse.map(AcademicYear.now() - _).zipWithIndex.map { case (academicYear, index) =>
           StudentAwardRow(
             sprCode = "%s/1".format(universityId),
             academicYear = academicYear,
-            awardCode = "BA", //Setting BA for now but we can use some random algothrim to use some few awards
+            awardCode = route.awardCode,
             awardDate = None,
             classificationCode = None
           )
