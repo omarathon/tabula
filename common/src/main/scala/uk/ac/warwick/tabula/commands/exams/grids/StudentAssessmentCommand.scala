@@ -152,7 +152,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
         .filter(_.isVisibleToStudent)
 
     // Are there any UA* type progression decisions
-    val uaProgressionDecisions = progressionDecisions.exists { pd => pd.outcome.pitCodes.exists(code => code.startsWith("UA")) }
+    val uaProgressionDecisions = progressionDecisions.exists { pd => pd.outcome.hasAward }
 
     val studentAwards =  if (uaProgressionDecisions) {
       studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)

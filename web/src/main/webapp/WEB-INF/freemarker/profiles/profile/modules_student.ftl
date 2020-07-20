@@ -56,7 +56,7 @@
           </div>
           <div class="panel-body">
             <span class="lead">${progressionDecision.outcome.message}</span>
-            <#if progressionDecision.outcome.hasAward && studentAwards?has_content>
+            <#if studentAwards?has_content>
               <#list studentAwards as studentAward>
                 <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
               </#list>
