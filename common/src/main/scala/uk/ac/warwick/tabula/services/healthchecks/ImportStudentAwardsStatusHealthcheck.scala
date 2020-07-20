@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
+import uk.ac.warwick.tabula.services.healthchecks.ImportStudentAwardsStatusHealthcheck._
 import uk.ac.warwick.util.core.DateTimeUtils
 import uk.ac.warwick.util.service.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
@@ -18,10 +19,15 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
+object ImportStudentAwardsStatusHealthcheck {
+  val Name = "import-student-awards"
+  val InitialState = new ServiceHealthcheck(Name, ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))
+}
+
 @Component
 @Profile(Array("scheduling"))
 class ImportStudentAwardsStatusHealthcheck
-  extends ServiceHealthcheckProvider(new ServiceHealthcheck("import-student-awards", ServiceHealthcheck.Status.Unknown, LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION))) {
+  extends ServiceHealthcheckProvider(InitialState) {
 
   /**
    * Fetch a list of audit events, most recent first, relating to this import
@@ -65,7 +71,7 @@ class ImportStudentAwardsStatusHealthcheck
       }.getOrElse(0)
 
     new ServiceHealthcheck(
-      "import-student-awards",
+      Name,
       status,
       LocalDateTime.now(DateTimeUtils.CLOCK_IMPLEMENTATION),
       message,
