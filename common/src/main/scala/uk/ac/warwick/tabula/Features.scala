@@ -143,6 +143,7 @@ abstract class Features {
   @Value("${features.scheduling.combinedModuleMembershipDataImport:true}") var schedulingCombinedModuleMembershipDataImport: Boolean = defaults.schedulingCombinedModuleMembershipDataImport
   @Value("${features.scheduling.departmentMandatoryPermissionsWarning:false}") var schedulingDepartmentMandatoryPermissionsWarning: Boolean = defaults.schedulingDepartmentMandatoryPermissionsWarning
   @Value("${features.scheduling.bulkProgressionDecisionsImport:true}") var schedulingBulkProgressionDecisionsImport: Boolean = defaults.schedulingBulkProgressionDecisionsImport
+  @Value("${features.scheduling.bulkStudentAwardsImport:true}") var schedulingBulkStudentAwardsImport: Boolean = defaults.schedulingBulkStudentAwardsImport
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
   @Value("${features.exams.graduationBenchmark:true}") var graduationBenchmark: Boolean = defaults.graduationBenchmark
@@ -162,6 +163,7 @@ abstract class Features {
   @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
   @Value("${features.progressionDecisionsInStudentProfile:true}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
   @Value("${features.processAgreedMarks:true}") var processAgreedMarks: Boolean = defaults.processAgreedMarks
+  @Value("${features.ignoreResultRelease:false}") var ignoreResultRelease: Boolean = defaults.processAgreedMarks
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -299,6 +301,7 @@ class FeaturesMessage {
   @BeanProperty var schedulingCombinedModuleMembershipDataImport = true
   @BeanProperty var schedulingDepartmentMandatoryPermissionsWarning = false
   @BeanProperty var schedulingBulkProgressionDecisionsImport = true
+  @BeanProperty var schedulingBulkStudentAwardsImport = true
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
@@ -321,6 +324,7 @@ class FeaturesMessage {
   @BeanProperty var includeSMSForCurrentYear = false
   @BeanProperty var progressionDecisionsInStudentProfile = true
   @BeanProperty var processAgreedMarks = true
+  @BeanProperty var ignoreResultRelease = false
 
 }
 

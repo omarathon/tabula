@@ -390,7 +390,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       )
 
       val passedModuleRegistrations = entityYear.moduleRegistrations.filter(isPassed)
-      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
+      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum >= ProgressionService.FirstYearRequiredCredits
       val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
       val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
@@ -415,7 +415,7 @@ abstract class AbstractProgressionService extends ProgressionService {
   private def suggestedResultIntermediateYear(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): ProgressionResult = {
     entityYear.studentCourseYearDetails.map(scyd => {
       val passedModuleRegistrations = entityYear.moduleRegistrations.filter(isPassed)
-      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.IntermediateRequiredCredits
+      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum >= ProgressionService.IntermediateRequiredCredits
       val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
       if (overallMark.isLeft) {

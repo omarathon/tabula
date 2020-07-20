@@ -51,27 +51,21 @@ abstract class ExportRecordedResitToSitsCommandInternal
         None
       } else {
         // first check to see if there is one and only one matching row
-        exportResitsToSitsService.countMatchingSitsRecords(resit) match {
-
-          case r if r > 0 =>
-            logger.warn(f"Not updating SITS for resit $resit - found an existing resit")
+        val rseq = exportResitsToSitsService.getNextResitSequence(resit)
+        exportResitsToSitsService.exportToSits(resit, rseq) match {
+          case 0 =>
+            logger.warn(s"Upload to SITS for resit $resit failed - updated zero rows")
             None
 
-          case _ =>
-            exportResitsToSitsService.exportToSits(resit) match {
-              case 0 =>
-                logger.warn(s"Upload to SITS for resit $resit failed - updated zero rows")
-                None
+          case r if r > 1 =>
+            throw new IllegalStateException(s"Unexpected SITS update! Only expected to insert one row, but $r rows were updated for resit $resit")
 
-              case r if r > 1 =>
-                throw new IllegalStateException(s"Unexpected SITS update! Only expected to insert one row, but $r rows were updated for resit $resit")
-
-              case 1 =>
-                logger.info(s"Resit uploaded to SITS -  $resit")
-                resit.needsWritingToSits = false
-                resit.lastWrittenToSits = Some(DateTime.now)
-                Some(resitService.saveOrUpdate(resit))
-            }
+          case 1 =>
+            logger.info(s"Resit uploaded to SITS -  $resit")
+            resit.needsWritingToSits = false
+            resit.lastWrittenToSits = Some(DateTime.now)
+            resit.resitSequence = Option(rseq)
+            Some(resitService.saveOrUpdate(resit))
         }
       }
     }

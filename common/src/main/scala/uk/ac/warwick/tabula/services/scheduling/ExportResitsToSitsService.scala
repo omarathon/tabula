@@ -9,11 +9,13 @@ import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.{JInteger, JMap}
+import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.data.model.RecordedResit
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportResitsToSitsService._
 import uk.ac.warwick.tabula.JavaImports._
+
+import scala.util.Try
 
 trait ExportResitsToSitsServiceComponent {
   def exportResitsToSitsService: ExportResitsToSitsService
@@ -24,8 +26,8 @@ trait AutowiringExportResitsToSitsServiceComponent extends ExportResitsToSitsSer
 }
 
 trait ExportResitsToSitsService {
-  def exportToSits(resit: RecordedResit): Int
-  def countMatchingSitsRecords(resit: RecordedResit): Int
+  def exportToSits(resit: RecordedResit, rseq: String): Int
+  def getNextResitSequence(resit: RecordedResit): String
 }
 
 object ExportResitsToSitsService {
@@ -77,43 +79,38 @@ object ExportResitsToSitsService {
     compile()
   }
 
-  final def CountMatchingBlankSraRecordsSql =
+  final def CurrentSraSequenceSql =
     f"""
-    select count(*) from $sitsSchema.cam_sra
+    select sra_rseq from $sitsSchema.cam_sra
       where spr_code = :sprCode
       and mod_code like :moduleCode
-      and mav_occur = :occurrence
       and ayr_code = :academicYear
-      and psl_code = 'Y'
-      and sra_seq = :sequence
-      and sra_rseq = :resitSequence
+      order by sra_rseq desc
+      fetch first 1 row only
     """
 
-  class CountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
-    def getCount(params: JMap[String, Any]): Int =
-      this.queryForObject(CountMatchingBlankSraRecordsSql, params, classOf[JInteger]).asInstanceOf[Int]
+  class CurrentSraSequenceQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
+    def getCurrentSraSequence(params: JMap[String, Any]): Option[String] =
+      Try(this.queryForObject(CurrentSraSequenceSql, params, classOf[String])).toOption
   }
 
 
 }
 
 class RecordedResitsParameterGetter(resit: RecordedResit) {
-  def getQueryParams: JMap[String, Any] = JHashMap(
+  def queryParams: JMap[String, Any] = JHashMap(
     "sprCode" -> resit.sprCode,
     "academicYear" -> resit.academicYear.toString,
     "moduleCode" -> resit.moduleCode,
-    "occurrence" -> resit.occurrence,
-    "sequence" -> resit.sequence,
-    "resitSequence" -> resit.resitSequence,
   )
 
-  def getCreateParams: JMap[String, Any] = JHashMap(
+  def createParams(rseq: String): JMap[String, Any] = JHashMap(
     "sprCode" -> resit.sprCode,
     "academicYear" -> resit.academicYear.toString,
     "moduleCode" -> resit.moduleCode,
     "occurrence" -> resit.occurrence,
     "sequence" -> resit.sequence,
-    "resitSequence" -> resit.resitSequence,
+    "resitSequence" -> rseq,
     "marksCode" -> resit.marksCode,
     "assessmentType" -> resit.assessmentType.astCode,
     "attempt" -> resit.currentResitAttempt.toString,
@@ -124,17 +121,22 @@ class RecordedResitsParameterGetter(resit: RecordedResit) {
 class AbstractExportResitsToSitsService extends ExportResitsToSitsService with Logging {
   self: SitsDataSourceComponent =>
 
-  def exportToSits(resit: RecordedResit): Int = {
+  def exportToSits(resit: RecordedResit, rseq: String): Int = {
     val parameterGetter = new RecordedResitsParameterGetter(resit)
     val updateQuery = new ResetModuleResultQuery(sitsDataSource)
-    val rowUpdated = updateQuery.updateByNamedParam(parameterGetter.getCreateParams)
+    val rowUpdated = updateQuery.updateByNamedParam(parameterGetter.createParams(rseq))
     rowUpdated
   }
 
-  override def countMatchingSitsRecords(resit: RecordedResit): Int = {
+  override def getNextResitSequence(resit: RecordedResit): String = {
     val parameterGetter = new RecordedResitsParameterGetter(resit)
-    val countQuery = new CountQuery(sitsDataSource)
-    countQuery.getCount(parameterGetter.getQueryParams)
+    val countQuery = new CurrentSraSequenceQuery(sitsDataSource)
+    val highestResitSequence = countQuery.getCurrentSraSequence(parameterGetter.queryParams)
+      .map(_.replaceAll("[^0-9]", "")) // strip out any characters
+      .flatMap(s => s.toIntOption)
+      .maxByOption(identity)
+      .getOrElse(0)
+    f"${highestResitSequence + 1 }%03d" // 3 chars padded with leading zeros
   }
 }
 
@@ -146,6 +148,6 @@ class ExportResitsToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportResitsToSitsSandboxService extends ExportResitsToSitsService {
-  def exportToSits(resit: RecordedResit): Int = 0
-  def countMatchingSitsRecords(resit: RecordedResit): Int = 0
+  def exportToSits(resit: RecordedResit, rseq: String): Int = 0
+  def getNextResitSequence(resit: RecordedResit): String = "001"
 }

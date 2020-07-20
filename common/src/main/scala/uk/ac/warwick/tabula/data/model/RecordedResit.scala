@@ -49,8 +49,10 @@ class RecordedResit extends GeneratedId
   @Column(nullable = false)
   var sequence: String = _
 
-  @Column(name = "resit_sequence", nullable = false)
-  var resitSequence: String = _
+  @Column(name = "resit_sequence")
+  private var _resitSequence: String = _
+  def resitSequence: Option[String] = Option(_resitSequence)
+  def resitSequence_=(resitSequence: Option[String]): Unit = _resitSequence = resitSequence.orNull
 
   @Column(name = "current_resit_attempt", nullable = false)
   var currentResitAttempt: JInteger = _

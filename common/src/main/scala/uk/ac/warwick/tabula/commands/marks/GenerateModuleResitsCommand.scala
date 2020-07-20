@@ -84,19 +84,12 @@ class GenerateModuleResitsCommandInternal(val sitsModuleCode: String, val module
 
       val components: Iterable[(AssessmentComponent, StudentMarkRecord)] = studentMarks.map(_.components).getOrElse(Nil)
 
-      val highestResitSequence: Int = components.flatMap(_._2.resitSequence)
-        .map(_.replaceAll("[^0-9]", "")) // strip out any characters
-        .flatMap(s => Try(s.toInt).toOption)
-        .maxByOption(identity)
-        .getOrElse(0)
-
-      resits.zipWithIndex.flatMap { case ((sequence, resitItem), index) =>
+      resits.flatMap { case (sequence, resitItem) =>
         val componentMarks = components.find(_._1.sequence == sequence).map(_._2)
         componentMarks.map { cm =>
           val recordedResit = new RecordedResit(cm, sprCode)
           recordedResit.assessmentType = resitItem.assessmentType
           recordedResit.weighting = resitItem.weighting.toInt
-          recordedResit.resitSequence = f"${highestResitSequence + index + 1}%03d" // 3 chars padded with leading zeros
           recordedResit.currentResitAttempt = {
             val currentAttempt = cm.currentResitAttempt.getOrElse(1)
             if (studentMarks.exists(_.incrementsAttempt)) currentAttempt + 1 else currentAttempt
