@@ -55,14 +55,19 @@
             </h3>
           </div>
           <div class="panel-body">
-            <p class="lead">${progressionDecision.outcome.message}</p>
+            <span class="lead">${progressionDecision.outcome.message}</span>
+            <#if progressionDecision.outcome.hasAward && studentAwards?has_content>
+              <#list studentAwards as studentAward>
+                <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
+              </#list>
+            </#if>
             <#if progressionDecision.minutes??><p>${progressionDecision.minutes}</p></#if>
           </div>
         </div>
       </#list>
     </#if>
 
-    <#if moduleRegistrationsAndComponents?has_content>
+      <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
       <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />

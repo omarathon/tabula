@@ -53,6 +53,7 @@ class ViewProfileModulesController extends AbstractViewProfileController {
       "yearAbroad" -> scyd.exists(_.yearAbroad),
       "moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq.empty),
       "progressionDecisions" -> studentBreakdown.map(_.progressionDecisions.reverse).getOrElse(Seq.empty), // Most recent first
+      "studentAwards" -> studentBreakdown.map(_.studentAwards).getOrElse(Seq.empty),
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
       "member" -> studentCourseDetails.student,
       "yearWeightingsInFlux" -> (thisAcademicYear.startYear == 2019),

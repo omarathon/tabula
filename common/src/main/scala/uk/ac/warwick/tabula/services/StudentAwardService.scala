@@ -11,6 +11,7 @@ trait StudentAwardService {
   def delete(sa: StudentAward): Unit
   def getByAcademicYears(academicYears: Seq[AcademicYear]): Seq[StudentAward]
   def getByUniversityIds(universityIds: Seq[String]): Seq[StudentAward]
+  def getBySprCodeAndAcademicYear(sprCode: String, academicYear:AcademicYear): Seq[StudentAward]
 }
 
 abstract class DatabaseStudentAwardService extends StudentAwardService {
@@ -31,6 +32,10 @@ abstract class DatabaseStudentAwardService extends StudentAwardService {
 
   override def getByUniversityIds(universityIds: Seq[String]): Seq[StudentAward] = transactional(readOnly = true) {
     studentAwardDao.getByUniversityIds(universityIds)
+  }
+
+  override def getBySprCodeAndAcademicYear(sprCode: String, academicYear: AcademicYear): Seq[StudentAward]  = transactional(readOnly = true) {
+    studentAwardDao.getBySprCodeAndAcademicYear(sprCode, academicYear)
   }
 }
 
