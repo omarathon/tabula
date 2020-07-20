@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, MarkState, ModuleRegistration, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringAssessmentMembershipServiceComponent}
 
 @Service
 class MarksWorkflowProgressService {
@@ -40,7 +41,7 @@ class MarksWorkflowProgressService {
   }
 }
 
-sealed abstract class ModuleOccurrenceMarkWorkflowStage extends WorkflowStage with EnumEntry {
+sealed abstract class ModuleOccurrenceMarkWorkflowStage extends WorkflowStage with EnumEntry with AutowiringAssessmentMembershipServiceComponent {
   def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): WorkflowStages.StageProgress
   override val actionCode: String = s"workflow.marks.moduleOccurrence.$entryName.action"
 }
@@ -221,6 +222,8 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
   case object CreateResits extends ModuleOccurrenceMarkWorkflowStage {
 
+    self: AssessmentMembershipService =>
+
     override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
 
       val componentRecords = components.flatMap(_.students)
@@ -229,8 +232,13 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
       val studentsRequiringResits = agreedStudents.filter(s => s.requiresResit)
 
+      val upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = components.map(_.upstreamAssessmentGroup)
+
+      val upstreamResitAssessmentGroupMembers = upstreamAssessmentGroups.flatten(uag => assessmentMembershipService.getUpstreamAssessmentGroupInfo(uag)).flatMap(_.resitMembers)
+
       val studentsWithOutstandingResits = studentsRequiringResits.filter { record =>
-        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(_.existingResit.isEmpty)
+        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(a => a.existingResit.isEmpty) &&
+          !upstreamResitAssessmentGroupMembers.exists(info => record.sprCode.contains(info.universityId))
       }
 
       if (componentRecords.exists(_.existingResit.exists(_.needsWritingToSits))) {
@@ -468,7 +476,7 @@ trait MarksWorkflowProgressServiceComponent {
   def workflowProgressService: MarksWorkflowProgressService
 }
 
-trait AutowiringMarksWorkflowProgressServiceComponent extends MarksWorkflowProgressServiceComponent {
+trait AutowiringMarksWorkflowProgressServiceComponent extends MarksWorkflowProgressServiceComponent with AutowiringAssessmentMembershipServiceComponent {
   var workflowProgressService: MarksWorkflowProgressService = Wire[MarksWorkflowProgressService]
 }
 
