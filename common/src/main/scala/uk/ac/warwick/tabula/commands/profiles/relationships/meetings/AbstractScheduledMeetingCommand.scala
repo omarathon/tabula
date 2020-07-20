@@ -39,14 +39,15 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
       null
     }
 
+    persistAttachments(scheduledMeetingRecord)
+
+    // persist the meeting record
+    meetingRecordService.saveOrUpdate(scheduledMeetingRecord)
+
     val relatedAgentMembers = scheduledMeetingRecord.relationships.flatMap(r => Try(r.agentMember.get).toOption)
     if (!relatedAgentMembers.exists(_.userId == scheduledMeetingRecord.creator.userId)) {
       scheduledMeetingRecord.creator = relatedAgentMembers.headOption.getOrElse(scheduledMeetingRecord.creator)
     }
-
-    persistAttachments(scheduledMeetingRecord)
-
-    // persist the meeting record
     meetingRecordService.saveOrUpdate(scheduledMeetingRecord)
   }
 

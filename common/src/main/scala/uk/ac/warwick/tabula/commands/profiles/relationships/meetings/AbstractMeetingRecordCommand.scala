@@ -56,6 +56,12 @@ abstract class AbstractMeetingRecordCommand {
     // persist the meeting record
     meetingRecordService.saveOrUpdate(meeting)
 
+    val relatedAgentMembers = meeting.relationships.flatMap(r => Try(r.agentMember.get).toOption)
+    if (!relatedAgentMembers.exists(_.userId == meeting.creator.userId)) {
+      meeting.creator = relatedAgentMembers.headOption.getOrElse(meeting.creator)
+    }
+    meetingRecordService.saveOrUpdate(meeting)
+
     if (features.meetingRecordApproval && !meeting.missed) {
       updateMeetingApproval(meeting)
     }
