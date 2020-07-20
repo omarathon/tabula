@@ -31,6 +31,7 @@ object StudentAssessmentCommand {
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringStudentAwardServiceComponent
       with AutowiringResitServiceComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
@@ -55,6 +56,7 @@ object StudentAssessmentProfileCommand {
       with AutowiringUpstreamRouteRuleServiceComponent
       with AutowiringModuleRegistrationMarksServiceComponent
       with AutowiringAssessmentComponentMarksServiceComponent
+      with AutowiringStudentAwardServiceComponent
       with AutowiringResitServiceComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
@@ -71,6 +73,7 @@ case class StudentMarksBreakdown(
   modules: Seq[ModuleRegistrationAndComponents],
   mitigatingCircumstances: Option[Seq[MitigatingCircumstancesSubmission]],
   progressionDecisions: Seq[ProgressionDecision],
+  studentAwards: Seq[StudentAward],
 )
 
 case class ModuleRegistrationAndComponents(
@@ -95,6 +98,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     with ModuleRegistrationServiceComponent
     with CourseAndRouteServiceComponent
     with NormalCATSLoadServiceComponent
+    with StudentAwardServiceComponent
     with UpstreamRouteRuleServiceComponent =>
 
   def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] = None
@@ -147,7 +151,15 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentCourseDetails.progressionDecisionsByYear(academicYear)
         .filter(_.isVisibleToStudent)
 
-    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions)
+    // Are there any UA* type progression decisions
+    val uaProgressionDecisions = progressionDecisions.exists(_.outcome.hasAward)
+
+    val studentAwards =  if (uaProgressionDecisions) {
+      studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)
+    } else Seq()
+
+
+    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions, studentAwards)
   }
 }
 
