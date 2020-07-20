@@ -112,9 +112,9 @@
                         <tr>
                           <td>
                             <#if componentRecord.existingResit?has_content>
-                              <span class="label label-success tabula-tooltip" data-title="Resit - ${componentRecord.existingResit.resitSequence}">
+                              <span class="label label-success tabula-tooltip" data-title="Resit - ${componentRecord.existingResit.resitSequence!''}">
                                 Resit created
-                                <span class="sr-only">Resit - ${componentRecord.existingResit.resitSequence}</span>
+                                <span class="sr-only">Resit - ${componentRecord.existingResit.resitSequence!''}</span>
                               </span>
                               <#if componentRecord.existingResit.needsWritingToSits>
                                 <span class="tabula-tooltip" data-title="Waiting to be written to SITS">
