@@ -52,7 +52,7 @@ abstract class AbstractModuleRegistrationMarksDao extends ModuleRegistrationMark
 
   override def allNeedingWritingToSits: Seq[RecordedModuleRegistration] =
     session.newCriteria[RecordedModuleRegistration]
-      .add(is("needsWritingToSits", true))
+      .add(isNotNull("_needsWritingToSitsSince"))
       .distinct
       .seq
 

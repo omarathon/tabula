@@ -58,7 +58,7 @@ abstract class AbstractAssessmentComponentMarksDao extends AssessmentComponentMa
 
   override def allNeedingWritingToSits: Seq[RecordedAssessmentComponentStudent] =
     session.newCriteria[RecordedAssessmentComponentStudent]
-      .add(is("needsWritingToSits", true))
+      .add(isNotNull("_needsWritingToSitsSince"))
       .distinct
       .seq
 
