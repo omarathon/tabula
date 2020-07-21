@@ -237,8 +237,8 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
       val upstreamResitAssessmentGroupMembers = upstreamAssessmentGroups.flatten(uag => assessmentMembershipService.getUpstreamAssessmentGroupInfo(uag)).flatMap(_.resitMembers)
 
       val studentsWithOutstandingResits = studentsRequiringResits.filter { record =>
-        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(a => a.existingResit.isEmpty) &&
-          !upstreamResitAssessmentGroupMembers.exists(info => record.sprCode.contains(info.universityId))
+        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(_.existingResit.isEmpty) &&
+          !upstreamResitAssessmentGroupMembers.exists(groupMember => record.sprCode.contains(groupMember.universityId))
       }
 
       if (componentRecords.exists(_.existingResit.exists(_.needsWritingToSits))) {
