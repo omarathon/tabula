@@ -110,13 +110,10 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
     val validGrades = gradeGenerator.applyForMarks(studentsMarks)
 
-    lazy val assignmentUpstreamAssessmentGroupInfos = assessment.assessmentGroups.asScala.map { group =>
-      group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
-    }.flatMap(groupInfo => groupInfo._2)
-
     val parsedFeedbacks = feedbacks.filter(_.universityId.isDefined).groupBy(f => {
+      val upstreamAssessmentGroupMembersForFeedback = getUpstreamAssessmentGroupMembers(f)
       f.latestGrade match {
-        case _ if !assignmentUpstreamAssessmentGroupInfos.exists(_.upstreamAssessmentGroup.membersIncludes(f._universityId)) => "notOnScheme"
+        case _ if upstreamAssessmentGroupMembersForFeedback.isEmpty => "notOnScheme"
         case Some(_) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
         case Some(grade) =>
           if (validGrades(f._universityId).isEmpty || !validGrades(f._universityId).exists(_.grade == grade))
