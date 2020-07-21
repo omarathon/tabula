@@ -68,6 +68,13 @@ object MarksDepartmentHomeCommand {
         },
         needsWritingToSits = recordedModuleRegistration.exists(_.needsWritingToSits),
         outOfSync = recordedModuleRegistration.exists(!_.needsWritingToSits) && (
+          recordedModuleRegistration.flatMap(_.latestState).exists {
+            // State is agreed but MR has no agreed marks
+            case MarkState.Agreed => moduleRegistration.agreedMark.isEmpty && moduleRegistration.agreedGrade.isEmpty
+
+            // State is not agreed but MR has agreed marks
+            case _ => moduleRegistration.agreedMark.nonEmpty || moduleRegistration.agreedGrade.nonEmpty
+          } ||
           recordedModuleRegistration.flatMap(_.latestMark).exists(m => !moduleRegistration.firstDefinedMark.contains(m)) ||
           recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g)) ||
           recordedModuleRegistration.flatMap(_.latestResult).exists(r => moduleRegistration.moduleResult != r)
