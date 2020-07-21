@@ -184,6 +184,6 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
         |     racs.occurrence = mr.occurrence and
         |     racs.academicYear = mr.academicYear and
         |     racs.universityId = studentCourseDetails.student.universityId
-        |where mr.deleted is false and racs.needsWritingToSits is true""".stripMargin
+        |where mr.deleted is false and racs._needsWritingToSitsSince is not null""".stripMargin
     ).seq
 }

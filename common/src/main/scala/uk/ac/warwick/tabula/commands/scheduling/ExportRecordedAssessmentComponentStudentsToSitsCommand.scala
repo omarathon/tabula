@@ -94,7 +94,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
               throw new IllegalStateException(s"Unexpected SITS update! Only expected to update one row, but $r rows were updated for assessment component mark $student")
 
             case 1 =>
-              student.needsWritingToSits = false
+              student.needsWritingToSitsSince = None
               student.lastWrittenToSits = Some(DateTime.now)
 
               // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync

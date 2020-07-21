@@ -94,7 +94,7 @@ class GenerateModuleResitsCommandInternal(val sitsModuleCode: String, val module
             val currentAttempt = cm.currentResitAttempt.getOrElse(1)
             if (studentMarks.exists(_.incrementsAttempt)) currentAttempt + 1 else currentAttempt
           }
-          recordedResit.needsWritingToSits = true
+          recordedResit.needsWritingToSitsSince = Some(DateTime.now)
           recordedResit.updatedBy = currentUser.apparentUser
           recordedResit.updatedDate = DateTime.now
           resitService.saveOrUpdate(recordedResit)

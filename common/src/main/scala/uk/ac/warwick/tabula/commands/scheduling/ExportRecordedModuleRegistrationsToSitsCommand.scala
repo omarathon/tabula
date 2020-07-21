@@ -65,7 +65,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
         case r if r > 1 =>
           throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
         case 1 =>
-          student.needsWritingToSits = false
+          student.needsWritingToSitsSince = None
           student.lastWrittenToSits = Some(DateTime.now)
 
           // Update the ModuleRegistration so it doesn't show as out of sync
