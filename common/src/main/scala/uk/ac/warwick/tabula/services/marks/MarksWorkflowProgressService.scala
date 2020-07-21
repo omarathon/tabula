@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{AssessmentComponentInfo, StudentMarkRecord}
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, DegreeType, GradeBoundary, MarkState, ModuleRegistration, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model._
 
 @Service
 class MarksWorkflowProgressService {
@@ -229,8 +229,11 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
 
       val studentsRequiringResits = agreedStudents.filter(s => s.requiresResit)
 
+      val upstreamResitAssessmentGroupMembers = componentRecords.filter(_.isReassessment)
+
       val studentsWithOutstandingResits = studentsRequiringResits.filter { record =>
-        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(_.existingResit.isEmpty)
+        componentRecords.filter(s => record.sprCode.contains(s.universityId)).exists(_.existingResit.isEmpty) &&
+          !upstreamResitAssessmentGroupMembers.exists(groupMember => record.sprCode.contains(groupMember.universityId))
       }
 
       if (componentRecords.exists(_.existingResit.exists(_.needsWritingToSits))) {

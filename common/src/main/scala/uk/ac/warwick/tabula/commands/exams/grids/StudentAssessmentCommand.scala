@@ -158,7 +158,6 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)
     } else Seq()
 
-
     StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions, studentAwards)
   }
 }
@@ -187,7 +186,7 @@ trait StudentModuleRegistrationAndComponents extends Logging {
       scyd.moduleRegistrations.map { mr =>
         val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember)] =
           for {
-            uagm <- mr.upstreamAssessmentGroupMembers
+            uagm <- mr.upstreamAssessmentGroupMembersAllAttempts
             aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
           } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
 

@@ -53,7 +53,7 @@ abstract class AbstractResitDao extends ResitDao {
 
   override def allNeedingWritingToSits: Seq[RecordedResit] =
     session.newCriteria[RecordedResit]
-      .add(is("needsWritingToSits", true))
+      .add(isNotNull("_needsWritingToSitsSince"))
       .addOrder(Order.asc("updatedDate"))
       .seq
 

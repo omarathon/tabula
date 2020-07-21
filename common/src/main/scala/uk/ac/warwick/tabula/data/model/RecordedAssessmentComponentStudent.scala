@@ -99,7 +99,7 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     newMark.updatedBy = uploader
     newMark.updatedDate = DateTime.now
     _marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
-    needsWritingToSits = true
+    needsWritingToSitsSince = Some(DateTime.now)
     newMark
   }
 
@@ -107,8 +107,11 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   def latestGrade: Option[String] = marks.headOption.flatMap(_.grade)
   def latestState: Option[MarkState] = marks.headOption.map(_.markState)
 
-  @Column(name = "needs_writing_to_sits", nullable = false)
-  var needsWritingToSits: Boolean = false
+  @Column(name = "needs_writing_to_sits_since")
+  private var _needsWritingToSitsSince: DateTime = _
+  def needsWritingToSitsSince: Option[DateTime] = Option(_needsWritingToSitsSince)
+  def needsWritingToSitsSince_=(needsWritingToSitsSince: Option[DateTime]): Unit = _needsWritingToSitsSince = needsWritingToSitsSince.orNull
+  def needsWritingToSits: Boolean = needsWritingToSitsSince.nonEmpty
 
   // empty for any student that's never been written
   @Column(name = "last_written_to_sits")
@@ -126,7 +129,7 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     "assessmentType" -> assessmentType,
     "resitSequence" -> resitSequence,
     "marks" -> marks,
-    "needsWritingToSits" -> needsWritingToSits,
+    "needsWritingToSitsSince" -> needsWritingToSitsSince,
     "lastWrittenToSits" -> lastWrittenToSits
   )
 }

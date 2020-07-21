@@ -74,15 +74,17 @@ class RecordedResit extends GeneratedId
   @Column(name = "updated_date", nullable = false)
   var updatedDate: DateTime = _
 
-  @Column(name = "needs_writing_to_sits", nullable = false)
-  var needsWritingToSits: Boolean = false
+  @Column(name = "needs_writing_to_sits_since")
+  private var _needsWritingToSitsSince: DateTime = _
+  def needsWritingToSitsSince: Option[DateTime] = Option(_needsWritingToSitsSince)
+  def needsWritingToSitsSince_=(needsWritingToSitsSince: Option[DateTime]): Unit = _needsWritingToSitsSince = needsWritingToSitsSince.orNull
+  def needsWritingToSits: Boolean = needsWritingToSitsSince.nonEmpty
 
   // empty for a resit that's never been written
   @Column(name = "last_written_to_sits")
   private var _lastWrittenToSits: DateTime = _
   def lastWrittenToSits: Option[DateTime] = Option(_lastWrittenToSits)
   def lastWrittenToSits_=(lastWrittenToSits: Option[DateTime]): Unit = _lastWrittenToSits = lastWrittenToSits.orNull
-
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,
@@ -95,7 +97,7 @@ class RecordedResit extends GeneratedId
     "assessmentType" -> assessmentType,
     "marksCode" -> marksCode,
     "weighting" -> weighting,
-    "needsWritingToSits" -> needsWritingToSits,
+    "needsWritingToSitsSince" -> needsWritingToSitsSince,
     "lastWrittenToSits" -> lastWrittenToSits
   )
 }

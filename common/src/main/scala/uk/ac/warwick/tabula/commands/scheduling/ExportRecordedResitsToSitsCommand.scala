@@ -62,7 +62,7 @@ abstract class ExportRecordedResitToSitsCommandInternal
 
           case 1 =>
             logger.info(s"Resit uploaded to SITS -  $resit")
-            resit.needsWritingToSits = false
+            resit.needsWritingToSitsSince = None
             resit.lastWrittenToSits = Some(DateTime.now)
             resit.resitSequence = Option(rseq)
             Some(resitService.saveOrUpdate(resit))

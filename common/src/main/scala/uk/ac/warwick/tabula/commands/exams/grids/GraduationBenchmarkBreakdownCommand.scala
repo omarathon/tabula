@@ -15,7 +15,7 @@ import scala.math.BigDecimal.RoundingMode
 object GraduationBenchmarkBreakdownCommand {
 
   type Result = Either[UGGraduationBenchmarkBreakdown, PGGraduationBenchmarkBreakdown]
-  type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState with GraduationBenchmarkBreakdownCommandRequest
+  type Command = Appliable[Result] with GraduationBenchmarkBreakdownCommandState with GraduationBenchmarkBreakdownCommandRequest with PermissionsChecking
 
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Command =
     new GraduationBenchmarkBreakdownCommandInternal(studentCourseDetails, academicYear)
@@ -136,16 +136,14 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
 }
 
 trait GraduationBenchmarkBreakdownPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
   self: GraduationBenchmarkBreakdownCommandState =>
 
-  override def permissionsCheck(p: PermissionsChecking): Unit = {
-    p.PermissionCheckAny(
-      Seq(CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
-        CheckablePermission(Permissions.Department.ExamGrids, Option(studentCourseYearDetails.route).getOrElse(studentCourseYearDetails.studentCourseDetails.currentRoute)))
-    )
-  }
-
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheckAny(Seq(
+      CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
+      CheckablePermission(Permissions.Department.ExamGrids, Option(studentCourseYearDetails.route).getOrElse(studentCourseYearDetails.studentCourseDetails.currentRoute)),
+      CheckablePermission(Permissions.Profiles.Read.ModuleRegistration.Results, studentCourseYearDetails)
+    ))
 }
 
 trait GraduationBenchmarkBreakdownCommandState {

@@ -71,6 +71,13 @@ object ListAssessmentComponentsCommand {
         needsWritingToSits = recordedStudent.exists(_.needsWritingToSits),
         outOfSync =
           recordedStudent.exists(!_.needsWritingToSits) && (
+            recordedStudent.flatMap(_.latestState).exists {
+              // State is agreed but UAGM has no agreed marks
+              case MarkState.Agreed => member.agreedMark.isEmpty && member.agreedGrade.isEmpty
+
+              // State is not agreed but UAGM has agreed marks
+              case _ => member.agreedMark.nonEmpty || member.agreedGrade.nonEmpty
+            } ||
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
