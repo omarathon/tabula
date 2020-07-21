@@ -158,7 +158,6 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)
     } else Seq()
 
-
     StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions, studentAwards)
   }
 }
