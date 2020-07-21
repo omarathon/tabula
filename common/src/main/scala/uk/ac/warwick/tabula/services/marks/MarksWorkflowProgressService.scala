@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.commands.marks.ListAssessmentComponentsCommand.{Asse
 import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentModuleMarkRecord
 import uk.ac.warwick.tabula.data.model.MarkState._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringAssessmentMembershipServiceComponent}
 
 @Service
 class MarksWorkflowProgressService {
@@ -41,7 +40,7 @@ class MarksWorkflowProgressService {
   }
 }
 
-sealed abstract class ModuleOccurrenceMarkWorkflowStage extends WorkflowStage with EnumEntry with AutowiringAssessmentMembershipServiceComponent {
+sealed abstract class ModuleOccurrenceMarkWorkflowStage extends WorkflowStage with EnumEntry {
   def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): WorkflowStages.StageProgress
   override val actionCode: String = s"workflow.marks.moduleOccurrence.$entryName.action"
 }
@@ -221,8 +220,6 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
   }
 
   case object CreateResits extends ModuleOccurrenceMarkWorkflowStage {
-
-    self: AssessmentMembershipService =>
 
     override def progress(students: Seq[StudentModuleMarkRecord], components: Seq[AssessmentComponentInfo]): StageProgress = {
 
@@ -474,7 +471,7 @@ trait MarksWorkflowProgressServiceComponent {
   def workflowProgressService: MarksWorkflowProgressService
 }
 
-trait AutowiringMarksWorkflowProgressServiceComponent extends MarksWorkflowProgressServiceComponent with AutowiringAssessmentMembershipServiceComponent {
+trait AutowiringMarksWorkflowProgressServiceComponent extends MarksWorkflowProgressServiceComponent {
   var workflowProgressService: MarksWorkflowProgressService = Wire[MarksWorkflowProgressService]
 }
 
