@@ -76,7 +76,19 @@
             </td>
           </tr>
 </#compress></#macro>
+<style type="text/css" nonce="${nonce()}">
+@media print {
+	.exam-grid-preview .grid td {
+		white-space: initial;
+	}
 
+	.table {
+		max-width: 100%;
+		width: 100%;
+		table-layout: fixed;
+	}
+}
+</style>
 <div class="exam-grid-preview">
   <div class="deptheader">
     <h1>Graduation benchmark breakdown</h1>
