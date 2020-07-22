@@ -25,7 +25,7 @@ class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember)
   self: ExpireRelationshipsOnOldCoursesCommandState with RelationshipServiceComponent =>
 
   override def applyInternal(): Unit = {
-    studentRelationships.groupBy(_.relationshipType).foreach { case (relType, relationships) =>
+    studentRelationships.groupBy(_.relationshipType).foreach { case (_, relationships) =>
       if (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) {
         val relationshipsToEnd = relationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
         relationshipService.endStudentRelationships(relationshipsToEnd, DateTime.now)

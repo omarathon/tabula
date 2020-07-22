@@ -45,3 +45,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro manageNormalLoads department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/normalload"/></#macro>
 <#macro manageWeightings department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/weightings"/></#macro>
 <#macro downloadGridDocument department academicYear jobInstance><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/documents/${jobInstance.id}/download" /></#macro>
+
+<#macro benchmarkDetails scyd yearMarksToUse="sitsIfAvailable" groupByLevel=true><@_u page="/grids/${scyd.enrolmentDepartment.code}/${scyd.academicYear.startYear?c}/${scyd.studentCourseDetails.urlSafeId}/benchmarkdetails?yearMarksToUse=${yearMarksToUse}&groupByLevel=${groupByLevel?c}" /></#macro>
