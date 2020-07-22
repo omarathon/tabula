@@ -167,7 +167,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 
 
   def endRelationships(): Unit = {
-    if (courseRow.endDate != null) {
+    if (courseRow.endDate != null && courseRow.mostSignificant) {
       val endDateFromSits = courseRow.endDate.toDateTimeAtCurrentTime
       val threeMonthsAgo = DateTime.now().minusMonths(3)
       if (endDateFromSits.isBefore(threeMonthsAgo)) {
