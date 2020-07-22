@@ -68,7 +68,7 @@ abstract class BulkImportStudentAwardsCommandInternal extends CommandInternal[Re
     if (oldValue.map(_.code) == newCode) false
     else {
       logger.debug(s"Detected property change for $property: $oldValue -> $newCode; setting value")
-      studentAwardBean.setPropertyValue(property, classification.orNull)
+      studentAwardBean.setPropertyValue(property, classification)
       true
     }
   }
@@ -78,7 +78,7 @@ abstract class BulkImportStudentAwardsCommandInternal extends CommandInternal[Re
     lazy val classification = row.classificationCode.flatMap(classificationMap.get)
 
     copyOptionProperty(studentAwardBean, "awardDate", row.awardDate) |
-      copyClassification(row.classificationCode, studentAwardBean, classification)
+    copyClassification(row.classificationCode, studentAwardBean, classification)
   }
 
 
@@ -87,8 +87,8 @@ abstract class BulkImportStudentAwardsCommandInternal extends CommandInternal[Re
     sa.sprCode = saRow.sprCode
     sa.academicYear = saRow.academicYear
     sa.award = awardsMap(saRow.awardCode)
-    sa.awardDate = saRow.awardDate.orNull
-    sa.classification = saRow.classificationCode.flatMap(code => classificationMap.get(code)).orNull
+    sa.awardDate = saRow.awardDate
+    sa.classification = saRow.classificationCode.flatMap(code => classificationMap.get(code))
     sa
   }
 
