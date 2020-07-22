@@ -78,7 +78,7 @@
 </#compress></#macro>
 <style type="text/css" nonce="${nonce()}">
 @media print {
-	.exam-grid-preview .grid td {
+	body .exam-grid-preview table.grid tbody td {
 		white-space: initial;
 	}
 
