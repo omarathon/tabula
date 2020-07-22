@@ -136,7 +136,6 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     val countQuery = new SmoCountQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     countQuery.getCount(parameterMap) > 0
-
   }
 
 
