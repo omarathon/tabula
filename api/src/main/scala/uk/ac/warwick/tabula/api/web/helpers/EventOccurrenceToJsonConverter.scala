@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
+import org.joda.time.DateTimeZone
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation}
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
@@ -16,7 +17,9 @@ trait EventOccurrenceToJsonConverter {
     "description" -> event.description,
     "eventType" -> event.eventType.displayName,
     "start" -> DateFormats.IsoDateTime.print(event.start),
+    "startDateTime" -> DateFormats.IsoDateTime.print(event.start.toDateTime(DateTimeZone.forID("Europe/London"))),
     "end" -> DateFormats.IsoDateTime.print(event.end),
+    "endDateTime" -> DateFormats.IsoDateTime.print(event.end.toDateTime(DateTimeZone.forID("Europe/London"))),
     "location" -> (event.location match {
       case Some(AliasedMapLocation(alias, MapLocation(_, locationId, syllabusPlusName))) => Map(
         "name" -> alias,
