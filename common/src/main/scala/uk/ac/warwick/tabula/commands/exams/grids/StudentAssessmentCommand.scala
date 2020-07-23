@@ -112,7 +112,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
 
     val weightedMeanYearMark: Option[BigDecimal] =
       moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false)
-        .toOption
+        .toOption.filterNot(_ == null) // Should never happen, but just being defensive
         .filter(_ => yearMarkReleasedToStudents)
 
     val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
@@ -128,6 +128,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
             upstreamRouteRuleService.list(studentCourseYearDetails.route, academicYear, l)
           }.getOrElse(Nil)
 
+        // Sometimes this will return null for the mark, e.g. if it contains pass/fail modules, so we guard that below
         val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
           moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
 
@@ -137,9 +138,9 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
           studentCourseYearDetails.overcattingModules.flatMap(overcattingModules => {
             overcatSubsets
               .find { case (_, subset) => subset.size == overcattingModules.size && subset.map(_.module).forall(overcattingModules.contains) }
-              .map { case (overcatMark, _) => Seq(meanMark, overcatMark).max }
+              .map { case (overcatMark, _) => Seq(Option(meanMark), Option(overcatMark)).flatten.max }
           }).orElse {
-            if (overcatSubsets.size == 1) Some(Seq(meanMark, overcatSubsets.head._1).max)
+            if (overcatSubsets.size == 1) Some(Seq(Option(meanMark), Option(overcatSubsets.head._1)).flatten.max)
             else None
           }
         } else {
