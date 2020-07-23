@@ -24,16 +24,13 @@ class StudentAward extends GeneratedId with ToString {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "classification_code", referencedColumnName = "code")
   private var _classification: Classification = _
-
   def classification: Option[Classification] = Option(_classification)
-
-  def classification_=(classification: Classification): Unit  = _classification = classification
+  def classification_=(classification: Option[Classification]): Unit  = _classification = classification.orNull
 
   @Column(name = "award_date")
   private var _awardDate: LocalDate = _
   def awardDate: Option[LocalDate] = Option(_awardDate)
-
-  def awardDate_=(awardDate: LocalDate): Unit = _awardDate = awardDate
+  def awardDate_=(awardDate: Option[LocalDate]): Unit = _awardDate = awardDate.orNull
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,

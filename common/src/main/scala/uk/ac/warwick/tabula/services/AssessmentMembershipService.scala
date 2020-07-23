@@ -364,10 +364,14 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  private def gradesForMark(marksCode: String, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
-    dao.getGradeBoundaries(marksCode, if (resitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment, resitAttempt.getOrElse(1))
-      .filter(_.isValidForMark(mark))
-      .sorted
+  private def gradesForMark(marksCode: String, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] = {
+    val assessmentType = if (resitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+    val attempt = resitAttempt.getOrElse(1)
+
+    RequestLevelCache.cachedBy("AssessmentMembershipService.getGradeBoundaries", s"$marksCode-$assessmentType-$attempt") {
+      dao.getGradeBoundaries(marksCode, assessmentType, attempt)
+    }.filter(_.isValidForMark(mark)).sorted
+  }
 
   def gradesForMark(component: AssessmentComponent, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
     component.marksCode.maybeText.map { marksCode =>
