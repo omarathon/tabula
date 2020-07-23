@@ -58,7 +58,7 @@
         <#if showSelectStudents>
           <th class="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
         </#if>
-        <th class="photo-col">Photo</th>
+        <th class="photo-col no-sort">Photo</th>
         <th class="student-col">First name</th>
         <th class="student-col">Last name</th>
         <th class="id-col">ID</th>
@@ -84,56 +84,22 @@
     <#if !student_table_script_included??>
       <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
-          $('.student-list').bigList({});
-          // add a custom parser for the date column
-          $.tablesorter.addParser({
-            id: 'customdate',
-            is: function (s, table, cell, $cell) {
-              return false; /*return false so this parser is not auto detected*/
-            },
-            format: function (s, table, cell, cellIndex) {
-              var $cell = $(cell);
-              return $cell.attr('data-datesort') || s;
-            },
-            parsed: false,
-            type: 'numeric'
-          });
+          $('.related_students').tablesorter({
+            sortLocaleCompare: true,
+            textAttribute: 'data-sortby',
+          }).on('tablesorter-ready', (e) => {
+            const $table = $(e.target);
+            $('.student-list').bigList({});
+            /*
+             * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
+             * the whole thing every time there's a change. Probably don't use it until we've found some
+             * way to optimise the amount of time it takes tablesorter to init.
+             */
+            if ($table.data('dynamic-sort') && !$table.data('dynamic-sort-initialised')) {
+              $table.data('dynamic-sort-initialised', true);
 
-          var tableSorterSortList = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return [[3, 0], [5, 0], [6, 0]];
+              $table.on('change', () => $table.trigger('update'));
             }
-            return [[2, 0], [4, 0], [5, 0]];
-          };
-          var tableSorterHeaders = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return {
-                8: {sorter: 'customdate'},
-                0: {sorter: false}
-              };
-            }
-            return {7: {sorter: 'customdate'}};
-          };
-
-          var tableSorterForce = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return [[3, 0]];
-            }
-            return [[2, 0]];
-          };
-          $(function () {
-            var showSelectStudentCheckBox = !!$(".collection-check-all").length;
-            $('.related_students').tablesorter({
-              sortList: tableSorterSortList(showSelectStudentCheckBox),
-              headers: tableSorterHeaders(showSelectStudentCheckBox),
-              sortForce: tableSorterForce(showSelectStudentCheckBox)
-            });
-
-            $('.related_student').on('mouseover', function (e) {
-              $(this).find('td').addClass('hover');
-            }).on('mouseout', function (e) {
-              $(this).find('td').removeClass('hover');
-            });
           });
         })(jQuery);
       </script>
