@@ -4,7 +4,7 @@ import org.springframework.beans.{BeanWrapper, PropertyAccessorFactory}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.imports.BulkImportStudentAwardsCommand._
-import uk.ac.warwick.tabula.data.model.{Classification, StudentAward}
+import uk.ac.warwick.tabula.data.model.{Award, Classification, StudentAward}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.services._
@@ -54,21 +54,21 @@ abstract class BulkImportStudentAwardsCommandInternal extends CommandInternal[Re
     with ClassificationServiceComponent
     with TransactionalComponent =>
 
-  lazy val awardsMap = awardService.allAwards.map(a => a.code -> a).toMap
-  lazy val classificationMap = classificationService.allClassifications.map(c => c.code -> c).toMap
+  lazy val awardsMap: Map[String, Award] = awardService.allAwards.map(a => a.code -> a).toMap
+  lazy val classificationMap: Map[String, Classification] = classificationService.allClassifications.map(c => c.code -> c).toMap
 
  // Maybe we should do something in the generic copyObjectProperty to deal with optional bean property value.
   private def copyClassification(newCode: Option[String], studentAwardBean: BeanWrapper, classification: Option[Classification]) = {
     val property = "classification"
     val oldValue = studentAwardBean.getPropertyValue(property) match {
       case None => None
-      case classification: Option[Classification] => classification
+      case classification: Option[Classification @unchecked] => classification
     }
 
-    if ((oldValue == None && newCode == None) || (oldValue.isDefined && newCode.isDefined && oldValue.get.code == newCode.get)) false
+    if (oldValue.map(_.code) == newCode) false
     else {
       logger.debug(s"Detected property change for $property: $oldValue -> $newCode; setting value")
-      studentAwardBean.setPropertyValue(property, classification.orNull)
+      studentAwardBean.setPropertyValue(property, classification)
       true
     }
   }
@@ -78,17 +78,17 @@ abstract class BulkImportStudentAwardsCommandInternal extends CommandInternal[Re
     lazy val classification = row.classificationCode.flatMap(classificationMap.get)
 
     copyOptionProperty(studentAwardBean, "awardDate", row.awardDate) |
-      copyClassification(row.classificationCode, studentAwardBean, classification)
+    copyClassification(row.classificationCode, studentAwardBean, classification)
   }
 
 
-  def getStudentAward(saRow: StudentAwardRow) = {
+  def getStudentAward(saRow: StudentAwardRow): StudentAward = {
     val sa = new StudentAward
     sa.sprCode = saRow.sprCode
     sa.academicYear = saRow.academicYear
-    sa.award = awardsMap.get(saRow.awardCode).get
-    sa.awardDate = saRow.awardDate.orNull
-    sa.classification = saRow.classificationCode.flatMap(code => classificationMap.get(code)).orNull
+    sa.award = awardsMap(saRow.awardCode)
+    sa.awardDate = saRow.awardDate
+    sa.classification = saRow.classificationCode.flatMap(code => classificationMap.get(code))
     sa
   }
 

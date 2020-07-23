@@ -109,8 +109,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     val weightedMeanYearMark: Option[BigDecimal] =
       moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
 
-    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
-
+    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).filter(_ => MarkState.resultsReleasedToStudents(academicYear, Option(studentCourseDetails), MarkState.DecisionReleaseTime)).orElse {
       // overcatted marks are returned even if no agreed marks exist so map on weightedMeanYearMark to ensure that we are only showing "agreed" overcatt marks
       weightedMeanYearMark.flatMap(meanMark => {
         val normalLoad: BigDecimal =
@@ -158,7 +157,6 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)
     } else Seq()
 
-
     StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules, mitCircsSubmissions, progressionDecisions, studentAwards)
   }
 }
@@ -187,7 +185,7 @@ trait StudentModuleRegistrationAndComponents extends Logging {
       scyd.moduleRegistrations.map { mr =>
         val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember)] =
           for {
-            uagm <- mr.upstreamAssessmentGroupMembers
+            uagm <- mr.upstreamAssessmentGroupMembersAllAttempts
             aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
           } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
 

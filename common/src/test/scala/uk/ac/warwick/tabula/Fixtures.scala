@@ -98,6 +98,21 @@ object Fixtures extends Mockito {
     c
   }
 
+  def award(code: String, name: String = null): Award = {
+    val a = new Award
+    a.code = code
+    a.name = Option(name).getOrElse("Award " + code)
+    a
+  }
+
+  def classification(code: String, name: String = null): Classification = {
+    val c = new Classification()
+    c.code = code
+    c.name = Option(name).getOrElse("Classification " + code)
+    c
+  }
+
+
   def yearWeighting(course: Course, weighting: JBigDecimal, academicYear: AcademicYear, yearOfStudy: YearOfStudy): CourseYearWeighting = {
     new CourseYearWeighting(course, academicYear, yearOfStudy, BigDecimal(weighting))
   }

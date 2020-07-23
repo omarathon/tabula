@@ -53,6 +53,17 @@ abstract class AbstractMeetingRecordCommand {
     meeting.lastUpdatedDate = DateTime.now
     persistAttachments(meeting)
 
+
+    val relatedAgentMembers = Try(meeting.agents).toOption.getOrElse(Nil)
+    val relatedStudentMembers = Try(meeting.relationships.flatMap(_.studentMember)).toOption.getOrElse(Nil)
+    if (
+      Option(meeting.creator).nonEmpty &&
+        !relatedAgentMembers.contains(meeting.creator) &&
+        !relatedStudentMembers.contains(meeting.creator)
+    ) {
+      meeting.creator = relatedAgentMembers.headOption.getOrElse(meeting.creator)
+    }
+
     // persist the meeting record
     meetingRecordService.saveOrUpdate(meeting)
 
