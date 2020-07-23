@@ -81,6 +81,7 @@ case class ModuleRegistrationAndComponents(
   markState: Option[MarkState],
   markRecord: StudentModuleMarkRecord,
   components: Seq[Component],
+  releasedToStudents: Boolean,
 )
 
 case class Component(
@@ -245,7 +246,8 @@ trait StudentModuleRegistrationAndComponents extends Logging {
                 gradeBoundary.exists(_.generatesResit)
               ),
             )
-          }
+          },
+          releasedToStudents = MarkState.resultsReleasedToStudents(mr, MarkState.DecisionReleaseTime),
         )
       }
     }
