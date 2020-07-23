@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 trait AbstractScheduledMeetingCommandInternal extends BindListener {
   self: AbstractScheduledMeetingRecordCommandState
@@ -37,6 +38,17 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
     } else {
       null
     }
+
+    val relatedAgentMembers = Try(scheduledMeetingRecord.agents).toOption.getOrElse(Nil)
+    val relatedStudentMembers = Try(scheduledMeetingRecord.relationships.flatMap(_.studentMember)).toOption.getOrElse(Nil)
+    if (
+      Option(scheduledMeetingRecord.creator).nonEmpty &&
+        !relatedAgentMembers.contains(scheduledMeetingRecord.creator) &&
+        !relatedStudentMembers.contains(scheduledMeetingRecord.creator)
+    ) {
+      scheduledMeetingRecord.creator = relatedAgentMembers.headOption.getOrElse(scheduledMeetingRecord.creator)
+    }
+
     persistAttachments(scheduledMeetingRecord)
 
     // persist the meeting record

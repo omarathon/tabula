@@ -4,11 +4,13 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.commands.{ComposableCommand, PopulateOnForm}
+import uk.ac.warwick.tabula.data.model.MeetingFormat.Email
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
+  val aprilFool: DateTime = dateTime(2022, DateTimeConstants.APRIL)
 
   trait Fixture {
     val relationship: StudentRelationship = mock[StudentRelationship]
@@ -27,6 +29,48 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
     command.relationships.add(relationship)
 
     val now = new DateTime(2019, DateTimeConstants.NOVEMBER, 1, 13, 40, 19, 0)
+  }
+
+
+  @Test
+  def useFirstAgentAsCreatorIfCreatorIsNotInRelationship(): Unit = withUser("cuscav") {
+    withFakeTime(aprilFool) {
+      val student: StudentMember = Fixtures.student(universityId = "1170836", userId = "studentmember")
+      val thisCreator: StaffMember = Fixtures.staff("9876543")
+      val thisAgent: StaffMember = Fixtures.staff("9996666")
+
+      val thisRelationship = StudentRelationship(
+        thisAgent,
+        StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
+        student,
+        DateTime.now
+      )
+
+      val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+      mockMeetingRecordService.listScheduled(Set(thisRelationship), Some(thisCreator)) returns Seq()
+
+      val command = new CreateScheduledMeetingRecordCommand(thisCreator, mock[StudentCourseDetails], Seq(thisRelationship))
+        with CreateScheduledMeetingRecordCommandValidation
+        with FileAttachmentServiceComponent
+        with AbstractScheduledMeetingCommandInternal
+        with MeetingRecordServiceComponent {
+        def meetingRecordService: MeetingRecordService = mockMeetingRecordService
+
+        def fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+
+      }
+      command.relationships.add(thisRelationship)
+
+      command.title = "title"
+      command.format = MeetingFormat.FaceToFace
+      command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
+      command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
+      command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+      command.description = "Lovely words"
+
+      val meeting = command.applyInternal()
+      meeting.creator should be(thisAgent)
+    }
   }
 
   @Test
