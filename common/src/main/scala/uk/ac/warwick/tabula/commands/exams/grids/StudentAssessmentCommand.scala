@@ -106,10 +106,15 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
   override def applyInternal(): StudentMarksBreakdown = {
     val modules = generateModuleRegistrationAndComponents(Seq(studentCourseYearDetails))
 
-    val weightedMeanYearMark: Option[BigDecimal] =
-      moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
+    // We explicitly allow years in the past for year marks
+    val yearMarkReleasedToStudents: Boolean = academicYear < AcademicYear.now || MarkState.resultsReleasedToStudents(academicYear, Option(studentCourseDetails), MarkState.DecisionReleaseTime)
 
-    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).filter(_ => MarkState.resultsReleasedToStudents(academicYear, Option(studentCourseDetails), MarkState.DecisionReleaseTime)).orElse {
+    val weightedMeanYearMark: Option[BigDecimal] =
+      moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false)
+        .toOption
+        .filter(_ => yearMarkReleasedToStudents)
+
+    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
       // overcatted marks are returned even if no agreed marks exist so map on weightedMeanYearMark to ensure that we are only showing "agreed" overcatt marks
       weightedMeanYearMark.flatMap(meanMark => {
         val normalLoad: BigDecimal =
@@ -125,19 +130,22 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
         val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
           moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
 
-        if (overcatSubsets.size > 1) {
+        if (overcatSubsets.nonEmpty) {
           // If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
           // find the subset that matches those modules, and show that mark if found
           studentCourseYearDetails.overcattingModules.flatMap(overcattingModules => {
             overcatSubsets
               .find { case (_, subset) => subset.size == overcattingModules.size && subset.map(_.module).forall(overcattingModules.contains) }
               .map { case (overcatMark, _) => Seq(meanMark, overcatMark).max }
-          }).orElse(overcatSubsets.headOption.map(_._1).filter(_ > meanMark)) // if no subset has been chosen show the one with the highest mark
+          }).orElse {
+            if (overcatSubsets.size == 1) Some(Seq(meanMark, overcatSubsets.head._1).max)
+            else None
+          }
         } else {
           Option(meanMark)
         }
       })
-    }
+    }.filter(_ => yearMarkReleasedToStudents)
 
     val yearWeighting = courseAndRouteService.getCourseYearWeighting(
       studentCourseYearDetails.studentCourseDetails.course.code,
