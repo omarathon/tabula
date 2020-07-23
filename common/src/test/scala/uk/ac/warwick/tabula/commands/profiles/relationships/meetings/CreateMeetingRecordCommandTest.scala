@@ -270,4 +270,42 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
       meeting.format should be(Email)
     }
   }
+
+  @Test
+  def useFirstAgentFromRelationShipAsCreatorIfCreatorIsNotInRelation() = withUser("cuscav") {
+    withFakeTime(aprilFool) {
+      val thisCreator: StaffMember = Fixtures.staff("9876543")
+      val thisAgent: StaffMember = Fixtures.staff("9996666")
+
+      val thisRelationship = StudentRelationship(
+        thisAgent,
+        StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
+        student,
+        DateTime.now
+      )
+
+      val cmd = new CreateMeetingRecordCommandInternal(thisCreator, Seq(thisRelationship))
+        with MeetingRecordCommandRequest
+        with CreateMeetingRecordCommandState
+        with MeetingRecordServiceComponent
+        with FeaturesComponent
+        with AttendanceMonitoringMeetingRecordServiceComponent
+        with FileAttachmentServiceComponent {
+        override val meetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
+        override val features: Features = Features.empty
+        override val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+        override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+      }
+      cmd.relationships.add(thisRelationship)
+      cmd.title = "A good title"
+      cmd.format = Email
+      cmd.meetingDateTime = marchHare
+      cmd.meetingDateStr = cmd.meetingDateTime.toString(DatePickerFormatter)
+      cmd.meetingTimeStr = cmd.meetingDateTime.toString(TimePickerFormatter)
+      cmd.meetingEndTimeStr = cmd.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
+      cmd.description = "Lovely words"
+      val meeting = cmd.applyInternal()
+      meeting.creator should be(thisAgent)
+    }
+  }
 }
