@@ -176,16 +176,14 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = false)
     }
 
-  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+  def upstreamAssessmentGroupMembersAllAttempts: Seq[UpstreamAssessmentGroupMember] =
     if (studentCourseDetails == null) Seq.empty
-    else {
-      val allMembers =
-        RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
-          membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
-        }.filter(member => member.universityId == studentCourseDetails.student.universityId)
+    else RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
+      membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
+    }.filter(member => member.universityId == studentCourseDetails.student.universityId)
 
-      ModuleRegistration.filterToLatestAttempt(allMembers)
-    }
+  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+    ModuleRegistration.filterToLatestAttempt(upstreamAssessmentGroupMembersAllAttempts)
 
   def recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent] = {
     val uagms = upstreamAssessmentGroupMembers

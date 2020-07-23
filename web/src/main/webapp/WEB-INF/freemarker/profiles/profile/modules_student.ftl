@@ -31,14 +31,16 @@
         </#list>
         <strong>Total CATS:</strong> ${totalCats}
       </#if>
-     <#if !yearWeightingsInFlux || (user.staff && !isSelf)>
-        <strong>Year mark:</strong> ${yearMark!"-"}
-        <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
-          (weighted mean: ${weightedMeanYearMark!"-"})
-        </#if>
-        <strong>Year Weighting:</strong>
-        <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
-     </#if>
+      <strong>Year mark:</strong> ${yearMark!"-"}
+      <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
+        (weighted mean: ${weightedMeanYearMark!"-"})
+      </#if>
+      <strong>Year Weighting:</strong>
+      <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
+      <#if graduationBenchmarkBreakdownUrl?has_content>
+        <strong>Graduation Benchmark:</strong>
+        <a href="${graduationBenchmarkBreakdownUrl}">${graduationBenchmark!"-"}</a>
+      </#if>
     </h3>
 
     <#if progressionDecisions?has_content>
@@ -135,7 +137,14 @@
                     <#list moduleRegistrationAndComponent.components as component>
                       <tr>
                         <td>${component.upstreamGroup.sequence}</td>
-                        <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
+                        <td>
+                          ${component.upstreamGroup.assessmentComponent.assessmentType.name}
+                          <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
+                            <span class="label label-info">Further first sit</span>
+                          <#elseif component.member.reassessment>
+                            <span class="label label-warning">Resit</span>
+                          </#if>
+                        </td>
                         <td>${component.upstreamGroup.name}</td>
                         <td>${(component.weighting!0)?string["0.#"]}%</td>
                         <td>${component.member.agreedMark!}</td>

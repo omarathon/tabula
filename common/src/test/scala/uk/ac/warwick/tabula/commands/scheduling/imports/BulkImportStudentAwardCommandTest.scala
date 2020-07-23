@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.data.AutowiringTransactionalComponent
 import uk.ac.warwick.tabula.data.model.{Award, Classification, StudentAward}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -23,8 +24,8 @@ class BulkImportStudentAwardCommandTest extends TestBase with Mockito with Loggi
 
     val existingAward1: Award = Fixtures.award(existingAwardCode1, "Bachelor of Science (with Honours)")
     val existingAward2: Award = Fixtures.award(existingAwardCode2, "Bachelor of Arts (with Honours)")
-    val existingClassification1: Classification = Fixtures.classification(existingClassificationCode1, "Second Class, Upper Division")
-    val existingClassification2: Classification = Fixtures.classification(existingClassificationCode2, "Second Class, Lower Division")
+    val existingClassification1: Option[Classification] = Some(Fixtures.classification(existingClassificationCode1, "Second Class, Upper Division"))
+    val existingClassification2: Option[Classification] = Some(Fixtures.classification(existingClassificationCode2, "Second Class, Lower Division"))
 
     val studentAwardImporter = smartMock[StudentAwardImporter]
     val studentAwardService = smartMock[StudentAwardService]
@@ -48,7 +49,7 @@ class BulkImportStudentAwardCommandTest extends TestBase with Mockito with Loggi
     command.classificationService = classificationService
 
     awardService.allAwards returns Seq(existingAward1, existingAward2)
-    classificationService.allClassifications returns Seq(existingClassification1, existingClassification2)
+    classificationService.allClassifications returns Seq(existingClassification1.get, existingClassification2.get)
 
 
   }
@@ -137,12 +138,34 @@ class BulkImportStudentAwardCommandTest extends TestBase with Mockito with Loggi
     }
   }
 
-  def studentAward(sprCode: String, award: Award, classification: Classification, academicYear: AcademicYear): StudentAward = {
+  @Test def testDeleteWithUpdateRowBulkImportStudentAwardCommand(): Unit = {
+    new Environment {
+      val somePastDate = new DateTime(yr, DateTimeConstants.NOVEMBER, 15, 9, 18 ).toLocalDate
+
+      val sprCode1 = "0123473/2"
+      val sprCode2 = "0123474/2"
+      val sitsStudentAwardRow1 = StudentAwardRow(sprCode1, year, existingAwardCode1, Some(somePastDate), Some(existingClassificationCode1))
+
+      //existing award at tabula different than SITS (award date changed in SITS)
+      val existingStudentAward1 = studentAward(sprCode1, existingAward1, existingClassification1, year)
+      val existingStudentAward2 = studentAward(sprCode2, existingAward2, existingClassification2, year)
+      studentAwardImporter.getStudentAwardRowsForAcademicYears(years) returns Seq(sitsStudentAwardRow1)
+      studentAwardService.getByAcademicYears(years) returns Seq(existingStudentAward1, existingStudentAward2)
+
+      val result = command.applyInternal
+      result.created should be(0)
+      result.deleted should be(1)
+      result.updated should be(1)
+
+    }
+  }
+  def studentAward(sprCode: String, award: Award, classification: Option[Classification], academicYear: AcademicYear, awardDate: Option[LocalDate] = None): StudentAward = {
     val sa = new StudentAward()
     sa.sprCode = sprCode
     sa.award = award
     sa.classification = classification
     sa.academicYear = academicYear
+    sa.awardDate = awardDate
     sa
   }
 

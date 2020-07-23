@@ -37,6 +37,9 @@ class GraduationBenchmarkBreakdownController extends ExamsController
 
   @ModelAttribute("command")
   def command(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear, @RequestParam(required = false) calculateYearMarks: JBoolean): GraduationBenchmarkBreakdownCommand.Command = {
+    // Prevent students from viewing their own breakdown even if they have permission
+    if (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId) throw new ItemNotFoundException
+
     val command = GraduationBenchmarkBreakdownCommand(mandatory(studentCourseDetails), mandatory(academicYear))
     calculateYearMarks match {
       case null => // Do nothing, use the default
