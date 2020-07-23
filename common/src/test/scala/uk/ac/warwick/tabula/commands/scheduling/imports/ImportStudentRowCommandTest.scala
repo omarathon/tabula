@@ -189,41 +189,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
   trait Environment extends MockedResultSet with EnvironmentWithoutResultSet
 
-  /** When a SPR is (P)ermanently withdrawn, end relationships
-    * FOR THAT ROUTE ONLY
-    */
-  @Test def endingWithdrawnRouteRelationships(): Unit = {
-    new Environment {
-      val student = new StudentMember()
-
-      def createRelationship(sprCode: String, scjCode: String): MemberStudentRelationship = {
-        val rel = new MemberStudentRelationship()
-        rel.studentMember = student
-        val scd = new StudentCourseDetails()
-        scd.scjCode = scjCode
-        scd.sprCode = sprCode
-        rel.studentCourseDetails = scd
-        rel
-      }
-
-      val rel1: MemberStudentRelationship = createRelationship(sprCode = "1111111/1", scjCode = "1111111/1")
-      val rel2: MemberStudentRelationship = createRelationship(sprCode = "1111111/2", scjCode = "1111111/2")
-      val rel3: MemberStudentRelationship = createRelationship(sprCode = "1111111/1", scjCode = "1111111/3")
-      relationshipService.getAllCurrentRelationships(student) returns Seq(rel1, rel2, rel3)
-
-      row.sprCode = "1111111/1"
-      row.sprStatusCode = "P"
-      row.endDate = new DateTime().minusMonths(6).toLocalDate
-
-      val courseCommand: ImportStudentCourseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), student)
-      courseCommand.applyInternal()
-
-      rel1.endDate.toLocalDate should be(row.endDate)
-      assertResult(null, "Shouldn't end course that's on a different route")(rel2.endDate)
-      rel3.endDate.toLocalDate should be(row.endDate)
-    }
-  }
-
   @Test def testImportStudentCourseYearCommand(): Unit = {
     new Environment {
       val studentCourseDetails = new StudentCourseDetails
