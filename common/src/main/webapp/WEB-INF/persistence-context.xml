@@ -27,6 +27,7 @@
 
   <bean id="flywayConfig" class="org.flywaydb.core.api.configuration.ClassicConfiguration"
         p:dataSource-ref="dataSource"
+        p:group="true"
   />
 
   <bean id="flyway" class="org.flywaydb.core.Flyway" init-method="migrate">
