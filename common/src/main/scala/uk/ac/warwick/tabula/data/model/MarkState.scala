@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import enumeratum.{Enum, EnumEntry}
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 sealed abstract class MarkState(val description: String, val cssClass: String) extends EnumEntry
@@ -27,8 +27,8 @@ object MarkState extends Enum[MarkState] {
     resultsReleasedToStudents(moduleRegistration.academicYear, Option(moduleRegistration.studentCourseDetails), releaseTime)
 
   def resultsReleasedToStudents(academicYear: AcademicYear, studentCourseDetails: Option[StudentCourseDetails], releaseTime: LocalTime): Boolean = {
-    // Include previous years as well for (e.g.) resits, that'll work for 19/20 at least.
-    if (academicYear <= AcademicYear.starting(2019)) {
+    // For previous years marks will be shown as soon they are processed. This includes resits.
+    if (academicYear == AcademicYear.starting(2019)) {
       val releaseDate: Option[LocalDate] = studentCourseDetails.collect {
         case scd if scd.course.code.startsWith("D") && scd.freshStudentCourseYearDetailsForYear(academicYear).exists(_.yearOfStudy == 1) =>
           DegreeApprenticeshipFirstYearReleaseDate2020
