@@ -87,8 +87,8 @@
           $('.related_students').tablesorter({
             sortLocaleCompare: true,
             textAttribute: 'data-sortby',
-          }).on('tablesorter-ready', (e) => {
-            const $table = $(e.target);
+          }).on('tablesorter-ready', function(e) {
+            var $table = $(e.target);
             $('.student-list').bigList({});
             /*
              * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
@@ -98,7 +98,9 @@
             if ($table.data('dynamic-sort') && !$table.data('dynamic-sort-initialised')) {
               $table.data('dynamic-sort-initialised', true);
 
-              $table.on('change', () => $table.trigger('update'));
+              $table.on('change', function() {
+                $table.trigger('update')
+              });
             }
           });
         })(jQuery);
