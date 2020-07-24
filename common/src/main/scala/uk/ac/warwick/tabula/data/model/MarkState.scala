@@ -27,7 +27,7 @@ object MarkState extends Enum[MarkState] {
     resultsReleasedToStudents(moduleRegistration.academicYear, Option(moduleRegistration.studentCourseDetails), releaseTime)
 
   def resultsReleasedToStudents(academicYear: AcademicYear, studentCourseDetails: Option[StudentCourseDetails], releaseTime: LocalTime): Boolean = {
-    // For previous years marks will be shown as soon they are processed. This includes resits which don't have to wait for the release day.
+    // For previous years marks will be shown as soon they are processed. This includes resits.
     if (academicYear == AcademicYear.starting(2019)) {
       val releaseDate: Option[LocalDate] = studentCourseDetails.collect {
         case scd if scd.course.code.startsWith("D") && scd.freshStudentCourseYearDetailsForYear(academicYear).exists(_.yearOfStudy == 1) =>
