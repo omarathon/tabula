@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
@@ -46,10 +48,10 @@ class MemberTest extends TestBase with Mockito {
     val mod2 = new Module("cs102")
     mod1.adminDepartment = extDept
     mod2.adminDepartment = homeDept
-    val modReg1 = new ModuleRegistration(studentCourseDetails.scjCode, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A")
-    val modReg2 = new ModuleRegistration(studentCourseDetails.scjCode, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A")
-    studentCourseDetails.addModuleRegistration(modReg1)
-    studentCourseDetails.addModuleRegistration(modReg2)
+    val modReg1 = new ModuleRegistration(studentCourseDetails.sprCode, mod1, new JBigDecimal("12.0"), "CS101-12", AcademicYear(2012), "A", null)
+    val modReg2 = new ModuleRegistration(studentCourseDetails.sprCode, mod2, new JBigDecimal("12.0"), "CS102-12", AcademicYear(2013), "A", null)
+    studentCourseDetails._moduleRegistrations.add(modReg1)
+    studentCourseDetails._moduleRegistrations.add(modReg2)
 
     member.mostSignificantCourseDetails.get.department = courseDept
 
@@ -95,10 +97,10 @@ class MemberTest extends TestBase with Mockito {
 
     val mod1 = new Module("cs101")
     val mod2 = new Module("cs102")
-    val modReg1 = new ModuleRegistration(scd1.scjCode, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A")
-    val modReg2 = new ModuleRegistration(scd1.scjCode, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A")
-    scd1.addModuleRegistration(modReg1)
-    scd1.addModuleRegistration(modReg2)
+    val modReg1 = new ModuleRegistration(scd1.sprCode, mod1, new JBigDecimal("12.0"), "CS101-12", AcademicYear(2012), "A", null)
+    val modReg2 = new ModuleRegistration(scd1.sprCode, mod2, new JBigDecimal("12.0"), "CS102-12", AcademicYear(2013), "A", null)
+    scd1._moduleRegistrations.add(modReg1)
+    scd1._moduleRegistrations.add(modReg2)
 
     member.registeredModulesByYear(Some(AcademicYear(2013))) should be(Set(mod2))
     member.registeredModulesByYear(None) should be(Set(mod1, mod2))
@@ -109,10 +111,10 @@ class MemberTest extends TestBase with Mockito {
 
     val mod3 = new Module("cs103")
     val mod4 = new Module("cs104")
-    val modReg3 = new ModuleRegistration(scd2.scjCode, mod3, new JBigDecimal("12.0"), AcademicYear(2012), "A")
-    val modReg4 = new ModuleRegistration(scd2.scjCode, mod4, new JBigDecimal("12.0"), AcademicYear(2013), "A")
-    scd2.addModuleRegistration(modReg3)
-    scd2.addModuleRegistration(modReg4)
+    val modReg3 = new ModuleRegistration(scd2.sprCode, mod3, new JBigDecimal("12.0"), "CS103-12", AcademicYear(2012), "A", null)
+    val modReg4 = new ModuleRegistration(scd2.sprCode, mod4, new JBigDecimal("12.0"), "CS104-12", AcademicYear(2013), "A", null)
+    scd2._moduleRegistrations.add(modReg3)
+    scd2._moduleRegistrations.add(modReg4)
 
     member.registeredModulesByYear(Some(AcademicYear(2013))) should be(Set(mod2, mod4))
     member.registeredModulesByYear(None) should be(Set(mod1, mod2, mod3, mod4))
@@ -240,18 +242,29 @@ class MemberTest extends TestBase with Mockito {
     val scyd2012 = scd1.latestStudentCourseYearDetails
     scyd2012.academicYear = AcademicYear(2012)
     scyd2012.yearOfStudy = 1
+    scyd2012.studyLevel = "1"
     val scyd2013 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2013), yearOfStudy = 1, studentCourseDetails = scd1)
+    scyd2013.studyLevel = "1"
     scd1.addStudentCourseYearDetails(scyd2013)
     val scyd2014 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2014), yearOfStudy = 2, studentCourseDetails = scd1)
+    scyd2014.studyLevel = "2"
     scd1.addStudentCourseYearDetails(scyd2014)
     val scyd2015 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2015), yearOfStudy = 3, studentCourseDetails = scd1)
+    scyd2015.studyLevel = "3"
     scd1.addStudentCourseYearDetails(scyd2015)
     val scd2 = Fixtures.studentCourseDetails(student, null, null)
     scd2.scjCode = s"${student.universityId}/2"
     val scyd2016 = scd2.latestStudentCourseYearDetails
     scyd2016.academicYear = AcademicYear(2016)
     scyd2016.yearOfStudy = 1
+    scyd2016.studyLevel = "1"
     student.courseAndRouteService = courseAndRouteService
+
+    scyd2012.id = UUID.randomUUID.toString
+    scyd2013.id = UUID.randomUUID.toString
+    scyd2014.id = UUID.randomUUID.toString
+    scyd2015.id = UUID.randomUUID.toString
+    scyd2016.id = UUID.randomUUID.toString
 
     val entity = student.toExamGridEntity(scyd2015)
     entity.validYears(1).studentCourseYearDetails.get should be(scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)

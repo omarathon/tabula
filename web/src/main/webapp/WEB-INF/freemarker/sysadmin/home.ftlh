@@ -74,6 +74,19 @@
     </p>
 
     <p>
+        <@f.form method="post" action="${url('/sysadmin/import-sits-individual-year')}" modelAttribute="blankForm">
+    <div class="input-group">
+      <select name="academicYear" class="form-control">
+          <#list academicYears as ay>
+            <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+          </#list>
+      </select>
+      <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="SITS Assignments (specific year)" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
+    </div>
+      </@f.form>
+    </p>
+
+    <p>
       <@f.form method="post" action="${url('/sysadmin/import-module-lists')}" modelAttribute="">
         <input class="btn btn-danger" type="submit" value="SITS module lists" data-toggle="confirm-submit" data-message="Really? Could take a minute">
       </@f.form>
@@ -121,6 +134,32 @@
           </select>
           <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Module Registrations" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
         </div>
+      </@f.form>
+    </p>
+
+    <p>
+      <@f.form method="post" action="${url('/sysadmin/import-progression-decisions')}" modelAttribute="blankForm">
+        <div class="input-group">
+          <select name="academicYear" class="form-control">
+            <#list academicYears as ay>
+              <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+            </#list>
+          </select>
+          <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Progression Decisions" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
+        </div>
+      </@f.form>
+    </p>
+
+    <p>
+        <@f.form method="post" action="${url('/sysadmin/import-student-awards')}" modelAttribute="blankForm">
+            <div class="input-group">
+      <select name="academicYear" class="form-control">
+          <#list academicYears as ay>
+            <option value="${ay.startYear}" <#if ay.startYear == currentAcademicYear.startYear>selected</#if>>${ay.toString}</option>
+          </#list>
+      </select>
+      <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Student Awards" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
+    </div>
       </@f.form>
     </p>
 

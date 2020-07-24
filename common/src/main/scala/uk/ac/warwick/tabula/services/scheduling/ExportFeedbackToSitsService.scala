@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
-import java.util
 
 import javax.sql.DataSource
 import org.joda.time.DateTime
@@ -13,9 +12,10 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback, MarkState, RecordedAssessmentComponentStudent, RecordedAssessmentComponentStudentMark, UpstreamAssessmentGroupMember, UpstreamAssessmentGroupMemberAssessmentType}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, ExportResitFeedbackToSitsQuery, SASPartialMatchQuery, SITSMarkRow, SRAPartialMatchQuery, SasCountQuery, SraCountQuery}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService._
 
 import scala.jdk.CollectionConverters._
 
@@ -28,63 +28,79 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 }
 
 trait ExportFeedbackToSitsService {
-  def countMatchingSitsRecords(feedback: Feedback): Integer
-
-  def exportToSits(feedback: Feedback): Integer
-
+  def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int
+  def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int
   def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow]
 }
 
-class ParameterGetter(feedback: Feedback) {
+class FeedbackParameterGetter(feedback: Feedback) {
   val assessGroups: Seq[AssessmentGroup] = feedback.assessmentGroups
   val possibleOccurrenceSequencePairs: Seq[(String, String)] = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 
-  def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
+  def getQueryParams: Option[JMap[String, Any]] = possibleOccurrenceSequencePairs match {
     case pairs if pairs.isEmpty => None
     case _ => Option(JHashMap(
       // for the where clause
-      ("studentId", feedback.studentIdentifier),
-      ("academicYear", feedback.academicYear.toString),
-      ("moduleCodeMatcher", feedback.module.code.toUpperCase + "%"),
-      ("now", DateTime.now.toDate),
+      "studentId" -> feedback.studentIdentifier,
+      "academicYear" -> feedback.academicYear.toString,
+      "moduleCodeMatcher" -> (feedback.module.code.toUpperCase + "%"),
+      "resitSequenceMatcher" -> "%", // We don't hold this for Feedback
 
       // in theory we should look for a record with occurrence and sequence from the same pair,
       // but in practice there won't be any ambiguity since the record is already determined
       // by student, module code and year
-      ("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
-      ("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava)
+      "occurrences" -> possibleOccurrenceSequencePairs.map(_._1).asJava,
+      "sequences" -> possibleOccurrenceSequencePairs.map(_._2).asJava
     ))
   }
+}
 
-  def getUpdateParams(mark: Integer, grade: String): Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
-    case pairs if pairs.isEmpty => None
-    case _ => Option(JHashMap(
-      // for the where clause
-      ("studentId", feedback.studentIdentifier),
-      ("academicYear", feedback.academicYear.toString),
-      ("moduleCodeMatcher", feedback.module.code.toUpperCase + "%"),
-      ("now", DateTime.now.toDate),
+class RecordedAssessmentComponentStudentParameterGetter(student: RecordedAssessmentComponentStudent) {
+  def getQueryParams: JMap[String, Any] = JHashMap(
+    // for the where clause
+    "studentId" -> student.universityId,
+    "academicYear" -> student.academicYear.toString,
+    "moduleCodeMatcher" -> student.moduleCode,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
+    "occurrences" -> Seq(student.occurrence).asJava,
+    "sequences" -> Seq(student.sequence).asJava
+  )
 
-      // in theory we should look for a record with occurrence and sequence from the same pair,
-      // but in practice there won't be any ambiguity since the record is already determined
-      // by student, module code and year
-      ("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
-      ("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava),
+  // If we've got an agreed mark/grade, store the last recorded mark/grade before it was agreed as the actual mark/grade
+  lazy val latestRecordedActualMark: Option[RecordedAssessmentComponentStudentMark] = student.marks.find(_.markState != MarkState.Agreed)
+  lazy val actualMark: JInteger = JInteger(latestRecordedActualMark match {
+    case Some(m) => m.mark
+    case _ => student.latestMark
+  })
+  lazy val actualGrade: String = (latestRecordedActualMark match {
+    case Some(m) => m.grade
+    case _ => student.latestGrade
+  }).orNull
 
-      // data to insert
-      ("actualMark", mark),
-      ("actualGrade", grade)
-    ))
-  }
+  def getUpdateParams: JMap[String, Any] = JHashMap(
+    // for the where clause
+    "studentId" -> student.universityId,
+    "academicYear" -> student.academicYear.toString,
+    "moduleCodeMatcher" -> student.moduleCode,
+    "resitSequenceMatcher" -> student.resitSequence.getOrElse("%"),
+    "occurrences" -> Seq(student.occurrence).asJava,
+    "sequences" -> Seq(student.sequence).asJava,
 
+    // data to insert
+    "now" -> DateTime.now.toDate,
+    "actualMark" -> actualMark,
+    "actualGrade" -> actualGrade,
+    "agreedMark" -> JInteger(student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))),
+    "agreedGrade" -> student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed)).orNull
+  )
 }
 
 
 class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService with Logging {
-  self: SitsDataSourceComponent =>
+  self: SitsDataSourceComponent with AssessmentMembershipServiceComponent =>
 
-  private def countInternal(feedback: Feedback, tableName: String, query: CountQuery) = {
-    val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
+  private def countInternal(feedback: Feedback, tableName: String, query: CountQuery): Int = {
+    val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
     parameterGetter.getQueryParams match {
       case Some(params) =>
         query.getCount(params)
@@ -94,59 +110,70 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
     }
   }
 
-  private def countMatchingSasRecords(feedback: Feedback): Integer = {
-    val countQuery = new SasCountQuery(sitsDataSource)
-    countInternal(feedback, "SAS", countQuery)
-
+  private def countInternal(student: RecordedAssessmentComponentStudent, query: CountQuery): Int = {
+    val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
+    query.getCount(parameterGetter.getQueryParams)
   }
 
-  private def countMatchingSraRecords(feedback: Feedback): Integer = {
+  private def countMatchingSasRecords(feedback: Feedback): Int = {
+    val countQuery = new SasCountQuery(sitsDataSource)
+    countInternal(feedback, "SAS", countQuery)
+  }
+
+  private def countMatchingSasRecords(student: RecordedAssessmentComponentStudent): Int = {
+    val countQuery = new SasCountQuery(sitsDataSource)
+    countInternal(student, countQuery)
+  }
+
+  private def countMatchingSraRecords(feedback: Feedback): Int = {
     val countQuery = new SraCountQuery(sitsDataSource)
     countInternal(feedback, "SRA", countQuery)
   }
 
-  def countMatchingSitsRecords(feedback: Feedback): Integer = feedback match {
-    case f: Feedback if f.assignment.resitAssessment => countMatchingSraRecords(feedback: Feedback)
-    case _ => countMatchingSasRecords(feedback: Feedback)
+  private def countMatchingSraRecords(student: RecordedAssessmentComponentStudent): Int = {
+    val countQuery = new SraCountQuery(sitsDataSource)
+    countInternal(student, countQuery)
   }
 
-  def exportToSits(feedback: Feedback): Integer = {
-    val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
-    val (updateQuery, tableName) = feedback match {
-      case f: Feedback if f.assignment.resitAssessment => (new ExportResitFeedbackToSitsQuery(sitsDataSource), "CAM_SRA")
-      case _ => (new ExportFeedbackToSitsQuery(sitsDataSource), "CAM_SAS")
-    }
+  override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = student.assessmentType match {
+    case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+      countMatchingSasRecords(student)
 
-    val grade = feedback.latestGrade
-    val mark = feedback.latestMark
-    val numRowsChanged = {
-      if (grade.isDefined && mark.isDefined) {
-        parameterGetter.getUpdateParams(mark.get, grade.get) match {
-          case Some(params) =>
-            updateQuery.updateByNamedParam(params)
-          case None =>
-            logger.warn(s"Cannot upload feedback ${feedback.id} for SITS $tableName as no assessment groups found")
-            0
-        }
-      } else {
-        logger.warn(f"Not updating SITS $tableName for feedback ${feedback.id} - no latest mark or grade found")
-        0 // issue a warning when the FeedbackForSits record is created, not here
-      }
-    }
-    numRowsChanged
+    case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+      countMatchingSraRecords(student)
   }
 
-  def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
+  override def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int = {
+    val parameterGetter = new RecordedAssessmentComponentStudentParameterGetter(student)
+    val agreed = student.latestState.contains(MarkState.Agreed)
+    val reassessmentExpected = agreed && {
+      val assessmentComponent = member.flatMap(_.upstreamAssessmentGroup.assessmentComponent)
+      val currentResitAttempt = member.flatMap(_.currentResitAttempt)
+      val gradeBoundaries = assessmentComponent.map(ac => assessmentMembershipService.gradesForMark(ac, student.latestMark, currentResitAttempt)).getOrElse(Nil)
+      gradeBoundaries.find(gb => student.latestGrade.contains(gb.grade)).exists(_.generatesResit)
+    }
 
+    val updateQuery = student.assessmentType match {
+      case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+        new ExportFeedbackToSitsQuery(sitsDataSource, agreed, reassessmentExpected)
+
+      case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+        new ExportResitFeedbackToSitsQuery(sitsDataSource, agreed, reassessmentExpected)
+    }
+
+    updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
+  }
+
+  override def getPartialMatchingSITSRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SITSMarkRow] = {
     val (matchQuery, tableName) = feedback match {
       case f: Feedback if f.assignment.resitAssessment => (new SRAPartialMatchQuery(sitsDataSource), "CAM_SRA")
       case _ => (new SASPartialMatchQuery(sitsDataSource), "CAM_SAS")
     }
 
-    val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
+    val parameterGetter: FeedbackParameterGetter = new FeedbackParameterGetter(feedback)
     parameterGetter.getQueryParams match {
       case Some(params) =>
-        matchQuery.executeByNamedParam(params.asScala.view.filterKeys(_ != "now").toMap.asJava).asScala.toSeq
+        matchQuery.executeByNamedParam(params).asScala.toSeq
       case None =>
         logger.warn(s"Cannot get partial matching $tableName records for feedback ${feedback.id} as no assessment groups found")
         Nil
@@ -169,50 +196,32 @@ object ExportFeedbackToSitsService {
     and psl_code = 'Y'
     """
 
-  def whereClause = s"$rootWhereClause and mab_seq in (:sequences)" // mab_seq = sequence code determining an assessment component
-  def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences)" // sra_seq = sequence code determining an assessment component
-
-  // Only upload when the mark/grade is empty or was previously uploaded by Tabula
-  def writeableWhereClause =
-    f"""$whereClause
-    and (
-      sas_actm is null and sas_actg is null
-      or sas_udf1 = '$tabulaIdentifier'
-    )
-    """
-
-  def resitWriteableWhereClause =
-    f"""$resitWhereClause
-    and (
-      sra_actm is null and sra_actg is null
-      or sra_udf2 = '$tabulaIdentifier'
-    )
-    """
+  // :resitSequenceMatcher = '%' is stupid but necessary as the number of bind params needs to match
+  def whereClause = s"$rootWhereClause and mab_seq in (:sequences) and '%' = :resitSequenceMatcher" // mab_seq = sequence code determining an assessment component
+  def resitWhereClause = s"$rootWhereClause and sra_seq in (:sequences) and sra_rseq like :resitSequenceMatcher" // sra_seq = sequence code determining an assessment component
 
   final def CountMatchingBlankSasRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sas $writeableWhereClause
+    select count(*) from $sitsSchema.cam_sas $whereClause
     """
 
   final def CountMatchingBlankSraRecordsSql =
     f"""
-    select count(*) from $sitsSchema.cam_sra $resitWriteableWhereClause
+    select count(*) from $sitsSchema.cam_sra $resitWhereClause
     """
 
   abstract class CountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
-    def getCount(params: util.HashMap[String, Object]): Int
+    def getCount(params: JMap[String, Any]): Int
   }
 
   class SasCountQuery(ds: DataSource) extends CountQuery(ds) {
-
-    def getCount(params: util.HashMap[String, Object]): Int = {
+    def getCount(params: JMap[String, Any]): Int = {
       this.queryForObject(CountMatchingBlankSasRecordsSql, params, classOf[JInteger]).asInstanceOf[Int]
     }
   }
 
   class SraCountQuery(ds: DataSource) extends CountQuery(ds) {
-
-    def getCount(params: util.HashMap[String, Object]): Int = {
+    def getCount(params: JMap[String, Any]): Int = {
       this.queryForObject(CountMatchingBlankSraRecordsSql, params, classOf[JInteger]).asInstanceOf[Int]
     }
   }
@@ -221,40 +230,65 @@ object ExportFeedbackToSitsService {
   // SAS_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
   // SAS_PROC = Current Process - Value of SAS enabled overall marks to be calculated in SITS
   // SAS_UDF1, SAS_UDF2 - user defined fields used for audit
-  final def UpdateSITSFeedbackSql =
+  final def UpdateSITSFeedbackSql(agreed: Boolean, reassessment: Boolean): String = {
+
+    val (processStatus, currentProcess) = if (agreed) {
+      if(reassessment) ("R", "RAS") else ("A", "COM")
+    } else {
+      ("I", "SAS")
+    }
+
     f"""
-		update $sitsSchema.cam_sas
-		set sas_actm = :actualMark,
-			sas_actg = :actualGrade,
-			sas_prcs = 'I',
-			sas_proc = 'SAS',
-			sas_udf1 = '$tabulaIdentifier',
-			sas_udf2 = :now
-		$writeableWhereClause
-	"""
+    update $sitsSchema.cam_sas
+    set sas_actm = :actualMark,
+      sas_actg = :actualGrade,
+      sas_agrm = :agreedMark,
+      sas_agrg = :agreedGrade,
+      sas_prcs = '$processStatus',
+      sas_proc = '$currentProcess',
+      ${if (agreed) "sas_coma = sas_cura," else ""}
+      sas_udf1 = '$tabulaIdentifier',
+      sas_udf2 = :now
+    $whereClause
+    """
+  }
 
   // update Student Assessment table (CAM_SRA) which holds module component resit marks
   // SRA_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
   // SRA_PROC = Current Process - Value of RAS enabled overall marks to be calculated in SITS
   // SRA_UDF2, SRA_UDF3 - user defined fields used for audit
-  final def UpdateSITSResitFeedbackSql =
+  final def UpdateSITSResitFeedbackSql(agreed: Boolean, reassessment: Boolean): String = {
+
+    val (processStatus, currentProcess) = if (agreed) {
+      if(reassessment) ("R", "RAS") else ("A", "COM")
+    } else {
+      ("I", "RAS")
+    }
+
     f"""
-		update $sitsSchema.cam_sra
-		set sra_actm = :actualMark,
-			sra_actg = :actualGrade,
-			sra_prcs = 'I',
-			sra_proc = 'RAS',
-			sra_udf2 = '$tabulaIdentifier',
-			sra_udf3 = :now
-		$resitWriteableWhereClause
-	"""
+    update $sitsSchema.cam_sra
+    set sra_actm = :actualMark,
+      sra_actg = :actualGrade,
+      sra_agrm = :agreedMark,
+      sra_agrg = :agreedGrade,
+      sra_prcs = '$processStatus',
+      sra_proc = '$currentProcess',
+      ${if (agreed) "sra_coma = sra_cura," else ""}
+      sra_udf2 = '$tabulaIdentifier',
+      sra_udf3 = :now
+    $resitWhereClause
+    """
+  }
 
   abstract class ExportQuery(ds: DataSource, val query: String) extends SqlUpdate(ds, query) {
     declareParameter(new SqlParameter("actualMark", Types.INTEGER))
     declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
+    declareParameter(new SqlParameter("agreedMark", Types.INTEGER))
+    declareParameter(new SqlParameter("agreedGrade", Types.VARCHAR))
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("now", Types.DATE))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
@@ -262,8 +296,8 @@ object ExportFeedbackToSitsService {
     compile()
   }
 
-  class ExportFeedbackToSitsQuery(ds: DataSource) extends ExportQuery(ds, UpdateSITSFeedbackSql)
-  class ExportResitFeedbackToSitsQuery(ds: DataSource) extends ExportQuery(ds, UpdateSITSResitFeedbackSql)
+  class ExportFeedbackToSitsQuery(ds: DataSource, agreed: Boolean, reassessment: Boolean) extends ExportQuery(ds, UpdateSITSFeedbackSql(agreed, reassessment))
+  class ExportResitFeedbackToSitsQuery(ds: DataSource, agreed: Boolean, reassessment: Boolean) extends ExportQuery(ds, UpdateSITSResitFeedbackSql(agreed, reassessment))
 
   final def PartialMatchingSasRecordsSql =
     f"""
@@ -279,6 +313,7 @@ object ExportFeedbackToSitsService {
     declareParameter(new SqlParameter("studentId", Types.VARCHAR))
     declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
     declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+    declareParameter(new SqlParameter("resitSequenceMatcher", Types.VARCHAR))
     declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
     declareParameter(new SqlParameter("sequences", Types.VARCHAR))
   }
@@ -288,6 +323,8 @@ object ExportFeedbackToSitsService {
       SITSMarkRow(
         ImportMemberHelpers.getInteger(rs, "sas_actm"),
         rs.getString("sas_actg"),
+        ImportMemberHelpers.getInteger(rs, "sas_agrm"),
+        rs.getString("sas_agrg"),
         rs.getString("sas_udf1")
       )
     }
@@ -298,6 +335,8 @@ object ExportFeedbackToSitsService {
       SITSMarkRow(
         ImportMemberHelpers.getInteger(rs, "sra_actm"),
         rs.getString("sra_actg"),
+        ImportMemberHelpers.getInteger(rs, "sra_agrm"),
+        rs.getString("sra_agrg"),
         rs.getString("sra_udf2")
       )
     }
@@ -306,6 +345,8 @@ object ExportFeedbackToSitsService {
   case class SITSMarkRow(
     actualMark: Option[Int],
     actualGrade: String,
+    agreedMark: Option[Int],
+    agreedGrade: String,
     uploader: String
   )
 
@@ -314,14 +355,12 @@ object ExportFeedbackToSitsService {
 @Profile(Array("dev", "test", "production"))
 @Service
 class ExportFeedbackToSitsServiceImpl
-  extends AbstractExportFeedbackToSitsService with AutowiringSitsDataSourceComponent
+  extends AbstractExportFeedbackToSitsService with AutowiringSitsDataSourceComponent with AutowiringAssessmentMembershipServiceComponent
 
 @Profile(Array("sandbox"))
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
-  def countMatchingSitsRecords(feedback: Feedback) = 0
-
-  def exportToSits(feedback: Feedback) = 0
-
-  def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
+  override def countMatchingSitsRecords(student: RecordedAssessmentComponentStudent): Int = 0
+  override def exportToSits(student: RecordedAssessmentComponentStudent, member: Option[UpstreamAssessmentGroupMember]): Int = 0
+  override def getPartialMatchingSITSRecords(feedback: Feedback): Seq[SITSMarkRow] = Nil
 }

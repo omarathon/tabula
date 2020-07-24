@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
-import org.joda.time.LocalDate
+import org.joda.time.{LocalDate, LocalTime}
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter, AssignmentToXmlConverter}
-import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentMonolithCommand, CreateAssignmentMonolithRequest, ModifyAssignmentMonolithRequest}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{CreateAssignmentMonolithCommand, CreateAssignmentMonolithRequest, ModifyAssignmentMonolithRequest, SharedAssignmentStudentProperties}
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
@@ -117,19 +117,25 @@ class CreateAssignmentController extends ModuleAssignmentsController {
   }
 }
 
+case class SitsLink(moduleCode: String, occurrence: String, sequence: String)
+
+
 trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends JsonApiRequest[A]
-  with BooleanAssignmentProperties {
+  with BooleanAssignmentProperties with SharedAssignmentStudentProperties {
 
   @BeanProperty var name: String = null
   @BeanProperty var openDate: LocalDate = null
   @BeanProperty var closeDate: LocalDate = null
+  @BeanProperty var closeTime: LocalTime = null
   @BeanProperty var academicYear: AcademicYear = null
   @BeanProperty var feedbackTemplate: FeedbackTemplate = null
   @BeanProperty var markingWorkflow: CM2MarkingWorkflow = null
   @BeanProperty var includeUsers: JList[String] = null
   @BeanProperty var excludeUsers: JList[String] = null
   @BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
+  @BeanProperty var sitsLinks: JList[SitsLink] = null
   @BeanProperty var fileAttachmentLimit: JInteger = null
+  @BeanProperty var unlimitedAttachments: JBoolean = null
   @BeanProperty var fileAttachmentTypes: JList[String] = null
   @BeanProperty var individualFileSizeLimit: JInteger = null
   @BeanProperty var minWordCount: JInteger = null
@@ -144,7 +150,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
 
     Option(name).foreach(state.name = _)
     Option(openDate).foreach(state.openDate = _)
-    Option(closeDate).foreach(state.closeDate = _)
+    Option(closeDate).foreach(d => state.closeDate = d.toDateTime(Option(closeTime).getOrElse(Assignment.defaultCloseTime)))
 
     state match {
       case createState: CreateAssignmentMonolithRequest =>
@@ -157,8 +163,8 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
     Option(excludeUsers).foreach { state.excludeUsers = _ }
-    Option(upstreamGroups).foreach(state.upstreamGroups = _)
     Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
+    Option(unlimitedAttachments).foreach(state.unlimitedAttachments = _)
     Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
     Option(individualFileSizeLimit).foreach(state.individualFileSizeLimit = _)
     Option(minWordCount).foreach(state.wordCountMin = _)
@@ -184,7 +190,30 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentMonolithRequest] extends 
     Option(turnitinExcludeBibliography).foreach(state.turnitinExcludeBibliography = _)
     Option(turnitinExcludeQuoted).foreach(state.turnitinExcludeQuoted = _)
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
+    Option(resitAssessment).foreach(state.resitAssessment = _)
+    Option(anonymity).foreach(state.anonymity = _)
+    Option(createdByAEP).foreach(state.createdByAEP = _)
 
+    if (sitsLinks != null ) {
+      val sitsLinksSeq = Option(sitsLinks.asScala).getOrElse(Seq.empty)
+      if (sitsLinksSeq.forall { link =>
+        state.allUpstreamGroups.exists(uag => uag.assessmentComponent.moduleCode == link.moduleCode
+          && uag.assessmentComponent.sequence == link.sequence && uag.occurrence == link.occurrence)
+
+      }) {
+        val linkedUpstreamGroups: JList[UpstreamGroup] = state.allUpstreamGroups.filter { upstreamGroup =>
+          sitsLinksSeq.exists { sitsLink =>
+            upstreamGroup.assessmentComponent.moduleCode == sitsLink.moduleCode &&
+              upstreamGroup.sequence == sitsLink.sequence &&
+              upstreamGroup.occurrence == sitsLink.occurrence
+          }
+
+        }.asJava
+        state.upstreamGroups = linkedUpstreamGroups
+      } else {
+        errors.reject("assignment.api.sitsLinks.invalidData")
+      }
+    }
     state.afterBind()
   }
 
@@ -196,7 +225,9 @@ class CreateAssignmentRequest extends AssignmentPropertiesRequest[CreateAssignme
   includeUsers = JArrayList()
   upstreamGroups = JArrayList()
   fileAttachmentLimit = 1
+  unlimitedAttachments = false
   fileAttachmentTypes = JArrayList()
   wordCountConventions = "Exclude any bibliography or appendices."
+  createdByAEP = false
 
 }

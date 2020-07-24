@@ -6,22 +6,27 @@
   <h1>Modules</h1>
 
   <#if hasPermission>
-
     <#if user.staff>
       <div class="pull-right">
         <@routes.profiles.mrm_link command.studentCourseYearDetails />
         View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif" />
         </a>
       </div>
+
+      <p>Module Registration Status:
+        <#if command.studentCourseYearDetails.moduleRegistrationStatus??>
+          ${(command.studentCourseYearDetails.moduleRegistrationStatus.description)!}
+        <#else>
+          Unknown (not in SITS)
+        </#if>
+      </p>
     </#if>
 
-    <p>Module Registration Status:
-      <#if command.studentCourseYearDetails.moduleRegistrationStatus??>
-        ${(command.studentCourseYearDetails.moduleRegistrationStatus.description)!}
-      <#else>
-        Unknown (not in SITS)
-      </#if>
-    </p>
+    <#if (command.studentCourseYearDetails.studentCourseDetails.courseType.code)! == "PG(T)">
+      <div class="alert alert-info">
+        Marks visible to you on this page are subject to agreement by the Final Board of Examiners and until such time, these marks are provisional and subject to change.
+      </div>
+    </#if>
 
     <h3>
       <#if moduleRegistrationsAndComponents?has_content>
@@ -37,7 +42,37 @@
       </#if>
       <strong>Year Weighting:</strong>
       <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
+      <#if graduationBenchmarkBreakdownUrl?has_content>
+        <strong>Graduation Benchmark:</strong>
+        <a href="${graduationBenchmarkBreakdownUrl}">${graduationBenchmark!"-"}</a>
+      </#if>
     </h3>
+
+    <#if progressionDecisions?has_content>
+      <#list progressionDecisions as progressionDecision>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              Progression decision
+              <#if progressionDecision.resitPeriod>
+                <span class="label label-info">Summer vacation exam period</span>
+              <#else>
+                <span class="label label-info">Summer exam period</span>
+              </#if>
+            </h3>
+          </div>
+          <div class="panel-body">
+            <span class="lead">${progressionDecision.outcome.message}</span>
+            <#if progressionDecision.outcome.hasAward && studentAwards?has_content>
+              <#list studentAwards as studentAward>
+                <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
+              </#list>
+            </#if>
+            <#if progressionDecision.minutes??><p>${progressionDecision.minutes}</p></#if>
+          </div>
+        </div>
+      </#list>
+    </#if>
 
     <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
@@ -49,13 +84,13 @@
               <@fmt.module_name moduleRegistration.module />
             </#compress></a>
             <span class="mod-reg-summary">
-              <#if showModuleResults>
+              <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
                 <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
                 <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
                 <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
                 <#if moduleRegistration.passedCats??>
-                <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
-              </#if>
+                  <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+                </#if>
               </#if>
             </span>
           </h3>
@@ -77,7 +112,7 @@
                   <strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
                 </div>
                 <div class="col-md-4">
-                  <#if showModuleResults>
+                  <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
                     <strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
                     <strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
                     <strong>Passed CATS:</strong>
@@ -99,19 +134,30 @@
                       <th>Type</th>
                       <th>Name</th>
                       <th>Weighting</th>
-                      <th>Mark</th>
-                      <th>Grade</th>
+                      <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                        <th>Mark</th>
+                        <th>Grade</th>
+                      </#if>
                     </tr>
                     </thead>
                     <tbody>
                     <#list moduleRegistrationAndComponent.components as component>
                       <tr>
                         <td>${component.upstreamGroup.sequence}</td>
-                        <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
+                        <td>
+                          ${component.upstreamGroup.assessmentComponent.assessmentType.name}
+                          <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
+                            <span class="label label-info">Further first sit</span>
+                          <#elseif component.member.reassessment>
+                            <span class="label label-warning">Resit</span>
+                          </#if>
+                        </td>
                         <td>${component.upstreamGroup.name}</td>
-                        <td>${component.upstreamGroup.assessmentComponent.weighting!0}%</td>
-                        <td>${component.member.firstAgreedMark!}</td>
-                        <td>${component.member.firstAgreedGrade!}</td>
+                        <td>${(component.weighting!0)?string["0.#"]}%</td>
+                        <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                          <td>${component.member.agreedMark!}</td>
+                          <td>${component.member.agreedGrade!}</td>
+                        </#if>
                       </tr>
                     </#list>
                     </tbody>

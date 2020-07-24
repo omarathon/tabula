@@ -15,7 +15,7 @@
 
 <#macro assignmentInformation>
   <div>
-    <#if !assignment.openEnded>
+    <#if !assignment.openEnded && !(assignment.createdByAEP!false)>
       <#assign time_remaining = durationFormatter(assignment.closeDate) />
       <p>
         <#if extension?? && extension.relevant>
@@ -44,7 +44,7 @@
           If you do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
         </p>
       </#if>
-    <#else>
+    <#elseif !(assignment.createdByAEP!false)>
       <p class="very-subtle">
         This assignment does not have a deadline.
 
@@ -201,7 +201,7 @@
       or submit your assignment then you'll need to get in touch directly with your
       course/module convenor as the assignment has now been archived.
     </p>
-  <#elseif !assignment.collectSubmissions>
+  <#elseif !assignment.collectSubmissions || assignment.createdByAEP!false>
     <p>
       This assignment isn't collecting submissions through this system, but you may get
       an email to retrieve your feedback from here.

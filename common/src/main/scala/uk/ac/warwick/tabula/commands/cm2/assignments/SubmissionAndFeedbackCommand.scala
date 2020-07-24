@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
@@ -17,7 +16,6 @@ import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceCo
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters._
 
 object SubmissionAndFeedbackCommand {
@@ -73,6 +71,7 @@ trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer
   val enhancedFeedbacksCommand: ListFeedbackCommand.CommandType = ListFeedbackCommand(assignment)
 
   override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
+
   override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
 }
 
@@ -187,7 +186,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           stages = progress.stages,
           coursework = coursework,
           assignment = assignment,
-          disability = None
+          disability = None,
+          reasonableAdjustmentsDeclared = None,
         )
       }
     }
@@ -200,9 +200,13 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
         }
 
         profileService.getAllMembersWithUserIds(users, activeOnly = false)
-          .collect{ case student: StudentMember => student.disability.map(d => student.universityId -> d)  }
+          .collect { case student: StudentMember => student.disability.map(d => student.universityId -> d) }
           .flatten
           .toMap
+      }
+
+      val reasonableAdjustmentsDeclaredLookup: Map[String, Option[Boolean]] = benchmarkTask("Lookup submissions ") {
+        enhancedSubmissions.map(es => es.submission.usercode -> es.submission.reasonableAdjustmentsDeclared).toMap
       }
 
       for (usercode <- usercodesWithSubmissionOrFeedback) yield {
@@ -249,7 +253,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           stages = progress.stages,
           coursework = coursework,
           assignment = assignment,
-          disability = disabilityLookup.get(user.getWarwickId)
+          disability = disabilityLookup.get(user.getWarwickId),
+          reasonableAdjustmentsDeclared = reasonableAdjustmentsDeclaredLookup.get(user.getUserId).flatten,
         )
       }
     }

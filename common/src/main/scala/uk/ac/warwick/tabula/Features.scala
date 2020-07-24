@@ -130,6 +130,8 @@ abstract class Features {
   @Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes: Boolean = defaults.schedulingAttendanceUpdateSchemes
   @Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals: Boolean = defaults.schedulingAttendanceUpdateTotals
   @Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits: Boolean = defaults.schedulingExportFeedbackToSits
+  @Value("${features.scheduling.exportResitsToSits:true}") var schedulingExportResitsToSits: Boolean = defaults.schedulingExportResitsToSits
+  @Value("${features.scheduling.exportRecordedModuleMarksToSits:true}") var schedulingExportRecordedModuleMarksToSits: Boolean = defaults.schedulingExportRecordedModuleMarksToSits
   @Value("${features.scheduling.triggers:true}") var schedulingTriggers: Boolean = defaults.schedulingTriggers
   @Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration: Boolean = defaults.schedulingObjectStorageMigration
   @Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport: Boolean = defaults.schedulingModuleListsImport
@@ -140,8 +142,11 @@ abstract class Features {
   @Value("${features.scheduling.bulkModuleRegistrationsImport:true}") var schedulingBulkModuleRegistrationsImport: Boolean = defaults.schedulingBulkModuleRegistrationsImport
   @Value("${features.scheduling.combinedModuleMembershipDataImport:true}") var schedulingCombinedModuleMembershipDataImport: Boolean = defaults.schedulingCombinedModuleMembershipDataImport
   @Value("${features.scheduling.departmentMandatoryPermissionsWarning:false}") var schedulingDepartmentMandatoryPermissionsWarning: Boolean = defaults.schedulingDepartmentMandatoryPermissionsWarning
+  @Value("${features.scheduling.bulkProgressionDecisionsImport:true}") var schedulingBulkProgressionDecisionsImport: Boolean = defaults.schedulingBulkProgressionDecisionsImport
+  @Value("${features.scheduling.bulkStudentAwardsImport:true}") var schedulingBulkStudentAwardsImport: Boolean = defaults.schedulingBulkStudentAwardsImport
   @Value("${features.exams:true}") var exams: Boolean = defaults.exams
   @Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
+  @Value("${features.exams.graduationBenchmark:true}") var graduationBenchmark: Boolean = defaults.graduationBenchmark
 
   @Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
   @Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
@@ -150,9 +155,15 @@ abstract class Features {
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:true}") var mitCircs: Boolean = defaults.mitCircs
+  @Value("${features.mitCircs.covid19:true}") var mitcircsCovid19: Boolean = defaults.mitcircsCovid19
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
   @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
+  @Value("${features.marksManagement:true}") var marksManagement: Boolean = defaults.marksManagement
+  @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
+  @Value("${features.progressionDecisionsInStudentProfile:true}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
+  @Value("${features.processAgreedMarks:true}") var processAgreedMarks: Boolean = defaults.processAgreedMarks
+  @Value("${features.ignoreResultRelease:false}") var ignoreResultRelease: Boolean = defaults.processAgreedMarks
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -275,6 +286,8 @@ class FeaturesMessage {
   @BeanProperty var schedulingExportAttendanceToSits = true
   @BeanProperty var schedulingSynchroniseAttendanceToSits = true
   @BeanProperty var schedulingExportFeedbackToSits = true
+  @BeanProperty var schedulingExportResitsToSits = true
+  @BeanProperty var schedulingExportRecordedModuleMarksToSits = true
   @BeanProperty var schedulingAttendanceUpdateSchemes = true
   @BeanProperty var schedulingAttendanceUpdateTotals = true
   @BeanProperty var schedulingTriggers = true
@@ -287,9 +300,12 @@ class FeaturesMessage {
   @BeanProperty var schedulingBulkModuleRegistrationsImport = true
   @BeanProperty var schedulingCombinedModuleMembershipDataImport = true
   @BeanProperty var schedulingDepartmentMandatoryPermissionsWarning = false
+  @BeanProperty var schedulingBulkProgressionDecisionsImport = true
+  @BeanProperty var schedulingBulkStudentAwardsImport = true
 
   @BeanProperty var exams = true
   @BeanProperty var examGrids = true
+  @BeanProperty var graduationBenchmark = true
 
   @BeanProperty var reports = true
 
@@ -300,9 +316,16 @@ class FeaturesMessage {
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
   @BeanProperty var mitCircs = true
+  @BeanProperty var mitcircsCovid19 = true
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
   @BeanProperty var notificationBatching = false
+  @BeanProperty var marksManagement = true
+  @BeanProperty var includeSMSForCurrentYear = false
+  @BeanProperty var progressionDecisionsInStudentProfile = true
+  @BeanProperty var processAgreedMarks = true
+  @BeanProperty var ignoreResultRelease = false
+
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

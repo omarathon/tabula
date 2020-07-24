@@ -146,19 +146,19 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
       }
     }
   }
-  lazy val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, selectCourseCommand.studyYearByLevelOrBlock, normalCATSLoadService)
-  lazy val routeRulesLookup: UpstreamRouteRuleLookup = UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)
+  lazy val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(selectCourseCommand.studyYearByLevelOrBlock, normalCATSLoadService)
+  lazy val routeRulesLookup: UpstreamRouteRuleLookup = UpstreamRouteRuleLookup(upstreamRouteRuleService)
 
   lazy val overcatSubsets: Map[ExamGridEntity, Map[YearOfStudy, Seq[(BigDecimal, Seq[ModuleRegistration])]]] =
     entities.map(entity => {
       val subsets = entity.validYears
-        .filter { case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty }
+        .filter { case (year, entityYear) => routeRulesLookup(entityYear).nonEmpty }
         .view
         .mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
           entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
-          normalLoadLookup(entityYear.route),
-          routeRulesLookup(entityYear.route, entityYear.level)
+          normalLoadLookup(entityYear),
+          routeRulesLookup(entityYear)
         ))
         .map { case (year, overcattedModuleSubsets) =>
           if (overcattedModuleSubsets.size > 1) year -> overcattedModuleSubsets

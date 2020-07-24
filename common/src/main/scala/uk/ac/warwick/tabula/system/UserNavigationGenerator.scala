@@ -4,6 +4,7 @@ import java.time.Duration
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.marks.MarksManagementHomeCommand
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.TeachingQualityUser
@@ -71,6 +72,9 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
         roleService.hasRole(user, TeachingQualityUser())
       )
 
+    val canManageMarksManagement =
+      permissionsService.getAllPermissionDefinitionsFor(user, MarksManagementHomeCommand.AdminPermission).nonEmpty
+
     val modelMap = Map(
       "user" -> user,
       "canAdmin" -> canAdmin,
@@ -78,7 +82,8 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
       "canViewProfiles" -> canViewProfiles,
       "examsEnabled" -> examsEnabled,
       "examGridsEnabled" -> examGridsEnabled,
-      "canManageMitigatingCircumstances" -> canManageMitigatingCircumstances
+      "canManageMitigatingCircumstances" -> canManageMitigatingCircumstances,
+      "canManageMarksManagement" -> canManageMarksManagement
     )
 
     UserNavigation(

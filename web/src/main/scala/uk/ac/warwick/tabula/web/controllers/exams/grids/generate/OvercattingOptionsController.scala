@@ -48,7 +48,7 @@ class OvercattingOptionsController extends ExamsController
       mandatory(department),
       mandatory(academicYear),
       mandatory(scyd),
-      NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService),
+      NormalLoadLookup(scyd.yearOfStudy, normalCATSLoadService),
       routeRules(scyd, academicYear),
       user,
       basedOnLevel = basedOnLevel
@@ -61,7 +61,7 @@ class OvercattingOptionsController extends ExamsController
     @PathVariable scyd: StudentCourseYearDetails,
     @RequestParam(value = "basedOnLevel", required = false) basedOnLevel: Boolean
   ) =
-    OvercattingOptionsView(department, academicYear, scyd, NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService), routeRules(scyd, academicYear), basedOnLevel = basedOnLevel)
+    OvercattingOptionsView(department, academicYear, scyd, NormalLoadLookup(scyd.yearOfStudy, normalCATSLoadService), routeRules(scyd, academicYear), basedOnLevel = basedOnLevel)
 
   @ModelAttribute("ExamGridColumnValueType")
   def examGridColumnValueType = ExamGridColumnValueType
@@ -168,10 +168,16 @@ class OvercattingOptionsView(
     originalEntity.copy(years = originalEntity.years.updated(studyYearByLevelOrBlock, Some(ExamGridEntityYear(
       moduleRegistrations = overcattedModules,
       cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,
-      route = scyd.studentCourseDetails.currentRoute,
+      route = scyd.route match {
+        case r: Route => r
+        case _ => scyd.studentCourseDetails.currentRoute
+      },
+      baseAcademicYear = scyd.academicYear,
       overcattingModules = Some(overcattedModules.map(_.module)),
       markOverrides = Some(overwrittenMarks),
       studentCourseYearDetails = None,
+      agreedMark = Option(scyd.agreedMark).map(BigDecimal(_)),
+      yearAbroad = scyd.yearAbroad,
       level = scyd.level,
       yearOfStudy = studyYearByLevelOrBlock
     ))))
@@ -191,8 +197,9 @@ class OvercattingOptionsView(
     showZeroWeightedComponents = false,
     showComponentSequence = false,
     showModuleNames = department.moduleNameToShow,
-    calculateYearMarks = false,
-    isLevelGrid = basedOnLevel
+    yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly,
+    isLevelGrid = basedOnLevel,
+    applyBenchmark = false
   )
 
   private lazy val currentYearMark = if (basedOnLevel) {
@@ -206,7 +213,7 @@ class OvercattingOptionsView(
     new UniversityIDColumnOption().getColumns(overcattedEntitiesState),
     new ChooseOvercatColumnOption().getColumns(overcattedEntitiesState, Option(overcatChoice)),
     new OvercattedYearMarkColumnOption().getColumns(overcattedEntitiesState),
-    new FixedValueColumnOption().getColumns(overcattedEntitiesState, currentYearMark.right.toOption)
+    new FixedValueColumnOption().getColumns(overcattedEntitiesState, currentYearMark.toOption)
   ).flatten
 
   lazy val optionsColumnCategories: Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]] =

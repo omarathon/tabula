@@ -1,0 +1,53 @@
+package uk.ac.warwick.tabula.data
+
+import org.hibernate.criterion.Order._
+import org.hibernate.criterion.Restrictions._
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.Daoisms._
+import uk.ac.warwick.tabula.data.model.ProgressionDecision
+
+trait ProgressionDecisionDao {
+  def saveOrUpdate(pd: ProgressionDecision): Unit
+  def delete(pd: ProgressionDecision): Unit
+  def getByAcademicYears(academicYears: Seq[AcademicYear]): Seq[ProgressionDecision]
+  def getByUniversityIds(universityIds: Seq[String]): Seq[ProgressionDecision]
+}
+
+abstract class HibernateProgressionDecisionDao extends ProgressionDecisionDao with HelperRestrictions {
+  self: ExtendedSessionComponent =>
+
+  override def saveOrUpdate(pd: ProgressionDecision): Unit = session.saveOrUpdate(pd)
+
+  override def delete(pd: ProgressionDecision): Unit = session.delete(pd)
+
+  override def getByAcademicYears(academicYears: Seq[AcademicYear]): Seq[ProgressionDecision] =
+    safeInSeq(() => {
+      session.newCriteria[ProgressionDecision]
+        .addOrder(asc("sprCode"))
+        .addOrder(asc("sequence"))
+    }, "academicYear", academicYears)
+
+  override def getByUniversityIds(universityIds: Seq[String]): Seq[ProgressionDecision] =
+    safeInSeq(() => {
+      session.newCriteria[ProgressionDecision]
+        .createAlias("_allStudentCourseDetails", "studentCourseDetails")
+        .add(isNull("studentCourseDetails.missingFromImportSince"))
+        .addOrder(asc("sprCode"))
+        .addOrder(asc("sequence"))
+    }, "studentCourseDetails.student.universityId", universityIds).distinct
+}
+
+@Repository("progressionDecisionDao")
+class AutowiringProgressionDecisionDao
+  extends HibernateProgressionDecisionDao
+    with Daoisms
+
+trait ProgressionDecisionDaoComponent {
+  def progressionDecisionDao: ProgressionDecisionDao
+}
+
+trait AutowiringProgressionDecisionDaoComponent extends ProgressionDecisionDaoComponent {
+  var progressionDecisionDao: ProgressionDecisionDao = Wire[ProgressionDecisionDao]
+}

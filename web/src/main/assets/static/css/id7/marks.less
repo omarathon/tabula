@@ -1,0 +1,70 @@
+@import (reference) "bootstrap/less/variables";
+@import (reference) "bootstrap/less/mixins/vendor-prefixes";
+@import (reference) "@universityofwarwick/id7/less/variables";
+@import (inline) "chart.js/dist/Chart.min.css";
+
+@import "stage-progress-bar";
+
+// Could use :out-of-range here but that doesn't catch invalid step (i.e. where someone puts 70.1 for a mark but step="1")
+.form-control:invalid {
+  // Source: bootstrap/less/mixins/forms .form-control-validation
+  @text-color: @state-danger-text;
+  @border-color: @state-danger-text;
+  @background-color: @state-danger-bg;
+
+  border-color: @border-color;
+  .box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075)); // Redeclare so transitions work
+  &:focus {
+    border-color: darken(@border-color, 10%);
+    @shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px lighten(@border-color, 20%);
+    .box-shadow(@shadow);
+  }
+
+  + .input-group-addon {
+    color: @text-color;
+    background-color: @background-color;
+    border-color: @border-color;
+  }
+}
+
+.striped-section .section-title .next-action {
+  color: @text-color;
+}
+
+.marks-form {
+  > .table, > .id7-wide-table-wrapper-container > .table-responsive > .table {
+    > tbody > tr > td {
+      white-space: nowrap;
+
+      .modal, .has-error {
+        white-space: normal;
+      }
+    }
+  }
+
+  .table {
+    colgroup.assessment-component, colgroup.module-mark-calculation {
+      border-left: 2px solid @table-border-color;
+
+      + colgroup.assessment-component {
+        border-left: 1px solid @table-border-color;
+      }
+    }
+  }
+
+  input, select {
+    min-width: 80px;
+  }
+
+  th .modal {
+    font-weight: normal;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
+canvas#chart + .scaling-guidance {
+  margin-top: 2rem;
+}

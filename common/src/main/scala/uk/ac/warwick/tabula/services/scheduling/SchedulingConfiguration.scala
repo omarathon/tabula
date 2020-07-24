@@ -160,6 +160,7 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ImportProfilesSingleDepartmentJob]("scheduling.importProfilesSingleDepartment"),
     propertiesConfiguredJob[ImportAssignmentsJob]("scheduling.importAssignments"),
     propertiesConfiguredJob[ImportAssignmentsAllYearsJob]("scheduling.importAssignmentsAllYears"),
+    propertiesConfiguredJob[ImportAssignmentsIndividualYearJob]("scheduling.importAssignmentsIndividualYear"),
     propertiesConfiguredJob[ImportSmallGroupEventLocationsJob]("scheduling.importSmallGroupEventLocations"),
     propertiesConfiguredJob[TurnitinTcaRegisterWebhooksJob]("scheduling.turnitinTcaRegisterWebhooks"),
     propertiesConfiguredJob[BulkImportModuleRegistrationsJob]("scheduling.bulkImportModuleRegistrations"),
@@ -171,7 +172,8 @@ object SchedulingConfiguration {
     propertiesConfiguredJob[ImportModuleMembershipDataJob]("scheduling.importModuleMembershipData"),
     propertiesConfiguredJob[ManualMembershipWarningJob]("scheduling.manualMembershipWarning"),
     propertiesConfiguredJob[ImportModuleListsJob]("scheduling.importModuleLists"),
-
+    propertiesConfiguredJob[BulkImportProgressionDecisionsJob]("scheduling.bulkImportProgressionDecisions"),
+    propertiesConfiguredJob[BulkImportStudentAwardsJob]("scheduling.bulkImportStudentAwards"),
     propertiesConfiguredJob[RemoveAgedApplicantsJob]("scheduling.removeAgedApplicants"),
 
     propertiesConfiguredJob[CleanupTemporaryFilesJob]("scheduling.cleanupTemporaryFiles"),
@@ -198,7 +200,9 @@ object SchedulingConfiguration {
     // SITS exports
     propertiesConfiguredJob[ExportAttendanceToSitsJob]("scheduling.exportAttendanceToSits"),
     propertiesConfiguredJob[SynchroniseAttendanceToSitsJob]("scheduling.synchroniseAttendanceToSits"),
-    propertiesConfiguredJob[ExportFeedbackToSitsJob]("scheduling.exportFeedbackToSits"),
+    propertiesConfiguredJob[ExportRecordedAssessmentComponentStudentsToSitsJob]("scheduling.exportRecordedAssessmentComponentStudentsToSits"),
+    propertiesConfiguredJob[ExportRecordedModuleRegistrationsToSitsJob]("scheduling.exportRecordedModuleRegistrationsToSits"),
+    propertiesConfiguredJob[ExportRecordedResitsToSitsJob]("scheduling.exportRecordedResitsToSits"),
     propertiesConfiguredJob[ExportYearMarksToSitsJob]("scheduling.exportYearMarksToSits")
   ).flatten
 }

@@ -187,15 +187,15 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
   private[this] trait BatchedNotificationsDueFixture {
     val assignment1 = Fixtures.assignment("5,000 word essay")
     assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-    assignment1.closeDate = DateTime.now.plusDays(1).withTime(Assignment.closeTime)
+    assignment1.closeDate = DateTime.now.plusDays(1).withTime(Assignment.defaultCloseTime)
 
     val assignment2 = Fixtures.assignment("10,000 word essay")
     assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-    assignment2.closeDate = DateTime.now.plusDays(1).withTime(Assignment.closeTime)
+    assignment2.closeDate = DateTime.now.plusDays(1).withTime(Assignment.defaultCloseTime)
 
     val assignment3 = Fixtures.assignment("5,000 word essay")
     assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
-    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.closeTime)
+    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.defaultCloseTime)
 
     val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
     val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)
@@ -207,16 +207,16 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
   private[this] trait BatchedNotificationsLateFixture {
     val assignment1 = Fixtures.assignment("5,000 word essay")
     assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.defaultCloseTime)
 
     val assignment2 = Fixtures.assignment("10,000 word essay")
     assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment2.allowLateSubmissions = false
-    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.defaultCloseTime)
 
     val assignment3 = Fixtures.assignment("5,000 word essay")
     assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
-    assignment3.closeDate = DateTime.now.minusDays(3).withTime(Assignment.closeTime)
+    assignment3.closeDate = DateTime.now.minusDays(3).withTime(Assignment.defaultCloseTime)
 
     val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
     val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)
@@ -228,16 +228,16 @@ class SubmissionDueNotificationTest extends TestBase with Mockito with Freemarke
   private[this] trait BatchedNotificationsMixedFixture {
     val assignment1 = Fixtures.assignment("5,000 word essay")
     assignment1.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+    assignment1.closeDate = DateTime.now.minusDays(1).withTime(Assignment.defaultCloseTime)
 
     val assignment2 = Fixtures.assignment("10,000 word essay")
     assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.closeTime)
+    assignment2.closeDate = DateTime.now.minusDays(1).withTime(Assignment.defaultCloseTime)
     assignment2.allowLateSubmissions = false
 
     val assignment3 = Fixtures.assignment("5,000 word essay")
     assignment3.module = Fixtures.module("cs123", "Talking to Computer Scientists")
-    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.closeTime)
+    assignment3.closeDate = DateTime.now.plusDays(3).withTime(Assignment.defaultCloseTime)
 
     val notification1 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment1)
     val notification2 = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment2)

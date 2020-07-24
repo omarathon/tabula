@@ -241,6 +241,8 @@ object Permissions {
   object Marks {
     case object MarksManagement extends ScopelessPermission("Marks management across all departments")
     case object UploadToSits extends ScopelessPermission("Upload marks to SITS")
+    case object ReviewComponentMarksUpload extends ScopelessPermission("See the progress of departmental component mark upload")
+    case object OverwriteAgreedMarks extends Permission("Overwrite agreed marks")
   }
 
   object Extension {
@@ -294,6 +296,7 @@ object Permissions {
       object StudentCourseDetails {
         case object Core extends Permission("View a student's basic course, route and department details")
         case object Status extends Permission("View a student's enrolment and study status")
+        case object SpecialExamArrangements extends Permission("View a student's special exam arrangements")
       }
 
       case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType])

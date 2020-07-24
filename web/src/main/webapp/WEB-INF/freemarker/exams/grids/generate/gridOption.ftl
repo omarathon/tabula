@@ -396,12 +396,24 @@
         academic years are not available in SITS.</p>
     </#assign>
 
+    <#assign uploadedYearMarksIfAvailablePopoverContent>
+      <p>If you have <a target="_blank" href="<@routes.exams.uploadYearMarks department academicYear />">uploaded year marks</a> via Tabula, you can use these
+        in your grid. If an uploaded year mark isn't available, the calculated year mark will be used based on component and module marks.</p>
+    </#assign>
+
     <div class="row">
       <div class="col-md-3">
         <div class="radio">
           <label><input type="radio" name="yearMarksToUse" value="sits"
                         <#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
-            /> Uploaded year marks <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
+            /> Uploaded year marks only <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="radio">
+          <label><input type="radio" name="yearMarksToUse" value="sitsIfAvailable"
+                        <#if gridOptionsCommand.yearMarksToUse == 'sitsIfAvailable'>checked</#if>
+            /> Uploaded year marks if available <@fmt.help_popover id="sitsIfAvailable" content=uploadedYearMarksIfAvailablePopoverContent html=true /></label>
         </div>
       </div>
       <div class="col-md-3">
@@ -431,6 +443,7 @@
           </label>
         </div>
       </div>
+
       <div class="col-md-3">
         <div class="checkbox">
           <label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"
@@ -468,6 +481,62 @@
         </div>
       </#if>
     </div>
+
+    <#if features.graduationBenchmark>
+      <hr />
+      <h3>Graduation benchmark</h3>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="benchmarkWeightedAssessmentMark"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("benchmarkWeightedAssessmentMark")>checked</#if>
+              /> Current year weighted assessment mark<@fmt.help_popover id="benchmarkWeightedAssessmentMark" content="Weighted assessment mark for the graduation benchmark." />
+            </label>
+          </div>
+        </div>
+
+        <#if selectCourseCommand.ugCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>
+          <div class="col-md-3">
+            <div class="checkbox">
+              <label><input type="checkbox" name="predefinedColumnIdentifiers" value="percentageAssessmentsTaken"
+                            <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("percentageAssessmentsTaken")>checked</#if>
+                /> Percentage of assessments taken (UG) <@fmt.help_popover id="percentageAssessmentsTaken" content="Percentage of assessments taken in the year, used in the graduation benchmark calculation (applies to UG students only)." />
+              </label>
+            </div>
+          </div>
+        </#if>
+
+        <#if selectCourseCommand.pgCourseIncluded || gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>
+          <div class="col-md-3">
+            <div class="checkbox">
+              <label><input type="checkbox" name="predefinedColumnIdentifiers" value="catsConsidered"
+                            <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("catsConsidered")>checked</#if>
+                /> Number of CATS considered (PG) <@fmt.help_popover id="catsConsidered" content="Number of CATS considered, used in the graduation benchmark calculation (applies to PG students only)." />
+              </label>
+            </div>
+          </div>
+        </#if>
+
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="graduationBenchmark"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("graduationBenchmark")>checked</#if>
+              /> Graduation benchmark <@fmt.help_popover id="graduationBenchmark" content="Calculated graduation benchmark." />
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="applyBenchmark" <#if gridOptionsCommand.applyBenchmark>checked</#if> />
+              Apply graduation benchmark <@fmt.help_popover id="applyBenchmark" content="The graduation benchmark will be used to calculate the final degree mark and classification." />
+            </label>
+          </div>
+        </div>
+      </div>
+    </#if>
 
     <hr />
 

@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
 
+import scala.math.BigDecimal.RoundingMode
+
 trait PropertyCopying extends Logging {
   var sitsStatusImporter: SitsStatusImporter = Wire[SitsStatusImporter]
 
@@ -125,11 +127,11 @@ trait PropertyCopying extends Logging {
   }
 
   def copyBigDecimal(destinationBean: BeanWrapper, property: String, optionalBigDecimal: Option[JBigDecimal]): Boolean = {
-    val oldValue = destinationBean.getPropertyValue(property)
+    val oldValue = destinationBean.getPropertyValue(property).asInstanceOf[JBigDecimal]
 
     optionalBigDecimal match {
       case Some(newValue: JBigDecimal) =>
-        if (oldValue != newValue) {
+        if (Option(oldValue).map(_.setScale(2, RoundingMode.HALF_UP)).orNull != newValue.setScale(2, RoundingMode.HALF_UP)) {
           destinationBean.setPropertyValue(property, newValue)
           true
         }
@@ -141,5 +143,16 @@ trait PropertyCopying extends Logging {
         }
         else false
     }
+  }
+
+  def copyOptionProperty[A](destinationBean: BeanWrapper, property: String, newValue: Option[A]): Boolean = {
+    val oldValue = destinationBean.getPropertyValue(property)
+
+    // null == null in Scala so this is safe for unset values
+    if (oldValue != newValue) {
+      logger.debug(s"Detected property change for $property: $oldValue -> $newValue; setting value")
+      destinationBean.setPropertyValue(property, newValue)
+      true
+    } else false
   }
 }

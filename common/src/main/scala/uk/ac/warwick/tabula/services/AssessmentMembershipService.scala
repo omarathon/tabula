@@ -8,15 +8,17 @@ import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging, RequestLevelCache}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
+import scala.jdk.CollectionConverters._
 
 trait AssessmentMembershipService {
   def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
 
   def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def find(group: AssessmentGroup): Option[AssessmentGroup]
 
@@ -32,11 +34,13 @@ trait AssessmentMembershipService {
 
   def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 
-  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo]
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
+
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
   def getUpstreamAssessmentGroups(module: Module, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
@@ -58,9 +62,9 @@ trait AssessmentMembershipService {
     */
   def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -68,7 +72,11 @@ trait AssessmentMembershipService {
 
   def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
 
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]]
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Map[UpstreamAssessmentGroupKey, Seq[Assignment]]
 
   /**
     * Get all assessment groups that can serve this assignment this year.
@@ -79,7 +87,7 @@ trait AssessmentMembershipService {
 
   def getUpstreamAssessmentGroupInfo(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -94,7 +102,7 @@ trait AssessmentMembershipService {
   // empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
   def emptyMembers(groupsToEmpty: Seq[String]): Int
 
-  def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+  def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): UpstreamAssessmentGroup
 
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
@@ -125,11 +133,35 @@ trait AssessmentMembershipService {
 
   def deleteGradeBoundaries(marksCode: String): Unit
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary]
+
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int]): Seq[GradeBoundary]
+
+  def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int]
+
+  def markScheme(marksCode: String): Seq[GradeBoundary]
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
+
+  def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule]
+
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
+
+  def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def save(schedule: AssessmentComponentExamSchedule): Unit
+
+  def delete(schedule: AssessmentComponentExamSchedule): Unit
+
+  def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
+  def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule]
+
+  def save(rule: VariableAssessmentWeightingRule): Unit
+
+  def delete(rule: VariableAssessmentWeightingRule): Unit
 }
 
 // all the small group sets and assignments in Tabula for a department with manually added students
@@ -175,11 +207,11 @@ class AssessmentMembershipServiceImpl
   def emptyMembers(groupsToEmpty: Seq[String]): Int =
     dao.emptyMembers(groupsToEmpty: Seq[String])
 
-  def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup = {
+  def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): UpstreamAssessmentGroup = {
     if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 
-    getUpstreamAssessmentGroup(template).map { group =>
-      group.replaceMembers(registrations.map(_.universityId))
+    getUpstreamAssessmentGroup(template, eagerLoad = true).map { group =>
+      group.replaceMembers(registrations.map(r => (r.universityId, r.resitSequence.maybeText)), assessmentType)
       group
     } getOrElse {
       logger.warn("No such assessment group found: " + template.toString)
@@ -197,7 +229,7 @@ class AssessmentMembershipServiceImpl
     */
   def find(assignment: AssessmentComponent): Option[AssessmentComponent] = dao.find(assignment)
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = dao.find(group)
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = dao.find(group, eagerLoad)
 
   def find(group: AssessmentGroup): Option[AssessmentGroup] = dao.find(group)
 
@@ -217,14 +249,17 @@ class AssessmentMembershipServiceImpl
 
   def getUpstreamAssessmentGroups(student: StudentMember, academicYear: AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroups(student, academicYear, resitOnly)
 
-  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
+  def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = find(template, eagerLoad)
 
   def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo] = {
-    find(template).map(grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
+    find(template, eagerLoad = false).map(grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
   }
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
     dao.getUpstreamAssessmentGroupInfo(groups, academicYear)
+
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
+    dao.getUpstreamAssessmentGroupInfoForComponents(components, academicYear)
 
   def getUpstreamAssessmentGroup(id: String): Option[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroup(id)
 
@@ -262,16 +297,37 @@ class AssessmentMembershipServiceImpl
   def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]] =
     dao.getAssessmentComponentsByPaperCode(department, paperCodes)
 
+  def getUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Map[AssessmentComponentKey, Seq[UpstreamAssessmentGroupInfo]] =
+    dao.getCurrentUpstreamAssessmentGroupMembers(components, academicYear)
+      .groupBy(_.upstreamAssessmentGroup)
+      .map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }
+      .toSeq
+      .groupBy(uagi => AssessmentComponentKey(uagi.upstreamAssessmentGroup))
+
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent] =
     dao.getAllAssessmentComponents(academicYears)
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Map[UpstreamAssessmentGroupKey, Seq[Assignment]] = {
+    val allAssignments = dao.getAssignmentsForAssessmentGroups(keys)
+    keys.map(k => k -> {
+      allAssignments.filter(a => {
+        k.academicYear == a.academicYear && a.assessmentGroups.asScala.toSeq.exists(ag => {
+          val occurrence = ag.occurrence
+          val sequence = ag.assessmentComponent.sequence
+          val moduleCode = ag.assessmentComponent.moduleCode
+          occurrence == k.occurrence && sequence == k.sequence && moduleCode == k.moduleCode
+        })
+      })
+    }).toMap
+  }
 
   /**
     * Gets assessment components for this department.
     */
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments, inUseOnly)
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] =
-    dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly)
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] =
+    dao.getAssessmentComponents(department, includeSubDepartments, assessmentType, withExamPapersOnly, inUseOnly)
 
   def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
@@ -288,8 +344,8 @@ class AssessmentMembershipServiceImpl
     uagMap.map { case (uag, currentMembers) => UpstreamAssessmentGroupInfo(uag, currentMembers) }.toSeq ++ additional
   }
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
-    dao.getUpstreamAssessmentGroups(registration, eagerLoad)
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
+    dao.getUpstreamAssessmentGroups(registration, allAssessmentGroups, eagerLoad)
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
     dao.getUpstreamAssessmentGroups(academicYears)
@@ -308,22 +364,58 @@ class AssessmentMembershipServiceImpl
     dao.deleteGradeBoundaries(marksCode)
   }
 
-  def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary] = {
-    def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
+  private def gradesForMark(marksCode: String, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] = {
+    val assessmentType = if (resitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+    val attempt = resitAttempt.getOrElse(1)
 
-    component.marksCode match {
-      case code: String =>
-        dao.getGradeBoundaries(code).filter(gradeBoundaryMatchesMark)
-      case _ =>
-        Seq()
-    }
+    RequestLevelCache.cachedBy("AssessmentMembershipService.getGradeBoundaries", s"$marksCode-$assessmentType-$attempt") {
+      dao.getGradeBoundaries(marksCode, assessmentType, attempt)
+    }.filter(_.isValidForMark(mark)).sorted
   }
+
+  def gradesForMark(component: AssessmentComponent, mark: Option[Int], resitAttempt: Option[Int]): Seq[GradeBoundary] =
+    component.marksCode.maybeText.map { marksCode =>
+      gradesForMark(marksCode, mark, resitAttempt)
+    }.getOrElse(Seq.empty)
+
+  def gradesForMark(moduleRegistration: ModuleRegistration, mark: Option[Int]): Seq[GradeBoundary] =
+    moduleRegistration.marksCode.maybeText.map { marksCode =>
+      gradesForMark(marksCode, mark, moduleRegistration.currentResitAttempt)
+    }.getOrElse(Seq.empty)
+
+  def markScheme(marksCode: String): Seq[GradeBoundary] = dao.getGradeBoundaries(marksCode)
+
+  def passMark(moduleRegistration: ModuleRegistration, resitAttempt: Option[Int]): Option[Int] =
+    dao.getPassMark(moduleRegistration.marksCode, if (resitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment, resitAttempt.getOrElse(1))
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo =
-    dao.departmentsManualMembership(department: Department, academicYear: AcademicYear)
+    dao.departmentsManualMembership(department, academicYear)
 
+  override def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule] =
+    dao.allScheduledExams(examProfileCodes)
+
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
+    dao.findScheduledExamBySlotSequence(examProfileCode, slotId, sequence, locationSequence)
+
+  override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] =
+    dao.findScheduledExams(component, academicYear)
+
+  override def save(schedule: AssessmentComponentExamSchedule): Unit = dao.save(schedule)
+
+  override def delete(schedule: AssessmentComponentExamSchedule): Unit = dao.delete(schedule)
+
+  override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    dao.allVariableAssessmentWeightingRules
+
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] = RequestLevelCache.cachedBy("AssessmentMembershipService.getVariableAssessmentWeightingRules", s"$moduleCodeWithCats-$assessmentGroup") {
+    dao.getVariableAssessmentWeightingRules(moduleCodeWithCats, assessmentGroup)
+  }
+
+  override def save(rule: VariableAssessmentWeightingRule): Unit = dao.save(rule)
+
+  override def delete(rule: VariableAssessmentWeightingRule): Unit = dao.delete(rule)
 }
 
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {

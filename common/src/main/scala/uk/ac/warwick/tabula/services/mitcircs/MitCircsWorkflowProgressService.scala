@@ -14,8 +14,6 @@ import scala.collection.immutable
 
 @Service
 class MitCircsWorkflowProgressService extends RequestLevelCaching[Department, Seq[MitCircsWorkflowStage]] {
-  final val MaxPower = 100
-
   // This is mostly a placeholder for if we allow any variation in the workflow in the future
   def getStagesFor(department: Department): Seq[MitCircsWorkflowStage] = cachedBy(department) {
     MitCircsWorkflowStage.values
@@ -25,44 +23,7 @@ class MitCircsWorkflowProgressService extends RequestLevelCaching[Department, Se
     val allStages = getStagesFor(department)
     val progresses = allStages.map(_.progress(department)(submission))
 
-    val workflowMap = WorkflowStages.toMap(progresses)
-
-    // Quick exit for if we're at the end
-    if (progresses.last.completed) {
-      WorkflowProgress(MaxPower, progresses.last.messageCode, progresses.last.health.cssClass, None, workflowMap)
-    } else {
-      val stagesWithPreconditionsMet = progresses.filter(progress => workflowMap(progress.stage.toString).preconditionsMet)
-
-      progresses.filter(_.started).lastOption match {
-        case Some(lastProgress) =>
-          val index = progresses.indexOf(lastProgress)
-
-          // If the current stage is complete, the next stage requires action
-          val nextProgress = if (lastProgress.completed) {
-            val nextProgressCandidate = progresses(index + 1)
-
-            if (stagesWithPreconditionsMet.contains(nextProgressCandidate)) {
-              nextProgressCandidate
-            } else {
-              // The next stage can't start yet because its preconditions are not met.
-              // Find the latest incomplete stage from earlier in the workflow whose preconditions are met.
-              val earlierReadyStages = progresses.reverse
-                .dropWhile(_ != nextProgressCandidate)
-                .filterNot(_.completed)
-                .filter(stagesWithPreconditionsMet.contains)
-
-              earlierReadyStages.headOption.getOrElse(lastProgress)
-            }
-          } else {
-            lastProgress
-          }
-
-          val percentage = ((index + 1) * MaxPower) / allStages.size
-          WorkflowProgress(percentage, lastProgress.messageCode, lastProgress.health.cssClass, Some(nextProgress.stage), workflowMap)
-        case None =>
-          WorkflowProgress(0, progresses.head.messageCode, progresses.head.health.cssClass, None, workflowMap)
-      }
-    }
+    WorkflowProgress(progresses, allStages)
   }
 }
 

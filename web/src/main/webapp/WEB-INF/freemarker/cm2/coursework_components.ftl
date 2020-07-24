@@ -286,7 +286,19 @@
       <#if info.submission??>
         <#local submission = info.submission />
         <#local submissionStatus>
-          <strong>Submitted:</strong> <@fmt.date date=submission.submittedDate showLocal=true />
+          <strong>
+              <#if !show_submission_progress>
+                  <#if submission.late>
+                    Submitted Late:
+                  <#elseif submission.authorisedLate>
+                    Submitted within extension:
+                  <#else>
+                    Submitted:
+                  </#if>
+              <#else>
+                  Submitted:
+              </#if>
+          </strong> <@fmt.date date=submission.submittedDate showLocal=true />
         </#local>
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
@@ -562,6 +574,9 @@
       <#if stageInfo.completed>
         <#local state = 'success' />
         <#local icon = 'fa-check-circle-o' />
+      <#elseif stageInfo.skipped>
+        <#local state = 'primary' />
+        <#local icon = 'fa-arrow-circle-o-right' />
       <#elseif stageInfo.started>
         <#local state = 'warning' />
         <#local icon = 'fa-dot-circle-o' />
@@ -1052,7 +1067,7 @@
     <#list student.stages?keys as stage_name>
       <@workflow_stage student.stages[stage_name]><#compress>
         <#if stage_name == 'Submission'>
-          <@submission_details submission true student />
+          <@submission_details submission true true student />
         <#elseif stage_name == 'CheckForPlagiarism'>
           <#if submission??>
             <@fmt.p submission.allAttachments?size "file" />
@@ -1360,7 +1375,7 @@
   </#if>
 </#macro>
 
-<#macro submission_details submission=[] showDisabilityDisclosure=false student=""><@compress single_line=true>
+<#macro submission_details submission=[] showDisabilityDisclosure=false showReasonableAdjustmentsDeclaration=false student=""><@compress single_line=true>
   <#if submission?has_content>
     <#if submission.submittedDate??>
       <span tabindex="0" class="date tabula-tooltip" data-title="<@lateness submission />">
@@ -1372,7 +1387,11 @@
       <@disability_disclosure student_disability=student.disability/>
     </#if>
 
-    <#if submission.allAttachments?size gt 0>
+      <#if showReasonableAdjustmentsDeclaration && student.reasonableAdjustmentsDeclared!false>
+        <@reasonable_adjustment_declaration/>
+      </#if>
+
+      <#if submission.allAttachments?size gt 0>
       &emsp;<@submission_attachments_link submission />
     </#if>
   </#if>
@@ -1390,8 +1409,13 @@
       <span tabindex="0" class="label label-info use-tooltip" data-html="true"
             title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
     </#if>
+
     <#if features.disabilityOnSubmission && student.disability??>
       <@disability_disclosure student_disability=student.disability/>
+    </#if>
+
+    <#if student.reasonableAdjustmentsDeclared!false>
+        <@reasonable_adjustment_declaration/>
     </#if>
   <#else>
     <span class="label label-info">Unsubmitted</span>
@@ -1423,6 +1447,10 @@
   >
     <span class="label label-info">Disability disclosed</span>
   </a>
+</#macro>
+
+<#macro reasonable_adjustment_declaration>
+  <span class="label label-info">Reasonable adjustments declared</span>
 </#macro>
 
 <#macro originalityReport attachment>

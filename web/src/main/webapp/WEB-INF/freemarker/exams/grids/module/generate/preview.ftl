@@ -88,6 +88,10 @@
             </thead>
             <tbody>
             <tr>
+              <td><span class="exam-grid-unconfirmed">#</span></td>
+              <td>Unconfirmed marks (subject to change)</td>
+            </tr>
+            <tr>
               <td><span class="exam-grid-fail">#</span></td>
               <td>Failed module or component</td>
             </tr>
@@ -146,7 +150,11 @@
                     <td>${entity.universityId} </td>
                     <td> ${scd.scjCode}</td>
                     <td><span tabindex="0" class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
-                    <td><span tabindex="0" class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
+                    <td>
+                      <#if scd.currentRoute??>
+                        <span tabindex="0" class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span>
+                      </#if>
+                    </td>
                     <td>${mr.academicYear.startYear?c}</td>
                     <td>${mr.cats}</td>
                     <#list componentInfo as component>
@@ -154,7 +162,8 @@
                       <#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
                         <#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
                         <#assign componentResitDetails = componentDetails.resitInfo />
-                        <td>
+                        <#assign unconfirmedClass><#if componentDetails.markState?? && componentDetails.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+                        <td class="${unconfirmedClass}">
                           <#if componentResitDetails.resitMark??>
                             <#assign resitmark_class>
                               <#compress>
@@ -175,11 +184,18 @@
                               </#compress>
                             </#assign>
                             <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
+                          <#elseif ((componentResitDetails.resitGrade)!((componentDetails.grade)!'')) == 'FM'>
+                            <#assign componentmark_class>
+                              <#compress>
+                                <#if componentDetails.actualMark>exam-grid-actual-mark</#if>
+                              </#compress>
+                            </#assign>
+                            <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>-</span>
                           <#else>
                             <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
                           </#if>
                         </td>
-                        <td>
+                        <td class="${unconfirmedClass}">
                           <#if componentResitDetails.resitGrade??>
                             <#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
                             <#if componentDetails.grade??>
@@ -199,16 +215,21 @@
                         <td></td>
                       </#if>
                     </#list>
-                    <td>
+                    <#assign unconfirmedClass><#if mr.markState?? && mr.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+                    <td class="${unconfirmedClass}">
                       <#if mr.agreedMark??>
                         <span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
                       <#elseif mr.actualMark??>
                         <span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
-                      <#else>
+                      <#elseif (mr.agreedGrade!'') == 'FM'>
+                        <span>-</span>
+                      <#elseif (mr.actualGrade!'') == 'FM'>
+                        <span class="exam-grid-actual-mark">-</span>
+                      <#elseif !mr.passFail>
                         <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
                       </#if>
                     </td>
-                    <td>
+                    <td class="${unconfirmedClass}">
                       <#if mr.agreedGrade??>
                         <span>${mr.agreedGrade}</span>
                       <#elseif mr.actualGrade??>
@@ -321,21 +342,17 @@
         function reflowScroll() {
           setTimeout(function () {
             $scrollWrapper
-            // Update the width of the scroll track to match the container
+              // Update the width of the scroll track to match the container
               .width($scrollWrapper.parent().width())
               // Update the scroll bar so it reflects the width of the grid
               .children().width($grid.width()).end()
-            // Reset the scroll bar to the initial position
+              // Reset the scroll bar to the initial position
               .scrollLeft(0);
           }, 0);
         }
 
         $(window).on('id7:reflow', reflowScroll);
         reflowScroll();
-
-        // we want to hide the native scroll bar on non-mac platform
-        // after we moved the the original scroll bar to a different place.
-        $('.table-responsive').css('overflow-x', 'hidden');
       }
 
       setTimeout(function () {

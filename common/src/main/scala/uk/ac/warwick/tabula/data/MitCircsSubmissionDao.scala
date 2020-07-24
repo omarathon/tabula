@@ -66,8 +66,9 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       .addOrder(Order.desc("_lastModified"))
       .seq
 
-  override def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission] = {
-    session.newCriteria[MitigatingCircumstancesSubmission]
+  override def submissionsWithOutcomes(students: Seq[StudentMember]): Seq[MitigatingCircumstancesSubmission] =
+    if (students.isEmpty) Seq.empty
+    else session.newCriteria[MitigatingCircumstancesSubmission]
       .add(safeIn("student", students))
       .add(or(
         is("_state", ApprovedByChair),
@@ -75,7 +76,6 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       ))
       .add(isNotNull("outcomeGrading"))
       .seq
-  }
 
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =
@@ -144,6 +144,10 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     // MCOs can never see drafts
     c.add(isNot("_state", MitigatingCircumstancesSubmissionState.Draft))
 
+    filter.isCoronavirus.foreach { b =>
+      c.add(is("covid19Submission", b))
+    }
+
     if(filter.isUnread) {
       c.createAlias("_messages",  "m", joinType = JoinType.LEFT_OUTER_JOIN) // join messages to avoid lazy loading for each submission individually
       c.distinct.seq.sortBy(_.lastModified).reverse.filter(_.isUnreadByOfficer)
@@ -191,5 +195,6 @@ case class MitigatingCircumstancesSubmissionFilter(
   approvedStartDate: Option[LocalDate] = None,
   approvedEndDate: Option[LocalDate] = None,
   state: Set[MitigatingCircumstancesSubmissionState] = Set.empty,
-  isUnread: Boolean = false
+  isUnread: Boolean = false,
+  isCoronavirus: Option[Boolean] = None
 )

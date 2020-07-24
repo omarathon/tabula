@@ -49,4 +49,11 @@ object SysadminBreadcrumbs {
 
   }
 
+  object MarksManagement {
+    case object Home extends BreadCrumb {
+      val title = "Marks Management"
+      val url = Some(Routes.sysadmin.MarksManagement.home)
+    }
+  }
+
 }

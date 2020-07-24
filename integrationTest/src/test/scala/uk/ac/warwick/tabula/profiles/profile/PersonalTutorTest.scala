@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.profiles.profile
 import org.joda.time.DateTime
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
+import uk.ac.warwick.tabula.{BrowserTest, DateFormats}
 
 import scala.jdk.CollectionConverters._
 
@@ -74,6 +74,9 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
     textField("title").value = "Created meeting"
 
     val datetime = DateTime.now.minusDays(1).withHourOfDay(11)
+
+    // set the datepicker to the correct month prior to using the picker to pick the day
+    textField("meetingDateStr").value = DateFormats.DatePickerFormatter.print(datetime.withDayOfMonth(1).toLocalDate)
 
     eventually {
       val meetingDateStr = textField("meetingDateStr")

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
 import com.google.common.annotations.VisibleForTesting
+import enumeratum.{Enum, EnumEntry}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -9,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
-import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.system.{EnumTwoWayConverter, TwoWayConverter}
 
 object ExamGridColumnOption {
   type Identifier = String
@@ -45,9 +46,13 @@ object ExamGridColumnOption {
     val PassedCATS = 31
     val PreviousYears = 40
     val CurrentYear = 41
-    val OvercattedYearMark = 42
-    val BoardAgreedMark = 43
-    val FinalOverallMark = 44
+    val BenchmarkWeightedAssessmentMark = 42
+    val OvercattedYearMark = 43
+    val BoardAgreedMark = 44
+    val GraduationBenchmark = 45
+    val PercentageAssessmentsTaken = 46
+    val CATSConsidered = 47
+    val FinalOverallMark = 48
     val SuggestedResult = 50
     val SuggestedFinalYearGrade = 51
     val MitigatingCircumstances = 60
@@ -131,7 +136,7 @@ class StringToExamGridDisplayModuleNameColumnValue extends TwoWayConverter[Strin
   override def convertLeft(source: ExamGridDisplayModuleNameColumnValue): String = Option(source).map(_.value).orNull
 }
 
-case class ExamGridColumnState(
+case class ExamGridColumnState (
   entities: Seq[ExamGridEntity],
   overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
   coreRequiredModuleLookup: CoreRequiredModuleLookup,
@@ -145,12 +150,15 @@ case class ExamGridColumnState(
   showZeroWeightedComponents: Boolean,
   showComponentSequence: Boolean,
   showModuleNames: ExamGridDisplayModuleNameColumnValue,
-  calculateYearMarks: Boolean,
-  isLevelGrid: Boolean
-)
+  yearMarksToUse: ExamGridYearMarksToUse,
+  isLevelGrid: Boolean,
+  applyBenchmark: Boolean,
+) {
+  override lazy val hashCode: Int = super.hashCode()
+}
 
 case object EmptyExamGridColumnState {
-  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks = false, isLevelGrid = false)
+  def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = ExamGridDisplayModuleNameColumnValue.LongNames, yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, isLevelGrid = false, applyBenchmark = false)
 }
 
 @Component
@@ -225,3 +233,13 @@ trait HasExamGridColumnSecondaryValue {
   val secondaryValue: String
 
 }
+
+sealed abstract class ExamGridYearMarksToUse(override val entryName: String) extends EnumEntry
+object ExamGridYearMarksToUse extends Enum[ExamGridYearMarksToUse] {
+  case object UploadedYearMarksOnly extends ExamGridYearMarksToUse("sits")
+  case object UploadedYearMarksIfAvailable extends ExamGridYearMarksToUse("sitsIfAvailable")
+  case object CalculateYearMarks extends ExamGridYearMarksToUse("calculated")
+
+  override def values: IndexedSeq[ExamGridYearMarksToUse] = findValues
+}
+class ExamGridYearMarksToUseConverter extends EnumTwoWayConverter(ExamGridYearMarksToUse)

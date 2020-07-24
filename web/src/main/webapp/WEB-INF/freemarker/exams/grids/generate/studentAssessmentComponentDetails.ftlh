@@ -1,4 +1,5 @@
-<#import "/WEB-INF/freemarker/mitcircs/mitcircs_components.ftlh" as components />
+<#import "/WEB-INF/freemarker/mitcircs/mitcircs_components.ftlh" as mitcircs_components />
+<#import "/WEB-INF/freemarker/marks/marks_components.ftlh" as marks_components />
 
 <div class="exam-grid-preview">
   <div class="deptheader">
@@ -53,10 +54,10 @@
       <tr>
         <th>Normal CAT load:</th>
         <td>
-          <#if normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)?has_content>
-            ${normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)}
+          <#if normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)?has_content>
+            ${normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)}
           <#else>
-            <#assign defaultNormalLoad>${normalLoadLookup.apply(studentCourseDetails.currentRoute)}</#assign>
+            <#assign defaultNormalLoad>${normalLoadLookup.apply(studentCourseDetails.currentRoute, command.studentCourseYearDetails.academicYear)}</#assign>
             ${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
           </#if>
         </td>
@@ -71,6 +72,10 @@
       </tr>
       </thead>
       <tbody>
+      <tr>
+        <td><span class="exam-grid-unconfirmed">#</span></td>
+        <td>Unconfirmed marks (subject to change)</td>
+      </tr>
       <tr>
         <td><span class="exam-grid-fail">#</span></td>
         <td>Failed module or component</td>
@@ -101,14 +106,15 @@
       <tr class="assessment_componentdetails_header">
         <th>Module</th>
         <th>Module Credit</th>
+        <th>Type</th>
         <th>Seq</th>
         <th>Assessment</th>
-
-        <th>Type</th>
+        <th>Weighting</th>
         <th>Component Mark</th>
         <th>Component Grade</th>
         <th class="header_col">Module Mark</th>
         <th class="header_col">Module Grade</th>
+        <th class="header_col">Module Result</th>
       </tr>
       </thead>
       <tbody>
@@ -120,6 +126,7 @@
             <div>${mr.module.name}</div>
           </td>
           <td class="assessment_details_col">${mr.cats}</td>
+          <td class="assessment_details_col"><#if mr.selectionStatus??>${(mr.selectionStatus.description)!}<#else>-</#if></td>
           <td>
             <table class="component_info">
               <tbody>
@@ -142,29 +149,52 @@
               </tbody>
             </table>
           </td>
-          <td class="assessment_details_col"><#if mr.selectionStatus??>${(mr.selectionStatus.description)!}<#else>-</#if></td>
           <td>
             <table class="component_info">
               <tbody>
               <#list info.components as component>
                 <tr>
-                  <td>
+                  <td>${(component.weighting!0)?string["0.#"]}%</td>
+                </tr>
+              </#list>
+              </tbody>
+            </table>
+          </td>
+          <td>
+            <table class="component_info">
+              <tbody>
+              <#list info.components as component>
+                <#assign unconfirmedClass><#if component.markState?? && component.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+                <tr>
+                  <td class="${unconfirmedClass}">
                     <#if component.member.firstDefinedMark??>
-                      <#assign passMark =mapGet(passMarkMap, component.upstreamGroup.assessmentComponent.module) />
+                      <#assign passMark = mapGet(passMarkMap, component.upstreamGroup.assessmentComponent.module) />
                       <#assign class><#compress>
                         <#if component.member.firstDefinedMark?number < passMark>exam-grid-fail </#if>
                         <#if !component.member.isAgreedMark()>exam-grid-actual-mark </#if>
-                        <#if component.member.isResitMark()>exam-grid-resit </#if>
+                        <#if component.member.reassessment>exam-grid-resit </#if>
                       </#compress></#assign>
                       <span class="${class}"><#compress>
                             ${component.member.firstDefinedMark}
-                            <#if component.member.isResitMark() && component.member.firstOriginalMark??>
+                            <#if component.member.reassessment && component.member.firstOriginalMark??>
+                          (${component.member.firstOriginalMark})
+                        </#if>
+                          </#compress></span>
+                    <#elseif (component.member.firstDefinedGrade!"") == 'FM'>
+                      <#assign class><#compress>
+                        <#if !component.member.isAgreedMark()>exam-grid-actual-mark </#if>
+                        <#if component.member.reassessment>exam-grid-resit </#if>
+                      </#compress></#assign>
+                      <span class="${class}"><#compress>
+                        -
+                        <#if component.member.reassessment && component.member.firstOriginalMark??>
                           (${component.member.firstOriginalMark})
                         </#if>
                           </#compress></span>
                     <#else>
                       <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Assessment component">X</span>
                     </#if>
+                    <@marks_components.componentMarkHistory component.markRecord component.upstreamGroup.assessmentComponent member />
                   </td>
                 </tr>
               </#list>
@@ -175,10 +205,11 @@
             <table class="component_info">
               <tbody>
               <#list info.components as component>
+                <#assign unconfirmedClass><#if component.markState?? && component.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
                 <tr>
-                  <td>
+                  <td class="${unconfirmedClass}">
                     <#if component.member.firstDefinedGrade??>
-                      <span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${component.member.firstDefinedGrade}</span>
+                      <span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if> "> ${component.member.firstDefinedGrade}</span>
                     <#else>
                       <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Assessment component">X</span>
                     </#if>
@@ -188,7 +219,8 @@
               </tbody>
             </table>
           </td>
-          <td class="assessment_details_col assessment_details_col1">
+          <#assign unconfirmedClass><#if info.markState?? && info.markState.entryName == "UnconfirmedActual">exam-grid-unconfirmed</#if></#assign>
+          <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
             <#assign passMark = mapGet(passMarkMap, mr.module) />
             <#if mr.agreedMark??>
               <#if mr.agreedMark?number lt passMark>
@@ -198,21 +230,47 @@
               </#if>
             <#elseif mr.actualMark??>
               <#if mr.actualMark?number < passMark>
-                <span class=exam-grid-fail">${mr.actualMark}</span>
+                <span class="exam-grid-fail">${mr.actualMark}</span>
               <#else>
-                <span class=exam-grid-actual-mark">${mr.actualMark}</span>
+                <span class="exam-grid-actual-mark">${mr.actualMark}</span>
+              </#if>
+            <#elseif ((mr.agreedGrade)!((mr.actualGrade)!'FM')) == 'FM'>
+              <#if mr.agreedGrade??>
+                -
+              <#else>
+                <span class="exam-grid-actual-mark">-</span>
               </#if>
             <#else>
               <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>
             </#if>
+            <@marks_components.moduleMarkHistory info.markRecord mr.sitsModuleCode member />
           </td>
-          <td class="assessment_details_col assessment_details_col1">
+          <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
             <#if mr.agreedGrade??>
-              ${mr.agreedGrade}
+              <#if mr.agreedGrade == "F">
+                <span class="exam-grid-fail">${mr.agreedGrade}</span>
+              <#else>
+                ${mr.agreedGrade}
+              </#if>
             <#elseif mr.actualGrade??>
-              ${mr.actualGrade}
+              <#if mr.actualGrade == "F">
+                <span class="exam-grid-fail">${mr.actualGrade}</span>
+              <#else>
+                <span class="exam-grid-actual-mark">${mr.actualGrade}</span>
+              </#if>
             <#else>
               <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Module registration">X</span>
+            </#if>
+          </td>
+          <td class="assessment_details_col assessment_details_col1 ${unconfirmedClass}">
+            <#if mr.moduleResult??>
+              <#if mr.moduleResult.dbValue == "F">
+                <span class="exam-grid-fail">${mr.moduleResult.description}</span>
+              <#else>
+                ${mr.moduleResult.description}
+              </#if>
+            <#else>
+              <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No result set for Module registration">X</span>
             </#if>
           </td>
         </tr>
@@ -228,35 +286,35 @@
           <div class="well">
             <h3>MIT-${submission.key}<#if submission.acute> &mdash; Acute mitigation already applied</#if></h3>
 
-            <@components.detail label="Grading">
-                ${submission.gradingCode} &mdash; ${submission.outcomeGrading.description} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
-            </@components.detail>
+            <@mitcircs_components.detail label="Grading">
+                ${submission.gradingCode} <@fmt.help_popover id="grading-${submission.key}" content="${submission.outcomeGrading.helpText}" />
+            </@mitcircs_components.detail>
 
-            <@components.detail label="Date approved">
+            <@mitcircs_components.detail label="Date approved">
               <#if submission.acute><@fmt.date date=submission.outcomesLastRecordedOn /><#else><@fmt.date date=submission.outcomesApprovedOn /></#if>
-            </@components.detail>
+            </@mitcircs_components.detail>
 
             <#if submission.outcomeGrading.entryName != "Rejected">
               <#if submission.acute>
-                <@components.detail label="Outcome" condensed=true>
+                <@mitcircs_components.detail label="Outcome" condensed=true>
                   <#if submission.acuteOutcome??>
                     ${submission.acuteOutcome.description}
                   <#else>
                     <span class="very-subtle">None</span>
                   </#if>
-                </@components.detail>
+                </@mitcircs_components.detail>
 
                 <#if submission.affectedAssessments?has_content>
-                  <@components.detail "Affected assessments">
+                  <@mitcircs_components.detail "Affected assessments">
                   <ul class="list-unstyled">
                     <#list submission.assessmentsWithAcuteOutcome as assessment>
-                      <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
+                      <li><@mitcircs_components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                     </#list>
                   </ul>
-                  </@components.detail>
+                  </@mitcircs_components.detail>
                 </#if>
               <#else>
-                <@components.detail "Recommendations to board">
+                <@mitcircs_components.detail "Recommendations to board">
                   <ul class="list-unstyled">
                     <#list submission.boardRecommendations as recommendation><#if !(recommendation.assessmentSpecific!false)>
                       <li>
@@ -268,7 +326,7 @@
                     <#list submission.affectedAssessments as assessment>
                       <#if assessment.boardRecommendations?has_content>
                         <li>
-                          <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
+                          <@mitcircs_components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                           <ul>
                             <#list assessment.boardRecommendations as recommendation>
                               <li>
@@ -281,11 +339,11 @@
                       </#if>
                     </#list>
                   </ul>
-                </@components.detail>
+                </@mitcircs_components.detail>
 
-                <@components.detail "Comments for board">
+                <@mitcircs_components.detail "Comments for board">
                   <#noautoesc>${submission.formattedBoardRecommendationComments}</#noautoesc>
-                </@components.detail>
+                </@mitcircs_components.detail>
               </#if>
             </#if>
 

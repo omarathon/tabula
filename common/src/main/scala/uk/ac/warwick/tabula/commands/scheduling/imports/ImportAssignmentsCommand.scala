@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -38,6 +37,19 @@ object ImportAssignmentsCommand {
     override lazy val eventName = "ImportAssignmentsAllYears"
   }
 
+  def applyIndividualYear(year: AcademicYear): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
+    with ImportAssignmentsIndividualYearCommand
+    with RemovesMissingAssessmentComponentsCommand
+    with RemovesMissingUpstreamAssessmentGroupsCommand
+    with ImportAssignmentsAllMembers
+    with ImportAssignmentsDescription
+    with AutowiringAssignmentImporterComponent
+    with Daoisms {
+    override def yearsToImport: Seq[AcademicYear] = Seq(year)
+
+    override lazy val eventName = "ImportAssignmentsIndividualYear"
+  }
+
   def applyForMembers(applyMembers: Seq[MembershipMember], applyYears: Seq[AcademicYear]): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
     with ImportAssignmentsCommand
     with ImportAssignmentsSpecificMembers
@@ -52,14 +64,14 @@ object ImportAssignmentsCommand {
     assignmentsFound: Int,
     assignmentsChanged: Int,
     groupsFound: Int,
-    groupsChanged: Int)
-
+    groupsChanged: Int
+  )
 }
 
 trait ImportAssignmentsMembersToImport {
   def yearsToImport: Seq[AcademicYear]
 
-  def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit
+  def membersToImport(assessmentType: UpstreamAssessmentGroupMemberAssessmentType)(callback: UpstreamAssessmentRegistration => Unit): Unit
 
   def importEverything: Boolean
 }
@@ -67,8 +79,8 @@ trait ImportAssignmentsMembersToImport {
 trait ImportAssignmentsAllMembers extends ImportAssignmentsMembersToImport {
   self: AssignmentImporterComponent =>
 
-  override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-    assignmentImporter.allMembers(yearsToImport)(callback)
+  override def membersToImport(assessmentType: UpstreamAssessmentGroupMemberAssessmentType)(callback: UpstreamAssessmentRegistration => Unit): Unit = {
+    assignmentImporter.allMembers(assessmentType, yearsToImport)(callback)
   }
 
   val importEverything: Boolean = true
@@ -79,8 +91,8 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
 
   val members: Seq[MembershipMember]
 
-  override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-    assignmentImporter.specificMembers(members, yearsToImport)(callback)
+  override def membersToImport(assessmentType: UpstreamAssessmentGroupMemberAssessmentType)(callback: UpstreamAssessmentRegistration => Unit): Unit = {
+    assignmentImporter.specificMembers(members, assessmentType, yearsToImport)(callback)
   }
 
   val importEverything: Boolean = false
@@ -110,6 +122,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         doGroupMembers()
         logger.debug("Imported assessment groups. Importing grade boundaries...")
         doGradeBoundaries()
+        logger.debug("Imported grade boundaries. Importing variable assessment weighting rules...")
+        doVariableAssessmentWeightingRules()
+        logger.debug("Imported variable assessment weighting rules. Importing exam schedule...")
+        doExamSchedule()
 
         logger.debug("Removing blank feedback for students who have deregistered...")
         removeBlankFeedbackForDeregisteredStudents()
@@ -155,6 +171,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       existingAssessmentComponents.foreach { existing =>
         transactional() {
           if (!assessmentComponents.exists(upstream => upstream.sameKey(existing))) {
+            session.refresh(existing)
             removeAssessmentComponent(existing)
           }
         }
@@ -187,49 +204,75 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
   }
 
   /**
-    * This calls the importer method that iterates over ALL module registrations.
-    * The results are ordered such that it can hold a list of items until it
-    * detects one that belongs to a different group, at which point it saves
-    * what it's got and starts a new list. This way we don't have to load many
-    * things into memory at once.
-    */
+   * This calls the importer method that iterates over ALL module registrations.
+   * The results are ordered such that it can hold a list of items until it
+   * detects one that belongs to a different group, at which point it saves
+   * what it's got and starts a new list. This way we don't have to load many
+   * things into memory at once.
+   */
   def doGroupMembers(): Unit = {
     benchmark("Import all group members") {
-      var registrations = List[UpstreamModuleRegistration]()
-      var notEmptyGroupIds = Set[String]()
+      def doGroupMembersForAssessmentType(assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Set[UpstreamAssessmentGroup] = {
+        var notEmptyGroups = Set[UpstreamAssessmentGroup]()
+        var registrations = List[UpstreamAssessmentRegistration]()
+        var count = 0
+        benchmark(s"Process $assessmentType group members") {
+          membersToImport(assessmentType) { r =>
+            if (registrations.nonEmpty && r.differentGroup(registrations.head, assessmentType)) {
+              // This element r is for a new group, so save this group and start afresh
 
-      var count = 0
-      benchmark("Process group members") {
-        membersToImport { r =>
-          if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
-            // This element r is for a new group, so save this group and start afresh
-
-            transactional() {
-              save(registrations)
-                .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+              transactional() {
+                notEmptyGroups = notEmptyGroups ++ save(registrations, assessmentType)
+              }
+              registrations = Nil
             }
-            registrations = Nil
-          }
-          registrations = registrations :+ r
+            registrations = registrations :+ r
 
-          count += 1
-          if (count % 1000 == 0) {
-            logger.info("Processed " + count + " group members")
+            count += 1
+            if (count % 1000 == 0) {
+              logger.info(s"Processed $count $assessmentType group members")
+            }
           }
         }
-      }
 
-      // TAB-1265 Don't forget the very last bunch.
-      if (registrations.nonEmpty) {
-        benchmark("Save registrations") {
-          transactional() {
-            save(registrations)
-              .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+        // TAB-1265 Don't forget the very last bunch.
+        if (registrations.nonEmpty) {
+          benchmark(s"Save final $assessmentType registrations") {
+            transactional() {
+              notEmptyGroups = notEmptyGroups ++ save(registrations, assessmentType)
+            }
           }
         }
+
+        logger.info(s"Imported $count $assessmentType group members")
+
+        notEmptyGroups
       }
+
+      val notEmptyGroupIdsByAssessmentType: Map[UpstreamAssessmentGroupMemberAssessmentType, Set[UpstreamAssessmentGroup]] =
+        UpstreamAssessmentGroupMemberAssessmentType.values.map { assessmentType =>
+          assessmentType -> doGroupMembersForAssessmentType(assessmentType).filter(uag => yearsToImport.contains(uag.academicYear))
+        }.toMap
 
       if (importEverything) {
+        // We need to clear out groups we didn't see for each type; e.g. where a resit used to be against a sequence but not anymore
+        benchmark("Clearing out unseen groups per assessment type") {
+          UpstreamAssessmentGroupMemberAssessmentType.values.foreach { assessmentType =>
+            val seenIds = notEmptyGroupIdsByAssessmentType(assessmentType).map(_.id)
+
+            notEmptyGroupIdsByAssessmentType.view.filterKeys(_ != assessmentType)
+              .values.flatten
+              .filterNot(uag => seenIds.contains(uag.id))
+              .foreach { uag =>
+                transactional() {
+                  assessmentMembershipService.replaceMembers(uag, Seq.empty, assessmentType)
+                }
+              }
+          }
+        }
+
+        val notEmptyGroupIds: Set[String] = notEmptyGroupIdsByAssessmentType.values.flatten.toSet.map((g: UpstreamAssessmentGroup) => g.id)
+
         // empty unseen groups - this is done in transactional batches
 
         val groupsToEmpty = transactional(readOnly = true) {
@@ -248,31 +291,95 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
     }
   }
 
+  def doExamSchedule(): Unit = {
+    benchmark("Import exam schedule") {
+      transactional() { // Do it all in one big tx
+        val existing = assessmentMembershipService.allScheduledExams(assignmentImporter.publishedExamProfiles(yearsToImport))
+
+        val seenIds =
+          assignmentImporter.getAllScheduledExams(yearsToImport)
+            .filter(ac => Module.stripCats(ac.moduleCode).nonEmpty) // Ignore any duff data
+            .map { schedule =>
+              val updated =
+                assessmentMembershipService.findScheduledExamBySlotSequence(schedule.examProfileCode, schedule.slotId, schedule.sequence, schedule.locationSequence)
+                  .map(_.copyFrom(schedule))
+                  .getOrElse(schedule)
+
+              // Make sure any transient instances are saved before we try and add students to them
+              assessmentMembershipService.save(updated)
+
+              val existingStudents = updated.students.asScala.toSeq
+              val students =
+                assignmentImporter.getScheduledExamStudents(updated)
+                  .map { student =>
+                    if (!student.universityId.hasText && student.sprCode.hasText) {
+                      // Just guess, duff data
+                      student.universityId = student.sprCode.split('/').head
+                    }
+
+                    student
+                  }
+                  .filter(_.universityId.nonEmpty)
+
+              existingStudents.filterNot(s => students.exists(_.universityId == s.universityId))
+                .foreach(updated.students.remove)
+
+              students.foreach { s =>
+                existingStudents.find(e => s.universityId == e.universityId) match {
+                  case Some(existing) if existing.sameDataAs(s) => // do nothing
+                  case Some(existing) => existing.copyFrom(s)
+                  case _ =>
+                    s.schedule = updated
+                    updated.students.add(s)
+                }
+              }
+
+              assessmentMembershipService.save(updated)
+
+              updated.id
+            }
+
+        // Delete any ids that we haven't seen
+        existing.filterNot(e => seenIds.contains(e.id)).foreach(assessmentMembershipService.delete)
+      }
+    }
+  }
+
   /**
-    * This sequence of ModuleRegistrations represents the members of an assessment
-    * group, so save them (and reconcile it with any existing members we have in the
-    * database).
-    * The students in a group does NOT vary by sequence, so the membership should be set on ALL the groups.
-    * Then set the properties of members of each group by sequence.
-    */
-  def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
+   * This sequence of ModuleRegistrations represents the members of an assessment
+   * group, so save them (and reconcile it with any existing members we have in the
+   * database).
+   * The students in a group does NOT vary by sequence, so the membership should be set on ALL the groups.
+   * Then set the properties of members of each group by sequence.
+   */
+  def save(registrations: Seq[UpstreamAssessmentRegistration], assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Seq[UpstreamAssessmentGroup] = {
     registrations.headOption.map { head =>
       var hasChanged: Boolean = false
 
       // Get all the Assessment Components we have in the DB, even if marked as not in use, as we might have previous years groups to populate
-      val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode, inUseOnly = false)
+      val allAssessmentComponentsForAssessmentGroup = assessmentMembershipService.getAssessmentComponents(head.moduleCode, inUseOnly = false)
         .filter(_.assessmentGroup == head.assessmentGroup)
+
+      val assessmentComponents = assessmentType match {
+        case UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment =>
+          allAssessmentComponentsForAssessmentGroup
+
+        case UpstreamAssessmentGroupMemberAssessmentType.Reassessment =>
+          // Reassessment group membership varies by sequence so we should receive smaller batches with only registrations for this sequence
+          allAssessmentComponentsForAssessmentGroup.filter(_.sequence == head.sequence)
+      }
+
       val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
         .map { assessmentGroup =>
-          assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup)
+          assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup, eagerLoad = true)
             .map { group =>
               if (importEverything) {
-                val existingUniversityIds: Set[String] = group.members.asScala.map(_.universityId).toSet
-                val newUniversityIds: Set[String] = registrations.map(_.universityId).toSet
+                val existingUniversityIdAndResitSequences: Set[(String, Option[String])] = group.members.asScala.map(m => (m.universityId, m.resitSequence)).toSet
+                val newUniversityIdAndResitSequences: Set[(String, Option[String])] = registrations.map(r => (r.universityId, r.resitSequence.maybeText)).toSet
 
-                if (existingUniversityIds != newUniversityIds) {
+                if (existingUniversityIdAndResitSequences != newUniversityIdAndResitSequences) {
                   hasChanged = true
-                  assessmentMembershipService.replaceMembers(group, registrations)
+                  assessmentMembershipService.replaceMembers(group, registrations, assessmentType)
                 } else group
               } else group
             }
@@ -285,34 +392,29 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
         // Find the registrations for this exact group (including sequence)
         val theseRegistrations = hasSequence.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
         if (theseRegistrations.nonEmpty) {
-          val registrationsByStudent = theseRegistrations.groupBy(_.sprCode)
+          val registrationsByStudent = theseRegistrations.groupBy(r => (r.sprCode, r.resitSequence))
+
           // Where there are multiple values for each of the properties (seat number, mark, and grade) we need to flatten them to a single value.
           // Where there is ambiguity, set the value to None
-          val propertiesMap: Map[String, UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case (sprCode, studentRegistrations) =>
-            sprCode -> {
+          val propertiesMap: Map[(String, String), UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case ((sprCode, resitSequence), studentRegistrations) =>
+            (sprCode, resitSequence) -> {
               if (studentRegistrations.size == 1) {
                 new UpstreamAssessmentGroupMemberProperties {
                   position = Try(studentRegistrations.head.seatNumber.toInt).toOption
-                  actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
+                  actualMark = Try(studentRegistrations.head.actualMark.toInt).toOption
                   actualGrade = studentRegistrations.head.actualGrade.maybeText
-                  agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
+                  agreedMark = Try(studentRegistrations.head.agreedMark.toInt).toOption
                   agreedGrade = studentRegistrations.head.agreedGrade.maybeText
-                  resitActualMark = Try(BigDecimal(studentRegistrations.head.resitActualMark)).toOption
-                  resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
-                  resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
-                  resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
-                  resitExpected = Option(studentRegistrations.head.resitExpected)
+                  currentResitAttempt = Try(studentRegistrations.head.currentResitAttempt.toInt).toOption
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
-
-                def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
 
                 def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
 
                 def resolveDuplicates[A](props: Seq[A], description: String): Option[A] = {
                   if (props.distinct.size > 1) {
-                    logger.warn("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
+                    logger.debug("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
                       description,
                       props.mkString(", "),
                       sprCode,
@@ -327,33 +429,25 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
                 new UpstreamAssessmentGroupMemberProperties {
                   position = resolveDuplicates(validInts(studentRegistrations.map(_.seatNumber)), "seat number")
-                  actualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.actualMark)), "actual mark")
+                  actualMark = resolveDuplicates(validInts(studentRegistrations.map(_.actualMark)), "actual mark")
                   actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
-                  agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
+                  agreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.agreedMark)), "agreed mark")
                   agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
-                  resitActualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
-                  resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
-                  resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
-                  resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
-                  resitExpected = resolveDuplicates(studentRegistrations.map(_.resitExpected), "resit expected")
+                  currentResitAttempt = resolveDuplicates(validInts(studentRegistrations.map(_.currentResitAttempt)), "current attempt number")
                 }
               }
             }
           }
 
-          propertiesMap.foreach { case (sprCode, properties) =>
-            group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
+          propertiesMap.foreach { case ((sprCode, resitSequence), properties) =>
+            group.members.asScala.find(m => m.universityId == SprCode.getUniversityId(sprCode) && m.resitSequence.orNull == resitSequence).foreach { member =>
               val memberHasChanged = (
                 member.position != properties.position ||
                 member.actualMark != properties.actualMark ||
                 member.actualGrade != properties.actualGrade ||
                 member.agreedMark != properties.agreedMark ||
                 member.agreedGrade != properties.agreedGrade ||
-                member.resitActualMark != properties.resitActualMark ||
-                member.resitActualGrade != properties.resitActualGrade ||
-                member.resitAgreedMark != properties.resitAgreedMark ||
-                member.resitAgreedGrade != properties.resitAgreedGrade ||
-                member.resitExpected != properties.resitExpected
+                member.currentResitAttempt != properties.currentResitAttempt
               )
 
               if (memberHasChanged) {
@@ -364,11 +458,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.actualGrade = properties.actualGrade
                 member.agreedMark = properties.agreedMark
                 member.agreedGrade = properties.agreedGrade
-                member.resitActualMark = properties.resitActualMark
-                member.resitActualGrade = properties.resitActualGrade
-                member.resitAgreedMark = properties.resitAgreedMark
-                member.resitAgreedGrade = properties.resitAgreedGrade
-                member.resitExpected = properties.resitExpected
+                member.currentResitAttempt = properties.currentResitAttempt
                 assessmentMembershipService.save(member)
               }
             }
@@ -396,12 +486,107 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
   def doGradeBoundaries(): Unit = {
     transactional() {
-      val boundaries = assignmentImporter.getAllGradeBoundaries
-      boundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
-      for (gradeBoundary <- logSize(boundaries)) {
+      val sitsBoundaries = assignmentImporter.getAllGradeBoundaries
+
+      val marksAndProcessAndAttempt = sitsBoundaries.map(gb => (gb.marksCode, gb.process, gb.attempt)).distinct
+
+      val fmBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.ForceMajeureMissingComponentGrade && gb.process == process && gb.attempt == attempt)) None
+        else Some(GradeBoundary(
+          marksCode = marksCode,
+          process = process,
+          attempt = attempt,
+          rank = 1000,
+          grade = GradeBoundary.ForceMajeureMissingComponentGrade,
+          minimumMark = None,
+          maximumMark = None,
+          signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+          result = None, // No suggested result for FM, all results are allowed
+          agreedStatus = GradeBoundaryAgreedStatus.Agreed, // This outcome doesn't change
+          incrementsAttempt = false,
+        ))
+      }
+
+      val wBoundary = marksAndProcessAndAttempt.flatMap { case (marksCode, process, attempt) =>
+        if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.grade == GradeBoundary.WithdrawnGrade && gb.process == process)) {
+          Seq.empty
+        } else if (sitsBoundaries.exists(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.isDefault)) {
+          val passMark =
+            sitsBoundaries.find(gb => gb.marksCode == marksCode && gb.process == process && gb.minimumMark.nonEmpty && gb.isDefault && gb.result.contains(ModuleResult.Pass))
+              .flatMap(_.minimumMark)
+              .minOption
+              .getOrElse(ProgressionService.DefaultPassMark)
+
+          Seq(
+            GradeBoundary(
+              marksCode = marksCode,
+              process = process,
+              attempt = attempt,
+              rank = 999,
+              grade = GradeBoundary.WithdrawnGrade,
+              minimumMark = Some(passMark),
+              maximumMark = Some(100),
+              signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+              result = Some(ModuleResult.Pass),
+              agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+              incrementsAttempt = false,
+            ),
+            GradeBoundary(
+              marksCode = marksCode,
+              process = process,
+              attempt = attempt,
+              rank = 999,
+              grade = GradeBoundary.WithdrawnGrade,
+              minimumMark = Some(0),
+              maximumMark = Some(passMark - 1),
+              signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+              result = Some(ModuleResult.Fail),
+              agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+              incrementsAttempt = false,
+            )
+          )
+        } else {
+          Seq(GradeBoundary(
+            marksCode = marksCode,
+            process = process,
+            attempt = attempt,
+            rank = 999,
+            grade = GradeBoundary.WithdrawnGrade,
+            minimumMark = None,
+            maximumMark = None,
+            signalStatus = GradeBoundarySignalStatus.SpecificOutcome,
+            result = Some(ModuleResult.Fail),
+            agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+            incrementsAttempt = false,
+          ))
+        }
+      }
+
+      // Inject the FM and W grades if they don't exist already
+      val allBoundaries = sitsBoundaries ++ fmBoundary ++ wBoundary
+
+      allBoundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
+      for (gradeBoundary <- logSize(allBoundaries)) {
         assessmentMembershipService.save(gradeBoundary)
       }
     }
+  }
+
+  def doVariableAssessmentWeightingRules(): Unit = transactional() {
+    val existing = assessmentMembershipService.allVariableAssessmentWeightingRules
+    val upstream = assignmentImporter.getAllVariableAssessmentWeightingRules
+
+    val additions = upstream.filterNot(rule => existing.exists(_.matchesKey(rule)))
+    val deletions = existing.filterNot(rule => upstream.exists(_.matchesKey(rule)))
+    val modifications = existing.flatMap { rule =>
+      upstream.find(_.matchesKey(rule)).map { r =>
+        rule.copyFrom(r)
+        rule
+      }
+    }
+
+    (additions ++ modifications).foreach(assessmentMembershipService.save)
+    deletions.foreach(assessmentMembershipService.delete)
   }
 
   def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =
@@ -440,10 +625,22 @@ trait ImportAssignmentsDescription extends Describable[Unit] {
   def describe(d: Description): Unit = {}
 }
 
-trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
+trait ImportAssignmentsYearCommand extends ImportAssignmentsCommand {
+  def process(year: AcademicYear): Unit = {
+    benchmark(s"ImportAssignmentsCommand for $year") {
+      doAssignments()
+      doGroups()
+      doGroupMembers()
+      doExamSchedule()
+      logger.info(s"ImportAssignmentsCommand for $year completed")
+    }
+  }
 
-  @Value("${tabula.yearZero}") var yearZero: Int = 2000
+}
 
+trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsYearCommand {
+
+  var yearZero: Int = Wire.property("${tabula.yearZero:2000}").toInt
   private var currentYear: AcademicYear = _
 
   override def yearsToImport: Seq[AcademicYear] = Seq(currentYear)
@@ -452,15 +649,15 @@ trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
     val next = AcademicYear.now().next.startYear
     for (year <- yearZero until next) {
       currentYear = AcademicYear.starting(year)
-
-      benchmark(s"ImportAssignmentsCommand for $currentYear") {
-        doAssignments()
-        doGroups()
-        doGroupMembers()
-      }
+      process(currentYear)
     }
   }
+}
 
+trait ImportAssignmentsIndividualYearCommand extends ImportAssignmentsYearCommand {
+  override def applyInternal(): Unit = {
+    process(yearsToImport.head)
+  }
 }
 
 trait RemovesMissingAssessmentComponents {

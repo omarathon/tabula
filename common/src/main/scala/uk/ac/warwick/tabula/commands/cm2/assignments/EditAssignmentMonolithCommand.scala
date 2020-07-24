@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import java.util.stream.Collectors
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -36,6 +38,11 @@ object EditAssignmentMonolithCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
       with AutowiringUserLookupComponent
       with AutowiringZipServiceComponent
+      with PopulateEditAssignmentDetailsRequest {
+      copySharedFeedbackFrom(assignment)
+      copySharedSubmissionFrom(assignment)
+      copySharedOptionsFrom(assignment)
+    }
 }
 
 abstract class EditAssignmentMonolithCommandInternal(val assignment: Assignment)
@@ -61,8 +68,8 @@ abstract class EditAssignmentMonolithCommandInternal(val assignment: Assignment)
     studentsCommand.anonymity = anonymity
     studentsCommand.hiddenFromStudents = hiddenFromStudents
 
-    studentsCommand.assessmentGroups = assessmentGroups
-    studentsCommand.members = members
+    studentsCommand.assessmentGroups = assignment.assessmentGroups.stream().collect(Collectors.toList())
+    studentsCommand.members.copyFrom(members)
     studentsCommand.apply()
 
     assessmentService.save(assignment)

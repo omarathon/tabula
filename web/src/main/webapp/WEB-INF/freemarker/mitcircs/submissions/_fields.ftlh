@@ -4,19 +4,53 @@
 
 <@mitcirc.identity_section student />
 
+<#if features.mitcircsCovid19>
+  <@mitcirc.question_section
+    question = "Are your mitigating circumstances coronavirus related?"
+    showNumber = false
+  >
+    <div class="radio">
+      <@bs3form.radio_inline>
+        <@f.radiobutton path="covid19Submission" value="true" /> Yes
+      </@bs3form.radio_inline>
+      <@bs3form.radio_inline>
+        <@f.radiobutton path="covid19Submission" value="false" /> No
+      </@bs3form.radio_inline>
+      <@bs3form.errors path="covid19Submission" />
+    </div>
+  </@mitcirc.question_section>
+</#if>
+
+<@mitcirc.question_section
+  question = "Your coronavirus circumstances"
+  hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick."
+  cssClass = "mitcircs-form__fields__section--covid19--yes"
+  covid19Hide = true
+>
+  <@mitcirc.checkboxesWithOther covid19IssueTypes "issueTypes" "issueTypeDetails" />
+</@mitcirc.question_section>
+
+
 <@mitcirc.question_section
   question = "What kind of mitigating circumstances are you presenting?"
+  covidQuestion = "What kind of coronavirus circumstances are you presenting?"
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
+  cssClass="mitcircs-form__fields__section--covid19--no"
+  covid19Hide = true
 >
   <@mitcirc.checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 </@mitcirc.question_section>
 
 <@mitcirc.question_section
   question = "What period do your mitigating circumstances cover?"
+  covidQuestion = "What period do your coronavirus circumstances cover?"
   hint = "If you're claiming for a period in the past, include a start and end date. If you're claiming for
     something that's ongoing, you may not know the end date at this point."
+  covidHint = "If you’re claiming for a period in the past, or a defined self-isolation period, include a
+    start and end date. If you’re claiming for something that’s ongoing, you may not know the end date at this point."
   cssClass = "form-horizontal"
+  covid19Hide = true
 >
   <@bs3form.form_group "startDate">
     <@bs3form.label path="startDate" cssClass="col-xs-4 col-sm-2">Start date</@bs3form.label>
@@ -60,12 +94,14 @@
 <#if previousSubmissions?has_content>
   <@mitcirc.question_section
     question = "Does this relate to a previous mitigating circumstances claim of yours?"
+    cssClass="mitcircs-form__fields__section--covid19--no"
+    covid19Hide = true
   >
     <@bs3form.form_group path="relatedSubmission">
       <@f.select path="relatedSubmission" cssClass="form-control">
         <option value="">No, this does not relate to a previous submission</option>
         <#list previousSubmissions as submission>
-          <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type.entryName == "Other"> - ${submission.issueTypeDetails}</#if><#if type_has_next>, </#if></#list></#if></#assign>
+          <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type.entryName == "Other" && submission.issueTypeDetails?has_content> - ${submission.issueTypeDetails!""}</#if><#if type_has_next>, </#if></#list></#if></#assign>
           <@f.option value="${submission.key}" label="${label?markup_string}" />
         </#list>
       </@f.select>
@@ -78,6 +114,9 @@
   question = "Which assessments have been affected?"
   hint = "Please tell us which coursework submissions or exams have been affected by your mitigating circumstances.
     To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
+  covidHint = "Please tell us which coursework submissions or exams have been affected by your coronavirus circumstances.
+    To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
+  covid19Hide = true
 >
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
@@ -203,6 +242,8 @@
 
 <@mitcirc.question_section
   question = "Have you discussed your mitigating circumstances with anyone?"
+  covidQuestion = "Have you discussed your circumstances with anyone?"
+  covid19Hide = true
 >
   <div class="radio">
     <@bs3form.radio_inline>
@@ -223,12 +264,14 @@
     <@mitcirc.checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <@mitcirc.question_hint "Please tell us why you haven't yet discussed your mitigating circumstances with anyone" />
+    <div class="<#if features.mitcircsCovid19>covid--no</#if>">
+      <@mitcirc.question_hint "Please tell us why you haven’t been able to discuss your circumstances with anyone yet." />
 
-    <@bs3form.form_group "noContactReason">
-      <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
-      <@bs3form.errors path="noContactReason" />
-    </@bs3form.form_group>
+      <@bs3form.form_group "noContactReason">
+        <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
+        <@bs3form.errors path="noContactReason" />
+      </@bs3form.form_group>
+    </div>
 
     <div class="mitcircs-form__fields__section__hint">
       <p>Depending on your circumstances, you might find it helpful to talk to one or more of the following:</p>
@@ -237,13 +280,23 @@
         <li>Your personal tutor or another member of staff in your department</li>
         <li>Your GP or other healthcare professional</li>
         <li>Warwick’s <a href="https://warwick.ac.uk/supportservices" target="_blank">Wellbeing Support Services</a></li>
+        <li><a href="https://warwick.ac.uk/insite/coronavirus/" target="_blank">Current university FAQs on coronavirus</a></li>
+        <li><a href="https://www.gov.uk/government/publications/covid-19-stay-at-home-guidance/stay-at-home-guidance-for-people-with-confirmed-or-possible-coronavirus-covid-19-infection" target="_blank">Current UK government advice on coronavirus</a></li>
+        <li><a href="https://111.nhs.uk/service/COVID-19/" target="_blank">Current NHS 111 advice on coronavirus</a></li>
       </ul>
     </div>
   </div>
 </@mitcirc.question_section>
 
-<@mitcirc.question_section question = "Details">
-  <ol class="mitcircs-form__fields__section__hint">
+<@mitcirc.question_section question = "Details" covid19Hide = true>
+  <#if features.mitcircsCovid19>
+    <p class="mitcircs-form__fields__section__hint covid--yes">
+      Please provide some details of how coronavirus has impacted you and how this has affected your assessments.
+      (E.g. school was closed from 21/3/20 and I could not attend due to childcare, I developed a cough and have
+      self-isolated for 7 days)
+    </p>
+  </#if>
+  <ol class="mitcircs-form__fields__section__hint <#if features.mitcircsCovid19>covid--no</#if>">
     <li>Please provide further details of the mitigating circumstances and how they have affected your assessments.</li>
     <li>Please include anything that you've done, or that's being done by other people, to help with your issues.</li>
     <li>If you're getting treatment or other support which will eventually resolve your issues, please tell us something about how and when you expect this to take place.</li>
@@ -264,11 +317,24 @@
     <li>Written by an independent qualified practitioner (letters from relatives are not acceptable); dated and written on headed or official notepaper and in English. If the letter is in another language you must provide both a copy of the original note and a certified translation into English. The University may seek to verify the accuracy of the translation provided.</li>
   </ul>
 </#assign>
+<#assign evidenceCovidHelp>
+  Photocopy or scanned evidence is acceptable and should be in English. If the evidence is in another language you should
+  provide both a copy of the original note and a certified translation into English. The University may seek to verify the
+  accuracy of any evidence provided.
+</#assign>
+<#if features.mitcircsCovid19>
+  <#assign supportingEvidenceHint = "Due to the coronavirus pandemic we realise it may not be possible to obtain supporting evidence for your claim. If this is the case, please explain why you cannot obtain the evidence above. If you do have evidence please upload as much evidence as you have that is relevant." />
+<#else>
+  <#assign supportingEvidenceHint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf." />
+</#if>
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
-  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (e.g. your personal tutor) who will then certify the evidence on your behalf."
+  hint = supportingEvidenceHint
+  covidHint = "<strong>For coronavirus claims it is not currently necessary to upload evidence. However if you do have evidence, for example a NHS111 virtual sick note or a school closure letter, then please do so here. If you have evidence but you would prefer not to upload it to the system, it is possible to share this with a trusted member of staff, eg. your personal or senior tutor.</strong>"
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
+  helpCovidPopover = evidenceCovidHelp
+  covid19Hide = true
 >
   <#function render_attachment attachment>
     <#local result><@routes.mitcircs.renderAttachment submission attachment /></#local>
@@ -303,7 +369,8 @@
 <@mitcirc.question_section
   question = "If you're unable to provide evidence now please tell us about evidence you’re going to upload in the future"
   hint = "Please give a brief description of this outstanding evidence and tell us when you expect to be able to provide it"
-  cssClass = "form-horizontal"
+  cssClass = "form-horizontal mitcircs-form__fields__section--covid19--no"
+  covid19Hide = true
 >
   <@bs3form.form_group "pendingEvidenceDue">
     <@bs3form.label path="pendingEvidenceDue" cssClass="col-xs-4 col-sm-2">Due date</@bs3form.label>

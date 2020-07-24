@@ -38,7 +38,7 @@ object UpstreamAffectedAssessment {
     "inUse" -> o.inUse,
     "assessmentType" -> maybeType(o),
     "marksCode" -> o.marksCode,
-    "weighting" -> Int.unbox(o.weighting),
+    "weighting" -> o.scaledWeighting,
   )
 
   implicit val writesUpstreamAssessmentGroup: Writes[UpstreamAssessmentGroup] = o => Json.obj(
@@ -114,13 +114,13 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
       upstreamAssessmentGroups
         .flatMap { uag =>
           assessmentMembershipService.getAssessmentComponent(uag).map { component =>
-            UpstreamAffectedAssessment(component.module, uag.academicYear, component.name, None, component, Seq(uag), Nil)
+            UpstreamAffectedAssessment(component.module, uag.academicYear, component.name, uag.deadline, component, Seq(uag), Nil)
           }
         }
         .groupBy { a => (a.assessmentComponent, a.academicYear) }
         .map { case (_, c) =>
           c.reduce[UpstreamAffectedAssessment] { case (a1, a2) =>
-            a1.copy(upstreamAssessmentGroups = a1.upstreamAssessmentGroups ++ a2.upstreamAssessmentGroups)
+            a1.copy(upstreamAssessmentGroups = a1.upstreamAssessmentGroups ++ a2.upstreamAssessmentGroups, deadline = a1.deadline.orElse(a2.deadline))
           }
         }
         .toSeq
@@ -162,7 +162,7 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
         component.copy(
           tabulaAssignments = assignments,
           name = assignment.name,
-          deadline = Option(assignment.submissionDeadline(student.asSsoUser)).map(_.toLocalDate),
+          deadline = Option(assignment.submissionDeadline(student.asSsoUser)).map(_.toLocalDate).orElse(component.deadline),
         )
       } else {
         component.copy(tabulaAssignments = assignments)

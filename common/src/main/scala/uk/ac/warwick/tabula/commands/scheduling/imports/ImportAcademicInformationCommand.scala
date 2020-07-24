@@ -29,6 +29,7 @@ object ImportAcademicInformationCommand {
       with ImportAwards
       with ImportDisabilities
       with ImportLevels
+      with ImportClassifications
       with AutowiringModuleAndDepartmentServiceComponent
       with AutowiringModuleImporterComponent
       with AutowiringCourseAndRouteServiceComponent
@@ -38,6 +39,7 @@ object ImportAcademicInformationCommand {
       with AutowiringAwardImporterComponent
       with AutowiringDisabilityImporterComponent
       with AutowiringLevelImporterComponent
+      with AutowiringClassificationImporterComponent
       with ImportSystemDataPermissions
       with ImportAcademicInformationDescription
       with Logging
@@ -55,7 +57,8 @@ object ImportAcademicInformationCommand {
     modesOfAttendance: ImportResult,
     awards: ImportResult,
     disabilities: ImportResult,
-    levels: ImportResult
+    levels: ImportResult,
+    classifications: ImportResult,
   )
 
   def combineResults(results: Seq[ImportResult]): ImportResult =
@@ -141,7 +144,8 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
     ImportModesOfAttendance with
     ImportAwards with
     ImportDisabilities with
-    ImportLevels =>
+    ImportLevels with
+    ImportClassifications  =>
 
   def applyInternal() = ImportAcademicInformationResults(
     departments = benchmarkTask("Import departments") {
@@ -198,7 +202,12 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
       transactional() {
         importLevels()
       }
-    }
+    },
+    classifications = benchmarkTask("Import classifications") {
+      transactional() {
+        importClassifications()
+      }
+    },
   )
 }
 
@@ -529,6 +538,16 @@ trait ImportLevels {
   def importLevels(): ImportResult = {
     logger.info("Importing levels")
     levelImporter.importLevels()
+  }
+}
+
+
+trait ImportClassifications {
+  self: ClassificationImporterComponent with Logging =>
+
+  def importClassifications(): ImportResult = {
+    logger.info("Importing classification")
+    classificationImporter.importClassifications()
   }
 }
 

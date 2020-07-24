@@ -5,7 +5,10 @@ import org.scalatest.Assertions
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUse
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+
+import scala.util.Random
 
 class ProgressionServiceTest extends TestBase with Mockito {
 
@@ -26,6 +29,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
       override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
     }
+    student.courseAndRouteService = service.courseAndRouteService
 
     def entityYear3: ExamGridEntityYear = scyd3.toExamGridEntityYear
 
@@ -40,25 +44,25 @@ class ProgressionServiceTest extends TestBase with Mockito {
   @Test
   def suggestedResultNullModuleMark(): Unit = {
     new Fixture {
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = null
+        agreedMark = None
       ))
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
-      result.asInstanceOf[ProgressionResult.Unknown].details.contains(module1.code.toUpperCase) should be (true)
+      result.asInstanceOf[ProgressionResult.Unknown].details should include(module1.code.toUpperCase)
     }
   }
 
   @Test
   def suggestedResultNoModuleRegistrations(): Unit = {
     new Fixture {
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
-      result.asInstanceOf[ProgressionResult.Unknown].details.contains("No module registrations found") should be (true)
+      result.asInstanceOf[ProgressionResult.Unknown].details should include("No module registrations found")
     }
   }
 
@@ -74,15 +78,15 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(30), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(100)
+        agreedMark = Some(100)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -96,15 +100,15 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(30)
+        agreedMark = Some(30)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -118,15 +122,15 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.PossiblyProceed.description)
     }
 
@@ -140,22 +144,22 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Proceed.description)
     }
   }
@@ -172,15 +176,15 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(30.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(100)
+        agreedMark = Some(100)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -194,15 +198,15 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Resit.description)
     }
 
@@ -216,22 +220,22 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq())
       )
 
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       ))
-      student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+      student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(30).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       ))
 
-      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(ProgressionResult.Proceed.description)
     }
   }
@@ -240,7 +244,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
   def suggestedFinalYearGradeNotFinalYear(): Unit = {
     new Fixture {
       scyd3.yearOfStudy = 2
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Ignore.description)
     }
   }
@@ -270,9 +274,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns None
       service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Left("No mark for you")
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details should be("The final overall mark cannot be calculated because there is no mark for year 1, year 2, year 3")
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 1, year 2, year 3")
     }
 
     // No mark for 2nd year
@@ -283,9 +287,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
         Seq((BigDecimal(90.0), args(0).asInstanceOf[Seq[ModuleRegistration]]))
       }
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details should be("The final overall mark cannot be calculated because there is no mark for year 2")
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 2")
     }
 
     // No mark for this year
@@ -295,9 +299,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
       student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
       student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details should be("The final overall mark cannot be calculated because there is no mark for year 3")
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 3")
     }
   }
 
@@ -314,17 +318,17 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(75).underlying,
         academicYear,
-        agreedMark = BigDecimal(40)
+        agreedMark = Some(40)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
       scyd3.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
       scyd3.moduleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
       scyd3.moduleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
@@ -336,9 +340,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2))
       )
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
 
     // Overcat, single subset
@@ -347,11 +351,11 @@ class ProgressionServiceTest extends TestBase with Mockito {
         (BigDecimal(90.0), Seq(mr1, mr2))
       ) // One subset
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       // Should re-use the initally calculated mark as only 1 subset
       verify(service.moduleRegistrationService, times(1)).weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean])
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
 
     // Overcat, 2 subsets, none chosen
@@ -361,17 +365,17 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module2,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(50)
+        agreedMark = Some(50)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
       ) // Two subsets
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details should be("The final overall mark cannot be calculated because there is no mark for year 3")
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should be("The final overall mark cannot be calculated because there is no mark for year 3")
     }
 
     // Overcat, 2 subsets, 1 chosen
@@ -381,18 +385,18 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module2,
         BigDecimal(60).underlying,
         academicYear,
-        agreedMark = BigDecimal(50)
+        agreedMark = Some(50)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
       service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], ArgumentMatchers.eq(BigDecimal(180)), ArgumentMatchers.eq(Seq())) returns Seq(
         (BigDecimal(90.0), Seq(mr1, mr2)),
         (BigDecimal(90.0), Seq(mr1, mr3))
       ) // Two subsets
       scyd3.overcattingModules = Seq(module1, module2) // Subset chosen
 
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
   }
 
@@ -410,9 +414,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns None
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include("Could not find year weightings")
     }
 
     // No weighting for 2nd year
@@ -430,9 +434,9 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Some(year1Weighting)
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 2) returns None
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns Some(year3Weighting)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq(year1Weighting, year3Weighting))
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year3Weighting))
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains(s"Could not find year weightings for: ${course.code.toUpperCase} ${student.mostSignificantCourse.sprStartAcademicYear.toString} Year 2")
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include(s"Could not find year weightings for: ${course.code.toUpperCase} ${student.mostSignificantCourse.sprStartAcademicYear.toString} Year 2")
     }
   }
 
@@ -458,20 +462,20 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(60).underlying,
         scyd2.academicYear,
-        agreedMark = null
+        agreedMark = None
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains(module1.code.toUpperCase) should be (true)
+      result.asInstanceOf[FinalYearGrade.Unknown].reason should include(module1.code.toUpperCase)
     }
 
     // Not enough credits passed in 2nd year
@@ -481,34 +485,34 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(35) // Failed in 2nd year
+        agreedMark = Some(35) // Failed in 2nd year
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
         case _ => Assertions.fail("Incorrect type returned")
@@ -523,34 +527,34 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(35) // Failed in final year
+        agreedMark = Some(35) // Failed in final year
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       result match {
         case withMark: FinalYearMark => withMark.mark should be(BigDecimal(69))
         case _ => Assertions.fail("Incorrect type returned")
@@ -565,34 +569,34 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd2.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, yearWeightings)
       // 1st year: 65 @ 20%, 2nd year: 60 @ 40%, 3rd year 80 @ 40%
       // Final grade 69 = 2.1, but on the grade boundary so borderline
       result match {
@@ -617,29 +621,30 @@ class ProgressionServiceTest extends TestBase with Mockito {
       override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
       override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
     }
+    student.courseAndRouteService = service.courseAndRouteService
 
     def entityYear: ExamGridEntityYear = scyd.toExamGridEntityYear
 
     val yearWeighting: CourseYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(100), student.mostSignificantCourse.sprStartAcademicYear, 1)
     service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] => Seq() }
 
-    student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+    student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
       scd = student.mostSignificantCourse,
       mod = module1,
       cats = BigDecimal(40).underlying,
       year = scyd.academicYear,
-      agreedMark = BigDecimal(70)
+      agreedMark = Some(70)
     ))
-    student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+    student.mostSignificantCourse._moduleRegistrations.add(Fixtures.moduleRegistration(
       scd = student.mostSignificantCourse,
       mod = module2,
       cats = BigDecimal(40).underlying,
       year = scyd.academicYear,
-      agreedMark = BigDecimal(70)
+      agreedMark = Some(70)
     ))
     service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(70.0))
     service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Option(yearWeighting)
-    val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear, 70, Map(), calculateYearMarks = false, groupByLevel = false, weightings = Seq(yearWeighting))
+    val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear, 70, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, weightings = Seq(yearWeighting))
     result match {
       case withMark: FinalYearMark => withMark.mark should be(BigDecimal(70))
       case _ => Assertions.fail("Incorrect type returned")
@@ -660,34 +665,34 @@ class ProgressionServiceTest extends TestBase with Mockito {
         module1,
         BigDecimal(40).underlying,
         scyd1.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr2: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(40).underlying,
         scyd1.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr3: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module1,
         BigDecimal(40).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
       val mr4: ModuleRegistration = Fixtures.moduleRegistration(
         student.mostSignificantCourse,
         module2,
         BigDecimal(60).underlying,
         scyd3.academicYear,
-        agreedMark = BigDecimal(90)
+        agreedMark = Some(90)
       )
-      student.mostSignificantCourse.addModuleRegistration(mr1)
-      student.mostSignificantCourse.addModuleRegistration(mr2)
-      student.mostSignificantCourse.addModuleRegistration(mr3)
-      student.mostSignificantCourse.addModuleRegistration(mr4)
-      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq(year1Weighting, year2Weighting, year3Weighting))
+      student.mostSignificantCourse._moduleRegistrations.add(mr1)
+      student.mostSignificantCourse._moduleRegistrations.add(mr2)
+      student.mostSignificantCourse._moduleRegistrations.add(mr3)
+      student.mostSignificantCourse._moduleRegistrations.add(mr4)
+      val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, applyBenchmark = false, Seq(year1Weighting, year2Weighting, year3Weighting))
       // 1st year: 65 @ 70%, 2nd year: 60 @ 0%, 3rd year 80 @ 30%
       // Final grade 69.5 = 2.1, but on the grade boundary so borderline
       result match {
@@ -725,14 +730,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
   def allowEmptyYearMarks(): Unit = {
     // full time student with no year abroad
     new ThreeYearStudentFixture {
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
       allowEmpty should be(false)
     }
 
     // An year abroad - 2nd year  with null block occurrence
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("SWE", "SANDWICH (E)", "Sandwich (thick) Erasmus Scheme")
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(true)
     }
 
@@ -740,7 +745,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YO", "OPTIONAL YR", "Optional year out (study related)")
       scyd2.blockOccurrence = "FW" //  SITS block occurrence
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(true)
     }
 
@@ -748,7 +753,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YM", "COMP YR", "Compulsory year out (study related)")
       scyd2.blockOccurrence = "I"
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(false)
     }
 
@@ -756,11 +761,210 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new ThreeYearStudentFixture {
       scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YX", "EXCH YR", "Exchange year out (study related)")
       scyd2.blockOccurrence = "I"
-      var allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+      val allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2.copy(yearAbroad = scyd2.yearAbroad))
       allowEmpty should be(false)
     }
 
   }
 
+  @Test
+  def postgraduateBenchmark(): Unit = {
+    new Fixture {
+      val scd: StudentCourseDetails = Fixtures.student().mostSignificantCourse
+      val academicYear: AcademicYear = AcademicYear(2019)
+      scd.latestStudentCourseYearDetails.academicYear = academicYear
+      val department: Department = Fixtures.department("in")
+
+      // examples from https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/pgt/examples/
+
+      val pgtScd: StudentCourseDetails = Fixtures.studentCourseDetails(Fixtures.student(), department)
+      pgtScd.award = new Award("MSC")
+      val pgtScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(studentCourseDetails = pgtScd)
+
+      val exampleA: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax931"), BigDecimal(10).underlying, academicYear, "", Some(91), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax924"), BigDecimal(10).underlying, academicYear, "", Some(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", Some(74), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax91v"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93p"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax423"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95k"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92t"), BigDecimal(10).underlying, academicYear, "", Some(72), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t7"), BigDecimal(10).underlying, academicYear, "", Some(69), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax956"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p2"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p7"), BigDecimal(10).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95l"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleA) should be(BigDecimal(72.1))
+
+
+      val exampleB: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t8"), BigDecimal(10).underlying, academicYear, "", Some(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98p"), BigDecimal(50).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p4"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9f7"), BigDecimal(10).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax984"), BigDecimal(10).underlying, academicYear, "", Some(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax926"), BigDecimal(10).underlying, academicYear, "", Some(63), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9l8"), BigDecimal(10).underlying, academicYear, "", Some(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax3m7"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax963"), BigDecimal(10).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e5"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax932"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ba"), BigDecimal(10).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97g"), BigDecimal(10).underlying, academicYear, "", Some(46), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleB) should be(BigDecimal(66.2))
+
+      val exampleC: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9p8"), BigDecimal(10).underlying, academicYear, "", Some(73), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", Some(71), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax933"), BigDecimal(15).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax994"), BigDecimal(15).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax982"), BigDecimal(10).underlying, academicYear, "", Some(68), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97l"), BigDecimal(15).underlying, academicYear, "", Some(66), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax947"), BigDecimal(15).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94z"), BigDecimal(60).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9ep"), BigDecimal(15).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9m3"), BigDecimal(10).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleC) should be(BigDecimal(63.2))
+
+      val exampleD: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax986"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax979"), BigDecimal(15).underlying, academicYear, "", Some(61), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95j"), BigDecimal(15).underlying, academicYear, "", Some(57), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9e9"), BigDecimal(60).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax97k"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94r"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax957"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax94n"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleD) should be(BigDecimal(53.8))
+
+      val exampleE: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92b"), BigDecimal(15).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax974"), BigDecimal(15).underlying, academicYear, "", Some(65), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax95p"), BigDecimal(60).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w7"), BigDecimal(15).underlying, academicYear, "", Some(56), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9s4"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax966"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9dw"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9r4"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9vp"), BigDecimal(15).underlying, academicYear, "", Some(50), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleE) should be(BigDecimal(61.1))
+
+      val exampleF: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", Some(100), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(76), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", Some(75), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9u0"), BigDecimal(15).underlying, academicYear, "", Some(60), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93y"), BigDecimal(15).underlying, academicYear, "", Some(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax988"), BigDecimal(15).underlying, academicYear, "", Some(54), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92m"), BigDecimal(15).underlying, academicYear, "", Some(53), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgtScyd, exampleF) should be(BigDecimal(73.1))
+
+
+      val pgdipScd: StudentCourseDetails = Fixtures.studentCourseDetails(Fixtures.student(), department)
+      pgdipScd.award = new Award("PGDIP") // MSC
+      val pgdipScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(studentCourseDetails = pgdipScd)
+
+      val exampleG: Seq[ModuleRegistration] = Random.shuffle(Seq(
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92p"), BigDecimal(15).underlying, academicYear, "", Some(100), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax98y"), BigDecimal(15).underlying, academicYear, "", Some(76), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax92w"), BigDecimal(15).underlying, academicYear, "", Some(75), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9t2"), BigDecimal(45).underlying, academicYear, "", Some(70), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax93n"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+        Fixtures.moduleRegistration(scd, Fixtures.module("ax9w4"), BigDecimal(15).underlying, academicYear, "", Some(62), ModuleSelectionStatus.Core),
+      ))
+      service.postgraduateBenchmark(pgdipScyd, exampleG) should be(BigDecimal(76.8))
+    }
+  }
+
+  class FixtureWithYearsAndMarks(marks: Seq[BigDecimal], yearWeightings: Seq[Int]) {
+
+    val student: StudentMember = Fixtures.student("1234")
+    student.mostSignificantCourse.course = course
+    student.mostSignificantCourse.sprStartAcademicYear = academicYear - (yearWeightings.size - 1)
+    val currentScyd: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
+    currentScyd.academicYear = academicYear
+    currentScyd.yearOfStudy = yearWeightings.size
+    student.mostSignificantCourse.courseYearLength = yearWeightings.size
+    currentScyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+    val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
+      override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
+      override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
+    }
+    student.courseAndRouteService = service.courseAndRouteService
+
+    def entityYear: ExamGridEntityYear = currentScyd.toExamGridEntityYear
+    var weightings: Seq[CourseYearWeighting] = Seq()
+
+    val previousYears = yearWeightings.reverse.tail.reverse.zipWithIndex.map { case (w, i) =>
+      val yearOfStudy = i + 1
+      val scyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails()
+      scyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+      scyd.studentCourseDetails = student.mostSignificantCourse
+      scyd.yearOfStudy = yearOfStudy
+      scyd.academicYear = academicYear - (yearWeightings.size -1 -i)
+      scyd.agreedMark = marks(i).underlying()
+      student.mostSignificantCourse.addStudentCourseYearDetails(scyd)
+
+      val weighting = Fixtures.yearWeighting(course, new JBigDecimal(w), student.mostSignificantCourse.sprStartAcademicYear, yearOfStudy)
+      weightings = weightings :+ weighting
+      service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, yearOfStudy) returns Option(weighting)
+      scyd
+    }
+
+    service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(marks.last)
+    service.moduleRegistrationService.overcattedModuleSubsets(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers { args: Array[AnyRef] =>
+      Seq((marks.last, args(0).asInstanceOf[Seq[ModuleRegistration]]))
+    }
+
+    val lastYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(yearWeightings.last), student.mostSignificantCourse.sprStartAcademicYear, yearWeightings.size)
+    weightings = weightings :+ lastYearWeighting
+    service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, yearWeightings.size) returns Option(lastYearWeighting)
+  }
+
+  @Test
+  def graduateBenchmark(): Unit = {
+    // examples from https://warwick.ac.uk/insite/coronavirus/staff/teaching/policyguidance/undergraduateintermediatefinal/graduationbenchmark-finalists/
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(70), BigDecimal(58), BigDecimal(60)),
+      Seq(0, 50, 50)
+    ) {
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(50))
+      service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(65))
+
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(60.3))
+    }
+
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(64), BigDecimal(68), BigDecimal(70)),
+      Seq(10, 30, 60)
+    ) {
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(76))
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(70))
+    }
+
+    new FixtureWithYearsAndMarks(
+      Seq(BigDecimal(64), BigDecimal(68), BigDecimal(76), BigDecimal(72)),
+      Seq(10, 20, 30, 40)
+    ) {
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(72))
+
+      service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(71.5))
+    }
+  }
 
 }

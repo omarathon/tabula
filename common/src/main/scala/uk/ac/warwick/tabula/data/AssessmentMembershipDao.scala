@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
+import javax.persistence.EntityManager
 import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -31,7 +32,7 @@ trait AutowiringAssessmentMembershipDaoComponent extends AssessmentMembershipDao
 trait AssessmentMembershipDao {
   def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup]
 
   def find(group: AssessmentGroup): Option[AssessmentGroup]
 
@@ -69,9 +70,9 @@ trait AssessmentMembershipDao {
     */
   def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent]
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent]
 
   def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
@@ -80,6 +81,8 @@ trait AssessmentMembershipDao {
   def getAssessmentComponentsByPaperCode(department: Department, paperCodes: Seq[String]): Map[String, Seq[AssessmentComponent]]
 
   def getAllAssessmentComponents(academicYears: Seq[AcademicYear]): Seq[AssessmentComponent]
+
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Seq[Assignment]
 
   /**
     * Get all assessment groups that can serve this assignment this year.
@@ -94,7 +97,7 @@ trait AssessmentMembershipDao {
 
   def getCurrentUpstreamAssessmentGroupMembers(uagid: String): Seq[UpstreamAssessmentGroupMember]
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
   def getUpstreamAssessmentGroups(academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -103,6 +106,8 @@ trait AssessmentMembershipDao {
   def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
+
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 
   def emptyMembers(groupsToEmpty: Seq[String]): Int
 
@@ -126,9 +131,31 @@ trait AssessmentMembershipDao {
 
   def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
 
+  def getGradeBoundaries(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Seq[GradeBoundary]
+
+  def getPassMark(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Option[Int]
+
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 
   def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
+
+  def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule]
+
+  def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule]
+
+  def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule]
+
+  def save(schedule: AssessmentComponentExamSchedule): Unit
+
+  def delete(schedule: AssessmentComponentExamSchedule): Unit
+
+  def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule]
+
+  def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule]
+
+  def save(rule: VariableAssessmentWeightingRule): Unit
+
+  def delete(rule: VariableAssessmentWeightingRule): Unit
 }
 
 @Repository
@@ -156,7 +183,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           scd.student.universityId = :universityId and
           scd.statusOnCourse.code not like 'P%' and
           ${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
-          ((a.resitAssessment = true and a.resitAssessment = uagms.resitExpected) or  a.resitAssessment = false) and
+          ((a.resitAssessment = true and uagms.assessmentType = 'Reassessment') or a.resitAssessment = false) and
           a.deleted = false and a._hiddenFromStudents = false""")
         .setString("universityId", user.getWarwickId)
 
@@ -194,17 +221,23 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("sequence", assignment.sequence))
       .uniqueResult
 
-  def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] =
-    session.newCriteria[UpstreamAssessmentGroup]
+  def find(group: UpstreamAssessmentGroup, eagerLoad: Boolean): Option[UpstreamAssessmentGroup] = {
+    val criteria = session.newCriteria[UpstreamAssessmentGroup]
       .add(is("assessmentGroup", group.assessmentGroup))
       .add(is("academicYear", group.academicYear))
       .add(is("moduleCode", group.moduleCode))
       .add(is("occurrence", group.occurrence))
       .add(is("sequence", group.sequence))
-      .uniqueResult
+
+    if (eagerLoad) {
+      criteria.setFetchMode("members", FetchMode.JOIN).distinct
+    }
+
+    criteria.uniqueResult
+  }
 
   def find(group: AssessmentGroup): Option[AssessmentGroup] = {
-    if (group.assignment == null && group.smallGroupSet == null) None
+    if (group.assignment == null && group.smallGroupSet == null && group.exam == null) None
     else {
       val criteria = session.newCriteria[AssessmentGroup]
         .add(is("assessmentComponent", group.assessmentComponent))
@@ -237,8 +270,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       }
 
   def save(group: UpstreamAssessmentGroup): Unit =
-    find(group).getOrElse {
-      session.save(group)
+    find(group, eagerLoad = false) match {
+      case Some(existing) if existing.deadline == group.deadline => // Do nothing
+      case Some(outdated) =>
+        outdated.deadline = group.deadline
+        session.update(outdated)
+
+      case _ => session.save(group)
     }
 
   def save(member: UpstreamAssessmentGroupMember): Unit = session.saveOrUpdate(member)
@@ -290,10 +328,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .add(is("member.universityId", student.universityId))
 
     if (resitOnly) {
-      criteria.add(or(
-        or(isNotNull("member.resitActualMark"), isNotNull("member.resitActualGrade")),
-        or(isNotNull("member.resitAgreedMark"), isNotNull("member.resitAgreedGrade"))
-      ))
+      criteria.add(is("member.assessmentType", UpstreamAssessmentGroupMemberAssessmentType.Reassessment))
     }
 
     criteria.add(is("academicYear", academicYear))
@@ -323,7 +358,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   private def modulesIncludingSubDepartments(d: Department): Seq[Module] =
     modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = {
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -331,8 +366,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     if (deptModules.isEmpty) Nil
     else {
       val components = safeInSeq(() => {
-        session.newCriteria[AssessmentComponent]
-          .add(is("inUse", true))
+        val c = session.newCriteria[AssessmentComponent]
+
+        if (inUseOnly) {
+          c.add(is("inUse", true))
+        }
+
+        c
           .addOrder(asc("moduleCode"))
           .addOrder(asc("sequence"))
       }, "module", deptModules)
@@ -342,7 +382,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     }
   }
 
-  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean): Seq[AssessmentComponent] = {
+  def getAssessmentComponents(department: Department, includeSubDepartments: Boolean, assessmentType: Option[AssessmentType], withExamPapersOnly: Boolean, inUseOnly: Boolean): Seq[AssessmentComponent] = {
     val deptModules =
       if (includeSubDepartments) modulesIncludingSubDepartments(department)
       else modules(department)
@@ -350,9 +390,11 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     if (deptModules.isEmpty) Nil
     else {
       val c = session.newCriteria[AssessmentComponent]
-        .add(is("inUse", true))
         .addOrder(asc("moduleCode"))
         .addOrder(asc("sequence"))
+      if (inUseOnly) {
+        c.add(is("inUse", true))
+      }
       if (withExamPapersOnly) {
         c.add(isNotNull("_examPaperCode"))
       }
@@ -411,6 +453,18 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .setParameterList("academicYears", academicYears)
       .seq
 
+  def getAssignmentsForAssessmentGroups(keys: Seq[UpstreamAssessmentGroupKey]): Seq[Assignment] = {
+    val em: EntityManager = session
+    em.createNativeQuery(s"""
+      select distinct a.* from assignment a
+        join assessmentgroup ag on a.id = ag.assignment_id
+        join assessmentcomponent ac on ac.id = ag.upstream_id
+      where array[ac.modulecode, cast(a.academicyear as varchar), ac.sequence, ag.occurrence] in (:keys)
+    """, classOf[Assignment])
+      .setParameter("keys", keys.asJava)
+      .getResultList.asScala.toSeq.asInstanceOf[Seq[Assignment]]
+  }
+
   def countPublishedFeedback(assignment: Assignment): Int = {
     session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")
       .setString("assignmentId", assignment.id)
@@ -453,19 +507,17 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
-  // TODO Get members for multiple components in a single query - Doing a single query for each may be acceptable. If so, burn this junk
-  // this will need a user-type to teach JPA about the Tuple being used for the composite key
-  // see https://stackoverflow.com/questions/55317347/jpql-and-list-of-tuples-as-parameter-for-select-in-statements
   def getCurrentUpstreamAssessmentGroupMembers(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
-    session.createNativeQuery(s"""
+    val em: EntityManager = session
+    em.createNativeQuery(s"""
       select distinct uagm.* from UpstreamAssessmentGroupMember uagm
 				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear
 				join StudentCourseDetails scd on scd.universityId = uagm.universityId
 				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
-      where (uag.moduleCode, uag.assessmentGroup, uag.sequence) in (:compositeKeys)
-    """)
+      where array[uag.moduleCode, uag.assessmentGroup, uag.sequence] in (:compositeKeys)
+    """, classOf[UpstreamAssessmentGroupMember])
       .setParameter("academicYear", academicYear.startYear)
-      .setParameter("compositeKeys", components.map(c => (c.moduleCode, c.assessmentGroup, c.sequence)).asJava)
+      .setParameter("compositeKeys", components.map(AssessmentComponentKey.apply).asJava)
       .getResultList.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
@@ -482,13 +534,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .list.asScala.toSeq.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
   }
 
-  def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
+  def getUpstreamAssessmentGroups(registration: ModuleRegistration, allAssessmentGroups: Boolean, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
     val criteria =
       session.newCriteria[UpstreamAssessmentGroup]
         .add(is("academicYear", registration.academicYear))
-        .add(is("moduleCode", registration.toSITSCode))
-        .add(is("assessmentGroup", registration.assessmentGroup))
+        .add(is("moduleCode", registration.sitsModuleCode))
         .add(is("occurrence", registration.occurrence))
+
+    if (!allAssessmentGroups) {
+      criteria.add(is("assessmentGroup", registration.assessmentGroup))
+    }
 
     if (eagerLoad) {
       criteria.setFetchMode("members", FetchMode.JOIN).distinct
@@ -510,13 +565,39 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       .seq
   }
 
-  def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
-    session.newCriteria[UpstreamAssessmentGroup]
-      // TODO Is there a way to do not-in with multiple queries?
-      .add(not(safeIn("id", ids)))
+  def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] = {
+    val c = session.newCriteria[UpstreamAssessmentGroup]
       .add(safeIn("academicYear", academicYears))
+
+    if (ids.nonEmpty) {
+      // TODO Is there a way to do not-in with multiple queries?
+      c.add(not(safeIn("id", ids)))
+    }
+
+    c.project[String](Projections.id()).seq
+  }
+
+  // Get only current members
+  private def currentMembersByGroup(upstreamGroups: Seq[UpstreamAssessmentGroup]): Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
+    if (upstreamGroups.isEmpty) Map.empty
+    else session.newQuery[UpstreamAssessmentGroupMember](
+      """
+        select distinct uagm
+        from UpstreamAssessmentGroupMember uagm
+          join uagm.upstreamAssessmentGroup uag
+
+          join StudentCourseDetails scd on
+            scd.student.universityId = uagm.universityId
+
+          join StudentCourseYearDetails scyd on
+            scyd.studentCourseDetails = scd and
+            scyd.academicYear = uag.academicYear and
+            scd.statusOnCourse.code not like 'P%'
+        where
+          uag in (:upstreamGroups)""")
+      .setParameterList("upstreamGroups", upstreamGroups)
       .seq
-      .map(_.id)
+      .groupBy(_.upstreamAssessmentGroup)
 
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] = {
     // Get the UpstreamAssessmentGroups first as some of them will be empty
@@ -541,27 +622,34 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
         .setParameterList("groups", groups)
         .seq
 
-    // Get only current members
-    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
-      if (upstreamGroups.isEmpty) Map.empty
-      else session.newQuery[UpstreamAssessmentGroupMember](
+    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] = currentMembersByGroup(upstreamGroups)
+
+    upstreamGroups.map { group =>
+      UpstreamAssessmentGroupInfo(group, currentMembers.getOrElse(group, Nil))
+    }
+  }
+
+  def getUpstreamAssessmentGroupInfoForComponents(components: Seq[AssessmentComponent], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] = {
+    // Get the UpstreamAssessmentGroups first as some of them will be empty
+    val upstreamGroups: Seq[UpstreamAssessmentGroup] =
+      if (components.isEmpty) Nil
+      else session.newQuery[UpstreamAssessmentGroup](
         """
-        select distinct uagm
-        from UpstreamAssessmentGroupMember uagm
-          join uagm.upstreamAssessmentGroup uag
-
-          join StudentCourseDetails scd on
-            scd.student.universityId = uagm.universityId
-
-          join StudentCourseYearDetails scyd on
-            scyd.studentCourseDetails = scd and
-            scyd.academicYear = uag.academicYear and
-            scd.statusOnCourse.code not like 'P%'
+        select distinct uag
+        from UpstreamAssessmentGroup uag
+          join fetch AssessmentComponent ac
+            on ac.assessmentGroup = uag.assessmentGroup and
+               ac.moduleCode = uag.moduleCode and
+               ac.sequence = uag.sequence
+          join fetch uag.members
         where
-          uag in (:upstreamGroups)""")
-        .setParameterList("upstreamGroups", upstreamGroups)
+          uag.academicYear = :academicYear and
+          ac in (:components)""")
+        .setParameter("academicYear", academicYear)
+        .setParameterList("components", components)
         .seq
-        .groupBy(_.upstreamAssessmentGroup)
+
+    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] = currentMembersByGroup(upstreamGroups)
 
     upstreamGroups.map { group =>
       UpstreamAssessmentGroupInfo(group, currentMembers.getOrElse(group, Nil))
@@ -588,15 +676,32 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     session.save(gb)
   }
 
-  def deleteGradeBoundaries(marksCode: String): Unit = {
-    getGradeBoundaries(marksCode).foreach(session.delete)
-  }
+  def deleteGradeBoundaries(marksCode: String): Unit =
+    session.newUpdateQuery("delete GradeBoundary gb where gb.marksCode = :marksCode")
+      .setParameter("marksCode", marksCode)
+      .run()
 
-  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] = {
+  def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] =
     session.newCriteria[GradeBoundary]
       .add(is("marksCode", marksCode))
       .seq
-  }
+
+  def getGradeBoundaries(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Seq[GradeBoundary] =
+    session.newCriteria[GradeBoundary]
+      .add(is("marksCode", marksCode))
+      .add(is("process", process))
+      .add(is("attempt", attempt))
+      .seq
+
+  def getPassMark(marksCode: String, process: GradeBoundaryProcess, attempt: Int): Option[Int] =
+    session.newCriteria[GradeBoundary]
+      .add(is("marksCode", marksCode))
+      .add(is("process", process))
+      .add(is("attempt", attempt))
+      .add(is("_result", ModuleResult.Pass))
+      .add(in("signalStatus", GradeBoundarySignalStatus.values.filter(_.isDefaultCandidate): _*))
+      .project[Option[Int]](Projections.min("minimumMark"))
+      .uniqueResult.flatten
 
   def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
     val assignments = session.createSQLQuery(
@@ -659,4 +764,54 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
       columns(2).asInstanceOf[Int]
     ))
   }
+
+  override def allScheduledExams(examProfileCodes: Seq[String]): Seq[AssessmentComponentExamSchedule] =
+    if (examProfileCodes.isEmpty) Seq.empty
+    else session.newCriteria[AssessmentComponentExamSchedule]
+      .add(safeIn("examProfileCode", examProfileCodes))
+      .seq
+
+  override def findScheduledExamBySlotSequence(examProfileCode: String, slotId: String, sequence: String, locationSequence: String): Option[AssessmentComponentExamSchedule] =
+    session.newCriteria[AssessmentComponentExamSchedule]
+      .add(is("examProfileCode", examProfileCode))
+      .add(is("slotId", slotId))
+      .add(is("sequence", sequence))
+      .add(is("locationSequence", locationSequence))
+      .seq.headOption
+
+  override def findScheduledExams(component: AssessmentComponent, academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] = {
+    val c =
+      session.newCriteria[AssessmentComponentExamSchedule]
+        .add(is("moduleCode", component.moduleCode))
+        .add(is("assessmentComponentSequence", component.sequence))
+        .addOrder(asc("startTime"))
+
+    academicYear.foreach(year => c.add(is("academicYear", year)))
+
+    c.seq
+  }
+
+  override def save(schedule: AssessmentComponentExamSchedule): Unit =
+    session.saveOrUpdate(schedule)
+
+  override def delete(schedule: AssessmentComponentExamSchedule): Unit =
+    session.delete(schedule)
+
+  override def allVariableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    session.newCriteria[VariableAssessmentWeightingRule]
+      .addOrder(asc("moduleCode"))
+      .addOrder(asc("assessmentGroup"))
+      .addOrder(asc("ruleSequence"))
+      .seq
+
+  override def getVariableAssessmentWeightingRules(moduleCodeWithCats: String, assessmentGroup: String): Seq[VariableAssessmentWeightingRule] =
+    session.newCriteria[VariableAssessmentWeightingRule]
+      .add(is("moduleCode", moduleCodeWithCats))
+      .add(is("assessmentGroup", assessmentGroup))
+      .addOrder(asc("ruleSequence"))
+      .seq
+
+  override def save(rule: VariableAssessmentWeightingRule): Unit = session.saveOrUpdate(rule)
+
+  override def delete(rule: VariableAssessmentWeightingRule): Unit = session.delete(rule)
 }

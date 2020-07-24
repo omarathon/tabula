@@ -30,7 +30,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
   import uk.ac.warwick.tabula.data.Transactions._
 
   // How many jobs to load and run each time
-  val RunBatchSize = 10
+  val RunBatchSize = 25
 
   var stopping = false
 
@@ -96,7 +96,9 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
     }
   }
 
-  def unfinishedInstances: Seq[JobInstance] = jobDao.unfinishedInstances
+  def unfinishedInstances: Seq[JobInstance] = transactional(readOnly = true) {
+    jobDao.unfinishedInstances
+  }
 
   def listRecent(start: Int, count: Int): Seq[JobInstance] = jobDao.listRecent(start, count)
 

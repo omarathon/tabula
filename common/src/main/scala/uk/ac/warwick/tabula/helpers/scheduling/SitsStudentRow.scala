@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.helpers.scheduling
 
 import java.sql.ResultSet
 
-import org.joda.time.LocalDate
+import org.joda.time.{Duration, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
-import uk.ac.warwick.tabula.data.model.{BasicStudentCourseProperties, BasicStudentCourseYearProperties}
+import uk.ac.warwick.tabula.data.model.{BasicStudentCourseProperties, BasicStudentCourseYearProperties, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.util.Try
 
@@ -95,6 +96,22 @@ class SitsStudentRow(resultSet: ResultSet)
   this.courseYearLength = JInteger(Try(resultSet.getString("course_year_length").toInt).toOption)
   this.levelCode = resultSet.getString("level_code")
   this.reasonForTransferCode = resultSet.getString("scj_transfer_reason_code")
+  this.specialExamArrangements = resultSet.getString("special_exam_arrangements") match {
+    case "Y" | "y" => true
+    case _ => false
+  }
+  this.specialExamArrangementsLocation = if (this.specialExamArrangements) {
+    resultSet.getString("special_exam_arrangements_room_code") match {
+      case null | "" => null
+      case code => NamedLocation(resultSet.getString("special_exam_arrangements_room_name").maybeText.getOrElse(code))
+    }
+  } else null
+  this.specialExamArrangementsExtraTime = if (this.specialExamArrangements) {
+    Try(resultSet.getString("special_exam_arrangements_extra_time").toInt).toOption
+      .filter(_ > 0)
+      .map(Duration.standardMinutes(_))
+      .orNull
+  } else null
 
   // data from the result set which will be used by ImportStudentCourseYearCommand to create
   // StudentCourseYearDetails.  The data needs to be extracted in this command while the result set is accessible.

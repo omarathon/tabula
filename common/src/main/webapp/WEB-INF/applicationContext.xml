@@ -129,6 +129,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.AbstractMeetingRecordIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssessmentGroupIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkerFeedbackIdConverter"/>
@@ -217,6 +218,9 @@
     <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaSubmissionStatusConverter"/>
     <bean class="uk.ac.warwick.tabula.services.turnitintca.TcaErrorCodeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.FiniteDurationConverter" />
+    <bean class="uk.ac.warwick.tabula.data.convert.BigDecimalConverter"/>
+    <bean class="uk.ac.warwick.tabula.commands.marks.ConfirmModuleMarksActionConverter" />
+    <bean class="uk.ac.warwick.tabula.exams.grids.columns.ExamGridYearMarksToUseConverter" />
   </util:list>
 
   <bean id="typeConverter"
@@ -237,6 +241,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
+        <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssessmentGroupIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
@@ -247,6 +252,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
         <bean class="uk.ac.warwick.tabula.data.convert.FiniteDurationConverter" />
+        <bean class="uk.ac.warwick.tabula.data.convert.BigDecimalConverter" />
       </list>
     </property>
   </bean>
@@ -265,14 +271,14 @@
     </mvc:interceptor>
     <mvc:interceptor>
       <mvc:mapping path="/**"/>
-      <mvc:exclude-mapping path="/static/*"/>
+      <mvc:exclude-mapping path="/static/**"/>
       <mvc:exclude-mapping path="/favicon.ico"/>
       <mvc:exclude-mapping path="*.ftl"/>
       <mvc:exclude-mapping path="*.flth"/>
-      <mvc:exclude-mapping path="/error/*"/>
+      <mvc:exclude-mapping path="/error/**"/>
       <mvc:exclude-mapping path="/error"/>
-      <mvc:exclude-mapping path="/test/*"/>
-      <mvc:exclude-mapping path="/service/*"/>
+      <mvc:exclude-mapping path="/test/**"/>
+      <mvc:exclude-mapping path="/service/**"/>
       <!-- /api/v1 and /api/v2 -->
       <mvc:exclude-mapping path="/v1/**"/>
       <mvc:exclude-mapping path="/v2/**"/>
@@ -505,6 +511,9 @@
         </entry>
         <entry key="theYear">
           <bean class="uk.ac.warwick.tabula.web.views.TheYear"/>
+        </entry>
+        <entry key="assignmentCloseTimes">
+          <bean class="uk.ac.warwick.tabula.web.views.AssignmentCloseTimes"/>
         </entry>
         <entry key="usersWithRole">
           <bean class="uk.ac.warwick.tabula.web.views.UsersWithRoleFunction"/>

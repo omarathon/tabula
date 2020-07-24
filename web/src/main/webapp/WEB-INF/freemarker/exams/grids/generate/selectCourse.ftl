@@ -280,7 +280,9 @@
             <li>Short grid</li>
           </#if>
           <#if gridOptionsCommand.yearMarksToUse == 'sits'>
-            <li>Uploaded year marks</li>
+            <li>Uploaded year marks only</li>
+          <#elseif gridOptionsCommand.yearMarksToUse == 'sitsIfAvailable'>
+            <li>Uploaded year marks if available</li>
           <#else>
             <li>Calculate year marks</li>
           </#if>
@@ -445,11 +447,11 @@
       var $gridScopeRadio = $('input[name=gridScope]');
       $gridScopeRadio.on('change', function () {
         if (this.value === "level") {
-          $('.block').hide();
-          $('.level').show();
+          $('.block').hide().find('input').prop('disabled', true);
+          $('.level').show().find('input').prop('disabled', false);
         } else if (this.value === "block") {
-          $('.level').hide();
-          $('.block').show();
+          $('.level').hide().find('input').prop('disabled', true);
+          $('.block').show().find('input').prop('disabled', false);
         }
       });
 

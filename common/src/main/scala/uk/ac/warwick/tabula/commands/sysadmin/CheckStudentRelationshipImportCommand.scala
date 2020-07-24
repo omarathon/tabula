@@ -125,7 +125,8 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
         ) yield dept.getStudentRelationshipSource(tutorType) == StudentRelationshipSource.SITS).getOrElse(false)
 
         val (tutorSource, tutorId) = department match {
-          case Some(d) if sitsIsSource && d.code.toLowerCase == "wm" => (SCJ, data.map(_.scjTutor).map(_.substring(2)))
+          case Some(d) if sitsIsSource && d.code.maybeText.exists(_.toLowerCase == "wm") =>
+            (SCJ, data.flatMap(_.scjTutor.maybeText).map(_.substring(2)))
           case Some(d) if sitsIsSource => (SPR, data.map(_.sprTutor))
           case _ => (SPR, None)
         }

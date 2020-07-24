@@ -53,6 +53,19 @@ object SubmitAssignmentCommand {
       with AutowiringFeaturesComponent
       with AutowiringZipServiceComponent
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+
+  def onBehalfOfWithSubmittedDateAndDeadline(assignment: Assignment, member: Member, submittedDate: DateTime, submissionDeadline: DateTime) =
+    new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member), Some(submittedDate), Some(submissionDeadline))
+      with ComposableCommand[Submission]
+      with SubmitAssignmentBinding
+      with SubmitAssignmentSetSubmittedDatePermissions
+      with SubmitAssignmentDescription
+      with SubmitAssignmentValidation
+      with SubmitAssignmentTriggers
+      with AutowiringSubmissionServiceComponent
+      with AutowiringFeaturesComponent
+      with AutowiringZipServiceComponent
+      with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 }
 
 trait SubmitAssignmentState {
@@ -85,12 +98,15 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
   var useDisability: JBoolean = _
 
+  var reasonableAdjustmentsDeclared: JBoolean = _
+
   // used as a hint to the view.
   var justSubmitted: Boolean = false
 
 }
 
-abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser)
+abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser,
+  val submittedDate: Option[DateTime] = None, val submissionDeadline: Option[DateTime] = None)
   extends CommandInternal[Submission] with SubmitAssignmentRequest {
 
   self: SubmissionServiceComponent
@@ -101,7 +117,8 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
 
   override def applyInternal(): Submission = transactional() {
     assignment.submissions.asScala.find(_.isForUser(user.asUser)).foreach { existingSubmission =>
-      if (assignment.resubmittable(user.asUser)) {
+      if (assignment.resubmittable(user.asUser) ||
+        (assignment.createdByAEP && assignment.allowResubmission && assignment.isAlive && assignment.collectSubmissions && assignment.isOpened)) {
         triggerService.removeExistingTriggers(existingSubmission)
         submissionService.delete(existingSubmission)
       } else { // Validation should prevent ever reaching here.
@@ -114,9 +131,11 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
     val submission = new Submission
     submission.assignment = assignment
     submission.submitted = true
-    submission.submittedDate = new DateTime
+    submission.submittedDate = submittedDate.getOrElse(new DateTime)
     submission.usercode = user.usercode
     submission._universityId = user.universityId
+
+    submissionDeadline.foreach(deadline => submission.explicitSubmissionDeadline = deadline)
 
     val savedValues = fields.asScala.map {
       case (_, submissionValue) =>
@@ -137,6 +156,16 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
       value.name = Submission.UseDisabilityFieldName
       value.submission = submission
       useDisabilityValue.persist(value)
+      savedValues.append(value)
+    }
+
+    if (reasonableAdjustmentsDeclared != null) {
+      val reasonableAdjustmentsDeclaredValue = new BooleanFormValue(null)
+      reasonableAdjustmentsDeclaredValue.value = reasonableAdjustmentsDeclared
+      val value = new SavedFormValue
+      value.name = Submission.ReasonableAdjustmentsDeclaredFieldName
+      value.submission = submission
+      reasonableAdjustmentsDeclaredValue.persist(value)
       savedValues.append(value)
     }
 
@@ -195,6 +224,14 @@ trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking 
   }
 }
 
+trait SubmitAssignmentSetSubmittedDatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  self: SubmitAssignmentState =>
+
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Submission.Update, PermissionsTarget.Global)
+  }
+}
+
 trait SubmitAssignmentValidation extends SelfValidating {
   self: SubmitAssignmentRequest
     with FeaturesComponent =>
@@ -210,7 +247,8 @@ trait SubmitAssignmentValidation extends SelfValidating {
 
     val hasExtension = assignment.isWithinExtension(user.asUser)
 
-    if (!assignment.allowLateSubmissions && (assignment.isClosed && !hasExtension)) {
+    // TODO take into account any specified submittedDate, instead of excluding AEP
+    if (!assignment.allowLateSubmissions && assignment.isClosed && !hasExtension && !assignment.createdByAEP ) {
       errors.reject("assignment.submit.closed")
     }
 

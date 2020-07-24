@@ -16,22 +16,25 @@ class MitCircsForm {
     $form
       .find(':input[name="issueTypes"]')
       .on('input change', () => {
-        const checked = $(':input[name="issueTypes"]:checked').closest('.checkbox');
+        const $checked = $(':input[name="issueTypes"]:checked').closest('.checkbox');
         const $dl = $('<dl></dl>');
-        checked.each((i, issueType) => {
+        $checked.each((i, issueType) => {
           const $issueType = $(issueType);
-          $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
-          $dl.append($('<dd></dd>').text($issueType.data('evidenceguidance')));
+          if ($issueType.data('evidenceguidance') !== '') {
+            $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
+            $dl.append($('<dd></dd>').text($issueType.data('evidenceguidance')));
+          }
         });
         const $hintContainer = $('.mitcircs-form__fields__section__evidence-upload .mitcircs-form__fields__section__hint');
         $hintContainer.find('dl').remove();
-        $hintContainer.append($dl);
+        if ($dl.find('dt').length > 0) $hintContainer.append($dl);
       })
       .trigger('change');
 
     $form
       .find(':input[name="issueTypes"][value="Other"]')
-      .on('input change', e => $form.find(':input[name="issueTypeDetails"]').prop('disabled', !$(e.target).is(':checked')));
+      .on('input change', e => $(e.target).closest('label').siblings(':input[name="issueTypeDetails"]').prop('readonly', !$(e.target).is(':checked')))
+      .trigger('change');
 
     // End date or ongoing
     $form
@@ -59,8 +62,8 @@ class MitCircsForm {
       .trigger('change');
 
     $form
-      .find(':input[name="contacted"][value="Other"]')
-      .on('input change', e => $form.find(':input[name="contactOther"]').prop('disabled', !$(e.target).is(':checked')))
+      .find(':input[name="contacts"][value="Other"]')
+      .on('input change', e => $(e.target).closest('label').siblings(':input[name="contactOther"]').prop('readonly', !$(e.target).is(':checked')))
       .trigger('change');
 
     // check-all on assessment tabs
@@ -73,8 +76,53 @@ class MitCircsForm {
         .trigger('change');
     });
 
+    // initially hide covid help text variants
+    $form.find('.covid--yes, .covid--no').toggle(false);
+    $form
+      .find('input[name="covid19Submission"]')
+      .on('input change', () => {
+        const val = $form.find('input[name="covid19Submission"]:checked').val();
+        if (val) {
+          $form.find('.mitcircs-form__fields__section--covid19--yes, .covid--yes')
+            .toggle(val === 'true')
+            .find('input')
+            .prop('disabled', val !== 'true');
+          $form.find('.mitcircs-form__fields__section--covid19--no, .covid--no')
+            .toggle(val !== 'true')
+            .find('input')
+            .prop('disabled', val === 'true');
+          $form.find('.mitcircs-form__fields__section')
+            .not('.mitcircs-form__fields__section--covid19--yes,.mitcircs-form__fields__section--covid19--no')
+            .show();
+        }
+        MitCircsForm.updateQuestionNumbersAndColours(form);
+      })
+      .trigger('change');
+
     this.initAssessmentsTable();
     $form.on('submit', this.processAssessmentsTableFormFieldsForSubmission.bind(this));
+  }
+
+  static updateQuestionNumbersAndColours(form) {
+    const $form = $(form);
+
+    // colours
+    $form
+      .find('.mitcircs-form__fields__section--boxed')
+      .removeClass('mitcircs-form__fields__section--boxed--even')
+      .filter(':visible')
+      .each((i, e) => {
+        // zero based so odds are even (:
+        if (i % 2 === 1) $(e).addClass('mitcircs-form__fields__section--boxed--even');
+      });
+
+    // numbers
+    $form
+      .find('.mitcircs-form__fields__section:has(.mitcircs-form__fields__section__number)')
+      .filter(':visible')
+      .each((i, e) => {
+        $(e).find('.mitcircs-form__fields__section__number').html(i + 1);
+      });
   }
 
   initAssessmentsTable() {
@@ -405,3 +453,5 @@ function init() {
 }
 
 $(() => init());
+
+export default MitCircsForm;

@@ -159,7 +159,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
     MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r }
-      .map(r => r -> affectedAssessments.asScala.toSeq.filter(_.boardRecommendations.contains(r)))
+      .map{ r => r -> affectedAssessments.asScala.toSeq.filter{ a => Option(a.boardRecommendations).exists(_.contains(r)) } }
       .filter{ case (_, a) => a.nonEmpty }
       .toMap
 
@@ -198,6 +198,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   // Guarded against being set directly; use .approveAndSubmit() below
   def approvedOn: Option[DateTime] = Option(_approvedOn)
+
+  @Column(nullable = false)
+  var covid19Submission: Boolean = false
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
@@ -289,7 +292,6 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "boardRecommendationComments")
   private var encryptedBoardRecommendationComments: CharSequence = _
-  // free text for use when the boardRecommendations type includes Other
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 
@@ -409,7 +411,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isAcute: Boolean = Option(acuteOutcome).isDefined
   def canConfirmSensitiveEvidence: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || state == ApprovedByChair || panel.nonEmpty) && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || !isAcute)
-  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || isAcute)
+  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && ((panel.isEmpty && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)) || isAcute)
   def canWithdraw: Boolean = !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canApproveOutcomes: Boolean = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
   def canReopen: Boolean = isWithdrawn

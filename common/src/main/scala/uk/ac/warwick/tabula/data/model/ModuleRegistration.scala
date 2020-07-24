@@ -2,59 +2,117 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.apache.commons.lang3.builder.CompareToBuilder
-import org.hibernate.annotations.{Proxy, Type}
-import org.joda.time.{DateTime, LocalDate}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
-import uk.ac.warwick.tabula.system.permissions._
+import uk.ac.warwick.tabula.services.marks.AssessmentComponentMarksService
+import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 import scala.jdk.CollectionConverters._
+import scala.util.Try
+
+object ModuleRegistration {
+  final val GraduationBenchmarkCutoff: LocalDate = new LocalDate(2020, DateTimeConstants.MARCH, 13)
+
+  // a list of all the markscheme codes that we consider to be pass/fail modules
+  final val PassFailMarkSchemeCodes = Seq("PF")
+
+  def filterToLatestAttempt(allMembers: Seq[UpstreamAssessmentGroupMember]): Seq[UpstreamAssessmentGroupMember] = {
+    // Filter down to just the latest resit sequence
+    // Find the assessment group to filter by (this is for students who take multiple reassessments)
+    val assessmentGroup =
+      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
+
+    // Group by assessment component so we only get the latest by resit sequence
+    allMembers
+      .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
+      .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
+      .values.map(_.maxBy(_.resitSequence))
+      .toSeq
+  }
+}
 
 /*
- * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
+ * sprCode, fullModuleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
-class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
+class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] with Serializable {
 
-  def this(scjCode: String, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String, passFail: Boolean = false) {
+  def this(sprCode: String, module: Module, cats: JBigDecimal, sitsModuleCode: String, academicYear: AcademicYear, occurrence: String, marksCode: String) {
     this()
-    this._scjCode = scjCode
+    this.sprCode = sprCode
     this.module = module
     this.academicYear = academicYear
     this.cats = cats
+    this.sitsModuleCode = sitsModuleCode
     this.occurrence = occurrence
-    this.passFail = passFail
+    this.marksCode = marksCode.maybeText.orNull
   }
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  @transient var assessmentComponentMarksService: AssessmentComponentMarksService = Wire[AssessmentComponentMarksService]
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "moduleCode", referencedColumnName = "code")
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var module: Module = _
 
+  /**
+   * This is the CATS value of the module registration, it does not *necessarily* match the CATS value
+   * of the module or what's in the fullModuleCode.
+   */
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var cats: JBigDecimal = _
+
+  /**
+   * Uppercase module code, with CATS. Doesn't necessarily match the cats property (which is the credits registered)
+   */
+  var sitsModuleCode: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var academicYear: AcademicYear = _
 
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "scjCode", insertable = false, updatable = false)
-  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var studentCourseDetails: StudentCourseDetails = _
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "StudentCourseDetails_ModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "scjcode", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "scjcode", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  var _allStudentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
 
-  @Column(name = "scjCode")
-  var _scjCode: String = _
+  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+  def studentCourseDetails: StudentCourseDetails =
+    _allStudentCourseDetails.asScala.find(_.mostSignificant)
+      .orElse(_allStudentCourseDetails.asScala.maxByOption(_.scjCode))
+      .orNull
+
+  // This isn't really a ManyToMany but we don't have bytecode instrumentation so this allows us to make it lazy at both ends
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "ModuleRegistration_RecordedModuleRegistration",
+    joinColumns = Array(new JoinColumn(name = "module_registration_id", insertable = false, updatable = false)),
+    inverseJoinColumns = Array(new JoinColumn(name = "recorded_module_registration_id", insertable = false, updatable = false))
+  )
+  @JoinColumn(name = "id", insertable = false, updatable = false)
+  @BatchSize(size = 200)
+  private val _recordedModuleRegistration: JSet[RecordedModuleRegistration] = JHashSet()
+  def recordedModuleRegistration: Option[RecordedModuleRegistration] = _recordedModuleRegistration.asScala.headOption
+
+  var sprCode: String = _
+
+  // get the integer part of the SPR code so we can sort registrations to the same module by it
+  def sprSequence: Int = sprCode.split("/").lastOption.flatMap(s => Try(s.toInt).toOption).getOrElse(Int.MinValue)
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var assessmentGroup: String = _
@@ -63,22 +121,26 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   var occurrence: String = _
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var actualMark: JBigDecimal = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var actualMark: Option[Int] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var actualGrade: String = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  var actualGrade: Option[String] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var agreedMark: JBigDecimal = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  var agreedMark: Option[Int] = None
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-  var agreedGrade: String = _
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  var agreedGrade: Option[String] = None
 
-  def firstDefinedMark: Option[JBigDecimal] = Option(agreedMark).orElse(Option(actualMark))
+  def firstDefinedMark: Option[Int] = agreedMark.orElse(actualMark)
 
-  def firstDefinedGrade: Option[String] = Option(agreedGrade).orElse(Option(actualGrade))
+  def firstDefinedGrade: Option[String] = agreedGrade.orElse(actualGrade)
 
-  def hasAgreedMarkOrGrade: Boolean = Option(agreedMark).isDefined || Option(agreedGrade).isDefined
+  def hasAgreedMarkOrGrade: Boolean = agreedMark.isDefined || agreedGrade.isDefined
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
   @Column(name = "selectionstatuscode")
@@ -89,7 +151,12 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   var lastUpdatedDate: DateTime = DateTime.now
 
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-  var passFail: Boolean = _
+  var marksCode: String = _
+
+  def process: GradeBoundaryProcess = if(currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
+
+  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+  def passFail: Boolean = marksCode.maybeText.exists(ModuleRegistration.PassFailMarkSchemeCodes.contains)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
   @Column(name = "moduleresult")
@@ -105,45 +172,75 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   }
 
   def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
-      membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
+    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$sitsModuleCode-$occurrence") {
+      membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = false)
     }
 
+  def upstreamAssessmentGroupMembersAllAttempts: Seq[UpstreamAssessmentGroupMember] =
+    if (studentCourseDetails == null) Seq.empty
+    else RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
+      membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
+    }.filter(member => member.universityId == studentCourseDetails.student.universityId)
+
   def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
-      membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
-    }.filter(_.universityId == studentCourseDetails.student.universityId)
+    ModuleRegistration.filterToLatestAttempt(upstreamAssessmentGroupMembersAllAttempts)
+
+  def recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent] = {
+    val uagms = upstreamAssessmentGroupMembers
+
+    RequestLevelCache.cachedBy("ModuleRegistration.recordedAssessmentComponentStudents", s"$academicYear-$sitsModuleCode-$occurrence") {
+      upstreamAssessmentGroups.flatMap(assessmentComponentMarksService.getAllRecordedStudents)
+    }.filter(r => uagms.exists(r.matchesIdentity))
+  }
+
+  def currentResitAttempt: Option[Int] = upstreamAssessmentGroupMembers.flatMap(_.currentResitAttempt).maxOption
 
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
     val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))
     upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
   }
 
-  override def toString: String = s"${_scjCode}-${module.code}-$cats-$academicYear"
+  def componentsForBenchmark: Seq[UpstreamAssessmentGroupMember] = {
+    upstreamAssessmentGroupMembers
+      .filter(_.deadline.exists(d => d.isBefore(ModuleRegistration.GraduationBenchmarkCutoff) || d.isEqual(ModuleRegistration.GraduationBenchmarkCutoff)))
+      .filter(_.firstDefinedMark.isDefined)
+  }
+
+  def componentsIgnoredForBenchmark: Seq[UpstreamAssessmentGroupMember] = {
+    upstreamAssessmentGroupMembers.diff(componentsForBenchmark)
+  }
+
+  def componentMarks(includeActualMarks: Boolean): Seq[(AssessmentType, String, Option[Int])] =
+    upstreamAssessmentGroupMembers.flatMap { uagm =>
+      uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
+        (ac.assessmentType, ac.sequence, if (includeActualMarks) uagm.firstDefinedMark else uagm.agreedMark)
+      }
+    }
+
+  override def toString: String = s"$sprCode-$sitsModuleCode-$academicYear"
 
   //allowing module manager to see MR records - TAB-6062(module grids)
   def permissionsParents: LazyList[PermissionsTarget] = LazyList(Option(studentCourseDetails), Option(module)).flatten
 
   override def compare(that: ModuleRegistration): Int =
     new CompareToBuilder()
-      .append(studentCourseDetails, that.studentCourseDetails)
+      .append(sprCode, that.sprCode)
+      .append(sitsModuleCode, that.sitsModuleCode)
       .append(module, that.module)
       .append(cats, that.cats)
       .append(academicYear, that.academicYear)
       .append(occurrence, that.occurrence)
       .build()
 
-  def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
-
   def moduleList(route: Route): Option[UpstreamModuleList] = route.upstreamModuleLists.asScala
     .filter(_.academicYear == academicYear)
-    .find(_.matches(toSITSCode))
+    .find(_.matches(sitsModuleCode))
 }
 
 /**
   * Holds data about an individual student's registration on a single module.
   */
-case class UpstreamModuleRegistration(
+case class UpstreamAssessmentRegistration(
   year: String,
   sprCode: String,
   seatNumber: String,
@@ -155,21 +252,19 @@ case class UpstreamModuleRegistration(
   actualGrade: String,
   agreedMark: String,
   agreedGrade: String,
-  resitActualMark: String,
-  resitActualGrade: String,
-  resitAgreedMark: String,
-  resitAgreedGrade: String,
-  resitExpected: Boolean
+  currentResitAttempt: String,
+  resitSequence: String,
 ) {
 
   def universityId: String = SprCode.getUniversityId(sprCode)
 
-  // Assessment group membership doesn't vary by sequence - for groups that are null we want to return same group -TAB-5615
-  def differentGroup(other: UpstreamModuleRegistration): Boolean =
+  // Assessment group membership doesn't vary by sequence for original assessment but does for re-assessment
+  def differentGroup(other: UpstreamAssessmentRegistration, assessmentType: UpstreamAssessmentGroupMemberAssessmentType): Boolean =
     year != other.year ||
-      (occurrence != other.occurrence && assessmentGroup != AssessmentComponent.NoneAssessmentGroup) ||
-      moduleCode != other.moduleCode ||
-      assessmentGroup != other.assessmentGroup
+    (occurrence != other.occurrence && assessmentGroup != AssessmentComponent.NoneAssessmentGroup) ||
+    moduleCode != other.moduleCode ||
+    assessmentGroup != other.assessmentGroup ||
+    (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.Reassessment && sequence != other.sequence)
 
   /**
     * Returns UpstreamAssessmentGroups matching the group attributes.

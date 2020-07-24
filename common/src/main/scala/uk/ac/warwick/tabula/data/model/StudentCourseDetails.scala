@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{CascadeType, Entity, _}
 import org.hibernate.annotations.{Proxy, _}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, Duration, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object StudentCourseDetails {
   final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
@@ -33,7 +33,8 @@ class StudentCourseDetails
     with HibernateVersioned
     with CanBeStale
     with PermissionsTarget
-    with Ordered[StudentCourseDetails] {
+    with Ordered[StudentCourseDetails]
+    with Serializable {
 
   @transient
   var relationshipService: RelationshipService = Wire.auto[RelationshipService]
@@ -75,17 +76,19 @@ class StudentCourseDetails
     studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
   }
 
-  @OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "_allStudentCourseDetails")
   @BatchSize(size = 200)
-  private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+  val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 
   def moduleRegistrations: Seq[ModuleRegistration] = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
 
-  def addModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.add(moduleRegistration)
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "_allStudentCourseDetails")
+  @BatchSize(size = 200)
+  val _progressionDecisions: JSet[ProgressionDecision] = JHashSet()
 
-  def removeModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.remove(moduleRegistration)
+  def progressionDecisions: Seq[ProgressionDecision] = _progressionDecisions.asScala.toSeq.sortBy(_.sequence)
 
-  def clearModuleRegistrations(): Unit = _moduleRegistrations.clear()
+  def progressionDecisionsByYear(year: AcademicYear): Seq[ProgressionDecision] = progressionDecisions.filter(_.academicYear == year)
 
   def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
@@ -254,6 +257,20 @@ trait BasicStudentCourseProperties {
 
   @Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
   var reasonForTransferCode: String = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Column(nullable = true, name = "special_exam_arrangements")
+  var specialExamArrangements: JBoolean = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
+  @Column(nullable = true, name = "special_exam_arrangements_location")
+  var specialExamArrangementsLocation: Location = _
+
+  @Restricted(Array("Profiles.Read.StudentCourseDetails.SpecialExamArrangements"))
+  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDurationAsString")
+  @Column(nullable = true, name = "special_exam_arrangements_extra_time")
+  var specialExamArrangementsExtraTime: Duration = _
 }
 
 trait StudentCourseProperties extends BasicStudentCourseProperties {

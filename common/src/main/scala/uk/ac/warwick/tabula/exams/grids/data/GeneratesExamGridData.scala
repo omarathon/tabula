@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreRequiredModulesColum
 import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
 import uk.ac.warwick.tabula.services._
 
-import scala.jdk.CollectionConverters._
 import scala.collection.immutable.ListMap
+import scala.jdk.CollectionConverters._
 
 trait GeneratesExamGridData extends CourseAndRouteServiceComponent with MaintenanceModeServiceComponent with ModuleRegistrationServiceComponent {
   protected def checkAndApplyOvercatAndGetGridData(
@@ -41,12 +41,12 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       .flatMap(entity => {
         entity.validYears.get(selectCourseCommand.studyYearByLevelOrBlock).map((entity, _))
       })
-      .map { case (entity, entityYear) =>
+      .map { case (_, entityYear) =>
         entityYear -> moduleRegistrationService.overcattedModuleSubsets(
           entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
-          normalLoadLookup(entityYear.route),
-          routeRulesLookup(entityYear.route, entityYear.level)
+          normalLoadLookup(entityYear),
+          routeRulesLookup(entityYear)
         )
       }.toMap
 
@@ -66,8 +66,9 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
       showComponentSequence = gridOptionsCommand.showComponentSequence,
       showModuleNames = gridOptionsCommand.moduleNameToShow,
-      calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-      isLevelGrid = selectCourseCommand.isLevelGrid
+      yearMarksToUse = gridOptionsCommand.yearMarksSetting,
+      isLevelGrid = selectCourseCommand.isLevelGrid,
+      applyBenchmark = gridOptionsCommand.applyBenchmark
     )
 
     val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))

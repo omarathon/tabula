@@ -30,6 +30,7 @@ trait SharedAssignmentDetailProperties extends BooleanAssignmentDetailProperties
   def copySharedDetailFrom(assignment: Assignment): Unit = {
     openEnded = assignment.openEnded
     resitAssessment = assignment.resitAssessment
+    createdByAEP = assignment.createdByAEP
   }
 
   def copySharedDetailTo(assignment: Assignment): Unit = {
@@ -109,9 +110,12 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   @Length(max = 600)
   var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
 
+  // fileAttachmentLimit value is ignored if unlimitedAttachments is set to true
   @Min(1)
   @Max(Assignment.MaximumFileAttachments)
   var fileAttachmentLimit: Int = 1
+
+  var unlimitedAttachments: JBoolean = _
 
   @Min(1)
   @Max(Assignment.MaximumFileAttachments)
@@ -138,6 +142,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     for (field <- findCommentField(assignment)) comment = field.value
     for (file <- findFileField(assignment)) {
       fileAttachmentLimit = file.attachmentLimit
+      unlimitedAttachments = file.unlimitedAttachments
       minimumFileAttachmentLimit = file.minimumAttachmentLimit
       fileAttachmentTypes = file.attachmentTypes.asJava
       individualFileSizeLimit = file.individualFileSizeLimit
@@ -154,6 +159,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     for (field <- findCommentField(assignment)) field.value = comment
     for (file <- findFileField(assignment)) {
       file.attachmentLimit = fileAttachmentLimit
+      file.unlimitedAttachments = unlimitedAttachments
       file.minimumAttachmentLimit = minimumFileAttachmentLimit
       file.attachmentTypes = fileAttachmentTypes.asScala.toSeq
       file.individualFileSizeLimit = individualFileSizeLimit

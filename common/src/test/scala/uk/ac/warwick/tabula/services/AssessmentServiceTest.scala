@@ -383,9 +383,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     group.sequence = "A01"
     group.academicYear = AcademicYear(2010)
     group.members = JArrayList(
-      new UpstreamAssessmentGroupMember(group, "rob"),
-      new UpstreamAssessmentGroupMember(group, "kev"),
-      new UpstreamAssessmentGroupMember(group, "bib")
+      new UpstreamAssessmentGroupMember(group, "rob", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "kev", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "bib", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     )
 
     assignmentMembershipService.save(group)
@@ -411,7 +411,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     session.clear()
 
-    val foundGroup = assignmentMembershipService.find(group)
+    val foundGroup = assignmentMembershipService.find(group, eagerLoad = false)
     foundGroup should be(Symbol("defined"))
     foundGroup.eq(Some(group)) should be(false)
 
@@ -421,8 +421,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     session.flush()
     session.clear()
 
-    assignmentMembershipService.find(group) should be(Symbol("empty"))
-    assignmentMembershipService.find(foundGroup.get) should be(Symbol("defined"))
+    assignmentMembershipService.find(group, eagerLoad = false) should be(Symbol("empty"))
+    assignmentMembershipService.find(foundGroup.get, eagerLoad = true) should be(Symbol("defined"))
   }
 
   @Test def assessmentComponents(): Unit = transactional { tx =>
@@ -501,9 +501,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
     session.flush()
 
-    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false) should be(Seq(ua1, ua2))
-    assignmentMembershipService.getAssessmentComponents(lawDept, includeSubDepartments = true) should be(Seq(ua3))
-    assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs"), includeSubDepartments = true) should be(Seq())
+    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false, inUseOnly = true) should be(Seq(ua1, ua2))
+    assignmentMembershipService.getAssessmentComponents(lawDept, includeSubDepartments = true, inUseOnly = true) should be(Seq(ua3))
+    assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs"), includeSubDepartments = true, inUseOnly = true) should be(Seq())
 
     val chemistrySubDept = Fixtures.department("ch-ug")
     chemistrySubDept.parent = chemistryDept
@@ -513,8 +513,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     chemistryDept.modules.remove(chemistryModule)
     chemistrySubDept.modules.add(chemistryModule)
 
-    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false) should be(Seq())
-    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = true) should be(Seq(ua1, ua2))
+    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false, inUseOnly = true) should be(Seq())
+    assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = true, inUseOnly = true) should be(Seq(ua1, ua2))
   }
 
   @Test def assessmentGroups(): Unit = transactional { tx =>
@@ -531,9 +531,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamGroup.assessmentGroup = "A"
     upstreamGroup.academicYear = AcademicYear(2010)
     upstreamGroup.members = JArrayList(
-      new UpstreamAssessmentGroupMember(upstreamGroup, "rob"),
-      new UpstreamAssessmentGroupMember(upstreamGroup, "kev"),
-      new UpstreamAssessmentGroupMember(upstreamGroup, "bib")
+      new UpstreamAssessmentGroupMember(upstreamGroup, "rob", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamGroup, "kev", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamGroup, "bib", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     )
 
     assignmentMembershipService.save(upstreamGroup)
@@ -759,22 +759,22 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamAg3.sequence = "A03"
 
     upstreamAg1.members = JArrayList(
-      new UpstreamAssessmentGroupMember(upstreamAg1, "0000001"),
-      new UpstreamAssessmentGroupMember(upstreamAg1, "0000002")
+      new UpstreamAssessmentGroupMember(upstreamAg1, "0000001", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg1, "0000002", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     )
 
     upstreamAg2.members = JArrayList(
-      new UpstreamAssessmentGroupMember(upstreamAg2, "0000002"),
-      new UpstreamAssessmentGroupMember(upstreamAg2, "0000003")
+      new UpstreamAssessmentGroupMember(upstreamAg2, "0000002", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg2, "0000003", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     )
 
     upstreamAg3.members = JArrayList(
-      new UpstreamAssessmentGroupMember(upstreamAg3, "0000001"),
-      new UpstreamAssessmentGroupMember(upstreamAg3, "0000002"),
-      new UpstreamAssessmentGroupMember(upstreamAg3, "0000003"),
-      new UpstreamAssessmentGroupMember(upstreamAg3, "0000004"),
-      new UpstreamAssessmentGroupMember(upstreamAg3, "0000005"),
-      new UpstreamAssessmentGroupMember(upstreamAg3, "1000006") //PWD stu
+      new UpstreamAssessmentGroupMember(upstreamAg3, "0000001", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg3, "0000002", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg3, "0000003", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg3, "0000004", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg3, "0000005", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamAg3, "1000006", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) //PWD stu
     )
 
     assignmentMembershipService.save(upstreamAg1)
@@ -1074,7 +1074,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     resultWhenSomeMR.size should be(2)
 
     // one of the modules is for this course and the other for none - should still get both assignments back
-    scd.addModuleRegistration(mr)
+    scd._moduleRegistrations.add(mr)
     val resultWhenOneMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
     resultWhenOneMR.size should be(2)
 

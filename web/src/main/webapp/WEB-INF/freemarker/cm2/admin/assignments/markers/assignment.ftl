@@ -117,7 +117,7 @@
           var $comments = $prevFeedback.find('.feedback-comments:first');
           var $notes = $prevFeedback.find('.feedback-comments:not(:first):last');
           var $attachments = $prevFeedback.find('.feedback-attachments li');
-          var $form = $('.marking-and-feedback form', $row);
+          var $form = $('form', $row);
 
           var $newComments = $form.find('textarea:first');
           if ($newComments.val()) {
@@ -202,7 +202,6 @@
         Coursework.wirePDFDownload();
 
         $('.marking-table')
-          .bigList(bigListOptions)
           .on('show.bs.collapse', function (e) {
             var $target = $(e.target);
             var id = $target.attr('id');
@@ -222,7 +221,8 @@
               var $row = $(this);
               $($row.data('target')).detach().insertAfter($row);
             });
-          });
+          })
+          .bigList(bigListOptions);
 
         if (firstTime && window.location.hash && $(window.location.hash).length) {
           var $target = $(window.location.hash);
@@ -249,6 +249,7 @@
       $body.on('change', 'input[type=radio][name=changesState]', function (e) {
         var show = this.value === "make-changes";
         $(this).closest('.online-marking').find('.marking-and-feedback').toggle(show);
+        $(this).closest('.online-marking').find('.marking-and-feedback.approved').val(!show);
       });
 
     })(jQuery);

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports.{JList, _}
 import uk.ac.warwick.tabula.api.commands.exams.AssessmentComponentMembersCommand._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Department, UpstreamAssessmentGroupInfo}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponentKey, Department, UpstreamAssessmentGroupInfo}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -37,16 +37,15 @@ class AssessmentComponentMembersCommandInternal(val department: Department, val 
   self: AssessmentComponentMembersRequest with AssessmentMembershipServiceComponent =>
 
   def applyInternal(): Result = transactional() {
-    val paperCodeMembers = assessmentMembershipService
+    val paperCodeComponents = assessmentMembershipService
       .getAssessmentComponentsByPaperCode(department, paperCodes.asScala.toSeq)
-      .view.mapValues(components => components.flatMap(c => assessmentMembershipService.getUpstreamAssessmentGroupInfo(c, academicYear)))
-      .toMap
 
-    val componentMembers = assessmentMembershipService
-      .getAssessmentComponents(department, assessmentComponents.asScala.toSeq)
-      .map(c => c.id -> assessmentMembershipService.getUpstreamAssessmentGroupInfo(c, academicYear))
-      .toMap
+    val components = assessmentMembershipService.getAssessmentComponents(department, assessmentComponents.asScala.toSeq)
 
+    val memberLookup = assessmentMembershipService.getUpstreamAssessmentGroupMembers(components ++ paperCodeComponents.values.flatten.toSeq, academicYear)
+
+    val paperCodeMembers = paperCodeComponents.view.mapValues(_.flatMap(c => memberLookup.getOrElse(AssessmentComponentKey(c), Nil))).toMap
+    val componentMembers = components.map(c => c.id -> memberLookup.getOrElse(AssessmentComponentKey(c), Nil)).toMap
     AssessmentComponentMembersResult(paperCodeMembers, componentMembers)
   }
 }
@@ -54,7 +53,7 @@ class AssessmentComponentMembersCommandInternal(val department: Department, val 
 trait AssessmentComponentMembersPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: AssessmentComponentMembersState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(RequiredPermission, department)
   }
 }

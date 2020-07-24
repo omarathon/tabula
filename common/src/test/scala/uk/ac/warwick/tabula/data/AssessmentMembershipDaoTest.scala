@@ -92,8 +92,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     upstreamGroup2.sequence = "A02"
     upstreamGroup2.academicYear = AcademicYear(2010)
     upstreamGroup2.members = JArrayList(
-      new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"),
-      new UpstreamAssessmentGroupMember(upstreamGroup2, "1000005")
+      new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(upstreamGroup2, "1000005", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     )
 
     assignment2.assessmentGroups.add(assessmentGroup2)
@@ -123,7 +123,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     upstreamGroup3.occurrence = "A"
     upstreamGroup3.assessmentGroup = "A"
     upstreamGroup3.academicYear = AcademicYear(2010)
-    upstreamGroup3.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089"))
+    upstreamGroup3.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
 
     assignment3.assessmentGroups.add(assessmentGroup3)
     assignment3.academicYear = AcademicYear(2010)
@@ -217,10 +217,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         upstreamGroup5WithResitStudent.assessmentGroup = "A1"
         upstreamGroup5WithResitStudent.sequence = "A03"
         upstreamGroup5WithResitStudent.academicYear = AcademicYear(2010)
-        val uagMember1 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "0672089")
-        uagMember1.resitExpected = Some(true)
-        val uagMember2 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "1000005")
-        uagMember2.resitExpected = Some(false)
+        val uagMember1 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "0672089", UpstreamAssessmentGroupMemberAssessmentType.Reassessment, Some("001"))
+        val uagMember2 = new UpstreamAssessmentGroupMember(upstreamGroup5WithResitStudent, "1000005", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
 
         upstreamGroup5WithResitStudent.members = JArrayList(
           uagMember1, uagMember2
@@ -272,8 +270,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         upstreamGroup6WithoutResit.assessmentGroup = "A1"
         upstreamGroup6WithoutResit.sequence = "A04"
         upstreamGroup6WithoutResit.academicYear = AcademicYear(2010)
-        val uagMember11 = new UpstreamAssessmentGroupMember(upstreamGroup6WithoutResit, "0672089")
-        uagMember11.resitExpected = Some(false)
+        val uagMember11 = new UpstreamAssessmentGroupMember(upstreamGroup6WithoutResit, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
 
         upstreamGroup6WithoutResit.members = JArrayList(uagMember11)
 
@@ -303,8 +300,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
       new Fixture {
         // Add user again
         upstreamGroup3.members = JArrayList(
-          new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089"),
-          new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089")
+          new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+          new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
         )
 
         session.save(assignment2AC)
@@ -399,7 +396,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         currentMembers.size should be(1)
 
         //now add one more PWD member. We should still have just 1 member
-        upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "1000006"))
+        upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "1000006", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
         session.update(upstreamGroup2)
         session.flush()
 
@@ -414,7 +411,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         session.save(stu3)
         session.flush()
 
-        upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "0000007"))
+        upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "0000007", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment))
         session.update(upstreamGroup2)
         session.flush()
 
@@ -432,4 +429,34 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
     }
   }
 
+
+  @Test def PassMark(): Unit = transactional { _ =>
+    new Fixture {
+      val gradeBoundaries = Seq(
+        Fixtures.gradeBoundary("WMR", grade = "1", minimumMark = Some(70), maximumMark = Some(100), result = Some(ModuleResult.Pass)),
+        Fixtures.gradeBoundary("WMR", grade = "21", minimumMark = Some(60), maximumMark = Some(69), result = Some(ModuleResult.Pass)),
+        Fixtures.gradeBoundary("WMR", grade = "22", minimumMark = Some(50), maximumMark = Some(59), result = Some(ModuleResult.Pass)),
+        Fixtures.gradeBoundary("WMR", grade = "3", minimumMark = Some(40), maximumMark = Some(49), result = Some(ModuleResult.Pass)),
+        Fixtures.gradeBoundary("WMR", grade = "F", minimumMark = Some(0), maximumMark = Some(39), result = Some(ModuleResult.Fail)),
+        Fixtures.gradeBoundary("WMR", grade = "CP", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Pass), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("WMR", grade = GradeBoundary.WithdrawnGrade, minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("WMR", grade = "R", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Deferred), signalStatus = GradeBoundarySignalStatus.SpecificOutcome, agreedStatus = GradeBoundaryAgreedStatus.Reassessment, incrementsAttempt = true),
+        Fixtures.gradeBoundary("WMR", grade = GradeBoundary.ForceMajeureMissingComponentGrade, signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+
+        Fixtures.gradeBoundary("HRNZ", grade = "P", result = Some(ModuleResult.Pass)),
+        Fixtures.gradeBoundary("HRNZ", grade = "F", result = Some(ModuleResult.Fail)),
+        Fixtures.gradeBoundary("HRNZ", grade = "S", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Pass), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.WithdrawnGrade, minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = "R", minimumMark = Some(0), maximumMark = Some(100), result = Some(ModuleResult.Fail), signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+        Fixtures.gradeBoundary("HRNZ", grade = GradeBoundary.ForceMajeureMissingComponentGrade, signalStatus = GradeBoundarySignalStatus.SpecificOutcome),
+      )
+
+      gradeBoundaries.foreach(dao.save)
+      session.flush()
+
+      dao.getPassMark("WMR", GradeBoundaryProcess.StudentAssessment, 1) should be (Some(40))
+      dao.getPassMark("HRNZ", GradeBoundaryProcess.StudentAssessment, 1) should be (None)
+      dao.getPassMark("NOBOUNDARIES", GradeBoundaryProcess.StudentAssessment, 1) should be (None)
+    }
+  }
 }

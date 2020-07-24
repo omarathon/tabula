@@ -3,13 +3,15 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
+import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
-import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringProgressionServiceComponent}
 
 import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
+import scala.util.{Failure, Success}
 
 object ModuleExamGridColumn {
 
@@ -29,12 +31,14 @@ object ModuleExamGridColumn {
     SITSIndicator("CP", "Compensated Pass"),
     SITSIndicator("N", "Resit refused/not taken"),
     SITSIndicator("QF", "Qualified Fail"),
-    SITSIndicator("T", "Temporary Withdraw")
+    SITSIndicator("T", "Temporary Withdraw"),
+    SITSIndicator("FM", "Force majeure")
   )
 }
 
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, val moduleList: Option[UpstreamModuleList], isDuplicate: Boolean, cats: JBigDecimal)
-  extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with AutowiringAssessmentMembershipServiceComponent {
+  extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with AutowiringAssessmentMembershipServiceComponent
+    with AutowiringProgressionServiceComponent {
 
   def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
@@ -63,89 +67,108 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
     _values.getOrElseUpdate(entity, {
       val values = getModuleRegistration(entity).map(mr => {
         val overallMark = {
-          if (entity.markOverrides.exists(_.get(module).isDefined)) {
+          if (entity.markOverrides.exists(_.contains(module))) {
             ExamGridColumnValueOverrideDecimal(entity.markOverrides.get(module))
           } else {
+            lazy val isUnconfirmed: Boolean =
+              mr.recordedModuleRegistration.flatMap(_.latestState).contains(UnconfirmedActual)
+
             if (mr.passFail) {
               val (grade, isActual) = mr.agreedGrade match {
-                case grade: String => (grade, false)
-                case _ => Option(mr.actualGrade).map(g => (g, true)).getOrElse(null, false)
+                case Some(grade: String) => (grade, false)
+                case _ => mr.actualGrade.map(g => (g, true)).getOrElse(null, false)
               }
               if (grade == null) {
                 ExamGridColumnValueMissing("Agreed and actual grade missing")
-              } else if (grade == "F") {
-                ExamGridColumnValueFailedString(grade, isActual)
               } else {
-                ExamGridColumnValueString(grade, isActual)
+                ExamGridColumnValueString(grade, isActual, isFail = grade == "F", isUnconfirmed = isUnconfirmed)
               }
             } else {
               val (mark, isActual) = mr.agreedMark match {
-                case mark: JBigDecimal => (BigDecimal(mark), false)
-                case _ => Option(mr.actualMark).map(m => (BigDecimal(m), true)).getOrElse(null, false)
+                case Some(mark: Int) => (BigDecimal(mark), false)
+                case _ => mr.actualMark.map(m => (BigDecimal(m), true)).getOrElse(null, mr.actualGrade.nonEmpty && mr.agreedGrade.isEmpty)
               }
-              if (mark == null) {
+
+              if (mark == null && mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.exists(_.grade == g))) {
+                val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
+                if (indicator.grade == GradeBoundary.ForceMajeureMissingComponentGrade) {
+                  // This is the only grade where the module result can vary so we need to include that too
+                  ExamGridColumnValueWithTooltip(s"${indicator.grade}${Option(mr.moduleResult).map(r => s" (${r.description})").getOrElse("")}", isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), unconfirmed = isUnconfirmed)
+                } else {
+                  ExamGridColumnValueWithTooltip(indicator.grade, isActual, indicator.description, failed = Option(mr.moduleResult).contains(ModuleResult.Fail), unconfirmed = isUnconfirmed)
+                }
+              } else if (mark == null) {
                 ExamGridColumnValueMissing("Agreed and actual mark missing")
-              } else if (isActual && mr.actualGrade == "F" || mr.agreedGrade == "F") {
-                ExamGridColumnValueFailedDecimal(mark, isActual)
+              } else if (progressionService.isFailed(mr)) {
+                ExamGridColumnValueDecimal(mark, isActual, isFail = true, isUnconfirmed = isUnconfirmed)
               } else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
-                ExamGridColumnValueOvercatDecimal(mark, isActual)
+                ExamGridColumnValueOvercatDecimal(mark, isActual, isUnconfirmed = isUnconfirmed)
               } else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.exists(_.grade == g))) {
                 val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
-                ExamGridColumnValueWithTooltip(s"${mr.firstDefinedGrade.get} ($mark)", isActual, indicator.description)
+                ExamGridColumnValueWithTooltip(s"${mr.firstDefinedGrade.get} ($mark)", isActual, indicator.description, unconfirmed = isUnconfirmed)
               } else {
-                ExamGridColumnValueDecimal(mark, isActual)
+                ExamGridColumnValueDecimal(mark, isActual, isUnconfirmed = isUnconfirmed)
               }
             }
           }
         }
         if (state.showComponentMarks) {
-          def toValue(member: UpstreamAssessmentGroupMember): ExamGridColumnValue = {
-            val (mark, isActual) = (member.firstDefinedMark.orNull, !member.isAgreedMark)
+          def toValue(member: UpstreamAssessmentGroupMember, weighting: BigDecimal, isUnconfirmed: Boolean): ExamGridColumnValue = {
+            val (mark, grade, isActual) = (member.firstDefinedMark, member.firstDefinedGrade, !member.isAgreedMark)
 
             def markAsString: String = {
-              val raw = mark.underlying.stripTrailingZeros.toPlainString
-              val checkResit = if (member.isResitMark) s"[$raw ${member.firstOriginalMark.map(s => s"($s)").getOrElse("")}]" else raw
+              val raw = mark.orElse(grade).get.toString
+              val checkResit = if (member.isReassessment) s"[$raw${member.firstOriginalMark.orElse(member.firstOriginalGrade).map(s => s" ($s)").getOrElse("")}]" else raw
               val checkShowSequence = if (state.showComponentSequence) s"$checkResit (${member.upstreamAssessmentGroup.sequence})" else checkResit
               checkShowSequence
             }
 
-            if (mark == null) {
+            if (mark.isEmpty && grade.isEmpty) {
               ExamGridColumnValueMissing("Agreed and actual mark missing")
-            } else if (member.firstDefinedGrade.contains("F")) {
-              if (state.showComponentSequence || member.isResitMark) {
-                ExamGridColumnValueFailedString(markAsString, isActual)
-              } else {
-                ExamGridColumnValueFailedDecimal(mark, isActual)
-              }
             } else {
-              if (state.showComponentSequence || member.isResitMark) {
-                ExamGridColumnValueString(markAsString, isActual)
-              }
-              else ExamGridColumnValueDecimal(mark, isActual)
+              val sequence = member.upstreamAssessmentGroup.sequence
+              val name = member.upstreamAssessmentGroup.assessmentComponent.map(_.name).getOrElse("")
+              val tooltip = s"$sequence $name - $weighting%"
+              val isFail = member.firstDefinedGrade.contains("F")
+              ExamGridColumnValueWithTooltip(markAsString, isActual, tooltip, failed = isFail, unconfirmed = isUnconfirmed)
             }
           }
 
           val assessmentComponents = {
-            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
+            lazy val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = true)
+
+            val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.firstDefinedMark.isDefined || m.firstDefinedGrade.nonEmpty).sortBy(_.upstreamAssessmentGroup.sequence)
+
+            val isUnconfirmed = allComponents.map(uagm =>
+              uagm -> mr.recordedAssessmentComponentStudents.find(_.matchesIdentity(uagm)).flatMap(_.latestState).contains(UnconfirmedActual)
+            ).toMap
+
+            val componentsAndWeights = allComponents.map { uagm => uagm ->
+              _assessmentComponents.find { component =>
+                component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
+                component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
+                component.sequence == uagm.upstreamAssessmentGroup.sequence
+              }.flatMap(ac => ac.weightingFor(marks) match {
+                case Success(w) => w
+                case Failure(t) =>
+                  logger.error(s"Couldn't calculate variable weighting for $ac, using scaled weighting", t)
+                  ac.scaledWeighting
+              })
+            }.toMap.collect { case (key, Some(value)) => (key, value, isUnconfirmed(key)) }
+
             if (state.showZeroWeightedComponents)
-              allComponents
+              componentsAndWeights
             else {
-              allComponents.filter { uagm =>
-                _assessmentComponents.find { component =>
-                  component.moduleCode == uagm.upstreamAssessmentGroup.moduleCode &&
-                    component.assessmentGroup == uagm.upstreamAssessmentGroup.assessmentGroup &&
-                    component.sequence == uagm.upstreamAssessmentGroup.sequence
-                }.flatMap(ac => Option(ac.weighting)).exists(_ > 0)
-              }
+              componentsAndWeights.filter(_._2 > 0)
             }
           }
 
-          val (exams, assignments) = assessmentComponents.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
+          val (exams, assignments) = assessmentComponents.partition(_._1.upstreamAssessmentGroup.assessmentComponent.exists(_.assessmentType.subtype == TabulaAssessmentSubtype.Exam))
 
           ExamGridColumnValueType.toMap(
             overall = overallMark,
-            assignments = assignments.map(toValue),
-            exams = exams.map(toValue)
+            assignments = assignments.map { case (uagm, w, isUnconfirmed) => toValue(uagm, w, isUnconfirmed) }.toSeq,
+            exams = exams.map { case (uagm, w, isUnconfirmed) => toValue(uagm, w, isUnconfirmed) }.toSeq
           )
         } else {
           ExamGridColumnValueType.toMap(overallMark)
@@ -160,18 +183,17 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
     })
   }
 
-  private def scaled(bg: JBigDecimal): JBigDecimal =
-    JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
+  protected def scaled(bg: JBigDecimal): JBigDecimal =
+    JBigDecimal(Option(bg).map(_.setScale(1, RoundingMode.HALF_UP)))
 
-  private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] = {
+  private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] =
     entity.moduleRegistrations.find(mr =>
       mr.module == module &&
-        scaled(mr.cats) == scaled(cats) &&
-        (moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
+      scaled(mr.cats) == scaled(cats) &&
+      (moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
     )
-  }
 
-  override val secondaryValue: String = cats.toPlainString
+  override val secondaryValue: String = scaled(cats).toPlainString
 
 }
 
@@ -222,9 +244,9 @@ abstract class OptionalModuleExamGridColumn(state: ExamGridColumnState, module: 
 
   // TAB-6883 - show the FMC that this module belongs to for stats
   override val secondaryValue: String = if(state.department.rootDepartment.code == "st") {
-    cats.toPlainString + moduleList.map(ml => s" - ${ml.shortName}").getOrElse("")
+    scaled(cats).toPlainString + moduleList.map(ml => s" - ${ml.shortName}").getOrElse("")
   } else {
-    cats.toPlainString
+    scaled(cats).toPlainString
   }
 }
 

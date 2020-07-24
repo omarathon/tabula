@@ -8,25 +8,28 @@ DROP TABLE CAM_SSN IF EXISTS;
 CREATE TABLE IF NOT EXISTS CAM_SMS
 (
   MOD_CODE VARCHAR(10) NOT NULL,
-  SMS_AGRP VARCHAR(2),
-  SMS_OCCL VARCHAR(6)  NOT NULL,
   AYR_CODE VARCHAR(6)  NOT NULL,
   SPR_CODE VARCHAR(12) NOT NULL,
+  PSL_CODE VARCHAR(1),
+  SMS_AGRP VARCHAR(2),
+  SMS_OCCL VARCHAR(6),
   SMS_MCRD INTEGER,
-  SES_CODE VARCHAR(12),
+  SES_CODE VARCHAR(12)
 );
 
 CREATE TABLE IF NOT EXISTS CAM_SMO
 (
   MOD_CODE  VARCHAR(10) NOT NULL,
-  SMO_AGRP  VARCHAR(2),
   MAV_OCCUR VARCHAR(6)  NOT NULL,
   AYR_CODE  VARCHAR(6)  NOT NULL,
   SPR_CODE  VARCHAR(12) NOT NULL,
+  PSL_CODE  VARCHAR(1) NOT NULL,
+  SMO_AGRP  VARCHAR(2),
   SMO_MCRD  INTEGER,
   SES_CODE  VARCHAR(12),
   SMO_RTSC  VARCHAR(6)
 );
+
 
 CREATE TABLE IF NOT EXISTS CAM_SSN
 (
@@ -35,9 +38,35 @@ CREATE TABLE IF NOT EXISTS CAM_SSN
   SSN_MRGS VARCHAR(6)  NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS INS_SMR
+(
+  SPR_CODE VARCHAR(12) NOT NULL,
+  MOD_CODE VARCHAR(10) NOT NULL,
+  MAV_OCCUR VARCHAR(6) NOT NULL,
+  AYR_CODE VARCHAR(6) NOT NULL,
+  PSL_CODE VARCHAR(1) NOT NULL,
+  SMR_ACTM INTEGER,
+  SMR_ACTG VARCHAR(2),
+  SMR_AGRM INTEGER,
+  SMR_AGRG VARCHAR(2),
+  SMR_CRED DECIMAL ,
+  SMR_RSLT VARCHAR(1),
+  SMR_CURA INTEGER,
+  SMR_COMA INTEGER,
+  SMR_SASS VARCHAR(1),
+  SMR_PROC VARCHAR(6),
+  SMR_PRCS VARCHAR(1),
+  SMR_UDF2 VARCHAR(15),
+  SMR_UDF3 VARCHAR(15),
+  SMR_UDF5 VARCHAR(15),
+  SMR_UDFA VARCHAR(15),
+  SMR_FASD DATE
+);
+
 -- Module availability and assessment details
 DROP TABLE CAM_MAB IF EXISTS;
 DROP TABLE CAM_MAV IF EXISTS;
+DROP TABLE CAM_MAD IF EXISTS;
 
 CREATE TABLE IF NOT EXISTS CAM_MAB
 (
@@ -51,7 +80,8 @@ CREATE TABLE IF NOT EXISTS CAM_MAB
   MAB_APAC VARCHAR(12)  NOT NULL,
   MAB_ADVC VARCHAR(12)  NOT NULL,
   MAB_PERC INTEGER      NOT NULL,
-  MAB_HOHM TIMESTAMP
+  MAB_HOHM TIMESTAMP,
+  MAB_FAYN VARCHAR(1)
 );
 
 CREATE TABLE IF NOT EXISTS CAM_MAV
@@ -60,6 +90,17 @@ CREATE TABLE IF NOT EXISTS CAM_MAV
   PSL_CODE  CHAR(1),
   AYR_CODE  VARCHAR(6)  NOT NULL,
   MAV_OCCUR VARCHAR(6)  NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS CAM_MAD
+(
+  MOD_CODE  VARCHAR(10) NOT NULL,
+  PSL_CODE  CHAR(1),
+  AYR_CODE  VARCHAR(6)  NOT NULL,
+  MAV_OCCUR VARCHAR(6)  NOT NULL,
+  MAP_CODE  VARCHAR(10) NOT NULL,
+  MAB_SEQ   VARCHAR(6)  NOT NULL,
+  MAD_DDATE DATE
 );
 
 DROP TABLE CAM_WSS IF EXISTS;
@@ -73,7 +114,8 @@ CREATE TABLE IF NOT EXISTS CAM_WSS
   WSS_MODC VARCHAR(8)  NOT NULL,
   WSS_PUBL VARCHAR(1)  NOT NULL,
   WSS_SEAT VARCHAR(12) NOT NULL,
-  WSS_MABS VARCHAR(12) NOT NULL
+  WSS_MABS VARCHAR(12) NOT NULL,
+  WSS_PROC VARCHAR(12) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS CAM_WSM
@@ -163,11 +205,13 @@ CREATE TABLE IF NOT EXISTS CAM_SRA
   AYR_CODE  VARCHAR(6)  NOT NULL,
   MOD_CODE  VARCHAR(10) NOT NULL,
   MAV_OCCUR VARCHAR(6)  NOT NULL,
-  SRA_SEQ   VARCHAR(6)  NOT NULL,
+  SRA_SEQ   VARCHAR(3)  NOT NULL,
+  SRA_RSEQ   VARCHAR(3)  NOT NULL,
   SRA_ACTM  INTEGER,
   SRA_ACTG  VARCHAR(2),
   SRA_AGRM  INTEGER,
-  SRA_AGRG  VARCHAR(2)
+  SRA_AGRG  VARCHAR(2),
+  SRA_CURA  INTEGER
 );
 
 
@@ -194,11 +238,15 @@ VALUES ('CH130-15', 'Y', '11/12', 'A');
 INSERT INTO CAM_MAV
 VALUES ('CH130-20', 'Y', '11/12', 'A');
 INSERT INTO CAM_MAB
-VALUES ('CH130-15', 'A01', 'Chem 130 A01', 'A', 'E', 'Y', null, 'CH1300', 'X', 50, null);
+VALUES ('CH130-15', 'A01', 'Chem 130 A01', 'A', 'E', 'Y', null, 'CH1300', 'X', 50, null, 'Y');
+INSERT INTO CAM_MAD
+VALUES ('CH130-15', 'Y', '11/12', 'A', 'CH130-15', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'CH130-15', 'CH1300');
 INSERT INTO CAM_MAB
-VALUES ('CH130-20', 'A01', 'Chem 130 A01 (20 CATS)', 'A', 'E', 'Y', null, 'CH1300', 'X', 50, null);
+VALUES ('CH130-20', 'A01', 'Chem 130 A01 (20 CATS)', 'A', 'E', 'Y', null, 'CH1300', 'X', 50, null, 'Y');
+INSERT INTO CAM_MAD
+VALUES ('CH130-20', 'Y', '11/12', 'A', 'CH130-20', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'CH130-20', 'CH1300');
 INSERT INTO CAM_APA
@@ -209,9 +257,11 @@ VALUES ('CH1300', 'X', '1900-01-01 01:30:00', null);
 -- some more items that don't have corresponding students,
 -- but don't have the right data in other tables to form a complete entry
 INSERT INTO CAM_MAB
-VALUES ('XX100-30', 'A01', 'Mystery Meat', 'A', 'E', 'Y', null, 'XX1000', 'X', 50, '1900-01-01 01:30:00');
+VALUES ('XX100-30', 'A01', 'Mystery Meat', 'A', 'E', 'Y', null, 'XX1000', 'X', 50, '1900-01-01 01:30:00', 'Y');
 INSERT INTO CAM_MAV
 VALUES ('XX100-30', 'Y', '11/12', 'A');
+INSERT INTO CAM_MAD
+VALUES ('XX100-30', 'Y', '11/12', 'A', 'XX100-30', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'XX100-30', 'XX1000');
 INSERT INTO CAM_APA
@@ -219,9 +269,11 @@ VALUES ('XX1000', 'Mystery Meat', 'OPEN');
 INSERT INTO CAM_ADV
 VALUES ('XX1000', 'X', '1900-01-01 01:30:00', '1900-01-01 00:20:00');
 INSERT INTO CAM_MAB
-VALUES ('XX101-30', 'A01', 'Danger Zone', 'A', 'E', 'Y', null, 'XX1010', 'X', 50, '1900-01-01 01:30:00');
+VALUES ('XX101-30', 'A01', 'Danger Zone', 'A', 'E', 'Y', null, 'XX1010', 'X', 50, '1900-01-01 01:30:00', 'Y');
 INSERT INTO CAM_MAV
 VALUES ('XX101-30', 'Y', '11/12', 'A');
+INSERT INTO CAM_MAD
+VALUES ('XX101-30', 'Y', '11/12', 'A', 'XX101-30', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'XX101-30', 'XX1010');
 INSERT INTO CAM_APA
@@ -230,9 +282,11 @@ INSERT INTO CAM_ADV
 VALUES ('XX1010', 'X', '1900-01-01 01:30:00', '1900-01-01 00:20:00');
 
 INSERT INTO CAM_MAB
-VALUES ('CH115-30', 'A01', 'Chemicals Essay', 'A', 'E', 'Y', null, 'CH1150', 'X', 50, '1900-01-01 01:30:00');
+VALUES ('CH115-30', 'A01', 'Chemicals Essay', 'A', 'E', 'Y', null, 'CH1150', 'X', 50, '1900-01-01 01:30:00', 'Y');
 INSERT INTO CAM_MAV
 VALUES ('CH115-30', 'Y', '11/12', 'A');
+INSERT INTO CAM_MAD
+VALUES ('CH115-30', 'Y', '11/12', 'A', 'CH115-30', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'CH115-30', 'CH1150');
 INSERT INTO CAM_APA
@@ -241,9 +295,11 @@ INSERT INTO CAM_ADV
 VALUES ('CH1150', 'X', '1900-01-01 01:30:00', null);
 
 INSERT INTO CAM_MAB
-VALUES ('CH120-15', 'A01', 'Chemistry Dissertation', 'A', 'E', 'Y', null, 'CH1200', 'X', 50, null);
+VALUES ('CH120-15', 'A01', 'Chemistry Dissertation', 'A', 'E', 'Y', null, 'CH1200', 'X', 50, null, 'Y');
 INSERT INTO CAM_MAV
 VALUES ('CH120-15', 'Y', '11/12', 'A');
+INSERT INTO CAM_MAD
+VALUES ('CH120-15', 'Y', '11/12', 'A', 'CH120-15', 'A01', '2020-07-01');
 INSERT INTO CAM_WSM
 VALUES ('EXJUN-12', '11/12', 'CH120-15', 'CH1200');
 INSERT INTO CAM_APA
@@ -283,42 +339,43 @@ VALUES ('UDFA-G500', 'G500');
 
 -- unconfirmed registrations
 INSERT INTO CAM_SMS
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123456/1', 30, 'C');
+VALUES ('CH115-30', '11/12', '0123456/1', 'Y', 'A', 'A', 30, 'C');
 INSERT INTO CAM_SSN
 VALUES ('0123456/1', '11/12', 'GEN');
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-12', '0123456/1', '11/12', 'CH115-30', 'Y', '1', 'A01');
+VALUES ('EXJUN-12', '0123456/1', '11/12', 'CH115-30', 'Y', '1', 'A01', 'SAS');
 
 INSERT INTO CAM_SMS
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123457/1', 30, 'C');
+VALUES ('CH115-30', '11/12', '0123457/1', 'Y', 'A', 'A', 30, 'C');
 INSERT INTO CAM_SSN
 VALUES ('0123457/1', '11/12', 'GEN');
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-12', '0123457/1', '11/12', 'CH115-30', 'Y', '2', 'A01');
+VALUES ('EXJUN-12', '0123457/1', '11/12', 'CH115-30', 'Y', '2', 'A01', 'SAS');
 
 -- confirmed registrations
 INSERT INTO CAM_SMO
-VALUES ('CH115-30', 'A', 'A', '11/12', '0123458/1', 30, 'C', null);
+VALUES ('CH115-30', 'A', '11/12', '0123458/1', 'Y', 'A', 30, 'C', null);
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH115-30', 'Y', '3', 'A01');
+VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH115-30', 'Y', '3', 'A01', 'SAS');
 INSERT INTO CAM_SMO
-VALUES ('CH120-15', 'A', 'A', '11/12', '0123458/1', 30, 'C', null);
+VALUES ('CH120-15', 'A', '11/12', '0123458/1', 'Y', 'A', 30, 'C', null);
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH120-15', 'Y', '1', 'A01');
+VALUES ('EXJUN-12', '0123458/1', '11/12', 'CH120-15', 'Y', '1', 'A01', 'SAS');
 INSERT INTO CAM_SSN
 VALUES ('0123458/1', '11/12', 'CON');
 
 -- auto-uploaded confirmed registrations
 INSERT INTO CAM_SMO
-VALUES ('CH115-30', null, 'A', '11/12', '0123460/1', 30, 'C', null);
+VALUES ('CH115-30', 'A', '11/12', '0123460/1', 'Y', null, 30, 'C', null);
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-12', '0123460/1', '11/12', 'CH115-30', 'Y', '4', 'A01');
+VALUES ('EXJUN-12', '0123460/1', '11/12', 'CH115-30', 'Y', '4', 'A01', 'SAS');
 
 -- Some data from other years that the import should ignore
 INSERT INTO CAM_SMO
-VALUES ('CH130-20', 'A', 'A', '10/11', '0123458/1', 30, 'C', null);
+VALUES ('CH130-20', 'A', '10/11', '0123458/1','Y','A', 30, 'C', null);
+
 INSERT INTO CAM_WSS
-VALUES ('EXJUN-11', '0123458/1', '10/11', 'CH130-20', 'Y', '1', 'A01');
+VALUES ('EXJUN-11', '0123458/1', '10/11', 'CH130-20', 'Y', '1', 'A01', 'SAS');
 INSERT INTO CAM_SSN
 VALUES ('0123458/1', '10/11', 'CON');
 
@@ -332,4 +389,58 @@ VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', 32, 'F', 33, 'F', 'R');
 
 -- resit marks
 INSERT INTO CAM_SRA
-VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', 40, '3', 40, '3');
+VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', '001',40, '3', 40, '3', 1);
+
+
+
+
+--test data for Export SMR functionality
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123401/2', 'Y', 'A', 30, 'C', null);
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123451/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123453/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123452/2', 'Y', 'A', 30, 'C', null);
+
+INSERT INTO CAM_SMO
+VALUES ('CH118-30', 'A', '18/19', '0123461/2', 'Y', 'A', 30, 'C', null);
+
+--test data for Export SMR functionality
+--Straightforward pass student
+INSERT INTO INS_SMR
+VALUES ('0123451/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null, null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123452/2', 'CH118-30', 'A', '18/19', 'Y', 61, '21', null, null, 30, 'P', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123453/2', 'CH118-30', 'A', '18/19', 'Y', 61, '21', 61, '21', 30, 'P', 1,1, 'A', 'COM', 'A', null, 'Y', 'SRAs by dept', null, null);
+
+
+ --Failed student data with initial SMR
+INSERT INTO INS_SMR
+VALUES ('0123461/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123462/2', 'CH118-30', 'A', '18/19', 'Y', 29, 'F', null, null, 0, 'F', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123463/2', 'CH118-30', 'A', '18/19', 'Y', 29, 'F', 29, 'F', 0, 'F', 2,1, 'R', 'RAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123464/2', 'CH118-30', 'A', '18/19', 'Y', 29, '2', null, null, 30, 'P', 2,1, 'R', 'RAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123465/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', 40, '2', 30, 'P', 2,2, 'R', 'COM', 'A',  null, null, null, null, null);
+
+
+
+ --Further Ist attempt student data with initial SMR
+INSERT INTO INS_SMR
+VALUES ('0123471/2', 'CH118-30', 'A', '18/19', 'Y', null, null, null, null, null, null, 1,0, null, 'SAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123472/2', 'CH118-30', 'A', '18/19', 'Y', 15, 'S', null, null, 0, 'D', 1,0, null, 'SAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123473/2', 'CH118-30', 'A', '18/19', 'Y', 15, 'S', 15, 'S', 0, 'D', 1,1, 'R', 'RAS', null,  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123474/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', null, null, 30, 'P', 1,1, 'R', 'RAS', 'C',  null, null, null, null, null);
+INSERT INTO INS_SMR
+VALUES ('0123475/2', 'CH118-30', 'A', '18/19', 'Y', 40, '2', 40, '2', 30, 'P', 1,1, 'R', 'COM', 'A',  null, null, null, null, null);

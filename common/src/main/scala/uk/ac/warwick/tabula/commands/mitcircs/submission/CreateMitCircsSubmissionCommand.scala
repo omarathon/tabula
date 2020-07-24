@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, FeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.submission.CreateMitCircsSubmissionCommand._
@@ -106,6 +106,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
     }
+    submission.covid19Submission = covid19Submission
     file.attached.asScala.foreach(submission.addAttachment)
     submission.relatedSubmission = relatedSubmission
 
@@ -133,7 +134,8 @@ trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with Per
 trait MitCircsSubmissionValidation extends SelfValidating {
   self: MitCircsSubmissionRequest
     with MitCircsSubmissionState
-    with ModuleAndDepartmentServiceComponent =>
+    with ModuleAndDepartmentServiceComponent
+    with FeaturesComponent =>
 
   override def validate(errors: Errors): Unit = {
     // Only validate at submission time, allow drafts to be saved that would be invalid
@@ -176,6 +178,9 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       if (!affectedAssessments.asScala.exists(_.selected))
         errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
 
+      // validate evidence
+      val covid19EvidenceExempt: Boolean = features.mitcircsCovid19 && Option(covid19Submission).exists(_.booleanValue)
+
       // validate contact
       Option(contacted).map(_.booleanValue) match {
         case Some(true) =>
@@ -184,7 +189,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
           else if (contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
             errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
         case Some(false) =>
-          if (!noContactReason.hasText)
+          if (!noContactReason.hasText && !covid19EvidenceExempt)
             errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
         case None =>
           errors.rejectValue("contacted", "mitigatingCircumstances.contacted.required")
@@ -193,8 +198,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       // validate reason
       if (!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
 
-      // validate evidence
-      if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {
+      if (!covid19EvidenceExempt && attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {
         errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
         errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.pending")
       }
@@ -254,6 +258,8 @@ trait MitCircsSubmissionRequest {
 
   var relatedSubmission: MitigatingCircumstancesSubmission = _
   var approve: Boolean = _ // set this to true when a user is approving a draft submission or one made on their behalf
+
+  var covid19Submission: JBoolean = _
 }
 
 trait CreateMitCircsSubmissionState extends MitCircsSubmissionState {

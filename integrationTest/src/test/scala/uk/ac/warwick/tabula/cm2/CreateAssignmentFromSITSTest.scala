@@ -142,10 +142,15 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
       datePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
 
       click on datePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "8" }.head
+      click on datePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == "12:00" }.head
+      click on datePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == "12:00" }.head
+
+      // eventually { click on datePicker.underlying.findElement(By.xpath(s"//span[@class='hour active']")) }
+      // eventually { click on datePicker.underlying.findElement(By.xpath(s"//span[@class='minute active']")) }
     }
 
     Then("The close date should be the new value")
-    closeDate.getAttribute("value") should be("08-Aug-2017")
+    closeDate.getAttribute("value") should be("08-Aug-2017 12:00:00")
 
     When("I click on the Set dates button")
     val setDatesButton = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Save dates')]")).get(0)

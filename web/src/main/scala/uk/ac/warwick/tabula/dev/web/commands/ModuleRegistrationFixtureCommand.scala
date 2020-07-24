@@ -26,13 +26,12 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 
       val regs: Seq[ModuleRegistration] =
         for {
-          uniId <- universityIds.split(",")
+          uniId <- universityIds.split(",").toSeq
           student <- memberDao.getByUniversityId(uniId).filter(_.isInstanceOf[StudentMember]).toSeq
           scd <- student.asInstanceOf[StudentMember].freshStudentCourseDetails
         } yield {
-          val modReg = new ModuleRegistration(scd.scjCode, module, cats, academicYear, "A")
+          val modReg = new ModuleRegistration(scd.sprCode, module, cats, "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString), academicYear, "A", "WMR")
           session.save(modReg)
-          scd.addModuleRegistration(modReg)
           session.save(scd)
           session.flush()
 

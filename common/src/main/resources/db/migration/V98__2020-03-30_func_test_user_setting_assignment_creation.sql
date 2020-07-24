@@ -1,0 +1,2 @@
+-- disable assignment property population based on the last assignment created by functional test users (the initial state for tests should be deterministic)
+update usersettings set settings = settings::jsonb || '{ "newAssignmentSettings" : "none" }' where userid like 'tabula-functest%';

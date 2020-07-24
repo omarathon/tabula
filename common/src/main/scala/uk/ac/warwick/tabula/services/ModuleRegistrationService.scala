@@ -3,12 +3,14 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.ModuleResult.Pass
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, AutowiringTransactionalComponent, ModuleRegistrationDaoComponent, TransactionalComponent}
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 import scala.math.BigDecimal.RoundingMode
+
+case class ComponentAndMarks(assessmentComponent: Option[AssessmentComponent], member: UpstreamAssessmentGroupMember, cats:BigDecimal)
 
 trait ModuleRegistrationService {
 
@@ -20,8 +22,7 @@ trait ModuleRegistrationService {
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration]
@@ -30,9 +31,15 @@ trait ModuleRegistrationService {
 
   def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 
+  def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration]
+
+  def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration]
+
   def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration]
 
   def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration]
+
+  def getByRecordedAssessmentComponentStudentsNeedsWritingToSits(students: Seq[RecordedAssessmentComponentStudent]): Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]]
 
   /**
     * Gets the weighted mean mark for the given module registrations.
@@ -44,6 +51,14 @@ trait ModuleRegistrationService {
     * @return The weighted mean mark, if all the provided registration has an agreed mark
     */
   def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
+
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
+
+  def componentsAndMarksExcludedFromBenchmark(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
+
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
+
+  def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
   /**
     * Like weightedMeanYearMark but only returns year marks calculated from agreed (post board) marks
@@ -64,8 +79,8 @@ trait ModuleRegistrationService {
 }
 
 abstract class AbstractModuleRegistrationService extends ModuleRegistrationService {
-
-  self: ModuleRegistrationDaoComponent =>
+  self: ModuleRegistrationDaoComponent
+    with TransactionalComponent =>
 
   def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 
@@ -75,32 +90,48 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
   def getByNotionalKey(
     studentCourseDetails: StudentCourseDetails,
-    module: Module,
-    cats: JBigDecimal,
+    sitsModuleCode: String,
     academicYear: AcademicYear,
     occurrence: String
   ): Option[ModuleRegistration] =
-    moduleRegistrationDao.getByNotionalKey(studentCourseDetails, module, cats, academicYear, occurrence)
+    moduleRegistrationDao.getByNotionalKey(studentCourseDetails, sitsModuleCode, academicYear, occurrence)
 
-  def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
+  override def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
 
-  def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
+  override def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-  def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
+  override def getByModuleOccurrence(sitsModuleCode: String, academicYear: AcademicYear, occurrence: String): Seq[ModuleRegistration] = transactional(readOnly = true) {
+    moduleRegistrationDao.getByModuleOccurrence(sitsModuleCode, academicYear, occurrence)
+  }
+
+  override def getByDepartmentAndYear(department: Department, academicYear: AcademicYear): Seq[ModuleRegistration] =
+    moduleRegistrationDao.getByDepartmentAndYear(department, academicYear)
+
+  override def getByYears(academicYears: Seq[AcademicYear], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByYears(academicYears, includeDeleted)
 
-  def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
+  override def getByUniversityIds(universityIds: Seq[String], includeDeleted: Boolean): Seq[ModuleRegistration] =
     moduleRegistrationDao.getByUniversityIds(universityIds, includeDeleted)
 
-  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
+  override def getByRecordedAssessmentComponentStudentsNeedsWritingToSits(students: Seq[RecordedAssessmentComponentStudent]): Map[RecordedAssessmentComponentStudent, Seq[ModuleRegistration]] = transactional(readOnly = true) {
+    val allModuleRegistrations =
+      moduleRegistrationDao.getByRecordedAssessmentComponentStudentsNeedsWritingToSits
+        .groupBy(mr => (SprCode.getUniversityId(mr.sprCode), mr.sitsModuleCode, mr.academicYear, mr.occurrence))
+
+    students.map { student =>
+      student -> allModuleRegistrations.getOrElse((student.universityId, student.moduleCode, student.academicYear, student.occurrence), Seq.empty)
+    }.toMap
+  }
+
+  private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int], gradeFn: ModuleRegistration => Option[String]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
       val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
       (mark, cats)
-    }).filter { case (mark, cats) => mark != null & cats != null }
-    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(_.passFail).size) {
+    }).filter { case (mark, cats) => mark != null && cats != null && cats > 0 }
+    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade) || BigDecimal(mr.cats) == 0).size) {
       Right(
         (nonNullReplacedMarksAndCats.map { case (mark, cats) => mark * cats }.sum / nonNullReplacedMarksAndCats.map { case (_, cats) => cats }.sum)
           .setScale(1, RoundingMode.HALF_UP)
@@ -112,15 +143,59 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
         else
           Left(s"The year mark cannot be calculated because there are no module marks")
       else
-        Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
+        Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && marksFn(mr).isEmpty && !gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade)).map(_.module.code.toUpperCase).mkString(", ")}")
     }
   }
 
   def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.firstDefinedMark }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty)(_.firstDefinedMark, _.firstDefinedGrade)
 
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
-    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
+    calculateYearMark(moduleRegistrations, markOverrides, allowEmpty)(_.agreedMark, _.agreedGrade)
+
+  def benchmarkComponentsAndMarks(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    getComponentsAndMarks(moduleRegistration.componentsForBenchmark, moduleRegistration)
+  }
+
+  def componentsAndMarksExcludedFromBenchmark(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks] = {
+    getComponentsAndMarks(moduleRegistration.componentsIgnoredForBenchmark, moduleRegistration)
+  }
+
+  private def getComponentsAndMarks(components: Seq[UpstreamAssessmentGroupMember], moduleRegistration: ModuleRegistration) = {
+    // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
+    lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
+
+    components.map { uagm =>
+      val weighting: BigDecimal =
+        uagm.upstreamAssessmentGroup.assessmentComponent
+          .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
+          .getOrElse(BigDecimal(0))
+
+      val cats = (weighting / 100) * moduleRegistration.cats
+      ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
+    }
+  }
+
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+    val completedCats = moduleRegistrations.flatMap(benchmarkComponentsAndMarks).map(_.cats).sum
+    val totalCats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+    if(totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
+  }
+
+  def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+    val marksForBenchmark = moduleRegistrations.map(mr => mr -> benchmarkComponentsAndMarks(mr)).toMap
+
+    val cats = marksForBenchmark.values.flatten.map(_.cats).sum
+
+    val benchmark = if(cats == 0) BigDecimal(0) else {
+      marksForBenchmark.values.flatten.map { componentAndMarks =>
+        val mark = componentAndMarks.member.firstDefinedMark.getOrElse(throw new IllegalStateException("Components without marks shouldn't be used to calculate the benchmark"))
+        mark * componentAndMarks.cats
+      }.sum / marksForBenchmark.values.flatten.map(_.cats).sum
+    }
+
+    benchmark.setScale(1, RoundingMode.HALF_UP)
+  }
 
   def overcattedModuleSubsets(
     moduleRegistrations: Seq[ModuleRegistration],
@@ -128,9 +203,13 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     normalLoad: BigDecimal,
     rules: Seq[UpstreamRouteRule]
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
-    val validRecords = moduleRegistrations.filterNot(_.deleted)
-    if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
-        Seq((null, validRecords))
+    val validRecords = moduleRegistrations
+      .filterNot(_.deleted)
+      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0) // 0 CAT modules don't count towards the overall mark so ignore them
+      .filterNot(mr => mr.firstDefinedGrade.contains(GradeBoundary.WithdrawnGrade)) // Remove withdrawn modules
+
+    if (validRecords.exists(mr => mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
+      Seq((null, validRecords))
     } else {
       // TAB-6331 - Overcat subsets don't _have_ to contain all optional core modules. If a minimum number of optional core modules must be passed that should
       // be handled by pathway rules instead (which means as far as grids are concerned there is no difference between Optional and OptionalCore modules)
@@ -138,14 +217,17 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
         mr.selectionStatus == ModuleSelectionStatus.Core
       )
       val subsets = validRecords.toSet.subsets.toSeq
-      val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
-        // CATS total of at least the normal load
-        modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
-          // Contains all the core modules
-          coreModules.forall(modRegs.contains) &&
-          // All the registrations have agreed or actual marks
-          modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
-      )
+      val validSubsets = subsets.filter(_.nonEmpty).filter { modRegs =>
+        val (forceMajeureModRegs, modRegsWithoutForceMajeure) = modRegs.partition(_.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
+        val forceMajeureCats = forceMajeureModRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum
+
+        // CATS total of at least the normal load, less any FM module weightings
+        modRegsWithoutForceMajeure.toSeq.map(mr => BigDecimal(mr.cats)).sum >= (normalLoad - forceMajeureCats) &&
+        // Contains all the core modules (including if FM)
+        coreModules.forall(modRegs.contains) &&
+        // All the registrations have agreed or actual marks
+        modRegsWithoutForceMajeure.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.contains(mr.module) && markOverrides(mr.module) != null)
+      }
       val ruleFilteredSubsets = validSubsets.filter(modRegs => rules.forall(_.passes(modRegs.toSeq)))
       val subsetsToReturn = {
         if (ruleFilteredSubsets.isEmpty) {
@@ -156,6 +238,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           ruleFilteredSubsets
         }
       }
+
+      // Explicitly specify how to order doubles
+      import Ordering.Double.TotalOrdering
       subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
         .collect { case (Right(mark), modRegs) => (mark, modRegs) }
         .sortBy { case (mark, modRegs) =>
@@ -178,6 +263,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 class ModuleRegistrationServiceImpl
   extends AbstractModuleRegistrationService
     with AutowiringModuleRegistrationDaoComponent
+    with AutowiringTransactionalComponent
 
 trait ModuleRegistrationServiceComponent {
   def moduleRegistrationService: ModuleRegistrationService

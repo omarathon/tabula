@@ -13,6 +13,8 @@ import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.api.builders.trigger.Trigger;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
+import com.atlassian.bamboo.specs.builders.notification.DeploymentFinishedNotification;
+import com.atlassian.bamboo.specs.builders.notification.DeploymentStartedAndFinishedNotification;
 import com.atlassian.bamboo.specs.builders.task.*;
 import com.atlassian.bamboo.specs.builders.trigger.AfterSuccessfulBuildPlanTrigger;
 import com.atlassian.bamboo.specs.builders.trigger.ScheduledTrigger;
@@ -200,23 +202,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
     return Collections.singleton(
       deployment(PROJECT, "ALL", "Tabula")
         .autoTomcatEnvironment("Development", "tabula-dev.warwick.ac.uk", "tabula", "dev", SLACK_CHANNEL)
-        .tomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", env -> {
-          String branch = System.getenv("TEST_DEPLOY_BRANCH");
-          final Trigger trigger;
-          if (branch == null || branch.length() == 0) {
-            trigger = new AfterSuccessfulBuildPlanTrigger().triggerByMasterBranch();
-          } else {
-            trigger = new AfterSuccessfulBuildPlanTrigger().triggerByBranch(branch);
-          }
-
-          env.triggers(trigger)
-              .notifications(
-                new Notification()
-                  .type(new DeploymentFailedNotification())
-                  .recipients(slackRecipient(SLACK_CHANNEL))
-              );
-          }
-        )
+        .autoTomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", SLACK_CHANNEL)
         .tomcatEnvironment("Sandbox", "tabula-sandbox.warwick.ac.uk", "tabula", "sandbox", env -> env
           .triggers(new AfterSuccessfulBuildPlanTrigger().triggerByBranch("master"))
           .notifications(
@@ -225,7 +211,19 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
               .recipients(slackRecipient(SLACK_CHANNEL))
           )
         )
-        .productionTomcatEnvironment("Production", "tabula.warwick.ac.uk", "tabula", SLACK_CHANNEL)
+        .tomcatEnvironment("Production", "tabula.warwick.ac.uk", "tabula", "prod", env -> env
+          .notifications(
+            new Notification()
+              .type(new DeploymentStartedAndFinishedNotification())
+              .recipients(slackRecipient(SLACK_CHANNEL)),
+            new Notification()
+              .type(new DeploymentFinishedNotification())
+              .recipients(slackRecipient("#support-summary")),
+            new Notification()
+              .type(new DeploymentFinishedNotification())
+              .recipients(slackRecipient("#support-tabula"))
+          )
+        )
         .build()
     );
   }

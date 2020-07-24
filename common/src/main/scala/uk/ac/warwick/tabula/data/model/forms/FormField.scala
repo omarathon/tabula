@@ -285,6 +285,10 @@ class FileField extends AssignmentFormField {
 
   def attachmentLimit_=(limit: Int): Unit = setProperty("attachmentLimit", limit)
 
+  def unlimitedAttachments: JBoolean = getProperty[JBoolean]("unlimitedAttachments", false)
+
+  def unlimitedAttachments_=(unlimited: JBoolean): Unit = setProperty("unlimitedAttachments", unlimited)
+
   def minimumAttachmentLimit: Int = getProperty[JInteger]("minimumAttachmentLimit", 1)
 
   def minimumAttachmentLimit_=(limit: Int): Unit = setProperty("minimumAttachmentLimit", limit)
@@ -310,7 +314,7 @@ class FileField extends AssignmentFormField {
       case v: FileFormValue =>
         if (v.file.isMissing) {
           errors.rejectValue("file", "file.missing")
-        } else if (v.file.size > attachmentLimit) {
+        } else if (v.file.size > attachmentLimit && !unlimitedAttachments) {
           if (attachmentLimit == 1) errors.rejectValue("file", "file.toomany.one")
           else errors.rejectValue("file", "file.toomany", Array(attachmentLimit: JInteger), "")
         } else if (v.file.size < minimumAttachmentLimit) {
@@ -346,6 +350,7 @@ class FileField extends AssignmentFormField {
     newField.label = this.label
     newField.context = this.context
     newField.attachmentLimit = this.attachmentLimit
+    newField.unlimitedAttachments = this.unlimitedAttachments
     newField.attachmentTypes = this.attachmentTypes
     newField.individualFileSizeLimit = this.individualFileSizeLimit
     newField

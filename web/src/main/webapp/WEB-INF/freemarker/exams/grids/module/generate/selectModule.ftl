@@ -21,7 +21,8 @@
   </div>
 
   <#assign generateModuleGridAction><@routes.exams.generateModuleGrid department academicYear /></#assign>
-  <@f.form action=generateModuleGridAction cssClass="form-inline select-course" method="post">
+  <@f.form action=generateModuleGridAction modelAttribute="selectModuleExamCommand" cssClass="form-inline select-course" method="post">
+    <@bs3form.errors path="" />
     <div class="form-inline creation-form" style="margin-bottom: 10px;">
       <label for="module-picker">Select module:</label>
       <select id="module-picker" name="module" class="form-control" style="width: 360px;" placeholder="Start typing a module code or name&hellip;">
@@ -30,8 +31,6 @@
           <option value="${module.code}"><@fmt.module_name module false /></option>
         </#list>
       </select>
-
-      <@bs3form.errors path="selectModuleExamCommand" />
 
       <div class="buttons">
         <button class="btn btn-default disabled" type="submit">Next</button>

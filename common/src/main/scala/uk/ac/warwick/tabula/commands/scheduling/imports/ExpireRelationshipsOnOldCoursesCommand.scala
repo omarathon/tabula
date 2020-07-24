@@ -11,26 +11,25 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 object ExpireRelationshipsOnOldCoursesCommand {
   def apply(student: StudentMember) =
     new ExpireRelationshipsOnOldCoursesCommandInternal(student)
-      with ComposableCommand[Unit]
+      with ComposableCommand[Seq[StudentRelationship]]
       with AutowiringRelationshipServiceComponent
       with ExpireRelationshipsOnOldCoursesValidation
       with ExpireRelationshipsOnOldCoursesPermissions
       with ExpireRelationshipsOnOldCoursesCommandState
-      with Unaudited
+      with ExpireRelationshipsOnOldCoursesCommandDescription
 }
 
 
-class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember) extends CommandInternal[Unit] {
+class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember) extends CommandInternal[Seq[StudentRelationship]] {
 
   self: ExpireRelationshipsOnOldCoursesCommandState with RelationshipServiceComponent =>
 
-  override def applyInternal(): Unit = {
-    studentRelationships.groupBy(_.relationshipType).foreach { case (relType, relationships) =>
-      if (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) {
-        val relationshipsToEnd = relationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
-        relationshipService.endStudentRelationships(relationshipsToEnd, DateTime.now)
-      }
-    }
+  override def applyInternal(): Seq[StudentRelationship] = {
+    if (hasOnlyVeryOldRelationships(studentRelationships) || hasCurrentRelationship(studentRelationships)) {
+      val relationshipsToEnd = studentRelationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
+      relationshipService.endStudentRelationships(relationshipsToEnd, DateTime.now)
+      relationshipsToEnd
+    } else Seq()
   }
 }
 
@@ -80,4 +79,16 @@ trait ExpireRelationshipsOnOldCoursesCommandState {
 
   def hasCurrentRelationship(relationships: Seq[StudentRelationship]): Boolean =
     relationships.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded)
+}
+
+trait ExpireRelationshipsOnOldCoursesCommandDescription extends Describable[Seq[StudentRelationship]] {
+  self: ExpireRelationshipsOnOldCoursesCommandState =>
+
+  override lazy val eventName = "ExpireRelationshipsOnOldCourses"
+
+  override def describe(d: Description): Unit =
+    d.studentIds(Seq(student.universityId))
+
+  override def describeResult(d: Description, result: Seq[StudentRelationship]): Unit =
+    d.studentIds(Seq(student.universityId)).property("studentRelationships", result.map(_.id))
 }

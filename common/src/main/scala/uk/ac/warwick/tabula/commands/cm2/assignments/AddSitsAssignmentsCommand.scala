@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTimeConstants, LocalDate}
+import org.joda.time.format.{DateTimeFormat => JodaDateTimeFormat}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate, LocalTime}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -15,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.validators.DateWithinYears
+import uk.ac.warwick.tabula.validators.{DateWithinYears, WithinYears}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionDeniedException}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -67,8 +68,9 @@ class SitsAssignmentItem(
   @DateWithinYears(maxPast = 3, maxFuture = 3)
   var openDate: LocalDate = _
 
-  @DateWithinYears(maxPast = 3, maxFuture = 3)
-  var closeDate: LocalDate = _
+  @WithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var closeDate: DateTime = _
 
   var openEnded: JBoolean = false
 
@@ -94,7 +96,7 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 
       assignment.openDate = item.openDate.toDateTime(Assignment.openTime)
       if(!item.openEnded) {
-        assignment.closeDate = item.closeDate.toDateTime(Assignment.closeTime)
+        assignment.closeDate = item.closeDate
       }
       assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
 
@@ -147,7 +149,7 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
 
   private def fetchSitsAssignmentItems(): JList[SitsAssignmentItem] = {
     for {
-      assessmentComponent <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
+      assessmentComponent <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments, inUseOnly = true)
       assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(assessmentComponent, academicYear).sortBy(_.occurrence)
     } yield {
       val item = new SitsAssignmentItem(
@@ -167,13 +169,14 @@ trait AddSitsAssignmentsCommandOnBind extends BindListener {
   override def onBind(result: BindingResult): Unit = {
     // re-attach UpstreamAssessmentGroup objects based on the other properties
     for (item <- sitsAssignmentItems.asScala if item.assessmentGroup == null) {
+      val year = academicYear // Allow to break inner scope
       item.assessmentGroup = assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
-        this.academicYear = academicYear
+        this.academicYear = year
         this.occurrence = item.occurrence
         this.moduleCode = item.assessmentComponent.moduleCode
         this.sequence = item.assessmentComponent.sequence
         this.assessmentGroup = item.assessmentComponent.assessmentGroup
-      })
+      }, eagerLoad = false)
     }
   }
 }
@@ -220,7 +223,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
     for (item <- items) {
       for (existingAssignment <- assessmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.assessmentComponent.moduleCodeBasic))) {
         val path = "sitsAssignmentItems[%d]".format(sitsAssignmentItems.indexOf(item))
-        errors.rejectValue(path, "name.duplicate.assignment", Array(item.name), null)
+        errors.rejectValue(path, "name.duplicate.assignment", Array(item.name, academicYear.toString), null)
       }
 
       def sameNameAs(item: SitsAssignmentItem)(other: SitsAssignmentItem) = {
@@ -258,8 +261,13 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
       }
 
       if (item.closeDate != null && !item.openEnded) {
-        if (holidayDates.contains(item.closeDate) || item.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
+        if (holidayDates.contains(item.closeDate.toLocalDate) || item.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || item.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
           errors.rejectValue("closeDate", "closeDate.notWorkingDay")
+        }
+        if(!Assignment.isValidCloseTime(item.closeDate)) {
+          val formatter = JodaDateTimeFormat.forPattern("ha")
+          val times: Array[AnyRef] = Array(formatter.print(Assignment.CloseTimeStart).toLowerCase, formatter.print(Assignment.CloseTimeEnd).toLowerCase)
+          errors.rejectValue("closeDate", "closeDate.invalidTime", times, "")
         }
       }
 
@@ -341,10 +349,10 @@ trait AddSitsAssignmentsCommandState {
   @BeanProperty
   val defaultOpenDate: LocalDate = LocalDate.now()
 
-  @DateWithinYears(maxFuture = 3)
-  @DateTimeFormat(pattern = DateFormats.DatePickerPattern)
+  @WithinYears(maxPast = 3, maxFuture = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   @BeanProperty
-  val defaultCloseDate: LocalDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+  val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH).toDateTime(new LocalTime(12, 0))
 
   @BeanProperty
   val defaultOpenEnded = false

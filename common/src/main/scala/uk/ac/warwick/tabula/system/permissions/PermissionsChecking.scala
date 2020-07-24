@@ -164,6 +164,12 @@ trait PermissionsCheckingMethods extends Logging {
       throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it doesn't belong to specified panel")
     }
 
+  def mustBeLinked(upstreamAssessmentGroup: UpstreamAssessmentGroup, assessmentComponent: AssessmentComponent): Unit =
+    if (AssessmentComponentKey(mandatory(upstreamAssessmentGroup)) != AssessmentComponentKey(mandatory(assessmentComponent))) {
+      logger.info("Not displaying upstream assessment group as it doesn't belong to specified assessment component")
+      throw new ItemNotFoundException(upstreamAssessmentGroup, "Not displaying upstream assessment group as it doesn't belong to specified assessment component")
+    }
+
   /**
     * Returns an object if it is non-null and not None. Otherwise
     * it throws an ItemNotFoundException, which should get picked

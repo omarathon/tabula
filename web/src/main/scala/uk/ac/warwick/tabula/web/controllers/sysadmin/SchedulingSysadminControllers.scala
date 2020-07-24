@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.services.scheduling.AutowiringSchedulerComponent
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
@@ -215,6 +216,21 @@ class ImportSitsAssignmentsAllYearsController extends BaseSysadminController wit
 }
 
 @Controller
+@RequestMapping(Array("/sysadmin/import-sits-individual-year"))
+class ImportSitsAssignmentsIndividualYearController extends BaseSysadminController with AutowiringJobServiceComponent {
+
+  var scheduler: Scheduler = Wire[Scheduler]
+
+  @RequestMapping(method = Array(POST))
+  def importYear(@RequestParam academicYear: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[ImportAssignmentsIndividualYearJob]("academicYear" -> academicYear)
+    ))
+  }
+
+}
+
+@Controller
 @RequestMapping(Array("/sysadmin/import-module-lists"))
 class ImportSitsModuleListsController extends BaseSysadminController {
 
@@ -264,6 +280,30 @@ class ImportModuleRegistrationsController extends BaseSysadminController {
       scheduler.scheduleNow[BulkImportModuleRegistrationsJob]("academicYear" -> academicYear)
     ))
   }
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-progression-decisions"))
+class ImportProgressionDecisionsController extends BaseSysadminController
+  with AutowiringSchedulerComponent {
+
+  @PostMapping
+  def importProgressionDecisions(@RequestParam academicYear: String): Mav =
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[BulkImportProgressionDecisionsJob]("academicYear" -> academicYear)
+    ))
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-student-awards"))
+class ImportStudentAwardsController extends BaseSysadminController
+  with AutowiringSchedulerComponent {
+
+  @PostMapping
+  def importStudentAwards(@RequestParam academicYear: String): Mav =
+    Redirect(Routes.sysadmin.jobs.quartzStatus(
+      scheduler.scheduleNow[BulkImportStudentAwardsJob]("academicYear" -> academicYear)
+    ))
 }
 
 @Controller

@@ -594,6 +594,24 @@ abstract class Description {
   def syllabusPlusLocation(location: SyllabusPlusLocation): Description =
     property("syllabusPlusLocation", location.toStringProps.toMap)
 
+  def assessmentComponent(assessmentComponent: AssessmentComponent): Description = {
+    module(assessmentComponent.module)
+    properties(
+      "moduleCodeFull" -> assessmentComponent.moduleCode,
+      "assessmentGroup" -> assessmentComponent.assessmentGroup,
+      "sequence" -> assessmentComponent.sequence
+    )
+  }
+
+  def upstreamAssessmentGroup(upstreamAssessmentGroup: UpstreamAssessmentGroup): Description =
+    properties(
+      "moduleCodeFull" -> upstreamAssessmentGroup.moduleCode,
+      "assessmentGroup" -> upstreamAssessmentGroup.assessmentGroup,
+      "occurrence" -> upstreamAssessmentGroup.occurrence,
+      "academicYear" -> upstreamAssessmentGroup.academicYear.toString,
+      "sequence" -> upstreamAssessmentGroup.sequence
+    )
+
   // delegate equality to the underlying map
   override def hashCode: Int = map.hashCode()
 

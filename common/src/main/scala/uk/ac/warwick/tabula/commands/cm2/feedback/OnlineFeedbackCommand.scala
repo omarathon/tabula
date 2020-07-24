@@ -270,6 +270,8 @@ trait OnlineFeedbackState extends SubmissionState with ExtensionState {
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JList[FileAttachment] = _
 
+  var approved: Boolean = false
+
   private def fieldHasValue = Try(fields.asScala.exists { case (_, value: StringFormValue) => value.value.hasText }).toOption.getOrElse(false)
 
   private def hasFile = Option(attachedFiles).exists(!_.isEmpty) || Option(file).exists(!_.attachedOrEmpty.isEmpty)
@@ -306,6 +308,7 @@ trait SubmissionState {
       .flatMap(_.disability)
   )
 
+  def reasonableAdjustmentsDeclared: Option[Boolean] = submission.flatMap(_.reasonableAdjustmentsDeclared)
 }
 
 trait ExtensionState {

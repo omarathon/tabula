@@ -32,7 +32,7 @@ object MarkingSummaryCommand {
     progress: Seq[MarkingStageProgress]
   ) {
     def started: Boolean = progress.exists(_.progress.started)
-
+    def skipped: Boolean = progress.exists(_.progress.skipped)
     def completed: Boolean = progress.forall(_.progress.completed)
   }
 
@@ -202,7 +202,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
   // Completed - Assignments finished
   lazy val markerCompletedAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get completed assignments") {
     allMarkerAssignments.filter { info =>
-      info.stages.nonEmpty && info.stages.last.progress.forall(_.progress.completed)
+      info.stages.nonEmpty && info.stages.last.progress.forall(s => s.progress.completed || s.progress.skipped)
     }
   }
 

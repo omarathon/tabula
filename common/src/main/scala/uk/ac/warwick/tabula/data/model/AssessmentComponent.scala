@@ -4,12 +4,14 @@ import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.Duration
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.jdk.CollectionConverters._
+import scala.util.{Success, Try}
 
 /**
   * Represents an upstream assessment component as found in the central
@@ -19,7 +21,7 @@ import scala.jdk.CollectionConverters._
   */
 @Entity
 @Proxy
-class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString {
+class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable with ToString with Logging {
 
   @transient var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
@@ -68,7 +70,101 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
   var marksCode: String = _
 
-  var weighting: JInteger = _
+  /**
+   * The raw weighting of the assessment component. Beware! This may need scaling (e.g. where weightings are 125/125/750 because SITS doesn't support decimals)
+   * or may be affected by VariableAssessmentWeightingRules.
+   */
+  @Column(name = "weighting")
+  var rawWeighting: JInteger = _
+
+  private def scaleWeighting(raw: Int, total: Int): BigDecimal =
+    if (raw == 0 || total == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
+    else if (total == 100) BigDecimal(raw)
+    else {
+      val bd = BigDecimal(raw * 100) / BigDecimal(total)
+      bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
+      bd
+    }
+
+  @transient lazy val scaledWeighting: Option[BigDecimal] = Option(rawWeighting).map(_.toInt).map { weighting =>
+    // If VAW applies, just use the raw weighting
+    if (variableAssessmentWeightingRules.nonEmpty) BigDecimal(weighting)
+    else {
+      val totalWeight =
+        allComponentsForAssessmentGroup
+          .flatMap(ac => Option(ac.rawWeighting).map(_.toInt))
+          .sum
+
+      scaleWeighting(weighting, totalWeight)
+    }
+  }
+
+  @transient lazy val variableAssessmentWeightingRules: Seq[VariableAssessmentWeightingRule] =
+    membershipService.getVariableAssessmentWeightingRules(moduleCode, assessmentGroup)
+
+  @transient lazy val allComponentsForAssessmentGroup: Seq[AssessmentComponent] =
+    membershipService.getAssessmentComponents(moduleCode, inUseOnly = false)
+      .filter(_.assessmentGroup == assessmentGroup)
+
+  /**
+   * Calculate the weighting for the student that the UpstreamAssessmentGroupMembers represent, taking into account any
+   * variable assessment weighting rules.
+   *
+   * @param marks a sequence of tuples of assessment type, assessment sequence (so we can identify this assessment) and mark,
+   *              if available. This should only include marks that should be considered, which may be only agreed marks, or
+   *              agreed marks falling back to actual marks.
+   *
+   * @return the scaled (out of 100%) weighting of this assessment component, using variable assessment weightings if available
+   *         or falling back to [[scaledWeighting]]
+   */
+  def weightingFor(marks: Seq[(AssessmentType, String, Option[Int])]): Try[Option[BigDecimal]] =
+    if (variableAssessmentWeightingRules.isEmpty) Success(scaledWeighting)
+    else Try {
+      // Get matching assessment components for this assessment _type_
+      val componentsForType: Map[String, AssessmentComponent] =
+        allComponentsForAssessmentGroup.filter(_.assessmentType == assessmentType)
+          .map(ac => ac.sequence -> ac)
+          .toMap
+
+      val rulesForType = variableAssessmentWeightingRules.filter(_.assessmentType == assessmentType)
+
+      // Tuple of sequence and mark, ordered by highest mark
+      val marksForType: Seq[(String, Option[Int])] =
+        marks.filter { case (t, _, _) => t == assessmentType }
+          .map { case (_, sequence, mark) => (sequence, mark) }
+          .sortBy { case (seq, mark) =>
+            // Order by mark (in reverse order, so highest mark first) then by sequence, alphabetically
+            (
+              -mark.getOrElse(-1),
+              seq
+            )
+          }
+
+      // Data validation check. We must have:
+      // - The same number of Variable Assessment Weighting Rules as there are components
+      // - No extra unexpected marks have been passed
+      // - Marks (or a record with no mark) for every assessment sequence
+      require(componentsForType.size == rulesForType.size, s"${toString()}: There are ${componentsForType.size} assessment components for $assessmentType (${componentsForType.keys.mkString(",")}) but ${rulesForType.size} VAW rules")
+      require(componentsForType.size == marksForType.size, s"${toString()}: There are ${componentsForType.size} assessment components for $assessmentType (${componentsForType.keys.mkString(",")}) but ${marksForType.size} marks passed (${marksForType.map(_._1).mkString(",")})")
+
+      val missingMarkSequences = componentsForType.keys.filterNot(sequence => marksForType.exists { case (s, _) => s == sequence })
+      require(missingMarkSequences.isEmpty, s"No mark was provided for assessment sequence(s) ${missingMarkSequences.mkString(", ")}")
+
+      val rawWeightings: Map[AssessmentComponent, Int] =
+        // The order is by highest mark
+        marksForType.zipWithIndex.map { case ((seq, _), index) =>
+          val rule = rulesForType(index)
+          val component = componentsForType(seq)
+
+          component -> rule.rawWeighting
+        }.toMap
+
+      rawWeightings.get(this).map { rawWeighting =>
+        // Need to scale this lot too because VAW has raw weightings too!
+        val totalWeight = variableAssessmentWeightingRules.map(_.rawWeighting).sum
+        scaleWeighting(rawWeighting, totalWeight)
+      }
+    }
 
   @Column(name = "exam_paper_code")
   private var _examPaperCode: String = _
@@ -104,6 +200,13 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
   def examPaperType_=(examPaperType: Option[ExaminationType]): Unit = _examPaperType = examPaperType.orNull
 
   /**
+   * Whether this assessment component represents the final chronological assessment for this assessment group. This
+   * will (should) be set to true for exactly one AssessmentComponent for a combination of [[moduleCode]] and [[assessmentGroup]].
+   */
+  @Column(name = "final_chronological_assessment")
+  var finalChronologicalAssessment: Boolean = _
+
+  /**
     * Returns moduleCode without CATS. e.g. in304
     */
   def moduleCodeBasic: String = Module.stripCats(moduleCode).getOrElse(throw new IllegalArgumentException(s"$moduleCode did not fit expected module code pattern"))
@@ -124,13 +227,14 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     this.assessmentType != other.assessmentType ||
     this.inUse != other.inUse ||
     this.marksCode != other.marksCode ||
-    this.weighting != other.weighting ||
+    this.rawWeighting != other.rawWeighting ||
     this.examPaperCode != other.examPaperCode ||
     this.examPaperTitle != other.examPaperTitle ||
     this.examPaperSection != other.examPaperSection ||
     this.examPaperDuration != other.examPaperDuration ||
     this.examPaperReadingTime != other.examPaperReadingTime ||
-    this.examPaperType != other.examPaperType
+    this.examPaperType != other.examPaperType ||
+    this.finalChronologicalAssessment != other.finalChronologicalAssessment
 
   override def preSave(newRecord: Boolean): Unit = {
     ensureNotNull("name", name)
@@ -150,36 +254,40 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     name = other.name
     assessmentType = other.assessmentType
     marksCode = other.marksCode
-    weighting = other.weighting
+    rawWeighting = other.rawWeighting
     examPaperCode = other.examPaperCode
     examPaperTitle = other.examPaperTitle
     examPaperSection = other.examPaperSection
     examPaperDuration = other.examPaperDuration
     examPaperReadingTime = other.examPaperReadingTime
     examPaperType = other.examPaperType
+    finalChronologicalAssessment = other.finalChronologicalAssessment
   }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
-     "moduleCode" -> moduleCode,
-     "assessmentGroup" -> assessmentGroup,
-     "sequence" -> sequence,
-     "inUse" -> inUse,
-     "module" -> module,
-     "name" -> name,
-     "assessmentType" -> assessmentType,
-     "marksCode" -> marksCode,
-     "weighting" -> weighting,
-     "examPaperCode" -> examPaperCode,
-     "examPaperTitle" -> examPaperTitle,
-     "examPaperSection" -> examPaperSection,
-     "examPaperDuration" -> examPaperDuration,
-     "examPaperReadingTime" -> examPaperReadingTime,
-     "examPaperType" -> examPaperType
+    "moduleCode" -> moduleCode,
+    "assessmentGroup" -> assessmentGroup,
+    "sequence" -> sequence,
+    "inUse" -> inUse,
+    "module" -> module,
+    "name" -> name,
+    "assessmentType" -> assessmentType,
+    "marksCode" -> marksCode,
+    "rawWeighting" -> rawWeighting,
+    "examPaperCode" -> examPaperCode,
+    "examPaperTitle" -> examPaperTitle,
+    "examPaperSection" -> examPaperSection,
+    "examPaperDuration" -> examPaperDuration,
+    "examPaperReadingTime" -> examPaperReadingTime,
+    "examPaperType" -> examPaperType,
+    "finalChronologicalAssessment" -> finalChronologicalAssessment
   )
 
   def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
 
   def linkedAssignments: Seq[Assignment] = links.asScala.toSeq.collect { case l if l.assignment != null => l.assignment }
+
+  def scheduledExams(academicYear: Option[AcademicYear]): Seq[AssessmentComponentExamSchedule] = membershipService.findScheduledExams(this, academicYear)
 }
 
 object AssessmentComponent {

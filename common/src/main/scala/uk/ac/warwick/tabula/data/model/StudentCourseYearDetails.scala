@@ -31,15 +31,18 @@ object StudentCourseYearDetails {
 
   //ensure we have  a single module code from module registration records. Some students have same module codes for different years but the latest year is the valid one with board marks
   def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] =
-    mrRecords.groupBy(_.module.code).values.map(_.maxBy(_.academicYear.startYear)).toSeq
+    mrRecords.groupBy(_.module.code).values.flatMap { modRegs =>
+      modRegs.filterNot(mr => mr.agreedGrade.orElse(mr.actualGrade).contains(GradeBoundary.WithdrawnGrade))
+        .maxByOption(_.academicYear.startYear)
+    }.toSeq
 
   // makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
   def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails*): ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYearGrouped", s"$yearOfStudy-${scyds.map(_.id).sorted.mkString("-")}") {
-      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
+      if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException(s"Cannot group StudentCourseYearDetails from different levels ${scyds.map(_.studyLevel).distinct.mkString(", ")}")
       val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
       val route = {
-        val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
+        val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)) // ignore any nulls
         allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
       }
       val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
@@ -48,11 +51,14 @@ object StudentCourseYearDetails {
         moduleRegistrations = moduleRegistrations,
         cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
         route = route,
+        baseAcademicYear = scyds.min.academicYear,
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = scyds.sorted.lastOption,
+        agreedMark = scyds.toSeq.flatMap(scyd => Option(scyd.agreedMark)).lastOption.map(BigDecimal(_)),
+        yearAbroad = scyds.exists(_.yearAbroad),
         level = scyds.head.level,
-        yearOfStudy
+        yearOfStudy = yearOfStudy,
       )
     }
 
@@ -203,25 +209,31 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var agreedMarkUploadedBy: User = _
 
+  def totalCats: BigDecimal = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+
   def toExamGridEntityYear: ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYear", id) {
       ExamGridEntityYear(
         moduleRegistrations = moduleRegistrations, //ones that are not deleted
-        cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+        cats = totalCats,
         route = route match {
           case _: Route => route
           case _ => studentCourseDetails.currentRoute
         },
+        baseAcademicYear = academicYear,
         overcattingModules = overcattingModules,
         markOverrides = None,
         studentCourseYearDetails = Some(this),
+        agreedMark = Option(agreedMark).map(BigDecimal(_)),
+        yearAbroad = yearAbroad,
         level = level,
-        yearOfStudy = this.yearOfStudy
+        yearOfStudy = this.yearOfStudy,
       )
     }
 
-  //Logic picked up from cognos -TAB-6397
-  def yearAbroad: Boolean = modeOfAttendance != null && modeOfAttendance.yearAbroad && (blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
+  // Logic picked up from cognos - TAB-6397
+  // Don't worry about block occurrence if the MoA ends with "E" for "Erasmus"
+  def yearAbroad: Boolean = modeOfAttendance != null && modeOfAttendance.yearAbroad && (modeOfAttendance.code.endsWith("E") || blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
 
   override def postLoad(): Unit = {
     ensureOvercatting()

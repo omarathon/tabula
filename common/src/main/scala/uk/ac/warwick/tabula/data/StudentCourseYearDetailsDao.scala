@@ -211,10 +211,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
       val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
         .createAlias("upstreamAssessmentGroup", "uag")
         .add(is("uag.academicYear", academicYear))
-        .add(or(
-          or(isNotNull("resitActualMark"), isNotNull("resitActualGrade")),
-          or(isNotNull("resitAgreedMark"), isNotNull("resitAgreedGrade"))
-        ))
+        .add(is("assessmentType", UpstreamAssessmentGroupMemberAssessmentType.Reassessment))
         .add(eqProperty("uagm.universityId", "scd.student.universityId"))
       c.add(Subqueries.exists(resitQuery.setProjection(property("uagm.universityId"))))
     }
@@ -256,11 +253,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
             .toMap
 
         // Eagerly load the students and relationships for use later
-        sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
+        if (studentsMap.isEmpty) Seq.empty
+        else sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
           .add(safeIn("universityId", studentsMap.keys.toSeq))
           .setFetchMode("studentCourseDetails", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails._moduleRegistrations._recordedModuleRegistration", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
           .setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)

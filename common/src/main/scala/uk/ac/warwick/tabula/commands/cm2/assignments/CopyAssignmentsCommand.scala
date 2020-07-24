@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
@@ -22,7 +22,7 @@ object CopyAssignmentsCommand {
   type Result = Seq[Assignment]
   type Command = Appliable[Result] with CopyAssignmentsState
 
-  val AdminPermission = Permissions.Assignment.Create
+  val AdminPermission: Permission = Permissions.Assignment.Create
 
   def apply(department: Department, academicYear: AcademicYear): Command =
     new CopyDepartmentAssignmentsCommandInternal(department, academicYear)
@@ -77,7 +77,8 @@ abstract class AbstractCopyAssignmentsCommandInternal
     if (assignment.openEnded) {
       newAssignment.closeDate = null
     } else {
-      newAssignment.closeDate = newAssignment.openDate.plus(new Duration(assignment.openDate, assignment.closeDate)).withTime(Assignment.closeTime)
+      val timeComponent = if(Assignment.isValidCloseTime(assignment.closeDate)) assignment.closeDate.toLocalTime else Assignment.defaultCloseTime
+      newAssignment.closeDate = newAssignment.openDate.plus(new Duration(assignment.openDate, assignment.closeDate)).withTime(timeComponent)
 
       while (holidayDates.contains(newAssignment.closeDate.toLocalDate) || newAssignment.closeDate.getDayOfWeek == DateTimeConstants.SATURDAY || newAssignment.closeDate.getDayOfWeek == DateTimeConstants.SUNDAY) {
         newAssignment.closeDate = newAssignment.closeDate.plusDays(1)
@@ -119,6 +120,8 @@ abstract class AbstractCopyAssignmentsCommandInternal
       // Single-use
       case workflow: CM2MarkingWorkflow => copyMarkingWorkflow(assignment.module.adminDepartment, workflow)
     }
+    // don't copy createdByAEP property
+    newAssignment.createdByAEP = false
 
     var workflowCtg = assignment.workflowCategory match {
       case Some(workflowCategory: WorkflowCategory) =>

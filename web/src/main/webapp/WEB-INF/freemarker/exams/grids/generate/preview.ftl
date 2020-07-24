@@ -222,20 +222,20 @@
               <th>Normal CAT load:</th>
               <td>
                   <#if normalLoadLookup.routes?size == 1>
-                      <#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)?has_content>
-                          ${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
+                      <#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first, academicYear)?has_content>
+                          ${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first, academicYear)}
                       <#else>
-                          <#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
+                          <#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first, academicYear)}</#assign>
                           ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
                       </#if>
                   <#else>
                       <#assign popover>
                         <ul><#list normalLoadLookup.routes?sort_by('code') as route>
                             <li>${route.code?upper_case}:
-                                <#if normalLoadLookup.withoutDefault(route)?has_content>
-                                    ${normalLoadLookup.withoutDefault(route)}
+                                <#if normalLoadLookup.withoutDefault(route, academicYear)?has_content>
+                                    ${normalLoadLookup.withoutDefault(route, academicYear)}
                                 <#else>
-                                    <#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
+                                    <#assign defaultNormalLoad>${normalLoadLookup.apply(route, academicYear)}</#assign>
                                     ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
                                 </#if>
                             </li>
@@ -266,6 +266,10 @@
             </tr>
             </thead>
             <tbody>
+            <tr>
+              <td><span class="exam-grid-unconfirmed">#</span></td>
+              <td>Unconfirmed marks (subject to change)</td>
+            </tr>
             <tr>
               <td><span class="exam-grid-fail">#</span></td>
               <td>Failed module or component</td>
@@ -388,8 +392,13 @@
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button>
               </li>
               <li>
-                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells
-                </button>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoCellComments}">Excel grid without cell comments</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCellsNoCellComments}">Excel grid without merged cells, without cell comments</button>
               </li>
               <li>
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button>
@@ -495,21 +504,17 @@
         function reflowScroll() {
           setTimeout(function () {
             $scrollWrapper
-            // Update the width of the scroll track to match the container
+              // Update the width of the scroll track to match the container
               .width($scrollWrapper.parent().width())
               // Update the scroll bar so it reflects the width of the grid
               .children().width($grid.width()).end()
-            // Reset the scroll bar to the initial position
+              // Reset the scroll bar to the initial position
               .scrollLeft(0);
           }, 0);
         }
 
         $(window).on('id7:reflow', reflowScroll);
         reflowScroll();
-
-        // we want to hide the native scroll bar on non-mac platform
-        // after we moved the the original scroll bar to a different place.
-        $('.table-responsive').css('overflow-x', 'hidden');
       }
 
       setTimeout(function () {

@@ -68,7 +68,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     WorkflowItems(
       student = student,
       enhancedSubmission = submission map { s => SubmissionListItem(s, submissionDownloaded) },
-      enhancedFeedback = feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, Some(new FeedbackForSits)) },
+      enhancedFeedback = feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, Some(FeedbackForSits(f, FeedbackForSitsStatus.UploadNotAttempted, None, None, None))) },
       enhancedExtension = extension map { e => ExtensionListItem(e, withinExtension) }
     )
 
@@ -89,7 +89,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
       stages = ListMap.empty,
       coursework = workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension),
       assignment = assignment,
-      disability = None
+      disability = None,
+      reasonableAdjustmentsDeclared = None,
     )
 
   class SampleFilteringCommand(elems: (String, String)*) {

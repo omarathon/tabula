@@ -45,7 +45,31 @@ trait ExamGridDocumentsController extends ExamsController
     coreRequiredModuleLookup,
     department,
     academicYear,
-    mergedCells = true
+    mergedCells = true,
+    cellComments = true,
+  )
+
+  @RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excelNoCellComments))
+  def mergedCellsNoComments(
+    @Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+    selectCourseCommandErrors: Errors,
+    @Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+    gridOptionsCommandErrors: Errors,
+    @ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+    @ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = excel(
+    selectCourseCommand,
+    selectCourseCommandErrors,
+    gridOptionsCommand,
+    gridOptionsCommandErrors,
+    checkOvercatCommand,
+    coreRequiredModuleLookup,
+    department,
+    academicYear,
+    mergedCells = true,
+    cellComments = false,
   )
 
   @RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excelNoMergedCells))
@@ -67,7 +91,31 @@ trait ExamGridDocumentsController extends ExamsController
     coreRequiredModuleLookup,
     department,
     academicYear,
-    mergedCells = false
+    mergedCells = false,
+    cellComments = true,
+  )
+
+  @RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excelNoMergedCellsNoCellComments))
+  def noMergedCellsNoComments(
+    @Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+    selectCourseCommandErrors: Errors,
+    @Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+    gridOptionsCommandErrors: Errors,
+    @ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+    @ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = excel(
+    selectCourseCommand,
+    selectCourseCommandErrors,
+    gridOptionsCommand,
+    gridOptionsCommandErrors,
+    checkOvercatCommand,
+    coreRequiredModuleLookup,
+    department,
+    academicYear,
+    mergedCells = false,
+    cellComments = false,
   )
 
   def excel(
@@ -79,13 +127,14 @@ trait ExamGridDocumentsController extends ExamsController
     coreRequiredModuleLookup: CoreRequiredModuleLookup,
     department: Department,
     academicYear: AcademicYear,
-    mergedCells: Boolean
+    mergedCells: Boolean,
+    cellComments: Boolean,
   ): Mav = {
     if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
       throw new IllegalArgumentException
     }
 
-    createJobAndRedirect(ExcelGridDocument, ExcelGridDocument.options(mergedCells), department, academicYear, selectCourseCommand, gridOptionsCommand)
+    createJobAndRedirect(ExcelGridDocument, ExcelGridDocument.options(mergedCells, cellComments), department, academicYear, selectCourseCommand, gridOptionsCommand)
   }
 
   private def marksRecordRender(department: Department, academicYear: AcademicYear, selectCourseCommand: SelectCourseCommand, gridOptionsCommand: GridOptionsCommand, isConfidential: Boolean): Mav = {

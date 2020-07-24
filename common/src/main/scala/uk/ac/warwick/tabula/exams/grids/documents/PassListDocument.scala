@@ -49,11 +49,12 @@ class PassListDocument extends ExamGridDocument
       selectCourseCommand.yearOfStudy,
       selectCourseCommand.academicYear,
       progressionService,
-      NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-      UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+      NormalLoadLookup(selectCourseCommand.yearOfStudy, normalCATSLoadService),
+      UpstreamRouteRuleLookup(upstreamRouteRuleService),
       isConfidential,
-      calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-      selectCourseCommand.isLevelGrid
+      yearMarksToUse = gridOptionsCommand.yearMarksSetting,
+      selectCourseCommand.isLevelGrid,
+      gridOptionsCommand.applyBenchmark
     )
 
     val file = new FileAttachment()

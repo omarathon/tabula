@@ -131,8 +131,9 @@ trait PopulateEditAssignmentDetailsRequest {
   openDate = Option(assignment.openDate).map(_.toLocalDate).orNull
   openEnded = assignment.openEnded
   resitAssessment = assignment.resitAssessment
+  createdByAEP = assignment.createdByAEP
   openEndedReminderDate = Option(assignment.openEndedReminderDate).map(_.toLocalDate).orNull
-  closeDate = Option(assignment.closeDate).map(_.toLocalDate).orNull
+  closeDate = Option(assignment.closeDate).orNull
   workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
   reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
   anonymity = assignment._anonymity
@@ -160,7 +161,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (name != null && name.length < 3000) {
       val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive && !(existing eq assignment) }
       for (duplicate <- duplicates.headOption) {
-        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name), "")
+        errors.rejectValue("name", "name.duplicate.assignment", Array(duplicate.name, academicYear.toString), "")
       }
     }
 
@@ -170,7 +171,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (openDate != null && (assignment.openDate == null || !openDate.isEqual(assignment.openDate.toLocalDate))) {
       validateOpenDate(errors)
     }
-    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate.toLocalDate) || !closeDate.isBefore(Assignment.closeTimeEnforcementDate))) {
+    if (closeDate != null && !openEnded && (assignment.closeDate == null || !closeDate.isEqual(assignment.closeDate) || !closeDate.toLocalDate.isBefore(Assignment.closeTimeEnforcementDate))) {
       validateCloseDate(errors)
     }
 
@@ -185,11 +186,11 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (assignment.hasWorkflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
       val (existingMarkersA, existingMarkersB) = extractMarkers
 
-      if (!existingMarkersA.forall(markersA.asScala.contains)) {
+      if (markersA != null && !existingMarkersA.forall(markersA.asScala.contains)) {
         errors.rejectValue("markersA", "workflow.cannotRemoveMarkers")
       }
 
-      if (!existingMarkersB.forall(markersB.asScala.contains)) {
+      if (markersB != null && !existingMarkersB.forall(markersB.asScala.contains)) {
         errors.rejectValue("markersB", "workflow.cannotRemoveMarkers")
       }
     }

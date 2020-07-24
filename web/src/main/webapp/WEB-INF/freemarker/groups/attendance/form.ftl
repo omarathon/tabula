@@ -131,7 +131,7 @@
       <#if recordAttendanceHistory?has_content>
         <p>
           <strong>Attendance last updated</strong>: <@fmt.date date=(recordAttendanceHistory?last).recorded />
-          <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#small-group-register-history-modal"><i class="fal fa-history"></i> View history</button>
+          <button type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#small-group-register-history-modal"><i class="fal fa-history" aria-hidden="true"></i><span class="sr-only">View history</span></button>
         </p>
 
         <@modal.modal id="small-group-register-history-modal">
@@ -492,6 +492,7 @@
       var $printForm = $('#print-modal').find('form');
       $table.tablesorter({
         cancelSelection: false,
+        initialized: function() { AttendanceRecording.recordMonitoringPointsScripts() } ,
         headers: {
           0: {sorter: false},
           1: {sorter: false},

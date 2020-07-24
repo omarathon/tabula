@@ -23,6 +23,7 @@ trait AssignmentToJsonConverter {
       "resitAssessment" -> assignment.resitAssessment,
       "name" -> assignment.name,
       "studentUrl" -> (toplevelUrl + Routes.cm2.assignment(assignment)),
+      "summaryUrl" -> (toplevelUrl + Routes.cm2.admin.assignment.submissionsandfeedback.summary(assignment)),
       "collectMarks" -> assignment.collectMarks,
       "useMarkPoints" -> assignment.useMarkPoints,
       "markingWorkflow" -> {

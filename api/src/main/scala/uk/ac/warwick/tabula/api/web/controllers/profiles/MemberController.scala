@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
+import scala.jdk.CollectionConverters._
+import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
+import uk.ac.warwick.tabula.commands.profiles.profile.{ViewMultipleProfileCommand, ViewProfileCommand}
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
@@ -16,6 +18,13 @@ import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationCom
 @RequestMapping(value = Array("/v1/member/{member}"), params = Array("!includeStale"))
 class MemberController extends ApiController
   with FreshMemberApi
+  with MemberToJsonConverter
+  with AutowiringScalaFreemarkerConfigurationComponent
+
+@Controller
+@RequestMapping(value = Array("/v1/memberProfiles"), params = Array("members"))
+class FreshMemberProfilesController extends ApiController
+  with MultipleFreshMemberApi
   with MemberToJsonConverter
   with AutowiringScalaFreemarkerConfigurationComponent
 
@@ -63,6 +72,27 @@ trait GetMemberApi {
       "member" -> jsonMemberObject(checkMember(command.apply()), APIFieldRestriction.restriction("member", fields))
     )))
 }
+
+trait MultipleFreshMemberApi {
+  self: ApiController with MemberToJsonConverter =>
+
+  def checkMember(m: Member): Member = notStale(mandatory(m))
+
+  @ModelAttribute("command")
+  def getCommand(@RequestParam members: JList[String]): ViewMultipleProfileCommand.Command =
+    ViewMultipleProfileCommand(members, user)
+
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getMembers(@ModelAttribute("command") command: ViewMultipleProfileCommand.Command, @RequestParam(defaultValue = "member") fields: String): Mav =
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "members" -> Map(
+        command.apply().map(m => (m.universityId, jsonMemberObject(checkMember(m), APIFieldRestriction.restriction("member", fields)))).toSeq: _*
+      )
+    )))
+}
+
 
 trait FreshMemberApi extends GetMemberApi {
   self: ApiController with MemberToJsonConverter =>

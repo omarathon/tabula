@@ -17,6 +17,7 @@ import scala.collection.mutable
 
 object Submission {
   val UseDisabilityFieldName = "use-disability"
+  val ReasonableAdjustmentsDeclaredFieldName = "reasonable-adjustments-declared"
 }
 
 @Entity
@@ -46,6 +47,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
   @Column(name = "submitted_date")
   var submittedDate: DateTime = _
+
+  var explicitSubmissionDeadline: DateTime = _
 
   @NotNull
   @Column(name = "userId")
@@ -110,6 +113,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
   }
 
   def useDisability: Boolean = values.asScala.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
+
+  def reasonableAdjustmentsDeclared: Option[Boolean] = values.asScala.find(_.name == Submission.ReasonableAdjustmentsDeclaredFieldName).map(_.value.toBoolean)
 
 }
 

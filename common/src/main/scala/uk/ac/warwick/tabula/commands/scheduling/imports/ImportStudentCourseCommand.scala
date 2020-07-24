@@ -86,23 +86,12 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
   }
 
   def updateRelationships(studentCourseDetails: StudentCourseDetails): Unit = {
-    // Check the SPR (status on route) code to see if they are permanently withdrawn, and
-    // end relationships if so.  The SCJ code may indicate that they are
-    // permanently withdrawn from the course, but it may have the same route code as their
-    // current course (surprisingly).  In that case we don't want to go ahead and end all
-    // relationships for the route code.
-    if (courseRow.sprStatusCode != null && courseRow.sprStatusCode.startsWith("P")) {
-      // they are permanently withdrawn. don't do this for temporary withdrawal; deceased handled separately
-      endRelationships()
+    if (courseRow.endDate == null || courseRow.endDate.isAfter(DateTime.now.toLocalDate)) {
+      captureTutor(studentCourseDetails)
     }
-    else {
-      if (courseRow.endDate == null || courseRow.endDate.isAfter(DateTime.now.toLocalDate)) {
-        captureTutor(studentCourseDetails)
-      }
 
-      if (courseRow.scjCode != null && courseRow.scjStatusCode != null && !courseRow.scjStatusCode.startsWith("P"))
-        new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
-    }
+    if (courseRow.scjCode != null && courseRow.scjStatusCode != null && !courseRow.scjStatusCode.startsWith("P"))
+      new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
   }
 
   private val basicStudentCourseProperties = Set(
@@ -114,7 +103,10 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
     "courseYearLength",
     "mostSignificant",
     "levelCode",
-    "reasonForTransferCode"
+    "reasonForTransferCode",
+    "specialExamArrangements",
+    "specialExamArrangementsLocation",
+    "specialExamArrangementsExtraTime"
   )
 
   private lazy val courseDepartment = courseRow.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
@@ -159,22 +151,6 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
               )
           }
         }
-    }
-  }
-
-
-  def endRelationships(): Unit = {
-    if (courseRow.endDate != null) {
-      val endDateFromSits = courseRow.endDate.toDateTimeAtCurrentTime
-      val threeMonthsAgo = DateTime.now().minusMonths(3)
-      if (endDateFromSits.isBefore(threeMonthsAgo)) {
-        relationshipService.getAllCurrentRelationships(stuMem)
-          .filter { relationship => relationship.studentCourseDetails.sprCode == courseRow.sprCode }
-          .foreach { relationship =>
-            relationship.endDate = endDateFromSits
-            relationshipService.saveOrUpdate(relationship)
-          }
-      }
     }
   }
 

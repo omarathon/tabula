@@ -150,11 +150,11 @@ table.table.attendance-table {
     text-align: center;
   }
 
-  &.tablesorter > thead > tr th.header {
+  &.tablesorter > thead > tr th.header, &.tablesorter > thead > tr th.tablesorter-header {
     /* Position from bottom, CSS3 feature */
     background-position: bottom 10px right;
 
-    &.headerSortDown {
+    &.headerSortDown, &.tablesorter-headerDesc {
       background-position: bottom 14px right;
     }
   }

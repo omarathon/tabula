@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.convert
 
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.TwoWayConverter
@@ -11,7 +12,13 @@ class JodaDateTimeConverter extends TwoWayConverter[String, DateTime] {
     if (text.hasText) try {
       DateTime.parse(text, DateTimePickerFormatter)
     } catch {
-      case e: IllegalArgumentException => null
+      // Try ISO format
+      case _: IllegalArgumentException =>
+        try {
+          DateTime.parse(text, ISODateTimeFormat.dateTime())
+        } catch {
+          case _: IllegalArgumentException => null
+        }
     }
     else null
 

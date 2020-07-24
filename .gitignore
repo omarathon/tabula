@@ -53,15 +53,10 @@ ${*
 /.idea/*
 *.iml
 *.iws
-!/.idea/modules.iml
-!/.idea/modules/*.iml
-!/.idea/modules/**/*.iml
 !/.idea/codeStyles
 !/.idea/codeStyleSettings.xml
 !/.idea/fileTemplates/*
 !/.idea/gradle.xml
-!/.idea/encodings.xml
-!/.idea/misc.xml
 
 # Sublime Text IDE
 *.sublime-project

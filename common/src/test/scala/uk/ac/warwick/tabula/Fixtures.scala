@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.jdk.CollectionConverters._
 
@@ -97,6 +98,21 @@ object Fixtures extends Mockito {
     c
   }
 
+  def award(code: String, name: String = null): Award = {
+    val a = new Award
+    a.code = code
+    a.name = Option(name).getOrElse("Award " + code)
+    a
+  }
+
+  def classification(code: String, name: String = null): Classification = {
+    val c = new Classification()
+    c.code = code
+    c.name = Option(name).getOrElse("Classification " + code)
+    c
+  }
+
+
   def yearWeighting(course: Course, weighting: JBigDecimal, academicYear: AcademicYear, yearOfStudy: YearOfStudy): CourseYearWeighting = {
     new CourseYearWeighting(course, academicYear, yearOfStudy, BigDecimal(weighting))
   }
@@ -150,47 +166,80 @@ object Fixtures extends Mockito {
     s
   }
 
-  def assessmentComponent(module: Module, number: Int): AssessmentComponent = {
+  def assessmentComponent(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A", marksCode: String = null): AssessmentComponent = {
     val a = new AssessmentComponent
     a.name = "Assignment %d" format number
     a.module = module
     a.moduleCode = "%s-30" format module.code.toUpperCase
-    a.assessmentGroup = "A"
-    a.sequence = "A%02d" format number
-    a.assessmentType = AssessmentType.Essay
+    a.assessmentGroup = assessmentGroup
+    a.sequence = "%s%02d".format(assessmentType.subtype.code, number)
+    a.assessmentType = assessmentType
     a.inUse = true
+    a.rawWeighting = weighting
+    a.marksCode = marksCode
     a
   }
 
-  def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroup = {
+  def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String, sequence: String): UpstreamAssessmentGroup = {
     val group = new UpstreamAssessmentGroup
     group.academicYear = academicYear
     group.assessmentGroup = code
     group.moduleCode = module
     group.occurrence = occurrence
+    group.sequence = sequence
     group.members.addAll(Seq(
-      new UpstreamAssessmentGroupMember(group, "0123456"),
-      new UpstreamAssessmentGroupMember(group, "0123457"),
-      new UpstreamAssessmentGroupMember(group, "0123458")
+      new UpstreamAssessmentGroupMember(group, "0123456", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "0123457", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment),
+      new UpstreamAssessmentGroupMember(group, "0123458", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     ).asJava)
     group
   }
 
-  def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
-    val uag = assessmentGroup(academicYear, code, module, occurrence)
+  def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String, sequence: String): UpstreamAssessmentGroupInfo = {
+    val uag = assessmentGroup(academicYear, code, module, occurrence, sequence)
     val activeMembers = uag.members
     //add one PWD
-    val uagm = new UpstreamAssessmentGroupMember(uag, "1000006")
+    val uagm = new UpstreamAssessmentGroupMember(uag, "1000006", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
     uag.members.add(uagm)
     UpstreamAssessmentGroupInfo(uag, activeMembers.asScala.toSeq)
   }
 
-  def assessmentGroup(assignment: AssessmentComponent): UpstreamAssessmentGroup =
-    assessmentGroup(
-      academicYear = AcademicYear(2012),
+  def assessmentGroup(assignment: AssessmentComponent, academicYear: AcademicYear = AcademicYear(2012)): UpstreamAssessmentGroup = {
+    val group = assessmentGroup(
+      academicYear = academicYear,
       code = assignment.assessmentGroup,
       module = assignment.moduleCode + "-30",
-      occurrence = "A")
+      occurrence = "A",
+      sequence = assignment.sequence
+    )
+    group.assessmentComponent = assignment
+    group
+  }
+
+  def assessmentGroupAndMember(
+    assignment: AssessmentComponent,
+    actualMark: Int,
+    academicYear: AcademicYear,
+    deadline: LocalDate = AcademicYear(2019).termOrVacation(PeriodType.springTerm).lastDay
+  ): UpstreamAssessmentGroup = {
+    val group = assessmentGroup(assignment, academicYear)
+    group.deadline = Option(deadline)
+    val groupMember = new UpstreamAssessmentGroupMember(group, "0123456", UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment)
+    groupMember.actualMark = Option(actualMark)
+    group.members.clear()
+    group.members.addAll(Seq(groupMember).asJava)
+    group
+  }
+
+  def variableAssessmentWeightingRule(module: Module, number: Int, assessmentType: AssessmentType = AssessmentType.Essay, weighting: Int = 100, assessmentGroup: String = "A"): VariableAssessmentWeightingRule = {
+    val rule = new VariableAssessmentWeightingRule
+    rule.moduleCode = "%s-30" format module.code.toUpperCase
+    rule.assessmentGroup = assessmentGroup
+    rule.ruleSequence = "%03d".format(number)
+    rule.assessmentType = assessmentType
+    rule.rawWeighting = weighting
+    rule
+  }
 
   def feedbackTemplate(name: String): FeedbackTemplate = {
     val template = new FeedbackTemplate
@@ -270,6 +319,7 @@ object Fixtures extends Mockito {
     }
 
     val scd = new StudentCourseDetails(member, scjCodeToUse)
+    scd.course = Fixtures.course("UCSA-G500")
     scd.student = member
     scd.sprCode = member.universityId + "/2"
     scd.department = courseDepartment
@@ -344,12 +394,14 @@ object Fixtures extends Mockito {
     cats: JBigDecimal,
     year: AcademicYear,
     occurrence: String = "",
-    agreedMark: BigDecimal = BigDecimal(0),
-    status: ModuleSelectionStatus = ModuleSelectionStatus.Core
+    agreedMark: Option[Int] = None,
+    status: ModuleSelectionStatus = ModuleSelectionStatus.Core,
+    marksCode: String = null,
   ): ModuleRegistration = {
-    val scjCode = Option(scd).map(_.scjCode).orNull
-    val mr = new ModuleRegistration(scjCode, mod, cats, year, occurrence)
-    mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+    val sprCode = Option(scd).map(_.sprCode).orNull
+    val mr = new ModuleRegistration(sprCode, mod, cats, if (cats != null) "%s-%s".format(mod.code.toUpperCase, cats.stripTrailingZeros().toPlainString) else mod.code.toUpperCase, year, occurrence, marksCode)
+    mr._allStudentCourseDetails.add(scd)
+    mr.agreedMark = agreedMark
     mr.selectionStatus = status
     mr
   }
@@ -441,12 +493,6 @@ object Fixtures extends Mockito {
     ug
   }
 
-  def feedbackForSits(feedback: Feedback, user: User): FeedbackForSits = {
-    val fb = new FeedbackForSits
-    fb.init(feedback, user)
-    fb
-  }
-
   def disability(description: String, code: String = ""): Disability = {
     val d = new Disability
     d.sitsDefinition = description
@@ -530,5 +576,30 @@ object Fixtures extends Mockito {
     q
   }
 
+  def gradeBoundary(
+    marksCode: String,
+    process: GradeBoundaryProcess = GradeBoundaryProcess.StudentAssessment,
+    attempt: Int = 1,
+    rank: Int = 1,
+    grade: String,
+    minimumMark: Option[Int] = None,
+    maximumMark: Option[Int] = None,
+    signalStatus: GradeBoundarySignalStatus = GradeBoundarySignalStatus.NoSignal,
+    result: Option[ModuleResult] = None,
+    agreedStatus: GradeBoundaryAgreedStatus = GradeBoundaryAgreedStatus.Agreed,
+    incrementsAttempt: Boolean = false,
+  ): GradeBoundary = GradeBoundary(
+    marksCode = marksCode,
+    process = process,
+    attempt = attempt,
+    rank = rank,
+    grade = grade,
+    minimumMark = minimumMark,
+    maximumMark = maximumMark,
+    signalStatus = signalStatus,
+    result = result,
+    agreedStatus = agreedStatus,
+    incrementsAttempt = incrementsAttempt,
+  )
 
 }

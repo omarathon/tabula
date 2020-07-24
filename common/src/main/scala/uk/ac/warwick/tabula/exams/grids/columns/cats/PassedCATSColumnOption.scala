@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.exams.grids.columns.cats
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, ModuleRegistration}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
 
 @Component
-class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
+class PassedCATSColumnOption extends ChosenYearExamGridColumnOption with AutowiringProgressionServiceComponent {
 
   override val identifier: ExamGridColumnOption.Identifier = "passedCats"
 
@@ -24,33 +25,24 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 
     override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-    override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
+    override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] =
       state.entities.map(entity =>
         entity -> relevantEntityYear(entity).map(entityYear => result(entityYear))
           .getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for year $thisYearOfStudy"))
       ).toMap
-    }
 
     private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
-
-      val emptyExpectingMarks = entity.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty)
+      val emptyExpectingMarks = entity.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
       val emptyExpectingGrades = entity.moduleRegistrations.filter(mr => mr.passFail && mr.firstDefinedGrade.isEmpty)
 
       if (emptyExpectingMarks.nonEmpty || emptyExpectingGrades.nonEmpty) {
-
         val noMarks = if (emptyExpectingMarks.isEmpty) "" else emptyExpectingMarks.map(_.module.code.toUpperCase).mkString("the following module registrations have no mark: ", ", ", "")
         val noGrades = if (emptyExpectingGrades.isEmpty) "" else emptyExpectingGrades.map(_.module.code.toUpperCase).mkString("the following module registrations have no grade: ", ", ", "")
 
         val reasons = Seq(noMarks, noGrades).filter(_.hasText)
         ExamGridColumnValueMissing("The passed CATS cannot be calculated because %s".format(reasons.mkString(" and ")))
       } else {
-        def isFailed(mr: ModuleRegistration): Boolean = {
-          if (mr.passFail) !mr.firstDefinedGrade.contains("F")
-          else if (Option(mr.agreedMark).isDefined) mr.agreedGrade != "F"
-          else mr.actualGrade != "F"
-        }
-
-        ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(isFailed).map(mr => BigDecimal(mr.cats)).sum.underlying)
+        ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(progressionService.isPassed).map(mr => BigDecimal(mr.cats)).sum.underlying)
       }
     }
 

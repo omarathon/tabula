@@ -40,6 +40,30 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito with Free
     }
   }
 
+
+  @Test def titleOnTimeAEPSubmission(): Unit = withFakeTime(new DateTime(2019, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+    withUser("cuscao", "0270954") {
+      val assignment = Fixtures.assignment("AEP exam")
+      assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+      // closeDate is before submission, but we have explicit Submission deadline
+      assignment.closeDate = new DateTime(2019, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
+      assignment.createdByAEP = true
+
+      val submission = Fixtures.submission()
+      submission.assignment = assignment
+
+      submission.submittedDate = DateTime.now
+      // explicit submission deadline is after submission date
+      submission.explicitSubmissionDeadline = new DateTime(2019, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+
+      assignment.isLate(submission) should be(false)
+      assignment.isAuthorisedLate(submission) should be(false)
+
+      val notification = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+      notification.title should be("CS118: Submission received for \"AEP exam\"")
+    }
+  }
+
   @Test def titleOnTimeBeforeExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
@@ -85,6 +109,30 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito with Free
 
       val notification = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
       notification.title should be("CS118: Late submission received for \"5,000 word essay\"")
+    }
+  }
+
+  @Test def titleLateAEPSubmission(): Unit = withFakeTime(new DateTime(2019, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
+    withUser("cuscao", "0270954") {
+      val assignment = Fixtures.assignment("AEP exam")
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
+      assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+      // assignment close date is irrelevant for AEP submissions
+      assignment.closeDate = new DateTime(2019, DateTimeConstants.SEPTEMBER, 16, 20, 0, 0, 0)
+      assignment.createdByAEP = true
+
+      val submission = Fixtures.submission()
+      submission.assignment = assignment
+      submission.submittedDate = DateTime.now
+      submission.explicitSubmissionDeadline = new DateTime(2019, DateTimeConstants.SEPTEMBER, 11, 20, 0, 0, 0)
+
+      assignment.isLate(submission) should be(true)
+      assignment.isAuthorisedLate(submission) should be(false)
+
+      val notification = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+      notification.title should be("CS118: Late submission received for \"AEP exam\"")
     }
   }
 
