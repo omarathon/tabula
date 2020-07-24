@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
+import uk.ac.warwick.tabula.WorkflowStageHealth
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
-import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
 
 import scala.jdk.CollectionConverters._
 
@@ -50,7 +49,9 @@ trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
 
     val submissionDetails = Map("submission" -> jsonSubmissionObject(student))
 
-    val extensionDetails = jsonExtension(student)
+    val extensionDetails = Map(
+      "extension" -> student.coursework.enhancedExtension.map(jsonExtension).orNull
+    )
 
     val feedbackDetails = Map(
       "feedback" -> student.coursework.enhancedFeedback.map { enhancedFeedback =>

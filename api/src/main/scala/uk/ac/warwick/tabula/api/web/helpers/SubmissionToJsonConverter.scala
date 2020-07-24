@@ -41,9 +41,9 @@ trait SubmissionToJsonConverter {
 
   def jsonSubmissionObject(student: AssignmentSubmissionStudentInfo): Map[String, Any] = {
     student.coursework.enhancedSubmission.map { enhancedSubmission =>
-      jsonSubmissionObject(enhancedSubmission.submission) ++ Map(
-        "downloaded" -> enhancedSubmission.downloaded
-      ) ++ jsonExtension(student)
+      jsonSubmissionObject(enhancedSubmission.submission) ++
+      Map("downloaded" -> enhancedSubmission.downloaded) ++
+      Map("extension" -> student.coursework.enhancedExtension.map(jsonExtension).orNull)
     }.orNull
   }
 }
