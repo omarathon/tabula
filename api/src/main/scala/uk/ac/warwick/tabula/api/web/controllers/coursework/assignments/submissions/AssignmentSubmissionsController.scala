@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.api.web.helpers.SubmissionToJsonConverter
+import uk.ac.warwick.tabula.api.web.helpers.{ExtensionToJsonConvertor, SubmissionToJsonConverter}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, SubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 abstract class AssignmentSubmissionsController extends ApiController
-  with SubmissionToJsonConverter
+  with SubmissionToJsonConverter with ExtensionToJsonConvertor
 
 @Controller
 @RequestMapping(

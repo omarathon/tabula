@@ -26,6 +26,7 @@ abstract class AEPAssignmentController extends ApiController
   with AssignmentToJsonConverter
   with AssessmentMembershipInfoToJsonConverter
   with AssignmentStudentToJsonConverter
+  with ExtensionToJsonConvertor
   with ReplacingAssignmentStudentMessageResolver
   with GetAssignmentApiFullOutput
 
@@ -34,6 +35,7 @@ abstract class AEPAssignmentController extends ApiController
 class AEPAssignmentCreateSubmissionController extends ApiController
   with AEPCreateSubmissionApi
   with SubmissionToJsonConverter
+  with ExtensionToJsonConvertor
   with CreatesSubmission {
   validatesSelf[SelfValidating]
 }
