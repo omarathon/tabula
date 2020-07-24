@@ -29,7 +29,7 @@ object FiltersRelationships {
       "levelCode" -> AliasAndJoinType("levelCode")
     ),
     "department" -> Seq(
-      "route" -> AliasAndJoinType("route"),
+      "currentRoute" -> AliasAndJoinType("route"),
       "route.adminDepartment" -> AliasAndJoinType("department")
     ),
     "termtimeAddress" -> Seq(
