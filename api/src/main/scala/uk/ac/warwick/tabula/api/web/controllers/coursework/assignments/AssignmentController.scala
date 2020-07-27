@@ -38,6 +38,7 @@ abstract class AssignmentController extends ApiController
   with AssignmentToJsonConverter
   with AssessmentMembershipInfoToJsonConverter
   with AssignmentStudentToJsonConverter
+  with ExtensionToJsonConvertor
   with ReplacingAssignmentStudentMessageResolver
   with GetAssignmentApiFullOutput {
 
@@ -94,6 +95,7 @@ class DeleteAssignmentController extends AssignmentController with DeleteAssignm
 class AssignmentCreateSubmissionController extends ApiController
   with CreateSubmissionApi
   with SubmissionToJsonConverter
+  with ExtensionToJsonConvertor
   with CreatesSubmission {
   validatesSelf[SelfValidating]
 }
@@ -123,7 +125,7 @@ trait GetAssignmentApiOutput {
 }
 
 trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
-  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter with ExtensionToJsonConvertor =>
 
   def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any] = Map(
     "assignment" -> jsonAssignmentObject(assignment),

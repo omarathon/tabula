@@ -6,7 +6,6 @@
   <h1>Modules</h1>
 
   <#if hasPermission>
-
     <#if user.staff>
       <div class="pull-right">
         <@routes.profiles.mrm_link command.studentCourseYearDetails />
@@ -21,6 +20,12 @@
           Unknown (not in SITS)
         </#if>
       </p>
+    </#if>
+
+    <#if (command.studentCourseYearDetails.studentCourseDetails.courseType.code)! == "PG(T)">
+      <div class="alert alert-info">
+        Marks visible to you on this page are subject to agreement by the Final Board of Examiners and until such time, these marks are provisional and subject to change.
+      </div>
     </#if>
 
     <h3>
@@ -69,7 +74,7 @@
       </#list>
     </#if>
 
-      <#if moduleRegistrationsAndComponents?has_content>
+    <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
       <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
@@ -79,13 +84,13 @@
               <@fmt.module_name moduleRegistration.module />
             </#compress></a>
             <span class="mod-reg-summary">
-              <#if showModuleResults>
+              <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
                 <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
                 <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
                 <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
                 <#if moduleRegistration.passedCats??>
-                <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
-              </#if>
+                  <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+                </#if>
               </#if>
             </span>
           </h3>
@@ -107,7 +112,7 @@
                   <strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
                 </div>
                 <div class="col-md-4">
-                  <#if showModuleResults>
+                  <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
                     <strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
                     <strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
                     <strong>Passed CATS:</strong>
@@ -129,8 +134,10 @@
                       <th>Type</th>
                       <th>Name</th>
                       <th>Weighting</th>
-                      <th>Mark</th>
-                      <th>Grade</th>
+                      <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                        <th>Mark</th>
+                        <th>Grade</th>
+                      </#if>
                     </tr>
                     </thead>
                     <tbody>
@@ -147,8 +154,10 @@
                         </td>
                         <td>${component.upstreamGroup.name}</td>
                         <td>${(component.weighting!0)?string["0.#"]}%</td>
-                        <td>${component.member.agreedMark!}</td>
-                        <td>${component.member.agreedGrade!}</td>
+                        <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                          <td>${component.member.agreedMark!}</td>
+                          <td>${component.member.agreedGrade!}</td>
+                        </#if>
                       </tr>
                     </#list>
                     </tbody>

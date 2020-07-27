@@ -72,7 +72,10 @@ abstract class GraduationBenchmarkSysadminCommandInternal extends CommandInterna
     val universityIds = ids.split('\n').map(_.safeTrim).filter(_.hasText).map(SprCode.getUniversityId)
     profileService.getAllMembersWithUniversityIds(universityIds.toSeq)
       .collect { case s: StudentMember => s }
-      .flatMap(_.freshStudentCourseYearDetailsForYear(AcademicYear.starting(2019)))
+      .flatMap { student =>
+        val scyds = student.allFreshStudentCourseYearDetailsForYear(AcademicYear.starting(2019))
+        scyds.filter(_.studentCourseDetails.mostSignificant).sorted.lastOption.orElse(scyds.sorted.lastOption)
+      }
       .map { scyd =>
         val entity = scyd.studentCourseDetails.student.toExamGridEntity(scyd, basedOnLevel = true, mitCircs = Seq.empty)
         val entityYear = entity.validYears.find(_._2.studentCourseYearDetails.contains(scyd)).get._2

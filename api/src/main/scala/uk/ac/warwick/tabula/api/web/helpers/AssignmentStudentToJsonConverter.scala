@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
+import uk.ac.warwick.tabula.WorkflowStageHealth
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
-import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
 
 import scala.jdk.CollectionConverters._
 
 trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
-  self: AssignmentStudentMessageResolver with ApiController =>
+  self: AssignmentStudentMessageResolver with ApiController with ExtensionToJsonConvertor =>
 
   def jsonAssignmentStudentObject(student: AssignmentSubmissionStudentInfo): Map[String, Any] = {
     val userDetails = Map("universityId" -> student.user.getWarwickId)
@@ -51,17 +50,7 @@ trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
     val submissionDetails = Map("submission" -> jsonSubmissionObject(student))
 
     val extensionDetails = Map(
-      "extension" -> student.coursework.enhancedExtension.map { enhancedExtension =>
-        val extension = enhancedExtension.extension
-
-        Map(
-          "id" -> extension.id,
-          "state" -> extension.state.description,
-          "expired" -> (extension.state == ExtensionState.Approved && !enhancedExtension.within),
-          "expiryDate" -> extension.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
-          "requestedExpiryDate" -> extension.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull
-        )
-      }.orNull
+      "extension" -> student.coursework.enhancedExtension.map(jsonExtension).orNull
     )
 
     val feedbackDetails = Map(
