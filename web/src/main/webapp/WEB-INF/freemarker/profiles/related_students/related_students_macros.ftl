@@ -66,7 +66,7 @@
         <th class="year-col">Year</th>
         <th class="course-but-photo-col">Course</th>
         <#if showMeetings>
-          <th class="meetings-col sorter-false">Last met</th></#if>
+          <th class="meetings-col sorter-customdate">Last met</th></#if>
       </tr>
       </thead>
       <tbody>
@@ -98,6 +98,20 @@
               });
             } else $buttons.addClass('disabled');
           };
+
+          // add a custom parser for the date column
+          $.tablesorter.addParser({
+            id: 'customdate',
+            is: function (s, table, cell, $cell) {
+              return false; /*return false so this parser is not auto detected*/
+            },
+            format: function (s, table, cell, cellIndex) {
+              var $cell = $(cell);
+              return $cell.attr('data-datesort') || s;
+            },
+            parsed: false,
+            type: 'numeric'
+          });
 
           $('.related_students').tablesorter({
             sortLocaleCompare: true,
