@@ -43,7 +43,7 @@ trait ModuleRegistrationDao {
 
   def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String]
+  def findRegisteredUsers(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String], includeUniversityIds: Boolean): Seq[String]
 
   def getByRecordedAssessmentComponentStudentsNeedsWritingToSits: Seq[ModuleRegistration]
 }
@@ -145,10 +145,10 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
       .seq
   }
 
-  def findRegisteredUsercodes(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Seq[String] = {
+  def findRegisteredUsers(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String], universityIds: Boolean = false): Seq[String] = {
     val query = session.newQuery[String](
       s"""
-        select distinct studentCourseDetails.student.userId
+        select distinct ${if (universityIds) "studentCourseDetails.student.universityId" else "studentCourseDetails.student.userId"}
         from ModuleRegistration mr
         join StudentCourseDetails studentCourseDetails
           on studentCourseDetails.sprCode = mr.sprCode
