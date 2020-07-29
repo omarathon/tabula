@@ -84,12 +84,31 @@
     <#if !student_table_script_included??>
       <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
+          var generateBulkRecordLink = function () {
+            var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');
+            var $selectedCheckBoxes = $(".collection-checkbox:checkbox:checked");
+            if ($selectedCheckBoxes.length > 0) {
+              $buttons.removeClass('disabled');
+              $buttons.each(function () {
+                var $button = $(this);
+                var course = $.map($selectedCheckBoxes, function (checkbox) {
+                  return $(checkbox).data('student-course-details');
+                });
+                $button.attr("href", $button.data("href") + course);
+              });
+            } else $buttons.addClass('disabled');
+          };
+
           $('.related_students').tablesorter({
             sortLocaleCompare: true,
             textAttribute: 'data-sortby',
           }).on('tablesorter-ready', function(e) {
             var $table = $(e.target);
-            $('.student-list').bigList({});
+            $('.student-list').bigList({
+              onBulkChange: function() {
+                generateBulkRecordLink();
+              }
+            });
             /*
              * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
              * the whole thing every time there's a change. Probably don't use it until we've found some
