@@ -105,10 +105,7 @@
           }).on('tablesorter-ready', function(e) {
             var $table = $(e.target);
             $('.student-list').bigList({
-              onNoneChecked: function() {
-                generateBulkRecordLink();
-              },
-              onSomeChecked: function() {
+              onBulkChange: function() {
                 generateBulkRecordLink();
               }
             });
