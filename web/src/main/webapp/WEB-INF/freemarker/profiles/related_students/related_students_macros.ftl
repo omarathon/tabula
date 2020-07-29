@@ -66,7 +66,7 @@
         <th class="year-col">Year</th>
         <th class="course-but-photo-col">Course</th>
         <#if showMeetings>
-          <th class="meetings-col">Last met</th></#if>
+          <th class="meetings-col sorter-false">Last met</th></#if>
       </tr>
       </thead>
       <tbody>
