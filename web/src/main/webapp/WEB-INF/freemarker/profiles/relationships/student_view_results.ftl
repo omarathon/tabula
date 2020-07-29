@@ -32,6 +32,9 @@
       var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');
       var generateBulkRecordLink = function () {
         var $selectedCheckBoxes = $(".collection-checkbox:checkbox:checked");
+        if ($(".collection-check-all").prop("checked")) {
+          $selectedCheckBoxes = $(".collection-checkbox:checkbox");
+        }
         if ($selectedCheckBoxes.length > 0) {
           $buttons.removeClass('disabled');
           $buttons.each(function () {
