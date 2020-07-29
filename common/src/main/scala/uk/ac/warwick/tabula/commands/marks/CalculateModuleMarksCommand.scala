@@ -650,7 +650,7 @@ trait ClearRecordedModuleMarks {
     // There might be multiple module registrations here, for different SPR codes. Just blat them all
     // We can't restrict this by AssessmentGroup because it might be a resit mark by another mechanism
     moduleRegistrationService.getByModuleOccurrence(recordedAssessmentComponentStudent.moduleCode, recordedAssessmentComponentStudent.academicYear, recordedAssessmentComponentStudent.occurrence)
-      .filter(_.studentCourseDetails.student.universityId == recordedAssessmentComponentStudent.universityId)
+      .filter(mr => Option(mr.studentCourseDetails).exists(_.student.universityId == recordedAssessmentComponentStudent.universityId))
       .filter(ClearRecordedModuleMarks.shouldClear(_)(moduleRegistrationMarksService).nonEmpty)
       .map(moduleRegistrationMarksService.getOrCreateRecordedModuleRegistration)
       .map { recordedModuleRegistration =>
