@@ -26,8 +26,7 @@
   <import resource="hibernate-packages-context.xml"/>
 
   <bean id="flywayConfig" class="org.flywaydb.core.api.configuration.ClassicConfiguration"
-        p:dataSource-ref="dataSource"
-        p:group="true"
+        p:dataSource-ref="flywayDataSource"
   />
 
   <bean id="flyway" class="org.flywaydb.core.Flyway" init-method="migrate">
@@ -63,7 +62,7 @@
         p:sessionFactory-ref="sessionFactory" />
 
   <beans profile="console">
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean name="dataSource,flywayDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
       <property name="driverClassName" value="org.postgresql.Driver"/>
       <property name="url" value="${db.url}"/>
       <property name="username" value="${db.username}"/>
@@ -91,11 +90,12 @@
   </beans>
 
   <beans profile="dev,sandbox,production">
-
-    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <bean name="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName" value="java:comp/env/jdbc/TabulaDS"/>
     </bean>
-
+    <bean name="flywayDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName" value="java:comp/env/jdbc/TabulaFlywayDS"/>
+    </bean>
   </beans>
 
   <beans profile="dev,production">
@@ -119,7 +119,7 @@
   </beans>
 
   <beans profile="test">
-    <bean id="dataSource" class="uk.ac.warwick.tabula.PostgreSQLEmbeddedDatabaseFactoryBean" lazy-init="false"/>
+    <bean name="dataSource,flywayDataSource" class="uk.ac.warwick.tabula.PostgreSQLEmbeddedDatabaseFactoryBean" lazy-init="false"/>
 
     <import resource="hibernate-test-scripts-context.xml"/>
 
