@@ -25,7 +25,7 @@ Table of Contents
 - [Quick start](#quick-start)
   - [Pre-requisites](#pre-requisites)
 - [Setting up for development](#setting-up-for-development)
-	- [ActiveMQ](#activemq)
+  - [ActiveMQ](#activemq)
   - [Elasticsearch](#elasticsearch)
   - [Java 8 JDK](#java-8-jdk)
   - [Starting Tomcat](#starting-tomcat)
