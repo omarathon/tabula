@@ -58,7 +58,7 @@
         <#if showSelectStudents>
           <th class="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
         </#if>
-        <th class="photo-col">Photo</th>
+        <th class="photo-col no-sort">Photo</th>
         <th class="student-col">First name</th>
         <th class="student-col">Last name</th>
         <th class="id-col">ID</th>
@@ -66,7 +66,7 @@
         <th class="year-col">Year</th>
         <th class="course-but-photo-col">Course</th>
         <#if showMeetings>
-          <th class="meetings-col">Last met</th></#if>
+          <th class="meetings-col sorter-customdate">Last met</th></#if>
       </tr>
       </thead>
       <tbody>
@@ -84,7 +84,21 @@
     <#if !student_table_script_included??>
       <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
-          $('.student-list').bigList({});
+          var generateBulkRecordLink = function () {
+            var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');
+            var $selectedCheckBoxes = $(".collection-checkbox:checkbox:checked");
+            if ($selectedCheckBoxes.length > 0) {
+              $buttons.removeClass('disabled');
+              $buttons.each(function () {
+                var $button = $(this);
+                var course = $.map($selectedCheckBoxes, function (checkbox) {
+                  return $(checkbox).data('student-course-details');
+                });
+                $button.attr("href", $button.data("href") + course);
+              });
+            } else $buttons.addClass('disabled');
+          };
+
           // add a custom parser for the date column
           $.tablesorter.addParser({
             id: 'customdate',
@@ -99,41 +113,28 @@
             type: 'numeric'
           });
 
-          var tableSorterSortList = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return [[3, 0], [5, 0], [6, 0]];
-            }
-            return [[2, 0], [4, 0], [5, 0]];
-          };
-          var tableSorterHeaders = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return {
-                8: {sorter: 'customdate'},
-                0: {sorter: false}
-              };
-            }
-            return {7: {sorter: 'customdate'}};
-          };
-
-          var tableSorterForce = function (showSelectStudentCheckBox) {
-            if (showSelectStudentCheckBox) {
-              return [[3, 0]];
-            }
-            return [[2, 0]];
-          };
-          $(function () {
-            var showSelectStudentCheckBox = !!$(".collection-check-all").length;
-            $('.related_students').tablesorter({
-              sortList: tableSorterSortList(showSelectStudentCheckBox),
-              headers: tableSorterHeaders(showSelectStudentCheckBox),
-              sortForce: tableSorterForce(showSelectStudentCheckBox)
+          $('.related_students').tablesorter({
+            sortLocaleCompare: true,
+            textAttribute: 'data-sortby',
+          }).on('tablesorter-ready', function(e) {
+            var $table = $(e.target);
+            $('.student-list').bigList({
+              onBulkChange: function() {
+                generateBulkRecordLink();
+              }
             });
+            /*
+             * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
+             * the whole thing every time there's a change. Probably don't use it until we've found some
+             * way to optimise the amount of time it takes tablesorter to init.
+             */
+            if ($table.data('dynamic-sort') && !$table.data('dynamic-sort-initialised')) {
+              $table.data('dynamic-sort-initialised', true);
 
-            $('.related_student').on('mouseover', function (e) {
-              $(this).find('td').addClass('hover');
-            }).on('mouseout', function (e) {
-              $(this).find('td').removeClass('hover');
-            });
+              $table.on('change', function() {
+                $table.trigger('update')
+              });
+            }
           });
         })(jQuery);
       </script>

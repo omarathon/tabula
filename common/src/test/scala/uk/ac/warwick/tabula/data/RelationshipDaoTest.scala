@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.data
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
 import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.commands.FiltersRelationships
+import uk.ac.warwick.tabula.data.ScalaRestriction.isIfTicked
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
@@ -270,6 +272,41 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 
     memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff1.universityId, Seq()).size should be(2)
     memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be(1)
+  }
+
+
+  @Test def studentsWithVistingCriteriaAgentRelationship(): Unit = transactional { tx =>
+    val dept = Fixtures.department("ml", "Modern Languages")
+
+    session.save(dept)
+
+    sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+    val stu = Fixtures.student(universityId = "1000001", userId = "student", department = dept, courseDepartment = dept, sprStatus = sprFullyEnrolledStatus)
+    stu.lastUpdatedDate = new DateTime(2020, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+    val staff = Fixtures.staff(universityId = "1000003", userId = "staff1", department = dept)
+    staff.lastUpdatedDate = new DateTime(2020, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+    memberDao.saveOrUpdate(stu)
+    memberDao.saveOrUpdate(staff)
+
+    val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
+
+    val relBetweenStaff1AndStu = StudentRelationship(staff, relationshipType, stu, DateTime.now)
+
+
+    relationshipDao.saveOrUpdate(relBetweenStaff1AndStu)
+
+    memberDao.getStudentsByDepartment(dept).size should be(1)
+    relationshipDao.getStudentsByRelationshipAndDepartment(relationshipType, dept).size should be(1)
+    val vistingRestriction = isIfTicked(
+      "department.code", "io",
+      true).get
+    vistingRestriction.aliases.addAll(FiltersRelationships.AliasPaths("department"))
+
+    //Should not throw hibernate exception (TAB-8629)
+    memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff.universityId, Seq(vistingRestriction)).size should be(0)
   }
 
 }

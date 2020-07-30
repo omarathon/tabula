@@ -46,7 +46,7 @@ abstract class MemberSearchCommandInternal(override val departments: Seq[Departm
       throw new IllegalArgumentException("At least one filter value must be defined")
     }
 
-    val restrictions = buildRestrictions(user, departments, AcademicYear.now())
+    val restrictions = buildRestrictions(user, departments, academicYear)
 
     departments match {
       case Nil => profileService.findAllUserIdsByRestrictions(restrictions).distinct
@@ -70,6 +70,7 @@ trait MemberSearchCommandRequest extends RequiresPermissionsChecking with Permis
 
   val defaultOrder: Seq[Order] = Seq(asc("lastName"), asc("firstName"))
 
+  var academicYear: AcademicYear = AcademicYear.now()
   var sortOrder: JList[Order] = JArrayList()
   var courseTypes: JList[CourseType] = JArrayList()
   var specificCourseTypes: JList[SpecificCourseType] = JArrayList()

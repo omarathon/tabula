@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.submissions.MemberSubmissionsController.ViewMemberSubmissionsCommand
-import uk.ac.warwick.tabula.api.web.helpers.{SubmissionInfoToJsonConverter, SubmissionToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{ExtensionToJsonConvertor, SubmissionInfoToJsonConverter, SubmissionToJsonConverter}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ListMemberSubmissionsCommand, ListSubmissionsResult}
 import uk.ac.warwick.tabula.data.model._
@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 abstract class MemberSubmissionsController extends ApiController
   with SubmissionToJsonConverter
   with SubmissionInfoToJsonConverter
+  with ExtensionToJsonConvertor
   with AutowiringExtensionServiceComponent
   with AutowiringUserLookupComponent
   with AutowiringSubmissionServiceComponent
