@@ -58,7 +58,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
         latestResult match {
           case Some(Pass) => Some("COM")
           case Some(Deferred) if latestGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade) => Some("COM")
-          case Some(Fail) | Some(Deferred) => Some("RAS") // Process is RAS even for first sits
+          case Some(Fail) | Some(Deferred) => if(requiresResit) Some("RAS") else Some("COM")
           case _ => Some("SAS")
         }
       } else {

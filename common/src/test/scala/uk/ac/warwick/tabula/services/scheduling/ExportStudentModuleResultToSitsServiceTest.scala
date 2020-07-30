@@ -295,4 +295,52 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
       }
     }
   }
+
+  @Transactional
+  @Test def smrExportWithAgreedNoResitRecordedMark(): Unit = {
+    withUser("cusxxx") {
+      new ExportSMREnvironment {
+        val dbRmr4: RecordedModuleRegistration = session.get(classOf[RecordedModuleRegistration].getName, rmr4.id).asInstanceOf[RecordedModuleRegistration]
+        val rMark4: RecordedModuleMark = dbRmr4.addMark(uploader = currentUser.apparentUser,
+          mark = Some(20),
+          grade = Some("N"),
+          result = Some(Fail),
+          source = ComponentMarkCalculation,
+          markState = Agreed,
+          comments = "Agreed fail")
+        smrExporter.assessmentMembershipService.gradesForMark(mr4, Some(20)) returns Seq(GradeBoundary (
+          marksCode = "WAR",
+          process = GradeBoundaryProcess.Reassessment,
+          attempt = 1,
+          rank = 1,
+          grade = "N",
+          Some(0),
+          Some(100),
+          signalStatus = NoSignal,
+          result = Some(Fail),
+          agreedStatus = GradeBoundaryAgreedStatus.Agreed,
+          incrementsAttempt = false
+        ))
+
+        val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
+        m1.membershipService = smartMock[AssessmentMembershipService]
+        m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+        val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr4, finalAssessmentAttended = false)
+        session.flush()
+        session.clear()
+        cnt should be(1)
+        val existingSmr: Option[SmrSubset] = smrExporter.smrRecordSubdata(dbRmr4)
+        existingSmr.size should be(1)
+        existingSmr.get.actualMark should be(Some(20))
+        existingSmr.get.actualGrade should be(Some("N"))
+        existingSmr.get.agreedMark should be(Some(20))
+        existingSmr.get.agreedGrade should be(Some("N"))
+        existingSmr.get.currentAttempt should be(Some(1))
+        existingSmr.get.completedAttempt should be(Some(1))
+        existingSmr.get.sasStatus should be(Some("A"))
+        existingSmr.get.processStatus should be(None)
+        existingSmr.get.process should be(Some("COM"))
+      }
+    }
+  }
 }
