@@ -40,7 +40,9 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
     SmallGroups.Create,
     SmallGroupEvents.Register,
     SmallGroups.Update,
-    SmallGroups.Allocate
+    SmallGroups.Allocate,
+
+    Profiles.Read.ModuleRegistration.Core
   )
 
   def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
