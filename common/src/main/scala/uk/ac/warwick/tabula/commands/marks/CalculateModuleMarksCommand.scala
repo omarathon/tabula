@@ -632,7 +632,15 @@ object ClearRecordedModuleMarks {
         recordedModuleRegistration.latestResult.nonEmpty
       }
 
-    if (isNonEmpty) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration, requiresResit = false))
+    val isUnchanged = {
+      existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
+        ((recordedModuleRegistration.latestMark.isEmpty && moduleRegistration.firstDefinedMark.isEmpty) || recordedModuleRegistration.latestMark.exists(m => moduleRegistration.firstDefinedMark.contains(m))) &&
+        ((recordedModuleRegistration.latestGrade.isEmpty && moduleRegistration.firstDefinedGrade.isEmpty) || recordedModuleRegistration.latestGrade.exists(g => moduleRegistration.firstDefinedGrade.contains(g))) &&
+        ((recordedModuleRegistration.latestResult.isEmpty && Option(moduleRegistration.moduleResult).isEmpty) || recordedModuleRegistration.latestResult.contains(moduleRegistration.moduleResult))
+      }
+    }
+
+    if (isNonEmpty && !isUnchanged) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration, requiresResit = false))
     else None
   }
 }

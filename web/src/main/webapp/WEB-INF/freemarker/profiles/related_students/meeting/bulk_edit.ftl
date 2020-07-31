@@ -9,7 +9,7 @@
         <h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
         <h6 <#if isModal!false>class="modal-title"</#if>>
           <span class="very-subtle">between ${relationshipType.agentRole}</span> ${command.creator.fullName!""}
-          <span class="very-subtle">and ${relationshipType.studentRole}(s)</span>
+          <span class="very-subtle">and <@fmt.p studentList?size relationshipType.studentRole /></span>
           <a class="studentList" href="#" title="Bulk Students" data-content="Some content inside the popover">Show</a>
           <div class="hide studentList"></div>
         </h6>

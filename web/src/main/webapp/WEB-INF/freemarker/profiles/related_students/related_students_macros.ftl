@@ -37,7 +37,7 @@
           <td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}">
             <@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true /><br />
             <span tabindex="0" class="badge progress-bar-<#if (pendingApprovals > 2)>danger<#elseif (pendingApprovals > 0)>warning<#else>success</#if>  use-tooltip"
-                  data-original-title="Number of unapproved meetings">${pendingApprovals}</span>
+                  title="Number of unapproved meetings">${pendingApprovals}</span>
           </td>
         <#else>
           <td></td>
@@ -66,7 +66,7 @@
         <th class="year-col">Year</th>
         <th class="course-but-photo-col">Course</th>
         <#if showMeetings>
-          <th class="meetings-col">Last met</th></#if>
+          <th class="meetings-col sorter-customdate">Last met</th></#if>
       </tr>
       </thead>
       <tbody>
@@ -84,12 +84,45 @@
     <#if !student_table_script_included??>
       <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
+          var generateBulkRecordLink = function () {
+            var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');
+            var $selectedCheckBoxes = $(".collection-checkbox:checkbox:checked");
+            if ($selectedCheckBoxes.length > 0) {
+              $buttons.removeClass('disabled');
+              $buttons.each(function () {
+                var $button = $(this);
+                var course = $.map($selectedCheckBoxes, function (checkbox) {
+                  return $(checkbox).data('student-course-details');
+                });
+                $button.attr("href", $button.data("href") + course);
+              });
+            } else $buttons.addClass('disabled');
+          };
+
+          // add a custom parser for the date column
+          $.tablesorter.addParser({
+            id: 'customdate',
+            is: function (s, table, cell, $cell) {
+              return false; /*return false so this parser is not auto detected*/
+            },
+            format: function (s, table, cell, cellIndex) {
+              var $cell = $(cell);
+              return $cell.attr('data-datesort') || s;
+            },
+            parsed: false,
+            type: 'numeric'
+          });
+
           $('.related_students').tablesorter({
             sortLocaleCompare: true,
             textAttribute: 'data-sortby',
           }).on('tablesorter-ready', function(e) {
             var $table = $(e.target);
-            $('.student-list').bigList({});
+            $('.student-list').bigList({
+              onBulkChange: function() {
+                generateBulkRecordLink();
+              }
+            });
             /*
              * Beware: performance is garbage if you use data-dynamic-sort="true" because it will re-init
              * the whole thing every time there's a change. Probably don't use it until we've found some

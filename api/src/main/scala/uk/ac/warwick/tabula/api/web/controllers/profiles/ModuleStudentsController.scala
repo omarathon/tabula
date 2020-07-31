@@ -29,10 +29,11 @@ trait GetModuleStudentsApi {
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
   def currentSITSAcademicYear(@ModelAttribute("getCommand") cmd: ViewViewableCommand[Module]): Mav = {
     getMav(
-      cmd.apply(),
-      AcademicYear.now(),
-      None,
-      None
+      module = cmd.apply(),
+      academicYear = AcademicYear.now(),
+      endDate = None,
+      occurrence = None,
+      universityIds = false
     )
   }
 
@@ -41,17 +42,23 @@ trait GetModuleStudentsApi {
     @ModelAttribute("getCommand") cmd: ViewViewableCommand[Module],
     @PathVariable academicYear: AcademicYear,
     @RequestParam(required = false) endDate: LocalDate,
-    @RequestParam(required = false) occurrence: String
+    @RequestParam(required = false) occurrence: String,
+    @RequestParam(required = false) universityIds: Boolean = false
   ): Mav = {
-    getMav(cmd.apply(), academicYear, Option(endDate), Option(occurrence))
+    getMav(
+      module = cmd.apply(),
+      academicYear = academicYear,
+      endDate = Option(endDate),
+      occurrence = Option(occurrence),
+      universityIds = universityIds
+    )
   }
 
-  def getMav(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String]): Mav = {
-    val usercodes = moduleRegistrationService.findRegisteredUsercodes(module, academicYear, endDate, occurrence)
+  def getMav(module: Module, academicYear: AcademicYear, endDate: Option[LocalDate], occurrence: Option[String], universityIds: Boolean): Mav = {
+    val results = moduleRegistrationService.findRegisteredUsercodes(module, academicYear, endDate, occurrence, universityIds)
     Mav(new JSONView(Map(
       "success" -> true,
-      "status" -> "ok",
-      "usercodes" -> usercodes
-    )))
+      "status" -> "ok"
+    ) ++ (if (universityIds) { Map("universityIds" -> results) } else { Map ("usercodes" -> results) })))
   }
 }

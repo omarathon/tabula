@@ -28,7 +28,6 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
     SmallGroups.Delete,
     SmallGroups.ImportFromExternalSystem,
 
-    Profiles.Read.ModuleRegistration.Core,
     Profiles.Read.ModuleRegistration.Results
   )
 
