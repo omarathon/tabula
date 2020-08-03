@@ -165,11 +165,39 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     // We need to get marks for _all_ components for the Module Registration in order to calculate a VAW weighting
     lazy val marks: Seq[(AssessmentType, String, Option[Int])] = moduleRegistration.componentMarks(includeActualMarks = true)
 
+    val hasResitWeightings: Boolean = components.exists(_.resitAssessmentWeighting.nonEmpty)
+
+    val totalRawWeighting: Int =
+      if (hasResitWeightings)
+        components.map { uagm =>
+          uagm.resitAssessmentWeighting
+            .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+            .getOrElse(0)
+        }.sum
+      else 100
+
+    def scaleWeighting(raw: Int): BigDecimal =
+      if (raw == 0 || totalRawWeighting == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
+      else if (totalRawWeighting == 100) BigDecimal(raw)
+      else {
+        val bd = BigDecimal(raw * 100) / BigDecimal(totalRawWeighting)
+        bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
+        bd
+      }
+
     components.map { uagm =>
       val weighting: BigDecimal =
-        uagm.upstreamAssessmentGroup.assessmentComponent
-          .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
-          .getOrElse(BigDecimal(0))
+        if (hasResitWeightings) {
+          scaleWeighting(
+            uagm.resitAssessmentWeighting
+              .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+              .getOrElse(0)
+          )
+        } else {
+          uagm.upstreamAssessmentGroup.assessmentComponent
+            .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
+            .getOrElse(BigDecimal(0))
+        }
 
 
 
@@ -181,7 +209,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
     val completedCats = moduleRegistrations.flatMap(benchmarkComponentsAndMarks).map(_.cats).sum
     val totalCats = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
-    if(totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
+    if (totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
   }
 
   def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
