@@ -167,7 +167,7 @@ class OvercattingOptionsView(
   lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedModuleSubsets.map { case (_, overcattedModules) =>
     originalEntity.copy(years = originalEntity.years.updated(studyYearByLevelOrBlock, Some(ExamGridEntityYear(
       moduleRegistrations = overcattedModules,
-      cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,
+      cats = overcattedModules.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum,
       route = scyd.route match {
         case r: Route => r
         case _ => scyd.studentCourseDetails.currentRoute

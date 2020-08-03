@@ -71,7 +71,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
         year.moduleRegistrations.zipWithIndex.foreach { case (mr, index) =>
           val row = moduleTable.getRow(index + 1)
           row.getCell(0).setText(s"${mr.module.code.toUpperCase} ${mr.module.name}")
-          row.getCell(1).setText(mr.cats.toPlainString)
+          row.getCell(1).setText(Option(mr.cats).map(_.toPlainString).getOrElse(""))
           if (mr.agreedMark.nonEmpty || mr.agreedGrade.nonEmpty) {
             row.getCell(2).setText(mr.agreedMark.map(_.toString).getOrElse("-"))
             row.getCell(3).setText(mr.agreedGrade.getOrElse(""))

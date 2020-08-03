@@ -91,6 +91,9 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
   var cats: JBigDecimal = _
 
+  @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+  def safeCats: Option[BigDecimal] = Option(cats).map(BigDecimal(_))
+
   /**
    * Uppercase module code, with CATS. Doesn't necessarily match the cats property (which is the credits registered)
    */

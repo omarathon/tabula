@@ -49,7 +49,7 @@ object StudentCourseYearDetails {
 
       ExamGridEntityYear(
         moduleRegistrations = moduleRegistrations,
-        cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+        cats = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum,
         route = route,
         baseAcademicYear = scyds.min.academicYear,
         overcattingModules = overcattingModules,
@@ -209,7 +209,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var agreedMarkUploadedBy: User = _
 
-  def totalCats: BigDecimal = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+  def totalCats: BigDecimal = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
 
   def toExamGridEntityYear: ExamGridEntityYear =
     RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYear", id) {

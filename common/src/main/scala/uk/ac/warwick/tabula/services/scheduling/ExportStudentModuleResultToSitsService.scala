@@ -47,10 +47,10 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     val requiresResit = gradeBoundary.exists(_.generatesResit)
     val incrementAttempt = gradeBoundary.exists(_.incrementsAttempt)
 
-    val smrCredits: Option[JBigDecimal] = latestResult match {
-      case Some(Pass) => Some(mr.cats)
+    val smrCredits: Option[BigDecimal] = latestResult match {
+      case Some(Pass) => mr.safeCats
       case None => None // null this field if we don't have a result yet
-      case _ => Some(new JBigDecimal(0))
+      case _ => Some(BigDecimal(0))
     }
 
     val smrProcess: Option[String] = {
@@ -112,7 +112,7 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
       sasStatus = smrSasStatus,
       processStatus = smrProcStatus,
       process = smrProcess,
-      credits = smrCredits,
+      credits = smrCredits.map(_.underlying),
       currentAttempt = Option(smrCurrentAttempt),
       completedAttempt = Option(smrCompletedAttempt),
       actualMark = smrActualMark,
