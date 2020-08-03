@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServic
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
+import scala.collection.mutable
 import scala.util.{Failure, Success}
 
 object StudentAssessmentCommand {
@@ -85,6 +86,8 @@ case class ModuleRegistrationAndComponents(
 )
 
 case class Component(
+  name: String,
+  assessmentType: AssessmentType,
   upstreamGroup: UpstreamGroup,
   member: UpstreamAssessmentGroupMember,
   weighting: Option[BigDecimal],
@@ -193,15 +196,19 @@ trait StudentModuleRegistrationAndComponents extends Logging {
 
     scyds.flatMap { scyd =>
       scyd.moduleRegistrations.map { mr =>
-        val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember)] =
-          for {
-            uagm <- mr.upstreamAssessmentGroupMembersAllAttempts
-            aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
-          } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
+        def extractMarks(components: Seq[UpstreamAssessmentGroupMember]): Seq[(AssessmentType, String, Option[Int])] = components.flatMap { uagm =>
+          uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
+            (ac.assessmentType, ac.sequence, if (includeActualMarks) uagm.firstDefinedMark else uagm.agreedMark)
+          }
+        }
 
-        // For VAW
-        val marks: Seq[(AssessmentType, String, Option[Int])] = mr.componentMarks(includeActualMarks = includeActualMarks)
-        val hasAnyMarks = marks.exists { case (_, _, mark) => mark.nonEmpty }
+        val seen: mutable.Set[UpstreamAssessmentGroupMember] = mutable.Set()
+        val components: Seq[(UpstreamGroup, UpstreamAssessmentGroupMember, Option[BigDecimal])] =
+          for {
+            attempt <- mr.upstreamAssessmentGroupMembersAllAttempts(extractMarks)
+            (uagm, weighting) <- attempt.sortBy(_._1.upstreamAssessmentGroup.sequence) if seen.add(uagm)
+            aComponent <- uagm.upstreamAssessmentGroup.assessmentComponent
+          } yield (new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, attempt.map(_._1)), uagm, weighting)
 
         val recordedModuleRegistration: Option[RecordedModuleRegistration] = moduleRegistrationMarksService.getRecordedModuleRegistration(mr)
         val process = if (mr.currentResitAttempt.nonEmpty) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
@@ -212,7 +219,7 @@ trait StudentModuleRegistrationAndComponents extends Logging {
           moduleRegistration = mr,
           markState = recordedModuleRegistration.flatMap(_.latestState),
           markRecord = StudentModuleMarkRecord(mr, recordedModuleRegistration, gradeBoundary.exists(_.generatesResit)),
-          components = components.map { case (ug, uagm) =>
+          components = components.map { case (ug, uagm, weighting) =>
             val recordedAssessmentComponentStudent: Option[RecordedAssessmentComponentStudent] = assessmentComponentMarksService.getRecordedStudent(uagm)
             val resit: Option[RecordedResit] = studentsResits.filter(r => r.sprCode == mr.sprCode && r.sequence == ug.sequence)
               .sortBy(_.currentResitAttempt)
@@ -223,18 +230,32 @@ trait StudentModuleRegistrationAndComponents extends Logging {
               grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process))
             }
 
+            val hasResitWeightings: Boolean = ug.currentMembers.exists(_.resitAssessmentWeighting.nonEmpty)
+
+            val totalRawWeighting: Int =
+              if (hasResitWeightings)
+                ug.currentMembers.map { uagm =>
+                  uagm.resitAssessmentWeighting
+                    .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+                    .getOrElse(0)
+                }.sum
+              else 100
+
+            def scaleWeighting(raw: Int): BigDecimal =
+              if (raw == 0 || totalRawWeighting == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
+              else if (totalRawWeighting == 100) BigDecimal(raw)
+              else {
+                val bd = BigDecimal(raw * 100) / BigDecimal(totalRawWeighting)
+                bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
+                bd
+              }
+
             Component(
+              name = uagm.resitAssessmentName.getOrElse(ug.name),
+              assessmentType = uagm.resitAssessmentType.getOrElse(ug.assessmentComponent.assessmentType),
               upstreamGroup = ug,
               member = uagm,
-              weighting =
-                if (hasAnyMarks)
-                  ug.assessmentComponent.weightingFor(marks)  match {
-                    case Success(w) => w
-                    case Failure(t) =>
-                      logger.error(s"Couldn't calculate variable weighting for ${ug.assessmentComponent}, using scaled weighting", t)
-                      ug.assessmentComponent.scaledWeighting
-                  }
-                else ug.assessmentComponent.scaledWeighting,
+              weighting = weighting,
               markState = recordedAssessmentComponentStudent.flatMap(_.latestState),
               markRecord = StudentMarkRecord(
                 UpstreamAssessmentGroupInfo(
