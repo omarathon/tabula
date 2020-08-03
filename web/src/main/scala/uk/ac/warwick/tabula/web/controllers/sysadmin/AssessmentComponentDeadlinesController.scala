@@ -91,9 +91,9 @@ object AssessmentComponentDeadlinesController {
     DateTimeFormat.forPattern("MMM-yy"),
   )
 
-  def parseDeadlineDate(in: String): LocalDate = in match {
+  def parseDeadlineDate(in: String, academicYear: AcademicYear = AcademicYear.now()): LocalDate = in match {
     case r"""(?i)^\s*week (\d+)${weekNumber}\s*$$""" =>
-      AcademicYear.now().weeks(weekNumber.toInt).firstDay
+      academicYear.weeks(weekNumber.toInt).firstDay
 
     case s if DeadlineYearMonthFormats.exists(df => Try(YearMonth.parse(s, df)).isSuccess) =>
       DeadlineYearMonthFormats.to(LazyList).map(df => Try(YearMonth.parse(s, df)))
