@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.assignments._
@@ -34,7 +35,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController
       "department" -> module.adminDepartment,
       "module" -> module,
       "academicYear" -> cmd.academicYear,
-      "reusableWorkflows" -> cm2MarkingWorkflowService.getReusableWorkflows(module.adminDepartment, academicYear),
+      "reusableWorkflows" -> cm2MarkingWorkflowService.getReusableWorkflows(module.adminDepartment, cmd.academicYear),
       "availableWorkflows" -> MarkingWorkflowType.values.sorted,
       "allWorkflowCategories" -> WorkflowCategory.values,
       "workflow" -> cmd.workflow,
