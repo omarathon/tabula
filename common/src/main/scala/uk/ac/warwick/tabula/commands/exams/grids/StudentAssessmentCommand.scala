@@ -230,26 +230,6 @@ trait StudentModuleRegistrationAndComponents extends Logging {
               grade.flatMap(g => gradeBoundaries.find(gb => gb.grade == g && gb.process == process))
             }
 
-            val hasResitWeightings: Boolean = ug.currentMembers.exists(_.resitAssessmentWeighting.nonEmpty)
-
-            val totalRawWeighting: Int =
-              if (hasResitWeightings)
-                ug.currentMembers.map { uagm =>
-                  uagm.resitAssessmentWeighting
-                    .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
-                    .getOrElse(0)
-                }.sum
-              else 100
-
-            def scaleWeighting(raw: Int): BigDecimal =
-              if (raw == 0 || totalRawWeighting == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
-              else if (totalRawWeighting == 100) BigDecimal(raw)
-              else {
-                val bd = BigDecimal(raw * 100) / BigDecimal(totalRawWeighting)
-                bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
-                bd
-              }
-
             Component(
               name = uagm.resitAssessmentName.getOrElse(ug.name),
               assessmentType = uagm.resitAssessmentType.getOrElse(ug.assessmentComponent.assessmentType),
