@@ -51,7 +51,7 @@ object ModuleRegistration {
 
           true
         }
-      }
+      }.reverse // Put them back in resit sequence order
     }
 }
 
