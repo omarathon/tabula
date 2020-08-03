@@ -23,19 +23,36 @@ object ModuleRegistration {
   // a list of all the markscheme codes that we consider to be pass/fail modules
   final val PassFailMarkSchemeCodes = Seq("PF")
 
-  def filterToLatestAttempt(allMembers: Seq[UpstreamAssessmentGroupMember]): Seq[UpstreamAssessmentGroupMember] = {
-    // Filter down to just the latest resit sequence
-    // Find the assessment group to filter by (this is for students who take multiple reassessments)
-    val assessmentGroup =
-      allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
+  def filterToLatestAttempt(allMembers: Seq[UpstreamAssessmentGroupMember]): Seq[UpstreamAssessmentGroupMember] =
+    if (allMembers.forall(!_.isReassessment)) allMembers
+    else {
+      // Filter down to just the latest resit sequence
+      // Find the assessment group to filter by (this is for students who take multiple reassessments)
+      val assessmentGroup =
+        allMembers.maxByOption(_.resitSequence).map(_.upstreamAssessmentGroup.assessmentGroup)
 
-    // Group by assessment component so we only get the latest by resit sequence
-    allMembers
-      .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
-      .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
-      .values.map(_.maxBy(_.resitSequence))
-      .toSeq
-  }
+      // Group by assessment component so we only get the latest by resit sequence
+      val uagms =
+        allMembers
+          .filter(uagm => assessmentGroup.contains(uagm.upstreamAssessmentGroup.assessmentGroup))
+          .groupBy(uagm => (uagm.upstreamAssessmentGroup.moduleCode, uagm.upstreamAssessmentGroup.sequence))
+          .values.map(_.maxBy(_.resitSequence))
+          .toSeq
+
+      var rawWeighting: Int = 0
+
+      uagms.sortBy(_.resitSequence).reverse.takeWhile { uagm =>
+        if (rawWeighting == 100 || rawWeighting == 1000 || rawWeighting == 10000) false // that'll do, pig
+        else {
+          rawWeighting +=
+            uagm.resitAssessmentWeighting
+              .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+              .getOrElse(0)
+
+          true
+        }
+      }.reverse // Put them back in resit sequence order
+    }
 }
 
 /*
@@ -176,14 +193,99 @@ class ModuleRegistration extends GeneratedId with PermissionsTarget with CanBeDe
       membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = false)
     }
 
-  def upstreamAssessmentGroupMembersAllAttempts: Seq[UpstreamAssessmentGroupMember] =
+  def upstreamAssessmentGroupMembersAllAttempts(extractMarks: Seq[UpstreamAssessmentGroupMember] => Seq[(AssessmentType, String, Option[Int])]): Seq[Seq[(UpstreamAssessmentGroupMember, Option[BigDecimal])]] =
     if (studentCourseDetails == null) Seq.empty
-    else RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
-      membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
-    }.filter(member => member.universityId == studentCourseDetails.student.universityId)
+    else {
+      val uagms = RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$sitsModuleCode-$occurrence") {
+        membershipService.getUpstreamAssessmentGroups(this, allAssessmentGroups = true, eagerLoad = true).flatMap(_.members.asScala)
+      }.filter(member => member.universityId == studentCourseDetails.student.universityId)
 
-  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    ModuleRegistration.filterToLatestAttempt(upstreamAssessmentGroupMembersAllAttempts)
+      val firstAttempt = uagms.filterNot(_.isReassessment)
+      val firstAttemptMarks = extractMarks(firstAttempt)
+
+      val firstAttemptWithWeightings: Seq[(UpstreamAssessmentGroupMember, Option[BigDecimal])] = firstAttempt.map { uagm =>
+        val weighting =
+          if (firstAttemptMarks.exists { case (_, _, mark) => mark.nonEmpty })
+            uagm.upstreamAssessmentGroup.assessmentComponent.flatMap { ac =>
+              ac.weightingFor(firstAttemptMarks).getOrElse(ac.scaledWeighting)
+            }
+          else uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(_.scaledWeighting)
+
+        (uagm, weighting)
+      }
+
+      // No resits, exit early
+      if (uagms.forall(!_.isReassessment)) Seq(firstAttemptWithWeightings)
+      else {
+        val reassessments = uagms.filter(_.isReassessment).sortBy(_.resitSequence)
+
+        def calculateReassessmentWeightings(components: Seq[UpstreamAssessmentGroupMember]): Seq[(UpstreamAssessmentGroupMember, Option[BigDecimal])] = {
+          val hasResitWeightings: Boolean = components.exists(_.resitAssessmentWeighting.nonEmpty)
+
+          val totalRawWeighting: Int =
+            if (hasResitWeightings)
+              components.map { uagm =>
+                uagm.resitAssessmentWeighting
+                  .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+                  .getOrElse(0)
+              }.sum
+            else 100
+
+          def scaleWeighting(raw: Int): BigDecimal =
+            if (raw == 0 || totalRawWeighting == 0) BigDecimal(0) // 0 will always scale to 0 and a total of 0 will always lead to a weighting of 0
+            else if (totalRawWeighting == 100) BigDecimal(raw)
+            else {
+              val bd = BigDecimal(raw * 100) / BigDecimal(totalRawWeighting)
+              bd.setScale(1, BigDecimal.RoundingMode.HALF_UP)
+              bd
+            }
+
+          lazy val marks = extractMarks(components)
+
+          components.map { uagm =>
+            val weighting: Option[BigDecimal] =
+              if (hasResitWeightings) {
+                uagm.resitAssessmentWeighting
+                  .orElse(uagm.upstreamAssessmentGroup.assessmentComponent.flatMap(ac => Option(ac.rawWeighting).map(_.toInt)))
+                  .map(scaleWeighting)
+              } else if (marks.exists { case (_, _, mark) => mark.nonEmpty }) {
+                uagm.upstreamAssessmentGroup.assessmentComponent
+                  .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
+              } else {
+                uagm.upstreamAssessmentGroup.assessmentComponent
+                  .flatMap(_.scaledWeighting)
+              }
+
+            (uagm, weighting)
+          }
+        }
+
+        var sittings: Seq[Seq[(UpstreamAssessmentGroupMember, Option[BigDecimal])]] = Seq.empty
+        var thisSitting: Seq[UpstreamAssessmentGroupMember] = Seq.empty
+        reassessments.foreach { reassessment =>
+          // If the attempt or assessment group has changed or the sequence has already been seen, add thisSitting to sittings
+          if (thisSitting.exists(uagm => uagm.currentResitAttempt != reassessment.currentResitAttempt || uagm.upstreamAssessmentGroup.assessmentGroup != reassessment.upstreamAssessmentGroup.assessmentGroup || uagm.upstreamAssessmentGroup.sequence == reassessment.upstreamAssessmentGroup.sequence)) {
+            sittings ++= Seq(calculateReassessmentWeightings(ModuleRegistration.filterToLatestAttempt(firstAttempt ++ thisSitting)))
+            thisSitting = Seq.empty
+          }
+
+          thisSitting ++= Seq(reassessment)
+        }
+        sittings ++= Seq(calculateReassessmentWeightings(ModuleRegistration.filterToLatestAttempt(firstAttempt ++ thisSitting)))
+
+        Seq(firstAttemptWithWeightings) ++ sittings
+      }
+    }
+
+  def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
+    def extractMarks(components: Seq[UpstreamAssessmentGroupMember]): Seq[(AssessmentType, String, Option[Int])] = components.flatMap { uagm =>
+      uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
+        (ac.assessmentType, ac.sequence, uagm.agreedMark) // Agreed marks only
+      }
+    }
+
+    upstreamAssessmentGroupMembersAllAttempts(extractMarks).last.map(_._1)
+  }
 
   def recordedAssessmentComponentStudents: Seq[RecordedAssessmentComponentStudent] = {
     val uagms = upstreamAssessmentGroupMembers
@@ -254,6 +356,9 @@ case class UpstreamAssessmentRegistration(
   agreedGrade: String,
   currentResitAttempt: String,
   resitSequence: String,
+  resitAssessmentName: Option[String],
+  resitAssessmentType: Option[AssessmentType],
+  resitAssessmentWeighting: Option[Int],
 ) {
 
   def universityId: String = SprCode.getUniversityId(sprCode)

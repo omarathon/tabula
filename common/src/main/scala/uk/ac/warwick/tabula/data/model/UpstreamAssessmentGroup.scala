@@ -151,13 +151,27 @@ trait UpstreamAssessmentGroupMemberProperties {
   @Column(name = "assessment_type", nullable = false)
   var assessmentType: UpstreamAssessmentGroupMemberAssessmentType = _
 
-  // These two are only set for assessmentType == Reassessment
+  // These are only set for assessmentType == Reassessment
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
   var currentResitAttempt: Option[Int] = None
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   @Column(name = "resit_sequence")
   var resitSequence: Option[String] = None
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+  @Column(name = "resit_assessment_name")
+  var resitAssessmentName: Option[String] = None
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
+  @Column(name = "resit_assessment_type")
+  private var _resitAssessmentType: AssessmentType = _
+  def resitAssessmentType: Option[AssessmentType] = Option(_resitAssessmentType)
+  def resitAssessmentType_=(resitAssessmentType: Option[AssessmentType]): Unit = _resitAssessmentType = resitAssessmentType.orNull
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+  @Column(name = "resit_assessment_weighting")
+  var resitAssessmentWeighting: Option[Int] = None
 }
 
 /** currentMembers are all members excluding PWD)  **/

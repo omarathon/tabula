@@ -134,7 +134,7 @@ trait ConfirmModuleMarksState extends ModuleOccurrenceState with ClearRecordedMo
 
   lazy val studentModuleRecords: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, StudentMarkRecord])] = studentModuleMarkRecords.map { student =>
     moduleRegistrations.find(_.sprCode == student.sprCode).map { moduleRegistration =>
-      student -> componentMarks(moduleRegistration.studentCourseDetails.student.universityId)
+      student -> componentMarks(moduleRegistration).view.mapValues(_._1).toMap
     }.getOrElse(student -> Map.empty[AssessmentComponent, StudentMarkRecord])
   }
 

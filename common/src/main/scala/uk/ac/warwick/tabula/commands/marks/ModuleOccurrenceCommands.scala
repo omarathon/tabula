@@ -53,18 +53,38 @@ trait ModuleOccurrenceLoadModuleRegistrations {
           ListAssessmentComponentsCommand.studentMarkRecords(info, assessmentComponentMarksService, resitService, assessmentMembershipService)
       }
 
-  def componentMarks(universityId: String): Map[AssessmentComponent, StudentMarkRecord] = {
-    // Find the assessment group to filter by (this is for students who take multiple reassessments)
-    val assessmentGroup =
-      studentComponentMarkRecords
-        .flatMap(_._2.find(_.universityId == universityId))
-        .maxByOption(_.resitSequence)
-        .map(_.upstreamAssessmentGroupMember.upstreamAssessmentGroup.assessmentGroup)
+  def componentMarks(moduleRegistration: ModuleRegistration): Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])] = {
+    def extractMarks(components: Seq[UpstreamAssessmentGroupMember]): Seq[(AssessmentType, String, Option[Int])] = components.flatMap { uagm =>
+      uagm.upstreamAssessmentGroup.assessmentComponent.map { ac =>
+        val mark: Option[Int] =
+          studentComponentMarkRecords.find(_._1 == ac)
+            .flatMap(_._2.find(_.upstreamAssessmentGroupMember == uagm).flatMap(_.mark))
+            .orElse(uagm.firstDefinedMark)
 
-    studentComponentMarkRecords
-      .filter { case (ac, allStudents) => assessmentGroup.contains(ac.assessmentGroup) && allStudents.exists(_.universityId == universityId) }
-      .map { case (ac, allStudents) =>
-        ac -> allStudents.filter(_.universityId == universityId).maxBy(_.resitSequence) // Resits first, then latest by resit sequence
+        (ac.assessmentType, ac.sequence, mark)
+      }
+    }
+
+    moduleRegistration.upstreamAssessmentGroupMembersAllAttempts(extractMarks)
+      .last // Use the weightings and components from the most recent attempt
+      .flatMap { case (uagm, weighting) =>
+        studentComponentMarkRecords.flatMap { case (ac, allStudents) =>
+          // If a student has had multiple attempts at the same assessment, use the attempt with the highest mark
+          val mostRecentAttempt = allStudents.find(_.upstreamAssessmentGroupMember == uagm)
+
+          // If the most recent attempt has a mark, allow using a previous attempt if it has a higher mark
+          // (Don't need to worry about pass/fail modules here)
+          val attempt =
+            if (mostRecentAttempt.exists(_.mark.nonEmpty)) {
+              // Same student and assessment
+              allStudents.filter(s => s.upstreamAssessmentGroupMember.upstreamAssessmentGroup == uagm.upstreamAssessmentGroup && s.universityId == uagm.universityId)
+                .maxByOption(_.mark)
+            } else {
+              mostRecentAttempt
+            }
+
+          attempt.map(ac -> (_, weighting))
+        }
       }
       .toMap
   }
