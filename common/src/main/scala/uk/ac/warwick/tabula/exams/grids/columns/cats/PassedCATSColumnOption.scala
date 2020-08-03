@@ -42,7 +42,7 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption with Autowir
         val reasons = Seq(noMarks, noGrades).filter(_.hasText)
         ExamGridColumnValueMissing("The passed CATS cannot be calculated because %s".format(reasons.mkString(" and ")))
       } else {
-        ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(progressionService.isPassed).map(mr => BigDecimal(mr.cats)).sum.underlying)
+        ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(progressionService.isPassed).map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum.underlying)
       }
     }
 

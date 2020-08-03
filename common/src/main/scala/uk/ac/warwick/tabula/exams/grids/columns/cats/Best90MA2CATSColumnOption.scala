@@ -33,7 +33,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
     //get all valid subsets
     val validSubsets = records.toSet.subsets.toSeq.filter(_.nonEmpty).filter(modRegs =>
       // CATS total of 90 subsets
-      modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum == 90
+      modRegs.toSeq.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum == 90
     )
 
     val validSubsetsWithWieghtedMeanMark = validSubsets.map(modRegs => (weightedMeanYearMarks(modRegs.toSeq), modRegs.toSeq.sortBy(_.module.code)))
@@ -66,7 +66,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
             case None => Seq()
           }
           //if cats are <= 90 then only one possible option
-          if (validRecords.map(mr => BigDecimal(mr.cats)).sum <= 90) {
+          if (validRecords.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum <= 90) {
             val gridColumnValue = weightedMeanYearMarks(validRecords) match {
               case Right(mark) => if (isResultRequired) ExamGridColumnValueString(getResultTitle(mark)) else ExamGridColumnValueDecimal(mark)
               case Left(message) => ExamGridColumnValueMissing(message)

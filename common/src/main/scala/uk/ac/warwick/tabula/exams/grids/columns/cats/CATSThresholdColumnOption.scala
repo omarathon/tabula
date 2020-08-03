@@ -29,7 +29,7 @@ abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolea
 
     private def result(entity: ExamGridEntity, entityYear: ExamGridEntityYear): ExamGridColumnValue = {
       def transformModuleRegistrations(moduleRegistrations: Seq[ModuleRegistration]): JBigDecimal = {
-        moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying
+        moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum.underlying
       }
 
       val modulesWithMarks = entityYear.moduleRegistrations.filterNot(_.passFail)

@@ -108,7 +108,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
         createCell(row, currentColumnIndex + 3, scd.course.code, None)
         createCell(row, currentColumnIndex + 4, Option(scd.currentRoute).map(_.code.toUpperCase).getOrElse(""), None)
         createCell(row, currentColumnIndex + 5, mr.academicYear.startYear.toString, None)
-        createCell(row, currentColumnIndex + 6, mr.cats.toString, None)
+        createCell(row, currentColumnIndex + 6, Option(mr.cats).map(_.toPlainString).getOrElse(""), None)
 
         cSeqColumnIndex = 0
         aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>

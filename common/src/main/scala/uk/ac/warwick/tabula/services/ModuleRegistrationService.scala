@@ -128,10 +128,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[Int], gradeFn: ModuleRegistration => Option[String]): Either[String, BigDecimal] = {
     val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
       val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
-      val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
+      val cats: BigDecimal = mr.safeCats.orNull
       (mark, cats)
     }).filter { case (mark, cats) => mark != null && cats != null && cats > 0 }
-    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade) || BigDecimal(mr.cats) == 0).size) {
+    if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(mr => mr.passFail || gradeFn(mr).contains(GradeBoundary.ForceMajeureMissingComponentGrade) || mr.safeCats.contains(0)).size) {
       Right(
         (nonNullReplacedMarksAndCats.map { case (mark, cats) => mark * cats }.sum / nonNullReplacedMarksAndCats.map { case (_, cats) => cats }.sum)
           .setScale(1, RoundingMode.HALF_UP)
@@ -171,14 +171,16 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
           .flatMap(ac => ac.weightingFor(marks).getOrElse(ac.scaledWeighting))
           .getOrElse(BigDecimal(0))
 
-      val cats = (weighting / 100) * moduleRegistration.cats
+
+
+      val cats = (weighting / 100) * moduleRegistration.safeCats.getOrElse(BigDecimal(0))
       ComponentAndMarks(uagm.upstreamAssessmentGroup.assessmentComponent, uagm, cats)
     }
   }
 
   def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
     val completedCats = moduleRegistrations.flatMap(benchmarkComponentsAndMarks).map(_.cats).sum
-    val totalCats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+    val totalCats = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
     if(totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
   }
 
@@ -205,7 +207,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
     val validRecords = moduleRegistrations
       .filterNot(_.deleted)
-      .filterNot(mr => mr.moduleResult == Pass && BigDecimal(mr.cats) == 0) // 0 CAT modules don't count towards the overall mark so ignore them
+      .filterNot(mr => mr.moduleResult == Pass && mr.safeCats.contains(0)) // 0 CAT modules don't count towards the overall mark so ignore them
       .filterNot(mr => mr.firstDefinedGrade.contains(GradeBoundary.WithdrawnGrade)) // Remove withdrawn modules
 
     if (validRecords.exists(mr => mr.firstDefinedMark.isEmpty && !mr.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))) {
@@ -219,10 +221,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
       val subsets = validRecords.toSet.subsets.toSeq
       val validSubsets = subsets.filter(_.nonEmpty).filter { modRegs =>
         val (forceMajeureModRegs, modRegsWithoutForceMajeure) = modRegs.partition(_.firstDefinedGrade.contains(GradeBoundary.ForceMajeureMissingComponentGrade))
-        val forceMajeureCats = forceMajeureModRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum
+        val forceMajeureCats = forceMajeureModRegs.toSeq.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
 
         // CATS total of at least the normal load, less any FM module weightings
-        modRegsWithoutForceMajeure.toSeq.map(mr => BigDecimal(mr.cats)).sum >= (normalLoad - forceMajeureCats) &&
+        modRegsWithoutForceMajeure.toSeq.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum >= (normalLoad - forceMajeureCats) &&
         // Contains all the core modules (including if FM)
         coreModules.forall(modRegs.contains) &&
         // All the registrations have agreed or actual marks
