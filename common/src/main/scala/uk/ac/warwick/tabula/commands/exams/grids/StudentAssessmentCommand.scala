@@ -14,10 +14,9 @@ import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServic
 import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.services.mitcircs.AutowiringMitCircsSubmissionServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent, ItemNotFoundException}
 
 import scala.collection.mutable
-import scala.util.{Failure, Success}
 
 object StudentAssessmentCommand {
   type Command = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState with PermissionsChecking
@@ -34,6 +33,7 @@ object StudentAssessmentCommand {
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringStudentAwardServiceComponent
       with AutowiringResitServiceComponent
+      with AutowiringFeaturesComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
@@ -59,6 +59,7 @@ object StudentAssessmentProfileCommand {
       with AutowiringAssessmentComponentMarksServiceComponent
       with AutowiringStudentAwardServiceComponent
       with AutowiringResitServiceComponent
+      with AutowiringFeaturesComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
       with StudentModuleRegistrationAndComponents
@@ -103,6 +104,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     with CourseAndRouteServiceComponent
     with NormalCATSLoadServiceComponent
     with StudentAwardServiceComponent
+    with FeaturesComponent
     with UpstreamRouteRuleServiceComponent =>
 
   def mitCircsSubmissions: Option[Seq[MitigatingCircumstancesSubmission]] = None
@@ -166,7 +168,9 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     // Are there any UA* type progression decisions
     val uaProgressionDecisions = progressionDecisions.exists(_.outcome.hasAward)
 
-    val studentAwards =  if (uaProgressionDecisions) {
+    lazy val pgtAwardDisplay = studentCourseDetails.courseType.contains(CourseType.PGT) &&
+      (features.ignoreResultRelease || MarkState.resultsReleasedToStudents(academicYear, Some(studentCourseDetails), MarkState.DecisionReleaseTime))
+    val studentAwards =  if (uaProgressionDecisions || pgtAwardDisplay) {
       studentAwardService.getBySprCodeAndAcademicYear(studentCourseDetails.sprCode,academicYear)
     } else Seq()
 
