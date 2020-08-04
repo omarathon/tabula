@@ -76,14 +76,7 @@
       <#list studentAwards as studentAward>
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">
-              Student Award <span class="label label-info">${studentAward.award.name}</span>
-            </h3>
-          </div>
-          <div class="panel-body">
-            <#if studentAward.classification?has_content>
-              <span class="lead">${studentAward.classification.name}</span>
-            </#if>
+            <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
           </div>
         </div>
       </#list>
