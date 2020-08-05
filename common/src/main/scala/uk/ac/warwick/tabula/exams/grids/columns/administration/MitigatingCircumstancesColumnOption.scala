@@ -75,7 +75,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
         val mitCircsHtml = entity.mitigatingCircumstances.map(s => s"""<dl class="dl-horizontal">
           <dt>MIT-${s.key}<dt><dd>Graded ${s.gradingCode.getOrElse("")} - (graded ${DateFormats.CSVDate.print(s.outcomesFinalisedOn)})<dd>
           ${if(s.outcomeGrading != MitigatingCircumstancesGrading.Rejected) {
-          s"""<dt>Recommendation</dt>
+          s"""<dt>Outcome</dt>
             ${globalRecommendations(s, html = true).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${affectedAssessmentsByRecommendation(s).mkStringOrEmpty("<dd>", "</dd><dd>", "</dd>")}
             ${modulesWithAcuteOutcomes(s).mkStringOrEmpty(s"<dd>${Option(s.acuteOutcome).map(_.description).getOrElse("")} (", ", ", ")</dd>")}
