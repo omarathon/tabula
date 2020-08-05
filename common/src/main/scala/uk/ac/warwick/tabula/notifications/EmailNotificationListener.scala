@@ -92,6 +92,8 @@ class EmailNotificationListener extends BatchingRecipientNotificationListener
       ))
 
       message.setText(plainText, htmlText)
+
+      fn(message)
     }
 
   private def generateMessage(recipientInfo: RecipientNotificationInfo): Option[MimeMessage] =
