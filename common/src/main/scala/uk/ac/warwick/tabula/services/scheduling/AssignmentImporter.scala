@@ -165,6 +165,11 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
 
   class UpstreamAssessmentRegistrationRowCallbackHandler(callback: UpstreamAssessmentRegistration => Unit) extends RowCallbackHandler {
     override def processRow(rs: ResultSet): Unit = {
+      def getNullableInt(column: String): Option[Int] = {
+        val intValue = rs.getInt(column)
+        if (rs.wasNull()) None else Some(intValue)
+      }
+
       callback(UpstreamAssessmentRegistration(
         year = rs.getString("academic_year_code"),
         sprCode = rs.getString("spr_code"),
@@ -178,7 +183,10 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean
         agreedMark = rs.getString("agreed_mark"),
         agreedGrade = rs.getString("agreed_grade"),
         currentResitAttempt = rs.getString("current_attempt_number"),
-        resitSequence = rs.getString("resit_sequence")
+        resitSequence = rs.getString("resit_sequence"),
+        resitAssessmentName = rs.getString("resit_assessment_name").maybeText,
+        resitAssessmentType = rs.getString("resit_assessment_type").maybeText.map(AssessmentType.factory),
+        resitAssessmentWeighting = getNullableInt("resit_assessment_weighting"),
       ))
     }
   }
@@ -378,6 +386,9 @@ class SandboxAssignmentImporter extends AssignmentImporter
             agreedGrade = agreedGrade,
             currentResitAttempt = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else if (SandboxData.randomMarkSeed(universityId, moduleCode) % 13 < 5) "1" else "2",
             resitSequence = if (assessmentType == UpstreamAssessmentGroupMemberAssessmentType.OriginalAssessment) null else "001",
+            resitAssessmentName = None,
+            resitAssessmentType = None,
+            resitAssessmentWeighting = None,
           ))
         } else None
       }).flatten.toSeq
@@ -690,7 +701,10 @@ object AssignmentImporter {
       sas.sas_agrm as agreed_mark,
       sas.sas_agrg as agreed_grade,
       null as current_attempt_number,
-      null as resit_sequence
+      null as resit_sequence,
+      null as resit_assessment_name,
+      null as resit_assessment_type,
+      null as resit_assessment_weighting
         from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
           join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
             on scj.scj_sprc = spr.spr_code and
@@ -733,7 +747,10 @@ object AssignmentImporter {
       sas.sas_agrm as agreed_mark,
       sas.sas_agrg as agreed_grade,
       null as current_attempt_number,
-      null as resit_sequence
+      null as resit_sequence,
+      null as resit_assessment_name,
+      null as resit_assessment_type,
+      null as resit_assessment_weighting
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -820,7 +837,10 @@ object AssignmentImporter {
        |  sra.sra_agrm as agreed_mark,
        |  sra.sra_agrg as agreed_grade,
        |  sra.sra_cura as current_attempt_number,
-       |  sra.sra_rseq as resit_sequence
+       |  sra.sra_rseq as resit_sequence,
+       |  sra.sra_name as resit_assessment_name,
+       |  sra.ast_code as resit_assessment_type,
+       |  sra.sra_perc as resit_assessment_weighting
        |from $sitsSchema.srs_scj scj
        |  join $sitsSchema.ins_spr spr
        |    on scj.scj_sprc = spr.spr_code and

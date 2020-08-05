@@ -208,7 +208,7 @@ object Fixtures extends Mockito {
     val group = assessmentGroup(
       academicYear = academicYear,
       code = assignment.assessmentGroup,
-      module = assignment.moduleCode + "-30",
+      module = assignment.moduleCode,
       occurrence = "A",
       sequence = assignment.sequence
     )

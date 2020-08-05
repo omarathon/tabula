@@ -138,7 +138,7 @@ trait GenerateModuleResitsState extends ModuleOccurrenceState {
 
   lazy val requiresResits: Seq[StudentMarks] = studentModuleMarkRecords.filter(_.markState.contains(Agreed)).flatMap { student =>
     val moduleRegistration = moduleRegistrations.find(_.sprCode == student.sprCode)
-    val components = moduleRegistration.map(mr => componentMarks(mr.studentCourseDetails.student.universityId))
+    val components = moduleRegistration.map(mr => componentMarks(mr).view.mapValues(_._1).toMap)
       .getOrElse(Map.empty[AssessmentComponent, StudentMarkRecord])
 
     val process = if (moduleRegistration.exists(_.currentResitAttempt.nonEmpty)) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment

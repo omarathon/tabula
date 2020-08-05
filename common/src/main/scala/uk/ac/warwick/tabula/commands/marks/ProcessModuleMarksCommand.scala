@@ -83,7 +83,7 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
             moduleRegistrations.find(_.sprCode == item.sprCode)
               .get // We validate that this exists
 
-          componentMarks(moduleRegistration.studentCourseDetails.student.universityId).map(_._2.upstreamAssessmentGroupMember)
+          componentMarks(moduleRegistration).map(_._2._1.upstreamAssessmentGroupMember)
         }
         .groupBy(_.upstreamAssessmentGroup)
         .map { case (uag, members) =>
@@ -100,7 +100,7 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
           moduleRegistrations.find(_.sprCode == item.sprCode)
             .get // We validate that this exists
 
-        val components = componentMarks(moduleRegistration.studentCourseDetails.student.universityId)
+        val components = componentMarks(moduleRegistration)
 
         require(item.grade.nonEmpty && item.result.nonEmpty)
 
@@ -119,7 +119,7 @@ abstract class ProcessModuleMarksCommandInternal(val sitsModuleCode: String, val
 
         // change the state of all components that are Unconfirmed actual (or that have no state)
         // this includes writing an empty agreed mark/grade if necessary - it stops it being modified later
-        components.values.filterNot(c => c.markState.contains(MarkState.Agreed) || c.agreed).foreach { component =>
+        components.values.map(_._1).filterNot(c => c.markState.contains(MarkState.Agreed) || c.agreed).foreach { component =>
           val recordedAssessmentComponentStudent =
             allRecordedAssessmentComponentStudents.getOrElse(component.upstreamAssessmentGroupMember.upstreamAssessmentGroup, Map.empty)
               .getOrElse(component.upstreamAssessmentGroupMember, new RecordedAssessmentComponentStudent(component.upstreamAssessmentGroupMember))

@@ -406,6 +406,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   agreedMark = Try(studentRegistrations.head.agreedMark.toInt).toOption
                   agreedGrade = studentRegistrations.head.agreedGrade.maybeText
                   currentResitAttempt = Try(studentRegistrations.head.currentResitAttempt.toInt).toOption
+                  resitAssessmentName = studentRegistrations.head.resitAssessmentName
+                  resitAssessmentType = studentRegistrations.head.resitAssessmentType
+                  resitAssessmentWeighting = studentRegistrations.head.resitAssessmentWeighting
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
@@ -434,6 +437,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   agreedMark = resolveDuplicates(validInts(studentRegistrations.map(_.agreedMark)), "agreed mark")
                   agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
                   currentResitAttempt = resolveDuplicates(validInts(studentRegistrations.map(_.currentResitAttempt)), "current attempt number")
+                  resitAssessmentName = resolveDuplicates(studentRegistrations.flatMap(_.resitAssessmentName), "resit assessment name")
+                  resitAssessmentType = resolveDuplicates(studentRegistrations.flatMap(_.resitAssessmentType), "resit assessment type")
+                  resitAssessmentWeighting = resolveDuplicates(studentRegistrations.flatMap(_.resitAssessmentWeighting), "resit assessment weighting")
                 }
               }
             }
@@ -447,7 +453,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.actualGrade != properties.actualGrade ||
                 member.agreedMark != properties.agreedMark ||
                 member.agreedGrade != properties.agreedGrade ||
-                member.currentResitAttempt != properties.currentResitAttempt
+                member.currentResitAttempt != properties.currentResitAttempt ||
+                member.resitAssessmentName != properties.resitAssessmentName ||
+                member.resitAssessmentType != properties.resitAssessmentType ||
+                member.resitAssessmentWeighting != properties.resitAssessmentWeighting
               )
 
               if (memberHasChanged) {
@@ -459,6 +468,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                 member.agreedMark = properties.agreedMark
                 member.agreedGrade = properties.agreedGrade
                 member.currentResitAttempt = properties.currentResitAttempt
+                member.resitAssessmentName = properties.resitAssessmentName
+                member.resitAssessmentType = properties.resitAssessmentType
+                member.resitAssessmentWeighting = properties.resitAssessmentWeighting
                 assessmentMembershipService.save(member)
               }
             }

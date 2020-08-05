@@ -37,7 +37,7 @@
           <td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}">
             <@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true /><br />
             <span tabindex="0" class="badge progress-bar-<#if (pendingApprovals > 2)>danger<#elseif (pendingApprovals > 0)>warning<#else>success</#if>  use-tooltip"
-                  data-original-title="Number of unapproved meetings">${pendingApprovals}</span>
+                  title="Number of unapproved meetings">${pendingApprovals}</span>
           </td>
         <#else>
           <td></td>

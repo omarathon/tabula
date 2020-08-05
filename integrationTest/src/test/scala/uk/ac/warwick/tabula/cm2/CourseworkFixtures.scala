@@ -368,6 +368,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
   def createMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*): String = as(P.Admin1) {
     openAdminPage()
+    loadCurrentAcademicYearTab()
     openMarkingWorkflowSettings()
 
     When("I click create")

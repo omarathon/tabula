@@ -25,7 +25,7 @@ class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
     override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
       state.entities.map(entity =>
         entity -> entity.validYears.get(state.yearOfStudy).map(entityYear =>
-          ExamGridColumnValueDecimal(entityYear.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying)
+          ExamGridColumnValueDecimal(entityYear.moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum.underlying)
         ).getOrElse(
           ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}")
         )

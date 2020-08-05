@@ -154,7 +154,9 @@
         <td data-sortby="${marks.mark!-1}">
           ${marks.mark!'-'}
 
-          <#if marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
+          <#if marks.reassessment && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
+            <span tabindex="0" class="badge tabula-tooltip" data-title="${weighting?string["0.#"]}% re-assessment weighting">${weighting?string["0.#"]}%</span>
+          <#elseif marks.mark?has_content && weighting?has_content && ac.scaledWeighting?has_content && weighting?string["0.#"] != ac.scaledWeighting?string["0.#"]>
             <span tabindex="0" class="badge tabula-tooltip" data-title="Weighting was adjusted to ${weighting?string["0.#"]}% by variable weighting rules">${weighting?string["0.#"]}%</span>
           </#if>
 

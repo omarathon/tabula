@@ -98,9 +98,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Nil
 
       val registrations = Seq(
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "", null, null)
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "", null, null, None, None, None)
       )
       command.doGroupMembers()
       verify(membershipService, times(5)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamAssessmentRegistration]], any[UpstreamAssessmentGroupMemberAssessmentType])
@@ -113,10 +113,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
   it should "process empty groups" in {
     new Fixture {
       val registrations = Seq(
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "", null, null)
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "", null, null, None, None, None)
       )
 
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
@@ -149,12 +149,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
   it should "set seat number to null where there is ambiguity" in {
     new Fixture {
       val registrations = Seq(
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null),
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", null, null, None, None, None),
 
         // We only set currentResitAttempt here so it passes the hasChanged check and calls .save() (for testing at the end)
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null)
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", "1", null, None, None, None)
       )
 
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
@@ -193,10 +193,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
   it should "set marks and grades to null where there is ambiguity" in {
     new Fixture {
       val registrations = Seq(
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", null, null),
-        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", null, null)
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", null, null, None, None, None),
+        UpstreamAssessmentRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", null, null, None, None, None)
       )
 
       membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")

@@ -305,16 +305,16 @@ abstract class AbstractProgressionService extends ProgressionService {
   def postgraduateBenchmark(scyd: StudentCourseYearDetails, moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
     val bestCats = numberCatsToConsiderPG(scyd)
     val (bestModules, catsConsidered) = bestPGModules(moduleRegistrations, bestCats)
-    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)).sum
+    val total = bestModules.map(mr => BigDecimal(mr.firstDefinedMark.get) * mr.safeCats.getOrElse(BigDecimal(0))).sum
     if(catsConsidered > 0) (total / catsConsidered).setScale(1, RoundingMode.HALF_UP) else BigDecimal(0)
   }
 
   def bestPGModules(moduleRegistrations: Seq[ModuleRegistration], bestCats: BigDecimal): (Seq[ModuleRegistration], BigDecimal) = {
-    val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.cats)).reverse
+    val sortedByMark = moduleRegistrations.filter(_.firstDefinedMark.isDefined).sortBy(mr => (mr.firstDefinedMark.get, mr.safeCats.getOrElse(BigDecimal(0)))).reverse
     var catsConsidered = BigDecimal(0)
     val bestModules = sortedByMark.takeWhile { mr =>
       val takeMore = catsConsidered < bestCats
-      if(takeMore) catsConsidered += mr.cats
+      if(takeMore) catsConsidered += mr.safeCats.getOrElse(BigDecimal(0))
       takeMore
     }
     (bestModules, catsConsidered)
@@ -390,7 +390,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       )
 
       val passedModuleRegistrations = entityYear.moduleRegistrations.filter(isPassed)
-      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum >= ProgressionService.FirstYearRequiredCredits
+      val passedCredits = passedModuleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum >= ProgressionService.FirstYearRequiredCredits
       val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
       val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
@@ -415,7 +415,7 @@ abstract class AbstractProgressionService extends ProgressionService {
   private def suggestedResultIntermediateYear(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): ProgressionResult = {
     entityYear.studentCourseYearDetails.map(scyd => {
       val passedModuleRegistrations = entityYear.moduleRegistrations.filter(isPassed)
-      val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum >= ProgressionService.IntermediateRequiredCredits
+      val passedCredits = passedModuleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum >= ProgressionService.IntermediateRequiredCredits
       val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
       if (overallMark.isLeft) {
@@ -586,11 +586,11 @@ abstract class AbstractProgressionService extends ProgressionService {
       }
 
       val passedModuleRegistrationsInFinalTwoYears: Seq[ModuleRegistration] = finalTwoYearsModuleRegistrations.filter(isPassed)
-      val sumFinalTwoYearsPassedCredits = passedModuleRegistrationsInFinalTwoYears.map(mr => BigDecimal(mr.cats)).sum
+      val sumFinalTwoYearsPassedCredits = passedModuleRegistrationsInFinalTwoYears.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
       val passedCreditsInFinalTwoYears = sumFinalTwoYearsPassedCredits >= ProgressionService.FinalTwoYearsRequiredCredits
 
       val passedModuleRegistrationsFinalYear: Seq[ModuleRegistration] = entityPerYear.toSeq.last._2.moduleRegistrations.filter(isPassed)
-      val sumFinalYearPassedCredits = passedModuleRegistrationsFinalYear.map(mr => BigDecimal(mr.cats)).sum
+      val sumFinalYearPassedCredits = passedModuleRegistrationsFinalYear.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
       val passedCreditsFinalYear = sumFinalYearPassedCredits >= ProgressionService.FinalYearRequiredCredits
 
       val onlyAttendedOneYear = entityPerYear.size == 1

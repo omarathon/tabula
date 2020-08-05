@@ -145,14 +145,14 @@
                       <tr>
                         <td>${component.upstreamGroup.sequence}</td>
                         <td>
-                          ${component.upstreamGroup.assessmentComponent.assessmentType.name}
+                          ${component.assessmentType.name}
                           <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
                             <span class="label label-info">Further first sit</span>
                           <#elseif component.member.reassessment>
                             <span class="label label-warning">Resit</span>
                           </#if>
                         </td>
-                        <td>${component.upstreamGroup.name}</td>
+                        <td>${component.name}</td>
                         <td>${(component.weighting!0)?string["0.#"]}%</td>
                         <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
                           <td>${component.member.agreedMark!}</td>
@@ -187,9 +187,16 @@
         <tbody>
           <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
             <#list moduleRegistrationAndComponent.components as component>
-              <#if component.upstreamGroup.assessmentComponent.assessmentType.subtype.code == 'E' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'LX' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'HE' && component.upstreamGroup.assessmentComponent.assessmentType.astCode != 'OE'>
+              <#if component.assessmentType.subtype.code == 'E' && component.assessmentType.astCode != 'LX' && component.assessmentType.astCode != 'HE' && component.assessmentType.astCode != 'OE'>
                 <tr>
-                  <td>${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}<#if moduleRegistrationAndComponent.moduleRegistration.cats?has_content>-${moduleRegistrationAndComponent.moduleRegistration.cats}</#if></td>
+                  <td>
+                    ${moduleRegistrationAndComponent.moduleRegistration.module.code?upper_case}<#if moduleRegistrationAndComponent.moduleRegistration.cats?has_content>-${moduleRegistrationAndComponent.moduleRegistration.cats}</#if>
+                    <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
+                      <span class="label label-info">Further first sit</span>
+                    <#elseif component.member.reassessment>
+                      <span class="label label-warning">Resit</span>
+                    </#if>
+                  </td>
                   <#if component.upstreamGroup.assessmentComponent.examPaperCode?has_content>
                     <td>${component.upstreamGroup.assessmentComponent.examPaperCode}</td>
                     <td>${component.upstreamGroup.assessmentComponent.examPaperTitle!""}</td>
@@ -223,7 +230,7 @@
                   <#else>
                     <td colspan="6">Unknown</td>
                   </#if>
-                  <td>${component.upstreamGroup.assessmentComponent.assessmentType.name}</td>
+                  <td>${component.assessmentType.name}</td>
                 </tr>
               </#if>
             </#list>

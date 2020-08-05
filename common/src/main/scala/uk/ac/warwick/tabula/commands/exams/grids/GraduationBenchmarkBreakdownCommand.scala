@@ -117,18 +117,18 @@ class GraduationBenchmarkBreakdownCommandInternal(val studentCourseDetails: Stud
       val (bestPGModules, catsConsidered) = progressionService.bestPGModules(moduleRegistrations, minCatsToConsider)
       val usedModulesWithCumulativeSums: Seq[CumulativeCatsAndMarks] = bestPGModules
         .foldLeft(Nil: Seq[CumulativeCatsAndMarks]) { case (acc, mr) =>
-          val catsScaledMark = BigDecimal(mr.firstDefinedMark.get) * BigDecimal(mr.cats)
-          if(acc.isEmpty) Seq(CumulativeCatsAndMarks(mr, catsScaledMark, BigDecimal(mr.cats)))
-          else acc :+ CumulativeCatsAndMarks(mr, acc.last.marks + catsScaledMark, acc.last.cats + BigDecimal(mr.cats))
+          val catsScaledMark = BigDecimal(mr.firstDefinedMark.get) * mr.safeCats.getOrElse(BigDecimal(0))
+          if(acc.isEmpty) Seq(CumulativeCatsAndMarks(mr, catsScaledMark, mr.safeCats.getOrElse(BigDecimal(0))))
+          else acc :+ CumulativeCatsAndMarks(mr, acc.last.marks + catsScaledMark, acc.last.cats + mr.safeCats.getOrElse(BigDecimal(0)))
         }
 
       Right(PGGraduationBenchmarkBreakdown(
-        modules = moduleRegistrations.sortBy(mr => (mr.firstDefinedMark, mr.cats)).reverse,
+        modules = moduleRegistrations.sortBy(mr => (mr.firstDefinedMark, mr.safeCats.getOrElse(BigDecimal(0)))).reverse,
         graduationBenchmark = progressionService.postgraduateBenchmark(studentCourseYearDetails, moduleRegistrations),
         minCatsToConsider,
-        totalCatsTaken = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+        totalCatsTaken = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum,
         usedModulesWithCumulativeSums,
-        unusedModules = (moduleRegistrations diff bestPGModules).sortBy(mr => (mr.firstDefinedMark, mr.cats)).reverse,
+        unusedModules = (moduleRegistrations diff bestPGModules).sortBy(mr => (mr.firstDefinedMark, mr.safeCats.getOrElse(BigDecimal(0)))).reverse,
         catsConsidered,
       ))
     }
