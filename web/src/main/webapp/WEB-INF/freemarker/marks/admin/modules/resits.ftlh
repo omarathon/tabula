@@ -109,6 +109,7 @@
                     <tbody>
                       <#list record.components?keys as assessmentComponent>
                         <#assign componentRecord = mapGet(record.components, assessmentComponent) />
+                        <#assign sitsResit = mapGet(record.sitsResits, assessmentComponent)!{} />
                         <tr>
                           <td>
                             <#if componentRecord.existingResit?has_content>
@@ -122,6 +123,11 @@
                                   <span class="sr-only">Waiting to be written to SITS</span>
                                 </span>
                               </#if>
+                            <#elseif sitsResit?has_content>
+                              <span class="label label-success tabula-tooltip" data-title="Resit - ${sitsResit.resitSequence!''}">
+                                Resit created
+                                <span class="sr-only">Resit - ${sitsResit.resitSequence!''}</span>
+                              </span>
                             <#elseif record.requiresResit>
                               <@f.checkbox path="resits[${sprCode}][${assessmentComponent.sequence}].create" />
                             </#if>
@@ -133,6 +139,8 @@
                           <td>
                             <#if componentRecord.existingResit?has_content>
                               ${componentRecord.existingResit.assessmentType.name}
+                            <#elseif sitsResit?has_content>
+                              ${sitsResit.resitAssessmentType.name}
                             <#elseif record.requiresResit>
                               <select name="resits[${sprCode}][${assessmentComponent.sequence}].assessmentType" class="form-control assessment-type" data-sequence="${assessmentComponent.sequence}">
                                 <#list assessmentTypes as at><option value="${at.astCode}" >${at.name}</option></#list>
@@ -144,6 +152,8 @@
                           <td>
                             <#if componentRecord.existingResit?has_content>
                               ${componentRecord.existingResit.weighting}
+                            <#elseif sitsResit?has_content>
+                                ${sitsResit.resitAssessmentWeighting!assessmentComponent.scaledWeighting}
                             <#else>
                               <@bs3form.form_group path="resits[${sprCode}][${assessmentComponent.sequence}].weighting">
                                 <@f.input type="number" path="resits[${sprCode}][${assessmentComponent.sequence}].weighting" class="form-control"/>
@@ -151,7 +161,11 @@
                               </@bs3form.form_group>
                             </#if>
                           </td>
-                          <td><#if record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if></td>
+                          <td>
+                              <#if componentRecord.existingResit?has_content> ${existingResit.currentResitAttempt}
+                              <#elseif sitsResit?has_content> ${sitsResit.currentResitAttempt}
+                              <#elseif record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if>
+                          </td>
                         </tr>
                       </#list>
                     </tbody>
