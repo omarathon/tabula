@@ -72,6 +72,17 @@
           </div>
         </div>
       </#list>
+    <#elseif studentAwards?has_content>
+      <#list studentAwards as studentAward>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Award</h3>
+          </div>
+          <div class="panel-body">
+            <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
+          </div>
+        </div>
+      </#list>
     </#if>
 
     <#if moduleRegistrationsAndComponents?has_content>
