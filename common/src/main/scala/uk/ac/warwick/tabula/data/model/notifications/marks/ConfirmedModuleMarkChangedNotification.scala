@@ -43,7 +43,7 @@ class ConfirmedModuleMarkChangedNotification
   }.sortBy(_.studentCourseDetails.scjCode)
 
 
-  override def title: String = s"$module: Student confirmed actual marks modified"
+  override def title: String = s"$module: Confirmed module marks have been changed"
 
   override def urlTitle = "view module marks in your department"
 
@@ -61,7 +61,7 @@ object ConfirmedModuleMarkChangedBatchedNotificationHandler extends BatchedNotif
     notifications.groupBy(_.department).values.toSeq
 
   override def titleForBatchInternal(notifications: Seq[ConfirmedModuleMarkChangedNotification], user: User): String =
-    "Student confirmed actual marks modified"
+    "Confirmed module marks have been changed"
 
   // We can use the same template as the main notification, we just combine the students and add in the module code
   override def contentForBatchInternal(notifications: Seq[ConfirmedModuleMarkChangedNotification]): FreemarkerModel =

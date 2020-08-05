@@ -29,7 +29,7 @@ class ConfirmedModuleMarkChangedNotificationTest extends TestBase with Mockito w
     notification.profileService = smartMock[ProfileService]
     notification.profileService.getStudentCourseDetailsBySprCode(scd.sprCode) returns Seq(scd)
     notification.topLevelUrl = "https://tabula.ac.uk"
-    notification.title should be ("IN101-30: Student confirmed actual marks modified")
+    notification.title should be ("IN101-30: Confirmed module marks have been changed")
 
     val content = notification.content
     renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
@@ -89,7 +89,7 @@ class ConfirmedModuleMarkChangedNotificationTest extends TestBase with Mockito w
     notification3.topLevelUrl = "https://tabula.ac.uk"
 
     val batch = Seq(notification1, notification2, notification3)
-    ConfirmedModuleMarkChangedBatchedNotificationHandler.titleForBatch(batch, currentUser.apparentUser) should be ("Student confirmed actual marks modified")
+    ConfirmedModuleMarkChangedBatchedNotificationHandler.titleForBatch(batch, currentUser.apparentUser) should be ("Confirmed module marks have been changed")
 
     val content = ConfirmedModuleMarkChangedBatchedNotificationHandler.contentForBatch(batch)
     renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be(
