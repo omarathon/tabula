@@ -2,13 +2,14 @@ package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, CM2MarkingWorkflowService}
 import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
@@ -62,8 +63,10 @@ class ReleaseToMarkerNotification
     with UserIdRecipientNotification
     with AutowiringUserLookupComponent
     with Logging
-    with AutowiringCM2MarkingWorkflowServiceComponent
     with AllCompletedActionRequiredNotification {
+
+  @transient
+  var cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire.auto[CM2MarkingWorkflowService]
 
   @transient
   lazy val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, recipient, cm2MarkingWorkflowService)
