@@ -54,7 +54,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     renderedResult.trim should be(
       """
         |10 students are allocated to you for marking.
-        |- This assignment does not require students to submit work to Tabula
+        |
+        |This assignment does not require students to submit work to Tabula.
       """.stripMargin.trim
     )
   }
