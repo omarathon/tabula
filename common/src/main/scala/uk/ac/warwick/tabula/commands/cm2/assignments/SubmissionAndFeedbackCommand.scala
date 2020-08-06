@@ -149,6 +149,14 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
       }
     }
 
+    lazy val uagms: Seq[UpstreamAssessmentGroupMember] = assignment.upstreamAssessmentGroupInfos.flatMap(_.allMembers)
+      .groupBy(_.universityId)
+      .values.map(_.maxBy(_.resitSequence)).toSeq
+
+    def hasActualMarksSITS(universityId: String): Boolean = {
+      uagms.exists(uagm => uagm.universityId == universityId && (uagm.isAgreedGrade || uagm.isAgreedMark))
+    }
+
     val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
       for (user <- unsubmittedMembers) yield benchmarkTask(s"Inflate information for ${user.getFullName} (${user.getUserId})") {
         val usersExtension = benchmarkTask("Find extension") {
@@ -171,7 +179,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
             enhancedFeedback = benchmarkTask("Enhance feedback") {
               enhancedFeedbackForUsercode(user.getUserId)
             },
-            enhancedExtension = enhancedExtensionForUniId
+            enhancedExtension = enhancedExtensionForUniId,
+            hasActualMarksSITS(user.getWarwickId)
           )
         }
 
@@ -241,7 +250,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           user,
           enhancedSubmission = enhancedSubmissionForUniId,
           enhancedFeedback = enhancedFeedbackForUsercode(usercode),
-          enhancedExtension = enhancedExtensionForUniId
+          enhancedExtension = enhancedExtensionForUniId,
+          hasActualMarksSITS(user.getWarwickId)
         )
 
         val progress = workflowProgressService.progress(assignment)(coursework)

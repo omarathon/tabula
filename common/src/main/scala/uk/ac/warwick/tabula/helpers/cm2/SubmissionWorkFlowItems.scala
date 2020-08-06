@@ -31,5 +31,6 @@ case class WorkflowItems(
   student: User,
   enhancedSubmission: Option[SubmissionListItem],
   enhancedFeedback: Option[FeedbackListItem],
-  enhancedExtension: Option[ExtensionListItem]
+  enhancedExtension: Option[ExtensionListItem],
+  agreedMarksExist: Boolean
 )

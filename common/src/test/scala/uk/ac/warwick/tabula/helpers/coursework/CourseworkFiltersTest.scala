@@ -69,7 +69,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
       student = student,
       enhancedSubmission = submission map { s => SubmissionListItem(s, submissionDownloaded) },
       enhancedFeedback = feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, Some(FeedbackForSits(f, FeedbackForSitsStatus.UploadNotAttempted, None, None, None))) },
-      enhancedExtension = extension map { e => ExtensionListItem(e, withinExtension) }
+      enhancedExtension = extension map { e => ExtensionListItem(e, withinExtension) },
+      agreedMarksExist = false
     )
 
   private def student(

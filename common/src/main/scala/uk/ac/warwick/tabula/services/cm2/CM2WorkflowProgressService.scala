@@ -449,6 +449,9 @@ object CM2WorkflowStages {
         case _ if isManuallyAdded =>
           StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.manuallyAdded", health = Danger, completed = true)
 
+        case _ if coursework.agreedMarksExist => // marks were entered outside of Tabula
+          StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.uploadedExternally", completed = true, skipped = true)
+
         case _ => StageProgress(UploadMarksToSits, started = false, messageCode = "workflow.UploadMarksToSits.notQueued")
       }
     }
