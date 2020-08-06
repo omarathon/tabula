@@ -1,4 +1,3 @@
-
 <#if assignment.collectSubmissions>
 <@fmt.p number=allocatedStudentsCount!0 singular="student" plural="students" /> <@fmt.p number=allocatedStudentsCount!0 singular="is" plural="are" shownumber=false /> allocated to you for marking.
   <#list studentsAtStagesCount as info>
@@ -23,5 +22,6 @@ Please check the assignment regularly as students with extensions may submit at 
 <#if feedbackDeadlineDate??>Student feedback is due on ${feedbackDeadlineDate}.</#if>
 <#else>
 <@fmt.p number=feedbacksCount!0 singular="student" plural="students" /> <@fmt.p number=feedbacksCount!0 singular="is" plural="are" shownumber=false /> allocated to you for marking.
-- This assignment does not require students to submit work to Tabula
+
+This assignment does not require students to submit work to Tabula.
 </#if>

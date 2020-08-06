@@ -329,5 +329,5 @@ trait CM2MarkingWorkflowServiceComponent {
 }
 
 trait AutowiringCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
-  def cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire.auto[CM2MarkingWorkflowService]
+  var cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire.auto[CM2MarkingWorkflowService]
 }
