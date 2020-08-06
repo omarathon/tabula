@@ -56,7 +56,7 @@ trait ModuleRegistrationService {
 
   def componentsAndMarksExcludedFromBenchmark(moduleRegistration: ModuleRegistration): Seq[ComponentAndMarks]
 
-  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration], normalLoad: BigDecimal): BigDecimal
 
   def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal
 
@@ -206,10 +206,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     }
   }
 
-  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {
+  def percentageOfAssessmentTaken(moduleRegistrations: Seq[ModuleRegistration], normalLoad: BigDecimal): BigDecimal = {
     val completedCats = moduleRegistrations.flatMap(benchmarkComponentsAndMarks).map(_.cats).sum
-    val totalCats = moduleRegistrations.map(mr => mr.safeCats.getOrElse(BigDecimal(0))).sum
-    if (totalCats == 0) BigDecimal(0) else (completedCats / totalCats) * 100
+    if (normalLoad == 0) BigDecimal(0) else (completedCats / normalLoad) * 100
   }
 
   def benchmarkWeightedAssessmentMark(moduleRegistrations: Seq[ModuleRegistration]): BigDecimal = {

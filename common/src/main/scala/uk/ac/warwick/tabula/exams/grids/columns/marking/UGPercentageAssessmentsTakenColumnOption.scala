@@ -33,7 +33,7 @@ class UGPercentageAssessmentsTakenColumnOption extends ChosenYearExamGridColumnO
               ExamGridColumnValueMissing(s"Percentage of assessments taken isn't defined for PGTs")
             case Some(UG) =>
               val scyd = entityYear.studentCourseYearDetails.get
-              ExamGridColumnValueDecimal(moduleRegistrationService.percentageOfAssessmentTaken(scyd.moduleRegistrations).setScale(1, RoundingMode.HALF_UP))
+              ExamGridColumnValueDecimal(moduleRegistrationService.percentageOfAssessmentTaken(scyd.moduleRegistrations, normalLoad = state.normalLoadLookup(entityYear)).setScale(1, RoundingMode.HALF_UP))
             case Some(ct) => ExamGridColumnValueMissing(s"Benchmarks aren't defined for ${ct.description} courses")
             case None => ExamGridColumnValueMissing(s"Could not find a course type for ${entity.universityId} for ${state.academicYear}")
           }

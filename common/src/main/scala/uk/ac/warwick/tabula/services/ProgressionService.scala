@@ -294,7 +294,7 @@ abstract class AbstractProgressionService extends ProgressionService {
         lazy val markPerYear = getMarkPerYear(entityPerYear, finalYear, normalLoad, routeRulesPerYear, yearMarksToUse, weightings, markForFinalYear = false)
         lazy val yearWeightings = getWeightingsPerYear(scyd, weightings, entityPerYear.keys.toSeq)
         for (mpy <- markPerYear; yw <- yearWeightings) yield {
-          calculateBenchmark(entityPerYear, mpy, yw)
+          calculateBenchmark(entityPerYear, mpy, yw, normalLoad)
         }
       } else {
         Left("Only applies to the final year of study")
@@ -325,7 +325,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     else BigDecimal(120)
   }
 
-  private def calculateBenchmark(entityPerYear: Map[Int, ExamGridEntityYear], marksPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting]): BigDecimal = {
+  private def calculateBenchmark(entityPerYear: Map[Int, ExamGridEntityYear], marksPerYear: Map[Int, BigDecimal], yearWeightings: Map[Int, CourseYearWeighting], normalLoad: BigDecimal): BigDecimal = {
     val finalYear :: otherYears = entityPerYear.keys.toSeq.sorted.reverse
     val previousYearWeightedMarks = otherYears.map { year =>
       val weighting = yearWeightings(year).weighting
@@ -333,7 +333,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       else BigDecimal(0)
     }.sum
     val finalYearModules = entityPerYear(finalYear).moduleRegistrations
-    val percentageOfFinalYearAssessments = moduleRegistrationService.percentageOfAssessmentTaken(finalYearModules) / 100
+    val percentageOfFinalYearAssessments = moduleRegistrationService.percentageOfAssessmentTaken(finalYearModules, normalLoad) / 100
     val benchmarkWeightedFinalYear = yearWeightings(finalYear).weighting * moduleRegistrationService.benchmarkWeightedAssessmentMark(finalYearModules) * percentageOfFinalYearAssessments
     val weightedPercentageOfCompletedAssessments = otherYears.map(year => yearWeightings(year).weighting).sum + (yearWeightings(finalYear).weighting * percentageOfFinalYearAssessments)
     if (weightedPercentageOfCompletedAssessments == 0) BigDecimal(0)
@@ -457,7 +457,8 @@ abstract class AbstractProgressionService extends ProgressionService {
             mpy,
             yw,
             entityYear.moduleRegistrations,
-            applyBenchmark
+            applyBenchmark,
+            normalLoad
           )
         }).fold(FinalYearGrade.Unknown.apply, identity)
       } else {
@@ -549,7 +550,8 @@ abstract class AbstractProgressionService extends ProgressionService {
     markPerYear: Map[Int, BigDecimal],
     yearWeightings: Map[Int, CourseYearWeighting],
     moduleRegistrations: Seq[ModuleRegistration],
-    applyBenchmark: Boolean
+    applyBenchmark: Boolean,
+    normalLoad: BigDecimal
   ): FinalYearGrade = {
     // This only considers years where the weighting counts  when they are not not abroad - so for a course with an
     // intercalated year weighted 0,50,0,50, this would consider years 2 and 4. For weightings set like 0/50/50/50 (2nd or 3rd year abroad for same course), it will consider last 2 years non- abroad ones
@@ -576,7 +578,7 @@ abstract class AbstractProgressionService extends ProgressionService {
       val finalMark = if(applyBenchmark) {
         val graduationBenchmark = scyd.studentCourseDetails.courseType match {
           case Some(PGT) => postgraduateBenchmark(scyd, moduleRegistrations)
-          case Some(UG) => calculateBenchmark(entityPerYear, markPerYear, yearWeightings)
+          case Some(UG) => calculateBenchmark(entityPerYear, markPerYear, yearWeightings, normalLoad)
           case _ => BigDecimal(0)
         }
 

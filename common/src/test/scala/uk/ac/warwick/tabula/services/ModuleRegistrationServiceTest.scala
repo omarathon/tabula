@@ -242,7 +242,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
   @Test
   def percentageOfAssessmentTaken(): Unit = {
     new GraduationBenchmarkFixture {
-      service.percentageOfAssessmentTaken(moduleRegistrations) should be (BigDecimal(60.0))
+      service.percentageOfAssessmentTaken(moduleRegistrations, BigDecimal(120)) should be (BigDecimal(60.0))
     }
   }
 }
