@@ -154,7 +154,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
       .values.map(_.maxBy(_.resitSequence)).toSeq
 
     def hasActualMarksSITS(universityId: String): Boolean = {
-      uagms.exists(ugam => ugam.universityId == universityId && (ugam.isAgreedGrade || ugam.isAgreedMark))
+      uagms.exists(uagm => uagm.universityId == universityId && (uagm.isAgreedGrade || uagm.isAgreedMark))
     }
 
     val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
