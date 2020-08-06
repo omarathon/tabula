@@ -49,13 +49,13 @@ abstract class MemberSearchCommandInternal(override val departments: Seq[Departm
     val restrictions = buildRestrictions(user, departments, academicYear)
 
     departments match {
-      case Nil => profileService.findAllUserIdsByRestrictions(restrictions).distinct
+      case Nil => profileService.findAllUserIdsByRestrictions(restrictions).distinct.sorted
       case departments => departments.flatMap { department =>
         profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
           department,
           restrictions
         )
-      }.distinct
+      }.distinct.sorted
     }
   }
 }
