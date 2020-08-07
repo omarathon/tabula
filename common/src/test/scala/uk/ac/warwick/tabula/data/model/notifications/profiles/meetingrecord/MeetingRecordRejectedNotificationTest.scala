@@ -1,10 +1,20 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{Fixtures, TestBase}
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
-class MeetingRecordRejectedNotificationTest extends TestBase {
+class MeetingRecordRejectedNotificationTest extends TestBase with Mockito with FreemarkerRendering {
+
+  val securityService: SecurityService = mock[SecurityService]
+  securityService.can(any[CurrentUser], any[ScopelessPermission]) returns true
+  securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget]) returns true
+
+  val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+  freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = securityService
 
   val agent: StaffMember = Fixtures.staff("1234567")
   agent.userId = "agent"
@@ -20,7 +30,7 @@ class MeetingRecordRejectedNotificationTest extends TestBase {
 
   val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
-  @Test def titleStudent() = withUser("cuscav", "0672089") {
+  @Test def titleStudent(): Unit = withUser("cuscav", "0672089") {
     val meeting = new MeetingRecord(student, Seq(relationship))
 
     val approval = Fixtures.meetingRecordApproval(state = MeetingApprovalState.Rejected)
@@ -30,7 +40,7 @@ class MeetingRecordRejectedNotificationTest extends TestBase {
     notification.titleFor(student.asSsoUser) should be("Personal tutor meeting record with Tutor Name returned with comments")
   }
 
-  @Test def titleTutor() = withUser("cuscav", "0672089") {
+  @Test def titleTutor(): Unit = withUser("cuscav", "0672089") {
     val meeting = new MeetingRecord(agent, Seq(relationship))
 
     val approval = Fixtures.meetingRecordApproval(state = MeetingApprovalState.Rejected)
@@ -38,6 +48,76 @@ class MeetingRecordRejectedNotificationTest extends TestBase {
 
     val notification = Notification.init(new MeetingRecordRejectedNotification, currentUser.apparentUser, approval)
     notification.titleFor(agent.asSsoUser) should be("Personal tutor meeting record with Student Name returned with comments")
+  }
+
+  @Test def content(): Unit = withUser("cuscav", "0672089") {
+    val meeting = new MeetingRecord(student, Seq(relationship))
+    meeting.title = "Project catch-up"
+    meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 28, 18, 30, 0, 0)
+
+    val approval = Fixtures.meetingRecordApproval(state = MeetingApprovalState.Rejected)
+    approval.meetingRecord = meeting
+    approval.comments = "I didn't like the picture you drew of me it was rude"
+
+    meeting.approvals.add(approval)
+
+    val notification = Notification.init(new MeetingRecordRejectedNotification, student.asSsoUser, approval)
+
+    val content = notification.content
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """Student Name has returned a record of your personal tutor meeting:
+        |
+        |Project catch-up on 28 March 2017 at 18:30:00
+        |
+        |Because: "I didn't like the picture you drew of me it was rude"
+        |
+        |This meeting record is pending revision.
+        |""".stripMargin
+    )
+  }
+
+  @Test def batch(): Unit = withUser("cuscav", "0672089") {
+    val notification1 = {
+      val meeting = new MeetingRecord(student, Seq(relationship))
+      meeting.title = "Project catch-up"
+      meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 28, 18, 30, 0, 0)
+
+      val approval = Fixtures.meetingRecordApproval(state = MeetingApprovalState.Rejected)
+      approval.meetingRecord = meeting
+      approval.comments = "I didn't like the picture you drew of me it was rude"
+
+      meeting.approvals.add(approval)
+
+      Notification.init(new MeetingRecordRejectedNotification, student.asSsoUser, approval)
+    }
+
+    val notification2 = {
+      val meeting = new MeetingRecord(student, Seq(relationship))
+      meeting.title = "Apology meeting"
+      meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 29, 18, 30, 0, 0)
+
+      val approval = Fixtures.meetingRecordApproval(state = MeetingApprovalState.Rejected)
+      approval.meetingRecord = meeting
+      approval.comments = "I don't think it was sincere"
+
+      meeting.approvals.add(approval)
+
+      Notification.init(new MeetingRecordRejectedNotification, student.asSsoUser, approval)
+    }
+
+    val batch = Seq(notification1, notification2)
+
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, student.asSsoUser) should be ("2 meeting records have been returned")
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, agent.asSsoUser) should be ("2 meeting records have been returned")
+
+    val content = MeetingRecordBatchedNotificationHandler.contentForBatch(batch)
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """2 meetings have been returned:
+        |
+        |- Project catch-up personal tutor meeting with Student Name on 28 March 2017 at 18:30:00 because "I didn't like the picture you drew of me it was rude". This meeting record is pending revision.
+        |- Apology meeting personal tutor meeting with Student Name on 29 March 2017 at 18:30:00 because "I don't think it was sincere". This meeting record is pending revision.
+        |""".stripMargin
+    )
   }
 
 }
