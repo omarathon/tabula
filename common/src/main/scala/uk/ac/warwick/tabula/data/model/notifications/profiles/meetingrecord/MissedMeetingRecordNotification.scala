@@ -3,10 +3,11 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.userlookup.User
 
-trait MissedMeetingRecordNotification
-  extends Notification[MeetingRecord, Unit]
+abstract class MissedMeetingRecordNotification
+  extends BatchedNotification[MeetingRecord, Unit, MissedMeetingRecordNotification](MissedMeetingRecordBatchedNotificationHandler)
     with MeetingRecordNotificationTrait
     with SingleItemNotification[MeetingRecord] {
   self: MyWarwickDiscriminator =>
@@ -25,7 +26,7 @@ trait MissedMeetingRecordNotification
 
   override def titleFor(user: User): String = "Missed meeting recorded"
 
-  def content = FreemarkerModel(FreemarkerTemplate, Map(
+  def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> agent,
     "agentRoles" -> agentRoles,
     "dateTimeFormatter" -> dateTimeFormatter,
@@ -39,11 +40,28 @@ trait MissedMeetingRecordNotification
   def urlTitle = "view the meeting record"
 }
 
+object MissedMeetingRecordBatchedNotificationHandler extends BatchedNotificationHandler[MissedMeetingRecordNotification] {
+  override def titleForBatchInternal(notifications: Seq[MissedMeetingRecordNotification], user: User): String =
+    s"${notifications.size} missed meetings have been recorded"
+
+  override def contentForBatchInternal(notifications: Seq[MissedMeetingRecordNotification]): FreemarkerModel =
+    FreemarkerModel("/WEB-INF/freemarker/notifications/meetingrecord/missed_meeting_record_notification_batch.ftl", Map(
+      "meetings" -> notifications.map(_.content.model),
+    ))
+
+  override def urlForBatchInternal(notifications: Seq[MissedMeetingRecordNotification], user: User): String =
+    Routes.home
+
+  override def urlTitleForBatchInternal(notifications: Seq[MissedMeetingRecordNotification]): String =
+    "view your meetings"
+}
+
 @Entity
 @Proxy
 @DiscriminatorValue("missedMeetingRecordStudent")
 class MissedMeetingRecordStudentNotification
-  extends MissedMeetingRecordNotification with MyWarwickNotification {
+  extends MissedMeetingRecordNotification
+    with MyWarwickNotification {
 
   priority = NotificationPriority.Warning
 
