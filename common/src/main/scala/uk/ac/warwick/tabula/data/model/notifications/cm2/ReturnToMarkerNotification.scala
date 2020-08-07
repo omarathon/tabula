@@ -75,6 +75,7 @@ object ReturnToMarkerBatchedNotificationHandler extends BatchedNotificationHandl
   override def contentForBatchInternal(notifications: Seq[ReturnToMarkerNotification]): FreemarkerModel =
     FreemarkerModel(ReturnToMarkerNotification.batchTemplateLocation, Map(
       "notifications" -> notifications.groupBy(_.assignment)
+        .toSeq.sortBy(_._2.map(_.created).min)
         .map { case (assignment, batch) =>
           Map(
             "assignment" -> assignment,

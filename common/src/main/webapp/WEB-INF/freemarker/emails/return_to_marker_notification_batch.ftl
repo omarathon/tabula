@@ -10,9 +10,9 @@ The following <@fmt.p number=notification['comments']?size singular="reason was"
 </#list></#if><#--
 --><#if notification['feedbackDeadlineDate']??>
 
-Student feedback is due on ${notification['feedbackDeadlineDate']}.</#if><#--
+Student feedback is due on ${notification['feedbackDeadlineDate']}.
+</#if><#--
 --><#if notification_has_next>
-
 
 ---
 
