@@ -93,7 +93,7 @@
         <div class="striped-section collapsible">
           <h3 class="section-title">
             <a class="collapse-trigger icon-container" href="#"><#compress>
-              <#if module?has_content><@fmt.module_name module /></#if>
+              <#if module?has_content><@fmt.module_name module /><#else><span class="mod-code">${moduleRegistration.sitsModuleCode}</span></#if>
             </#compress></a>
             <span class="mod-reg-summary">
               <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
@@ -110,7 +110,7 @@
             <div class="item-info">
               <div class="row">
                 <div class="col-md-4">
-                  <#if module?has_content><h4><@fmt.module_name module false /></h4></#if>
+                  <#if module?has_content><h4><@fmt.module_name module false /></h4><#else><h4>${moduleRegistration.sitsModuleCode}</h4></#if>
                 </div>
                 <div class="col-md-4">
                   <strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
