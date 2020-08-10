@@ -22,8 +22,7 @@
           <p>This student is a member of more than one of the assessment components linked to this ${context}. Feedback can only be uploaded to a single
             assessment component for each student.</p>
           <#if context == "assignment">
-            <p>Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment,
-              and that students are in the correct assessment components.</p>
+            <p>Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment.</p>
           </#if>
         </div>
       </#if>

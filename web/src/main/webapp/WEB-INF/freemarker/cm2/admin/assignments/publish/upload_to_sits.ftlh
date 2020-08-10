@@ -9,11 +9,10 @@
       <#if total==1>
         has feedback that cannot be uploaded because the student is a member of more than one of the assessment components linked to this assignment.
       <#else>
-        have feedback that cannot be uploaded because the students are member of more than one of the assessment components linked to this assignment.
+        have feedback that cannot be uploaded because the students are members of more than one of the assessment components linked to this assignment.
       </#if>
     </p>
-    <p>Feedback can only be uploaded to a single assessment component for each student. Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment,
-      and that students are in the correct assessment components.</p>
+    <p>Feedback can only be uploaded to a single assessment component for each student. Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment.</p>
   </div>
 
   <table class="table table-bordered table-condensed table-striped table-hover">
