@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.ExportRecordedModuleRegistrationsToSitsCommand._
-import uk.ac.warwick.tabula.data.model.{MarkState, RecordedModuleRegistration}
+import uk.ac.warwick.tabula.data.model.{MarkState, RecordedModuleMarkSitsError, RecordedModuleRegistration}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -62,27 +62,44 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
         }
       }
 
-      benchmarkTask("Export to SITS") { exportStudentModuleResultToSitsService.exportModuleMarksToSits(student, finalAssessmentAttended) } match {
-        case r if r > 1 =>
-          throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
-        case 1 =>
-          student.needsWritingToSitsSince = None
-          student.lastWrittenToSits = Some(DateTime.now)
+      if (!exportStudentModuleResultToSitsService.smoRecordExists(student)) {
+        logger.warn(s"SMO doesn't exists. Unable to update module mark record for $student")
 
-          // Update the ModuleRegistration so it doesn't show as out of sync
-          student.moduleRegistration.foreach { moduleRegistration => benchmarkTask("Update the ModuleRegistration so it doesn't show as out of sync") {
-            moduleRegistration.actualMark = student.latestMark
-            moduleRegistration.actualGrade = student.latestGrade
-            moduleRegistration.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
-            moduleRegistration.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
-            moduleRegistration.moduleResult = student.latestResult.orNull
+        student.markWrittenToSitsError(RecordedModuleMarkSitsError.MissingModuleRegistration)
+        moduleRegistrationMarksService.saveOrUpdate(student)
 
-            moduleRegistrationService.saveOrUpdate(moduleRegistration)
-          }}
+        None
+      } else {
+        if (exportStudentModuleResultToSitsService.smrRecordSubdata(student).isEmpty) {
+          logger.warn(s"SMR entry not found. SAS process may not have been run. Unable to update module mark record for $student")
 
-          Some(moduleRegistrationMarksService.saveOrUpdate(student))
-        case _ =>
+          student.markWrittenToSitsError(RecordedModuleMarkSitsError.MissingMarksRecord)
+          moduleRegistrationMarksService.saveOrUpdate(student)
+
           None
+        } else {
+          benchmarkTask("Export to SITS") { exportStudentModuleResultToSitsService.exportModuleMarksToSits(student, finalAssessmentAttended) } match {
+            case r if r > 1 =>
+              throw new IllegalStateException(s"Unexpected SITS SMR update! Only expected to update one row, but $r rows were updated for module mark $student")
+            case 1 =>
+              student.markWrittenToSits()
+
+              // Update the ModuleRegistration so it doesn't show as out of sync
+              student.moduleRegistration.foreach { moduleRegistration => benchmarkTask("Update the ModuleRegistration so it doesn't show as out of sync") {
+                moduleRegistration.actualMark = student.latestMark
+                moduleRegistration.actualGrade = student.latestGrade
+                moduleRegistration.agreedMark = student.latestMark.filter(_ => student.latestState.contains(MarkState.Agreed))
+                moduleRegistration.agreedGrade = student.latestGrade.filter(_ => student.latestState.contains(MarkState.Agreed))
+                moduleRegistration.moduleResult = student.latestResult.orNull
+
+                moduleRegistrationService.saveOrUpdate(moduleRegistration)
+              }}
+
+              Some(moduleRegistrationMarksService.saveOrUpdate(student))
+            case _ =>
+              None
+          }
+        }
       }
     }}
   }

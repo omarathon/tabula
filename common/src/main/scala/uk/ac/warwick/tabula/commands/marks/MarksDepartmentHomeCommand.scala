@@ -34,6 +34,7 @@ object MarksDepartmentHomeCommand {
     result: Option[ModuleResult],
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    sitsWriteError: Option[RecordedModuleMarkSitsError],
     markState: Option[MarkState],
     agreed: Boolean,
     history: Seq[RecordedModuleMark], // Most recent first
@@ -79,6 +80,7 @@ object MarksDepartmentHomeCommand {
           recordedModuleRegistration.flatMap(_.latestGrade).exists(g => !moduleRegistration.firstDefinedGrade.contains(g)) ||
           recordedModuleRegistration.flatMap(_.latestResult).exists(r => moduleRegistration.moduleResult != r)
         ),
+        sitsWriteError = recordedModuleRegistration.flatMap(_.lastSitsWriteError),
         markState = recordedModuleRegistration.flatMap(_.latestState),
         agreed = isAgreedSITS,
         history = recordedModuleRegistration.map(_.marks).getOrElse(Seq.empty),

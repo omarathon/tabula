@@ -90,6 +90,14 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.needsWritingToSits",
         )
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = CalculateModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.CalculateModuleMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
+        )
       } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
@@ -140,6 +148,14 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.needsWritingToSits",
         )
+      } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = ConfirmModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ConfirmModuleMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
+        )
       } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
@@ -185,6 +201,14 @@ object ModuleOccurrenceMarkWorkflowStage extends Enum[ModuleOccurrenceMarkWorkfl
           stage = ProcessModuleMarks,
           started = true,
           messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(Agreed) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = ProcessModuleMarks,
+          started = true,
+          messageCode = "workflow.marks.moduleOccurrence.ProcessModuleMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
         )
       } else if (students.exists(s => s.markState.contains(Agreed) && s.outOfSync)) {
         // Out of sync with SITS
@@ -336,6 +360,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           started = true,
           messageCode = "workflow.marks.component.RecordMarks.needsWritingToSits",
         )
+      } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = RecordMarks,
+          started = true,
+          messageCode = "workflow.marks.component.RecordMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
+        )
       } else if (students.exists(s => s.markState.contains(UnconfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
@@ -385,6 +417,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           started = true,
           messageCode = "workflow.marks.component.ConfirmMarks.needsWritingToSits",
         )
+      } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = ConfirmMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ConfirmMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
+        )
       } else if (students.exists(s => s.markState.contains(ConfirmedActual) && s.outOfSync)) {
         // Out of sync with SITS
         StageProgress(
@@ -430,6 +470,14 @@ object ComponentMarkWorkflowStage extends Enum[ComponentMarkWorkflowStage] {
           stage = ProcessMarks,
           started = true,
           messageCode = "workflow.marks.component.ProcessMarks.needsWritingToSits",
+        )
+      } else if (students.exists(s => s.markState.contains(Agreed) && s.sitsWriteError.nonEmpty)) {
+        // Error writing to SITS
+        StageProgress(
+          stage = ProcessMarks,
+          started = true,
+          messageCode = "workflow.marks.component.ProcessMarks.sitsWriteError",
+          health = WorkflowStageHealth.Danger,
         )
       } else if (students.exists(s => s.markState.contains(Agreed) && s.outOfSync)) {
         // Out of sync with SITS

@@ -92,6 +92,7 @@ class ComponentMarksController extends ApiController
     "grade" -> student.grade,
     "needsWritingToSits" -> student.needsWritingToSits,
     "outOfSync" -> student.outOfSync,
+    "sitsWriteError" -> student.sitsWriteError,
     "agreed" -> student.agreed,
   )
 

@@ -130,7 +130,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
             dateTime.isAfter(feedback.mostRecentAttachmentUpload)
         })
 
-        val viewed = feedback.hasContent && (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && whoViewed.filterKeys(_.getUserId == feedback.usercode).exists { case (user, dateTime) =>
+        val viewed = feedback.hasContent && (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && whoViewed.view.filterKeys(_.getUserId == feedback.usercode).exists { case (user, dateTime) =>
           val usercode = user.getUserId
 
           val latestOnlineUpdate = latestModifiedOnlineFeedback
