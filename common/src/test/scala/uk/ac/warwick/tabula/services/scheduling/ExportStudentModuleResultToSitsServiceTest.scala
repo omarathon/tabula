@@ -27,15 +27,14 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
   @Test def smrExportWithNoSmo(): Unit = {
     val mr1: ModuleRegistration = Fixtures.moduleRegistration(scd, module1, JBigDecimal(Some(30)), AcademicYear.starting(2018), "A1")
     val rmr = new RecordedModuleRegistration(mr1)
-    val test = smrExporter.exportModuleMarksToSits(rmr, finalAssessmentAttended = false)
-    test should be(0)
+    smrExporter.smoRecordExists(rmr) should be (false)
   }
 
   @Test def smrExportWithNoExistingPriorSMR(): Unit = {
     val mr1: ModuleRegistration = Fixtures.moduleRegistration(scd, module1, JBigDecimal(Some(30)), AcademicYear.starting(2018), "A")
     val rmr = new RecordedModuleRegistration(mr1)
-    val test = smrExporter.exportModuleMarksToSits(rmr, finalAssessmentAttended = false)
-    test should be(0)
+    smrExporter.smoRecordExists(rmr) should be (true)
+    smrExporter.smrRecordSubdata(rmr) should be (empty)
   }
 
   trait ExportSMREnvironment {
@@ -127,12 +126,15 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
 
   @Transactional
   @Test def smrExportActualPassMarksWithNoPriorResits(): Unit = {
+    withUser("cusxxx") {
+      new ExportSMREnvironment {
+        val m1: ModuleRegistration = dbRmr1.moduleRegistration.get
+        m1.membershipService = smartMock[AssessmentMembershipService]
+        m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
 
-      withUser("cusxxx") {
-        new ExportSMREnvironment {
-          val m1: ModuleRegistration = dbRmr1.moduleRegistration.get
-          m1.membershipService = smartMock[AssessmentMembershipService]
-          m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+        smrExporter.smoRecordExists(dbRmr1) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr1) should be (defined)
+
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr1, finalAssessmentAttended = false)
         session.flush()
         session.clear()
@@ -161,6 +163,9 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         val m2: ModuleRegistration = dbRmr2.moduleRegistration.get
         m2.membershipService = smartMock[AssessmentMembershipService]
         m2.membershipService.getUpstreamAssessmentGroups(m2, allAssessmentGroups = true, eagerLoad = true) returns Nil
+
+        smrExporter.smoRecordExists(dbRmr2) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr2) should be (defined)
 
         //pick up some student with agreed/actual marks and then export with blank mark entry
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr2, finalAssessmentAttended = false)
@@ -191,6 +196,10 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         m1.membershipService = smartMock[AssessmentMembershipService]
         m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
         smrExporter.assessmentMembershipService.gradesForMark(m1, Some(62)) returns Nil
+
+        smrExporter.smoRecordExists(dbRmr3) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr3) should be (defined)
+
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr3, finalAssessmentAttended = false)
         session.flush()
         session.clear()
@@ -240,6 +249,10 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
         m1.membershipService = smartMock[AssessmentMembershipService]
         m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+
+        smrExporter.smoRecordExists(dbRmr4) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr4) should be (defined)
+
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr4, finalAssessmentAttended = false)
         session.flush()
         session.clear()
@@ -277,6 +290,10 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
         m1.membershipService = smartMock[AssessmentMembershipService]
         m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+
+        smrExporter.smoRecordExists(dbRmr4) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr4) should be (defined)
+
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr4, finalAssessmentAttended = false)
         session.flush()
         session.clear()
@@ -325,6 +342,10 @@ class ExportStudentModuleResultToSitsServiceTest extends PersistenceTestBase  wi
         val m1: ModuleRegistration = dbRmr4.moduleRegistration.get
         m1.membershipService = smartMock[AssessmentMembershipService]
         m1.membershipService.getUpstreamAssessmentGroups(m1, allAssessmentGroups = true, eagerLoad = true) returns Nil
+
+        smrExporter.smoRecordExists(dbRmr4) should be (true)
+        smrExporter.smrRecordSubdata(dbRmr4) should be (defined)
+
         val cnt: Int = smrExporter.exportModuleMarksToSits(dbRmr4, finalAssessmentAttended = false)
         session.flush()
         session.clear()
