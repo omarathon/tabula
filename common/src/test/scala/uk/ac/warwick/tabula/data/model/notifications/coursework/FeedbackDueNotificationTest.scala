@@ -35,7 +35,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     applicationContext.getBeanFactory returns beanFactory
 
     val beanDefinition = smartMock[BeanDefinition]
-    beanFactory.getBeanDefinition(any[String]) returns beanDefinition
+    beanFactory.getBeanDefinition(anyString) returns beanDefinition
     beanDefinition.isAutowireCandidate returns true
 
     applicationContext.getBean("assignmentService") returns smartMock[AssessmentService]
@@ -67,7 +67,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     SpringConfigurer.applicationContext = null
   }
 
-  @Test def titleDueGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def titleDueGeneral(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -76,7 +76,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     notification.title should be("CS118: Feedback for \"5,000 word essay\" is due to be published")
   }
 
-  @Test def outputGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def outputGeneral(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -92,7 +92,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
   }
 
   // TAB-3303
-  @Test def outputGeneralPlural() = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
+  @Test def outputGeneralPlural(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
     val assignment = Fixtures.assignment("Implementation and Report")
     assignment.module = Fixtures.module("cs404", "Agent Based Systems")
     assignment.closeDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 12, 0, 0, 0)
@@ -107,7 +107,39 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     )
   }
 
-  @Test def titleDueExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def generalBatch(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
+    val assignment1 = Fixtures.assignment("Implementation and Report")
+    assignment1.module = Fixtures.module("cs404", "Agent Based Systems")
+    assignment1.closeDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 12, 0, 0, 0)
+    assignment1.extensionService = smartMock[ExtensionService]
+
+    val assignment2 = Fixtures.assignment("5,000 word essay")
+    assignment2.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment2.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+    assignment2.extensionService = smartMock[ExtensionService]
+
+    val notification1 = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment1)
+    val notification2 = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment2)
+
+    val batch = Seq(notification1, notification2)
+
+    FeedbackDueGeneralBatchedNotificationHandler.titleForBatch(batch, new AnonymousUser) should be ("Feedback for 2 assignments is due to be published")
+
+    val content = FeedbackDueGeneralBatchedNotificationHandler.contentForBatch(batch)
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """
+        |Feedback for 1 assignment is 125 days late:
+        |
+        |* Feedback for CS118 Programming for Computer Scientists 5,000 word essay is due in -81 working days on 14 October 2014.
+        |
+        |Feedback for 1 assignment is due tomorrow:
+        |
+        |* Feedback for CS404 Agent Based Systems Implementation and Report is due in 1 working day on 17 February 2015.
+        |""".stripMargin
+    )
+  }
+
+  @Test def titleDueExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -122,7 +154,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     notification.title should be("CS118: Feedback for 1234567 for \"5,000 word essay\" is due to be published")
   }
 
-  @Test def outputExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
+  @Test def outputExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
@@ -145,7 +177,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
   }
 
   // TAB-3303
-  @Test def outputExtensionPlural() = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
+  @Test def outputExtensionPlural(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
     val assignment = Fixtures.assignment("Implementation and Report")
     assignment.module = Fixtures.module("cs404", "Agent Based Systems")
     assignment.closeDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 12, 0, 0, 0)
@@ -169,7 +201,69 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     )
   }
 
-  @Test def recipientsExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def extensionBatch(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.FEBRUARY, 16, 17, 0, 0, 0)) {
+    val assignment = Fixtures.assignment("5,000 word essay")
+    assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+    assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
+
+    val submission1 = Fixtures.submission("1234567", "1234567")
+    submission1.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+    assignment.submissions.add(submission1)
+
+    val extension1 = Fixtures.extension()
+    extension1.assignment = assignment
+    extension1._universityId = "1234567"
+    extension1.usercode = "1234567"
+    extension1.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+    extension1.approve()
+
+    val submission2 = Fixtures.submission("1234567", "1234567")
+    submission2.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 20, 13, 0, 0, 0)
+    assignment.submissions.add(submission2)
+
+    val extension2 = Fixtures.extension()
+    extension2.assignment = assignment
+    extension2._universityId = "1234567"
+    extension2.usercode = "1234567"
+    extension2.expiryDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 17, 0, 0, 0)
+    extension2.approve()
+
+    val submission3 = Fixtures.submission("1234568", "1234568")
+    submission3.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 20, 13, 0, 0, 0)
+    assignment.submissions.add(submission3)
+
+    val extension3 = Fixtures.extension()
+    extension3.assignment = assignment
+    extension3._universityId = "1234568"
+    extension3.usercode = "1234568"
+    extension3.expiryDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 17, 0, 0, 0)
+    extension3.approve()
+
+    val notification1 = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension1)
+    val notification2 = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension2)
+    val notification3 = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension3)
+
+    val batch = Seq(notification1, notification2, notification3)
+
+    FeedbackDueExtensionBatchedNotificationHandler.titleForBatch(batch, new AnonymousUser) should be ("CS118: Feedback for 3 students for \"5,000 word essay\" is due to be published")
+
+    val content = FeedbackDueExtensionBatchedNotificationHandler.contentForBatch(batch)
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """For the assignment CS118 Programming for Computer Scientists 5,000 word essay:
+        |
+        |Feedback for 1 student is 124 days late:
+        |
+        |* 1234567 had an extension until 17 September 2014. Their feedback is due in -80 working days on 15 October 2014.
+        |
+        |Feedback for 2 students is due tomorrow:
+        |
+        |* 1234567 had an extension until 20 January 2015. Their feedback is due in 1 working day on 17 February 2015.
+        |* 1234568 had an extension until 20 January 2015. Their feedback is due in 1 working day on 17 February 2015.
+        |""".stripMargin
+    )
+  }
+
+  @Test def recipientsExtension(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -204,7 +298,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     notification.recipients should not be Symbol("empty")
   }
 
-  @Test def recipientsExtensionNoSubmissions() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def recipientsExtensionNoSubmissions(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -219,7 +313,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     notification.recipients should be(Symbol("empty"))
   }
 
-  @Test def recipientsGeneralAlreadyReleased() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def recipientsGeneralAlreadyReleased(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
@@ -266,7 +360,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     notification.recipients should be(Symbol("empty"))
   }
 
-  @Test def recipientsExtensionAlreadyReleased() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+  @Test def recipientsExtensionAlreadyReleased(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     val assignment = Fixtures.assignment("5,000 word essay")
     assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
     assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
