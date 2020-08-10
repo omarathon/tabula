@@ -2,11 +2,14 @@ package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 
-class OpenSmallGroupSetsNotificationTest extends TestBase {
+class OpenSmallGroupSetsNotificationTest extends TestBase with FreemarkerRendering {
 
-  @Test def title() = withUser("cuscav", "0672089") {
+  val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+
+  @Test def itWorks(): Unit = withUser("cuscav", "0672089") {
     val module1 = Fixtures.module("cs118")
     val module2 = Fixtures.module("cs119")
     val module3 = Fixtures.module("cs120")
@@ -33,6 +36,16 @@ class OpenSmallGroupSetsNotificationTest extends TestBase {
     set3.module = module2
     set2.format = SmallGroupFormat.Example
     notification.title should be("CS118, CS119 and CS120 seminars and example classes are now open for sign up")
+
+    val content = notification.content
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """The following seminars and example classes are open for sign up:
+        |
+        |- CS118 set 1
+        |- CS120 set 2
+        |- CS119 set 3
+        |""".stripMargin
+    )
   }
 
 }

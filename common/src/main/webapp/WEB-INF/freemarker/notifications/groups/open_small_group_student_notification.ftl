@@ -1,5 +1,5 @@
-The following ${formatsString} groups are open for sign up:
+The following ${formatsString} are open for sign up:
 
 <#list groupsets as groupSet>
-* ${groupSet.name}
+- ${groupSet.module.code?upper_case} ${groupSet.nameWithoutModulePrefix}
 </#list>
