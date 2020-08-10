@@ -17,7 +17,7 @@ object FinaliseFeedbackNotification {
 @Proxy
 @DiscriminatorValue("FinaliseFeedback")
 class FinaliseFeedbackNotification
-  extends NotificationWithTarget[Feedback, Assignment]
+  extends BatchedNotificationWithTarget[Feedback, Assignment, FinaliseFeedbackNotification](FinaliseFeedbackBatchedNotificationHandler)
     with ConfigurableNotification
     with AllCompletedActionRequiredNotification {
 
@@ -101,4 +101,38 @@ class FinaliseFeedbackNotificationSettings(departmentSettings: NotificationSetti
   def namedUsers = departmentSettings.UserSeqSetting("namedUsers", default = Seq(), userLookup)
 
   def notifyFirstNonEmptyGroupOnly = departmentSettings.BooleanSetting("notifyFirstNonEmptyGroupOnly", default = true)
+}
+
+object FinaliseFeedbackBatchedNotificationHandler extends BatchedNotificationHandler[FinaliseFeedbackNotification] {
+  // Group by assignment. Just uses the same template but combines
+  override def groupBatchInternal(notifications: Seq[FinaliseFeedbackNotification]): Seq[Seq[FinaliseFeedbackNotification]] =
+    notifications.groupBy(_.assignment).values.toSeq
+
+  override def titleForBatchInternal(notifications: Seq[FinaliseFeedbackNotification], user: User): String = {
+    val assignment = notifications.head.assignment
+
+    val moduleCode = assignment.module.code.toUpperCase
+    val numberOfItems = notifications.map(_.entities.size).sum
+    val submissionPlural = if (numberOfItems != 1) "submissions" else "submission"
+    val assignmentName = assignment.name
+    val pastTensePlural = if (numberOfItems != 1) "have" else "has"
+
+    s"""$moduleCode: $numberOfItems $submissionPlural for "$assignmentName" $pastTensePlural been marked"""
+  }
+
+  override def contentForBatchInternal(notifications: Seq[FinaliseFeedbackNotification]): FreemarkerModel = {
+    val assignment = notifications.head.assignment
+    val entities = notifications.flatMap(_.entities)
+
+    FreemarkerModel(FinaliseFeedbackNotification.templateLocation, Map(
+      "assignment" -> assignment,
+      "finalisedFeedbacks" -> entities
+    ))
+  }
+
+  override def urlForBatchInternal(notifications: Seq[FinaliseFeedbackNotification], user: User): String =
+    notifications.head.urlFor(user)
+
+  override def urlTitleForBatchInternal(notifications: Seq[FinaliseFeedbackNotification]): String =
+    notifications.head.urlTitle
 }
