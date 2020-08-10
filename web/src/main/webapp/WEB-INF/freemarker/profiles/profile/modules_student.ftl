@@ -89,95 +89,98 @@
       <#assign showModuleResults = features.showModuleResults />
       <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
-        <div class="striped-section collapsible">
-          <h3 class="section-title">
-            <a class="collapse-trigger icon-container" href="#"><#compress>
-              <@fmt.module_name moduleRegistration.module />
-            </#compress></a>
-            <span class="mod-reg-summary">
-              <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
-                <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
-                <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
-                <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
-                <#if moduleRegistration.passedCats??>
-                  <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+        <#assign module = moduleRegistration.module!"" />
+        <#if module?has_content>
+          <div class="striped-section collapsible">
+            <h3 class="section-title">
+              <a class="collapse-trigger icon-container" href="#"><#compress>
+                <@fmt.module_name module />
+              </#compress></a>
+              <span class="mod-reg-summary">
+                <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                  <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
+                  <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
+                  <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
+                  <#if moduleRegistration.passedCats??>
+                    <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+                  </#if>
                 </#if>
-              </#if>
-            </span>
-          </h3>
-          <div class="striped-section-contents ">
-            <div class="item-info">
-              <div class="row">
-                <div class="col-md-4">
-                  <h4><@fmt.module_name moduleRegistration.module false /></h4>
-                </div>
-                <div class="col-md-4">
-                  <strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
-                  <strong>Occurrence:</strong> ${(moduleRegistration.occurrence)!} <br />
-                  <strong>Status:</strong>
-                  <#if moduleRegistration.selectionStatus??>
-                    ${(moduleRegistration.selectionStatus.description)!}
-                  <#else>
-                    -
-                  </#if> <br />
-                  <strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
-                </div>
-                <div class="col-md-4">
-                  <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
-                    <strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
-                    <strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
-                    <strong>Passed CATS:</strong>
-                    <#if moduleRegistration.passedCats??>
-                      <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if>
+              </span>
+            </h3>
+            <div class="striped-section-contents ">
+              <div class="item-info">
+                <div class="row">
+                  <div class="col-md-4">
+                    <h4><@fmt.module_name module false /></h4>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
+                    <strong>Occurrence:</strong> ${(moduleRegistration.occurrence)!} <br />
+                    <strong>Status:</strong>
+                    <#if moduleRegistration.selectionStatus??>
+                      ${(moduleRegistration.selectionStatus.description)!}
                     <#else>
                       -
-                    </#if><br />
-                  </#if>
+                    </#if> <br />
+                    <strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
+                  </div>
+                  <div class="col-md-4">
+                    <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                      <strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
+                      <strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
+                      <strong>Passed CATS:</strong>
+                      <#if moduleRegistration.passedCats??>
+                        <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if>
+                      <#else>
+                        -
+                      </#if><br />
+                    </#if>
+                  </div>
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-md-12">
-                  <strong>Components:</strong><br />
-                  <table class="table table-condensed table-striped">
-                    <thead>
-                    <tr>
-                      <th>Sequence</th>
-                      <th>Type</th>
-                      <th>Name</th>
-                      <th>Weighting</th>
-                      <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
-                        <th>Mark</th>
-                        <th>Grade</th>
-                      </#if>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <#list moduleRegistrationAndComponent.components as component>
+                <div class="row">
+                  <div class="col-md-12">
+                    <strong>Components:</strong><br />
+                    <table class="table table-condensed table-striped">
+                      <thead>
                       <tr>
-                        <td>${component.upstreamGroup.sequence}</td>
-                        <td>
-                          ${component.assessmentType.name}
-                          <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
-                            <span class="label label-info">Further first sit</span>
-                          <#elseif component.member.reassessment>
-                            <span class="label label-warning">Resit</span>
-                          </#if>
-                        </td>
-                        <td>${component.name}</td>
-                        <td>${(component.weighting!0)?string["0.#"]}%</td>
+                        <th>Sequence</th>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Weighting</th>
                         <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
-                          <td>${component.member.agreedMark!}</td>
-                          <td>${component.member.agreedGrade!}</td>
+                          <th>Mark</th>
+                          <th>Grade</th>
                         </#if>
                       </tr>
-                    </#list>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                      <#list moduleRegistrationAndComponent.components as component>
+                        <tr>
+                          <td>${component.upstreamGroup.sequence}</td>
+                          <td>
+                            ${component.assessmentType.name}
+                            <#if component.member.reassessment && ((component.member.currentResitAttempt)!2) lte 1>
+                              <span class="label label-info">Further first sit</span>
+                            <#elseif component.member.reassessment>
+                              <span class="label label-warning">Resit</span>
+                            </#if>
+                          </td>
+                          <td>${component.name}</td>
+                          <td>${(component.weighting!0)?string["0.#"]}%</td>
+                          <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
+                            <td>${component.member.agreedMark!}</td>
+                            <td>${component.member.agreedGrade!}</td>
+                          </#if>
+                        </tr>
+                      </#list>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </#if>
       </#list>
 
       <h2>Examinations</h2>
