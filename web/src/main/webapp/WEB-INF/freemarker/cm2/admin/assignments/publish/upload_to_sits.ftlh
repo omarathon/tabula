@@ -1,6 +1,39 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <@cm2.assignmentHeader "Upload feedback to SITS" assignment "for" />
+<#if command.gradeValidation.invalidLinkedToMultipleComponents?has_content >
+  <div class="alert alert-danger">
+    <p>
+      <#assign total = command.gradeValidation.invalidLinkedToMultipleComponents?size />
+      <@fmt.p total "student" />
+      <#if total==1>
+        has feedback that cannot be uploaded because the student is a member of more than one of the assessment components linked to this assignment.
+      <#else>
+        have feedback that cannot be uploaded because the students are members of more than one of the assessment components linked to this assignment.
+      </#if>
+    </p>
+    <p>Feedback can only be uploaded to a single assessment component for each student. Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment.</p>
+  </div>
+
+  <table class="table table-bordered table-condensed table-striped table-hover">
+    <thead>
+      <tr>
+        <th>University ID</th>
+        <th>Mark</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <#list command.gradeValidation.invalidLinkedToMultipleComponents as feedback>
+        <tr>
+          <td>${feedback.studentIdentifier}</td>
+          <td>${feedback.latestMark!}</td>
+          <td>${feedback.latestGrade!}</td>
+        </tr>
+      </#list>
+    </tbody>
+  </table>
+</#if>
 
 <#if command.gradeValidation.notOnScheme?has_content >
   <div class="alert alert-danger">
