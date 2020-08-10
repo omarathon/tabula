@@ -63,7 +63,7 @@ abstract class ExportRecordedModuleRegistrationsToSitsCommandInternal
       }
 
       if (!exportStudentModuleResultToSitsService.smoRecordExists(student)) {
-        logger.warn(s"SMO doesn't exists. Unable to update module mark record for $student")
+        logger.warn(s"SMO doesn't exist. Unable to update module mark record for $student")
 
         student.markWrittenToSitsError(RecordedModuleMarkSitsError.MissingModuleRegistration)
         moduleRegistrationMarksService.saveOrUpdate(student)
