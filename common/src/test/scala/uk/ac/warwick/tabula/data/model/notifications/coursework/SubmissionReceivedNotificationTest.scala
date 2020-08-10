@@ -393,6 +393,132 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito with Free
     }
   }
 
+  @Test def batch(): Unit = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
+    withUser("cusca", "55556666") {
+      val marker: User = Fixtures.user("1234567", "1234567")
+      val student1: User = Fixtures.user("7654321", "7654321")
+      val student2: User = Fixtures.user("7654322", "7654322")
+      val student3: User = Fixtures.user("7654323", "7654323")
+
+      val department = Fixtures.department("ch")
+      val assignment = Fixtures.assignment("Another 5,000 word essay")
+      val module = Fixtures.module("cs118", "Programming for Computer Scientists")
+      assignment.module = module
+      assignment.closeDate = new DateTime(2018, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+      assignment.id = "1234"
+
+      assignment.feedbackService = smartMock[FeedbackService]
+      assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _: Any => assignment.feedbacks.asScala.toSeq }
+
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
+      val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
+      assignment.cm2MarkingWorkflow = workflow
+
+      val mockLookup: UserLookupService = mock[UserLookupService]
+      mockLookup.getUserByUserId(marker.getUserId) returns marker
+
+      val notification1 = {
+        val submission = Fixtures.submission(userId = "7654321", universityId = "7654321")
+        submission.id = "28334"
+        submission.assignment = assignment
+        submission.submittedDate = DateTime.now
+
+        val a = new FileAttachment
+        a.name = "Essay.docx"
+        submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
+
+        val feedback: Feedback = Fixtures.assignmentFeedback(student1.getWarwickId)
+        assignment.feedbacks.add(feedback)
+
+        val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
+        markerFeedback.marker = marker
+        markerFeedback.stage = SingleMarkingCompleted
+        markerFeedback.userLookup = mockLookup
+
+        val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+        n.userLookup = mockLookup
+        n
+      }
+
+      val notification2 = {
+        val submission = Fixtures.submission(userId = "7654322", universityId = "7654322")
+        submission.id = "2332432"
+        submission.assignment = assignment
+        submission.submittedDate = DateTime.now.plusDays(3)
+
+        val a = new FileAttachment
+        a.name = "Essay.docx"
+        submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
+
+        val feedback: Feedback = Fixtures.assignmentFeedback(student2.getWarwickId)
+        assignment.feedbacks.add(feedback)
+
+        val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
+        markerFeedback.marker = marker
+        markerFeedback.stage = SingleMarkingCompleted
+        markerFeedback.userLookup = mockLookup
+
+        val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+        n.userLookup = mockLookup
+        n
+      }
+
+      val notification3 = {
+        val submission = Fixtures.submission(userId = "7654323", universityId = "7654323")
+        submission.id = "94843905"
+        submission.assignment = assignment
+        submission.submittedDate = DateTime.now.plusDays(60)
+
+        val a = new FileAttachment
+        a.name = "Essay.docx"
+        submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
+
+        val feedback: Feedback = Fixtures.assignmentFeedback(student3.getWarwickId)
+        assignment.feedbacks.add(feedback)
+
+        val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
+        markerFeedback.marker = marker
+        markerFeedback.stage = SingleMarkingCompleted
+        markerFeedback.userLookup = mockLookup
+
+        val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+        n.userLookup = mockLookup
+        n
+      }
+
+      val batch = Seq(notification1, notification2, notification3)
+      SubmissionReceivedBatchedNotificationHandler.titleForBatch(batch, currentUser.apparentUser) should be ("CS118: 1 late submission, 2 submissions received for \"Another 5,000 word essay\"")
+
+      val content = SubmissionReceivedBatchedNotificationHandler.contentForBatch(batch)
+      val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(content.template), content.model)
+      notificationContent should be(
+        """3 submissions for the assignment 'Another 5,000 word essay' for CS118, Programming for Computer Scientists have been received.
+          |
+          |- 7654321
+          |    - Submission date: 1 September 2018 at 12:39:00
+          |    - Submission ID: 28334
+          |    - Uploaded attachments:
+          |        - Essay.docx
+          |    - Student feedback deadline: 12 October 2018
+          |- 7654322
+          |    - Submission date: 4 September 2018 at 12:39:00
+          |    - Submission ID: 2332432
+          |    - Uploaded attachments:
+          |        - Essay.docx
+          |    - Student feedback deadline: 12 October 2018
+          |- 7654323
+          |    - Submission date: 31 October 2018 at 12:39:00
+          |    - Submission ID: 94843905
+          |    - Uploaded attachments:
+          |        - Essay.docx
+          |
+          |""".stripMargin
+      )
+    }
+  }
+
   def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
     case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
     case ug: UserGroup => ug.userLookup = userLookup

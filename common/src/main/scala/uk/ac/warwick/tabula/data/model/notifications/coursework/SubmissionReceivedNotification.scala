@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.data.model.{Assignment, BatchedNotificationHandler, BatchedNotificationWithTarget, FreemarkerModel, NotificationWithTarget, Submission, UserSettings}
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, RoleOverride}
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -19,7 +19,9 @@ import scala.reflect.ClassTag
 @Entity
 @Proxy
 @DiscriminatorValue("SubmissionReceived")
-class SubmissionReceivedNotification extends SubmissionNotification {
+class SubmissionReceivedNotification
+  extends BatchedNotificationWithTarget[Submission, Assignment, SubmissionReceivedNotification](SubmissionReceivedBatchedNotificationHandler)
+    with SubmissionNotification {
 
   override def onPreSave(isNew: Boolean): Unit = {
     // if this submission was noteworthy then the priority is higher
@@ -109,4 +111,56 @@ class SubmissionReceivedNotification extends SubmissionNotification {
     (adminsWithPermission ++ currentMarker).distinct.filter(canEmailUser)
   }
 
+}
+
+object SubmissionReceivedBatchedNotificationHandler extends BatchedNotificationHandler[SubmissionReceivedNotification] {
+  // Batch notifications for the same assignment
+  override def groupBatchInternal(notifications: Seq[SubmissionReceivedNotification]): Seq[Seq[SubmissionReceivedNotification]] =
+    notifications.groupBy(_.assignment).values.toSeq
+
+  override def titleForBatchInternal(notifications: Seq[SubmissionReceivedNotification], user: User): String = {
+    val submissions = notifications.map(_.submission)
+    val authorisedLateSubmissions = submissions.count(s => s != null && s.isAuthorisedLate)
+    val lateSubmissions = submissions.count(s => s != null && !s.isAuthorisedLate && s.isLate)
+    val otherSubmissions = submissions.size - authorisedLateSubmissions - lateSubmissions
+
+    val parts = Seq(
+      lateSubmissions match {
+        case 0 => None
+        case 1 => Some("1 late submission")
+        case n => Some(s"$n late submissions")
+      },
+      authorisedLateSubmissions match {
+        case 0 => None
+        case 1 => Some("1 authorised late submission")
+        case n => Some(s"$n authorised late submissions")
+      },
+      otherSubmissions match {
+        case 0 => None
+        case 1 => Some("1 submission")
+        case n => Some(s"$n submissions")
+      }
+    ).flatten.mkString(", ")
+
+    "%s: %s received for \"%s\"".format(notifications.head.moduleCode, parts, notifications.head.assignment.name)
+  }
+
+  override def contentForBatchInternal(notifications: Seq[SubmissionReceivedNotification]): FreemarkerModel =
+    FreemarkerModel("/WEB-INF/freemarker/emails/submissionnotify_batch.ftl", Map(
+      "assignment" -> notifications.head.assignment,
+      "module" -> notifications.head.module,
+      "submissions" -> notifications.sortBy(_.submission.submittedDate).map { notification =>
+        Map(
+          "submission" -> notification.submission,
+          "submissionDate" -> DateFormats.NotificationDateTime.print(notification.submission.submittedDate),
+          "feedbackDeadlineDate" -> notification.submission.feedbackDeadline.map(DateFormats.NotificationDateOnly.print),
+        )
+      }
+    ))
+
+  override def urlForBatchInternal(notifications: Seq[SubmissionReceivedNotification], user: User): String =
+    Routes.admin.assignment.submissionsandfeedback.list(notifications.head.assignment)
+
+  override def urlTitleForBatchInternal(notifications: Seq[SubmissionReceivedNotification]): String =
+    "view all submissions for this assignment"
 }

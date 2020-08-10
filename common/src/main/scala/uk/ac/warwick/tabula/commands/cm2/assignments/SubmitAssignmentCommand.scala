@@ -310,7 +310,7 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
 trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] with CompletesNotifications[Submission] {
   self: SubmitAssignmentState with NotificationHandling =>
 
-  override def emit(submission: Submission): Seq[SubmissionNotification] = {
+  override def emit(submission: Submission): Seq[NotificationWithTarget[Submission, Assignment] with SubmissionNotification] = {
     val studentNotifications =
       if (assignment.isVisibleToStudents)
         Seq(Notification.init(new SubmissionReceiptNotification, user.asUser, Seq(submission), assignment))
