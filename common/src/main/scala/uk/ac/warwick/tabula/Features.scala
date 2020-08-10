@@ -158,7 +158,7 @@ abstract class Features {
   @Value("${features.mitCircs.covid19:true}") var mitcircsCovid19: Boolean = defaults.mitcircsCovid19
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
   @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
-  @Value("${features.notificationBatching:false}") var notificationBatching: Boolean = defaults.notificationBatching
+  @Value("${features.notificationBatching:true}") var notificationBatching: Boolean = defaults.notificationBatching
   @Value("${features.marksManagement:true}") var marksManagement: Boolean = defaults.marksManagement
   @Value("${features.includeSMSForCurrentYear:false}") var includeSMSForCurrentYear: Boolean = defaults.includeSMSForCurrentYear
   @Value("${features.progressionDecisionsInStudentProfile:true}") var progressionDecisionsInStudentProfile: Boolean = defaults.progressionDecisionsInStudentProfile
@@ -319,7 +319,7 @@ class FeaturesMessage {
   @BeanProperty var mitcircsCovid19 = true
   @BeanProperty var renderStackTracesForAllUsers = false
   @BeanProperty var enforceCsp = true
-  @BeanProperty var notificationBatching = false
+  @BeanProperty var notificationBatching = true
   @BeanProperty var marksManagement = true
   @BeanProperty var includeSMSForCurrentYear = false
   @BeanProperty var progressionDecisionsInStudentProfile = true
