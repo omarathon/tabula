@@ -40,6 +40,7 @@ class CalculateModuleMarksCommandTest extends TestBase with Mockito {
         grade = grade,
         needsWritingToSits = false,
         outOfSync = false,
+        sitsWriteError = None,
         markState = Some(UnconfirmedActual),
         agreed = false,
         history = Seq.empty,

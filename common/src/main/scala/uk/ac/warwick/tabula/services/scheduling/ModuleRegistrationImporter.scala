@@ -130,8 +130,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter
         } else (None: Option[Int], null: String, null: String)
 
       recordedModuleRegistration.filter(_.needsWritingToSits).foreach { r =>
-        r.needsWritingToSitsSince = None
-        r.lastWrittenToSits = Some(DateTime.now)
+        r.markWrittenToSits()
         moduleRegistrationMarksService.saveOrUpdate(r)
       }
 

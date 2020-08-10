@@ -348,8 +348,7 @@ class SandboxAssignmentImporter extends AssignmentImporter
             } else (null: String, null: String)
 
           recordedStudent.filter(_.needsWritingToSits).foreach { s =>
-            s.needsWritingToSitsSince = None
-            s.lastWrittenToSits = Some(DateTime.now)
+            s.markWrittenToSits()
             assessmentComponentMarksService.saveOrUpdate(s)
           }
 

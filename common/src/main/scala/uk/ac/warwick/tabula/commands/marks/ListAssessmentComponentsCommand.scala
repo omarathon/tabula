@@ -26,6 +26,7 @@ object ListAssessmentComponentsCommand {
     existingResit: Option[RecordedResit], // a new reassessment record for the next exam period
     needsWritingToSits: Boolean,
     outOfSync: Boolean,
+    sitsWriteError: Option[RecordedAssessmentComponentStudentMarkSitsError],
     markState: Option[MarkState],
     agreed: Boolean,
     history: Seq[RecordedAssessmentComponentStudentMark], // Most recent first
@@ -81,6 +82,7 @@ object ListAssessmentComponentsCommand {
             recordedStudent.flatMap(_.latestMark).exists(m => !member.firstDefinedMark.contains(m)) ||
             recordedStudent.flatMap(_.latestGrade).exists(g => !member.firstDefinedGrade.contains(g))
           ),
+        sitsWriteError = recordedStudent.flatMap(_.lastSitsWriteError),
         markState = recordedStudent.flatMap(_.latestState),
         agreed = isAgreedSITS,
         history = recordedStudent.map(_.marks).getOrElse(Seq.empty),
@@ -143,6 +145,7 @@ object ListAssessmentComponentsCommand {
 
     val needsWritingToSits: Boolean = students.exists(_.needsWritingToSits)
     val outOfSync: Boolean = students.exists(_.outOfSync)
+    val sitsWriteError: Option[RecordedAssessmentComponentStudentMarkSitsError] = students.flatMap(_.sitsWriteError).headOption
     val allAgreed: Boolean = students.nonEmpty && students.forall(_.agreed)
   }
   type Result = Seq[AssessmentComponentInfo]

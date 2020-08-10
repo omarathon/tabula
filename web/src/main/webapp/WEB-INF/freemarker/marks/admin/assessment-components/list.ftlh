@@ -47,6 +47,11 @@
               <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
               <span class="sr-only">Waiting to be written to SITS</span>
             </span>
+          <#elseif marksresult.sitsWriteError??>
+            <span tabindex="0" class="tabula-tooltip" data-title="Error writing mark to SITS: ${result.sitsWriteError.description}">
+              <i class="fa-fw fas fa-exclamation-square text-danger" aria-hidden="true"></i>
+              <span class="sr-only">Error writing mark to SITS: ${result.sitsWriteError.description}</span>
+            </span>
           <#elseif result.outOfSync>
             <span tabindex="0" class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
               <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>

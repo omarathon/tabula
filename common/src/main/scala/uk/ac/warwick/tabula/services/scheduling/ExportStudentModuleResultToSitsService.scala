@@ -30,6 +30,8 @@ trait AutowiringExportStudentModuleResultToSitsServiceComponent extends ExportSt
 }
 
 trait ExportStudentModuleResultToSitsService {
+  def smoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean
+  def smrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset]
   def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int
 }
 
@@ -132,14 +134,13 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     )
   }
 
-  def smoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
+  override def smoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = {
     val countQuery = new SmoCountQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     countQuery.getCount(parameterMap) > 0
   }
 
-
-  def smrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset] = {
+  override def smrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset] = {
     val smrExistingRowQuery = new SmrQuery(sitsDataSource)
     val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
     try {
@@ -150,46 +151,34 @@ class AbstractExportStudentModuleResultToSitsService extends ExportStudentModule
     }
   }
 
+  override def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = {
+    val updateQuery = new ExportStudentModuleResultToSitsUpdateQuery(sitsDataSource)
 
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = {
-    val existingSmr = smrRecordSubdata(recordedModuleRegistration)
-
-    if (!smoRecordExists(recordedModuleRegistration)) {
-      logger.warn(s"SMO doesn't exists. Unable to update module mark record for $recordedModuleRegistration")
-      0 //can throw an exception in case we want to report this to  user via UI
-    } else if (existingSmr.isEmpty) {
-      logger.warn(s"SMR entry not found. SAS process may not have been run. Unable to update module mark record for $recordedModuleRegistration")
-      0
-    } else {
-      val updateQuery = new ExportStudentModuleResultToSitsUpdateQuery(sitsDataSource)
-
-      val subsetData = extractSmrSubsetData(recordedModuleRegistration)
-      val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
-      parameterMap.putAll(JHashMap(
-        "currentAttemptNumber" -> subsetData.currentAttempt.orNull,
-        "completedAttemptNumber" -> subsetData.completedAttempt.orNull,
-        "moduleMarks" -> subsetData.actualMark.orNull,
-        "moduleGrade" -> subsetData.actualGrade.orNull,
-        "agreedModuleMarks" -> subsetData.agreedMark.orNull,
-        "agreedModuleGrade" -> subsetData.agreedGrade.orNull,
-        "credits" -> subsetData.credits.orNull,
-        "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
-        "finalAssesmentsAttended" -> recordedModuleRegistration.latestMark.map(_ => if (finalAssessmentAttended) "Y" else "N").orNull,
-        "dateTimeMarksUploaded" -> DateTime.now.toDate,
-        "sraByDept" -> recordedModuleRegistration.latestMark.map(_ => "SRAs by dept").orNull,
-        "moduleResult" -> subsetData.result.orNull,
-        "initialSASStatus" -> subsetData.sasStatus.orNull,
-        "processStatus" -> subsetData.processStatus.orNull,
-        "process" -> subsetData.process.orNull,
-        "dateTimeMarksUploaded" -> DateTime.now.toDate
-      ))
-      val rowUpdated = updateQuery.updateByNamedParam(parameterMap)
-      if (rowUpdated == 0) {
-        logger.warn(s"No SMR record found to update. Possible SAS hasn't yet generated initial SMR for $recordedModuleRegistration")
-      }
-      rowUpdated
+    val subsetData = extractSmrSubsetData(recordedModuleRegistration)
+    val parameterMap: JMap[String, Any] = keysParamaterMap(recordedModuleRegistration)
+    parameterMap.putAll(JHashMap(
+      "currentAttemptNumber" -> subsetData.currentAttempt.orNull,
+      "completedAttemptNumber" -> subsetData.completedAttempt.orNull,
+      "moduleMarks" -> subsetData.actualMark.orNull,
+      "moduleGrade" -> subsetData.actualGrade.orNull,
+      "agreedModuleMarks" -> subsetData.agreedMark.orNull,
+      "agreedModuleGrade" -> subsetData.agreedGrade.orNull,
+      "credits" -> subsetData.credits.orNull,
+      "currentDateTime" -> DateTimeFormat.forPattern("dd/MM/yy:HHmm").print(DateTime.now),
+      "finalAssesmentsAttended" -> recordedModuleRegistration.latestMark.map(_ => if (finalAssessmentAttended) "Y" else "N").orNull,
+      "dateTimeMarksUploaded" -> DateTime.now.toDate,
+      "sraByDept" -> recordedModuleRegistration.latestMark.map(_ => "SRAs by dept").orNull,
+      "moduleResult" -> subsetData.result.orNull,
+      "initialSASStatus" -> subsetData.sasStatus.orNull,
+      "processStatus" -> subsetData.processStatus.orNull,
+      "process" -> subsetData.process.orNull,
+      "dateTimeMarksUploaded" -> DateTime.now.toDate
+    ))
+    val rowUpdated = updateQuery.updateByNamedParam(parameterMap)
+    if (rowUpdated == 0) {
+      logger.warn(s"No SMR record found to update. Possible SAS hasn't yet generated initial SMR for $recordedModuleRegistration")
     }
-
+    rowUpdated
   }
 
 }
@@ -325,9 +314,9 @@ class ExportStudentModuleResultToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportStudentModuleResultToSitsSandboxService extends ExportStudentModuleResultToSitsService {
-
-  def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = 0
-
+  override def smoRecordExists(recordedModuleRegistration: RecordedModuleRegistration): Boolean = false
+  override def smrRecordSubdata(recordedModuleRegistration: RecordedModuleRegistration): Option[SmrSubset] = None
+  override def exportModuleMarksToSits(recordedModuleRegistration: RecordedModuleRegistration, finalAssessmentAttended: Boolean): Int = 0
 }
 
 

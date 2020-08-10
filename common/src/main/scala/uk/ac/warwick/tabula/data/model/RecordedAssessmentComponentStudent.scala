@@ -119,6 +119,30 @@ class RecordedAssessmentComponentStudent extends GeneratedId
   def lastWrittenToSits: Option[DateTime] = Option(_lastWrittenToSits)
   def lastWrittenToSits_=(lastWrittenToSits: Option[DateTime]): Unit = _lastWrittenToSits = lastWrittenToSits.orNull
 
+  @Column(name = "last_sits_write_error_date")
+  private var _lastSitsWriteErrorDate: DateTime = _
+  def lastSitsWriteErrorDate: Option[DateTime] = Option(_lastSitsWriteErrorDate)
+  def lastSitsWriteErrorDate_=(lastSitsWriteErrorDate: Option[DateTime]): Unit = _lastSitsWriteErrorDate = lastSitsWriteErrorDate.orNull
+
+  @Column(name = "last_sits_write_error")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.RecordedAssessmentComponentStudentMarkSitsErrorUserType")
+  private var _lastSitsWriteError: RecordedAssessmentComponentStudentMarkSitsError = _
+  def lastSitsWriteError: Option[RecordedAssessmentComponentStudentMarkSitsError] = Option(_lastSitsWriteError)
+  def lastSitsWriteError_=(lastSitsWriteError: Option[RecordedAssessmentComponentStudentMarkSitsError]): Unit = _lastSitsWriteError = lastSitsWriteError.orNull
+
+  def markWrittenToSits(): Unit = {
+    needsWritingToSitsSince = None
+    lastWrittenToSits = Some(DateTime.now)
+    lastSitsWriteErrorDate = None
+    lastSitsWriteError = None
+  }
+
+  def markWrittenToSitsError(error: RecordedAssessmentComponentStudentMarkSitsError): Unit = {
+    needsWritingToSitsSince = None
+    lastSitsWriteErrorDate = Some(DateTime.now)
+    lastSitsWriteError = Some(error)
+  }
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "moduleCode" -> moduleCode,
     "assessmentGroup" -> assessmentGroup,
@@ -130,7 +154,9 @@ class RecordedAssessmentComponentStudent extends GeneratedId
     "resitSequence" -> resitSequence,
     "marks" -> marks,
     "needsWritingToSitsSince" -> needsWritingToSitsSince,
-    "lastWrittenToSits" -> lastWrittenToSits
+    "lastWrittenToSits" -> lastWrittenToSits,
+    "lastSitsWriteErrorDate" -> lastSitsWriteErrorDate,
+    "lastSitsWriteError" -> lastSitsWriteError
   )
 }
 
@@ -175,6 +201,13 @@ class RecordedAssessmentComponentStudentMark extends GeneratedId
   )
 }
 
+sealed abstract class RecordedAssessmentComponentStudentMarkSitsError(val description: String) extends EnumEntry
+object RecordedAssessmentComponentStudentMarkSitsError extends Enum[RecordedAssessmentComponentStudentMarkSitsError] {
+  case object MissingMarksRecord extends RecordedAssessmentComponentStudentMarkSitsError("Missing SAS record for component mark")
+
+  override def values: IndexedSeq[RecordedAssessmentComponentStudentMarkSitsError] = findValues
+}
+
 sealed abstract class RecordedAssessmentComponentStudentMarkSource(val description: String) extends EnumEntry
 object RecordedAssessmentComponentStudentMarkSource extends Enum[RecordedAssessmentComponentStudentMarkSource] {
   case object MarkEntry extends RecordedAssessmentComponentStudentMarkSource("Record component marks")
@@ -188,3 +221,4 @@ object RecordedAssessmentComponentStudentMarkSource extends Enum[RecordedAssessm
 }
 
 class RecordedAssessmentComponentStudentMarkSourceUserType extends EnumUserType(RecordedAssessmentComponentStudentMarkSource)
+class RecordedAssessmentComponentStudentMarkSitsErrorUserType extends EnumUserType(RecordedAssessmentComponentStudentMarkSitsError)

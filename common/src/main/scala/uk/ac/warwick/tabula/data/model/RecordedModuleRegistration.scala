@@ -112,6 +112,30 @@ class RecordedModuleRegistration extends GeneratedId
   def lastWrittenToSits: Option[DateTime] = Option(_lastWrittenToSits)
   def lastWrittenToSits_=(lastWrittenToSits: Option[DateTime]): Unit = _lastWrittenToSits = lastWrittenToSits.orNull
 
+  @Column(name = "last_sits_write_error_date")
+  private var _lastSitsWriteErrorDate: DateTime = _
+  def lastSitsWriteErrorDate: Option[DateTime] = Option(_lastSitsWriteErrorDate)
+  def lastSitsWriteErrorDate_=(lastSitsWriteErrorDate: Option[DateTime]): Unit = _lastSitsWriteErrorDate = lastSitsWriteErrorDate.orNull
+
+  @Column(name = "last_sits_write_error")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.RecordedModuleMarkSitsErrorUserType")
+  private var _lastSitsWriteError: RecordedModuleMarkSitsError = _
+  def lastSitsWriteError: Option[RecordedModuleMarkSitsError] = Option(_lastSitsWriteError)
+  def lastSitsWriteError_=(lastSitsWriteError: Option[RecordedModuleMarkSitsError]): Unit = _lastSitsWriteError = lastSitsWriteError.orNull
+
+  def markWrittenToSits(): Unit = {
+    needsWritingToSitsSince = None
+    lastWrittenToSits = Some(DateTime.now)
+    lastSitsWriteErrorDate = None
+    lastSitsWriteError = None
+  }
+
+  def markWrittenToSitsError(error: RecordedModuleMarkSitsError): Unit = {
+    needsWritingToSitsSince = None
+    lastSitsWriteErrorDate = Some(DateTime.now)
+    lastSitsWriteError = Some(error)
+  }
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "sprCode" -> sprCode,
     "sitsModuleCode" -> sitsModuleCode,
@@ -119,7 +143,9 @@ class RecordedModuleRegistration extends GeneratedId
     "occurrence" -> occurrence,
     "marks" -> marks,
     "needsWritingToSitsSince" -> needsWritingToSitsSince,
-    "lastWrittenToSits" -> lastWrittenToSits
+    "lastWrittenToSits" -> lastWrittenToSits,
+    "lastSitsWriteErrorDate" -> lastSitsWriteErrorDate,
+    "lastSitsWriteError" -> lastSitsWriteError
   )
 
 }
@@ -182,4 +208,13 @@ object RecordedModuleMarkSource extends Enum[RecordedModuleMarkSource] {
   override def values: IndexedSeq[RecordedModuleMarkSource] = findValues
 }
 
+sealed abstract class RecordedModuleMarkSitsError(val description: String) extends EnumEntry
+object RecordedModuleMarkSitsError extends Enum[RecordedModuleMarkSitsError] {
+  case object MissingMarksRecord extends RecordedModuleMarkSitsError("Missing SMR record for module registration")
+  case object MissingModuleRegistration extends RecordedModuleMarkSitsError("Missing SMO record for module registration")
+
+  override def values: IndexedSeq[RecordedModuleMarkSitsError] = findValues
+}
+
 class RecordedModuleMarkSourceUserType extends EnumUserType(RecordedModuleMarkSource)
+class RecordedModuleMarkSitsErrorUserType extends EnumUserType(RecordedModuleMarkSitsError)
