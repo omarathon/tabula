@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 @Proxy
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
-  extends Notification[MeetingRecordApproval, Unit]
+  extends BatchedNotification[MeetingRecordApproval, Unit, Notification[_, Unit] with MeetingRecordNotificationTrait](MeetingRecordBatchedNotificationHandler)
     with MeetingRecordNotificationTrait
     with SingleItemNotification[MeetingRecordApproval]
     with AllCompletedActionRequiredNotification {
@@ -21,6 +21,8 @@ class MeetingRecordRejectedNotification
 
   def verb = "return"
 
+  override def verbed: String = "returned"
+
   def titleSuffix: String = "returned with comments"
 
   def content = FreemarkerModel(FreemarkerTemplate, Map(
@@ -28,7 +30,7 @@ class MeetingRecordRejectedNotification
     "agentRoles" -> agentRoles,
     "dateTimeFormatter" -> dateTimeFormatter,
     "meetingRecord" -> approval.meetingRecord,
-    "verbed" -> "returned",
+    "verbed" -> verbed,
     "reason" -> approval.comments
   ))
 

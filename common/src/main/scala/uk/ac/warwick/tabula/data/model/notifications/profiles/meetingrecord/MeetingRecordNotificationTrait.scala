@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Notification}
+import uk.ac.warwick.tabula.data.model.{BatchedNotificationHandler, FreemarkerModel, MeetingRecord, Notification}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.userlookup.User
 
@@ -37,4 +37,23 @@ trait MeetingRecordNotificationTrait {
   }
 
   def titleSuffix: String
+
+  def verbed: String
+}
+
+object MeetingRecordBatchedNotificationHandler extends BatchedNotificationHandler[Notification[_, Unit] with MeetingRecordNotificationTrait] {
+  override def titleForBatchInternal(notifications: Seq[Notification[_, Unit] with MeetingRecordNotificationTrait], user: User): String =
+    s"${notifications.size} meeting records have been ${notifications.head.verbed}"
+
+  override def contentForBatchInternal(notifications: Seq[Notification[_, Unit] with MeetingRecordNotificationTrait]): FreemarkerModel =
+    FreemarkerModel("/WEB-INF/freemarker/notifications/meetingrecord/meeting_record_notification_template_batch.ftl", Map(
+      "verbed" -> notifications.head.verbed,
+      "meetings" -> notifications.map(_.content.model),
+    ))
+
+  override def urlForBatchInternal(notifications: Seq[Notification[_, Unit] with MeetingRecordNotificationTrait], user: User): String =
+    Routes.home
+
+  override def urlTitleForBatchInternal(notifications: Seq[Notification[_, Unit] with MeetingRecordNotificationTrait]): String =
+    "view your meetings"
 }

@@ -17,6 +17,8 @@ trait MissedMeetingRecordNotification
 
   def verb = "view"
 
+  override def verbed: String = "viewed" // Not used
+
   override def titleSuffix: String = "recorded as missed"
 
   override def title: String = "Missed meeting recorded"
