@@ -49,10 +49,10 @@ object ReleaseSmallGroupSetsBatchedNotificationHandler extends BatchedNotificati
     notifications.groupBy(_.isStudent).values.toSeq
 
   private def formatsString(entities: Seq[SmallGroup]) = {
-    val pluralFormats = entities.map(_.groupSet.format.plural.toLowerCase).distinct.toList
-    pluralFormats match {
+    val formats = entities.map(_.groupSet.format.description.toLowerCase).distinct.toList
+    formats match {
       case singleFormat :: Nil => singleFormat
-      case _ => Seq(pluralFormats.init.mkString(", "), pluralFormats.last).mkString(" and ")
+      case _ => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
     }
   }
 

@@ -48,21 +48,21 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito with F
   @Test def title(): Unit = withUser("cuscav", "0672089") {
     val notification = Notification.init(new ReleaseSmallGroupSetsNotification, currentUser.apparentUser, group1)
     notification.userLookup = new MockUserLookup
-    notification.title should be("CS118 seminars allocation")
+    notification.title should be("CS118 seminar allocation")
   }
 
   @Test def titlePlural(): Unit = withUser("cuscav", "0672089") {
     val notification = Notification.init(new ReleaseSmallGroupSetsNotification, currentUser.apparentUser, Seq(group1, group2, group3))
     notification.userLookup = new MockUserLookup
-    notification.title should be("CS118 seminars allocations")
+    notification.title should be("CS118 seminar allocations")
 
     set2.module = module3
     set2.format = SmallGroupFormat.Workshop
-    notification.title should be("CS118 and CS120 seminars and workshops allocations")
+    notification.title should be("CS118 and CS120 seminar and workshop allocations")
 
     set3.module = module2
     set2.format = SmallGroupFormat.Example
-    notification.title should be("CS118, CS119 and CS120 seminars and example classes allocations")
+    notification.title should be("CS118, CS119 and CS120 seminar and example class allocations")
   }
 
   val TEST_CONTENT = "test"
@@ -82,7 +82,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito with F
     new SmallGroupFixture {
       val n: ReleaseSmallGroupSetsNotification = createNotification(group1, actor, recipient)
       n.userLookup = userLookup
-      n.title should be("LA101 labs allocation")
+      n.title should be("LA101 lab allocation")
     }
   }
 
@@ -91,7 +91,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito with F
     new SmallGroupFixture {
       val n: ReleaseSmallGroupSetsNotification = createMultiGroupNotification(Seq(group1, group2, group3), actor, recipient)
       n.userLookup = userLookup
-      n.title should be("LA101, LA102 and LA103 labs, seminars and tutorials allocations")
+      n.title should be("LA101, LA102 and LA103 lab, seminar and tutorial allocations")
     }
   }
 
@@ -100,7 +100,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito with F
     new SmallGroupFixture {
       val n: ReleaseSmallGroupSetsNotification = createMultiGroupNotification(Seq(group1, group2, group3, group4, group5), actor, recipient)
       n.userLookup = userLookup
-      n.title should be("LA101, LA102, LA103, LA104 and LA105 labs, seminars and tutorials allocations")
+      n.title should be("LA101, LA102, LA103, LA104 and LA105 lab, seminar and tutorial allocations")
     }
   }
 
