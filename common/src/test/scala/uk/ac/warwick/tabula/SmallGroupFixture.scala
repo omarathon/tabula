@@ -28,12 +28,15 @@ trait SmallGroupFixture extends Mockito {
 
   val tutor1 = new User
   tutor1.setUserId("tutor1")
+  tutor1.setFullName("Tutor Number1")
 
   val tutor2 = new User
   tutor2.setUserId("tutor2")
+  tutor2.setFullName("Tutor Number2")
 
   val tutor3 = new User
   tutor3.setUserId("tutor3")
+  tutor3.setFullName("Tutor Number3")
 
   val userLookup: MockUserLookup = new MockUserLookup
   userLookup.registerUserObjects(student1, student2, tutor1, tutor2, tutor3)
@@ -74,6 +77,7 @@ trait SmallGroupFixture extends Mockito {
       .withStartTime(new LocalTime(12, 0, 0, 0))
       .withDay(DayOfWeek.Monday)
       .withLocation("CMR0.1")
+      .withWeekRange(WeekRange(1, 10))
       .build
 
     val smallGroup = new SmallGroupBuilder()
@@ -203,7 +207,7 @@ class SmallGroupBuilder(val template: SmallGroup = new SmallGroup) {
 
 }
 
-class SmallGroupEventBuilder() {
+class SmallGroupEventBuilder {
 
   val template = new SmallGroupEvent
 
@@ -226,6 +230,11 @@ class SmallGroupEventBuilder() {
 
   def withLocation(s: String): SmallGroupEventBuilder = {
     template.location = NamedLocation(s)
+    this
+  }
+
+  def withWeekRange(weekRange: WeekRange): SmallGroupEventBuilder = {
+    template.weekRanges = template.weekRanges :+ weekRange
     this
   }
 
