@@ -26,7 +26,10 @@ class AuditLoggingEventListener extends EventListener {
     event.userAgent.maybeText.foreach { userAgent => info = info.withUserAgent(userAgent) }
     event.ipAddress.maybeText.foreach { ipAddress => info = info.withIpAddress(ipAddress) }
 
-    val data = (beforeEvent.extra ++ event.extra).map { case (k, v) => new Field(k) -> Logging.convertForStructuredArguments(v) }
+    val data =
+      (beforeEvent.extra ++ event.extra)
+        .map { case (k, v) => new Field(k) -> Logging.convertForStructuredArguments(v) }
+        .filterNot { case (_, v) => v == null }
 
     logger.log(info, data.asJava)
   }
