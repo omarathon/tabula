@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipSe
 import uk.ac.warwick.userlookup.User
 
 abstract class MissedAttendanceMonitoringCheckpointsNotification
-  extends Notification[AttendanceMonitoringCheckpointTotal, Unit]
+  extends BatchedNotification[AttendanceMonitoringCheckpointTotal, Unit, MissedAttendanceMonitoringCheckpointsNotification](MissedAttendanceMonitoringCheckpointsBatchedNotificationHandler)
     with SingleItemNotification[AttendanceMonitoringCheckpointTotal]
     with MyWarwickActivity {
 
@@ -84,4 +84,26 @@ class MissedAttendanceMonitoringCheckpointsHighNotification extends MissedAttend
   @transient
   override lazy val level: Int = department.missedMonitoringPointsNotificationLevels.high
 
+}
+
+object MissedAttendanceMonitoringCheckpointsBatchedNotificationHandler extends BatchedNotificationHandler[MissedAttendanceMonitoringCheckpointsNotification] {
+  // Group by department and academic year so we can send to a single page for the department
+  override def groupBatchInternal(notifications: Seq[MissedAttendanceMonitoringCheckpointsNotification]): Seq[Seq[MissedAttendanceMonitoringCheckpointsNotification]] =
+    notifications.groupBy(n => (n.department, n.academicYear)).values.toSeq
+
+  override def titleForBatchInternal(notifications: Seq[MissedAttendanceMonitoringCheckpointsNotification], user: User): String =
+    s"${notifications.size} students have missed ${notifications.head.level} monitoring points"
+
+  override def contentForBatchInternal(notifications: Seq[MissedAttendanceMonitoringCheckpointsNotification]): FreemarkerModel =
+    FreemarkerModel("/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_missed_checkpoints_notification_batch.ftl", Map(
+      "level" -> notifications.head.level,
+      "academicYear" -> notifications.head.academicYear,
+      "students" -> notifications.map(_.student).sortBy(s => (s.lastName, s.firstName, s.universityId)),
+    ))
+
+  override def urlForBatchInternal(notifications: Seq[MissedAttendanceMonitoringCheckpointsNotification], user: User): String =
+    Routes.View.students(notifications.head.department, notifications.head.academicYear)
+
+  override def urlTitleForBatchInternal(notifications: Seq[MissedAttendanceMonitoringCheckpointsNotification]): String =
+    s"view monitoring points for ${notifications.head.department.name} in ${notifications.head.academicYear.toString}"
 }
