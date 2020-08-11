@@ -698,7 +698,7 @@ object ProfileImporter extends Logging {
 
   val GetUniversityIdsPresentInMembership =
     """
-		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
+		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds) and (courseCode is null or courseCode != 'APPL')
 	"""
 
   class MembershipUniversityIdPresenceQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetUniversityIdsPresentInMembership) {
