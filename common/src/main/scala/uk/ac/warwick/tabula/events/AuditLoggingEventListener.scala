@@ -29,7 +29,6 @@ class AuditLoggingEventListener extends EventListener {
     val data =
       (beforeEvent.extra ++ event.extra)
         .map { case (k, v) => new Field(k) -> Logging.convertForStructuredArguments(v) }
-        .filterNot { case (_, v) => v == null }
 
     logger.log(info, data.asJava)
   }
