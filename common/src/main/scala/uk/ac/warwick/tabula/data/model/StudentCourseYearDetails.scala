@@ -144,7 +144,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
           if (studentCourseDetails.freshStudentCourseYearDetails.nonEmpty && studentCourseDetails.freshStudentCourseYearDetails.max == this) {
             relationship.isCurrent
           } else {
-            // Otherwise return the relationship if it lasted for at least 6 months in this academic year
+            // Otherwise return the relationship if it lasted for at least 2 months in this academic year
             val relationshipEndDate = if (relationship.endDate == null) academicYearEndDate.toDateTimeAtStartOfDay else relationship.endDate
             if (relationshipEndDate.isBefore(academicYearStartDate.toDateTimeAtStartOfDay) || relationship.startDate.isAfter(academicYearEndDate.toDateTimeAtStartOfDay)) {
               false

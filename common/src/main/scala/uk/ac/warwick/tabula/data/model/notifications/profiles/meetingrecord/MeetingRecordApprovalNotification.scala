@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 abstract class MeetingRecordApprovalNotification(@transient val verb: String)
-  extends Notification[MeetingRecord, Unit]
+  extends BatchedNotification[MeetingRecord, Unit, Notification[_, Unit] with MeetingRecordNotificationTrait](MeetingRecordBatchedNotificationHandler)
     with MeetingRecordNotificationTrait
     with SingleItemNotification[MeetingRecord]
     with AllCompletedActionRequiredNotification {
@@ -24,13 +24,15 @@ abstract class MeetingRecordApprovalNotification(@transient val verb: String)
 
   def meeting: MeetingRecord = item.entity
 
+  override def verbed: String = if (verb == "create") "created" else "edited"
+
   def titleSuffix: String = "needs review"
 
   def content = FreemarkerModel(FreemarkerTemplate, Map(
     "actor" -> meeting.creator.asSsoUser,
     "agentRoles" -> agentRoles,
     "dateTimeFormatter" -> dateTimeFormatter,
-    "verbed" -> (if (verb == "create") "created" else "edited"),
+    "verbed" -> verbed,
     "meetingRecord" -> meeting,
   ))
 

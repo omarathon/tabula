@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.MarkState._
 import uk.ac.warwick.tabula.data.model.RecordedAssessmentComponentStudentMarkSource.ModuleMarkConfirmation
 import uk.ac.warwick.tabula.data.model.RecordedModuleMarkSource.MarkConfirmation
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.marks.ConfirmModuleMarkChangedNotification
+import uk.ac.warwick.tabula.data.model.notifications.marks.ConfirmedModuleMarkChangedNotification
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent, AutowiringResitServiceComponent, ModuleRegistrationMarksServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
@@ -199,13 +199,13 @@ trait ConfirmModuleMarkChangedCommandNotification extends RecordedModuleRegistra
 
   self: ClearRecordedModuleMarksState with ProfileServiceComponent =>
 
-  override def emit(result: Seq[RecordedModuleRegistration]): Seq[ConfirmModuleMarkChangedNotification] = {
+  override def emit(result: Seq[RecordedModuleRegistration]): Seq[ConfirmedModuleMarkChangedNotification] = {
     val recordedModuleRegs: Seq[(RecordedModuleRegistration, Option[Department])] = result.map { rmr =>
       rmr ->  notificationDepartment(rmr)
     }
 
     recordedModuleRegs.filter(_._2.nonEmpty).groupBy(_._2.get).map { case (d, rmrWithDeptList) =>
-      Notification.init(new ConfirmModuleMarkChangedNotification, currentUser.apparentUser, rmrWithDeptList.map(_._1), d)
+      Notification.init(new ConfirmedModuleMarkChangedNotification, currentUser.apparentUser, rmrWithDeptList.map(_._1), d)
     }.toSeq
   }
 }

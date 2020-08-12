@@ -72,16 +72,28 @@
           </div>
         </div>
       </#list>
+    <#elseif studentAwards?has_content>
+      <#list studentAwards as studentAward>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Award</h3>
+          </div>
+          <div class="panel-body">
+            <p>${studentAward.award.name}<#if studentAward.classification?has_content> &mdash; ${studentAward.classification.name}</#if></p>
+          </div>
+        </div>
+      </#list>
     </#if>
 
     <#if moduleRegistrationsAndComponents?has_content>
       <#assign showModuleResults = features.showModuleResults />
       <#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
+        <#assign module = moduleRegistration.module!"" />
         <div class="striped-section collapsible">
           <h3 class="section-title">
             <a class="collapse-trigger icon-container" href="#"><#compress>
-              <@fmt.module_name moduleRegistration.module />
+              <#if module?has_content><@fmt.module_name module /><#else><span class="mod-code">${moduleRegistration.sitsModuleCode}</span></#if>
             </#compress></a>
             <span class="mod-reg-summary">
               <#if showModuleResults && moduleRegistrationAndComponent.releasedToStudents>
@@ -98,7 +110,7 @@
             <div class="item-info">
               <div class="row">
                 <div class="col-md-4">
-                  <h4><@fmt.module_name moduleRegistration.module false /></h4>
+                  <#if module?has_content><h4><@fmt.module_name module false /></h4><#else><h4>${moduleRegistration.sitsModuleCode}</h4></#if>
                 </div>
                 <div class="col-md-4">
                   <strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />

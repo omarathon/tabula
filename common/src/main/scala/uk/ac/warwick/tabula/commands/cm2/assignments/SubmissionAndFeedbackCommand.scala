@@ -130,7 +130,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
             dateTime.isAfter(feedback.mostRecentAttachmentUpload)
         })
 
-        val viewed = feedback.hasContent && (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && whoViewed.filterKeys(_.getUserId == feedback.usercode).exists { case (user, dateTime) =>
+        val viewed = feedback.hasContent && (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && whoViewed.view.filterKeys(_.getUserId == feedback.usercode).exists { case (user, dateTime) =>
           val usercode = user.getUserId
 
           val latestOnlineUpdate = latestModifiedOnlineFeedback
@@ -147,6 +147,14 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 
         FeedbackListItem(feedback, downloaded, viewed, allFeedbackForSits.get(feedback))
       }
+    }
+
+    lazy val uagms: Seq[UpstreamAssessmentGroupMember] = assignment.upstreamAssessmentGroupInfos.flatMap(_.allMembers)
+      .groupBy(_.universityId)
+      .values.map(_.maxBy(_.resitSequence)).toSeq
+
+    def hasActualMarksSITS(universityId: String): Boolean = {
+      uagms.exists(uagm => uagm.universityId == universityId && (uagm.isAgreedGrade || uagm.isAgreedMark))
     }
 
     val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
@@ -171,7 +179,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
             enhancedFeedback = benchmarkTask("Enhance feedback") {
               enhancedFeedbackForUsercode(user.getUserId)
             },
-            enhancedExtension = enhancedExtensionForUniId
+            enhancedExtension = enhancedExtensionForUniId,
+            hasActualMarksSITS(user.getWarwickId)
           )
         }
 
@@ -241,7 +250,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           user,
           enhancedSubmission = enhancedSubmissionForUniId,
           enhancedFeedback = enhancedFeedbackForUsercode(usercode),
-          enhancedExtension = enhancedExtensionForUniId
+          enhancedExtension = enhancedExtensionForUniId,
+          hasActualMarksSITS(user.getWarwickId)
         )
 
         val progress = workflowProgressService.progress(assignment)(coursework)

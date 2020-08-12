@@ -77,6 +77,10 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
       benchmarkTask(s"Count matching SITS rows - $student") { exportFeedbackToSitsService.countMatchingSitsRecords(student) } match {
         case 0 =>
           logger.warn(s"Not updating SITS for assessment component mark $student - found zero rows")
+
+          student.markWrittenToSitsError(RecordedAssessmentComponentStudentMarkSitsError.MissingMarksRecord)
+          assessmentComponentMarksService.saveOrUpdate(student)
+
           None
 
         case r if r > 1 =>
@@ -94,8 +98,7 @@ abstract class ExportRecordedAssessmentComponentStudentsToSitsCommandInternal
               throw new IllegalStateException(s"Unexpected SITS update! Only expected to update one row, but $r rows were updated for assessment component mark $student")
 
             case 1 =>
-              student.needsWritingToSitsSince = None
-              student.lastWrittenToSits = Some(DateTime.now)
+              student.markWrittenToSits()
 
               // Also update the UpstreamAssessmentGroupMember record so it doesn't show as out of sync
               benchmarkTask(s"Update UAGM - $student") {

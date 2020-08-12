@@ -659,8 +659,7 @@ object ProfileImporter extends Logging {
 			left outer join $sitsSchema.srs_nat nat2 on stu.stu_nat1 = nat2.nat_code
 		where
 			stu.stu_sta1 like '%%A' and -- applicant
-			stu.stu_sta2 is null and -- no student status
-			stu.stu_udf3 is null -- no IT account
+			stu.stu_sta2 is null -- no student status
 		"""
 
   val GetApplicantsByUniversityIdInformation = f"""$GetApplicantInformation and stu.stu_code in (:universityIds)"""
@@ -699,7 +698,7 @@ object ProfileImporter extends Logging {
 
   val GetUniversityIdsPresentInMembership =
     """
-		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
+		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds) and (courseCode is null or courseCode != 'APPL')
 	"""
 
   class MembershipUniversityIdPresenceQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetUniversityIdsPresentInMembership) {

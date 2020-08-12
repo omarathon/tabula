@@ -14,6 +14,11 @@
       <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
       <span class="sr-only">Waiting to be written to SITS</span>
     </span>
+  <#elseif student.sitsWriteError??>
+    <span tabindex="0" class="tabula-tooltip" data-title="Error writing mark to SITS: ${student.sitsWriteError.description}">
+      <i class="fa-fw fas fa-exclamation-square text-danger" aria-hidden="true"></i>
+      <span class="sr-only">Error writing mark to SITS: ${student.sitsWriteError.description}</span>
+    </span>
   <#elseif student.outOfSync>
     <span tabindex="0" class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">
       <i class="fa-fw fad fa-exclamation-circle" aria-hidden="true"></i>
@@ -32,6 +37,11 @@
     <span tabindex="0" class="tabula-tooltip" data-title="Waiting to be written to SITS">
       <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
       <span class="sr-only">Waiting to be written to SITS</span>
+    </span>
+  <#elseif marks.sitsWriteError??>
+    <span tabindex="0" class="tabula-tooltip" data-title="Error writing mark to SITS: ${marks.sitsWriteError.description}">
+      <i class="fa-fw fas fa-exclamation-square text-danger" aria-hidden="true"></i>
+      <span class="sr-only">Error writing mark to SITS: ${marks.sitsWriteError.description}</span>
     </span>
   <#elseif marks.outOfSync>
     <span tabindex="0" class="tabula-tooltip" data-title="Mark is out of sync with current mark in SITS">

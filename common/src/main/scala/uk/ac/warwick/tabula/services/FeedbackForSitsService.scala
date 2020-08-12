@@ -11,20 +11,22 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.services.marks.{AssessmentComponentMarksServiceComponent, AutowiringAssessmentComponentMarksServiceComponent, AutowiringModuleRegistrationMarksServiceComponent}
 
-import scala.jdk.CollectionConverters._
-
 case class ValidateAndPopulateFeedbackResult(
   valid: Seq[Feedback],
   populated: Map[Feedback, String],
   zero: Map[Feedback, String],
   invalid: Map[Feedback, String],
-  notOnScheme: Map[Feedback, String]
+  notOnScheme: Map[Feedback, String],
+  invalidLinkedToMultipleComponents: Seq[Feedback]
 )
 
 trait FeedbackForSitsService {
   def getByFeedback(feedback: Feedback): Option[FeedbackForSits]
+
   def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits]
+
   def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits]
+
   def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assignment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
 }
 
@@ -42,7 +44,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
     with FeedbackServiceComponent =>
 
   private def getUpstreamAssessmentGroupMembers(feedback: Feedback): Seq[UpstreamAssessmentGroupMember] =
-    // feedback.assessmentGroups only includes those where UAGI exists and members contains a matching uni ID, but doesn't verify reassessment
+  // feedback.assessmentGroups only includes those where UAGI exists and members contains a matching uni ID, but doesn't verify reassessment
     feedback.assessmentGroups.map(_.toUpstreamAssessmentGroupInfo(feedback.academicYear).get)
       .flatMap { info =>
         if (feedback.assignment.resitAssessment) {
@@ -110,6 +112,8 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
     val validGrades = gradeGenerator.applyForMarks(studentsMarks)
 
+    val invalidLinkedToMultipleComponents = feedbacks.filter(_.assessmentGroups.size > 1)
+
     val parsedFeedbacks = feedbacks.filter(_.universityId.isDefined).groupBy(f => {
       val upstreamAssessmentGroupMembersForFeedback = getUpstreamAssessmentGroupMembers(f)
       f.latestGrade match {
@@ -134,11 +138,17 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
           }
       }
     })
+
+    val validFeedbacks = parsedFeedbacks.getOrElse("valid", Seq()).filterNot { validItem =>
+      invalidLinkedToMultipleComponents.contains(validItem)
+    }
+    val populatedFeedback = parsedFeedbacks.getOrElse("populated", Seq()).filterNot { validItem =>
+      invalidLinkedToMultipleComponents.contains(validItem)
+    }.map(f1 => f1 -> validGrades(f1._universityId).find(_.isDefault).map(_.grade).get).toMap
+
     ValidateAndPopulateFeedbackResult(
-      parsedFeedbacks.getOrElse("valid", Seq()),
-      parsedFeedbacks.get("populated").map(feedbacksToPopulate =>
-        feedbacksToPopulate.map(f => f -> validGrades(f._universityId).find(_.isDefault).map(_.grade).get).toMap
-      ).getOrElse(Map()),
+      validFeedbacks,
+      populatedFeedback,
       parsedFeedbacks.get("zero").map(feedbacksToPopulate =>
         feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
       ).getOrElse(Map()),
@@ -146,8 +156,9 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
         feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
       ).getOrElse(Map()),
       parsedFeedbacks.get("notOnScheme").map(feedbacksToPopulate =>
-      feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
-    ).getOrElse(Map()),
+        feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
+      ).getOrElse(Map()),
+      invalidLinkedToMultipleComponents
     )
   }
 
@@ -177,6 +188,7 @@ abstract class ExportFeedbackToSitsCommandInternal(feedback: Feedback, upstreamA
     with ClearRecordedModuleMarks =>
 
   def upstreamAssessmentGroup: UpstreamAssessmentGroup = upstreamAssessmentGroupMember.upstreamAssessmentGroup
+
   def assessmentComponent: AssessmentComponent = upstreamAssessmentGroup.assessmentComponent.get
 
   override def applyInternal(): RecordedAssessmentComponentStudent = transactional() {
@@ -205,7 +217,7 @@ trait ExportFeedbackToSitsDescription extends Describable[RecordedAssessmentComp
 
   override def describe(d: Description): Unit =
     d.assessmentComponent(assessmentComponent)
-     .upstreamAssessmentGroup(upstreamAssessmentGroup)
+      .upstreamAssessmentGroup(upstreamAssessmentGroup)
 
   override def describeResult(d: Description, result: RecordedAssessmentComponentStudent): Unit =
     d.properties(

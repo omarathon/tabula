@@ -2,18 +2,21 @@ package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, CM2MarkingWorkflowService}
+import uk.ac.warwick.userlookup.User
 
 import scala.jdk.CollectionConverters._
 
 object ReleaseToMarkerNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"
+  val batchTemplateLocation: String = "/WEB-INF/freemarker/emails/released_to_marker_notification_batch.ftl"
 
   def renderCollectSubmissions(
     assignment: Assignment,
@@ -55,13 +58,15 @@ object ReleaseToMarkerNotification {
 @Proxy
 @DiscriminatorValue("CM2ReleaseToMarker")
 class ReleaseToMarkerNotification
-  extends NotificationWithTarget[MarkerFeedback, Assignment]
+  extends BatchedNotificationWithTarget[MarkerFeedback, Assignment, ReleaseToMarkerNotification](ReleaseToMarkerBatchedNotificationHandler)
     with SingleRecipientNotification
     with UserIdRecipientNotification
     with AutowiringUserLookupComponent
     with Logging
-    with AutowiringCM2MarkingWorkflowServiceComponent
     with AllCompletedActionRequiredNotification {
+
+  @transient
+  var cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire.auto[CM2MarkingWorkflowService]
 
   @transient
   lazy val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, recipient, cm2MarkingWorkflowService)
@@ -105,3 +110,32 @@ class ReleaseToMarkerNotification
 
 }
 
+object ReleaseToMarkerBatchedNotificationHandler extends BatchedNotificationHandler[ReleaseToMarkerNotification] {
+  override def titleForBatchInternal(notifications: Seq[ReleaseToMarkerNotification], user: User): String = {
+    val assignments = notifications.map(_.assignment).distinct
+
+    if (assignments.size == 1) notifications.head.titleFor(user)
+    else s"${assignments.size} assignments have been released for marking"
+  }
+
+  override def contentForBatchInternal(notifications: Seq[ReleaseToMarkerNotification]): FreemarkerModel = {
+    // We only retain the last notification for each assignment
+    val assignments =
+      notifications.groupBy(_.assignment).toSeq
+        .map { case (assignment, batch) =>
+          assignment -> batch.maxBy(_.created)
+        }
+        .sortBy(_._2.created)
+
+    if (assignments.size == 1) assignments.head._2.content
+    else FreemarkerModel(ReleaseToMarkerNotification.batchTemplateLocation, Map(
+      "notifications" -> assignments.map(_._2.content.model)
+    ))
+  }
+
+  override def urlForBatchInternal(notifications: Seq[ReleaseToMarkerNotification], user: User): String =
+    Routes.marker()
+
+  override def urlTitleForBatchInternal(notifications: Seq[ReleaseToMarkerNotification]): String =
+    "view assignments for marking"
+}

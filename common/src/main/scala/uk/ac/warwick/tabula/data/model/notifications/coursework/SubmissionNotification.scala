@@ -3,12 +3,11 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
-
-abstract class SubmissionNotification
-  extends NotificationWithTarget[Submission, Assignment]
-    with SingleItemNotification[Submission]
+trait SubmissionNotification
+  extends SingleItemNotification[Submission]
     with AutowiringUserLookupComponent
     with MyWarwickActivity {
+  self: NotificationWithTarget[Submission, Assignment] =>
 
   def submission: Submission = item.entity
 

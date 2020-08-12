@@ -12,10 +12,10 @@ trait Logging {
   @transient lazy val logger: Logger = LoggerFactory.getLogger(loggerName)
   @transient lazy val debugEnabled: Boolean = logger.isDebugEnabled
 
-  @transient val Error = Logging.Level.Error
-  @transient val Warn = Logging.Level.Warn
-  @transient val Info = Logging.Level.Info
-  @transient val Debug = Logging.Level.Debug
+  @transient val Error: Logging.Level = Logging.Level.Error
+  @transient val Warn: Logging.Level = Logging.Level.Warn
+  @transient val Info: Logging.Level = Logging.Level.Info
+  @transient val Debug: Logging.Level = Logging.Level.Debug
 
   /**
     * Logs a debug message, with the given arguments inserted into the
@@ -91,14 +91,13 @@ trait Logging {
       if (debugEnabled) logger.debug(desc)
       op
     } catch {
-      case e: Exception => {
-        logger.error(s"Exception while ${desc}")
+      case e: Exception =>
+        logger.error(s"Exception while $desc")
         throw e
-      }
     }
   }
 
-  private def log(logger: Logger, level: Logging.Level, message: => String) = level match {
+  private def log(logger: Logger, level: Logging.Level, message: => String): Unit = level match {
     case Error => if (logger.isErrorEnabled()) logger.error(message)
     case Warn => if (logger.isWarnEnabled()) logger.warn(message)
     case Info => if (logger.isInfoEnabled()) logger.info(message)
@@ -118,9 +117,10 @@ object Logging {
     case object Debug extends Level
   }
 
+  //noinspection ScalaDeprecation
   // We need to convert all Scala collections into Java collections
   // Also handles nulls as "-"
-  def convertForStructuredArguments(in: Any): AnyRef = (in match {
+  def convertForStructuredArguments(in: Any): AnyRef = in match {
     case Some(x: Object) => convertForStructuredArguments(x)
     case Some(null) => null
     case None => null
@@ -135,8 +135,5 @@ object Logging {
     case scol: scala.Iterable[_] => scol.map(convertForStructuredArguments).asJavaCollection
     case other: AnyRef => other
     case _ => null
-  }) match {
-    case null => "-"
-    case notNull => notNull
   }
 }

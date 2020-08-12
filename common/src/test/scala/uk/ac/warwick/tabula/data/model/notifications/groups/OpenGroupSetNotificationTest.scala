@@ -35,7 +35,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
   def urlIsSmallGroupTeachingHomePage(): Unit = new SmallGroupFixture {
     val n: OpenSmallGroupSetsStudentSignUpNotification = createNotification(Seq(groupSet1), actor, recipient)
     n.userLookup = userLookup
-    n.url should be("/groups")
+    n.url should be("/groups/")
   }
 
   @Test
@@ -56,7 +56,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
   def shouldCallTextRendererWithCorrectModel(): Unit = new SmallGroupFixture {
     val n: OpenSmallGroupSetsStudentSignUpNotification = createNotification(Seq(groupSet1), actor, recipient)
     val content: FreemarkerModel = n.content
-    content.model("profileUrl") should be("/groups")
+    content.model("profileUrl") should be("/groups/")
     content.model("groupsets") should be(Seq(groupSet1))
   }
 

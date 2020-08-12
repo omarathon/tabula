@@ -25,7 +25,7 @@ class CM2WorkflowProgressServiceTest extends TestBase with Mockito {
 
     val submission = Fixtures.submission()
 
-    val workflowItems = WorkflowItems(student = Fixtures.user(), enhancedSubmission = Some(SubmissionListItem(submission, downloaded = false)), enhancedExtension = None, enhancedFeedback = Some(FeedbackListItem(feedback = feedback, downloaded = false, onlineViewed = false, null)))
+    val workflowItems = WorkflowItems(student = Fixtures.user(), enhancedSubmission = Some(SubmissionListItem(submission, downloaded = false)), enhancedExtension = None, enhancedFeedback = Some(FeedbackListItem(feedback = feedback, downloaded = false, onlineViewed = false, null)), agreedMarksExist = false)
 
     val progress = service.progress(assignment)(workflowItems)
 
@@ -45,7 +45,7 @@ class CM2WorkflowProgressServiceTest extends TestBase with Mockito {
     // Initial marker B is complete, initial marker A is still pending
     feedback.outstandingStages.add(DblBlndInitialMarkerA)
 
-    val workflowItems = WorkflowItems(student = Fixtures.user(), enhancedSubmission = Some(SubmissionListItem(Fixtures.submission(), downloaded = false)), enhancedExtension = None, enhancedFeedback = Some(FeedbackListItem(feedback = feedback, downloaded = false, onlineViewed = false, null)))
+    val workflowItems = WorkflowItems(student = Fixtures.user(), enhancedSubmission = Some(SubmissionListItem(Fixtures.submission(), downloaded = false)), enhancedExtension = None, enhancedFeedback = Some(FeedbackListItem(feedback = feedback, downloaded = false, onlineViewed = false, null)), agreedMarksExist = false)
 
     val progress = service.progress(assignment)(workflowItems)
 

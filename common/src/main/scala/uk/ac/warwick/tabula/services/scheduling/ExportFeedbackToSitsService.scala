@@ -301,12 +301,12 @@ object ExportFeedbackToSitsService {
 
   final def PartialMatchingSasRecordsSql =
     f"""
-      select sas_actm, sas_actg, sas_udf1 from $sitsSchema.cam_sas $whereClause
+      select sas_actm, sas_actg, sas_agrm, sas_agrg, sas_udf1 from $sitsSchema.cam_sas $whereClause
     """
 
   final def PartialMatchingSraRecordsSql =
     f"""
-      select sra_actm, sra_actg, sra_udf2 from $sitsSchema.cam_sra $resitWhereClause
+      select sra_actm, sra_actg, sra_agrm, sra_agrg, sra_udf2 from $sitsSchema.cam_sra $resitWhereClause
     """
 
   abstract class PartialMatchQuery(ds: DataSource, sql: String) extends MappingSqlQueryWithParameters[SITSMarkRow](ds, sql) {

@@ -9,7 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.tabula.AutowiringTopLevelUrlComponent
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.model.{HasNotificationAttachment, SingleRecipientNotification, UniversityIdOrUserIdRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, HasNotificationAttachment, NotificationWithTarget, SingleRecipientNotification, Submission, UniversityIdOrUserIdRecipientNotification}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 
@@ -18,10 +18,12 @@ import scala.util.Using
 @Entity
 @Proxy
 @DiscriminatorValue("SubmissionReceipt")
-class SubmissionReceiptNotification extends SubmissionNotification
-  with SingleRecipientNotification
-  with UniversityIdOrUserIdRecipientNotification
-  with HasNotificationAttachment {
+class SubmissionReceiptNotification
+  extends NotificationWithTarget[Submission, Assignment]
+    with SubmissionNotification
+    with SingleRecipientNotification
+    with UniversityIdOrUserIdRecipientNotification
+    with HasNotificationAttachment {
 
   override def onPreSave(isNew: Boolean): Unit = {
     recipientUniversityId = submission.usercode

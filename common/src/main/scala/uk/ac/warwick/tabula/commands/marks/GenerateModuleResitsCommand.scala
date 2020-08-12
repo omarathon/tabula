@@ -9,21 +9,21 @@ import uk.ac.warwick.tabula.commands.marks.MarksDepartmentHomeCommand.StudentMod
 import uk.ac.warwick.tabula.commands.marks.GenerateModuleResitsCommand.{ResitItem, Result, Sequence, SprCode}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkState.Agreed
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, GradeBoundaryProcess, Module, RecordedResit}
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, GradeBoundaryProcess, Module, RecordedResit, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.services.marks._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringModuleRegistrationServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
 import scala.jdk.CollectionConverters._
-import scala.util.Try
 
 case class StudentMarks (
   module: StudentModuleMarkRecord,
   requiresResit: Boolean,
   incrementsAttempt: Boolean,
   components: Map[AssessmentComponent, StudentMarkRecord],
+  sitsResits: Map[AssessmentComponent, Option[UpstreamAssessmentGroupMember]]
 )
 
 object GenerateModuleResitsCommand {
@@ -134,18 +134,22 @@ trait GenerateModuleResitsState extends ModuleOccurrenceState {
   def getGradeBoundary(marksCode: String, process: GradeBoundaryProcess, grade: Option[String]): Option[GradeBoundary] =
     gradeBoundaries.find { gb => gb.marksCode == marksCode && gb.process == process && grade.contains(gb.grade) }
 
-  lazy val existingResits: Seq[RecordedResit] = upstreamAssessmentGroupInfos.flatMap { info => resitService.getAllResits(info.upstreamAssessmentGroup) }
+  lazy val existingResits: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroupInfos.flatMap(_.resitMembers)
 
   lazy val requiresResits: Seq[StudentMarks] = studentModuleMarkRecords.filter(_.markState.contains(Agreed)).flatMap { student =>
     val moduleRegistration = moduleRegistrations.find(_.sprCode == student.sprCode)
     val components = moduleRegistration.map(mr => componentMarks(mr).view.mapValues(_._1).toMap)
       .getOrElse(Map.empty[AssessmentComponent, StudentMarkRecord])
 
+    val sitsResits = components.keys.map(ac => ac -> existingResits.find { uagm =>
+      uagm.universityId == SprCode.getUniversityId(student.sprCode) && uagm.upstreamAssessmentGroup.sequence == ac.sequence
+    }).toMap
+
     val process = if (moduleRegistration.exists(_.currentResitAttempt.nonEmpty)) GradeBoundaryProcess.Reassessment else GradeBoundaryProcess.StudentAssessment
     val gradeBoundary = moduleRegistrations.find(_.sprCode == student.sprCode).flatMap { mr => getGradeBoundary(mr.marksCode, process, student.grade) }
 
     if (gradeBoundary.exists(_.generatesResit)) {
-      Some(StudentMarks(student, gradeBoundary.exists(_.generatesResit), gradeBoundary.exists(_.incrementsAttempt), components))
+      Some(StudentMarks(student, gradeBoundary.exists(_.generatesResit), gradeBoundary.exists(_.incrementsAttempt), components, sitsResits))
     } else {
       None
     }

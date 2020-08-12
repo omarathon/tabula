@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification, Notification, SingleItemNotification}
+import uk.ac.warwick.tabula.data.model.{BatchedNotification, BatchedNotificationHandler, FreemarkerModel, MyWarwickNotification, Notification, SingleItemNotification}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
@@ -18,7 +18,7 @@ object MitCircsPanelUpdatedNotification {
 @Proxy
 @DiscriminatorValue("MitCircsPanelUpdated")
 class MitCircsPanelUpdatedNotification
-  extends Notification[MitigatingCircumstancesPanel, Unit]
+  extends BatchedNotification[MitigatingCircumstancesPanel, Unit, MitCircsPanelUpdatedNotification](MitCircsPanelUpdatedBatchedNotificationHandler)
     with SingleItemNotification[MitigatingCircumstancesPanel]
     with MyWarwickNotification
     with AutowiringUserLookupComponent
@@ -54,4 +54,36 @@ class MitCircsPanelUpdatedNotification
 
   def urlTitle = s"view this mitigating circumstances panel"
 
+}
+
+object MitCircsPanelUpdatedBatchedNotificationHandler extends BatchedNotificationHandler[MitCircsPanelUpdatedNotification] {
+  // Only batch notifications for the same panel, grouping changes together
+  override def groupBatchInternal(notifications: Seq[MitCircsPanelUpdatedNotification]): Seq[Seq[MitCircsPanelUpdatedNotification]] =
+    notifications.groupBy(_.panel).values.toSeq
+
+  override def titleForBatchInternal(notifications: Seq[MitCircsPanelUpdatedNotification], user: User): String =
+    notifications.head.titleFor(user)
+
+  override def contentForBatchInternal(notifications: Seq[MitCircsPanelUpdatedNotification]): FreemarkerModel = {
+    val nameChanged = notifications.exists(_.nameChangedSetting.value)
+    val dateChanged = notifications.exists(_.dateChangedSetting.value)
+    val locationChanged = notifications.exists(_.locationChangedSetting.value)
+    val submissionsAdded = notifications.exists(_.submissionsAddedSetting.value)
+    val submissionsRemoved = notifications.exists(_.submissionsRemovedSetting.value)
+
+    FreemarkerModel(notifications.head.content.template, Map(
+      "panel" -> notifications.head.panel,
+      "nameChanged" -> nameChanged,
+      "dateChanged" -> dateChanged,
+      "locationChanged" -> locationChanged,
+      "submissionsAdded" -> submissionsAdded,
+      "submissionsRemoved" -> submissionsRemoved,
+    ))
+  }
+
+  override def urlForBatchInternal(notifications: Seq[MitCircsPanelUpdatedNotification], user: User): String =
+    notifications.head.urlFor(user)
+
+  override def urlTitleForBatchInternal(notifications: Seq[MitCircsPanelUpdatedNotification]): String =
+    notifications.head.urlTitle
 }

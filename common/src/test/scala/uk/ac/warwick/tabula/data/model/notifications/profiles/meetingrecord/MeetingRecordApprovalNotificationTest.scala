@@ -2,15 +2,20 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRendering with Mockito {
 
+  val securityService: SecurityService = mock[SecurityService]
+  securityService.can(any[CurrentUser], any[ScopelessPermission]) returns true
+  securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget]) returns true
+
   val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
-  freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = smartMock[SecurityService]
+  freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = securityService
 
   val agent: StaffMember = Fixtures.staff("1234567")
   agent.userId = "agent"
@@ -68,6 +73,60 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 
     val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
     notification.titleFor(agent.asSsoUser) should be("Personal tutor meeting record with Student Name needs review")
+  }
+
+  @Test def batchNew(): Unit = withUser("cuscav", "0672089") {
+    val meeting1 = new MeetingRecord(student, Seq(relationship))
+    meeting1.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 21, 18, 30, 0, 0)
+    meeting1.title = "Project update"
+
+    val meeting2 = new MeetingRecord(student, Seq(relationship))
+    meeting2.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 28, 18, 30, 0, 0)
+    meeting2.title = "Catch-up"
+
+    val notification1 = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting1)
+    val notification2 = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting2)
+
+    val batch = Seq(notification1, notification2)
+
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, student.asSsoUser) should be ("2 meeting records have been created")
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, agent.asSsoUser) should be ("2 meeting records have been created")
+
+    val content = MeetingRecordBatchedNotificationHandler.contentForBatch(batch)
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """2 meetings have been created:
+        |
+        |- Project update personal tutor meeting with Student Name on 21 March 2017 at 18:30:00. This meeting record has been approved.
+        |- Catch-up personal tutor meeting with Student Name on 28 March 2017 at 18:30:00. This meeting record has been approved.
+        |""".stripMargin
+    )
+  }
+
+  @Test def batchEdit(): Unit = withUser("cuscav", "0672089") {
+    val meeting1 = new MeetingRecord(student, Seq(relationship))
+    meeting1.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 21, 18, 30, 0, 0)
+    meeting1.title = "Project update"
+
+    val meeting2 = new MeetingRecord(student, Seq(relationship))
+    meeting2.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 28, 18, 30, 0, 0)
+    meeting2.title = "Catch-up"
+
+    val notification1 = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting1)
+    val notification2 = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting2)
+
+    val batch = Seq(notification1, notification2)
+
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, student.asSsoUser) should be ("2 meeting records have been edited")
+    MeetingRecordBatchedNotificationHandler.titleForBatch(batch, agent.asSsoUser) should be ("2 meeting records have been edited")
+
+    val content = MeetingRecordBatchedNotificationHandler.contentForBatch(batch)
+    renderToString(freeMarkerConfig.getTemplate(content.template), content.model) should be (
+      """2 meetings have been edited:
+        |
+        |- Project update personal tutor meeting with Student Name on 21 March 2017 at 18:30:00. This meeting record has been approved.
+        |- Catch-up personal tutor meeting with Student Name on 28 March 2017 at 18:30:00. This meeting record has been approved.
+        |""".stripMargin
+    )
   }
 
 }

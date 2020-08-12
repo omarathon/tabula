@@ -941,7 +941,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       Seq(BigDecimal(70), BigDecimal(58), BigDecimal(60)),
       Seq(0, 50, 50)
     ) {
-      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(50))
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]], any[BigDecimal]) returns (BigDecimal(50))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(65))
 
       service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(60.3))
@@ -951,7 +951,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       Seq(BigDecimal(64), BigDecimal(68), BigDecimal(70)),
       Seq(10, 30, 60)
     ) {
-      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]], any[BigDecimal]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(76))
       service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(70))
     }
@@ -960,7 +960,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       Seq(BigDecimal(64), BigDecimal(68), BigDecimal(76), BigDecimal(72)),
       Seq(10, 20, 30, 40)
     ) {
-      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]]) returns (BigDecimal(100) / BigDecimal(3))
+      service.moduleRegistrationService.percentageOfAssessmentTaken(any[Seq[ModuleRegistration]], any[BigDecimal]) returns (BigDecimal(100) / BigDecimal(3))
       service.moduleRegistrationService.benchmarkWeightedAssessmentMark(any[Seq[ModuleRegistration]]) returns (BigDecimal(72))
 
       service.graduationBenchmark(entityYear.studentCourseYearDetails, entityYear.yearOfStudy, BigDecimal(120), Map(), yearMarksToUse = ExamGridYearMarksToUse.UploadedYearMarksOnly, groupByLevel = false, weightings) should be(Right(71.5))

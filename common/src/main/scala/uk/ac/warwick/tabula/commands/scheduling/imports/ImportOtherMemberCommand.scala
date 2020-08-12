@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands.{Description, Unaudited}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{Daoisms, HibernateHelpers}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -23,13 +23,20 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
 
   def applyInternal(): Member = transactional() {
     val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
-    if (memberExisting.collect { case m@(_: StudentMember | _: StaffMember) => m }.nonEmpty) {
+    if (memberExisting.collect { case m @ (_: StudentMember | _: StaffMember) => m }.exists(_.missingFromImportSince == null)) {
       // Don't override existing students or staff
       memberExisting.get
     } else {
       logger.debug("Importing other member " + universityId + " into " + memberExisting)
 
-      val (isTransient, member) = memberExisting match {
+      val (isTransient, member) = memberExisting.map(HibernateHelpers.initialiseAndUnproxy) match {
+        case Some(m @ (_: StudentMember | _: StaffMember)) =>
+          // TAB-692 delete the existing member, then return a brand new one
+          // TAB-2188
+          logger.info(s"Deleting $m while importing $universityId")
+          memberDao.delete(m)
+          (true, if (this.userType == MemberUserType.Applicant) new ApplicantMember(universityId) else new OtherMember(universityId))
+
         case Some(m) => (false, m)
         case _ if this.userType == MemberUserType.Applicant => (true, new ApplicantMember(universityId))
         case _ => (true, new OtherMember(universityId))
