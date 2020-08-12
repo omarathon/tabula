@@ -137,6 +137,9 @@
   <#local member = membersBySprCode[student.sprCode] />
 
   <tr>
+    <td>
+      <@f.checkbox cssClass="collection-checkbox" path="students[${student.sprCode}].calculate" />
+    </td>
     <td data-sortby="${student.sprCode}">
       <@pl.profile_link member.universityId />
       ${student.sprCode}
@@ -270,7 +273,7 @@
       <div class="fix-area">
         <@f.form method="post" action=submitUrl?markup_string modelAttribute="command" cssClass="marks-form">
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
-          <table class="table table-striped table-sortable">
+          <table class="table table-striped table-sortable table-checkable">
             <colgroup class="student">
               <col class="student-info" />
               <col class="student-info" />
@@ -296,6 +299,7 @@
 
             <thead>
               <tr>
+                <th class="col-sm-1 for-check-all" rowspan="2" data-sorter="false"><input type="checkbox" class="collection-check-all" title="Select all/none" /></th>
                 <th class="col-sm-1 sortable" rowspan="2" data-sortInitialOrder="asc" data-sorter="text">SPR Code</th>
                 <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">First name</th>
                 <th class="col-sm-1 sortable" rowspan="2" data-sorter="text">Last name</th>
