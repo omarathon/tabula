@@ -50,6 +50,9 @@ object ImportSmallGroupSetsFromExternalSystemCommand {
   def generateSmallGroupSetNameAndFormat(module: Module, eventType: TimetableEventType): (String, SmallGroupFormat with Product with Serializable) = {
     val format = eventType match {
       case TimetableEventType.Seminar => SmallGroupFormat.Seminar
+      case TimetableEventType.Lecture => SmallGroupFormat.Lecture
+      case TimetableEventType.Exam => SmallGroupFormat.Exam
+      case TimetableEventType.Meeting => SmallGroupFormat.Meeting
       case _ => SmallGroupFormat.Workshop
     }
     val name = "%s %ss".format(module.code.toUpperCase, format)
