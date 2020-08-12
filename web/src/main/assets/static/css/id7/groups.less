@@ -315,4 +315,18 @@ table.week-selector {
   }
 }
 
+//Grey out links to actions that are not permitted and remove state changes
+.dropdown-menu > li > a.disabled {
+
+  color: @gray-light;
+  text-decoration: none;
+  cursor: not-allowed;
+
+  &:hover, &:focus {
+    background-color: transparent;
+    background-image: none; // Remove CSS gradient
+
+  }
+}
+
 @import "record-attendance.less";
