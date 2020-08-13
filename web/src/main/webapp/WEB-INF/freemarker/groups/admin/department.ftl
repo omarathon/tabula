@@ -137,8 +137,8 @@
 
           <li class="divider"></li>
 
-          <li<#if !hasGroupAttendance> class="disabled"</#if>>
-            <a href="<@routes.groups.departmentAttendance department adminCommand.academicYear />">View attendance</a>
+          <li>
+            <a <#if !hasGroupAttendance> class="disabled"</#if> href="<@routes.groups.departmentAttendance department adminCommand.academicYear />">View attendance</a>
           </li>
 
           <#if can.do('SmallGroupEvents.Register', department)>
