@@ -13,7 +13,7 @@
 </div>
 
 <p>
-  Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students.
+  Use this form to calculate and record <strong>unconfirmed actual</strong> module marks for students. Check the box next to any student you wish to record module marks for.
   <#if has_mma_calculation(studentModuleMarkRecords)>
     Because there are Force Majeure assessment components, you will need to perform a missing marks adjustment.
   </#if>
@@ -74,6 +74,7 @@
                     </table>
                     <#if suggestion.calculation.successful>
                       <div class="panel-footer clearfix" id="mma-modal-${student.sprCode?replace('/', '_')}-suggestion-${suggestion_index}">
+                        <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.calculate" value="true" />
                         <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${suggestion.calculation.mark!}" />
                         <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${suggestion.calculation.grade!}" />
                         <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${suggestion.calculation.grade!}" />
@@ -138,7 +139,7 @@
 
   <tr>
     <td>
-      <@f.checkbox cssClass="collection-checkbox" path="students[${student.sprCode}].calculate" />
+      <@f.checkbox id="students${student.sprCode?replace('/', '_')}.calculate" cssClass="collection-checkbox" path="students[${student.sprCode}].calculate" />
     </td>
     <td data-sortby="${student.sprCode}">
       <@pl.profile_link member.universityId />
@@ -342,7 +343,7 @@
                                   <#list mmaModuleMarkRecords as studentMarkRecord>
                                     <#assign student = studentMarkRecord._1() />
                                     <#assign calculation = studentMarkRecord._4().suggestions[suggestion_index].calculation />
-
+                                    <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.calculate" value="true" />
                                     <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.mark" value="${calculation.mark!}" />
                                     <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade" value="${calculation.grade!}" />
                                     <@f.hidden class="mma-suggestion-field" data\-target="students${student.sprCode?replace('/', '_')}.grade-txt" value="${calculation.grade!}" />
