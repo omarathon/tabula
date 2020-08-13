@@ -74,26 +74,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     department.modules.add(module1)
     department.modules.add(module2)
 
-    val user = new User("cuscav")
-    val currentUser = new CurrentUser(user, user)
-  }
-
-  private trait CommandFixture extends Fixture {
-    val command = new ImportSmallGroupSetsFromExternalSystemCommandInternal(department, currentUser) with CommandTestSupport
-  }
-
-  private trait FixtureWithSingleSeminarForYear {
-    self: CommandFixture =>
-
-    command.academicYear = AcademicYear(2012)
-
-    command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns true
-
     val tutor = new User("abcdef")
     tutor.setFoundUser(true)
     tutor.setWarwickId("1170047")
-
-    command.userLookup.registerUserObjects(tutor)
 
     val student1 = new User("student1")
     student1.setFoundUser(true)
@@ -119,7 +102,24 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     student6.setFoundUser(true)
     student6.setWarwickId("0000006")
 
+    val user = new User("cuscav")
+    val currentUser = new CurrentUser(user, user)
+  }
+
+  private trait CommandFixture extends Fixture {
+    val command = new ImportSmallGroupSetsFromExternalSystemCommandInternal(department, currentUser) with CommandTestSupport
+
+    command.userLookup.registerUserObjects(tutor)
+
+    command.academicYear = AcademicYear(2012)
+
+    command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns true
+
     command.userLookup.registerUserObjects(student1, student2, student3, student4, student5, student6)
+  }
+
+  private trait FixtureWithSingleSeminarForYear {
+    self: CommandFixture =>
 
     val tEventModule1Seminar1 = TimetableEvent(
       uid = "uuid1",
@@ -186,6 +186,55 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
     )))
   }
 
+  private trait FixtureWithSingleLectureForYear {
+    self: CommandFixture =>
+
+    val tEventLecture1 = TimetableEvent(
+      uid = "uuid1",
+      name = "IN101S",
+      title = "",
+      description = "",
+      startTime = new LocalTime(9, 0),
+      endTime = new LocalTime(10, 0),
+      weekRanges = Seq(WeekRange(1, 5)),
+      day = DayOfWeek.Tuesday,
+      eventType = TimetableEventType.Lecture,
+      location = Some(NamedLocation("CS1.01")),
+      parent = TimetableEvent.Parent(Some(module1)),
+      comments = None,
+      staff = Seq(tutor),
+      students = Seq(student1, student2, student3, student4, student5),
+      year = AcademicYear(2012),
+      relatedUrl = None,
+      attendance = Map()
+    )
+
+    command.timetableFetchingService.getTimetableForModule("IN101", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
+      tEventLecture1
+    )))
+    command.timetableFetchingService.getTimetableForModule("IN102", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
+      TimetableEvent(
+        uid = "uuid4",
+        name = "IN102S",
+        title = "",
+        description = "",
+        startTime = new LocalTime(12, 0),
+        endTime = new LocalTime(13, 0),
+        weekRanges = Seq(WeekRange(6, 10)),
+        day = DayOfWeek.Thursday,
+        eventType = TimetableEventType.Lecture,
+        location = Some(NamedLocation("CS1.04")),
+        parent = TimetableEvent.Parent(Some(module2)),
+        comments = None,
+        staff = Seq(tutor),
+        students = Seq(student4, student5, student6),
+        year = AcademicYear(2013),
+        relatedUrl = None,
+        attendance = Map()
+      )
+    )))
+  }
+
   @Test def init(): Unit = {
     new CommandFixture with FixtureWithSingleSeminarForYear {
       command.canManageDepartment should be (true)
@@ -234,6 +283,36 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
       group2event.endTime should be(new LocalTime(13, 0))
       group2event.location should be(NamedLocation("CS1.04"))
       group2event.tutors.knownType.includedUserIds should be(Set("abcdef"))
+    }
+  }
+
+  @Test def applyLectureEvents(): Unit = {
+    new CommandFixture with FixtureWithSingleLectureForYear {
+      val sets: Seq[SmallGroupSet] = command.applyInternal()
+
+      verify(command.smallGroupService, times(1)).saveOrUpdate(any[SmallGroupSet])
+      verify(command.smallGroupService, times(1)).saveOrUpdate(any[SmallGroup])
+
+      sets.size should be(1)
+
+      val set: SmallGroupSet = sets.head
+      set.format should be(SmallGroupFormat.Lecture)
+      set.name should be("IN101 Lectures")
+      set.groups.size should be(1)
+
+      val group: SmallGroup = set.groups.get(0) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
+      group.name = "Group 1"
+      group.students.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003","0000004","0000005"))
+      group.events.size should be(1)
+
+      val group1event: SmallGroupEvent = group.events.head
+      group1event.weekRanges should be(Seq(WeekRange(1, 5)))
+      group1event.day should be(DayOfWeek.Tuesday)
+      group1event.startTime should be(new LocalTime(9, 0))
+      group1event.endTime should be(new LocalTime(10, 0))
+      group1event.location should be(NamedLocation("CS1.01"))
+      group1event.tutors.knownType.includedUserIds should be(Set("abcdef"))
+
     }
   }
 
