@@ -138,6 +138,8 @@ object CalculateModuleMarksCommand {
       this()
       this.sprCode = sprCode
     }
+
+    var calculate: Boolean = true
   }
 
   type Result = Seq[RecordedModuleRegistration]
@@ -185,7 +187,7 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
   override val mandatoryEventName: String = "CalculateModuleMarks"
 
   override def applyInternal(): Result = transactional() {
-    students.asScala.values.toSeq
+    students.asScala.values.filter(_.calculate).toSeq
       .map { item =>
         val moduleRegistration =
           moduleRegistrations.find(_.sprCode == item.sprCode)
@@ -408,8 +410,9 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
       calculation match {
         case ModuleMarkCalculation.Success(mark, grade, result, comments) if shouldUseCalculation =>
           populateMarksItem(mark, grade, result, comments)
+          s.calculate = true
 
-        case _ => // Do nothing
+        case _ => s.calculate = false // do nothing
       }
 
       students.put(student.sprCode, s)
@@ -578,7 +581,7 @@ trait CalculateModuleMarksValidation extends ModuleOccurrenceValidation with Sel
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = module.adminDepartment.assignmentGradeValidation
-    students.asScala.foreach { case (sprCode, item) =>
+    students.asScala.filter { case (_, item) => item.calculate }.foreach { case (sprCode, item) =>
       errors.pushNestedPath(s"students[$sprCode]")
 
       validateMarkEntry(errors)(item, doGradeValidation)

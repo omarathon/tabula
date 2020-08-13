@@ -100,6 +100,8 @@ $(() => {
           }
 
           $dataTarget.val(value);
+        } else if ($dataTarget.is('input[type=checkbox]')) {
+          $dataTarget.prop('checked', value);
         } else {
           $dataTarget.val(value);
         }
