@@ -162,7 +162,7 @@
                             </#if>
                           </td>
                           <td>
-                              <#if componentRecord.existingResit?has_content> ${existingResit.currentResitAttempt}
+                              <#if componentRecord.existingResit?has_content> ${componentRecord.existingResit.currentResitAttempt}
                               <#elseif sitsResit?has_content> ${sitsResit.currentResitAttempt}
                               <#elseif record.incrementsAttempt>${record.currentResitAttempt!1 + 1}<#else>${componentRecord.currentResitAttempt!1}</#if>
                           </td>
