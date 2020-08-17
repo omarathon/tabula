@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.joda.time.{DateTimeConstants, LocalDate, LocalTime}
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
@@ -476,6 +476,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     val tertiaryNavBarElement = tertiaryNavBar.get.underlying
     val currentYear = AcademicYear.now()
     click on tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
+  }
+
+  def waitForAllAssignmentsToLoad(): Unit = {
+    eventually(pageSource contains "Loading…" should be (false))
   }
 }
 

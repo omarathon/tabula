@@ -50,6 +50,10 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
   private def deleteAssignment(title: String): Unit = {
     val path = "//*[contains(text(),'" ++ title ++ "')]"
 
+    Then(s"I should see the assignment title $title")
+    eventually(pageSource contains s"$title" should be (true))
+    waitForAllAssignmentsToLoad()
+
     eventually {
       val assignmentRowLink = id("main").webElement.findElement(By.partialLinkText(title))
       assignmentRowLink.isDisplayed shouldBe true
@@ -88,7 +92,7 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
     }
     eventually {
       Then("I should reach the delete page")
-      currentUrl should not include ("/edit")
+      currentUrl should not include "/edit"
     }
 
     Then("I should find not an assignment with no assignments")
