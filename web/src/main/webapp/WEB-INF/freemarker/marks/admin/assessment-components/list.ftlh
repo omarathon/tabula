@@ -47,7 +47,7 @@
               <i class="fa-fw fad fa-cloud-upload" aria-hidden="true"></i>
               <span class="sr-only">Waiting to be written to SITS</span>
             </span>
-          <#elseif marksresult.sitsWriteError??>
+          <#elseif result.sitsWriteError??>
             <span tabindex="0" class="tabula-tooltip" data-title="Error writing mark to SITS: ${result.sitsWriteError.description}">
               <i class="fa-fw fas fa-exclamation-square text-danger" aria-hidden="true"></i>
               <span class="sr-only">Error writing mark to SITS: ${result.sitsWriteError.description}</span>
