@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.marks.{ClearRecordedModuleMarks, ClearRecordedModuleMarksState, RecordAssessmentComponentMarksPermissions, RecordAssessmentComponentMarksState}
+import uk.ac.warwick.tabula.commands.marks.{ClearRecordedModuleMarks, ClearRecordedModuleMarksState, ListAssessmentComponentsCommand, RecordAssessmentComponentMarksPermissions, RecordAssessmentComponentMarksState}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkState.UnconfirmedActual
 import uk.ac.warwick.tabula.data.model._
@@ -192,19 +192,42 @@ abstract class ExportFeedbackToSitsCommandInternal(feedback: Feedback, upstreamA
   def assessmentComponent: AssessmentComponent = upstreamAssessmentGroup.assessmentComponent.get
 
   override def applyInternal(): RecordedAssessmentComponentStudent = transactional() {
-    val recordedAssessmentComponentStudent = assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember)
-    recordedAssessmentComponentStudent.addMark(
-      uploader = currentUser.apparentUser,
-      mark = feedback.latestMark,
-      grade = feedback.latestGrade,
-      source = RecordedAssessmentComponentStudentMarkSource.CourseworkMarking,
-      markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
-    )
+    val recordedStudent = assessmentComponentMarksService.getRecordedStudent(upstreamAssessmentGroupMember)
+    lazy val recordedAssessmentComponentStudent = recordedStudent.getOrElse(assessmentComponentMarksService.getOrCreateRecordedStudent(upstreamAssessmentGroupMember))
 
-    assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
+    // We just use this to calculate whether the mark has changed in the feedback so no need to worry about the params
+    val studentMarkRecord =
+      ListAssessmentComponentsCommand.StudentMarkRecord(
+        info = UpstreamAssessmentGroupInfo(
+          upstreamAssessmentGroup,
+          Seq(upstreamAssessmentGroupMember)
+        ),
+        member = upstreamAssessmentGroupMember,
+        recordedStudent = recordedStudent,
+        existingResit = None,
+        requiresResit = false,
+      )
 
-    // Need to clear the module marks
-    clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
+    val isUnchanged = {
+      !studentMarkRecord.outOfSync &&
+      studentMarkRecord.mark == feedback.latestMark &&
+      studentMarkRecord.grade == feedback.latestGrade
+    }
+
+    if (!isUnchanged) {
+      recordedAssessmentComponentStudent.addMark(
+        uploader = currentUser.apparentUser,
+        mark = feedback.latestMark,
+        grade = feedback.latestGrade,
+        source = RecordedAssessmentComponentStudentMarkSource.CourseworkMarking,
+        markState = recordedAssessmentComponentStudent.latestState.getOrElse(UnconfirmedActual),
+      )
+
+      assessmentComponentMarksService.saveOrUpdate(recordedAssessmentComponentStudent)
+
+      // Need to clear the module marks
+      clearRecordedModuleMarksFor(recordedAssessmentComponentStudent)
+    }
 
     recordedAssessmentComponentStudent
   }
