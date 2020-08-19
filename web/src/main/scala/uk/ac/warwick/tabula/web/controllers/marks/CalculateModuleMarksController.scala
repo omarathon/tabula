@@ -190,7 +190,7 @@ class CalculateModuleMarksController extends BaseModuleMarksController
     } else {
       // Filter down to just changes
       val changes: Seq[(StudentModuleMarkRecord, Map[AssessmentComponent, (StudentMarkRecord, Option[BigDecimal])], ModuleMarkCalculation, StudentModuleMarksItem)] =
-        cmd.students.asScala.values.toSeq.flatMap { student =>
+        cmd.students.asScala.values.toSeq.filter(_.calculate).flatMap { student =>
           // We know the .get is safe because it's validated
           val (studentModuleMarkRecord, componentMarks, mr, calculation) = studentModuleMarkRecords.find(_._1.sprCode == student.sprCode).get
 
