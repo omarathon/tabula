@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.ImportCommandFactory
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -92,7 +93,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
             membershipInfos.map { m =>
               val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, userLookup.getUserByUserId(usercode))
+              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, usercode.maybeText.map(userLookup.getUserByUserId).getOrElse {
+                val user = new AnonymousUser
+                user.setWarwickId(m.member.universityId)
+                user
+              })
             }.toMap
           }
 
