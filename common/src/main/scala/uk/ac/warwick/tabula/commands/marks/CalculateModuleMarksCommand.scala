@@ -390,13 +390,14 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
 
       populateMarksItem(student.mark, student.grade, student.result)
 
+      lazy val mostRecentChange =
+        student.history
+          .find(m => m.source == RecordedModuleMarkSource.ComponentMarkCalculation || m.source == RecordedModuleMarkSource.RecordModuleMarks)
+
       // We use the calculation _unless_:
       // - We had a RecordModuleMarks before the last ComponentMarkCalculation; or
       // - The most recent ComponentMarkCalculation had comments and there haven't been any component mark changes since
       lazy val shouldUseCalculation: Boolean = {
-        lazy val mostRecentChange =
-          student.history
-            .find(m => m.source == RecordedModuleMarkSource.ComponentMarkCalculation || m.source == RecordedModuleMarkSource.RecordModuleMarks)
 
         if (student.mark.isEmpty && student.grade.isEmpty && student.result.isEmpty) true
         else if (mostRecentChange.isEmpty) true
@@ -410,7 +411,8 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
       calculation match {
         case ModuleMarkCalculation.Success(mark, grade, result, comments) if shouldUseCalculation =>
           populateMarksItem(mark, grade, result, comments)
-          s.calculate = true
+          // set the calculate checkbox to true if the calculation is suggesting a change
+          s.calculate = mark != mostRecentChange.map(_.mark).orNull || grade != mostRecentChange.map(_.grade).orNull || result != mostRecentChange.map(_.result).orNull
 
         case _ => s.calculate = false // do nothing
       }
