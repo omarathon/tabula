@@ -66,12 +66,12 @@
 </#macro>
 
 <#macro componentMarkStudentStatus marks>
-  <#if !marks.currentMember>
+  <#if !(marks.currentMember!false)>
     <span tabindex="0" class="label label-warning tabula-tooltip" data-title="Permanently withdrawn">PWD</span>
   </#if>
-  <#if marks.reassessment && marks.furtherFirstSit>
+  <#if marks.reassessment!false && marks.furtherFirstSit!false>
     <span class="label label-info">Further first sit</span>
-  <#elseif marks.reassessment>
+  <#elseif marks.reassessment!false>
     <span tabindex="0" class="tabula-tooltip" data-title="Resit mark will be capped at the pass mark when calculating the module mark">
       <span class="label label-warning">Resit</span>
       <span class="sr-only">Resit mark will be capped at the pass mark when calculating the module mark</span>
