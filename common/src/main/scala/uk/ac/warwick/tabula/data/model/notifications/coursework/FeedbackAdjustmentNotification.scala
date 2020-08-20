@@ -38,7 +38,7 @@ class FeedbackAdjustmentNotification
 
   }
 
-  def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.studentIdentifier}"
+  def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name}: Adjustments have been made to feedback for ${feedback.studentIdentifier}"
 
   def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
     Map(
