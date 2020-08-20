@@ -75,14 +75,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
       benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
         val users: Map[UniversityId, User] =
-          if (department.code == ProfileImporter.applicantDepartmentCode)
-            membershipInfos.map { m =>
-              val user = new AnonymousUser
-              user.setUserId(m.member.universityId)
-              user.setWarwickId(m.member.universityId)
-              m.member.universityId -> new AnonymousUser()
-            }.toMap
-          else benchmarkTask("Fetch user details") {
+          benchmarkTask("Fetch user details") {
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
             val usersByWarwickIds = benchmarkTask("getUsersByWarwickUniIds") {
