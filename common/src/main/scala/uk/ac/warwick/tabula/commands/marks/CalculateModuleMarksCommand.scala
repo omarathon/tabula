@@ -412,7 +412,11 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
         case ModuleMarkCalculation.Success(mark, grade, result, comments) if shouldUseCalculation =>
           populateMarksItem(mark, grade, result, comments)
           // set the calculate checkbox to true if the calculation is suggesting a change
-          s.calculate = doesntMatchCalculation(s)
+          s.calculate =
+            (mark.nonEmpty && mostRecentChange.forall(_.mark.isEmpty)) ||
+            (grade.nonEmpty && mostRecentChange.forall(_.grade.isEmpty)) ||
+            (result.nonEmpty && mostRecentChange.forall(_.result.isEmpty)) ||
+            doesntMatchCalculation(s)
 
         case _ => s.calculate = false // do nothing
       }
