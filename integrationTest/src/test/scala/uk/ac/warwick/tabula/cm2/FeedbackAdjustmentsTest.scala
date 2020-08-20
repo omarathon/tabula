@@ -58,6 +58,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       eventually(click on module.findElement(By.className("mod-code")))
       Then("I should see the premarked assignment CM2")
       eventually(pageSource contains "Premarked assignment CM2" should be (true))
+      waitForAllAssignmentsToLoad()
       eventually{
         val assignmentLink = linkText("Premarked assignment CM2").webElement
         assignmentLink.isDisplayed shouldBe true

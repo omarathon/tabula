@@ -138,6 +138,8 @@ object CalculateModuleMarksCommand {
       this()
       this.sprCode = sprCode
     }
+
+    var calculate: Boolean = true
   }
 
   type Result = Seq[RecordedModuleRegistration]
@@ -185,7 +187,7 @@ abstract class CalculateModuleMarksCommandInternal(val sitsModuleCode: String, v
   override val mandatoryEventName: String = "CalculateModuleMarks"
 
   override def applyInternal(): Result = transactional() {
-    students.asScala.values.toSeq
+    students.asScala.values.filter(_.calculate).toSeq
       .map { item =>
         val moduleRegistration =
           moduleRegistrations.find(_.sprCode == item.sprCode)
@@ -388,13 +390,14 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
 
       populateMarksItem(student.mark, student.grade, student.result)
 
+      lazy val mostRecentChange =
+        student.history
+          .find(m => m.source == RecordedModuleMarkSource.ComponentMarkCalculation || m.source == RecordedModuleMarkSource.RecordModuleMarks)
+
       // We use the calculation _unless_:
       // - We had a RecordModuleMarks before the last ComponentMarkCalculation; or
       // - The most recent ComponentMarkCalculation had comments and there haven't been any component mark changes since
       lazy val shouldUseCalculation: Boolean = {
-        lazy val mostRecentChange =
-          student.history
-            .find(m => m.source == RecordedModuleMarkSource.ComponentMarkCalculation || m.source == RecordedModuleMarkSource.RecordModuleMarks)
 
         if (student.mark.isEmpty && student.grade.isEmpty && student.result.isEmpty) true
         else if (mostRecentChange.isEmpty) true
@@ -408,8 +411,16 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
       calculation match {
         case ModuleMarkCalculation.Success(mark, grade, result, comments) if shouldUseCalculation =>
           populateMarksItem(mark, grade, result, comments)
+          // set the calculate checkbox to true if the calculation is suggesting a change
+          s.calculate =
+            !student.agreed && (
+              (mark.nonEmpty && student.mark.isEmpty) ||
+              (grade.nonEmpty && student.grade.isEmpty) ||
+              (result.nonEmpty && student.result.isEmpty) ||
+              doesntMatchCalculation(s)
+            )
 
-        case _ => // Do nothing
+        case _ => s.calculate = false // do nothing
       }
 
       students.put(student.sprCode, s)
@@ -578,7 +589,7 @@ trait CalculateModuleMarksValidation extends ModuleOccurrenceValidation with Sel
 
   override def validate(errors: Errors): Unit = {
     val doGradeValidation = module.adminDepartment.assignmentGradeValidation
-    students.asScala.foreach { case (sprCode, item) =>
+    students.asScala.filter { case (_, item) => item.calculate }.foreach { case (sprCode, item) =>
       errors.pushNestedPath(s"students[$sprCode]")
 
       validateMarkEntry(errors)(item, doGradeValidation)
@@ -613,15 +624,7 @@ object ClearRecordedModuleMarks {
         recordedModuleRegistration.latestResult.nonEmpty
       }
 
-    val isUnchanged = {
-      existingRecordedModuleRegistration.exists { recordedModuleRegistration =>
-        ((recordedModuleRegistration.latestMark.isEmpty && moduleRegistration.firstDefinedMark.isEmpty) || recordedModuleRegistration.latestMark.exists(m => moduleRegistration.firstDefinedMark.contains(m))) &&
-        ((recordedModuleRegistration.latestGrade.isEmpty && moduleRegistration.firstDefinedGrade.isEmpty) || recordedModuleRegistration.latestGrade.exists(g => moduleRegistration.firstDefinedGrade.contains(g))) &&
-        ((recordedModuleRegistration.latestResult.isEmpty && Option(moduleRegistration.moduleResult).isEmpty) || recordedModuleRegistration.latestResult.contains(moduleRegistration.moduleResult))
-      }
-    }
-
-    if (isNonEmpty && !isUnchanged) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration, requiresResit = false))
+    if (isNonEmpty) Some(StudentModuleMarkRecord(moduleRegistration, existingRecordedModuleRegistration, requiresResit = false))
     else None
   }
 }

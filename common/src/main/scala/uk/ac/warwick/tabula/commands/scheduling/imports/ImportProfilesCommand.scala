@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.ImportCommandFactory
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -74,14 +75,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
       benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
         val users: Map[UniversityId, User] =
-          if (department.code == ProfileImporter.applicantDepartmentCode)
-            membershipInfos.map { m =>
-              val user = new AnonymousUser
-              user.setUserId(m.member.universityId)
-              user.setWarwickId(m.member.universityId)
-              m.member.universityId -> new AnonymousUser()
-            }.toMap
-          else benchmarkTask("Fetch user details") {
+          benchmarkTask("Fetch user details") {
             logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
             val usersByWarwickIds = benchmarkTask("getUsersByWarwickUniIds") {
@@ -92,7 +86,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
             membershipInfos.map { m =>
               val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, userLookup.getUserByUserId(usercode))
+              m.member.universityId -> usersByWarwickIds.getOrElse(warwickId, usercode.maybeText.map(userLookup.getUserByUserId).getOrElse {
+                val user = new AnonymousUser
+                user.setWarwickId(m.member.universityId)
+                user
+              })
             }.toMap
           }
 
