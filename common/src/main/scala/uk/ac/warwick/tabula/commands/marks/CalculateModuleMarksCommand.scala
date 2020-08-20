@@ -413,9 +413,9 @@ trait CalculateModuleMarksPopulateOnForm extends PopulateOnForm {
           populateMarksItem(mark, grade, result, comments)
           // set the calculate checkbox to true if the calculation is suggesting a change
           s.calculate =
-            (mark.nonEmpty && mostRecentChange.forall(_.mark.isEmpty)) ||
-            (grade.nonEmpty && mostRecentChange.forall(_.grade.isEmpty)) ||
-            (result.nonEmpty && mostRecentChange.forall(_.result.isEmpty)) ||
+            (mark.nonEmpty && student.mark.isEmpty) ||
+            (grade.nonEmpty && student.grade.isEmpty) ||
+            (result.nonEmpty && student.result.isEmpty) ||
             doesntMatchCalculation(s)
 
         case _ => s.calculate = false // do nothing
