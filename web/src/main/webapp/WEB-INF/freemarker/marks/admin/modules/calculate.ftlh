@@ -276,7 +276,7 @@
           <div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
           <table class="table table-striped table-sortable table-checkable">
             <colgroup class="student">
-              <col class="checkbox" />
+              <col class="check-all-checkbox" />
               <col class="student-info" />
               <col class="student-info" />
               <col class="student-info" />
